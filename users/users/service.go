@@ -210,10 +210,14 @@ func (i *Impl) Signup(ctx context.Context, req *usersgrpc.SignupRequest) (*users
 
 	userType, ok := usersgrpc.UserRole_value[req.GetUserType().String()]
 	if !ok {
-		return nil, status.Errorf(codes.Internal, "Invalid user type in request: %v", req.GetUserType().String())
+		return nil, status.Errorf(codes.Internal, "invalid user type in request: %v", req.GetUserType().String())
 	}
 
 	userRole, err := getUserRoleFromType(usersgrpc.UserType(userType))
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not convert user type to role %v", err)
+	}
 
 	newUser := sqlc.CreateUserParams{
 		PhoneNumber:             otpPhoneNumber,
@@ -261,7 +265,7 @@ func getUserRoleFromType(userType usersgrpc.UserType) (usersgrpc.UserRole, error
 	case usersgrpc.UserType_USER_TYPE_SELLER:
 		return usersgrpc.UserRole_USER_ROLE_FARMER, nil
 	default:
-		return usersgrpc.UserRole_USER_ROLE_UNSPECIFIED, fmt.Errorf("Invalid user type passed: %v", userType)
+		return usersgrpc.UserRole_USER_ROLE_UNSPECIFIED, fmt.Errorf("invalid user type passed: %v", userType)
 	}
 }
 
