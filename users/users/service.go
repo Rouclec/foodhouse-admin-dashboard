@@ -304,10 +304,6 @@ func (i *Impl) GetUserByID(
 		return nil, status.Errorf(codes.NotFound, "User not found: %v", err)
 	}
 
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Failed to convert user: %v", err)
-	}
-
 	return &usersgrpc.GetUserByIDResponse{
 		User: &usersgrpc.User{
 			UserId: foundUser.ID,
