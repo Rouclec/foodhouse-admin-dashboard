@@ -1,0 +1,1387 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "users.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Users"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/admin/{adminUserId}/users/create-subscription": {
+      "post": {
+        "operationId": "Users_CreateSubscription",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcCreateSubscriptionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UsersCreateSubscriptionBody"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/admin/{adminUserId}/users/delete-subscription/{subscriptionId}": {
+      "delete": {
+        "operationId": "Users_DeleteSubscription",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcDeleteSubscriptionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "subscriptionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/admin/{adminUserId}/users/grant-admin": {
+      "post": {
+        "operationId": "Users_GrantAdmin",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcGrantAdminResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UsersGrantAdminBody"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/admin/{adminUserId}/users/list-users": {
+      "get": {
+        "operationId": "Users_ListUsers",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcListUsersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "startKey",
+            "description": "Key for pagination, indicating where to start the list",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "count",
+            "description": "Number of users to retrieve",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "search",
+            "description": "keyword search for the users (could be name, or email)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/admin/{adminUserId}/users/update-subscription/{subscriptionId}": {
+      "put": {
+        "operationId": "Users_UpdateSubscription",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcUpdateSubscriptionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "subscriptionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UsersUpdateSubscriptionBody"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/public/revoke-refresh-token": {
+      "post": {
+        "operationId": "Users_RevokeRefreshToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcRevokeRefreshTokenResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/usersgrpcRevokeRefreshTokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/public/users/authenticate": {
+      "post": {
+        "operationId": "Users_Authenticate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcAuthenticateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/usersgrpcAuthenticateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/public/users/change-password": {
+      "post": {
+        "operationId": "Users_ChangePassword",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcChangePasswordResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/usersgrpcChangePasswordRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/public/users/health-check": {
+      "get": {
+        "operationId": "Users_HealthCheck",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcHealthCheckResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/public/users/last-otp-for-factor": {
+      "get": {
+        "operationId": "Users_LastOtpForFactor",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcLastOtpForFactorResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "factor",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/public/users/refresh-access-token": {
+      "post": {
+        "operationId": "Users_RefreshAccessToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcRefreshAccessTokenResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/usersgrpcRefreshAccessTokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/public/users/send-signup-sms-otp": {
+      "post": {
+        "operationId": "Users_SendSignupSmsOtp",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcSendSignUpSmsOtpResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/usersgrpcSendSignupSmsOtpRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/public/users/send-sms-otp": {
+      "post": {
+        "operationId": "Users_SendSmsOtp",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcSendSmsOtpResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/usersgrpcSendSmsOtpRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/public/users/signup": {
+      "post": {
+        "operationId": "Users_Signup",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcSignupResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/usersgrpcSignupRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/public/users/verify-otp": {
+      "post": {
+        "operationId": "Users_VerifyOtp",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcVerifyOtpResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/usersgrpcVerifyOtpRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/users/{userId}": {
+      "get": {
+        "operationId": "Users_GetUserByID",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcGetUserByIDResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "description": "ID of the user to fetch",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/users/{userId}/complete-registration": {
+      "post": {
+        "operationId": "Users_CompleteRegistration",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcCompleteRegistrationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UsersCompleteRegistrationBody"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/users/{userId}/delete-user-payment-method/{paymentMethodId}": {
+      "delete": {
+        "operationId": "Users_DeleteUserPaymentMethod",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcDeleteUserPaymentMethodResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "description": "UUID as string",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "paymentMethodId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/users/{userId}/subscribe": {
+      "post": {
+        "operationId": "Users_Subscribe",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcSubscribeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UsersSubscribeBody"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/users/{userId}/users/get-user-payment-methods-by-user-id": {
+      "get": {
+        "operationId": "Users_GetUserPaymentMethodsByUserID",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcGetUserPaymentMethodsByUserIDResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "description": "UUID as string",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/users/{userId}/users/get-user-subscriptions": {
+      "get": {
+        "operationId": "Users_GetUserSubscription",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcGetUserSubscriptionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "UsersCompleteRegistrationBody": {
+      "type": "object",
+      "properties": {
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "locationCoordinates": {
+          "$ref": "#/definitions/usersgrpcPoint"
+        }
+      },
+      "title": "Request message for UpdateUser"
+    },
+    "UsersCreateSubscriptionBody": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "string",
+          "format": "int64",
+          "title": "This is the number of days which the subscription is valid for"
+        },
+        "amount": {
+          "type": "string",
+          "format": "int64"
+        },
+        "currencyIsoCode": {
+          "type": "string"
+        }
+      }
+    },
+    "UsersGrantAdminBody": {
+      "type": "object",
+      "properties": {
+        "phoneNumber": {
+          "type": "string"
+        },
+        "residenceCountryIsoCode": {
+          "type": "string"
+        }
+      }
+    },
+    "UsersSubscribeBody": {
+      "type": "object",
+      "properties": {
+        "subscriptionId": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "string",
+          "format": "int64"
+        },
+        "currencyIsoCode": {
+          "type": "string"
+        },
+        "paymentMethod": {
+          "$ref": "#/definitions/usersgrpcPaymentMethod"
+        }
+      }
+    },
+    "UsersUpdateSubscriptionBody": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "string",
+          "format": "int64"
+        },
+        "amount": {
+          "type": "string",
+          "format": "int64"
+        },
+        "currencyIsoCode": {
+          "type": "string"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "usersgrpcAdditionalFactor": {
+      "type": "object",
+      "properties": {
+        "factorType": {
+          "$ref": "#/definitions/usersgrpcFactorType"
+        },
+        "requestId": {
+          "type": "string",
+          "title": "ID for the additional factor request\"security_question\")"
+        },
+        "factorHint": {
+          "type": "string",
+          "title": "Hint for the additional factor (e.g., last 4 digits of phone number)"
+        }
+      },
+      "description": "Request and response messages for gRPC methods."
+    },
+    "usersgrpcAuthFactor": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/usersgrpcFactorType"
+        },
+        "id": {
+          "type": "string",
+          "title": "for OTPs this will be a request_id, for email_password this\nwill be the email address"
+        },
+        "secretValue": {
+          "type": "string",
+          "title": "Value of the factor (e.g., password or OTP)"
+        }
+      }
+    },
+    "usersgrpcAuthenticateRequest": {
+      "type": "object",
+      "properties": {
+        "factors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/usersgrpcAuthFactor"
+          },
+          "title": "A list of authentication factors provided by the client"
+        }
+      }
+    },
+    "usersgrpcAuthenticateResponse": {
+      "type": "object",
+      "properties": {
+        "loginComplete": {
+          "type": "boolean",
+          "title": "Indicates if login is complete\nReturned if an additional factor is required"
+        },
+        "additionalFactor": {
+          "$ref": "#/definitions/usersgrpcAdditionalFactor"
+        },
+        "tokens": {
+          "$ref": "#/definitions/usersgrpcTokens",
+          "title": "Access and refresh tokens returned if login is complete"
+        },
+        "userId": {
+          "type": "string"
+        }
+      }
+    },
+    "usersgrpcChangePasswordRequest": {
+      "type": "object",
+      "properties": {
+        "newPassword": {
+          "type": "string"
+        },
+        "emailFactor": {
+          "$ref": "#/definitions/usersgrpcAuthFactor"
+        }
+      },
+      "title": "Request message for ChangePassword"
+    },
+    "usersgrpcChangePasswordResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      },
+      "title": "Response message for ChangePassword"
+    },
+    "usersgrpcCompleteRegistrationResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      },
+      "title": "Response message for UpdateUser"
+    },
+    "usersgrpcCreateSubscriptionResponse": {
+      "type": "object",
+      "properties": {
+        "subscription": {
+          "$ref": "#/definitions/usersgrpcSubscription"
+        }
+      }
+    },
+    "usersgrpcDeleteSubscriptionResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "usersgrpcDeleteUserPaymentMethodResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      },
+      "title": "Delete User Payment Method Response"
+    },
+    "usersgrpcFactorType": {
+      "type": "string",
+      "enum": [
+        "FACTOR_TYPE_UNSPECIFIED",
+        "FACTOR_TYPE_EMAIL_PASSWORD",
+        "FACTOR_TYPE_SMS_OTP",
+        "FACTOR_TYPE_EMAIL_OTP"
+      ],
+      "default": "FACTOR_TYPE_UNSPECIFIED"
+    },
+    "usersgrpcGetUserByIDResponse": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "$ref": "#/definitions/usersgrpcUser",
+          "title": "User details"
+        }
+      },
+      "title": "Response message for GetUserByID"
+    },
+    "usersgrpcGetUserPaymentMethodsByUserIDResponse": {
+      "type": "object",
+      "properties": {
+        "userPaymentMethods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/usersgrpcUserPaymentMethod"
+          }
+        }
+      }
+    },
+    "usersgrpcGetUserSubscriptionResponse": {
+      "type": "object",
+      "properties": {
+        "userSubscription": {
+          "$ref": "#/definitions/usersgrpcUserSubscription"
+        }
+      }
+    },
+    "usersgrpcGrantAdminResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "usersgrpcHealthCheckResponse": {
+      "type": "object"
+    },
+    "usersgrpcLastOtpForFactorResponse": {
+      "type": "object",
+      "properties": {
+        "otp": {
+          "type": "string"
+        }
+      }
+    },
+    "usersgrpcListUsersResponse": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/usersgrpcUser"
+          },
+          "title": "List of all users"
+        },
+        "nextKey": {
+          "type": "string",
+          "title": "Key for the next set of results (for pagination)"
+        }
+      },
+      "title": "Response message for ListAllUsers"
+    },
+    "usersgrpcOtpIntent": {
+      "type": "string",
+      "enum": [
+        "OTP_INTENT_UNSPECIFIED",
+        "OTP_INTENT_LOGIN",
+        "OTP_INTENT_RESET_PASSWORD",
+        "OTP_INTENT_SIGNUP"
+      ],
+      "default": "OTP_INTENT_UNSPECIFIED",
+      "title": "- OTP_INTENT_UNSPECIFIED: Default value if no intent is specified\n - OTP_INTENT_LOGIN: OTP for login\n - OTP_INTENT_RESET_PASSWORD: OTP for resetting password\n - OTP_INTENT_SIGNUP: OTP for signing up"
+    },
+    "usersgrpcPaymentMethod": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string"
+        },
+        "methodId": {
+          "type": "string"
+        }
+      }
+    },
+    "usersgrpcPoint": {
+      "type": "object",
+      "properties": {
+        "lon": {
+          "type": "number",
+          "format": "float"
+        },
+        "lat": {
+          "type": "number",
+          "format": "float"
+        }
+      }
+    },
+    "usersgrpcRefreshAccessTokenRequest": {
+      "type": "object",
+      "properties": {
+        "refreshToken": {
+          "type": "string",
+          "title": "The refresh token to validate and exchange for a new access token"
+        }
+      }
+    },
+    "usersgrpcRefreshAccessTokenResponse": {
+      "type": "object",
+      "properties": {
+        "accessToken": {
+          "type": "string",
+          "title": "The newly generated access token"
+        }
+      }
+    },
+    "usersgrpcRevokeRefreshTokenRequest": {
+      "type": "object",
+      "properties": {
+        "refreshToken": {
+          "type": "string"
+        }
+      },
+      "title": "Request message for RevokeRefreshToken"
+    },
+    "usersgrpcRevokeRefreshTokenResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      },
+      "title": "Response message for RevokeRefreshToken"
+    },
+    "usersgrpcSendSignUpSmsOtpResponse": {
+      "type": "object",
+      "properties": {
+        "requestId": {
+          "type": "string"
+        }
+      }
+    },
+    "usersgrpcSendSignupSmsOtpRequest": {
+      "type": "object",
+      "properties": {
+        "phoneNumber": {
+          "type": "string"
+        },
+        "intent": {
+          "$ref": "#/definitions/usersgrpcOtpIntent"
+        }
+      }
+    },
+    "usersgrpcSendSmsOtpRequest": {
+      "type": "object",
+      "properties": {
+        "phoneNumber": {
+          "type": "string"
+        },
+        "intent": {
+          "$ref": "#/definitions/usersgrpcOtpIntent"
+        }
+      }
+    },
+    "usersgrpcSendSmsOtpResponse": {
+      "type": "object",
+      "properties": {
+        "requestId": {
+          "type": "string"
+        }
+      }
+    },
+    "usersgrpcSignupRequest": {
+      "type": "object",
+      "properties": {
+        "phoneFactor": {
+          "$ref": "#/definitions/usersgrpcAuthFactor"
+        },
+        "residenceCountryIsoCode": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "userType": {
+          "$ref": "#/definitions/usersgrpcUserType"
+        }
+      }
+    },
+    "usersgrpcSignupResponse": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "tokens": {
+          "$ref": "#/definitions/usersgrpcTokens"
+        }
+      }
+    },
+    "usersgrpcSubscribeResponse": {
+      "type": "object",
+      "properties": {
+        "paymentId": {
+          "type": "string"
+        },
+        "paymentRef": {
+          "type": "string"
+        },
+        "userSubscription": {
+          "$ref": "#/definitions/usersgrpcUserSubscription"
+        }
+      }
+    },
+    "usersgrpcSubscription": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "string",
+          "format": "int64"
+        },
+        "amount": {
+          "type": "string",
+          "format": "int64"
+        },
+        "currencyIsoCode": {
+          "type": "string"
+        }
+      }
+    },
+    "usersgrpcTokens": {
+      "type": "object",
+      "properties": {
+        "accessToken": {
+          "type": "string",
+          "title": "Token to access the API"
+        },
+        "refreshToken": {
+          "type": "string",
+          "title": "Token to refresh access when expired"
+        }
+      }
+    },
+    "usersgrpcUpdateSubscriptionResponse": {
+      "type": "object",
+      "properties": {
+        "subscription": {
+          "$ref": "#/definitions/usersgrpcSubscription"
+        }
+      }
+    },
+    "usersgrpcUser": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/definitions/usersgrpcUserRole"
+        },
+        "phoneNumber": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "residenceCountryIsoCode": {
+          "type": "string"
+        },
+        "locationCoordinates": {
+          "$ref": "#/definitions/usersgrpcPoint"
+        },
+        "profileImage": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Using a timestamp for date"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "usersgrpcUserPaymentMethod": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "UUID as string"
+        },
+        "userId": {
+          "type": "string",
+          "title": "UUID as string"
+        },
+        "paymentMethod": {
+          "$ref": "#/definitions/usersgrpcPaymentMethod"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "title": "UserPaymentMethod"
+    },
+    "usersgrpcUserRole": {
+      "type": "string",
+      "enum": [
+        "USER_ROLE_UNSPECIFIED",
+        "USER_ROLE_FARMER",
+        "USER_ROLE_SELLER",
+        "USER_ROLE_ADMIN"
+      ],
+      "default": "USER_ROLE_UNSPECIFIED"
+    },
+    "usersgrpcUserSubscription": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "subscription": {
+          "$ref": "#/definitions/usersgrpcSubscription"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "usersgrpcUserType": {
+      "type": "string",
+      "enum": [
+        "USER_TYPE_UNSPECIFIED",
+        "USER_TYPE_FARMER",
+        "USER_TYPE_SELLER"
+      ],
+      "default": "USER_TYPE_UNSPECIFIED"
+    },
+    "usersgrpcVerifyOtpRequest": {
+      "type": "object",
+      "properties": {
+        "authFactor": {
+          "$ref": "#/definitions/usersgrpcAuthFactor"
+        }
+      }
+    },
+    "usersgrpcVerifyOtpResponse": {
+      "type": "object",
+      "properties": {
+        "valid": {
+          "type": "boolean",
+          "title": "returns true if the otp matches the request, else returns false"
+        }
+      }
+    }
+  }
+}

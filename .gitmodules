@@ -1,0 +1,6 @@
+[submodule "infra/cloudformation/aws-cloudformation-templates"]
+	path = infra/cloudformation/aws-cloudformation-templates
+	url = https://github.com/Iknite-Space/aws-cloudformation-templates.git
+[submodule "googleapis"]
+	path = googleapis
+	url = git@github.com:googleapis/googleapis

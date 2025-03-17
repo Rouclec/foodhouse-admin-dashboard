@@ -1,0 +1,466 @@
+syntax = "proto3";
+
+package usersgrpc;
+
+option go_package = "github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc";
+
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+
+enum UserRole {
+  USER_ROLE_UNSPECIFIED = 0;
+  USER_ROLE_FARMER = 1;
+  USER_ROLE_SELLER = 2;
+  USER_ROLE_ADMIN = 3;
+}
+
+message Point {
+  float lon = 1;
+  float lat = 2;
+}
+
+message User {
+  string user_id = 1;
+  UserRole role = 3;
+  string phone_number = 4;
+  string email = 5;
+  string first_name = 6;
+  string last_name = 7;
+  string residence_country_iso_code = 8;
+  Point location_coordinates = 9;
+  string profile_image = 10;
+  string address = 11;
+  google.protobuf.Timestamp created_at = 12; // Using a timestamp for date
+  google.protobuf.Timestamp updated_at = 13;
+}
+
+message AuthFactor {
+  FactorType type = 1;
+  // for OTPs this will be a request_id, for email_password this
+  // will be the email address
+  string id = 2;
+  // Value of the factor (e.g., password or OTP)
+  string secret_value = 3;
+}
+
+enum OtpIntent {
+  OTP_INTENT_UNSPECIFIED = 0;    // Default value if no intent is specified
+  OTP_INTENT_LOGIN = 1;          // OTP for login
+  OTP_INTENT_RESET_PASSWORD = 2; // OTP for resetting password
+  OTP_INTENT_SIGNUP = 3;         // OTP for signing up
+}
+
+enum FactorType {
+  FACTOR_TYPE_UNSPECIFIED = 0;
+  FACTOR_TYPE_EMAIL_PASSWORD = 1;
+  FACTOR_TYPE_SMS_OTP = 2;
+  FACTOR_TYPE_EMAIL_OTP = 3;
+}
+
+message Tokens {
+  // Token to access the API
+  string access_token = 1;
+  // Token to refresh access when expired
+  string refresh_token = 2;
+}
+
+// Request and response messages for gRPC methods.
+message AdditionalFactor {
+  FactorType factor_type = 1;
+  // ID for the additional factor request"security_question")
+  optional string request_id = 2;
+  // Hint for the additional factor (e.g., last 4 digits of phone number)
+  string factor_hint = 3;
+}
+
+message Subscription {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  int64 duration = 4;
+  int64 amount = 5;
+  string currency_iso_code = 6;
+}
+
+message PaymentMethod {
+  string method = 1;
+  string method_id = 2;
+}
+
+message UserSubscription {
+  string id = 1;
+  Subscription subscription = 2;
+  string user_id = 3;
+  bool active = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+  google.protobuf.Timestamp expires_at = 7;
+}
+
+message RefreshAccessTokenRequest {
+  // The refresh token to validate and exchange for a new access token
+  string refresh_token = 1;
+}
+
+message RefreshAccessTokenResponse {
+  // The newly generated access token
+  string access_token = 1;
+}
+
+message AuthenticateRequest {
+  // A list of authentication factors provided by the client
+  repeated AuthFactor factors = 1;
+}
+
+message AuthenticateResponse {
+  // Indicates if login is complete
+  // Returned if an additional factor is required
+  bool login_complete = 1;
+  AdditionalFactor additional_factor = 2;
+  // Access and refresh tokens returned if login is complete
+  Tokens tokens = 3;
+  string user_id = 4;
+}
+
+message SendSmsOtpRequest {
+  string phone_number = 1;
+  OtpIntent intent = 2;
+}
+
+message SendSmsOtpResponse { string request_id = 1; }
+
+message SendSignupSmsOtpRequest {
+  string phone_number = 1;
+  OtpIntent intent = 2;
+}
+
+message SendSignUpSmsOtpResponse { string request_id = 1; }
+
+message HealthCheckRequest {}
+message HealthCheckResponse {}
+
+enum UserType {
+  USER_TYPE_UNSPECIFIED = 0;
+  USER_TYPE_FARMER = 1;
+  USER_TYPE_SELLER = 2;
+}
+message SignupRequest {
+  AuthFactor phone_factor = 1;
+  string residence_country_iso_code = 2;
+  string password = 3;
+  UserType user_type = 4;
+}
+
+message SignupResponse {
+  string user_id = 1;
+  Tokens tokens = 2;
+}
+
+// Request message for GetUserByID
+message GetUserByIDRequest {
+  string user_id = 1; // ID of the user to fetch
+}
+
+// Response message for GetUserByID
+message GetUserByIDResponse {
+  User user = 1; // User details
+}
+
+// Request message for UpdateUser
+message CompleteRegistrationRequest {
+  string user_id = 1;
+  string first_name = 2;
+  string last_name = 3;
+  string email = 4;
+  Point location_coordinates = 5;
+}
+
+// Response message for UpdateUser
+message CompleteRegistrationResponse { string message = 1; }
+
+// Request message for ChangePassword
+message ChangePasswordRequest {
+  string new_password = 1;
+  AuthFactor email_factor = 2;
+}
+
+// Response message for ChangePassword
+message ChangePasswordResponse { string message = 1; }
+
+// Request message for RevokeRefreshToken
+message RevokeRefreshTokenRequest { string refresh_token = 1; }
+
+// Response message for RevokeRefreshToken
+message RevokeRefreshTokenResponse { string message = 1; }
+
+message VerifyOtpRequest { AuthFactor auth_factor = 1; }
+
+message VerifyOtpResponse {
+  // returns true if the otp matches the request, else returns false
+  bool valid = 1;
+}
+
+// Request message for LastOtpForFactor.
+// Note: This method is purely for testing purposes. It will not be enabled in
+// production.
+message LastOtpForFactorRequest { string factor = 1; }
+
+message LastOtpForFactorResponse { string otp = 1; }
+
+message GrantAdminRequest {
+  string admin_user_id = 1;
+  string phone_number = 2;
+  string residence_country_iso_code = 3;
+}
+
+message GrantAdminResponse { string message = 1; }
+
+// Request message for ListUsers
+message ListUsersRequest {
+  string admin_user_id = 1;
+  // Key for pagination, indicating where to start the list
+  string start_key = 2;
+  // Number of users to retrieve
+  int32 count = 3;
+  // keyword search for the users (could be name, or email)
+  string search = 4;
+}
+
+// Response message for ListAllUsers
+message ListUsersResponse {
+  // List of all users
+  repeated User users = 1;
+  // Key for the next set of results (for pagination)
+  string next_key = 2;
+}
+
+message CreateSubscriptionRequest {
+  string admin_user_id = 1;
+  string title = 2;
+  string description = 3;
+  // This is the number of days which the subscription is valid for
+  int64 duration = 4;
+  int64 amount = 5;
+  string currency_iso_code = 6;
+}
+
+message CreateSubscriptionResponse { Subscription subscription = 1; }
+
+message UpdateSubscriptionRequest {
+  string admin_user_id = 1;
+  string subscription_id = 2;
+  string title = 3;
+  string description = 4;
+  int64 duration = 5;
+  int64 amount = 6;
+  string currency_iso_code = 7;
+}
+
+message UpdateSubscriptionResponse { Subscription subscription = 1; }
+
+message DeleteSubscriptionRequst {
+  string admin_user_id = 1;
+  string subscription_id = 2;
+}
+
+message DeleteSubscriptionResponse { string message = 1; }
+
+message SubscribeRequest {
+  string user_id = 1;
+  string subscription_id = 2;
+  int64 amount = 3;
+  string currency_iso_code = 4;
+  PaymentMethod payment_method = 5;
+}
+
+message SubscribeResponse {
+  string payment_id = 1;
+  string payment_ref = 2;
+  UserSubscription user_subscription = 3;
+}
+
+// UserPaymentMethod
+message UserPaymentMethod {
+  string id = 1;      // UUID as string
+  string user_id = 2; // UUID as string
+  PaymentMethod payment_method = 3;
+  google.protobuf.Timestamp created_at = 4;
+}
+
+// Delete User Payment Method Request
+message DeleteUserPaymentMethodRequest {
+  string user_id = 1; // UUID as string
+  string payment_method_id = 2;
+}
+
+// Delete User Payment Method Response
+message DeleteUserPaymentMethodResponse { string message = 1; }
+
+// Get User Payment Methods by User ID Request
+message GetUserPaymentMethodsByUserIDRequest {
+  string user_id = 1; // UUID as string
+}
+
+message GetUserPaymentMethodsByUserIDResponse {
+  repeated UserPaymentMethod user_payment_methods = 1;
+}
+
+message GetUserSubscriptionRequest { string user_id = 1; }
+
+message GetUserSubscriptionResponse { UserSubscription user_subscription = 1; }
+
+service Users {
+
+  rpc SendSignupSmsOtp(SendSignupSmsOtpRequest)
+      returns (SendSignUpSmsOtpResponse) {
+    option (google.api.http) = {
+      post : "/v1/public/users/send-signup-sms-otp"
+      body : "*"
+    };
+  }
+
+  rpc Signup(SignupRequest) returns (SignupResponse) {
+    option (google.api.http) = {
+      post : "/v1/public/users/signup"
+      body : "*"
+    };
+  }
+
+  rpc GetUserByID(GetUserByIDRequest) returns (GetUserByIDResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}"
+    };
+  }
+
+  rpc CompleteRegistration(CompleteRegistrationRequest)
+      returns (CompleteRegistrationResponse) {
+    option (google.api.http) = {
+      post : "/v1/users/{user_id}/complete-registration"
+      body : "*"
+    };
+  }
+
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {
+    option (google.api.http) = {
+      get : "/v1/public/users/health-check"
+    };
+  }
+
+  rpc RefreshAccessToken(RefreshAccessTokenRequest)
+      returns (RefreshAccessTokenResponse) {
+    option (google.api.http) = {
+      post : "/v1/public/users/refresh-access-token"
+      body : "*"
+    };
+  }
+
+  rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse) {
+    option (google.api.http) = {
+      post : "/v1/public/users/authenticate"
+      body : "*"
+    };
+  }
+
+  rpc SendSmsOtp(SendSmsOtpRequest) returns (SendSmsOtpResponse) {
+    option (google.api.http) = {
+      post : "/v1/public/users/send-sms-otp"
+      body : "*"
+    };
+  }
+
+  rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse) {
+    option (google.api.http) = {
+      post : "/v1/public/users/change-password"
+      body : "*"
+    };
+  }
+
+  rpc RevokeRefreshToken(RevokeRefreshTokenRequest)
+      returns (RevokeRefreshTokenResponse) {
+    option (google.api.http) = {
+      post : "/v1/public/revoke-refresh-token"
+      body : "*"
+    };
+  }
+
+  rpc VerifyOtp(VerifyOtpRequest) returns (VerifyOtpResponse) {
+    option (google.api.http) = {
+      post : "/v1/public/users/verify-otp"
+      body : "*"
+    };
+  }
+
+  rpc LastOtpForFactor(LastOtpForFactorRequest)
+      returns (LastOtpForFactorResponse) {
+    option (google.api.http) = {
+      get : "/v1/public/users/last-otp-for-factor"
+    };
+  }
+
+  rpc GrantAdmin(GrantAdminRequest) returns (GrantAdminResponse) {
+    option (google.api.http) = {
+      post : "/v1/admin/{admin_user_id}/users/grant-admin"
+      body : "*"
+    };
+  }
+
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
+    option (google.api.http) = {
+      get : "/v1/admin/{admin_user_id}/users/list-users"
+    };
+  }
+
+  rpc CreateSubscription(CreateSubscriptionRequest)
+      returns (CreateSubscriptionResponse) {
+    option (google.api.http) = {
+      post : "/v1/admin/{admin_user_id}/users/create-subscription"
+      body : "*"
+    };
+  }
+
+  rpc UpdateSubscription(UpdateSubscriptionRequest)
+      returns (UpdateSubscriptionResponse) {
+    option (google.api.http) = {
+      put : "/v1/admin/{admin_user_id}/users/update-subscription/"
+            "{subscription_id}"
+      body : "*"
+    };
+  }
+
+  rpc DeleteSubscription(DeleteSubscriptionRequst)
+      returns (DeleteSubscriptionResponse) {
+    option (google.api.http) = {
+      delete : "/v1/admin/{admin_user_id}/users/delete-subscription/"
+               "{subscription_id}"
+    };
+  }
+
+  rpc Subscribe(SubscribeRequest) returns (SubscribeResponse) {
+    option (google.api.http) = {
+      post : "/v1/users/{user_id}/subscribe"
+      body : "*"
+    };
+  }
+
+  rpc GetUserSubscription(GetUserSubscriptionRequest)
+      returns (GetUserSubscriptionResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/users/get-user-subscriptions"
+    };
+  }
+
+  rpc GetUserPaymentMethodsByUserID(GetUserPaymentMethodsByUserIDRequest)
+      returns (GetUserPaymentMethodsByUserIDResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/users/get-user-payment-methods-by-user-id"
+    };
+  }
+
+  rpc DeleteUserPaymentMethod(DeleteUserPaymentMethodRequest)
+      returns (DeleteUserPaymentMethodResponse) {
+    option (google.api.http) = {
+      delete : "/v1/users/{user_id}/delete-user-payment-method/"
+               "{payment_method_id}"
+    };
+  }
+}

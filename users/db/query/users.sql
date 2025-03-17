@@ -1,0 +1,36 @@
+-- name: CreateUser :one
+INSERT INTO users (phone_number, email, password, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, role)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+RETURNING *;
+
+-- name: UpdateUser :one
+UPDATE users
+SET
+    (first_name, last_name, email, residence_country_iso_code, address, location_coordinates, profile_image, updated_at) =
+    ($1,         $2,        $3,    $4,                         $5,      $6,                   $7,            now())
+WHERE
+    id = $8
+RETURNING
+    *;
+
+-- name: GetUser :one
+SELECT * FROM users WHERE id = $1;
+
+-- name: GetUserForUpdate :one
+SELECT * FROM users WHERE id = $1 FOR UPDATE;
+
+-- name: GetUserByEmail :one
+SELECT * FROM users WHERE email = $1;
+
+-- name: GetUserByPhoneNumber :one
+SELECT * FROM users WHERE phone_number = $1;
+
+
+-- name: UpdateUserPassword :exec
+UPDATE users SET password = $1 WHERE id = $2;
+
+-- name: UpdateUserRole :exec
+UPDATE users SET role = $1 WHERE id = $2;
+
+-- name: CountUsers :one
+SELECT COUNT(*) FROM users WHERE created_at >= sqlc.arg(start_date) AND created_at < sqlc.arg(end_date);
