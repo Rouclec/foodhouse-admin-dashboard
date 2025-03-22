@@ -1,15 +1,15 @@
 -- name: CreateUser :one
-INSERT INTO users (phone_number, email, password, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, role)
+INSERT INTO users (phone_number, email, "password", first_name, last_name, residence_country_iso_code, "address", location_coordinates, profile_image, "role")
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 RETURNING *;
 
 -- name: UpdateUser :one
 UPDATE users
 SET
-    (first_name, last_name, email, residence_country_iso_code, address, location_coordinates, profile_image, updated_at) =
-    ($1,         $2,        $3,    $4,                         $5,      $6,                   $7,            now())
+    (first_name, last_name, email, "address", location_coordinates, profile_image, updated_at) =
+    ($1,         $2,        $3,    $4,        $5,                   $6,            now())
 WHERE
-    id = $8
+    id = $7
 RETURNING
     *;
 

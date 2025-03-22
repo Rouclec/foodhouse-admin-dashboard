@@ -13,3 +13,10 @@ SELECT * FROM user_subscriptions WHERE id = $1;
 UPDATE user_subscriptions
 SET active = true, updated_at = now()
 WHERE id = $1;
+
+-- name: GetUserActiveSubscription :one
+SELECT * 
+FROM user_subscriptions 
+WHERE user_id = $1 
+AND active = TRUE 
+LIMIT 1;

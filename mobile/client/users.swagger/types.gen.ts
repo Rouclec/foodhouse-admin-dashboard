@@ -14,6 +14,8 @@ export type UsersCompleteRegistrationBody = {
     firstName?: string;
     lastName?: string;
     email?: string;
+    address?: string;
+    profileImage?: string;
     locationCoordinates?: usersgrpcPoint;
 };
 
@@ -83,6 +85,10 @@ export type usersgrpcDeleteUserPaymentMethodResponse = {
 
 export type usersgrpcFactorType = 'FACTOR_TYPE_UNSPECIFIED' | 'FACTOR_TYPE_EMAIL_PASSWORD' | 'FACTOR_TYPE_SMS_OTP' | 'FACTOR_TYPE_EMAIL_OTP';
 
+export type usersgrpcGetUserActiveSubscriptionResponse = {
+    userSubscription?: usersgrpcUserSubscription;
+};
+
 export type usersgrpcGetUserByIDResponse = {
     user?: usersgrpcUser;
 };
@@ -91,8 +97,8 @@ export type usersgrpcGetUserPaymentMethodsByUserIDResponse = {
     userPaymentMethods?: Array<usersgrpcUserPaymentMethod>;
 };
 
-export type usersgrpcGetUserSubscriptionResponse = {
-    userSubscription?: usersgrpcUserSubscription;
+export type usersgrpcGetUserSubscriptionsResponse = {
+    userSubscriptions?: Array<usersgrpcUserSubscription>;
 };
 
 export type usersgrpcGrantAdminResponse = {
@@ -398,19 +404,6 @@ export type UsersVerifyOtpResponse = (usersgrpcVerifyOtpResponse);
 
 export type UsersVerifyOtpError = (rpcStatus);
 
-export type UsersGetUserByIdData = {
-    path: {
-        /**
-         * ID of the user to fetch
-         */
-        userId: string;
-    };
-};
-
-export type UsersGetUserByIdResponse = (usersgrpcGetUserByIDResponse);
-
-export type UsersGetUserByIdError = (rpcStatus);
-
 export type UsersCompleteRegistrationData = {
     body: UsersCompleteRegistrationBody;
     path: {
@@ -436,6 +429,19 @@ export type UsersDeleteUserPaymentMethodResponse = (usersgrpcDeleteUserPaymentMe
 
 export type UsersDeleteUserPaymentMethodError = (rpcStatus);
 
+export type UsersGetUserByIdData = {
+    path: {
+        /**
+         * ID of the user to fetch
+         */
+        userId: string;
+    };
+};
+
+export type UsersGetUserByIdResponse = (usersgrpcGetUserByIDResponse);
+
+export type UsersGetUserByIdError = (rpcStatus);
+
 export type UsersSubscribeData = {
     body: UsersSubscribeBody;
     path: {
@@ -446,6 +452,16 @@ export type UsersSubscribeData = {
 export type UsersSubscribeResponse = (usersgrpcSubscribeResponse);
 
 export type UsersSubscribeError = (rpcStatus);
+
+export type UsersGetUserActiveSubscriptionData = {
+    path: {
+        userId: string;
+    };
+};
+
+export type UsersGetUserActiveSubscriptionResponse = (usersgrpcGetUserActiveSubscriptionResponse);
+
+export type UsersGetUserActiveSubscriptionError = (rpcStatus);
 
 export type UsersGetUserPaymentMethodsByUserIdData = {
     path: {
@@ -460,12 +476,12 @@ export type UsersGetUserPaymentMethodsByUserIdResponse = (usersgrpcGetUserPaymen
 
 export type UsersGetUserPaymentMethodsByUserIdError = (rpcStatus);
 
-export type UsersGetUserSubscriptionData = {
+export type UsersGetUserSubscriptionsData = {
     path: {
         userId: string;
     };
 };
 
-export type UsersGetUserSubscriptionResponse = (usersgrpcGetUserSubscriptionResponse);
+export type UsersGetUserSubscriptionsResponse = (usersgrpcGetUserSubscriptionsResponse);
 
-export type UsersGetUserSubscriptionError = (rpcStatus);
+export type UsersGetUserSubscriptionsError = (rpcStatus);

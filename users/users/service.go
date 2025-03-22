@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
 	"github.com/foodhouse/foodhouseapp/sms"
@@ -16,6 +17,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const (
@@ -45,8 +47,10 @@ type Impl struct {
 var _ usersgrpc.UsersServer = (*Impl)(nil)
 
 // NewUsers returns a new instance of the UsersImpl.
-func NewUsers(repo repo.UsersRepo,
+func NewUsers(
+	repo repo.UsersRepo,
 	logger zerolog.Logger,
+	smsSender sms.SmsSender,
 	otpGenerator OtpGenerator,
 	tokenManagerBuilder TokenManagerBuilder,
 	enableDevMethods bool,
@@ -55,6 +59,7 @@ func NewUsers(repo repo.UsersRepo,
 		repo:                repo,
 		logger:              logger,
 		otpGenerator:        otpGenerator,
+		smsSender:           smsSender,
 		tokenManagerBuilder: tokenManagerBuilder,
 		devMethodsEndabled:  enableDevMethods,
 	}
@@ -119,11 +124,13 @@ func (i *Impl) SendSignupSmsOtp(ctx context.Context, req *usersgrpc.SendSignupSm
 		return nil, status.Errorf(codes.Internal, "Error generating OTP: %v", err)
 	}
 
+	i.logger.Debug().Msgf("Request id %v, otp %v", requestID, otp)
+
 	// Send the Message to the formatted number
 	response, err := i.smsSender.SendSms(
 		ctx,
 		formattedNumber,
-		fmt.Sprintf(`Your verification code for VsorPay is %v`, otp),
+		fmt.Sprintf(`Your verification code for Foodhouse is %v`, otp),
 	)
 
 	i.logger.Debug().Interface("SMS response: ", response).Msg("Response from sms client")
@@ -208,7 +215,7 @@ func (i *Impl) Signup(ctx context.Context, req *usersgrpc.SignupRequest) (*users
 		return nil, status.Errorf(codes.Unauthenticated, "Failed to validate OTP: %v", err)
 	}
 
-	userType, ok := usersgrpc.UserRole_value[req.GetUserType().String()]
+	userType, ok := usersgrpc.UserType_value[req.GetUserType().String()]
 	if !ok {
 		return nil, status.Errorf(codes.Internal, "invalid user type in request: %v", req.GetUserType().String())
 	}
@@ -225,6 +232,8 @@ func (i *Impl) Signup(ctx context.Context, req *usersgrpc.SignupRequest) (*users
 		ResidenceCountryIsoCode: req.GetResidenceCountryIsoCode(),
 		Role:                    userRole.String(),
 	}
+
+	i.logger.Debug().Interface("New user : ", newUser)
 
 	createdDBUser, err := querier.CreateUser(ctx, newUser)
 	if err != nil {
@@ -303,16 +312,52 @@ func (i *Impl) GetUserByID(
 	req *usersgrpc.GetUserByIDRequest) (*usersgrpc.GetUserByIDResponse, error) {
 	userID := req.GetUserId()
 
+	i.logger.Debug().Msgf("user id in request %v", req.GetUserId())
+
 	foundUser, err := i.repo.Do().GetUser(ctx, userID)
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "User not found: %v", err)
 	}
 
+	i.logger.Debug().Interface("User found", foundUser).Msg("User from DB")
+
 	return &usersgrpc.GetUserByIDResponse{
 		User: &usersgrpc.User{
-			UserId: foundUser.ID,
+			UserId:                  foundUser.ID,
+			PhoneNumber:             foundUser.PhoneNumber,
+			Email:                   safeString(foundUser.Email),
+			Role:                    getUserRole(foundUser.Role),
+			FirstName:               safeString(foundUser.FirstName),
+			LastName:                safeString(foundUser.LastName),
+			ResidenceCountryIsoCode: foundUser.ResidenceCountryIsoCode,
+			ProfileImage:            safeString(foundUser.ProfileImage),
+			LocationCoordinates:     getLocationPoint(foundUser.LocationCoordinates),
+			Address:                 safeString(foundUser.Address),
+			CreatedAt:               timestamppb.New(foundUser.CreatedAt.Time),
+			UpdatedAt:               timestamppb.New(foundUser.UpdatedAt.Time),
 		},
 	}, nil
+}
+
+func safeString(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+
+func getUserRole(role string) usersgrpc.UserRole {
+	if val, ok := usersgrpc.UserRole_value[role]; ok {
+		return usersgrpc.UserRole(val)
+	}
+	return usersgrpc.UserRole_USER_ROLE_UNSPECIFIED
+}
+
+func getLocationPoint(loc pgtype.Point) *usersgrpc.Point {
+	if !loc.Valid {
+		return nil
+	}
+	return &usersgrpc.Point{Lon: loc.P.X, Lat: loc.P.Y}
 }
 
 // UpdateRegistrationData implements usersgrpc.UsersServer.
@@ -339,7 +384,7 @@ func (i *Impl) CompleteRegistration(
 		return nil, status.Errorf(codes.Internal, "Error rolling back transaction: %v", err)
 	}
 
-	_, err = querier.GetUser(ctx, userID)
+	_, err = querier.GetUserForUpdate(ctx, userID)
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "User not found: %v", err)
 	}
@@ -351,8 +396,13 @@ func (i *Impl) CompleteRegistration(
 		FirstName:           &req.FirstName,
 		LastName:            &req.LastName,
 		Email:               &req.Email,
-		LocationCoordinates: pgtype.Point{P: pgtype.Vec2{X: float64(req.LocationCoordinates.GetLon()), Y: float64(req.LocationCoordinates.GetLat())}},
+		LocationCoordinates: pgtype.Point{P: pgtype.Vec2{X: float64(req.LocationCoordinates.GetLon()), Y: float64(req.LocationCoordinates.GetLat())}, Valid: true},
+		// ResidenceCountryIsoCode:,
+		ProfileImage: &req.ProfileImage,
+		Address:      &req.Address,
 	}
+
+	i.logger.Debug().Interface("update user params: ", arg)
 
 	_, err = querier.UpdateUser(ctx, arg)
 	if err != nil {
@@ -785,22 +835,137 @@ func (i *Impl) DeleteSubscription(ctx context.Context, req *usersgrpc.DeleteSubs
 }
 
 // UpdateSubscription implements usersgrpc.UsersServer.
-func (i *Impl) UpdateSubscription(context.Context, *usersgrpc.UpdateSubscriptionRequest) (*usersgrpc.UpdateSubscriptionResponse, error) {
-	panic("unimplemented")
+func (i *Impl) UpdateSubscription(ctx context.Context, req *usersgrpc.UpdateSubscriptionRequest) (*usersgrpc.UpdateSubscriptionResponse, error) {
+
+	// Declaring query to use for db transactions
+	querier, tx, err := i.repo.Begin(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to begin transaction: %v", err)
+	}
+
+	// Proper rollback handling
+	defer func() {
+		if rollbackErr := tx.Rollback(ctx); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
+			i.logger.Err(err).Msg("failed to rollback transaction")
+		}
+	}()
+
+	// GET the subscription for update
+	foundSubscription, err := querier.GetSubscriptionForUpdate(ctx, req.GetSubscriptionId())
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, status.Error(codes.NotFound, fmt.Sprint("No subscription found with id: %w", req.GetSubscriptionId()))
+		}
+		return nil, status.Errorf(codes.Internal, "Error fetching subscription: %v", err)
+	}
+
+	arg := sqlc.UpdateSubscriptionParams{
+		Title:           req.GetTitle(),
+		Description:     req.GetDescription(),
+		Duration:        pgtype.Interval{Microseconds: req.GetDuration() * 24 * 60 * 60 * 1000000, Valid: true},
+		Amount:          req.GetAmount(),
+		CurrencyIsoCode: req.GetCurrencyIsoCode(),
+		ID:              foundSubscription.ID,
+	}
+
+	updatedSubscription, err := querier.UpdateSubscription(ctx, arg)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Could not update subscription: %v", err)
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to commit the transaction: %v", err)
+	}
+
+	return &usersgrpc.UpdateSubscriptionResponse{
+		Subscription: &usersgrpc.Subscription{
+			Id:              updatedSubscription.ID,
+			Title:           updatedSubscription.Title,
+			Description:     updatedSubscription.Description,
+			Duration:        updatedSubscription.Duration.Microseconds / (24 * 60 * 60 * 1000000), // Convert microseconds back to days
+			Amount:          updatedSubscription.Amount,
+			CurrencyIsoCode: updatedSubscription.CurrencyIsoCode,
+		},
+	}, nil
 }
 
 // DeleteUserPaymentMethod implements usersgrpc.UsersServer.
-func (i *Impl) DeleteUserPaymentMethod(context.Context, *usersgrpc.DeleteUserPaymentMethodRequest) (*usersgrpc.DeleteUserPaymentMethodResponse, error) {
-	panic("unimplemented")
+func (i *Impl) DeleteUserPaymentMethod(ctx context.Context, req *usersgrpc.DeleteUserPaymentMethodRequest) (*usersgrpc.DeleteUserPaymentMethodResponse, error) {
+	err := i.repo.Do().DeleteUserPaymentMethod(ctx, req.GetPaymentMethodId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Erro deleting payment method: %v", err)
+	}
+
+	return &usersgrpc.DeleteUserPaymentMethodResponse{
+		Message: fmt.Sprintf("Payment method with id %v for user %v deleted successfully", req.GetPaymentMethodId(), req.GetUserId()),
+	}, nil
 }
 
 // GetUserPaymentMethodsByUserID implements usersgrpc.UsersServer.
-func (i *Impl) GetUserPaymentMethodsByUserID(context.Context, *usersgrpc.GetUserPaymentMethodsByUserIDRequest) (*usersgrpc.GetUserPaymentMethodsByUserIDResponse, error) {
-	panic("unimplemented")
+func (i *Impl) GetUserPaymentMethodsByUserID(ctx context.Context, req *usersgrpc.GetUserPaymentMethodsByUserIDRequest) (*usersgrpc.GetUserPaymentMethodsByUserIDResponse, error) {
+	paymentMethods, err := i.repo.Do().GetUserPaymentMethodsByUserID(ctx, req.GetUserId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Error getting user payment methods : %v", err)
+	}
+
+	var paymentMethodsResponse []*usersgrpc.UserPaymentMethod
+
+	for _, pm := range paymentMethods {
+		paymentMethodsResponse = append(paymentMethodsResponse, &usersgrpc.UserPaymentMethod{
+			Id:     pm.ID,
+			UserId: pm.UserID,
+			PaymentMethod: &usersgrpc.PaymentMethod{
+				Method:   pm.Method,
+				MethodId: *pm.MethodID,
+			},
+		})
+	}
+
+	return &usersgrpc.GetUserPaymentMethodsByUserIDResponse{
+		UserPaymentMethods: paymentMethodsResponse,
+	}, nil
 }
 
-// GetUserSubscription implements usersgrpc.UsersServer.
-func (i *Impl) GetUserSubscription(context.Context, *usersgrpc.GetUserSubscriptionRequest) (*usersgrpc.GetUserSubscriptionResponse, error) {
+// GetUserActiveSubscription implements usersgrpc.UsersServer.
+func (i *Impl) GetUserActiveSubscription(ctx context.Context, req *usersgrpc.GetUserActiveSubscriptionRequest) (*usersgrpc.GetUserActiveSubscriptionResponse, error) {
+	activeUserSubscription, err := i.repo.Do().GetUserActiveSubscription(ctx, req.UserId)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Error getting user active subscription : %v", err)
+	}
+
+	subscription, err := i.repo.Do().GetSubscriptionByID(ctx, activeUserSubscription.SubscriptionID)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Error fetching subscription : %v", err)
+	}
+
+	return &usersgrpc.GetUserActiveSubscriptionResponse{
+		UserSubscription: &usersgrpc.UserSubscription{
+			Id:     activeUserSubscription.ID,
+			UserId: activeUserSubscription.UserID,
+			Active: activeUserSubscription.Active,
+			Subscription: &usersgrpc.Subscription{
+				Id:              subscription.ID,
+				Title:           subscription.Title,
+				Description:     subscription.Description,
+				Amount:          subscription.Amount,
+				CurrencyIsoCode: subscription.CurrencyIsoCode,
+			},
+			CreatedAt: timestamppb.New(activeUserSubscription.CreatedAt.Time),
+			UpdatedAt: timestamppb.New(activeUserSubscription.UpdatedAt.Time),
+			ExpiresAt: timestamppb.New(activeUserSubscription.ExpiresAt),
+		},
+	}, nil
+}
+
+// GetUserSubscriptions implements usersgrpc.UsersServer.
+func (i *Impl) GetUserSubscriptions(context.Context, *usersgrpc.GetUserSubscriptionsRequest) (*usersgrpc.GetUserSubscriptionsResponse, error) {
 	panic("unimplemented")
 }
 
@@ -810,6 +975,82 @@ func (i *Impl) ListUsers(context.Context, *usersgrpc.ListUsersRequest) (*usersgr
 }
 
 // Subscribe implements usersgrpc.UsersServer.
-func (i *Impl) Subscribe(context.Context, *usersgrpc.SubscribeRequest) (*usersgrpc.SubscribeResponse, error) {
-	panic("unimplemented")
+func (i *Impl) Subscribe(ctx context.Context, req *usersgrpc.SubscribeRequest) (*usersgrpc.SubscribeResponse, error) {
+	// Declaring query to use for db transactions
+	querier, tx, err := i.repo.Begin(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to begin transaction: %v", err)
+	}
+
+	// Proper rollback handling
+	defer func() {
+		if rollbackErr := tx.Rollback(ctx); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
+			i.logger.Err(err).Msg("failed to rollback transaction")
+		}
+	}()
+
+	subscription, err := querier.GetSubscriptionByID(ctx, req.GetSubscriptionId())
+
+	// TODO for now, we're not converting the amount, so we will throw an error if the currency codes are different
+	// in the future, we will want to convert from currency code 1 to currency code 2 and then compare the amounts to make sure that they are the same
+
+	if subscription.CurrencyIsoCode != req.GetCurrencyIsoCode() {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("cannot convert from currency %v to currency %v", req.GetCurrencyIsoCode(), subscription.CurrencyIsoCode))
+	}
+
+	if req.GetAmount() < subscription.Amount {
+		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("The amount passed (%v) is less than the price (%v) for the package %v", req.GetAmount(), subscription.Amount, subscription.Title))
+	}
+
+	// create a user subscription
+	createUserSubscriptionArgs := &sqlc.CreateUserSubscriptionParams{
+		UserID:         req.GetUserId(),
+		SubscriptionID: subscription.ID,
+		Active:         false,
+		ExpiresAt: time.Now().Add(
+			time.Duration(
+				subscription.Duration.Microseconds/(24*60*60*1000000)) * 24 * time.Hour),
+	}
+
+	userSubscription, err := querier.CreateUserSubscription(ctx, *createUserSubscriptionArgs)
+
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("error creating user subscription %v", err))
+	}
+
+	// create a payment with the external ref as the
+	createPaymentArgs := &sqlc.CreatePaymentParams{
+		ExternalRef:     userSubscription.ID,
+		Amount:          subscription.Amount,
+		CurrencyIsoCode: req.GetCurrencyIsoCode(),
+		Method:          req.GetPaymentMethod().GetMethod(),
+	}
+
+	payment, err := querier.CreatePayment(ctx, *createPaymentArgs)
+
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("error creating payment %v", err))
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to commit the transaction: %v", err)
+	}
+
+	return &usersgrpc.SubscribeResponse{
+		PaymentId:  payment.ID,
+		PaymentRef: payment.ExternalRef,
+		UserSubscription: &usersgrpc.UserSubscription{
+			Id:        userSubscription.ID,
+			Active:    userSubscription.Active,
+			ExpiresAt: timestamppb.New(userSubscription.ExpiresAt),
+			CreatedAt: timestamppb.New(userSubscription.CreatedAt.Time),
+			UpdatedAt: timestamppb.New(userSubscription.UpdatedAt.Time),
+			Subscription: &usersgrpc.Subscription{
+				Id:          subscription.ID,
+				Title:       subscription.Title,
+				Description: subscription.Description,
+			},
+		},
+	}, nil
 }

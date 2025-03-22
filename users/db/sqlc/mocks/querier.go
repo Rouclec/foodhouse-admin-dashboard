@@ -352,6 +352,21 @@ func (mr *MockQuerierMockRecorder) GetSubscriptionByID(ctx, id any) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSubscriptionByID", reflect.TypeOf((*MockQuerier)(nil).GetSubscriptionByID), ctx, id)
 }
 
+// GetSubscriptionForUpdate mocks base method.
+func (m *MockQuerier) GetSubscriptionForUpdate(ctx context.Context, id string) (sqlc.Subscription, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSubscriptionForUpdate", ctx, id)
+	ret0, _ := ret[0].(sqlc.Subscription)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSubscriptionForUpdate indicates an expected call of GetSubscriptionForUpdate.
+func (mr *MockQuerierMockRecorder) GetSubscriptionForUpdate(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSubscriptionForUpdate", reflect.TypeOf((*MockQuerier)(nil).GetSubscriptionForUpdate), ctx, id)
+}
+
 // GetUser mocks base method.
 func (m *MockQuerier) GetUser(ctx context.Context, id string) (sqlc.User, error) {
 	m.ctrl.T.Helper()
@@ -365,6 +380,21 @@ func (m *MockQuerier) GetUser(ctx context.Context, id string) (sqlc.User, error)
 func (mr *MockQuerierMockRecorder) GetUser(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockQuerier)(nil).GetUser), ctx, id)
+}
+
+// GetUserActiveSubscription mocks base method.
+func (m *MockQuerier) GetUserActiveSubscription(ctx context.Context, userID string) (sqlc.UserSubscription, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserActiveSubscription", ctx, userID)
+	ret0, _ := ret[0].(sqlc.UserSubscription)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserActiveSubscription indicates an expected call of GetUserActiveSubscription.
+func (mr *MockQuerierMockRecorder) GetUserActiveSubscription(ctx, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserActiveSubscription", reflect.TypeOf((*MockQuerier)(nil).GetUserActiveSubscription), ctx, userID)
 }
 
 // GetUserByEmail mocks base method.

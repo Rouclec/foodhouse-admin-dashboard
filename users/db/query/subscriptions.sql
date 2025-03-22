@@ -18,5 +18,8 @@ DELETE FROM subscriptions WHERE id = $1;
 -- name: GetSubscriptionByID :one
 SELECT * FROM subscriptions WHERE id = $1;
 
+-- name: GetSubscriptionForUpdate :one
+SELECT * FROM subscriptions WHERE id = $1 FOR UPDATE;
+
 -- name: GetAllSubscriptions :many
 SELECT * FROM subscriptions;

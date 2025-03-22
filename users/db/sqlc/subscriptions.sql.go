@@ -103,6 +103,24 @@ func (q *Queries) GetSubscriptionByID(ctx context.Context, id string) (Subscript
 	return i, err
 }
 
+const getSubscriptionForUpdate = `-- name: GetSubscriptionForUpdate :one
+SELECT id, title, description, duration, amount, currency_iso_code FROM subscriptions WHERE id = $1 FOR UPDATE
+`
+
+func (q *Queries) GetSubscriptionForUpdate(ctx context.Context, id string) (Subscription, error) {
+	row := q.db.QueryRow(ctx, getSubscriptionForUpdate, id)
+	var i Subscription
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Description,
+		&i.Duration,
+		&i.Amount,
+		&i.CurrencyIsoCode,
+	)
+	return i, err
+}
+
 const updateSubscription = `-- name: UpdateSubscription :one
 UPDATE subscriptions
 SET

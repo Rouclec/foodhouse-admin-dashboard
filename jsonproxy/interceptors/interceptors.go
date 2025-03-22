@@ -18,7 +18,7 @@ const (
 	// The Authorization header value should be in the format "Bearer <JWT access token>".
 	BearerPrefix = "Bearer "
 	// RoleAdmin is the role for an admin user.
-	RoleAdmin = "admin"
+	RoleAdmin = "USER_ROLE_ADMIN"
 )
 
 // HTTPInterceptor is a type for HTTP middleware.

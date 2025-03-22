@@ -28,7 +28,7 @@ func (q *Queries) CountUsers(ctx context.Context, arg CountUsersParams) (int64, 
 }
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (phone_number, email, password, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, role)
+INSERT INTO users (phone_number, email, "password", first_name, last_name, residence_country_iso_code, "address", location_coordinates, profile_image, "role")
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 RETURNING id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at
 `
@@ -181,23 +181,22 @@ func (q *Queries) GetUserForUpdate(ctx context.Context, id string) (User, error)
 const updateUser = `-- name: UpdateUser :one
 UPDATE users
 SET
-    (first_name, last_name, email, residence_country_iso_code, address, location_coordinates, profile_image, updated_at) =
-    ($1,         $2,        $3,    $4,                         $5,      $6,                   $7,            now())
+    (first_name, last_name, email, "address", location_coordinates, profile_image, updated_at) =
+    ($1,         $2,        $3,    $4,        $5,                   $6,            now())
 WHERE
-    id = $8
+    id = $7
 RETURNING
     id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at
 `
 
 type UpdateUserParams struct {
-	FirstName               *string      `json:"first_name"`
-	LastName                *string      `json:"last_name"`
-	Email                   *string      `json:"email"`
-	ResidenceCountryIsoCode string       `json:"residence_country_iso_code"`
-	Address                 *string      `json:"address"`
-	LocationCoordinates     pgtype.Point `json:"location_coordinates"`
-	ProfileImage            *string      `json:"profile_image"`
-	ID                      string       `json:"id"`
+	FirstName           *string      `json:"first_name"`
+	LastName            *string      `json:"last_name"`
+	Email               *string      `json:"email"`
+	Address             *string      `json:"address"`
+	LocationCoordinates pgtype.Point `json:"location_coordinates"`
+	ProfileImage        *string      `json:"profile_image"`
+	ID                  string       `json:"id"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
@@ -205,7 +204,6 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		arg.FirstName,
 		arg.LastName,
 		arg.Email,
-		arg.ResidenceCountryIsoCode,
 		arg.Address,
 		arg.LocationCoordinates,
 		arg.ProfileImage,

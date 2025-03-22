@@ -532,37 +532,6 @@
         ]
       }
     },
-    "/v1/users/{userId}": {
-      "get": {
-        "operationId": "Users_GetUserByID",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/usersgrpcGetUserByIDResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "userId",
-            "description": "ID of the user to fetch",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Users"
-        ]
-      }
-    },
     "/v1/users/{userId}/complete-registration": {
       "post": {
         "operationId": "Users_CompleteRegistration",
@@ -638,6 +607,37 @@
         ]
       }
     },
+    "/v1/users/{userId}/get-user-by-id": {
+      "get": {
+        "operationId": "Users_GetUserByID",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcGetUserByIDResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "description": "ID of the user to fetch",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
     "/v1/users/{userId}/subscribe": {
       "post": {
         "operationId": "Users_Subscribe",
@@ -669,6 +669,36 @@
             "schema": {
               "$ref": "#/definitions/UsersSubscribeBody"
             }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/users/{userId}/users/get-user-active-subscription": {
+      "get": {
+        "operationId": "Users_GetUserActiveSubscription",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcGetUserActiveSubscriptionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
           }
         ],
         "tags": [
@@ -709,12 +739,12 @@
     },
     "/v1/users/{userId}/users/get-user-subscriptions": {
       "get": {
-        "operationId": "Users_GetUserSubscription",
+        "operationId": "Users_GetUserSubscriptions",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/usersgrpcGetUserSubscriptionResponse"
+              "$ref": "#/definitions/usersgrpcGetUserSubscriptionsResponse"
             }
           },
           "default": {
@@ -749,6 +779,12 @@
           "type": "string"
         },
         "email": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "profileImage": {
           "type": "string"
         },
         "locationCoordinates": {
@@ -989,6 +1025,14 @@
       ],
       "default": "FACTOR_TYPE_UNSPECIFIED"
     },
+    "usersgrpcGetUserActiveSubscriptionResponse": {
+      "type": "object",
+      "properties": {
+        "userSubscription": {
+          "$ref": "#/definitions/usersgrpcUserSubscription"
+        }
+      }
+    },
     "usersgrpcGetUserByIDResponse": {
       "type": "object",
       "properties": {
@@ -1011,11 +1055,15 @@
         }
       }
     },
-    "usersgrpcGetUserSubscriptionResponse": {
+    "usersgrpcGetUserSubscriptionsResponse": {
       "type": "object",
       "properties": {
-        "userSubscription": {
-          "$ref": "#/definitions/usersgrpcUserSubscription"
+        "userSubscriptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/usersgrpcUserSubscription"
+          }
         }
       }
     },
@@ -1083,11 +1131,11 @@
       "properties": {
         "lon": {
           "type": "number",
-          "format": "float"
+          "format": "double"
         },
         "lat": {
           "type": "number",
-          "format": "float"
+          "format": "double"
         }
       }
     },

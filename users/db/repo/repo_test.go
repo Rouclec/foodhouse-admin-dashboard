@@ -152,7 +152,6 @@ func TestUserLifecycle(t *testing.T) {
 		FirstName:               &firstName,
 		LastName:                &lastName,
 		Email:                   &email,
-		ResidenceCountryIsoCode: "CM",
 	}
 
 	updatedUser, err := userRepo.Do().UpdateUser(ctx, updateUser)

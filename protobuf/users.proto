@@ -15,8 +15,8 @@ enum UserRole {
 }
 
 message Point {
-  float lon = 1;
-  float lat = 2;
+  double lon = 1;
+  double lat = 2;
 }
 
 message User {
@@ -67,7 +67,7 @@ message Tokens {
 // Request and response messages for gRPC methods.
 message AdditionalFactor {
   FactorType factor_type = 1;
-  // ID for the additional factor request"security_question")
+  // ID for the additional factor request"security_question"
   optional string request_id = 2;
   // Hint for the additional factor (e.g., last 4 digits of phone number)
   string factor_hint = 3;
@@ -172,7 +172,9 @@ message CompleteRegistrationRequest {
   string first_name = 2;
   string last_name = 3;
   string email = 4;
-  Point location_coordinates = 5;
+  string address = 5;
+  string profile_image = 6;
+  Point location_coordinates = 7;
 }
 
 // Response message for UpdateUser
@@ -305,9 +307,12 @@ message GetUserPaymentMethodsByUserIDResponse {
   repeated UserPaymentMethod user_payment_methods = 1;
 }
 
-message GetUserSubscriptionRequest { string user_id = 1; }
+message GetUserSubscriptionsRequest { string user_id = 1; }
 
-message GetUserSubscriptionResponse { UserSubscription user_subscription = 1; }
+message GetUserSubscriptionsResponse { repeated UserSubscription user_subscriptions = 1; }
+
+message GetUserActiveSubscriptionRequest { string user_id = 1; }
+message GetUserActiveSubscriptionResponse { UserSubscription user_subscription = 1; }
 
 service Users {
 
@@ -328,7 +333,7 @@ service Users {
 
   rpc GetUserByID(GetUserByIDRequest) returns (GetUserByIDResponse) {
     option (google.api.http) = {
-      get : "/v1/users/{user_id}"
+      get : "/v1/users/{user_id}/get-user-by-id"
     };
   }
 
@@ -442,10 +447,17 @@ service Users {
     };
   }
 
-  rpc GetUserSubscription(GetUserSubscriptionRequest)
-      returns (GetUserSubscriptionResponse) {
+  rpc GetUserSubscriptions(GetUserSubscriptionsRequest)
+      returns (GetUserSubscriptionsResponse) {
     option (google.api.http) = {
       get : "/v1/users/{user_id}/users/get-user-subscriptions"
+    };
+  }
+
+  rpc GetUserActiveSubscription(GetUserActiveSubscriptionRequest)
+      returns (GetUserActiveSubscriptionResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/users/get-user-active-subscription"
     };
   }
 

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/ardanlabs/conf/v3"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 	"github.com/rs/zerolog"
 	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
 	"github.com/foodhouse/foodhouseapp/jsonproxy/interceptors"
@@ -40,6 +42,7 @@ type Config struct {
 	TransfersHostPort string `conf:"env:TRANSFERS_HOST_PORT,required"`
 	// FirebaseServiceAccountJSON holds the JSON credentials for the Firebase service account.
 	FirebaseServiceAccountJSON string `conf:"env:FIREBASE_SERVICE_ACCOUNT_JSON,required"`
+	AllowedOrigins             string `conf:"env:ALLOWED_ORIGINS,required"`
 }
 
 func run(ctx context.Context, log zerolog.Logger) error {
@@ -90,12 +93,21 @@ func run(ctx context.Context, log zerolog.Logger) error {
 
 	log.Info().Msg("Successfully registered firebase app...")
 
+	allowedOrigins := strings.Split(config.AllowedOrigins, ",")
+
+	corsHandler := cors.New(cors.Options{
+		AllowedOrigins:   allowedOrigins, // Change this to your allowed domains
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
+	}).Handler(handler)
+
 	log.Info().Msgf("Starting server on port %d", config.ListenPort)
 	// Start HTTP server (and proxy calls to gRPC server endpoint)
 	bindAddress := fmt.Sprintf(":%d", config.ListenPort)
 	server := &http.Server{
 		Addr:    bindAddress,
-		Handler: handler,
+		Handler: corsHandler,
 		//nolint:mnd // We set the timeouts here.
 		ReadHeaderTimeout: 15 * time.Second,
 	}
