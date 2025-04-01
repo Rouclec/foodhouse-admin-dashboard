@@ -304,7 +304,7 @@ message AttributeContext {
     // as the service evolves.
     //
     // For Google Cloud products, the encoding is what is used by Google Cloud
-    // APIs, such as `us-east1`, `aws-us-east-1`, and `azure-eastus2`. The
+    // APIs, such as `us-east1`, `aws-us-east-2`, and `azure-eastus2`. The
     // semantics of `location` is identical to the
     // `cloud.googleapis.com/location` label used by some Google Cloud APIs.
     string location = 12;

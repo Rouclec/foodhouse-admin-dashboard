@@ -13,7 +13,7 @@ lint:
 test:
 	@echo "Validating Cloudformation templates in: $(CF_DIR)"
 	for f in $$(find "$(CF_DIR)" -name \*.yaml ); do \
-		AWS_PAGER="" aws cloudformation validate-template --region us-east-1 --template-body file://$$f; \
+		AWS_PAGER="" aws cloudformation validate-template --region us-east-2 --template-body file://$$f; \
 	done
 
 cloudformation/aws-cloudformation-templates/core-components:

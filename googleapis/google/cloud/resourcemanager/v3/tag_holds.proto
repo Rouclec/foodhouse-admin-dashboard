@@ -98,7 +98,7 @@ message TagHold {
 
   // Required. The name of the resource where the TagValue is being used. Must
   // be less than 200 characters. E.g.
-  // `//compute.googleapis.com/compute/projects/myproject/regions/us-east-1/instanceGroupManagers/instance-group`
+  // `//compute.googleapis.com/compute/projects/myproject/regions/us-east-2/instanceGroupManagers/instance-group`
   string holder = 2 [(google.api.field_behavior) = REQUIRED];
 
   // Optional. An optional string representing the origin of this request. This
@@ -188,10 +188,10 @@ message ListTagHoldsRequest {
   // only `AND` syntax is supported. Some example queries are:
   //
   //   * `holder =
-  //     //compute.googleapis.com/compute/projects/myproject/regions/us-east-1/instanceGroupManagers/instance-group`
+  //     //compute.googleapis.com/compute/projects/myproject/regions/us-east-2/instanceGroupManagers/instance-group`
   //   * `origin = 35678234`
   //   * `holder =
-  //     //compute.googleapis.com/compute/projects/myproject/regions/us-east-1/instanceGroupManagers/instance-group
+  //     //compute.googleapis.com/compute/projects/myproject/regions/us-east-2/instanceGroupManagers/instance-group
   //     AND origin = 35678234`
   string filter = 4 [(google.api.field_behavior) = OPTIONAL];
 }

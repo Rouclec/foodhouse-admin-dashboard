@@ -252,7 +252,7 @@ message QuotaBucket {
   // If this map is nonempty, the default limit, effective limit, and quota
   // overrides apply only to requests that have the dimensions given in the map.
   //
-  // For example, if the map has key `region` and value `us-east-1`, then the
+  // For example, if the map has key `region` and value `us-east-2`, then the
   // specified effective limit is only effective in that region, and the
   // specified overrides apply only in that region.
   map<string, string> dimensions = 6;
@@ -279,7 +279,7 @@ message QuotaOverride {
   // for dimensions defined in the limit unit.
   //
   // For example, an override on a limit with the unit `1/{project}/{region}`
-  // could contain an entry with the key `region` and the value `us-east-1`;
+  // could contain an entry with the key `region` and the value `us-east-2`;
   // the override is only applied to quota consumed in that region.
   //
   // This map has the following restrictions:
@@ -360,7 +360,7 @@ message ProducerQuotaPolicy {
   // for dimensions defined in the limit unit.
   //
   // For example, a policy on a limit with the unit `1/{project}/{region}`
-  // could contain an entry with the key `region` and the value `us-east-1`;
+  // could contain an entry with the key `region` and the value `us-east-2`;
   // the policy is only applied to quota consumed in that region.
   //
   // This map has the following restrictions:
@@ -416,7 +416,7 @@ message AdminQuotaPolicy {
   // for dimensions defined in the limit unit.
   //
   // For example, a policy on a limit with the unit `1/{project}/{region}`
-  // could contain an entry with the key `region` and the value `us-east-1`;
+  // could contain an entry with the key `region` and the value `us-east-2`;
   // the policy is only applied to quota consumed in that region.
   //
   // This map has the following restrictions:

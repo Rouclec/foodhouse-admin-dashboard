@@ -53,7 +53,7 @@ jobs:
       - name: Assume the OIDC Role to get temporary credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: us-east-1
+          aws-region: us-east-2
           role-to-assume: arn:aws:iam::${{ steps.read_artifact_account_id.outputs.artifact_account_id }}:role/deploy
 
       - name: Read Configuration from Artifact Account Stack
@@ -80,7 +80,7 @@ jobs:
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: us-east-1
+          aws-region: us-east-2
           role-to-assume: arn:aws:iam::${{ needs.config.outputs.artifact_account_id }}:role/deploy
 
       - name: Login to Amazon ECR
@@ -119,7 +119,7 @@ jobs:
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: us-east-1
+          aws-region: us-east-2
           role-to-assume: arn:aws:iam::${{ needs.config.outputs.artifact_account_id }}:role/deploy
 
       - name: Login to Amazon ECR
@@ -148,7 +148,7 @@ jobs:
 
           aws ssm put-parameter --name "/build-artifact/jsonproxy/$GITHUB_REF_NAME" --value "$full_image_tag"  --type "String" --overwrite
   
-  
+
   infra:
     name: Publish Infra Artifacts
     runs-on: ubuntu-latest
@@ -161,7 +161,7 @@ jobs:
       # Assume the OIDC Role to get temporary credentials
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: us-east-1
+          aws-region: us-east-2
           role-to-assume: arn:aws:iam::${{ needs.config.outputs.artifact_account_id }}:role/deploy
 
       - name: Upload Cloudformation Templates to S3
