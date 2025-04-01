@@ -539,7 +539,7 @@ type AdditionalFactor struct {
 	unknownFields protoimpl.UnknownFields
 
 	FactorType FactorType `protobuf:"varint,1,opt,name=factor_type,json=factorType,proto3,enum=usersgrpc.FactorType" json:"factor_type,omitempty"`
-	// ID for the additional factor request"security_question")
+	// ID for the additional factor request"security_question"
 	RequestId *string `protobuf:"bytes,2,opt,name=request_id,json=requestId,proto3,oneof" json:"request_id,omitempty"`
 	// Hint for the additional factor (e.g., last 4 digits of phone number)
 	FactorHint string `protobuf:"bytes,3,opt,name=factor_hint,json=factorHint,proto3" json:"factor_hint,omitempty"`

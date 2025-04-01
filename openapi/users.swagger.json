@@ -903,7 +903,7 @@
         },
         "requestId": {
           "type": "string",
-          "title": "ID for the additional factor request\"security_question\")"
+          "title": "ID for the additional factor request\"security_question\""
         },
         "factorHint": {
           "type": "string",
