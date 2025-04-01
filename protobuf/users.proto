@@ -309,10 +309,14 @@ message GetUserPaymentMethodsByUserIDResponse {
 
 message GetUserSubscriptionsRequest { string user_id = 1; }
 
-message GetUserSubscriptionsResponse { repeated UserSubscription user_subscriptions = 1; }
+message GetUserSubscriptionsResponse {
+  repeated UserSubscription user_subscriptions = 1;
+}
 
 message GetUserActiveSubscriptionRequest { string user_id = 1; }
-message GetUserActiveSubscriptionResponse { UserSubscription user_subscription = 1; }
+message GetUserActiveSubscriptionResponse {
+  UserSubscription user_subscription = 1;
+}
 
 service Users {
 
