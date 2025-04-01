@@ -10,9 +10,9 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/foodhouse/foodhouseapp/users/db/sqlc"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/foodhouse/foodhouseapp/users/db/sqlc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

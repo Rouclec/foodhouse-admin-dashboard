@@ -7,10 +7,10 @@ import (
 	"testing"
 
 	"firebase.google.com/go/auth"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/foodhouse/foodhouseapp/jsonproxy/interceptors"
 	interceptors_mocks "github.com/foodhouse/foodhouseapp/jsonproxy/interceptors/mocks"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
 

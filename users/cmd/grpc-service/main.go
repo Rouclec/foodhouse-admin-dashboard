@@ -17,15 +17,15 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sns"
+	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
+	"github.com/foodhouse/foodhouseapp/sms"
+	"github.com/foodhouse/foodhouseapp/users/db/repo"
+	"github.com/foodhouse/foodhouseapp/users/users"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
-	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
-	"github.com/foodhouse/foodhouseapp/sms"
-	"github.com/foodhouse/foodhouseapp/users/db/repo"
-	"github.com/foodhouse/foodhouseapp/users/users"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -172,9 +172,7 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 		return err
 	}
 
-
 	tokenManager := users.NewFirebaseTokenManagerBuilder(firebaseAdminClient, config.FirebaseAPIKey, http.DefaultClient)
-
 
 	usersgrpc.RegisterUsersServer(grpcServer, users.NewUsers(usersRepo, logger, smsSender, otpGenerator, tokenManager,
 		config.EnableDevMethods))

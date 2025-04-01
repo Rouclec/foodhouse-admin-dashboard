@@ -13,12 +13,12 @@ import (
 
 	firebase "firebase.google.com/go"
 	"github.com/ardanlabs/conf/v3"
+	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
+	"github.com/foodhouse/foodhouseapp/jsonproxy/interceptors"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 	"github.com/rs/zerolog"
-	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
-	"github.com/foodhouse/foodhouseapp/jsonproxy/interceptors"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -76,7 +76,6 @@ func run(ctx context.Context, log zerolog.Logger) error {
 	if err != nil {
 		return fmt.Errorf("failed to register gRPC server: %w", err)
 	}
-
 
 	opt := option.WithCredentialsJSON([]byte(config.FirebaseServiceAccountJSON))
 	app, err := firebase.NewApp(ctx, nil, opt)

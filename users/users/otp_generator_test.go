@@ -4,13 +4,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
 	"github.com/foodhouse/foodhouseapp/users/db/sqlc"
 	sqlcMocks "github.com/foodhouse/foodhouseapp/users/db/sqlc/mocks"
 	"github.com/foodhouse/foodhouseapp/users/users"
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
 

@@ -148,10 +148,10 @@ func TestUserLifecycle(t *testing.T) {
 
 	// Update User
 	updateUser := sqlc.UpdateUserParams{
-		ID:                      fetchedUser.ID,
-		FirstName:               &firstName,
-		LastName:                &lastName,
-		Email:                   &email,
+		ID:        fetchedUser.ID,
+		FirstName: &firstName,
+		LastName:  &lastName,
+		Email:     &email,
 	}
 
 	updatedUser, err := userRepo.Do().UpdateUser(ctx, updateUser)
