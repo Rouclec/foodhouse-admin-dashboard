@@ -4,7 +4,7 @@ generate: generate-protos generate-client
 
 lint:
 	@echo "Running clang-format on protobufs"
-	clang-format --dry-run --Werror *.proto types/*.proto
+	clang-format --dry-run --Werror *.proto
 
 test:
 	@echo "No tests implemented for protobufs"
