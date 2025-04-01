@@ -9,10 +9,6 @@ generate:
 	go generate ./...
 
 install-dependencies:
-	@echo "Installing mobile dependencies"
-	cd mobile && make install
-	@echo "Installing admindashboard dependencies"
-	cd admindashboard && make install
 	@echo "Installing go dependencies"
 	go mod tidy
 
