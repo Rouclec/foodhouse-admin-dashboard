@@ -30,6 +30,8 @@ const (
 	VerifyEmail = "VERIFY_EMAIL"
 
 	ResetPassword = "RESET_PASSWORD"
+
+	OneMillion = 1000000
 )
 
 // Impl is the implementation of the Users service.
@@ -392,12 +394,13 @@ func (i *Impl) CompleteRegistration(
 	i.logger.Debug().Interface("args", req).Msg("Arguments")
 
 	arg := sqlc.UpdateUserParams{
-		ID:                  userID,
-		FirstName:           &req.FirstName,
-		LastName:            &req.LastName,
-		Email:               &req.Email,
-		LocationCoordinates: pgtype.Point{P: pgtype.Vec2{X: float64(req.LocationCoordinates.GetLon()), Y: float64(req.LocationCoordinates.GetLat())}, Valid: true},
-		// ResidenceCountryIsoCode:,
+		ID:        userID,
+		FirstName: &req.FirstName,
+		LastName:  &req.LastName,
+		Email:     &req.Email,
+		LocationCoordinates: pgtype.Point{
+			P: pgtype.Vec2{X: float64(req.GetLocationCoordinates().GetLon()),
+				Y: float64(req.GetLocationCoordinates().GetLat())}, Valid: true},
 		ProfileImage: &req.ProfileImage,
 		Address:      &req.Address,
 	}
@@ -776,29 +779,14 @@ func (i *Impl) GrantAdmin(
 	}, nil
 }
 
-// func dateStringTopgTimestamtz(date string) (pgtype.Timestamptz, error) {
-// 	var timestamp pgtype.Timestamptz
-// 	if date == "" {
-// 		return timestamp, nil
-// 	}
-
-// 	t, err := time.Parse("2006-01-02", date)
-// 	if err != nil {
-// 		return timestamp, err
-// 	}
-
-// 	timestamp.Time = t
-// 	timestamp.Valid = true
-
-// 	return timestamp, nil
-// }
-
 // CreateSubscription implements usersgrpc.UsersServer.
-func (i *Impl) CreateSubscription(ctx context.Context, req *usersgrpc.CreateSubscriptionRequest) (*usersgrpc.CreateSubscriptionResponse, error) {
+func (i *Impl) CreateSubscription(ctx context.Context,
+	req *usersgrpc.CreateSubscriptionRequest) (
+	*usersgrpc.CreateSubscriptionResponse, error) {
 	arg := sqlc.CreateSubscriptionParams{
 		Title:           req.GetTitle(),
 		Description:     req.GetDescription(),
-		Duration:        pgtype.Interval{Microseconds: req.GetDuration() * 24 * 60 * 60 * 1000000, Valid: true},
+		Duration:        pgtype.Interval{Microseconds: req.GetDuration() * 24 * 60 * 60 * OneMillion, Valid: true},
 		Amount:          req.GetAmount(),
 		CurrencyIsoCode: req.GetCurrencyIsoCode(),
 	}
@@ -811,10 +799,11 @@ func (i *Impl) CreateSubscription(ctx context.Context, req *usersgrpc.CreateSubs
 
 	return &usersgrpc.CreateSubscriptionResponse{
 		Subscription: &usersgrpc.Subscription{
-			Id:              subscription.ID,
-			Title:           subscription.Title,
-			Description:     subscription.Description,
-			Duration:        subscription.Duration.Microseconds / (24 * 60 * 60 * 1000000), // Convert microseconds back to days
+			Id:          subscription.ID,
+			Title:       subscription.Title,
+			Description: subscription.Description,
+			// Convert microseconds back to days
+			Duration:        subscription.Duration.Microseconds / (24 * 60 * 60 * OneMillion),
 			Amount:          subscription.Amount,
 			CurrencyIsoCode: subscription.CurrencyIsoCode,
 		},
@@ -822,7 +811,9 @@ func (i *Impl) CreateSubscription(ctx context.Context, req *usersgrpc.CreateSubs
 }
 
 // DeleteSubscription implements usersgrpc.UsersServer.
-func (i *Impl) DeleteSubscription(ctx context.Context, req *usersgrpc.DeleteSubscriptionRequst) (*usersgrpc.DeleteSubscriptionResponse, error) {
+func (i *Impl) DeleteSubscription(ctx context.Context,
+	req *usersgrpc.DeleteSubscriptionRequst) (
+	*usersgrpc.DeleteSubscriptionResponse, error) {
 	err := i.repo.Do().DeleteSubscription(ctx, req.GetSubscriptionId())
 
 	if err != nil {
@@ -835,8 +826,9 @@ func (i *Impl) DeleteSubscription(ctx context.Context, req *usersgrpc.DeleteSubs
 }
 
 // UpdateSubscription implements usersgrpc.UsersServer.
-func (i *Impl) UpdateSubscription(ctx context.Context, req *usersgrpc.UpdateSubscriptionRequest) (*usersgrpc.UpdateSubscriptionResponse, error) {
-
+func (i *Impl) UpdateSubscription(ctx context.Context,
+	req *usersgrpc.UpdateSubscriptionRequest) (
+	*usersgrpc.UpdateSubscriptionResponse, error) {
 	// Declaring query to use for db transactions
 	querier, tx, err := i.repo.Begin(ctx)
 	if err != nil {
@@ -863,7 +855,7 @@ func (i *Impl) UpdateSubscription(ctx context.Context, req *usersgrpc.UpdateSubs
 	arg := sqlc.UpdateSubscriptionParams{
 		Title:           req.GetTitle(),
 		Description:     req.GetDescription(),
-		Duration:        pgtype.Interval{Microseconds: req.GetDuration() * 24 * 60 * 60 * 1000000, Valid: true},
+		Duration:        pgtype.Interval{Microseconds: req.GetDuration() * 24 * 60 * 60 * OneMillion, Valid: true},
 		Amount:          req.GetAmount(),
 		CurrencyIsoCode: req.GetCurrencyIsoCode(),
 		ID:              foundSubscription.ID,
@@ -882,10 +874,11 @@ func (i *Impl) UpdateSubscription(ctx context.Context, req *usersgrpc.UpdateSubs
 
 	return &usersgrpc.UpdateSubscriptionResponse{
 		Subscription: &usersgrpc.Subscription{
-			Id:              updatedSubscription.ID,
-			Title:           updatedSubscription.Title,
-			Description:     updatedSubscription.Description,
-			Duration:        updatedSubscription.Duration.Microseconds / (24 * 60 * 60 * 1000000), // Convert microseconds back to days
+			Id:          updatedSubscription.ID,
+			Title:       updatedSubscription.Title,
+			Description: updatedSubscription.Description,
+			// Convert microseconds back to days
+			Duration:        updatedSubscription.Duration.Microseconds / (24 * 60 * 60 * OneMillion),
 			Amount:          updatedSubscription.Amount,
 			CurrencyIsoCode: updatedSubscription.CurrencyIsoCode,
 		},
@@ -893,7 +886,9 @@ func (i *Impl) UpdateSubscription(ctx context.Context, req *usersgrpc.UpdateSubs
 }
 
 // DeleteUserPaymentMethod implements usersgrpc.UsersServer.
-func (i *Impl) DeleteUserPaymentMethod(ctx context.Context, req *usersgrpc.DeleteUserPaymentMethodRequest) (*usersgrpc.DeleteUserPaymentMethodResponse, error) {
+func (i *Impl) DeleteUserPaymentMethod(ctx context.Context,
+	req *usersgrpc.DeleteUserPaymentMethodRequest) (
+	*usersgrpc.DeleteUserPaymentMethodResponse, error) {
 	err := i.repo.Do().DeleteUserPaymentMethod(ctx, req.GetPaymentMethodId())
 
 	if err != nil {
@@ -901,12 +896,15 @@ func (i *Impl) DeleteUserPaymentMethod(ctx context.Context, req *usersgrpc.Delet
 	}
 
 	return &usersgrpc.DeleteUserPaymentMethodResponse{
-		Message: fmt.Sprintf("Payment method with id %v for user %v deleted successfully", req.GetPaymentMethodId(), req.GetUserId()),
+		Message: fmt.Sprintf("Payment method with id %v for user %v deleted successfully",
+			req.GetPaymentMethodId(), req.GetUserId()),
 	}, nil
 }
 
 // GetUserPaymentMethodsByUserID implements usersgrpc.UsersServer.
-func (i *Impl) GetUserPaymentMethodsByUserID(ctx context.Context, req *usersgrpc.GetUserPaymentMethodsByUserIDRequest) (*usersgrpc.GetUserPaymentMethodsByUserIDResponse, error) {
+func (i *Impl) GetUserPaymentMethodsByUserID(ctx context.Context,
+	req *usersgrpc.GetUserPaymentMethodsByUserIDRequest) (
+	*usersgrpc.GetUserPaymentMethodsByUserIDResponse, error) {
 	paymentMethods, err := i.repo.Do().GetUserPaymentMethodsByUserID(ctx, req.GetUserId())
 
 	if err != nil {
@@ -932,8 +930,10 @@ func (i *Impl) GetUserPaymentMethodsByUserID(ctx context.Context, req *usersgrpc
 }
 
 // GetUserActiveSubscription implements usersgrpc.UsersServer.
-func (i *Impl) GetUserActiveSubscription(ctx context.Context, req *usersgrpc.GetUserActiveSubscriptionRequest) (*usersgrpc.GetUserActiveSubscriptionResponse, error) {
-	activeUserSubscription, err := i.repo.Do().GetUserActiveSubscription(ctx, req.UserId)
+func (i *Impl) GetUserActiveSubscription(ctx context.Context,
+	req *usersgrpc.GetUserActiveSubscriptionRequest) (
+	*usersgrpc.GetUserActiveSubscriptionResponse, error) {
+	activeUserSubscription, err := i.repo.Do().GetUserActiveSubscription(ctx, req.GetUserId())
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Error getting user active subscription : %v", err)
@@ -965,17 +965,23 @@ func (i *Impl) GetUserActiveSubscription(ctx context.Context, req *usersgrpc.Get
 }
 
 // GetUserSubscriptions implements usersgrpc.UsersServer.
-func (i *Impl) GetUserSubscriptions(context.Context, *usersgrpc.GetUserSubscriptionsRequest) (*usersgrpc.GetUserSubscriptionsResponse, error) {
+func (i *Impl) GetUserSubscriptions(context.Context,
+	*usersgrpc.GetUserSubscriptionsRequest) (
+	*usersgrpc.GetUserSubscriptionsResponse, error) {
 	panic("unimplemented")
 }
 
 // ListUsers implements usersgrpc.UsersServer.
-func (i *Impl) ListUsers(context.Context, *usersgrpc.ListUsersRequest) (*usersgrpc.ListUsersResponse, error) {
+func (i *Impl) ListUsers(context.Context,
+	*usersgrpc.ListUsersRequest) (
+	*usersgrpc.ListUsersResponse, error) {
 	panic("unimplemented")
 }
 
 // Subscribe implements usersgrpc.UsersServer.
-func (i *Impl) Subscribe(ctx context.Context, req *usersgrpc.SubscribeRequest) (*usersgrpc.SubscribeResponse, error) {
+func (i *Impl) Subscribe(ctx context.Context,
+	req *usersgrpc.SubscribeRequest) (
+	*usersgrpc.SubscribeResponse, error) {
 	// Declaring query to use for db transactions
 	querier, tx, err := i.repo.Begin(ctx)
 	if err != nil {
@@ -992,14 +998,19 @@ func (i *Impl) Subscribe(ctx context.Context, req *usersgrpc.SubscribeRequest) (
 	subscription, err := querier.GetSubscriptionByID(ctx, req.GetSubscriptionId())
 
 	// TODO for now, we're not converting the amount, so we will throw an error if the currency codes are different
-	// in the future, we will want to convert from currency code 1 to currency code 2 and then compare the amounts to make sure that they are the same
+	// in the future, we will want to convert from currency code 1
+	// to currency code 2 and then compare the amounts to make sure that they are the same
 
 	if subscription.CurrencyIsoCode != req.GetCurrencyIsoCode() {
-		return nil, status.Error(codes.Internal, fmt.Sprintf("cannot convert from currency %v to currency %v", req.GetCurrencyIsoCode(), subscription.CurrencyIsoCode))
+		return nil, status.Error(codes.Internal,
+			fmt.Sprintf("cannot convert from currency %v to currency %v",
+				req.GetCurrencyIsoCode(), subscription.CurrencyIsoCode))
 	}
 
 	if req.GetAmount() < subscription.Amount {
-		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("The amount passed (%v) is less than the price (%v) for the package %v", req.GetAmount(), subscription.Amount, subscription.Title))
+		return nil, status.Error(codes.InvalidArgument,
+			fmt.Sprintf("The amount passed (%v) is less than the price (%v) for the package %v",
+				req.GetAmount(), subscription.Amount, subscription.Title))
 	}
 
 	// create a user subscription
@@ -1009,7 +1020,7 @@ func (i *Impl) Subscribe(ctx context.Context, req *usersgrpc.SubscribeRequest) (
 		Active:         false,
 		ExpiresAt: time.Now().Add(
 			time.Duration(
-				subscription.Duration.Microseconds/(24*60*60*1000000)) * 24 * time.Hour),
+				subscription.Duration.Microseconds/(24*60*60*OneMillion)) * 24 * time.Hour),
 	}
 
 	userSubscription, err := querier.CreateUserSubscription(ctx, *createUserSubscriptionArgs)

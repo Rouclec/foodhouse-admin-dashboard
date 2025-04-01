@@ -4,24 +4,14 @@ import (
 	"context"
 	"database/sql"
 
-	// "errors"
 	"fmt"
 	"os"
 
-	// "reflect"
-	// "strings"
 	"testing"
-	// "time"
 
-	// "github.com/aws/aws-sdk-go/aws"
-	// "github.com/aws/aws-sdk-go/service/ses"
 	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
-	// "google.golang.org/grpc/codes"
-	// "google.golang.org/grpc/status"
 
-	// "github.com/foodhouse/foodhouseapp/sms"
 	smsMock "github.com/foodhouse/foodhouseapp/sms/mocks"
-	// "github.com/foodhouse/foodhouseapp/users/db/repo"
 	"github.com/foodhouse/foodhouseapp/users/db/repo/mocks"
 	"github.com/foodhouse/foodhouseapp/users/db/sqlc"
 	sqlc_mocks "github.com/foodhouse/foodhouseapp/users/db/sqlc/mocks"
@@ -30,12 +20,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 
-	// "github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
-	// "google.golang.org/grpc/codes"
-	// "google.golang.org/grpc/status"
-	// "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func TestSendSignupSmsOtp(t *testing.T) {
@@ -206,13 +192,19 @@ func TestSignup(t *testing.T) {
 	logger := zerolog.New(os.Stdout)
 
 	testCases := map[string]struct {
-		setupMocks    func(mockRepo *mocks.MockUsersRepo, mockQuerier *sqlc_mocks.MockQuerier, mockTokenManager *usersMocks.MockTokenManager, mockOtpGenerator *usersMocks.MockOtpGenerator)
+		setupMocks func(mockRepo *mocks.MockUsersRepo,
+			mockQuerier *sqlc_mocks.MockQuerier,
+			mockTokenManager *usersMocks.MockTokenManager,
+			mockOtpGenerator *usersMocks.MockOtpGenerator)
 		request       *usersgrpc.SignupRequest
 		expectedError error
 		expectedResp  *usersgrpc.SignupResponse
 	}{
 		"PasswordLengthBelowMinimum": {
-			setupMocks: func(mockRepo *mocks.MockUsersRepo, _ *sqlc_mocks.MockQuerier, _ *usersMocks.MockTokenManager, _ *usersMocks.MockOtpGenerator) {
+			setupMocks: func(mockRepo *mocks.MockUsersRepo,
+				_ *sqlc_mocks.MockQuerier,
+				_ *usersMocks.MockTokenManager,
+				_ *usersMocks.MockOtpGenerator) {
 				mockRepo.EXPECT().Begin(gomock.Any()).Times(0)
 			},
 			request: &usersgrpc.SignupRequest{
@@ -228,7 +220,10 @@ func TestSignup(t *testing.T) {
 			expectedResp:  nil,
 		},
 		"Invalid OTP": {
-			setupMocks: func(mockRepo *mocks.MockUsersRepo, mockQuerier *sqlc_mocks.MockQuerier, _ *usersMocks.MockTokenManager, mockOtpGenerator *usersMocks.MockOtpGenerator) {
+			setupMocks: func(mockRepo *mocks.MockUsersRepo,
+				mockQuerier *sqlc_mocks.MockQuerier,
+				_ *usersMocks.MockTokenManager,
+				mockOtpGenerator *usersMocks.MockOtpGenerator) {
 				mockRepo.EXPECT().Begin(gomock.Any()).Times(1).Return(mockQuerier, &sqlc_mocks.TxMock{}, nil)
 				mockOtpGenerator.EXPECT().VerifyOtpAuthFactor(gomock.Any(), gomock.Any()).Return("", fmt.Errorf("Invalid OTP"))
 			},
@@ -245,7 +240,10 @@ func TestSignup(t *testing.T) {
 			expectedResp:  nil,
 		},
 		"Successful Signup": {
-			setupMocks: func(mockRepo *mocks.MockUsersRepo, mockQuerier *sqlc_mocks.MockQuerier, mockTokenManager *usersMocks.MockTokenManager, mockOtpGenerator *usersMocks.MockOtpGenerator) {
+			setupMocks: func(mockRepo *mocks.MockUsersRepo,
+				mockQuerier *sqlc_mocks.MockQuerier,
+				mockTokenManager *usersMocks.MockTokenManager,
+				mockOtpGenerator *usersMocks.MockOtpGenerator) {
 				mockRepo.EXPECT().Begin(gomock.Any()).Times(1).Return(mockQuerier, &sqlc_mocks.TxMock{}, nil)
 				mockOtpGenerator.EXPECT().VerifyOtpAuthFactor(gomock.Any(), gomock.Any()).Return("+1234567890", nil)
 				mockQuerier.EXPECT().CreateUser(gomock.Any(), gomock.Any()).Return(sqlc.User{ID: "newUserId"}, nil)
@@ -294,9 +292,9 @@ func TestSignup(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				require.NotNil(t, resp)
-				require.Equal(t, tc.expectedResp.UserId, resp.UserId)
-				require.Equal(t, tc.expectedResp.Tokens.AccessToken, resp.Tokens.AccessToken)
-				require.Equal(t, tc.expectedResp.Tokens.RefreshToken, resp.Tokens.RefreshToken)
+				require.Equal(t, tc.expectedResp.GetUserId(), resp.GetUserId())
+				require.Equal(t, tc.expectedResp.GetTokens().GetAccessToken(), resp.GetTokens().GetAccessToken())
+				require.Equal(t, tc.expectedResp.GetTokens().GetRefreshToken(), resp.GetTokens().GetRefreshToken())
 			}
 		})
 	}
@@ -311,13 +309,17 @@ func TestRefreshAccessToken(t *testing.T) {
 	invalidRefreshToken := "invalidRefreshToken"
 	testUserID := "testUserId"
 	testCases := map[string]struct {
-		setupMocks    func(mockRepo *mocks.MockUsersRepo, mockQuerier *sqlc_mocks.MockQuerier, mockTokenManager *usersMocks.MockTokenManager)
+		setupMocks func(mockRepo *mocks.MockUsersRepo,
+			mockQuerier *sqlc_mocks.MockQuerier,
+			mockTokenManager *usersMocks.MockTokenManager)
 		request       *usersgrpc.RefreshAccessTokenRequest
 		expectedError error
 		expectedResp  *usersgrpc.RefreshAccessTokenResponse
 	}{
 		"Invalid Refresh Token": {
-			setupMocks: func(mockRepo *mocks.MockUsersRepo, mockQuerier *sqlc_mocks.MockQuerier, mockTokenManager *usersMocks.MockTokenManager) {
+			setupMocks: func(mockRepo *mocks.MockUsersRepo,
+				mockQuerier *sqlc_mocks.MockQuerier,
+				mockTokenManager *usersMocks.MockTokenManager) {
 				mockRepo.EXPECT().Do().Return(mockQuerier).AnyTimes()
 				mockTokenManager.EXPECT().RefreshTokenIsValid(gomock.Any(), invalidRefreshToken).Return(false, "", nil)
 			},
@@ -328,10 +330,16 @@ func TestRefreshAccessToken(t *testing.T) {
 			expectedResp:  nil,
 		},
 		"Valid Refresh Token - Access Token Generation Failure": {
-			setupMocks: func(mockRepo *mocks.MockUsersRepo, mockQuerier *sqlc_mocks.MockQuerier, mockTokenManager *usersMocks.MockTokenManager) {
+			setupMocks: func(mockRepo *mocks.MockUsersRepo,
+				mockQuerier *sqlc_mocks.MockQuerier,
+				mockTokenManager *usersMocks.MockTokenManager) {
 				mockRepo.EXPECT().Do().Return(mockQuerier).AnyTimes()
-				mockTokenManager.EXPECT().RefreshTokenIsValid(gomock.Any(), testRefreshToken).Return(true, testUserID, nil)
-				mockTokenManager.EXPECT().GenerateAccessToken(gomock.Any(), testUserID, gomock.Any()).Return("", fmt.Errorf("Token generation failed"))
+				mockTokenManager.EXPECT().
+					RefreshTokenIsValid(gomock.Any(), testRefreshToken).
+					Return(true, testUserID, nil)
+				mockTokenManager.EXPECT().
+					GenerateAccessToken(gomock.Any(), testUserID, gomock.Any()).
+					Return("", fmt.Errorf("Token generation failed"))
 			},
 			request: &usersgrpc.RefreshAccessTokenRequest{
 				RefreshToken: testRefreshToken,
@@ -340,7 +348,9 @@ func TestRefreshAccessToken(t *testing.T) {
 			expectedResp:  nil,
 		},
 		"Successful Token Refresh": {
-			setupMocks: func(mockRepo *mocks.MockUsersRepo, mockQuerier *sqlc_mocks.MockQuerier, mockTokenManager *usersMocks.MockTokenManager) {
+			setupMocks: func(mockRepo *mocks.MockUsersRepo,
+				mockQuerier *sqlc_mocks.MockQuerier,
+				mockTokenManager *usersMocks.MockTokenManager) {
 				mockRepo.EXPECT().Do().Return(mockQuerier).AnyTimes()
 				mockTokenManager.EXPECT().RefreshTokenIsValid(gomock.Any(), testRefreshToken).Return(true, testUserID, nil)
 				mockTokenManager.EXPECT().GenerateAccessToken(gomock.Any(), testUserID, gomock.Any()).Return("newAccessToken", nil)
@@ -378,7 +388,7 @@ func TestRefreshAccessToken(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				require.NotNil(t, resp)
-				require.Equal(t, tc.expectedResp.AccessToken, resp.AccessToken)
+				require.Equal(t, tc.expectedResp.GetAccessToken(), resp.GetAccessToken())
 			}
 		})
 	}
@@ -439,7 +449,7 @@ func TestGetUserByID(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				require.NotNil(t, resp)
-				require.Equal(t, tc.expectedResp.User.UserId, resp.User.UserId)
+				require.Equal(t, tc.expectedResp.GetUser().GetUserId(), resp.GetUser().GetUserId())
 			}
 		})
 	}
@@ -511,78 +521,8 @@ func TestCompleteRegistration(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				require.NotNil(t, resp)
-				require.Equal(t, tc.expectedResp.Message, resp.Message)
+				require.Equal(t, tc.expectedResp.GetMessage(), resp.GetMessage())
 			}
 		})
 	}
 }
-
-// func TestAuthenticate(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
-
-// 	logger := zerolog.New(os.Stdout)
-// 	testUserID := "testUserId"
-// 	testAccessToken := "accessToken"
-// 	testRefreshToken := "refreshToken"
-// 	testFactor := &usersgrpc.AuthFactor{Id: "factor1", SecretValue: "12345", Type: usersgrpc.FactorType_FACTOR_TYPE_SMS_OTP}
-
-// 	testCases := map[string]struct {
-// 		setupMocks    func(mockRepo *mocks.MockUsersRepo, mockTokenManager *usersMocks.MockTokenManager)
-// 		request       *usersgrpc.AuthenticateRequest
-// 		expectedError error
-// 		expectedResp  *usersgrpc.AuthenticateResponse
-// 	}{
-// 		"No Factors Provided": {
-// 			setupMocks:    func(mockRepo *mocks.MockUsersRepo, mockTokenManager *usersMocks.MockTokenManager) {},
-// 			request:       &usersgrpc.AuthenticateRequest{},
-// 			expectedError: status.Error(codes.InvalidArgument, "No factors provided"),
-// 			expectedResp:  nil,
-// 		},
-// 		"Successful Authentication": {
-// 			setupMocks: func(mockRepo *mocks.MockUsersRepo, mockTokenManager *usersMocks.MockTokenManager) {
-// 				mockTokenManager.EXPECT().GenerateAccessToken(gomock.Any(), testUserID, gomock.Any()).Return(testAccessToken, nil)
-// 				mockTokenManager.EXPECT().GenerateRefreshToken(gomock.Any(), testUserID).Return(testRefreshToken, nil)
-// 			},
-// 			request:       &usersgrpc.AuthenticateRequest{Factors: []*usersgrpc.AuthFactor{testFactor}},
-// 			expectedError: nil,
-// 			expectedResp: &usersgrpc.AuthenticateResponse{
-// 				LoginComplete: true,
-// 				Tokens: &usersgrpc.Tokens{
-// 					AccessToken:  testAccessToken,
-// 					RefreshToken: testRefreshToken,
-// 				},
-// 				UserId: testUserID,
-// 			},
-// 		},
-// 	}
-
-// 	for name, tc := range testCases {
-// 		t.Run(name, func(t *testing.T) {
-// 			mockRepo := mocks.NewMockUsersRepo(ctrl)
-// 			mockTokenManager := usersMocks.NewMockTokenManager(ctrl)
-// 			mockTokenManagerBuilder := usersMocks.NewMockTokenManagerBuilder(ctrl)
-
-// 			mockTokenManagerBuilder.EXPECT().WithQuerier(gomock.Any()).Return(mockTokenManager).AnyTimes()
-
-// 			tc.setupMocks(mockRepo, mockTokenManager)
-
-// 			usersService := users.NewUsers(mockRepo, logger, nil, nil, mockTokenManagerBuilder, false)
-
-// 			resp, err := usersService.Authenticate(context.Background(), tc.request)
-
-// 			if tc.expectedError != nil {
-// 				require.Error(t, err)
-// 				require.ErrorContains(t, err, tc.expectedError.Error())
-// 				require.Nil(t, resp)
-// 			} else {
-// 				require.NoError(t, err)
-// 				require.NotNil(t, resp)
-// 				require.Equal(t, tc.expectedResp.LoginComplete, resp.LoginComplete)
-// 				require.Equal(t, tc.expectedResp.Tokens.AccessToken, resp.Tokens.AccessToken)
-// 				require.Equal(t, tc.expectedResp.Tokens.RefreshToken, resp.Tokens.RefreshToken)
-// 				require.Equal(t, tc.expectedResp.UserId, resp.UserId)
-// 			}
-// 		})
-// 	}
-// }
