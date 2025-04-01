@@ -1,0 +1,266 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: The Users service
+Parameters:
+  EnvId:
+    Type: String
+    Description: Environment Id (used to namespace resources)
+    AllowedPattern: "[a-z][a-z0-9]{2,19}"
+    ConstraintDescription: Must be lower case letters between 3 and 20 characters.
+
+  VPC:
+    Type: AWS::EC2::VPC::Id
+
+  LogGroupName:
+    Type: String
+    Description: LogGroup name that should be use for the service
+
+  ClusterArn:
+    Type: String
+
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+
+  Image:
+    Type: String
+
+  DbAdminSecretArn:
+    Type: String
+
+  CustomResourcesServiceToken:
+    Type: String
+    Description: The ARN of the lambda that deploys custom resoures (needed for created an application specific database)
+
+  DesiredCount:
+    Type: Number
+    Default: 2
+
+  FirebaseServiceAccountSecretArn:
+    Type: String
+
+  FirebaseSdkSecretArn:
+    Type: String
+
+  TwilioClientSecretArn:
+    Type: String
+
+  GoogleChatClientSecretArn:
+    Type: String
+  
+  DomainName:
+    Type: String
+
+  # The following are optional parameters and are treated more like constants.
+  ContainerPort:
+    Type: Number
+    Default: 80
+
+  AppName:
+    Type: String
+    Default: "users"
+
+Resources:
+  MutationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${AppName}MutationEvents"
+  SmsDebugTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${AppName}SmsDebug"
+
+  AppDatabaseSecret:
+    Type: "AWS::SecretsManager::Secret"
+    Properties:
+      Name: !Sub "/${EnvId}/${AppName}_database"
+      GenerateSecretString:
+        SecretStringTemplate: !Sub '{"username": "${AppName}", "dbname": "${AppName}"}'
+        GenerateStringKey: "password"
+        PasswordLength: 30
+        ExcludePunctuation: true
+      Tags:
+        - Key: EnvId
+          Value: !Ref EnvId
+
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      # Name of the task definition. Subsequent versions of the task definition are grouped together under this name.
+      Family: !Sub "${EnvId}-${AppName}"
+      NetworkMode: bridge
+      RequiresCompatibilities:
+        - EC2
+      Memory: 84 # 84 MB = 20 for golang service container + 64MB for Service Connect proxy
+      ExecutionRoleArn: !Ref ExecutionRole
+      # "The Amazon Resource Name (ARN) of an AWS Identity and Access Management (IAM) role that grants containers in the task permission to call AWS APIs on your behalf."
+      TaskRoleArn: !Ref TaskRole
+      ContainerDefinitions:
+        - Name: App
+          Image: !Ref Image
+          PortMappings:
+            - ContainerPort: !Ref ContainerPort
+              Name: grpc
+          # Send logs to CloudWatch Logs
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-region: !Ref AWS::Region
+              awslogs-group: !Ref LogGroupName
+              awslogs-stream-prefix: !Ref AppName
+          Environment:
+            - Name: GRPC_PORT
+              Value: !Ref ContainerPort
+            - Name: LISTEN_PORT
+              Value: !Ref ContainerPort
+            - Name: MIGRATION_PATH
+              Value: "/app/migrations"
+            - Name: USER_MUTATION_TOPIC_ARN
+              Value: !Ref MutationTopic
+            - Name: SMS_DEBUG_SNS_TOPIC_ARN
+              Value: !Ref SmsDebugTopic
+            # TODO: This should be passed as a config from the environment file.
+            - Name: ENABLE_DEV_METHODS
+              Value: "true"
+            - Name: AWS_REGION
+              Value: !Ref AWS::Region
+            - Name: SENDER_EMAIL
+              Value: !Sub "noreply@${DomainName}"
+
+          Secrets:
+            - Name: DB_NAME
+              ValueFrom: !Sub "${AppDatabaseSecret}:dbname::"
+            - Name: DB_USER
+              ValueFrom: !Sub "${AppDatabaseSecret}:username::"
+            - Name: DB_HOST
+              ValueFrom: !Sub "${DbAdminSecretArn}:host::"
+            - Name: DB_PORT
+              ValueFrom: !Sub "${DbAdminSecretArn}:port::"
+            - Name: DB_PASSWORD
+              ValueFrom: !Sub "${AppDatabaseSecret}:password::"
+            - Name: TWILI_ACCOUNT_SID
+              ValueFrom: !Sub "${TwilioClientSecretArn}:account_sid::"
+            - Name: TWILIO_AUTH_TOKEN
+              ValueFrom: !Sub "${TwilioClientSecretArn}:auth_token::"
+            - Name: TWILIO_ACCOUNT_SID
+              ValueFrom: !Sub "${TwilioClientSecretArn}:account_sid::"
+            - Name: FROM_PHONE_NUMBER
+              ValueFrom: !Sub "${TwilioClientSecretArn}:from_phone_number::"
+            - Name: GOOGLE_CHAT_WEBHOOK_URL
+              ValueFrom: !Sub "${GoogleChatClientSecretArn}:webhook_url::"
+            - Name: FIREBASE_SERVICE_ACCOUNT_JSON
+              ValueFrom: !Sub "${FirebaseServiceAccountSecretArn}:::"
+            - Name: FIREBASE_API_KEY
+              ValueFrom: !Sub "${FirebaseSdkSecretArn}:apiKey::"
+
+  # We create a data in the RDS instance for the application.
+  # We do this with a custom Cloudformation resource that will run a lambda function.
+  AppDatabase:
+    Type: "Custom::PgDatabase"
+    Properties:
+      ServiceToken: !Ref CustomResourcesServiceToken
+      StackName: !Ref "AWS::StackName"
+      ServiceTimeout: 120
+      AdminSecretArn: !Ref DbAdminSecretArn
+      ServiceSecretArn: !Ref AppDatabaseSecret
+
+    # A role needed by ECS to Start the Ecs Service
+  ExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AppName}-EcsExecutionRole"
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: "sts:AssumeRole"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "secretsmanager:GetResourcePolicy"
+                  - "secretsmanager:GetSecretValue"
+                  - "secretsmanager:DescribeSecret"
+                  - "secretsmanager:ListSecretVersionIds"
+                  - "secretsmanager:ListSecrets"
+                Resource:
+                  - !Ref AppDatabaseSecret
+                  - !Ref DbAdminSecretArn
+                  - !Ref TwilioClientSecretArn
+                  - !Ref GoogleChatClientSecretArn
+                  - !Ref FirebaseServiceAccountSecretArn
+                  - !Ref FirebaseSdkSecretArn
+
+  # A role for the containers
+  TaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${EnvId}-${AppName}-TaskRole"
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "sns:Publish"
+                Resource:
+                  - !Ref MutationTopic
+                  - !Ref SmsDebugTopic
+              - Effect: Allow
+                Action:
+                  - "ses:SendEmail"
+                  - "ses:SendRawEmail"
+                  - "ses:GetTemplate"
+                  - "ses:ListTemplates"
+                  - "ses:SendTemplatedEmail"
+                  - "ses:VerifyEmailIdentity"
+                Resource: "*"
+
+  EcsService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub "${EnvId}-${AppName}"
+      Cluster: !Ref ClusterArn
+      TaskDefinition: !Ref TaskDefinition
+      DeploymentConfiguration:
+        MinimumHealthyPercent: 100
+        MaximumPercent: 200
+      DesiredCount: !Ref DesiredCount
+      LaunchType: EC2
+      ServiceConnectConfiguration:
+        Enabled: true
+        Namespace: !Sub "${EnvId}"
+        Services:
+          - PortName: grpc
+            DiscoveryName: !Sub "${EnvId}-${AppName}-grpc"
+            ClientAliases:
+              - DnsName: !Ref AppName
+                Port: !Ref ContainerPort
+  VerifyEmailTemplate:
+    Type: "AWS::SES::Template"
+    Properties:
+      Template:
+        TemplateName: "VERIFY_EMAIL"
+        SubjectPart: "Greetings {{givenName}}!"
+        TextPart: "Following your request to login into your account, we for your safety require your authentication. \r\nThe code {{otpCode}} shall grant you access to the app. \r\n This code shall be available to you for the next 6 hours."
+        HtmlPart: "<p>Your login code is:</p><h1>{{otpCode}}</h1><p>Following your request to login into your account, we require authentication for your safety.</p><p>This code shall be available to you for the next 6 hours.</p>"
+  ResetPasswordTemplate:
+    Type: "AWS::SES::Template"
+    Properties:
+      Template:
+        TemplateName: "RESET_PASSWORD"
+        SubjectPart: "Greetings {{givenName}}!"
+        TextPart: "Following your request to reset your password. \r\nYour reset code is {{otpCode}}. \r\n This code shall be available to you for the next 6 hours."
+        HtmlPart: "<p>Your reset password code is: </p><h1>{{otpCode}}</h1><p>Following your request to reset your password, we require authentication for your safety.</p><p>This code shall be available to you for the next 6 hours.</p>"

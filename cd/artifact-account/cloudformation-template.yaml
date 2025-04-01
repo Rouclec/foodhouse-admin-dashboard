@@ -1,0 +1,86 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  EnvironmentAccountIds:
+    Type: List<String>
+    Description: List of account ids for the environment accounts
+
+
+Resources:
+
+  EcrRepositoryusers:
+    Type: "AWS::ECR::Repository"
+    Properties:
+      RepositoryName: users
+
+  EcrRepositoryjsonproxy:
+    Type: "AWS::ECR::Repository"
+    Properties:
+      RepositoryName: jsonproxy
+    
+    
+
+
+  ## This is a cross-account policy that allows the environment accounts to access the ECR repositories
+  CrossAccountRegistryPolicy:
+    Type: "AWS::ECR::RegistryPolicy"
+    Properties:
+      PolicyText:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: UpdatedRegistryPolicy
+            Effect: Allow
+            Principal:
+              AWS:
+                !Split [
+                  ",",
+                  !Join [
+                    "",
+                    [
+                      "arn:aws:iam::",
+                      !Join [
+                        ":root,arn:aws:iam::",
+                        !Ref "EnvironmentAccountIds",
+                      ],
+                      ":root",
+                    ],
+                  ],
+                ]
+            Action: "ecr:*"
+            Resource: !Sub "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/*"
+
+  InfraArtifactsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Join ["-", ["infra-artifacts", !Ref "AWS::AccountId"]]
+
+  InfraArtifactsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref InfraArtifactsBucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - "s3:GetObject"
+              - "s3:ListBucket"
+            Effect: Allow
+            Resource:
+              - !Sub "arn:aws:s3:::${InfraArtifactsBucket}/*"
+              - !Sub "arn:aws:s3:::${InfraArtifactsBucket}"
+            Principal:
+              AWS: !Ref "EnvironmentAccountIds"
+
+## Output Values
+Outputs:
+  InfraArtifactsBucket:
+    Description: Artifact Bucket
+    Value: !Ref "InfraArtifactsBucket"
+
+  EcrRepositoryusersArn:
+    Description: Users ECR Repository Arn
+    Value: !GetAtt EcrRepositoryusers.Arn
+
+  EcrRepositoryjsonproxyArn:
+    Description: Jsonproxy ECR Repository Arn
+    Value: !GetAtt EcrRepositoryjsonproxy.Arn

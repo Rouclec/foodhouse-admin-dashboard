@@ -1,0 +1,16 @@
+name: Publish Build Artifacts for New Release Branch
+
+on:
+  create
+
+permissions:
+  id-token: write
+  contents: read
+
+
+jobs:
+  publish-build-artifacts:
+    name: Publish Build Artifacts
+    if: ${{ contains(github.ref, 'refs/heads/release/') }}
+    uses: ./.github/workflows/publish_build_artifacts.yaml
+
