@@ -77,6 +77,8 @@ func run(ctx context.Context, log zerolog.Logger) error {
 		return fmt.Errorf("failed to register gRPC server: %w", err)
 	}
 
+	log.Info().Msgf("Successfully registered usersgrpc on host and port %v", config.UsersHostPOrt)
+
 	opt := option.WithCredentialsJSON([]byte(config.FirebaseServiceAccountJSON))
 	app, err := firebase.NewApp(ctx, nil, opt)
 	if err != nil {
