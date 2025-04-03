@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
@@ -691,6 +692,13 @@ func (i *Impl) VerifyOtp(ctx context.Context, req *usersgrpc.VerifyOtpRequest) (
 	return &usersgrpc.VerifyOtpResponse{}, nil
 }
 
+func formatFactor(factor string) string {
+	if strings.Contains(factor, "@") {
+		return factor // It's an email, return as is
+	}
+	return fmt.Sprintf("+%s", factor) // Otherwise, assume it's a phone number
+}
+
 // LastOtpForFactor implements usersgrpc.UsersServer.
 func (i *Impl) LastOtpForFactor(ctx context.Context, req *usersgrpc.LastOtpForFactorRequest) (
 	*usersgrpc.LastOtpForFactorResponse, error) {
@@ -698,9 +706,9 @@ func (i *Impl) LastOtpForFactor(ctx context.Context, req *usersgrpc.LastOtpForFa
 		return nil, status.Error(codes.Unimplemented, "this method has been disabled")
 	}
 
-	i.logger.Debug().Msgf("factor for getting otps %v", req.GetFactor())
+	i.logger.Debug().Msgf("factor for getting otps %v", formatFactor(req.GetFactor()))
 	otps, err := i.repo.Do().GetLatestSentOtpByFactor(ctx, sqlc.GetLatestSentOtpByFactorParams{
-		Factor: req.GetFactor(),
+		Factor: formatFactor(req.GetFactor()),
 		Limit:  DailySMSLimit,
 	})
 	if err != nil {
