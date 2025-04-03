@@ -25,7 +25,7 @@ Parameters:
 
   DesiredCount:
     Type: Number
-    Default: 2
+    Default: 1
 
   DomainName:
     Type: String
