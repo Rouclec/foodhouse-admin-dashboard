@@ -698,6 +698,7 @@ func (i *Impl) LastOtpForFactor(ctx context.Context, req *usersgrpc.LastOtpForFa
 		return nil, status.Error(codes.Unimplemented, "this method has been disabled")
 	}
 
+	i.logger.Debug().Msgf("factor for getting otps %v", req.GetFactor())
 	otps, err := i.repo.Do().GetLatestSentOtpByFactor(ctx, sqlc.GetLatestSentOtpByFactorParams{
 		Factor: req.GetFactor(),
 		Limit:  DailySMSLimit,
