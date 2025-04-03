@@ -53,7 +53,7 @@ Resources:
     Properties:
       Name: !Sub "/${EnvId}/${AppName}_Secret"
       GenerateSecretString:
-        SecretStringTemplate: '{"email": "admin@iknite.studio"}'
+        SecretStringTemplate: '{"email": "admin@foodhousetesting.xyz"}'
         GenerateStringKey: "password"
         PasswordLength: 30
         ExcludeCharacters: '"@/\'
