@@ -32,7 +32,7 @@ Parameters:
 
   DesiredCount:
     Type: Number
-    Default: 2
+    Default: 1
 
   FirebaseServiceAccountSecretArn:
     Type: String
