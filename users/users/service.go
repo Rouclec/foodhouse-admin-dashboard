@@ -693,6 +693,7 @@ func (i *Impl) VerifyOtp(ctx context.Context, req *usersgrpc.VerifyOtpRequest) (
 }
 
 func formatFactor(factor string) string {
+	factor = strings.TrimSpace(factor) // Remove leading & trailing spaces
 	if strings.Contains(factor, "@") {
 		return factor // It's an email, return as is
 	}
