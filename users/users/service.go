@@ -706,6 +706,8 @@ func (i *Impl) LastOtpForFactor(ctx context.Context, req *usersgrpc.LastOtpForFa
 		return nil, err
 	}
 
+	i.logger.Debug().Msgf("last otps: ", otps)
+
 	if len(otps) == 0 {
 		return nil, status.Errorf(codes.NotFound, "No OTP found")
 	}
