@@ -244,7 +244,7 @@ Resources:
             ],
           ]
         CustomResourcesServiceToken: !GetAtt RdsStack.Outputs.DatabaseInitLambdaArn
-        DesiredCount: 2
+        DesiredCount: 1
       Tags:
         - Key: EnvId
           Value: !Ref "EnvId"
@@ -280,7 +280,7 @@ Resources:
               !GetAtt VpcStack.Outputs.SubnetBPrivate,
             ],
           ]
-        DesiredCount: 2
+        DesiredCount: 1
         DomainName: !Ref DomainName
         LoadBalancerCanonicalHostedZoneID: !GetAtt LoadBalancerStack.Outputs.LoadBalancerCanonicalHostedZoneID
         LoadBalancerDNSName: !GetAtt LoadBalancerStack.Outputs.LoadBalancerDNSName
