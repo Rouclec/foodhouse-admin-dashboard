@@ -122,7 +122,7 @@ Resources:
             ],
           ]
         AdditionalNodeSecurityGroupIds: !GetAtt RdsStack.Outputs.ClientSecurityGroupId
-        NumPrivateNodes: 2
+        NumPrivateNodes: 1
         InstanceType: t2.micro
       Tags:
         - Key: EnvId
