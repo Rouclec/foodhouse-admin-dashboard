@@ -58,7 +58,7 @@ type Config struct {
 	FirebaseServiceAccountJSON string `conf:"env:FIREBASE_SERVICE_ACCOUNT_JSON,required"`
 	FirebaseAPIKey             string `conf:"env:FIREBASE_API_KEY,required"`
 
-	OtpNumberOfDigits uint8 `conf:"env:OTP_NUMBER_OF_DIGITS,default:6"`
+	OtpNumberOfDigits uint8 `conf:"env:OTP_NUMBER_OF_DIGITS,default:4"`
 
 	// EnableDevMethods is a flag that enables development methods in the gRPC server.
 	// These methods can leak sensitive data and should not be enabled in production.

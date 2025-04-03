@@ -136,7 +136,7 @@ Resources:
               ValueFrom: !Sub "${DbAdminSecretArn}:port::"
             - Name: DB_PASSWORD
               ValueFrom: !Sub "${AppDatabaseSecret}:password::"
-            - Name: TWILI_ACCOUNT_SID
+            - Name: TWILIO_ACCOUNT_SID
               ValueFrom: !Sub "${TwilioClientSecretArn}:account_sid::"
             - Name: TWILIO_AUTH_TOKEN
               ValueFrom: !Sub "${TwilioClientSecretArn}:auth_token::"
