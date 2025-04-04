@@ -601,6 +601,52 @@ func (i *Impl) SendSmsOtp(ctx context.Context, req *usersgrpc.SendSmsOtpRequest,
 	}, nil
 }
 
+// SendEmailOtp implements usersgrpc.UsersServer.
+func (i *Impl) SendEmailOtp(ctx context.Context,
+	req *usersgrpc.SendEmailOtpRequest) (
+	*usersgrpc.SendEmailOtpResponse, error) {
+	i.logger.Debug().Str("email", req.GetEmail()).Msg("send email otp")
+
+	_, err := i.repo.Do().GetUserByEmail(ctx, &req.Email)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, status.Errorf(codes.NotFound, "User not found: %v", err)
+		}
+
+		return nil, status.Errorf(codes.Internal, "Failed to check for existing users: %v", err)
+	}
+
+	// Success: User exists, proceed with action.
+	totalMailsToEmailToday, err := i.repo.Do().CountSentOtpsToFactorToday(ctx, req.GetEmail())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Error checking sms requests for today %v", err)
+	}
+
+	i.logger.Debug().Interface("Number of requests today: ", totalMailsToEmailToday).
+		Msg("Number of requests for phone number today")
+
+	if totalMailsToEmailToday > DailySMSLimit {
+		return nil, status.Errorf(codes.ResourceExhausted, "Too many requests to this phone number")
+	}
+
+	// Generate a random 6-digit number
+	requestID, _, err := i.otpGenerator.GenerateOtp(ctx, usersgrpc.FactorType_FACTOR_TYPE_EMAIL_OTP, req.GetEmail())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Error generating OTP: %v", err)
+	}
+
+	// TODO: Send the Message to the formatted number
+	// _, err = i.smsSender.SendSms(ctx, formattedNumber,
+	// 	fmt.Sprintf("Your verification code for VsorPay is %s", otp))
+	// if err != nil {
+	// 	return nil, fmt.Errorf("error sending SMS: %w", err)
+	// }
+
+	return &usersgrpc.SendEmailOtpResponse{
+		RequestId: requestID,
+	}, nil
+}
+
 func (i *Impl) ChangePassword(ctx context.Context, req *usersgrpc.ChangePasswordRequest) (
 	*usersgrpc.ChangePasswordResponse, error) {
 	if req.GetEmailFactor().GetType() != usersgrpc.FactorType_FACTOR_TYPE_EMAIL_OTP {

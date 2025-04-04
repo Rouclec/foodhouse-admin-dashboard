@@ -180,6 +180,13 @@ message CompleteRegistrationRequest {
 // Response message for UpdateUser
 message CompleteRegistrationResponse { string message = 1; }
 
+message SendEmailOtpRequest {
+  string email = 1;
+  OtpIntent intent = 2;
+}
+
+message SendEmailOtpResponse { string request_id = 1; }
+
 // Request message for ChangePassword
 message ChangePasswordRequest {
   string new_password = 1;
@@ -366,6 +373,13 @@ service Users {
   rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse) {
     option (google.api.http) = {
       post : "/v1/public/users/authenticate"
+      body : "*"
+    };
+  }
+
+  rpc SendEmailOtp(SendEmailOtpRequest) returns (SendEmailOtpResponse) {
+    option (google.api.http) = {
+      post : "/v1/public/users/send-email-otp"
       body : "*"
     };
   }

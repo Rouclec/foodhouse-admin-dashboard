@@ -144,6 +144,15 @@ export type usersgrpcRevokeRefreshTokenResponse = {
     message?: string;
 };
 
+export type usersgrpcSendEmailOtpRequest = {
+    email?: string;
+    intent?: usersgrpcOtpIntent;
+};
+
+export type usersgrpcSendEmailOtpResponse = {
+    requestId?: string;
+};
+
 export type usersgrpcSendSignupSmsOtpRequest = {
     phoneNumber?: string;
     intent?: usersgrpcOtpIntent;
@@ -371,6 +380,14 @@ export type UsersRefreshAccessTokenData = {
 export type UsersRefreshAccessTokenResponse = (usersgrpcRefreshAccessTokenResponse);
 
 export type UsersRefreshAccessTokenError = (rpcStatus);
+
+export type UsersSendEmailOtpData = {
+    body: usersgrpcSendEmailOtpRequest;
+};
+
+export type UsersSendEmailOtpResponse = (usersgrpcSendEmailOtpResponse);
+
+export type UsersSendEmailOtpError = (rpcStatus);
 
 export type UsersSendSignupSmsOtpData = {
     body: usersgrpcSendSignupSmsOtpRequest;

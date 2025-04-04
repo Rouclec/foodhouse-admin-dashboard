@@ -2,9 +2,9 @@
 
 import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
-import type { UsersCreateSubscriptionData, UsersCreateSubscriptionError, UsersCreateSubscriptionResponse, UsersDeleteSubscriptionData, UsersDeleteSubscriptionError, UsersDeleteSubscriptionResponse, UsersGrantAdminData, UsersGrantAdminError, UsersGrantAdminResponse, UsersListUsersData, UsersUpdateSubscriptionData, UsersUpdateSubscriptionError, UsersUpdateSubscriptionResponse, UsersRevokeRefreshTokenData, UsersRevokeRefreshTokenError, UsersRevokeRefreshTokenResponse, UsersAuthenticateData, UsersAuthenticateError, UsersAuthenticateResponse, UsersChangePasswordData, UsersChangePasswordError, UsersChangePasswordResponse, UsersLastOtpForFactorData, UsersRefreshAccessTokenData, UsersRefreshAccessTokenError, UsersRefreshAccessTokenResponse, UsersSendSignupSmsOtpData, UsersSendSignupSmsOtpError, UsersSendSignupSmsOtpResponse, UsersSendSmsOtpData, UsersSendSmsOtpError, UsersSendSmsOtpResponse, UsersSignupData, UsersSignupError, UsersSignupResponse, UsersVerifyOtpData, UsersVerifyOtpError, UsersVerifyOtpResponse, UsersCompleteRegistrationData, UsersCompleteRegistrationError, UsersCompleteRegistrationResponse, UsersDeleteUserPaymentMethodData, UsersDeleteUserPaymentMethodError, UsersDeleteUserPaymentMethodResponse, UsersGetUserByIdData, UsersSubscribeData, UsersSubscribeError, UsersSubscribeResponse, UsersGetUserActiveSubscriptionData, UsersGetUserPaymentMethodsByUserIdData, UsersGetUserSubscriptionsData } from '../types.gen';
+import type { UsersCreateSubscriptionData, UsersCreateSubscriptionError, UsersCreateSubscriptionResponse, UsersDeleteSubscriptionData, UsersDeleteSubscriptionError, UsersDeleteSubscriptionResponse, UsersGrantAdminData, UsersGrantAdminError, UsersGrantAdminResponse, UsersListUsersData, UsersUpdateSubscriptionData, UsersUpdateSubscriptionError, UsersUpdateSubscriptionResponse, UsersRevokeRefreshTokenData, UsersRevokeRefreshTokenError, UsersRevokeRefreshTokenResponse, UsersAuthenticateData, UsersAuthenticateError, UsersAuthenticateResponse, UsersChangePasswordData, UsersChangePasswordError, UsersChangePasswordResponse, UsersLastOtpForFactorData, UsersRefreshAccessTokenData, UsersRefreshAccessTokenError, UsersRefreshAccessTokenResponse, UsersSendEmailOtpData, UsersSendEmailOtpError, UsersSendEmailOtpResponse, UsersSendSignupSmsOtpData, UsersSendSignupSmsOtpError, UsersSendSignupSmsOtpResponse, UsersSendSmsOtpData, UsersSendSmsOtpError, UsersSendSmsOtpResponse, UsersSignupData, UsersSignupError, UsersSignupResponse, UsersVerifyOtpData, UsersVerifyOtpError, UsersVerifyOtpResponse, UsersCompleteRegistrationData, UsersCompleteRegistrationError, UsersCompleteRegistrationResponse, UsersDeleteUserPaymentMethodData, UsersDeleteUserPaymentMethodError, UsersDeleteUserPaymentMethodResponse, UsersGetUserByIdData, UsersSubscribeData, UsersSubscribeError, UsersSubscribeResponse, UsersGetUserActiveSubscriptionData, UsersGetUserPaymentMethodsByUserIdData, UsersGetUserSubscriptionsData } from '../types.gen';
 import type { AxiosError } from 'axios';
-import { client, usersCreateSubscription, usersDeleteSubscription, usersGrantAdmin, usersListUsers, usersUpdateSubscription, usersRevokeRefreshToken, usersAuthenticate, usersChangePassword, usersHealthCheck, usersLastOtpForFactor, usersRefreshAccessToken, usersSendSignupSmsOtp, usersSendSmsOtp, usersSignup, usersVerifyOtp, usersCompleteRegistration, usersDeleteUserPaymentMethod, usersGetUserById, usersSubscribe, usersGetUserActiveSubscription, usersGetUserPaymentMethodsByUserId, usersGetUserSubscriptions } from '../sdk.gen';
+import { client, usersCreateSubscription, usersDeleteSubscription, usersGrantAdmin, usersListUsers, usersUpdateSubscription, usersRevokeRefreshToken, usersAuthenticate, usersChangePassword, usersHealthCheck, usersLastOtpForFactor, usersRefreshAccessToken, usersSendEmailOtp, usersSendSignupSmsOtp, usersSendSmsOtp, usersSignup, usersVerifyOtp, usersCompleteRegistration, usersDeleteUserPaymentMethod, usersGetUserById, usersSubscribe, usersGetUserActiveSubscription, usersGetUserPaymentMethodsByUserId, usersGetUserSubscriptions } from '../sdk.gen';
 
 type QueryKey<TOptions extends OptionsLegacyParser> = [
     Pick<TOptions, 'baseURL' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -306,6 +306,39 @@ export const usersRefreshAccessTokenMutation = (options?: Partial<OptionsLegacyP
     const mutationOptions: UseMutationOptions<UsersRefreshAccessTokenResponse, AxiosError<UsersRefreshAccessTokenError>, OptionsLegacyParser<UsersRefreshAccessTokenData>> = {
         mutationFn: async (localOptions) => {
             const { data } = await usersRefreshAccessToken({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const usersSendEmailOtpQueryKey = (options: OptionsLegacyParser<UsersSendEmailOtpData>) => [
+    createQueryKey('usersSendEmailOtp', options)
+];
+
+export const usersSendEmailOtpOptions = (options: OptionsLegacyParser<UsersSendEmailOtpData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await usersSendEmailOtp({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: usersSendEmailOtpQueryKey(options)
+    });
+};
+
+export const usersSendEmailOtpMutation = (options?: Partial<OptionsLegacyParser<UsersSendEmailOtpData>>) => {
+    const mutationOptions: UseMutationOptions<UsersSendEmailOtpResponse, AxiosError<UsersSendEmailOtpError>, OptionsLegacyParser<UsersSendEmailOtpData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await usersSendEmailOtp({
                 ...options,
                 ...localOptions,
                 throwOnError: true

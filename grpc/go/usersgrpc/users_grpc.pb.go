@@ -26,6 +26,7 @@ const (
 	Users_HealthCheck_FullMethodName                   = "/usersgrpc.Users/HealthCheck"
 	Users_RefreshAccessToken_FullMethodName            = "/usersgrpc.Users/RefreshAccessToken"
 	Users_Authenticate_FullMethodName                  = "/usersgrpc.Users/Authenticate"
+	Users_SendEmailOtp_FullMethodName                  = "/usersgrpc.Users/SendEmailOtp"
 	Users_SendSmsOtp_FullMethodName                    = "/usersgrpc.Users/SendSmsOtp"
 	Users_ChangePassword_FullMethodName                = "/usersgrpc.Users/ChangePassword"
 	Users_RevokeRefreshToken_FullMethodName            = "/usersgrpc.Users/RevokeRefreshToken"
@@ -54,6 +55,7 @@ type UsersClient interface {
 	HealthCheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
 	RefreshAccessToken(ctx context.Context, in *RefreshAccessTokenRequest, opts ...grpc.CallOption) (*RefreshAccessTokenResponse, error)
 	Authenticate(ctx context.Context, in *AuthenticateRequest, opts ...grpc.CallOption) (*AuthenticateResponse, error)
+	SendEmailOtp(ctx context.Context, in *SendEmailOtpRequest, opts ...grpc.CallOption) (*SendEmailOtpResponse, error)
 	SendSmsOtp(ctx context.Context, in *SendSmsOtpRequest, opts ...grpc.CallOption) (*SendSmsOtpResponse, error)
 	ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*ChangePasswordResponse, error)
 	RevokeRefreshToken(ctx context.Context, in *RevokeRefreshTokenRequest, opts ...grpc.CallOption) (*RevokeRefreshTokenResponse, error)
@@ -143,6 +145,16 @@ func (c *usersClient) Authenticate(ctx context.Context, in *AuthenticateRequest,
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(AuthenticateResponse)
 	err := c.cc.Invoke(ctx, Users_Authenticate_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersClient) SendEmailOtp(ctx context.Context, in *SendEmailOtpRequest, opts ...grpc.CallOption) (*SendEmailOtpResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SendEmailOtpResponse)
+	err := c.cc.Invoke(ctx, Users_SendEmailOtp_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -310,6 +322,7 @@ type UsersServer interface {
 	HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
 	RefreshAccessToken(context.Context, *RefreshAccessTokenRequest) (*RefreshAccessTokenResponse, error)
 	Authenticate(context.Context, *AuthenticateRequest) (*AuthenticateResponse, error)
+	SendEmailOtp(context.Context, *SendEmailOtpRequest) (*SendEmailOtpResponse, error)
 	SendSmsOtp(context.Context, *SendSmsOtpRequest) (*SendSmsOtpResponse, error)
 	ChangePassword(context.Context, *ChangePasswordRequest) (*ChangePasswordResponse, error)
 	RevokeRefreshToken(context.Context, *RevokeRefreshTokenRequest) (*RevokeRefreshTokenResponse, error)
@@ -355,6 +368,9 @@ func (UnimplementedUsersServer) RefreshAccessToken(context.Context, *RefreshAcce
 }
 func (UnimplementedUsersServer) Authenticate(context.Context, *AuthenticateRequest) (*AuthenticateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Authenticate not implemented")
+}
+func (UnimplementedUsersServer) SendEmailOtp(context.Context, *SendEmailOtpRequest) (*SendEmailOtpResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendEmailOtp not implemented")
 }
 func (UnimplementedUsersServer) SendSmsOtp(context.Context, *SendSmsOtpRequest) (*SendSmsOtpResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendSmsOtp not implemented")
@@ -544,6 +560,24 @@ func _Users_Authenticate_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersServer).Authenticate(ctx, req.(*AuthenticateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Users_SendEmailOtp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendEmailOtpRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).SendEmailOtp(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Users_SendEmailOtp_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).SendEmailOtp(ctx, req.(*SendEmailOtpRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -852,6 +886,10 @@ var Users_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Authenticate",
 			Handler:    _Users_Authenticate_Handler,
+		},
+		{
+			MethodName: "SendEmailOtp",
+			Handler:    _Users_SendEmailOtp_Handler,
 		},
 		{
 			MethodName: "SendSmsOtp",

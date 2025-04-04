@@ -404,6 +404,38 @@
         ]
       }
     },
+    "/v1/public/users/send-email-otp": {
+      "post": {
+        "operationId": "Users_SendEmailOtp",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcSendEmailOtpResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/usersgrpcSendEmailOtpRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
     "/v1/public/users/send-signup-sms-otp": {
       "post": {
         "operationId": "Users_SendSignupSmsOtp",
@@ -1174,6 +1206,25 @@
         }
       },
       "title": "Response message for RevokeRefreshToken"
+    },
+    "usersgrpcSendEmailOtpRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "intent": {
+          "$ref": "#/definitions/usersgrpcOtpIntent"
+        }
+      }
+    },
+    "usersgrpcSendEmailOtpResponse": {
+      "type": "object",
+      "properties": {
+        "requestId": {
+          "type": "string"
+        }
+      }
     },
     "usersgrpcSendSignUpSmsOtpResponse": {
       "type": "object",
