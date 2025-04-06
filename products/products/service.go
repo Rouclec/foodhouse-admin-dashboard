@@ -63,7 +63,7 @@ func (i *Impl) DeleteProduct(context.Context, *productsgrpc.DeleteProductRequest
 
 // HealthCheck implements productsgrpc.ProductsServer.
 func (i *Impl) HealthCheck(context.Context, *productsgrpc.HealthCheckRequest) (*productsgrpc.HealthCheckResponse, error) {
-	panic("unimplemented")
+	return &productsgrpc.HealthCheckResponse{}, nil
 }
 
 // ListProducts implements productsgrpc.ProductsServer.
