@@ -16,7 +16,10 @@ Parameters:
     Description: The id of the cloudformation templates to use for nested stacks. In CD this will be set to the git sha for the current commi
   UsersImageTag:
     Type: String
-    Description: This is the docker image and tag (image:tag) that should be deployed for the users service.o
+    Description: This is the docker image and tag (image:tag) that should be deployed for the users service.
+  ProductsImageTag:
+    Type: String
+    Description: This is the docker image and tag (image:tag) that should be deployed for the products service.
   JsonproxyImageTag:
     Type: String
     Description: This is the docker image and tag (image:tag) that should be deployed for the json proxy service.
