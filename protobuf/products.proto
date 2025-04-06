@@ -78,10 +78,10 @@ message UpdateProductRequest {
 
 message UpdateProductResponse { string message = 1; }
 
-message DeleteProductRequest { 
-    string user_id = 1;
-    string product_id = 2;
- }
+message DeleteProductRequest {
+  string user_id = 1;
+  string product_id = 2;
+}
 
 message DeleteProductResponse { string message = 1; }
 

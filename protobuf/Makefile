@@ -1,26 +1,27 @@
-.PHONY: test generate lint
+.PHONY : test generate lint
 
-generate: generate-protos generate-client
+             generate : generate -
+    protos generate -
+    client
 
-lint:
-	@echo "Running clang-format on protobufs"
-	clang-format --dry-run --Werror *.proto
+        lint : @echo "Running clang-format on protobufs" clang -
+               format-- dry -
+               run-- Werror
+                       *.proto
 
-test:
-	@echo "No tests implemented for protobufs"
+                           test : @echo "No tests implemented for protobufs"
 
+                                  ##Protobuf Generation../
+                   googleapis /
+                   google : git submodule init git submodule update
 
-## Protobuf Generation
-../googleapis/google:
-	git submodule init
-	git submodule update
-
-generate-protos: ../googleapis/google
-	@echo "Generating Protobufs..."
-	cd .. && docker build -t food-house-gen-protos -f ./protobuf/Dockerfile .
-	cd ../ && mkdir -p grpc; \
-	rm -rf ./grpc/go; \
-	mkdir -p ./grpc/go/types
+                                generate -
+               protos :../ googleapis /
+                   google @echo "Generating Protobufs..." cd..&&docker build -
+               t food - house - gen - protos -
+               f./ protobuf / Dockerfile.cd../ &&mkdir - p grpc;
+rm - rf./ grpc / go;
+        mkdir -p ./grpc/go/types
 	## Generate service and message definitions
 	cd ../ && docker run  --name food-house-gen-protos --rm \
 		-v ./protobuf:/app/protobuf \
@@ -45,4 +46,4 @@ generate-protos: ../googleapis/google
 generate-client: generate-protos
 	@echo "Generating Typescript Clients from OpenAPI spec"
 	## disabling this for now during development
-	# node generate-client.js;
+#node generate - client.js;
