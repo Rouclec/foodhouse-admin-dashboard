@@ -69,7 +69,7 @@ jobs:
 
             echo "infra_bucket_name=$infra_bucket_name" >> $GITHUB_OUTPUT
             echo "users_ecr_repo_arn=$users_ecr_repo_arn" >> $GITHUB_OUTPUT
-            echo "products_ecr_repo_arn=$users_ecr_repo_arn" >> $GITHUB_OUTPUT
+            echo "products_ecr_repo_arn=$products_ecr_repo_arn" >> $GITHUB_OUTPUT
             echo "jsonproxy_ecr_repo_arn=$jsonproxy_ecr_repo_arn" >> $GITHUB_OUTPUT
 
 

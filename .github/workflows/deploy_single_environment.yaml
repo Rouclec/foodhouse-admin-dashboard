@@ -85,7 +85,7 @@ jobs:
                     echo "environment_aws_account_id=$environment_aws_account_id" >> $GITHUB_OUTPUT
                     echo "release_infra_hash=$release_infra_hash" >> $GITHUB_OUTPUT
                       echo "users_image_tag=$users_image_tag" >> $GITHUB_OUTPUT
-                      echo "products_image_tag=$users_image_tag" >> $GITHUB_OUTPUT
+                      echo "products_image_tag=$products_image_tag" >> $GITHUB_OUTPUT
                       echo "jsonproxy_image_tag=$jsonproxy_image_tag" >> $GITHUB_OUTPUT
                       echo "infra_bucket_name=$infra_bucket_name" >> $GITHUB_OUTPUT
 
