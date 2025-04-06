@@ -73,6 +73,7 @@ jobs:
                   environment_aws_account_id=$(yq e '.[] | select(.envId == "'$envId'")| .awsAccountId' ./cd/environments.yaml)
                   release_infra_hash=$(aws ssm get-parameter --name "/build-artifact/infra/$target_ref" --query "Parameter.Value" --output text)
                   users_image_tag=$(aws ssm get-parameter --name "/build-artifact/users/$target_ref" --query "Parameter.Value" --output text)
+                  products_image_tag=$(aws ssm get-parameter --name "/build-artifact/products/$target_ref" --query "Parameter.Value" --output text)
                   jsonproxy_image_tag=$(aws ssm get-parameter --name "/build-artifact/jsonproxy/$target_ref" --query "Parameter.Value" --output text)
                   infra_bucket_name=$(aws cloudformation describe-stacks --stack-name "$ARTIFACTS_STACK_NAME" --query "Stacks[0].Outputs[?OutputKey=='InfraArtifactsBucket'].OutputValue" --output text )
 
@@ -84,6 +85,7 @@ jobs:
                     echo "environment_aws_account_id=$environment_aws_account_id" >> $GITHUB_OUTPUT
                     echo "release_infra_hash=$release_infra_hash" >> $GITHUB_OUTPUT
                       echo "users_image_tag=$users_image_tag" >> $GITHUB_OUTPUT
+                      echo "products_image_tag=$users_image_tag" >> $GITHUB_OUTPUT
                       echo "jsonproxy_image_tag=$jsonproxy_image_tag" >> $GITHUB_OUTPUT
                       echo "infra_bucket_name=$infra_bucket_name" >> $GITHUB_OUTPUT
 
@@ -110,6 +112,7 @@ jobs:
                       InfraArtifactsBucket="${{ steps.get_release_config.outputs.infra_bucket_name }}" \
                       InfraReleaseHash="${{ steps.get_release_config.outputs.release_infra_hash }}" \
                       UsersImageTag="${{ steps.get_release_config.outputs.users_image_tag }}" \
+                      ProductsImageTag="${{ steps.get_release_config.outputs.products_image_tag }}" \
                       JsonproxyImageTag="${{ steps.get_release_config.outputs.jsonproxy_image_tag }}" \
                       ReleaseTarget="${{ steps.get_release_config.outputs.target_ref }}" \
                       DomainName="${{ steps.get_release_config.outputs.domain_name }}" \

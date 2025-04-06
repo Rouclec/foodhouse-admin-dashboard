@@ -13,6 +13,7 @@ import (
 
 	firebase "firebase.google.com/go"
 	"github.com/ardanlabs/conf/v3"
+	"github.com/foodhouse/foodhouseapp/grpc/go/productsgrpc"
 	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
 	"github.com/foodhouse/foodhouseapp/jsonproxy/interceptors"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -38,8 +39,8 @@ func main() {
 
 type Config struct {
 	ListenPort        uint16 `conf:"env:LISTEN_PORT,required"`
-	UsersHostPOrt     string `conf:"env:USERS_HOST_PORT,required"`
-	TransfersHostPort string `conf:"env:TRANSFERS_HOST_PORT,required"`
+	UsersHostPort     string `conf:"env:USERS_HOST_PORT,required"`
+	ProductsHostPort string `conf:"env:PRODUCTS_HOST_PORT,required"`
 	// FirebaseServiceAccountJSON holds the JSON credentials for the Firebase service account.
 	FirebaseServiceAccountJSON string `conf:"env:FIREBASE_SERVICE_ACCOUNT_JSON,required"`
 	AllowedOrigins             string `conf:"env:ALLOWED_ORIGINS,required"`
@@ -72,12 +73,20 @@ func run(ctx context.Context, log zerolog.Logger) error {
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 
 	// Register users grpc server
-	err = usersgrpc.RegisterUsersHandlerFromEndpoint(ctx, jsonproxyMux, config.UsersHostPOrt, opts)
+	err = usersgrpc.RegisterUsersHandlerFromEndpoint(ctx, jsonproxyMux, config.UsersHostPort, opts)
 	if err != nil {
-		return fmt.Errorf("failed to register gRPC server: %w", err)
+		return fmt.Errorf("failed to register users gRPC server: %w", err)
 	}
 
-	log.Info().Msgf("Successfully registered usersgrpc on host and port %v", config.UsersHostPOrt)
+	log.Info().Msgf("Successfully registered usersgrpc on host and port %v", config.UsersHostPort)
+
+	// Register product grpc server
+	err = productsgrpc.RegisterProductsHandlerFromEndpoint(ctx, jsonproxyMux, config.ProductsHostPort, opts)
+	if err != nil {
+		return fmt.Errorf("failed to register products gRPC server: %w", err)
+	}
+
+	log.Info().Msgf("Successfully registered productsgrpc on host and port %v", config.ProductsHostPort)
 
 	opt := option.WithCredentialsJSON([]byte(config.FirebaseServiceAccountJSON))
 	app, err := firebase.NewApp(ctx, nil, opt)

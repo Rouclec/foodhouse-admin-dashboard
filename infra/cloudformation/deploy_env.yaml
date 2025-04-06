@@ -260,6 +260,46 @@ Resources:
           ],
         ]
 
+
+  ProductsStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - VpcStack
+      - RdsStack
+    Properties:
+      Parameters:
+        EnvId: !Ref "EnvId"
+        Image: !Ref ProductsImageTag
+        VPC: !GetAtt VpcStack.Outputs.VPC
+        LogGroupName: !Ref LogGroup
+        ClusterArn: !GetAtt EcsStack.Outputs.ClusterArn
+        DbAdminSecretArn: !GetAtt "RdsStack.Outputs.AdminSecretArn"
+        DomainName: !Ref DomainName
+        SubnetIds:
+          !Join [
+            ",",
+            [
+              !GetAtt VpcStack.Outputs.SubnetAPrivate,
+              !GetAtt VpcStack.Outputs.SubnetBPrivate,
+            ],
+          ]
+        CustomResourcesServiceToken: !GetAtt RdsStack.Outputs.DatabaseInitLambdaArn
+        DesiredCount: 1
+      Tags:
+        - Key: EnvId
+          Value: !Ref "EnvId"
+      TemplateURL:
+        !Join [
+          "",
+          [
+            "https://s3.amazonaws.com/",
+            !Ref "InfraArtifactsBucket",
+            "/cloudformation/",
+            !Ref "InfraReleaseHash",
+            "/services/products.yaml",
+          ],
+        ]
+
   JsonproxyStack:
     Type: AWS::CloudFormation::Stack
     DependsOn:

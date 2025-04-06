@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: The Jsonproxy API service
+Description: The Users service
 Parameters:
   EnvId:
     Type: String
@@ -23,39 +23,52 @@ Parameters:
   Image:
     Type: String
 
+  DbAdminSecretArn:
+    Type: String
+
+  CustomResourcesServiceToken:
+    Type: String
+    Description: The ARN of the lambda that deploys custom resoures (needed for created an application specific database)
+
   DesiredCount:
     Type: Number
     Default: 1
-
+  
   DomainName:
     Type: String
-    Description: The domain name for the environment where the service register a DNS record.
 
-  LoadBalancerDNSName:
-    Type: String
-    Description: The DNS name of the load balancer that the service is registered with. A DNS record will created that points to this value.
-
-  LoadBalancerCanonicalHostedZoneID:
-    Type: String
-    Description: The canonical hosted zone ID of the load balancer that the service is registered with.
-
-  HttpsListener:
-    Type: String
-    Description: The ARN of the HTTPS listener that the service is registered with.
-
-  FirebaseServiceAccountSecretArn:
-    Type: String
-
-  # The following are optional parameters and are treated more like constants and input values.
+  # The following are optional parameters and are treated more like constants.
   ContainerPort:
     Type: Number
     Default: 80
 
   AppName:
     Type: String
-    Default: "jsonproxy"
+    Default: "products"
 
 Resources:
+  MutationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${AppName}MutationEvents"
+  SmsDebugTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${AppName}SmsDebug"
+
+  AppDatabaseSecret:
+    Type: "AWS::SecretsManager::Secret"
+    Properties:
+      Name: !Sub "/${EnvId}/${AppName}_database"
+      GenerateSecretString:
+        SecretStringTemplate: !Sub '{"username": "${AppName}", "dbname": "${AppName}"}'
+        GenerateStringKey: "password"
+        PasswordLength: 30
+        ExcludePunctuation: true
+      Tags:
+        - Key: EnvId
+          Value: !Ref EnvId
+
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
@@ -82,17 +95,37 @@ Resources:
               awslogs-group: !Ref LogGroupName
               awslogs-stream-prefix: !Ref AppName
           Environment:
+            - Name: GRPC_PORT
+              Value: !Ref ContainerPort
             - Name: LISTEN_PORT
               Value: !Ref ContainerPort
-            - Name: USERS_HOST_PORT
-              Value: users:80
-            - Name: PRODUCTS_HOST_PORT
-              Value: products:80
-            - Name: ALLOWED_ORIGINS
-              Value: !Sub "https://admindashboard.${DomainName}"
+            - Name: MIGRATION_PATH
+              Value: "/app/migrations"
+            - Name: ENABLE_DEV_METHODS
+              Value: "true"
+
           Secrets:
-            - Name: FIREBASE_SERVICE_ACCOUNT_JSON
-              ValueFrom: !Sub "${FirebaseServiceAccountSecretArn}:::"
+            - Name: DB_NAME
+              ValueFrom: !Sub "${AppDatabaseSecret}:dbname::"
+            - Name: DB_USER
+              ValueFrom: !Sub "${AppDatabaseSecret}:username::"
+            - Name: DB_HOST
+              ValueFrom: !Sub "${DbAdminSecretArn}:host::"
+            - Name: DB_PORT
+              ValueFrom: !Sub "${DbAdminSecretArn}:port::"
+            - Name: DB_PASSWORD
+              ValueFrom: !Sub "${AppDatabaseSecret}:password::"
+
+  # We create a data in the RDS instance for the application.
+  # We do this with a custom Cloudformation resource that will run a lambda function.
+  AppDatabase:
+    Type: "Custom::PgDatabase"
+    Properties:
+      ServiceToken: !Ref CustomResourcesServiceToken
+      StackName: !Ref "AWS::StackName"
+      ServiceTimeout: 120
+      AdminSecretArn: !Ref DbAdminSecretArn
+      ServiceSecretArn: !Ref AppDatabaseSecret
 
     # A role needed by ECS to Start the Ecs Service
   ExecutionRole:
@@ -120,7 +153,8 @@ Resources:
                   - "secretsmanager:ListSecretVersionIds"
                   - "secretsmanager:ListSecrets"
                 Resource:
-                  - !Ref FirebaseServiceAccountSecretArn
+                  - !Ref AppDatabaseSecret
+                  - !Ref DbAdminSecretArn
 
   # A role for the containers
   TaskRole:
@@ -134,10 +168,29 @@ Resources:
               Service: ecs-tasks.amazonaws.com
             Action:
               - "sts:AssumeRole"
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "sns:Publish"
+                Resource:
+                  - !Ref MutationTopic
+                  - !Ref SmsDebugTopic
+              - Effect: Allow
+                Action:
+                  - "ses:SendEmail"
+                  - "ses:SendRawEmail"
+                  - "ses:GetTemplate"
+                  - "ses:ListTemplates"
+                  - "ses:SendTemplatedEmail"
+                  - "ses:VerifyEmailIdentity"
+                Resource: "*"
 
   EcsService:
     Type: AWS::ECS::Service
-    DependsOn: [ApiTargetGroup, ApiListenerRule]
     Properties:
       ServiceName: !Sub "${EnvId}-${AppName}"
       Cluster: !Ref ClusterArn
@@ -147,10 +200,6 @@ Resources:
         MaximumPercent: 200
       DesiredCount: !Ref DesiredCount
       LaunchType: EC2
-      LoadBalancers:
-        - ContainerName: App
-          ContainerPort: !Ref ContainerPort
-          TargetGroupArn: !Ref ApiTargetGroup
       ServiceConnectConfiguration:
         Enabled: true
         Namespace: !Sub "${EnvId}"
@@ -160,44 +209,3 @@ Resources:
             ClientAliases:
               - DnsName: !Ref AppName
                 Port: !Ref ContainerPort
-
-  ApiTargetGroup:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties:
-      HealthCheckIntervalSeconds: 10
-      HealthCheckPath: "/v1/public/healthcheck"
-      HealthCheckTimeoutSeconds: 5
-      UnhealthyThresholdCount: 2
-      HealthyThresholdCount: 2
-      Name: !Sub "${EnvId}-${AppName}-TargetGroup"
-      Protocol: HTTP
-      Port: !Ref ContainerPort
-      TargetGroupAttributes:
-        - Key: deregistration_delay.timeout_seconds
-          Value: 60 # default is 300
-      TargetType: instance
-      VpcId: !Ref VPC
-
-  ApiListenerRule:
-    Type: "AWS::ElasticLoadBalancingV2::ListenerRule"
-    Properties:
-      Actions:
-        - Type: forward
-          TargetGroupArn: !Ref ApiTargetGroup
-      Conditions:
-        - Field: host-header
-          HostHeaderConfig:
-            Values:
-              - !Sub "api.${DomainName}"
-      ListenerArn: !Ref HttpsListener
-      Priority: 1
-
-  DNSRecord:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      HostedZoneName: !Sub "${DomainName}."
-      Name: !Sub "api.${DomainName}"
-      Type: A
-      AliasTarget:
-        DNSName: !Ref LoadBalancerDNSName
-        HostedZoneId: !Ref LoadBalancerCanonicalHostedZoneID

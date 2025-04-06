@@ -13,6 +13,7 @@ on:
       - ".github/workflows/publish_build_artifacts.yaml"
       - "infra/**"
       - "users/**"
+      - "products/**"
       - "jsonproxy/**"
   workflow_run:
     ## Re-run this workflow if the artifact repositories have changed
@@ -34,6 +35,7 @@ jobs:
       artifact_account_id: ${{ steps.read_artifact_account_id.outputs.artifact_account_id }}
       infra_bucket_name: ${{ steps.read_artifact_stack_config.outputs.infra_bucket_name }}
       users_ecr_repo_arn: ${{ steps.read_artifact_stack_config.outputs.users_ecr_repo_arn }}
+      products_ecr_repo_arn: ${{ steps.read_artifact_stack_config.outputs.products_ecr_repo_arn }}
       jsonproxy_ecr_repo_arn: ${{ steps.read_artifact_stack_config.outputs.jsonproxy_ecr_repo_arn }}
     steps:
       - name: Check out code
@@ -62,10 +64,12 @@ jobs:
           artifacts_stack_name='artifact-account-setup'
           infra_bucket_name=$(aws cloudformation describe-stacks --stack-name "$artifacts_stack_name" --query "Stacks[0].Outputs[?OutputKey=='InfraArtifactsBucket'].OutputValue" --output text )
           users_ecr_repo_arn=$(aws cloudformation describe-stacks --stack-name "$artifacts_stack_name" --query "Stacks[0].Outputs[?OutputKey=='EcrRepositoryusersArn'].OutputValue" --output text )
+          products_ecr_repo_arn=$(aws cloudformation describe-stacks --stack-name "$artifacts_stack_name" --query "Stacks[0].Outputs[?OutputKey=='EcrRepositoryproductsArn'].OutputValue" --output text )
           jsonproxy_ecr_repo_arn=$(aws cloudformation describe-stacks --stack-name "$artifacts_stack_name" --query "Stacks[0].Outputs[?OutputKey=='EcrRepositoryjsonproxyArn'].OutputValue" --output text )
 
             echo "infra_bucket_name=$infra_bucket_name" >> $GITHUB_OUTPUT
             echo "users_ecr_repo_arn=$users_ecr_repo_arn" >> $GITHUB_OUTPUT
+            echo "products_ecr_repo_arn=$users_ecr_repo_arn" >> $GITHUB_OUTPUT
             echo "jsonproxy_ecr_repo_arn=$jsonproxy_ecr_repo_arn" >> $GITHUB_OUTPUT
 
 
@@ -107,6 +111,46 @@ jobs:
               echo "Image already exists, skipping build"
           fi
           aws ssm put-parameter --name "/build-artifact/users/$GITHUB_REF_NAME" --value "$full_image_tag"  --type "String" --overwrite
+
+  users:
+    name: Build and Publish Products Docker Image
+    needs: [config]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-2
+          role-to-assume: arn:aws:iam::${{ needs.config.outputs.artifact_account_id }}:role/deploy
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build Docker Image and Push to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          # We need to get the last commit hash of the products directory and the grpc directory.
+          # If either change we need ot push a new image.
+          commit_hash=$(find ./products/ ./grpc/ -type f -exec sha256sum {} + | sort | sha256sum | cut -f 1 -d ' ')
+          products_ecr_repo_arn="${{ needs.config.outputs.products_ecr_repo_arn }}"
+          products_ecr_repo_name=$(echo $products_ecr_repo_arn | cut -d'/' -f2)
+          full_image_tag=$ECR_REGISTRY/$products_ecr_repo_name:$commit_hash 
+
+          # Check if this tag already exists if so, we can skip the build.
+          if [ -z "$(docker manifest inspect "$full_image_tag" 2> /dev/null)" ]; then
+            cd products
+            make build full_image_tag="$full_image_tag"
+            make publish full_image_tag="$full_image_tag"
+          else
+              echo "Image already exists, skipping build"
+          fi
+          aws ssm put-parameter --name "/build-artifact/products/$GITHUB_REF_NAME" --value "$full_image_tag"  --type "String" --overwrite
+
 
   jsonproxy:
     name: Build and Publish Jsonproxy Docker Image

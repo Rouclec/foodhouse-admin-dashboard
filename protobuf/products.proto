@@ -1,0 +1,142 @@
+syntax = "proto3";
+
+package productsgrpc;
+
+option go_package = "github.com/foodhouse/foodhouseapp/grpc/go/productsgrpc";
+
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+
+enum UnitType {
+  UnitType_UNSPECIFIED = 0;
+  UnitType_KILOGRAM = 1;
+  UnitType_LITRES = 2;
+}
+
+message Category {
+  string id = 1;
+  string name = 2;
+  string slug = 3;
+  string created_by = 8;
+}
+
+message Amount {
+  int64 value = 1;
+  string currency_iso_code = 2;
+}
+
+message Product {
+  string id = 1;
+  Category category = 2;
+  string name = 3;
+  UnitType unit_type = 4;
+  Amount amount = 5;
+  string description = 6;
+  string image = 7;
+  string created_by = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+message CreateCategoryRequest {
+  string user_id = 1;
+  string name = 2;
+}
+
+message CreateCategoryResponse { Category category = 1; }
+
+message CreateProductRequest {
+  string user_id = 1;
+  string category_id = 2;
+  string name = 3;
+  UnitType unit_type = 4;
+  Amount amount = 5;
+  string description = 6;
+  string image = 7;
+}
+
+message CreateProductResponse { Product product = 1; }
+
+message ListUserProductsRequest {
+  string user_id = 1;
+  string search = 2;
+  int32 count = 3;
+}
+
+message ListUserProductsRespnse { repeated Product products = 1; }
+
+message UpdateProductRequest {
+  string user_id = 1;
+  string product_id = 2;
+  string category_id = 3;
+  string name = 4;
+  UnitType unit_type = 5;
+  Amount amount = 6;
+  string description = 7;
+  string image = 8;
+}
+
+message UpdateProductResponse { string message = 1; }
+
+message DeleteProductRequest { 
+    string user_id = 1;
+    string product_id = 2;
+ }
+
+message DeleteProductResponse { string message = 1; }
+
+message ListProductsRequest {
+  string category_id = 1;
+  Amount min_amount = 2;
+  Amount max_amount = 3;
+  string search = 4;
+  string start_key = 5;
+  int32 count = 6;
+}
+
+message ListProductsResponse { repeated Product products = 1; }
+
+message HealthCheckRequest {}
+message HealthCheckResponse {}
+
+service Products {
+
+  rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryResponse) {
+    option (google.api.http) = {
+      post : "/v1/admin/{user_id}/products/create-category"
+      body : "*"
+    };
+  }
+
+  rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse) {
+    option (google.api.http) = {
+      post : "/v1/users/{user_id}/products/create-product"
+      body : "*"
+    };
+  }
+
+  rpc UpdateProduct(UpdateProductRequest) returns (UpdateProductResponse) {
+    option (google.api.http) = {
+      put : "/v1/users/{user_id}/products/{product_id}/update-product"
+      body : "*"
+    };
+  }
+
+  rpc DeleteProduct(DeleteProductRequest) returns (DeleteProductResponse) {
+    option (google.api.http) = {
+      delete : "/v1/users/{user_id}/products/{product_id}/delete-product"
+    };
+  }
+
+  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse) {
+    option (google.api.http) = {
+      get : "/v1/public/products/list-products"
+    };
+  }
+
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {
+    option (google.api.http) = {
+      get : "/v1/public/products/health-check"
+    };
+  }
+}
