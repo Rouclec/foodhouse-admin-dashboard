@@ -112,7 +112,7 @@ jobs:
           fi
           aws ssm put-parameter --name "/build-artifact/users/$GITHUB_REF_NAME" --value "$full_image_tag"  --type "String" --overwrite
 
-  users:
+  products:
     name: Build and Publish Products Docker Image
     needs: [config]
     runs-on: ubuntu-latest
