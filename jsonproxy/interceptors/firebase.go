@@ -3,6 +3,7 @@ package interceptors
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"firebase.google.com/go/auth"
 )
@@ -17,6 +18,13 @@ type TokenVerifier interface {
 func NewFirebaseAuthenticationInterceptor(client TokenVerifier) HTTPInterceptor {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			
+			// Skip token verification for public routes
+			if strings.HasPrefix(r.URL.Path, "/v1/public") {
+				next.ServeHTTP(w, r)
+				return
+			}
+			
 			// Extract the Firebase ID token from the Authorization header
 			idToken := r.Header.Get(HeaderAuthentication)
 
