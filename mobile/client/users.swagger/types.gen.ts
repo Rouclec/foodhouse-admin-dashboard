@@ -229,7 +229,7 @@ export type usersgrpcUserPaymentMethod = {
     createdAt?: string;
 };
 
-export type usersgrpcUserRole = 'USER_ROLE_UNSPECIFIED' | 'USER_ROLE_FARMER' | 'USER_ROLE_SELLER' | 'USER_ROLE_ADMIN';
+export type usersgrpcUserRole = 'USER_ROLE_UNSPECIFIED' | 'USER_ROLE_FARMER' | 'USER_ROLE_BUYER' | 'USER_ROLE_ADMIN';
 
 export type usersgrpcUserSubscription = {
     id?: string;
@@ -241,7 +241,7 @@ export type usersgrpcUserSubscription = {
     expiresAt?: string;
 };
 
-export type usersgrpcUserType = 'USER_TYPE_UNSPECIFIED' | 'USER_TYPE_FARMER' | 'USER_TYPE_SELLER';
+export type usersgrpcUserType = 'USER_TYPE_UNSPECIFIED' | 'USER_TYPE_FARMER' | 'USER_TYPE_BUYER';
 
 export type usersgrpcVerifyOtpRequest = {
     authFactor?: usersgrpcAuthFactor;

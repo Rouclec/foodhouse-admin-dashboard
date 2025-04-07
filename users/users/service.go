@@ -248,11 +248,13 @@ func (i *Impl) Signup(ctx context.Context, req *usersgrpc.SignupRequest) (*users
 	claims := map[string]any{}
 	accessTokens, err := i.tokenManagerBuilder.WithQuerier(querier).GenerateAccessToken(ctx, createdDBUser.ID, claims)
 	if err != nil {
+		i.logger.Debug().Msgf("firebase error %v", err)
 		return nil, status.Errorf(codes.Internal, "Failed to generate tokens: %v", err)
 	}
 
 	refreshToken, err := i.tokenManagerBuilder.WithQuerier(querier).GenerateRefreshToken(ctx, createdDBUser.ID)
 	if err != nil {
+		i.logger.Debug().Msgf("firebase error %v", err)
 		return nil, status.Errorf(codes.Internal, "Failed to generate tokens: %v", err)
 	}
 
@@ -274,8 +276,8 @@ func getUserRoleFromType(userType usersgrpc.UserType) (usersgrpc.UserRole, error
 	switch userType {
 	case usersgrpc.UserType_USER_TYPE_FARMER:
 		return usersgrpc.UserRole_USER_ROLE_FARMER, nil
-	case usersgrpc.UserType_USER_TYPE_SELLER:
-		return usersgrpc.UserRole_USER_ROLE_FARMER, nil
+	case usersgrpc.UserType_USER_TYPE_BUYER:
+		return usersgrpc.UserRole_USER_ROLE_BUYER, nil
 	default:
 		return usersgrpc.UserRole_USER_ROLE_UNSPECIFIED, fmt.Errorf("invalid user type passed: %v", userType)
 	}

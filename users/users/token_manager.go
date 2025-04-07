@@ -19,7 +19,7 @@ import (
 
 const (
 	// DefaultRefreshTokenValidity is the default validity period for a refresh token.
-	DefaultRefreshTokenValidity = time.Hour * 24 * 30
+	DefaultRefreshTokenValidity = time.Hour * 24 * 30 * 3
 )
 
 //go:generate go run go.uber.org/mock/mockgen@v0.5.0 -destination=mocks/mock_token_manager.go -package=mocks -source=./token_manager.go TokenManager

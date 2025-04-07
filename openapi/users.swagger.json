@@ -1422,7 +1422,7 @@
       "enum": [
         "USER_ROLE_UNSPECIFIED",
         "USER_ROLE_FARMER",
-        "USER_ROLE_SELLER",
+        "USER_ROLE_BUYER",
         "USER_ROLE_ADMIN"
       ],
       "default": "USER_ROLE_UNSPECIFIED"
@@ -1461,7 +1461,7 @@
       "enum": [
         "USER_TYPE_UNSPECIFIED",
         "USER_TYPE_FARMER",
-        "USER_TYPE_SELLER"
+        "USER_TYPE_BUYER"
       ],
       "default": "USER_TYPE_UNSPECIFIED"
     },
