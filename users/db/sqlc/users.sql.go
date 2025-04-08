@@ -42,7 +42,7 @@ type CreateUserParams struct {
 	ResidenceCountryIsoCode string       `json:"residence_country_iso_code"`
 	Address                 *string      `json:"address"`
 	LocationCoordinates     pgtype.Point `json:"location_coordinates"`
-	ProfileImage            *string      `json:"profile_image"`
+	ProfileImage            string       `json:"profile_image"`
 	Role                    string       `json:"role"`
 }
 
@@ -195,7 +195,7 @@ type UpdateUserParams struct {
 	Email               *string      `json:"email"`
 	Address             *string      `json:"address"`
 	LocationCoordinates pgtype.Point `json:"location_coordinates"`
-	ProfileImage        *string      `json:"profile_image"`
+	ProfileImage        string       `json:"profile_image"`
 	ID                  string       `json:"id"`
 }
 

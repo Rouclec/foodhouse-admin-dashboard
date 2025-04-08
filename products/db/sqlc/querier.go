@@ -12,6 +12,11 @@ type Querier interface {
 	CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error)
 	CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error)
 	DeleteProduct(ctx context.Context, id string) error
+	GetCategory(ctx context.Context, id string) (Category, error)
+	GetProduct(ctx context.Context, id string) (Product, error)
+	GetProductForUpdate(ctx context.Context, id string) (Product, error)
+	GetProductWithCategory(ctx context.Context, id string) (GetProductWithCategoryRow, error)
+	ListCategories(ctx context.Context) ([]Category, error)
 	ListProducts(ctx context.Context, arg ListProductsParams) ([]Product, error)
 	UpdateProduct(ctx context.Context, arg UpdateProductParams) error
 }

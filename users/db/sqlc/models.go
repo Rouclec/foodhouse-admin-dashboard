@@ -58,7 +58,7 @@ type User struct {
 	ResidenceCountryIsoCode string             `json:"residence_country_iso_code"`
 	Address                 *string            `json:"address"`
 	LocationCoordinates     pgtype.Point       `json:"location_coordinates"`
-	ProfileImage            *string            `json:"profile_image"`
+	ProfileImage            string             `json:"profile_image"`
 	Password                string             `json:"password"`
 	CreatedAt               pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt               pgtype.Timestamptz `json:"updated_at"`

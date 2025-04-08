@@ -2,9 +2,9 @@
 
 import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
-import type { ProductsCreateCategoryData, ProductsCreateCategoryError, ProductsCreateCategoryResponse, ProductsListProductsData, ProductsCreateProductData, ProductsCreateProductError, ProductsCreateProductResponse, ProductsDeleteProductData, ProductsDeleteProductError, ProductsDeleteProductResponse, ProductsUpdateProductData, ProductsUpdateProductError, ProductsUpdateProductResponse } from '../types.gen';
+import type { ProductsCreateCategoryData, ProductsCreateCategoryError, ProductsCreateCategoryResponse, ProductsListProductsData, ProductsGetProductData, ProductsListFarmerProductsData, ProductsCreateProductData, ProductsCreateProductError, ProductsCreateProductResponse, ProductsDeleteProductData, ProductsDeleteProductError, ProductsDeleteProductResponse, ProductsGetFarmerProductData, ProductsUpdateProductData, ProductsUpdateProductError, ProductsUpdateProductResponse } from '../types.gen';
 import type { AxiosError } from 'axios';
-import { client, productsCreateCategory, productsHealthCheck, productsListProducts, productsCreateProduct, productsDeleteProduct, productsUpdateProduct } from '../sdk.gen';
+import { client, productsCreateCategory, productsGetCategories, productsHealthCheck, productsListProducts, productsGetProduct, productsListFarmerProducts, productsCreateProduct, productsDeleteProduct, productsGetFarmerProduct, productsUpdateProduct } from '../sdk.gen';
 
 type QueryKey<TOptions extends OptionsLegacyParser> = [
     Pick<TOptions, 'baseURL' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -66,6 +66,25 @@ export const productsCreateCategoryMutation = (options?: Partial<OptionsLegacyPa
     return mutationOptions;
 };
 
+export const productsGetCategoriesQueryKey = (options?: OptionsLegacyParser) => [
+    createQueryKey('productsGetCategories', options)
+];
+
+export const productsGetCategoriesOptions = (options?: OptionsLegacyParser) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await productsGetCategories({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: productsGetCategoriesQueryKey(options)
+    });
+};
+
 export const productsHealthCheckQueryKey = (options?: OptionsLegacyParser) => [
     createQueryKey('productsHealthCheck', options)
 ];
@@ -101,6 +120,44 @@ export const productsListProductsOptions = (options?: OptionsLegacyParser<Produc
             return data;
         },
         queryKey: productsListProductsQueryKey(options)
+    });
+};
+
+export const productsGetProductQueryKey = (options: OptionsLegacyParser<ProductsGetProductData>) => [
+    createQueryKey('productsGetProduct', options)
+];
+
+export const productsGetProductOptions = (options: OptionsLegacyParser<ProductsGetProductData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await productsGetProduct({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: productsGetProductQueryKey(options)
+    });
+};
+
+export const productsListFarmerProductsQueryKey = (options: OptionsLegacyParser<ProductsListFarmerProductsData>) => [
+    createQueryKey('productsListFarmerProducts', options)
+];
+
+export const productsListFarmerProductsOptions = (options: OptionsLegacyParser<ProductsListFarmerProductsData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await productsListFarmerProducts({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: productsListFarmerProductsQueryKey(options)
     });
 };
 
@@ -149,6 +206,25 @@ export const productsDeleteProductMutation = (options?: Partial<OptionsLegacyPar
         }
     };
     return mutationOptions;
+};
+
+export const productsGetFarmerProductQueryKey = (options: OptionsLegacyParser<ProductsGetFarmerProductData>) => [
+    createQueryKey('productsGetFarmerProduct', options)
+];
+
+export const productsGetFarmerProductOptions = (options: OptionsLegacyParser<ProductsGetFarmerProductData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await productsGetFarmerProduct({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: productsGetFarmerProductQueryKey(options)
+    });
 };
 
 export const productsUpdateProductMutation = (options?: Partial<OptionsLegacyParser<ProductsUpdateProductData>>) => {

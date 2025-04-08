@@ -37,10 +37,28 @@ export type productsgrpcDeleteProductResponse = {
     message?: string;
 };
 
+export type productsgrpcGetCategoriesResponse = {
+    categories?: Array<productsgrpcCategory>;
+};
+
+export type productsgrpcGetFarmerProductResponse = {
+    product?: productsgrpcProduct;
+};
+
+export type productsgrpcGetProductResponse = {
+    product?: productsgrpcProduct;
+};
+
 export type productsgrpcHealthCheckResponse = unknown;
+
+export type productsgrpcListFarmerProductsResponse = {
+    products?: Array<productsgrpcProduct>;
+    nextKey?: string;
+};
 
 export type productsgrpcListProductsResponse = {
     products?: Array<productsgrpcProduct>;
+    nextKey?: string;
 };
 
 export type productsgrpcProduct = {
@@ -92,6 +110,10 @@ export type ProductsCreateCategoryResponse = (productsgrpcCreateCategoryResponse
 
 export type ProductsCreateCategoryError = (rpcStatus);
 
+export type ProductsGetCategoriesResponse = (productsgrpcGetCategoriesResponse);
+
+export type ProductsGetCategoriesError = (rpcStatus);
+
 export type ProductsHealthCheckResponse = (productsgrpcHealthCheckResponse);
 
 export type ProductsHealthCheckError = (rpcStatus);
@@ -112,6 +134,36 @@ export type ProductsListProductsData = {
 export type ProductsListProductsResponse = (productsgrpcListProductsResponse);
 
 export type ProductsListProductsError = (rpcStatus);
+
+export type ProductsGetProductData = {
+    path: {
+        productId: string;
+    };
+};
+
+export type ProductsGetProductResponse = (productsgrpcGetProductResponse);
+
+export type ProductsGetProductError = (rpcStatus);
+
+export type ProductsListFarmerProductsData = {
+    path: {
+        userId: string;
+    };
+    query?: {
+        categoryId?: string;
+        count?: number;
+        'maxAmount.currencyIsoCode'?: string;
+        'maxAmount.value'?: string;
+        'minAmount.currencyIsoCode'?: string;
+        'minAmount.value'?: string;
+        search?: string;
+        startKey?: string;
+    };
+};
+
+export type ProductsListFarmerProductsResponse = (productsgrpcListFarmerProductsResponse);
+
+export type ProductsListFarmerProductsError = (rpcStatus);
 
 export type ProductsCreateProductData = {
     body: ProductsCreateProductBody;
@@ -134,6 +186,17 @@ export type ProductsDeleteProductData = {
 export type ProductsDeleteProductResponse = (productsgrpcDeleteProductResponse);
 
 export type ProductsDeleteProductError = (rpcStatus);
+
+export type ProductsGetFarmerProductData = {
+    path: {
+        productId: string;
+        userId: string;
+    };
+};
+
+export type ProductsGetFarmerProductResponse = (productsgrpcGetFarmerProductResponse);
+
+export type ProductsGetFarmerProductError = (rpcStatus);
 
 export type ProductsUpdateProductData = {
     body: ProductsUpdateProductBody;

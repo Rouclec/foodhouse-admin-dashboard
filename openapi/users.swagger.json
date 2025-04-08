@@ -1278,6 +1278,9 @@
         },
         "userType": {
           "$ref": "#/definitions/usersgrpcUserType"
+        },
+        "email": {
+          "type": "string"
         }
       }
     },

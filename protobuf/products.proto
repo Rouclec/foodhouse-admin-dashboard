@@ -94,7 +94,39 @@ message ListProductsRequest {
   int32 count = 6;
 }
 
-message ListProductsResponse { repeated Product products = 1; }
+message ListProductsResponse { 
+  repeated Product products = 1;
+  string next_key = 2; 
+}
+
+message ListFarmerProductsRequest {
+  string user_id = 1;
+  string category_id = 2;
+  Amount min_amount = 3;
+  Amount max_amount = 4;
+  string search = 5;
+  string start_key = 6;
+  int32 count = 7;
+}
+
+message ListFarmerProductsResponse { 
+  repeated Product products = 1;
+  string next_key = 2; 
+}
+
+message GetProductRequest { string product_id = 1; }
+
+message GetProductResponse { Product product = 1; }
+
+message GetCategoriesRequest {}
+message GetCategoriesResponse { repeated Category categories = 1; }
+
+message GetFarmerProductRequest {
+  string user_id = 1;
+  string product_id = 2;
+}
+
+message GetFarmerProductResponse { Product product = 1; }
 
 message HealthCheckRequest {}
 message HealthCheckResponse {}
@@ -131,6 +163,31 @@ service Products {
   rpc ListProducts(ListProductsRequest) returns (ListProductsResponse) {
     option (google.api.http) = {
       get : "/v1/public/products/list-products"
+    };
+  }
+
+  rpc ListFarmerProducts(ListFarmerProductsRequest) returns (ListFarmerProductsResponse) {
+    option (google.api.http) = {
+      get : "/v1/user/{user_id}/products/list-farmer-products"
+    };
+  }
+
+  rpc GetProduct(GetProductRequest) returns (GetProductResponse) {
+    option (google.api.http) = {
+      get : "/v1/public/products/{product_id}/get-product"
+    };
+  }
+
+  rpc GetFarmerProduct(GetFarmerProductRequest)
+      returns (GetFarmerProductResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/products/{product_id}/get-farmer-product"
+    };
+  }
+
+  rpc GetCategories(GetCategoriesRequest) returns (GetCategoriesResponse) {
+    option (google.api.http) = {
+      get : "/v1/public/products/get-categories"
     };
   }
 

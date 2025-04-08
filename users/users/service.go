@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -66,6 +67,12 @@ func NewUsers(
 		tokenManagerBuilder: tokenManagerBuilder,
 		devMethodsEndabled:  enableDevMethods,
 	}
+}
+
+var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
+
+func isValidEmail(email string) bool {
+	return emailRegex.MatchString(email)
 }
 
 // SendSignupSmsOtp sends an OTP to the user's phone number for signup.
@@ -192,9 +199,15 @@ func (i *Impl) Signup(ctx context.Context, req *usersgrpc.SignupRequest) (*users
 
 	userPassword := req.GetPassword()
 
+	ok := isValidEmail(req.GetEmail())
+
+	if !ok {
+		return nil, status.Errorf(codes.InvalidArgument, "Invalid email %v", req.GetEmail())
+	}
+
 	// Check password for minimum length
 	if len(userPassword) < MinimumPasswordLength {
-		return nil, status.Errorf(codes.Internal, "Password should be at least %v characters long",
+		return nil, status.Errorf(codes.InvalidArgument, "Password should be at least %v characters long",
 			MinimumPasswordLength)
 	}
 
@@ -220,7 +233,7 @@ func (i *Impl) Signup(ctx context.Context, req *usersgrpc.SignupRequest) (*users
 
 	userType, ok := usersgrpc.UserType_value[req.GetUserType().String()]
 	if !ok {
-		return nil, status.Errorf(codes.Internal, "invalid user type in request: %v", req.GetUserType().String())
+		return nil, status.Errorf(codes.InvalidArgument, "invalid user type in request: %v", req.GetUserType().String())
 	}
 
 	userRole, err := getUserRoleFromType(usersgrpc.UserType(userType))
@@ -232,6 +245,7 @@ func (i *Impl) Signup(ctx context.Context, req *usersgrpc.SignupRequest) (*users
 	newUser := sqlc.CreateUserParams{
 		PhoneNumber:             otpPhoneNumber,
 		Password:                hashedPassword,
+		Email:                   &req.Email,
 		ResidenceCountryIsoCode: req.GetResidenceCountryIsoCode(),
 		Role:                    userRole.String(),
 	}
@@ -335,7 +349,7 @@ func (i *Impl) GetUserByID(
 			FirstName:               safeString(foundUser.FirstName),
 			LastName:                safeString(foundUser.LastName),
 			ResidenceCountryIsoCode: foundUser.ResidenceCountryIsoCode,
-			ProfileImage:            safeString(foundUser.ProfileImage),
+			ProfileImage:            safeString(&foundUser.ProfileImage),
 			LocationCoordinates:     getLocationPoint(foundUser.LocationCoordinates),
 			Address:                 safeString(foundUser.Address),
 			CreatedAt:               timestamppb.New(foundUser.CreatedAt.Time),
@@ -404,7 +418,7 @@ func (i *Impl) CompleteRegistration(
 		LocationCoordinates: pgtype.Point{
 			P: pgtype.Vec2{X: float64(req.GetLocationCoordinates().GetLon()),
 				Y: float64(req.GetLocationCoordinates().GetLat())}, Valid: true},
-		ProfileImage: &req.ProfileImage,
+		ProfileImage: req.ProfileImage,
 		Address:      &req.Address,
 	}
 

@@ -3,6 +3,12 @@ INSERT INTO categories (name, slug, created_by)
 VALUES ($1, $2, $3)
 RETURNING *;
 
+-- name: ListCategories :many
+SELECT * FROM categories;
+
+-- name: GetCategory :one
+SELECT * FROM categories where id = $1;
+
 -- name: CreateProduct :one
 INSERT INTO product (
   category_id, name, unit_type, value, currency_iso_code,
@@ -40,4 +46,32 @@ WHERE
   ($5::text IS NULL OR name ILIKE '%' || $5 || '%' OR description ILIKE '%' || $5 || '%') AND
   ($6::timestamptz IS NULL OR created_at < $6)
 ORDER BY created_at DESC
-LIMIT COALESCE($7, 50);
+LIMIT COALESCE($7::int, 50);
+
+-- name: GetProductForUpdate :one
+SELECT * FROM product where id = $1 FOR UPDATE;
+
+-- name: GetProduct :one
+SELECT * FROM product where id = $1; 
+
+-- name: GetProductWithCategory :one
+SELECT 
+  p.id AS product_id,
+  p.name AS product_name,
+  p.unit_type,
+  p.value,
+  p.currency_iso_code,
+  p.description,
+  p.image,
+  p.created_by AS product_created_by,
+  p.created_at,
+  p.updated_at,
+  
+  c.id AS category_id,
+  c.name AS category_name,
+  c.slug AS category_slug,
+  c.created_by AS category_created_by
+
+FROM product p
+JOIN categories c ON p.category_id = c.id
+WHERE p.id = $1;

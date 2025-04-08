@@ -8,6 +8,8 @@ package sqlc
 import (
 	"context"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createCategory = `-- name: CreateCategory :one
@@ -94,6 +96,159 @@ func (q *Queries) DeleteProduct(ctx context.Context, id string) error {
 	return err
 }
 
+const getCategory = `-- name: GetCategory :one
+SELECT id, name, slug, created_by FROM categories where id = $1
+`
+
+func (q *Queries) GetCategory(ctx context.Context, id string) (Category, error) {
+	row := q.db.QueryRow(ctx, getCategory, id)
+	var i Category
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Slug,
+		&i.CreatedBy,
+	)
+	return i, err
+}
+
+const getProduct = `-- name: GetProduct :one
+SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at FROM product where id = $1
+`
+
+func (q *Queries) GetProduct(ctx context.Context, id string) (Product, error) {
+	row := q.db.QueryRow(ctx, getProduct, id)
+	var i Product
+	err := row.Scan(
+		&i.ID,
+		&i.CategoryID,
+		&i.Name,
+		&i.UnitType,
+		&i.Value,
+		&i.CurrencyIsoCode,
+		&i.Description,
+		&i.Image,
+		&i.CreatedBy,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getProductForUpdate = `-- name: GetProductForUpdate :one
+SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at FROM product where id = $1 FOR UPDATE
+`
+
+func (q *Queries) GetProductForUpdate(ctx context.Context, id string) (Product, error) {
+	row := q.db.QueryRow(ctx, getProductForUpdate, id)
+	var i Product
+	err := row.Scan(
+		&i.ID,
+		&i.CategoryID,
+		&i.Name,
+		&i.UnitType,
+		&i.Value,
+		&i.CurrencyIsoCode,
+		&i.Description,
+		&i.Image,
+		&i.CreatedBy,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getProductWithCategory = `-- name: GetProductWithCategory :one
+SELECT 
+  p.id AS product_id,
+  p.name AS product_name,
+  p.unit_type,
+  p.value,
+  p.currency_iso_code,
+  p.description,
+  p.image,
+  p.created_by AS product_created_by,
+  p.created_at,
+  p.updated_at,
+  
+  c.id AS category_id,
+  c.name AS category_name,
+  c.slug AS category_slug,
+  c.created_by AS category_created_by
+
+FROM product p
+JOIN categories c ON p.category_id = c.id
+WHERE p.id = $1
+`
+
+type GetProductWithCategoryRow struct {
+	ProductID         string             `json:"product_id"`
+	ProductName       string             `json:"product_name"`
+	UnitType          string             `json:"unit_type"`
+	Value             int64              `json:"value"`
+	CurrencyIsoCode   string             `json:"currency_iso_code"`
+	Description       string             `json:"description"`
+	Image             string             `json:"image"`
+	ProductCreatedBy  *string            `json:"product_created_by"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
+	CategoryID        string             `json:"category_id"`
+	CategoryName      string             `json:"category_name"`
+	CategorySlug      string             `json:"category_slug"`
+	CategoryCreatedBy *string            `json:"category_created_by"`
+}
+
+func (q *Queries) GetProductWithCategory(ctx context.Context, id string) (GetProductWithCategoryRow, error) {
+	row := q.db.QueryRow(ctx, getProductWithCategory, id)
+	var i GetProductWithCategoryRow
+	err := row.Scan(
+		&i.ProductID,
+		&i.ProductName,
+		&i.UnitType,
+		&i.Value,
+		&i.CurrencyIsoCode,
+		&i.Description,
+		&i.Image,
+		&i.ProductCreatedBy,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.CategoryID,
+		&i.CategoryName,
+		&i.CategorySlug,
+		&i.CategoryCreatedBy,
+	)
+	return i, err
+}
+
+const listCategories = `-- name: ListCategories :many
+SELECT id, name, slug, created_by FROM categories
+`
+
+func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
+	rows, err := q.db.Query(ctx, listCategories)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Category{}
+	for rows.Next() {
+		var i Category
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Slug,
+			&i.CreatedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listProducts = `-- name: ListProducts :many
 SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at
 FROM product
@@ -105,17 +260,17 @@ WHERE
   ($5::text IS NULL OR name ILIKE '%' || $5 || '%' OR description ILIKE '%' || $5 || '%') AND
   ($6::timestamptz IS NULL OR created_at < $6)
 ORDER BY created_at DESC
-LIMIT COALESCE($7, 50)
+LIMIT COALESCE($7::int, 50)
 `
 
 type ListProductsParams struct {
-	Column1 string      `json:"column_1"`
-	Column2 string      `json:"column_2"`
-	Value   int64       `json:"value"`
-	Value_2 int64       `json:"value_2"`
-	Column5 string      `json:"column_5"`
-	Column6 time.Time   `json:"column_6"`
-	Column7 interface{} `json:"column_7"`
+	Column1 string    `json:"column_1"`
+	Column2 string    `json:"column_2"`
+	Value   int64     `json:"value"`
+	Value_2 int64     `json:"value_2"`
+	Column5 string    `json:"column_5"`
+	Column6 time.Time `json:"column_6"`
+	Column7 int32     `json:"column_7"`
 }
 
 func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]Product, error) {

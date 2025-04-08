@@ -176,6 +176,7 @@ export type usersgrpcSignupRequest = {
     residenceCountryIsoCode?: string;
     password?: string;
     userType?: usersgrpcUserType;
+    email?: string;
 };
 
 export type usersgrpcSignupResponse = {

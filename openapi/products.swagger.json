@@ -54,6 +54,28 @@
         ]
       }
     },
+    "/v1/public/products/get-categories": {
+      "get": {
+        "operationId": "Products_GetCategories",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/productsgrpcGetCategoriesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Products"
+        ]
+      }
+    },
     "/v1/public/products/health-check": {
       "get": {
         "operationId": "Products_HealthCheck",
@@ -94,6 +116,117 @@
           }
         },
         "parameters": [
+          {
+            "name": "categoryId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "minAmount.value",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "minAmount.currencyIsoCode",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "maxAmount.value",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "maxAmount.currencyIsoCode",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "startKey",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/v1/public/products/{productId}/get-product": {
+      "get": {
+        "operationId": "Products_GetProduct",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/productsgrpcGetProductResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/v1/user/{userId}/products/list-farmer-products": {
+      "get": {
+        "operationId": "Products_ListFarmerProducts",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/productsgrpcListFarmerProductsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "categoryId",
             "in": "query",
@@ -197,6 +330,42 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/productsgrpcDeleteProductResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/v1/users/{userId}/products/{productId}/get-farmer-product": {
+      "get": {
+        "operationId": "Products_GetFarmerProduct",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/productsgrpcGetFarmerProductResponse"
             }
           },
           "default": {
@@ -378,8 +547,51 @@
         }
       }
     },
+    "productsgrpcGetCategoriesResponse": {
+      "type": "object",
+      "properties": {
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/productsgrpcCategory"
+          }
+        }
+      }
+    },
+    "productsgrpcGetFarmerProductResponse": {
+      "type": "object",
+      "properties": {
+        "product": {
+          "$ref": "#/definitions/productsgrpcProduct"
+        }
+      }
+    },
+    "productsgrpcGetProductResponse": {
+      "type": "object",
+      "properties": {
+        "product": {
+          "$ref": "#/definitions/productsgrpcProduct"
+        }
+      }
+    },
     "productsgrpcHealthCheckResponse": {
       "type": "object"
+    },
+    "productsgrpcListFarmerProductsResponse": {
+      "type": "object",
+      "properties": {
+        "products": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/productsgrpcProduct"
+          }
+        },
+        "nextKey": {
+          "type": "string"
+        }
+      }
     },
     "productsgrpcListProductsResponse": {
       "type": "object",
@@ -390,6 +602,9 @@
             "type": "object",
             "$ref": "#/definitions/productsgrpcProduct"
           }
+        },
+        "nextKey": {
+          "type": "string"
         }
       }
     },

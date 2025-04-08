@@ -149,6 +149,7 @@ message SignupRequest {
   string residence_country_iso_code = 2;
   string password = 3;
   UserType user_type = 4;
+  string email = 5;
 }
 
 message SignupResponse {
