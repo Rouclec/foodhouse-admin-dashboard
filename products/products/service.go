@@ -2,6 +2,8 @@ package products
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -238,21 +240,123 @@ func (i *Impl) ListFarmerProducts(ctx context.Context, req *productsgrpc.ListFar
 }
 
 // UpdateProduct implements productsgrpc.ProductsServer.
-func (i *Impl) UpdateProduct(context.Context, *productsgrpc.UpdateProductRequest) (*productsgrpc.UpdateProductResponse, error) {
-	panic("unimplemented")
+func (i *Impl) UpdateProduct(ctx context.Context, req *productsgrpc.UpdateProductRequest) (*productsgrpc.UpdateProductResponse, error) {
+	querier, tx, err := i.repo.Begin(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)
+	}
+
+	// Proper rollback handling
+	defer func() {
+		err = tx.Rollback(ctx)
+		if err != nil && !errors.Is(err, sql.ErrTxDone) {
+			i.logger.Err(err).Msgf("Failed to rollback transaction: %v", req)
+		}
+	}()
+
+	product, err := querier.GetProductForUpdate(ctx, req.GetProductId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting product %v", err)
+	}
+
+	i.logger.Debug().Interface("product found: ", product).Msg("Product for update")
+
+	_, ok := productsgrpc.UnitType_value[req.GetUnitType().String()]
+
+	if !ok {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid unit type %v", req.GetUnitType().String())
+	}
+
+	arg := sqlc.UpdateProductParams{
+		CategoryID:      req.GetCategoryId(),
+		Name:            req.GetName(),
+		UnitType:        req.GetUnitType().String(),
+		Value:           req.Amount.GetValue(),
+		CurrencyIsoCode: req.GetAmount().GetCurrencyIsoCode(),
+		Description:     req.GetDescription(),
+		Image:           req.GetImage(),
+	}
+
+	err = querier.UpdateProduct(ctx, arg)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error updating product %v", err)
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
+	}
+
+	return &productsgrpc.UpdateProductResponse{
+		Message: fmt.Sprintf("Product with id %v updated successfully", req.GetProductId()),
+	}, nil
 }
 
 // GetFarmerProduct implements productsgrpc.ProductsServer.
-func (i *Impl) GetFarmerProduct(context.Context, *productsgrpc.GetFarmerProductRequest) (*productsgrpc.GetFarmerProductResponse, error) {
-	panic("unimplemented")
+func (i *Impl) GetFarmerProduct(ctx context.Context, req *productsgrpc.GetFarmerProductRequest) (*productsgrpc.GetFarmerProductResponse, error) {
+	product, err := i.repo.Do().GetProduct(ctx, req.GetProductId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting product %v", err)
+	}
+
+	category, err := i.repo.Do().GetCategory(ctx, product.CategoryID)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error fetching category %v for product with id %v", err, req.GetProductId())
+	}
+
+	protoProduct, err := converters.SqlcToProtoProduct(product, &category)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error converting proto product to grpc %v", err)
+	}
+	return &productsgrpc.GetFarmerProductResponse{
+		Product: protoProduct,
+	}, nil
 }
 
 // GetProduct implements productsgrpc.ProductsServer.
-func (i *Impl) GetProduct(context.Context, *productsgrpc.GetProductRequest) (*productsgrpc.GetProductResponse, error) {
-	panic("unimplemented")
+func (i *Impl) GetProduct(ctx context.Context, req *productsgrpc.GetProductRequest) (*productsgrpc.GetProductResponse, error) {
+	product, err := i.repo.Do().GetProduct(ctx, req.GetProductId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting product %v", err)
+	}
+
+	category, err := i.repo.Do().GetCategory(ctx, product.CategoryID)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error fetching category %v for product with id %v", err, req.GetProductId())
+	}
+
+	protoProduct, err := converters.SqlcToProtoProduct(product, &category)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error converting proto product to grpc %v", err)
+	}
+	return &productsgrpc.GetProductResponse{
+		Product: protoProduct,
+	}, nil
 }
 
 // GetCategories implements productsgrpc.ProductsServer.
-func (i *Impl) GetCategories(context.Context, *productsgrpc.GetCategoriesRequest) (*productsgrpc.GetCategoriesResponse, error) {
-	panic("unimplemented")
+func (i *Impl) ListCategories(ctx context.Context, req *productsgrpc.ListCategoriesRequest) (*productsgrpc.ListCategoriesResponse, error) {
+	categories, err := i.repo.Do().ListCategories(ctx)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error fetching categories %v", err)
+	}
+
+	protoCategories, err := converters.SqlcToProtoCategories(categories)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error converting sqlc to proto categories: %v", err)
+	}
+
+	return &productsgrpc.ListCategoriesResponse{
+		Categories: protoCategories,
+	}, nil
 }

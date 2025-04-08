@@ -56,12 +56,12 @@
     },
     "/v1/public/products/get-categories": {
       "get": {
-        "operationId": "Products_GetCategories",
+        "operationId": "Products_ListCategories",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/productsgrpcGetCategoriesResponse"
+              "$ref": "#/definitions/productsgrpcListCategoriesResponse"
             }
           },
           "default": {
@@ -547,18 +547,6 @@
         }
       }
     },
-    "productsgrpcGetCategoriesResponse": {
-      "type": "object",
-      "properties": {
-        "categories": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/productsgrpcCategory"
-          }
-        }
-      }
-    },
     "productsgrpcGetFarmerProductResponse": {
       "type": "object",
       "properties": {
@@ -577,6 +565,18 @@
     },
     "productsgrpcHealthCheckResponse": {
       "type": "object"
+    },
+    "productsgrpcListCategoriesResponse": {
+      "type": "object",
+      "properties": {
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/productsgrpcCategory"
+          }
+        }
+      }
     },
     "productsgrpcListFarmerProductsResponse": {
       "type": "object",

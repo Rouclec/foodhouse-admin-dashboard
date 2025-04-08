@@ -94,9 +94,9 @@ message ListProductsRequest {
   int32 count = 6;
 }
 
-message ListProductsResponse { 
+message ListProductsResponse {
   repeated Product products = 1;
-  string next_key = 2; 
+  string next_key = 2;
 }
 
 message ListFarmerProductsRequest {
@@ -109,17 +109,17 @@ message ListFarmerProductsRequest {
   int32 count = 7;
 }
 
-message ListFarmerProductsResponse { 
+message ListFarmerProductsResponse {
   repeated Product products = 1;
-  string next_key = 2; 
+  string next_key = 2;
 }
 
 message GetProductRequest { string product_id = 1; }
 
 message GetProductResponse { Product product = 1; }
 
-message GetCategoriesRequest {}
-message GetCategoriesResponse { repeated Category categories = 1; }
+message ListCategoriesRequest {}
+message ListCategoriesResponse { repeated Category categories = 1; }
 
 message GetFarmerProductRequest {
   string user_id = 1;
@@ -166,7 +166,8 @@ service Products {
     };
   }
 
-  rpc ListFarmerProducts(ListFarmerProductsRequest) returns (ListFarmerProductsResponse) {
+  rpc ListFarmerProducts(ListFarmerProductsRequest)
+      returns (ListFarmerProductsResponse) {
     option (google.api.http) = {
       get : "/v1/user/{user_id}/products/list-farmer-products"
     };
@@ -185,7 +186,7 @@ service Products {
     };
   }
 
-  rpc GetCategories(GetCategoriesRequest) returns (GetCategoriesResponse) {
+  rpc ListCategories(ListCategoriesRequest) returns (ListCategoriesResponse) {
     option (google.api.http) = {
       get : "/v1/public/products/get-categories"
     };

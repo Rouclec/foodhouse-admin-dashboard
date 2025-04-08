@@ -4,7 +4,7 @@ import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 import type { ProductsCreateCategoryData, ProductsCreateCategoryError, ProductsCreateCategoryResponse, ProductsListProductsData, ProductsGetProductData, ProductsListFarmerProductsData, ProductsCreateProductData, ProductsCreateProductError, ProductsCreateProductResponse, ProductsDeleteProductData, ProductsDeleteProductError, ProductsDeleteProductResponse, ProductsGetFarmerProductData, ProductsUpdateProductData, ProductsUpdateProductError, ProductsUpdateProductResponse } from '../types.gen';
 import type { AxiosError } from 'axios';
-import { client, productsCreateCategory, productsGetCategories, productsHealthCheck, productsListProducts, productsGetProduct, productsListFarmerProducts, productsCreateProduct, productsDeleteProduct, productsGetFarmerProduct, productsUpdateProduct } from '../sdk.gen';
+import { client, productsCreateCategory, productsListCategories, productsHealthCheck, productsListProducts, productsGetProduct, productsListFarmerProducts, productsCreateProduct, productsDeleteProduct, productsGetFarmerProduct, productsUpdateProduct } from '../sdk.gen';
 
 type QueryKey<TOptions extends OptionsLegacyParser> = [
     Pick<TOptions, 'baseURL' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -66,14 +66,14 @@ export const productsCreateCategoryMutation = (options?: Partial<OptionsLegacyPa
     return mutationOptions;
 };
 
-export const productsGetCategoriesQueryKey = (options?: OptionsLegacyParser) => [
-    createQueryKey('productsGetCategories', options)
+export const productsListCategoriesQueryKey = (options?: OptionsLegacyParser) => [
+    createQueryKey('productsListCategories', options)
 ];
 
-export const productsGetCategoriesOptions = (options?: OptionsLegacyParser) => {
+export const productsListCategoriesOptions = (options?: OptionsLegacyParser) => {
     return queryOptions({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await productsGetCategories({
+            const { data } = await productsListCategories({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -81,7 +81,7 @@ export const productsGetCategoriesOptions = (options?: OptionsLegacyParser) => {
             });
             return data;
         },
-        queryKey: productsGetCategoriesQueryKey(options)
+        queryKey: productsListCategoriesQueryKey(options)
     });
 };
 

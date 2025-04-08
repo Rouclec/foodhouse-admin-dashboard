@@ -533,20 +533,20 @@ func local_request_Products_GetFarmerProduct_0(ctx context.Context, marshaler ru
 
 }
 
-func request_Products_GetCategories_0(ctx context.Context, marshaler runtime.Marshaler, client ProductsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetCategoriesRequest
+func request_Products_ListCategories_0(ctx context.Context, marshaler runtime.Marshaler, client ProductsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListCategoriesRequest
 	var metadata runtime.ServerMetadata
 
-	msg, err := client.GetCategories(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.ListCategories(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_Products_GetCategories_0(ctx context.Context, marshaler runtime.Marshaler, server ProductsServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetCategoriesRequest
+func local_request_Products_ListCategories_0(ctx context.Context, marshaler runtime.Marshaler, server ProductsServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListCategoriesRequest
 	var metadata runtime.ServerMetadata
 
-	msg, err := server.GetCategories(ctx, &protoReq)
+	msg, err := server.ListCategories(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -776,7 +776,7 @@ func RegisterProductsHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 
 	})
 
-	mux.Handle("GET", pattern_Products_GetCategories_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Products_ListCategories_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -784,12 +784,12 @@ func RegisterProductsHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/productsgrpc.Products/GetCategories", runtime.WithHTTPPathPattern("/v1/public/products/get-categories"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/productsgrpc.Products/ListCategories", runtime.WithHTTPPathPattern("/v1/public/products/get-categories"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Products_GetCategories_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Products_ListCategories_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
@@ -797,7 +797,7 @@ func RegisterProductsHandlerServer(ctx context.Context, mux *runtime.ServeMux, s
 			return
 		}
 
-		forward_Products_GetCategories_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Products_ListCategories_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1043,25 +1043,25 @@ func RegisterProductsHandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 
 	})
 
-	mux.Handle("GET", pattern_Products_GetCategories_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Products_ListCategories_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/productsgrpc.Products/GetCategories", runtime.WithHTTPPathPattern("/v1/public/products/get-categories"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/productsgrpc.Products/ListCategories", runtime.WithHTTPPathPattern("/v1/public/products/get-categories"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Products_GetCategories_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Products_ListCategories_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Products_GetCategories_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Products_ListCategories_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1107,7 +1107,7 @@ var (
 
 	pattern_Products_GetFarmerProduct_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"v1", "users", "user_id", "products", "product_id", "get-farmer-product"}, ""))
 
-	pattern_Products_GetCategories_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"v1", "public", "products", "get-categories"}, ""))
+	pattern_Products_ListCategories_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"v1", "public", "products", "get-categories"}, ""))
 
 	pattern_Products_HealthCheck_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"v1", "public", "products", "health-check"}, ""))
 )
@@ -1129,7 +1129,7 @@ var (
 
 	forward_Products_GetFarmerProduct_0 = runtime.ForwardResponseMessage
 
-	forward_Products_GetCategories_0 = runtime.ForwardResponseMessage
+	forward_Products_ListCategories_0 = runtime.ForwardResponseMessage
 
 	forward_Products_HealthCheck_0 = runtime.ForwardResponseMessage
 )

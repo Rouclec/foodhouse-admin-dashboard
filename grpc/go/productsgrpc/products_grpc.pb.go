@@ -27,7 +27,7 @@ const (
 	Products_ListFarmerProducts_FullMethodName = "/productsgrpc.Products/ListFarmerProducts"
 	Products_GetProduct_FullMethodName         = "/productsgrpc.Products/GetProduct"
 	Products_GetFarmerProduct_FullMethodName   = "/productsgrpc.Products/GetFarmerProduct"
-	Products_GetCategories_FullMethodName      = "/productsgrpc.Products/GetCategories"
+	Products_ListCategories_FullMethodName     = "/productsgrpc.Products/ListCategories"
 	Products_HealthCheck_FullMethodName        = "/productsgrpc.Products/HealthCheck"
 )
 
@@ -43,7 +43,7 @@ type ProductsClient interface {
 	ListFarmerProducts(ctx context.Context, in *ListFarmerProductsRequest, opts ...grpc.CallOption) (*ListFarmerProductsResponse, error)
 	GetProduct(ctx context.Context, in *GetProductRequest, opts ...grpc.CallOption) (*GetProductResponse, error)
 	GetFarmerProduct(ctx context.Context, in *GetFarmerProductRequest, opts ...grpc.CallOption) (*GetFarmerProductResponse, error)
-	GetCategories(ctx context.Context, in *GetCategoriesRequest, opts ...grpc.CallOption) (*GetCategoriesResponse, error)
+	ListCategories(ctx context.Context, in *ListCategoriesRequest, opts ...grpc.CallOption) (*ListCategoriesResponse, error)
 	HealthCheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
 }
 
@@ -135,10 +135,10 @@ func (c *productsClient) GetFarmerProduct(ctx context.Context, in *GetFarmerProd
 	return out, nil
 }
 
-func (c *productsClient) GetCategories(ctx context.Context, in *GetCategoriesRequest, opts ...grpc.CallOption) (*GetCategoriesResponse, error) {
+func (c *productsClient) ListCategories(ctx context.Context, in *ListCategoriesRequest, opts ...grpc.CallOption) (*ListCategoriesResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetCategoriesResponse)
-	err := c.cc.Invoke(ctx, Products_GetCategories_FullMethodName, in, out, cOpts...)
+	out := new(ListCategoriesResponse)
+	err := c.cc.Invoke(ctx, Products_ListCategories_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -167,7 +167,7 @@ type ProductsServer interface {
 	ListFarmerProducts(context.Context, *ListFarmerProductsRequest) (*ListFarmerProductsResponse, error)
 	GetProduct(context.Context, *GetProductRequest) (*GetProductResponse, error)
 	GetFarmerProduct(context.Context, *GetFarmerProductRequest) (*GetFarmerProductResponse, error)
-	GetCategories(context.Context, *GetCategoriesRequest) (*GetCategoriesResponse, error)
+	ListCategories(context.Context, *ListCategoriesRequest) (*ListCategoriesResponse, error)
 	HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
 	mustEmbedUnimplementedProductsServer()
 }
@@ -203,8 +203,8 @@ func (UnimplementedProductsServer) GetProduct(context.Context, *GetProductReques
 func (UnimplementedProductsServer) GetFarmerProduct(context.Context, *GetFarmerProductRequest) (*GetFarmerProductResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFarmerProduct not implemented")
 }
-func (UnimplementedProductsServer) GetCategories(context.Context, *GetCategoriesRequest) (*GetCategoriesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCategories not implemented")
+func (UnimplementedProductsServer) ListCategories(context.Context, *ListCategoriesRequest) (*ListCategoriesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListCategories not implemented")
 }
 func (UnimplementedProductsServer) HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HealthCheck not implemented")
@@ -374,20 +374,20 @@ func _Products_GetFarmerProduct_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Products_GetCategories_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetCategoriesRequest)
+func _Products_ListCategories_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListCategoriesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProductsServer).GetCategories(ctx, in)
+		return srv.(ProductsServer).ListCategories(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Products_GetCategories_FullMethodName,
+		FullMethod: Products_ListCategories_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProductsServer).GetCategories(ctx, req.(*GetCategoriesRequest))
+		return srv.(ProductsServer).ListCategories(ctx, req.(*ListCategoriesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -450,8 +450,8 @@ var Products_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Products_GetFarmerProduct_Handler,
 		},
 		{
-			MethodName: "GetCategories",
-			Handler:    _Products_GetCategories_Handler,
+			MethodName: "ListCategories",
+			Handler:    _Products_ListCategories_Handler,
 		},
 		{
 			MethodName: "HealthCheck",

@@ -37,10 +37,6 @@ export type productsgrpcDeleteProductResponse = {
     message?: string;
 };
 
-export type productsgrpcGetCategoriesResponse = {
-    categories?: Array<productsgrpcCategory>;
-};
-
 export type productsgrpcGetFarmerProductResponse = {
     product?: productsgrpcProduct;
 };
@@ -50,6 +46,10 @@ export type productsgrpcGetProductResponse = {
 };
 
 export type productsgrpcHealthCheckResponse = unknown;
+
+export type productsgrpcListCategoriesResponse = {
+    categories?: Array<productsgrpcCategory>;
+};
 
 export type productsgrpcListFarmerProductsResponse = {
     products?: Array<productsgrpcProduct>;
@@ -110,9 +110,9 @@ export type ProductsCreateCategoryResponse = (productsgrpcCreateCategoryResponse
 
 export type ProductsCreateCategoryError = (rpcStatus);
 
-export type ProductsGetCategoriesResponse = (productsgrpcGetCategoriesResponse);
+export type ProductsListCategoriesResponse = (productsgrpcListCategoriesResponse);
 
-export type ProductsGetCategoriesError = (rpcStatus);
+export type ProductsListCategoriesError = (rpcStatus);
 
 export type ProductsHealthCheckResponse = (productsgrpcHealthCheckResponse);
 

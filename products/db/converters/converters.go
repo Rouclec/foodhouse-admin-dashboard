@@ -46,3 +46,19 @@ func SqlcToProtoProduct(sqlcProduct sqlc.Product, sqlcCategory *sqlc.Category) (
 		CreatedBy:   *sqlcProduct.CreatedBy,
 	}, nil
 }
+
+func SqlcToProtoCategories(sqlcCategories []sqlc.Category) ([]*productsgrpc.Category, error) {
+	protoCategories := make([]*productsgrpc.Category, 0, len(sqlcCategories))
+
+	for _, c := range sqlcCategories {
+		protoCategory := &productsgrpc.Category{
+			Id:        c.ID,
+			Name:      c.Name,
+			Slug:      c.Slug,
+			CreatedBy: *c.CreatedBy,
+		}
+		protoCategories = append(protoCategories, protoCategory)
+	}
+
+	return protoCategories, nil
+}
