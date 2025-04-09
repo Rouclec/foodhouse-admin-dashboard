@@ -5,6 +5,7 @@ import (
 
 	"github.com/foodhouse/foodhouseapp/grpc/go/productsgrpc"
 	"github.com/foodhouse/foodhouseapp/products/db/sqlc"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func SqlcToProtoProducts(sqlcProducts []sqlc.Product) ([]*productsgrpc.Product, error) {
@@ -28,13 +29,17 @@ func SqlcToProtoProduct(sqlcProduct sqlc.Product, sqlcCategory *sqlc.Category) (
 	if !ok {
 		return nil, fmt.Errorf("invalid unit type %v", sqlcProduct.UnitType)
 	}
+
+	// Build a minimal category with just the ID if category is nil
+	category := &productsgrpc.Category{Id: sqlcProduct.CategoryID}
+	if sqlcCategory != nil {
+		category.Name = sqlcCategory.Name
+		category.Slug = sqlcCategory.Slug
+	}
+
 	return &productsgrpc.Product{
-		Id: sqlcProduct.ID,
-		Category: &productsgrpc.Category{
-			Id:   sqlcProduct.CategoryID,
-			Name: sqlcCategory.Name,
-			Slug: sqlcCategory.Slug,
-		},
+		Id:       sqlcProduct.ID,
+		Category: category, // Category will be nil if sqlcCategory is nil
 		Name:     sqlcProduct.Name,
 		UnitType: productsgrpc.UnitType(unitType),
 		Amount: &productsgrpc.Amount{
@@ -44,6 +49,8 @@ func SqlcToProtoProduct(sqlcProduct sqlc.Product, sqlcCategory *sqlc.Category) (
 		Description: sqlcProduct.Description,
 		Image:       sqlcProduct.Image,
 		CreatedBy:   *sqlcProduct.CreatedBy,
+		CreatedAt:   timestamppb.New(sqlcProduct.CreatedAt.Time),
+		UpdatedAt:   timestamppb.New(sqlcProduct.UpdatedAt.Time),
 	}, nil
 }
 

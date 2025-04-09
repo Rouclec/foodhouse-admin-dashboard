@@ -39,14 +39,20 @@ WHERE id = $1;
 SELECT *
 FROM product
 WHERE
-  ($1::varchar IS NULL OR created_by = $1) AND
-  ($2::varchar IS NULL OR category_id = $2) AND
-  (value >= COALESCE($3, 0)) AND
-  (value <= COALESCE($4, 9223372036854775807)) AND
-  ($5::text IS NULL OR name ILIKE '%' || $5 || '%' OR description ILIKE '%' || $5 || '%') AND
-  ($6::timestamptz IS NULL OR created_at < $6)
+  (sqlc.arg(created_by)::varchar = '' OR created_by = sqlc.arg(created_by)::varchar) AND
+  (sqlc.arg(category_id)::varchar = '' OR category_id = sqlc.arg(category_id)::varchar) AND
+  (sqlc.arg(min_value)::bigint = 0 OR value >= sqlc.arg(min_value)::bigint) AND
+  (
+    sqlc.arg(max_value)::bigint = 0 OR value <= COALESCE(sqlc.arg(max_value)::bigint, 9223372036854775807)
+  ) AND
+  (
+    sqlc.arg(search)::text = '' OR
+    name ILIKE '%' || sqlc.arg(search)::text || '%' OR
+    description ILIKE '%' || sqlc.arg(search)::text || '%'
+  ) AND
+  (sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at < sqlc.arg(created_before)::timestamptz)
 ORDER BY created_at DESC
-LIMIT COALESCE($7::int, 50);
+LIMIT sqlc.arg(count)::int;
 
 -- name: GetProductForUpdate :one
 SELECT * FROM product where id = $1 FOR UPDATE;

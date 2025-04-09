@@ -253,35 +253,41 @@ const listProducts = `-- name: ListProducts :many
 SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at
 FROM product
 WHERE
-  ($1::varchar IS NULL OR created_by = $1) AND
-  ($2::varchar IS NULL OR category_id = $2) AND
-  (value >= COALESCE($3, 0)) AND
-  (value <= COALESCE($4, 9223372036854775807)) AND
-  ($5::text IS NULL OR name ILIKE '%' || $5 || '%' OR description ILIKE '%' || $5 || '%') AND
-  ($6::timestamptz IS NULL OR created_at < $6)
+  ($1::varchar = '' OR created_by = $1::varchar) AND
+  ($2::varchar = '' OR category_id = $2::varchar) AND
+  ($3::bigint = 0 OR value >= $3::bigint) AND
+  (
+    $4::bigint = 0 OR value <= COALESCE($4::bigint, 9223372036854775807)
+  ) AND
+  (
+    $5::text = '' OR
+    name ILIKE '%' || $5::text || '%' OR
+    description ILIKE '%' || $5::text || '%'
+  ) AND
+  ($6::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at < $6::timestamptz)
 ORDER BY created_at DESC
-LIMIT COALESCE($7::int, 50)
+LIMIT $7::int
 `
 
 type ListProductsParams struct {
-	Column1 string    `json:"column_1"`
-	Column2 string    `json:"column_2"`
-	Value   int64     `json:"value"`
-	Value_2 int64     `json:"value_2"`
-	Column5 string    `json:"column_5"`
-	Column6 time.Time `json:"column_6"`
-	Column7 int32     `json:"column_7"`
+	CreatedBy     string    `json:"created_by"`
+	CategoryID    string    `json:"category_id"`
+	MinValue      int64     `json:"min_value"`
+	MaxValue      int64     `json:"max_value"`
+	Search        string    `json:"search"`
+	CreatedBefore time.Time `json:"created_before"`
+	Count         int32     `json:"count"`
 }
 
 func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]Product, error) {
 	rows, err := q.db.Query(ctx, listProducts,
-		arg.Column1,
-		arg.Column2,
-		arg.Value,
-		arg.Value_2,
-		arg.Column5,
-		arg.Column6,
-		arg.Column7,
+		arg.CreatedBy,
+		arg.CategoryID,
+		arg.MinValue,
+		arg.MaxValue,
+		arg.Search,
+		arg.CreatedBefore,
+		arg.Count,
 	)
 	if err != nil {
 		return nil, err

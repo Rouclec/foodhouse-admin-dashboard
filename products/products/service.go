@@ -159,6 +159,11 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 	var err error
 	startKey := time.Now().Add(time.Hour)
 
+	count := int(req.GetCount())
+	if count == 0 {
+		count = 20 // or whatever default you want
+	}
+
 	if req.GetStartKey() != "" {
 		startKey, err = time.Parse(time.RFC3339, req.GetStartKey())
 		if err != nil {
@@ -166,18 +171,24 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 		}
 	}
 
-	products, err := i.repo.Do().ListProducts(ctx, sqlc.ListProductsParams{
-		Column2: req.GetCategoryId(),
-		Value:   req.GetMinAmount().GetValue(),
-		Value_2: req.GetMaxAmount().GetValue(),
-		Column5: req.GetSearch(),
-		Column6: startKey,
-		Column7: req.GetCount(),
-	})
+	i.logger.Debug().Msgf("Start key %v", startKey)
+
+	args := sqlc.ListProductsParams{
+		CategoryID:    req.GetCategoryId(),
+		MinValue:      req.GetMinAmount().GetValue(),
+		MaxValue:      req.GetMaxAmount().GetValue(),
+		Search:        req.GetSearch(),
+		CreatedBefore: startKey,
+		Count:         int32(count), // Convert count to int32
+	}
+
+	products, err := i.repo.Do().ListProducts(ctx, args)
 
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "error deleting product %v", err)
+		return nil, status.Errorf(codes.Internal, "error getting products %v", err)
 	}
+
+	i.logger.Debug().Msgf("sqlc products %v", products)
 
 	protoProducts, err := converters.SqlcToProtoProducts(products)
 
@@ -185,9 +196,11 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 		return nil, status.Errorf(codes.Internal, "failed to convert sqlc products to proto: %v", err)
 	}
 
+	i.logger.Debug().Msgf("proto products %v", protoProducts)
+
 	nextKey := ""
 
-	if len(protoProducts) >= int(req.GetCount()) {
+	if len(protoProducts) >= count {
 		nextKey = protoProducts[len(protoProducts)-1].GetCreatedAt().AsTime().Format(time.RFC3339)
 	}
 	return &productsgrpc.ListProductsResponse{
@@ -208,18 +221,23 @@ func (i *Impl) ListFarmerProducts(ctx context.Context, req *productsgrpc.ListFar
 		}
 	}
 
+	count := int(req.GetCount())
+	if count == 0 {
+		count = 20 // or whatever default you want
+	}
+
 	products, err := i.repo.Do().ListProducts(ctx, sqlc.ListProductsParams{
-		Column1: req.GetUserId(),
-		Column2: req.GetCategoryId(),
-		Value:   req.GetMinAmount().GetValue(),
-		Value_2: req.GetMaxAmount().GetValue(),
-		Column5: req.GetSearch(),
-		Column6: startKey,
-		Column7: req.GetCount(),
+		CreatedBy:     req.GetUserId(),
+		CategoryID:    req.GetCategoryId(),
+		MinValue:      req.GetMinAmount().GetValue(),
+		MaxValue:      req.GetMaxAmount().GetValue(),
+		Search:        req.GetSearch(),
+		CreatedBefore: startKey,
+		Count:         int32(count), // Convert count to int32
 	})
 
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "error deleting product %v", err)
+		return nil, status.Errorf(codes.Internal, "error getting products %v", err)
 	}
 
 	protoProducts, err := converters.SqlcToProtoProducts(products)
@@ -230,7 +248,9 @@ func (i *Impl) ListFarmerProducts(ctx context.Context, req *productsgrpc.ListFar
 
 	nextKey := ""
 
-	if len(protoProducts) >= int(req.GetCount()) {
+	i.logger.Debug().Msgf("Count %v, product length %v", count, len(protoProducts))
+
+	if len(protoProducts) >= count {
 		nextKey = protoProducts[len(protoProducts)-1].GetCreatedAt().AsTime().Format(time.RFC3339)
 	}
 	return &productsgrpc.ListFarmerProductsResponse{
