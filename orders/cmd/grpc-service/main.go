@@ -143,7 +143,7 @@ func LoadConfig(cfg *Config) error {
 	if _, err := os.Stat(".env"); err == nil {
 		err = godotenv.Load()
 		if err != nil {
-			return fmt.Errorf("failed to load env file: %w", err)
+			return fmt.Errorf("failed to load the env file: %w", err)
 		}
 	}
 
