@@ -40,6 +40,13 @@ generate-protos: ../googleapis/google
 			--openapiv2_out ../openapi \
 			--openapiv2_opt use_go_templates=true \
 			"$$proto_file"; \
+	done; \
+	for proto_file in ./types/*.proto; do \
+		base_name=$$(basename "$$proto_file" .proto); \
+		protoc -I . -I ../googleapis \
+			--go_out "../grpc/go" --go_opt paths=source_relative \
+			--go-grpc_out "../grpc/go" --go-grpc_opt paths=source_relative \
+			"$$proto_file"; \
 	done'
 
 generate-client: generate-protos

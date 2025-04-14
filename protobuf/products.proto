@@ -6,6 +6,7 @@ option go_package = "github.com/foodhouse/foodhouseapp/grpc/go/productsgrpc";
 
 import "google/protobuf/timestamp.proto";
 import "google/api/annotations.proto";
+import "types/amount.proto";
 
 enum UnitType {
   UnitType_UNSPECIFIED = 0;
@@ -30,7 +31,7 @@ message Product {
   Category category = 2;
   string name = 3;
   UnitType unit_type = 4;
-  Amount amount = 5;
+  types.Amount amount = 5;
   string description = 6;
   string image = 7;
   string created_by = 8;
@@ -50,9 +51,10 @@ message CreateProductRequest {
   string category_id = 2;
   string name = 3;
   UnitType unit_type = 4;
-  Amount amount = 5;
+  types.Amount amount = 5;
   string description = 6;
   string image = 7;
+  bool whole_sale = 8;
 }
 
 message CreateProductResponse { Product product = 1; }
@@ -71,9 +73,10 @@ message UpdateProductRequest {
   string category_id = 3;
   string name = 4;
   UnitType unit_type = 5;
-  Amount amount = 6;
+  types.Amount amount = 6;
   string description = 7;
   string image = 8;
+  bool whole_sale = 9;
 }
 
 message UpdateProductResponse { string message = 1; }
@@ -87,8 +90,8 @@ message DeleteProductResponse { string message = 1; }
 
 message ListProductsRequest {
   string category_id = 1;
-  Amount min_amount = 2;
-  Amount max_amount = 3;
+  types.Amount min_amount = 2;
+  types.Amount max_amount = 3;
   string search = 4;
   string start_key = 5;
   int32 count = 6;
@@ -102,8 +105,8 @@ message ListProductsResponse {
 message ListFarmerProductsRequest {
   string user_id = 1;
   string category_id = 2;
-  Amount min_amount = 3;
-  Amount max_amount = 4;
+  types.Amount min_amount = 3;
+  types.Amount max_amount = 4;
   string search = 5;
   string start_key = 6;
   int32 count = 7;

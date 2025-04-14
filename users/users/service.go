@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/foodhouse/foodhouseapp/grpc/go/types"
 	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
 	"github.com/foodhouse/foodhouseapp/sms"
 	"github.com/foodhouse/foodhouseapp/users/db/repo"
@@ -372,11 +373,11 @@ func getUserRole(role string) usersgrpc.UserRole {
 	return usersgrpc.UserRole_USER_ROLE_UNSPECIFIED
 }
 
-func getLocationPoint(loc pgtype.Point) *usersgrpc.Point {
+func getLocationPoint(loc pgtype.Point) *types.Point {
 	if !loc.Valid {
 		return nil
 	}
-	return &usersgrpc.Point{Lon: loc.P.X, Lat: loc.P.Y}
+	return &types.Point{Lon: loc.P.X, Lat: loc.P.Y}
 }
 
 // UpdateRegistrationData implements usersgrpc.UsersServer.

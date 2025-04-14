@@ -12,10 +12,10 @@ SELECT * FROM categories where id = $1;
 -- name: CreateProduct :one
 INSERT INTO product (
   category_id, name, unit_type, value, currency_iso_code,
-  description, image, created_by
+  description, image, created_by, whole_sale
 ) VALUES (
   $1, $2, $3, $4, $5,
-  $6, $7, $8
+  $6, $7, $8, $9
 )
 RETURNING *;
 
@@ -28,6 +28,7 @@ SET category_id = $3,
     currency_iso_code = $7,
     description = $8,
     image = $9,
+    whole_sale = $10,
     updated_at = now()
 WHERE id = $2 AND created_by = $1;
 
@@ -66,6 +67,7 @@ SELECT
   p.name AS product_name,
   p.unit_type,
   p.value,
+  p.whole_sale,
   p.currency_iso_code,
   p.description,
   p.image,

@@ -820,7 +820,7 @@
           "type": "string"
         },
         "locationCoordinates": {
-          "$ref": "#/definitions/usersgrpcPoint"
+          "$ref": "#/definitions/typesPoint"
         }
       },
       "title": "Request message for UpdateUser"
@@ -924,6 +924,19 @@
             "type": "object",
             "$ref": "#/definitions/protobufAny"
           }
+        }
+      }
+    },
+    "typesPoint": {
+      "type": "object",
+      "properties": {
+        "lon": {
+          "type": "number",
+          "format": "double"
+        },
+        "lat": {
+          "type": "number",
+          "format": "double"
         }
       }
     },
@@ -1158,19 +1171,6 @@
         }
       }
     },
-    "usersgrpcPoint": {
-      "type": "object",
-      "properties": {
-        "lon": {
-          "type": "number",
-          "format": "double"
-        },
-        "lat": {
-          "type": "number",
-          "format": "double"
-        }
-      }
-    },
     "usersgrpcRefreshAccessTokenRequest": {
       "type": "object",
       "properties": {
@@ -1380,7 +1380,7 @@
           "type": "string"
         },
         "locationCoordinates": {
-          "$ref": "#/definitions/usersgrpcPoint"
+          "$ref": "#/definitions/typesPoint"
         },
         "profileImage": {
           "type": "string"

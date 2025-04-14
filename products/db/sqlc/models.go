@@ -15,6 +15,13 @@ type Category struct {
 	CreatedBy *string `json:"created_by"`
 }
 
+type PriceType struct {
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Slug       string `json:"slug"`
+	CategoryID string `json:"category_id"`
+}
+
 type Product struct {
 	ID              string             `json:"id"`
 	CategoryID      string             `json:"category_id"`
@@ -27,4 +34,11 @@ type Product struct {
 	CreatedBy       *string            `json:"created_by"`
 	CreatedAt       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	WholeSale       bool               `json:"whole_sale"`
+}
+
+type ProductName struct {
+	Name       string `json:"name"`
+	Slug       string `json:"slug"`
+	CategoryID string `json:"category_id"`
 }

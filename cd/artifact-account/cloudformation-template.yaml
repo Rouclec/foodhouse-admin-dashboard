@@ -18,6 +18,11 @@ Resources:
     Properties:
       RepositoryName: products
 
+  EcrRepositoryorders:
+    Type: "AWS::ECR::Repository"
+    Properties:
+      RepositoryName: orders
+
   EcrRepositoryjsonproxy:
     Type: "AWS::ECR::Repository"
     Properties:
@@ -89,6 +94,10 @@ Outputs:
   EcrRepositoryproductsArn:
     Description: Products ECR Repository Arn
     Value: !GetAtt EcrRepositoryproducts.Arn
+
+  EcrRepositoryordersArn:
+    Description: Orders ECR Repository Arn
+    Value: !GetAtt EcrRepositoryorders.Arn
 
   EcrRepositoryjsonproxyArn:
     Description: Jsonproxy ECR Repository Arn

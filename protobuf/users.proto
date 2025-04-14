@@ -6,17 +6,13 @@ option go_package = "github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc";
 
 import "google/protobuf/timestamp.proto";
 import "google/api/annotations.proto";
+import "types/point.proto";
 
 enum UserRole {
   USER_ROLE_UNSPECIFIED = 0;
   USER_ROLE_FARMER = 1;
   USER_ROLE_BUYER = 2;
   USER_ROLE_ADMIN = 3;
-}
-
-message Point {
-  double lon = 1;
-  double lat = 2;
 }
 
 message User {
@@ -27,7 +23,7 @@ message User {
   string first_name = 6;
   string last_name = 7;
   string residence_country_iso_code = 8;
-  Point location_coordinates = 9;
+  types.Point location_coordinates = 9;
   string profile_image = 10;
   string address = 11;
   google.protobuf.Timestamp created_at = 12; // Using a timestamp for date
@@ -175,7 +171,7 @@ message CompleteRegistrationRequest {
   string email = 4;
   string address = 5;
   string profile_image = 6;
-  Point location_coordinates = 7;
+  types.Point location_coordinates = 7;
 }
 
 // Response message for UpdateUser
