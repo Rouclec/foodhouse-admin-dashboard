@@ -88,6 +88,8 @@ Resources:
               Value: users:80
             - Name: PRODUCTS_HOST_PORT
               Value: products:80
+            - Name: ORDERS_HOST_PORT
+              Value: orders:80
             - Name: ALLOWED_ORIGINS
               Value: !Sub "https://admindashboard.${DomainName}"
           Secrets:

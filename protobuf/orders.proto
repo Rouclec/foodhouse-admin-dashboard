@@ -1,0 +1,118 @@
+syntax = "proto3";
+
+package ordersgrpc;
+
+option go_package = "github.com/foodhouse/foodhouseapp/grpc/go/ordersgrpc";
+
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+import "types/point.proto";
+import "types/amount.proto";
+
+enum OrderStatus {
+  OrderStatus_UNSPECIFIED = 0;
+  OrderStatus_CREATED = 1;
+  OrderStatus_PAID = 2;
+  OrderStatus_IN_TRANSIT = 3;
+  OrderStatus_DELIVERED = 4;
+}
+
+message Order {
+  string order_number = 1;
+  types.Point delivery_location = 2;
+  types.Amount price = 3;
+  OrderStatus status = 4;
+  int32 rating = 5;
+  string review = 6;
+  string product = 7;
+  string created_by = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+message OrderAuditLog {
+  google.protobuf.Timestamp timestamp = 1;
+  string actor = 2;
+  string action = 3;
+  string reason = 4;
+  Order before = 5;
+  Order after = 6;
+}
+
+message CreateOrderRequest {
+  string user_id = 1;
+  Order order = 2;
+}
+
+message CreateOrderResponse { Order order = 1; }
+
+message GetOrderDetailsRequest {
+  string user_id = 1;
+  int64 order_number = 2;
+}
+
+message GetOrderDetailsResponse {
+  Order order = 1;
+  repeated OrderAuditLog audit_log = 2;
+}
+
+message ConfirmOrderPaymentRequest { int64 order_number = 1; }
+message ConfirmOrderPaymentResponse {}
+
+message DispatchOrderRequest {
+  int64 order_number = 1;
+  string user_id = 2;
+}
+
+message DispatchOrderResponse {}
+
+message ConfirmDeliveryRequest {
+  int64 order_number = 1;
+  string user_id = 2;
+}
+
+message ConfirmDeliveryResponse {}
+
+message HealthCheckRequest {}
+message HealthCheckResponse {}
+
+service Orders {
+
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {
+    option (google.api.http) = {
+      post : "/v1/{user_id}/orders/create-order"
+      body : "*"
+    };
+  }
+
+  rpc GetOrderDetails(GetOrderDetailsRequest)
+      returns (GetOrderDetailsResponse) {
+    option (google.api.http) = {
+      get : "/v1/{user_id}/order/{order_number}/get-order-details"
+    };
+  }
+
+  rpc ConfirmOrderPayment(ConfirmOrderPaymentRequest)
+      returns (ConfirmOrderPaymentResponse) {}
+
+  rpc DispatchOrder(DispatchOrderRequest) returns (DispatchOrderResponse) {
+    option (google.api.http) = {
+      put : "/v1/{user_id}/orders/{order_number}/dispatch-order"
+      body : "*"
+    };
+  }
+
+  rpc ConfirmDelivery(ConfirmDeliveryRequest)
+      returns (ConfirmDeliveryResponse) {
+    option (google.api.http) = {
+      put : "/v1/{user_id}/orders/{order_number}/confirm-delivery"
+      body : "*"
+    };
+  }
+
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {
+    option (google.api.http) = {
+      get : "/v1/public/orders/health-check"
+    };
+  }
+}

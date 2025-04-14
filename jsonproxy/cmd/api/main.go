@@ -13,6 +13,7 @@ import (
 
 	firebase "firebase.google.com/go"
 	"github.com/ardanlabs/conf/v3"
+	"github.com/foodhouse/foodhouseapp/grpc/go/ordersgrpc"
 	"github.com/foodhouse/foodhouseapp/grpc/go/productsgrpc"
 	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
 	"github.com/foodhouse/foodhouseapp/jsonproxy/interceptors"
@@ -38,9 +39,10 @@ func main() {
 }
 
 type Config struct {
-	ListenPort        uint16 `conf:"env:LISTEN_PORT,required"`
-	UsersHostPort     string `conf:"env:USERS_HOST_PORT,required"`
+	ListenPort       uint16 `conf:"env:LISTEN_PORT,required"`
+	UsersHostPort    string `conf:"env:USERS_HOST_PORT,required"`
 	ProductsHostPort string `conf:"env:PRODUCTS_HOST_PORT,required"`
+	OrdersHostPort   string `conf:"env:ORDERS_HOST_PORT,required"`
 	// FirebaseServiceAccountJSON holds the JSON credentials for the Firebase service account.
 	FirebaseServiceAccountJSON string `conf:"env:FIREBASE_SERVICE_ACCOUNT_JSON,required"`
 	AllowedOrigins             string `conf:"env:ALLOWED_ORIGINS,required"`
@@ -87,6 +89,14 @@ func run(ctx context.Context, log zerolog.Logger) error {
 	}
 
 	log.Info().Msgf("Successfully registered productsgrpc on host and port %v", config.ProductsHostPort)
+
+	// Register orders grpc server
+	err = ordersgrpc.RegisterOrdersHandlerFromEndpoint(ctx, jsonproxyMux, config.OrdersHostPort, opts)
+	if err != nil {
+		return fmt.Errorf("failed to register ordrers gRPC server: %w", err)
+	}
+
+	log.Info().Msgf("Successfully registered ordersgrpc on host and port %v", config.OrdersHostPort)
 
 	opt := option.WithCredentialsJSON([]byte(config.FirebaseServiceAccountJSON))
 	app, err := firebase.NewApp(ctx, nil, opt)

@@ -9,6 +9,7 @@ import (
 
 	"testing"
 
+	"github.com/foodhouse/foodhouseapp/grpc/go/types"
 	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
 
 	smsMock "github.com/foodhouse/foodhouseapp/sms/mocks"
@@ -484,7 +485,7 @@ func TestCompleteRegistration(t *testing.T) {
 				FirstName:           testFirstName,
 				LastName:            testLastName,
 				Email:               testEmail,
-				LocationCoordinates: &usersgrpc.Point{Lat: testLat, Lon: testLon},
+				LocationCoordinates: &types.Point{Lat: testLat, Lon: testLon},
 			},
 			expectedError: nil,
 			expectedResp:  &usersgrpc.CompleteRegistrationResponse{Message: "Registration completed successfully."},

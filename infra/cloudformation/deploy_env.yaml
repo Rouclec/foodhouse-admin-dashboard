@@ -20,6 +20,9 @@ Parameters:
   ProductsImageTag:
     Type: String
     Description: This is the docker image and tag (image:tag) that should be deployed for the products service.
+  OrderssImageTag:
+    Type: String
+    Description: This is the docker image and tag (image:tag) that should be deployed for the orders service.
   JsonproxyImageTag:
     Type: String
     Description: This is the docker image and tag (image:tag) that should be deployed for the json proxy service.
@@ -302,6 +305,46 @@ Resources:
             "/services/products.yaml",
           ],
         ]
+
+  OrdersStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - VpcStack
+      - RdsStack
+    Properties:
+      Parameters:
+        EnvId: !Ref "EnvId"
+        Image: !Ref OrdersImageTag
+        VPC: !GetAtt VpcStack.Outputs.VPC
+        LogGroupName: !Ref LogGroup
+        ClusterArn: !GetAtt EcsStack.Outputs.ClusterArn
+        DbAdminSecretArn: !GetAtt "RdsStack.Outputs.AdminSecretArn"
+        DomainName: !Ref DomainName
+        SubnetIds:
+          !Join [
+            ",",
+            [
+              !GetAtt VpcStack.Outputs.SubnetAPrivate,
+              !GetAtt VpcStack.Outputs.SubnetBPrivate,
+            ],
+          ]
+        CustomResourcesServiceToken: !GetAtt RdsStack.Outputs.DatabaseInitLambdaArn
+        DesiredCount: 1
+      Tags:
+        - Key: EnvId
+          Value: !Ref "EnvId"
+      TemplateURL:
+        !Join [
+          "",
+          [
+            "https://s3.amazonaws.com/",
+            !Ref "InfraArtifactsBucket",
+            "/cloudformation/",
+            !Ref "InfraReleaseHash",
+            "/services/orders.yaml",
+          ],
+        ]
+
 
   JsonproxyStack:
     Type: AWS::CloudFormation::Stack

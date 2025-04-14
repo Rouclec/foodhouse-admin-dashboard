@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/foodhouse/foodhouseapp/grpc/go/productsgrpc"
+	"github.com/foodhouse/foodhouseapp/grpc/go/types"
 	"github.com/foodhouse/foodhouseapp/products/db/sqlc"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -42,7 +43,7 @@ func SqlcToProtoProduct(sqlcProduct sqlc.Product, sqlcCategory *sqlc.Category) (
 		Category: category, // Category will be nil if sqlcCategory is nil
 		Name:     sqlcProduct.Name,
 		UnitType: productsgrpc.UnitType(unitType),
-		Amount: &productsgrpc.Amount{
+		Amount: &types.Amount{
 			Value:           sqlcProduct.Value,
 			CurrencyIsoCode: sqlcProduct.CurrencyIsoCode,
 		},

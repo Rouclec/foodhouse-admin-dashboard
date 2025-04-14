@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/foodhouse/foodhouseapp/grpc/go/productsgrpc"
+	"github.com/foodhouse/foodhouseapp/grpc/go/types"
 	"github.com/foodhouse/foodhouseapp/products/db/converters"
 	"github.com/foodhouse/foodhouseapp/products/db/repo"
 	"github.com/foodhouse/foodhouseapp/products/db/sqlc"
@@ -121,7 +122,7 @@ func (i *Impl) CreateProduct(ctx context.Context, req *productsgrpc.CreateProduc
 			},
 			Name:     product.Name,
 			UnitType: productsgrpc.UnitType(unitType),
-			Amount: &productsgrpc.Amount{
+			Amount: &types.Amount{
 				Value:           product.Value,
 				CurrencyIsoCode: product.CurrencyIsoCode,
 			},

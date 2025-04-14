@@ -39,12 +39,12 @@ func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) 
 const createProduct = `-- name: CreateProduct :one
 INSERT INTO product (
   category_id, name, unit_type, value, currency_iso_code,
-  description, image, created_by
+  description, image, created_by, whole_sale
 ) VALUES (
   $1, $2, $3, $4, $5,
-  $6, $7, $8
+  $6, $7, $8, $9
 )
-RETURNING id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at
+RETURNING id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale
 `
 
 type CreateProductParams struct {
@@ -56,6 +56,7 @@ type CreateProductParams struct {
 	Description     string  `json:"description"`
 	Image           string  `json:"image"`
 	CreatedBy       *string `json:"created_by"`
+	WholeSale       bool    `json:"whole_sale"`
 }
 
 func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error) {
@@ -68,6 +69,7 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 		arg.Description,
 		arg.Image,
 		arg.CreatedBy,
+		arg.WholeSale,
 	)
 	var i Product
 	err := row.Scan(
@@ -82,6 +84,7 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 		&i.CreatedBy,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.WholeSale,
 	)
 	return i, err
 }
@@ -113,7 +116,7 @@ func (q *Queries) GetCategory(ctx context.Context, id string) (Category, error) 
 }
 
 const getProduct = `-- name: GetProduct :one
-SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at FROM product where id = $1
+SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale FROM product where id = $1
 `
 
 func (q *Queries) GetProduct(ctx context.Context, id string) (Product, error) {
@@ -131,12 +134,13 @@ func (q *Queries) GetProduct(ctx context.Context, id string) (Product, error) {
 		&i.CreatedBy,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.WholeSale,
 	)
 	return i, err
 }
 
 const getProductForUpdate = `-- name: GetProductForUpdate :one
-SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at FROM product where id = $1 FOR UPDATE
+SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale FROM product where id = $1 FOR UPDATE
 `
 
 func (q *Queries) GetProductForUpdate(ctx context.Context, id string) (Product, error) {
@@ -154,6 +158,7 @@ func (q *Queries) GetProductForUpdate(ctx context.Context, id string) (Product, 
 		&i.CreatedBy,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.WholeSale,
 	)
 	return i, err
 }
@@ -164,6 +169,7 @@ SELECT
   p.name AS product_name,
   p.unit_type,
   p.value,
+  p.whole_sale,
   p.currency_iso_code,
   p.description,
   p.image,
@@ -186,6 +192,7 @@ type GetProductWithCategoryRow struct {
 	ProductName       string             `json:"product_name"`
 	UnitType          string             `json:"unit_type"`
 	Value             int64              `json:"value"`
+	WholeSale         bool               `json:"whole_sale"`
 	CurrencyIsoCode   string             `json:"currency_iso_code"`
 	Description       string             `json:"description"`
 	Image             string             `json:"image"`
@@ -206,6 +213,7 @@ func (q *Queries) GetProductWithCategory(ctx context.Context, id string) (GetPro
 		&i.ProductName,
 		&i.UnitType,
 		&i.Value,
+		&i.WholeSale,
 		&i.CurrencyIsoCode,
 		&i.Description,
 		&i.Image,
@@ -250,7 +258,7 @@ func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
 }
 
 const listProducts = `-- name: ListProducts :many
-SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at
+SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale
 FROM product
 WHERE
   ($1::varchar = '' OR created_by = $1::varchar) AND
@@ -308,6 +316,7 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]P
 			&i.CreatedBy,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.WholeSale,
 		); err != nil {
 			return nil, err
 		}
@@ -328,6 +337,7 @@ SET category_id = $3,
     currency_iso_code = $7,
     description = $8,
     image = $9,
+    whole_sale = $10,
     updated_at = now()
 WHERE id = $2 AND created_by = $1
 `
@@ -342,6 +352,7 @@ type UpdateProductParams struct {
 	CurrencyIsoCode string  `json:"currency_iso_code"`
 	Description     string  `json:"description"`
 	Image           string  `json:"image"`
+	WholeSale       bool    `json:"whole_sale"`
 }
 
 func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) error {
@@ -355,6 +366,7 @@ func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) er
 		arg.CurrencyIsoCode,
 		arg.Description,
 		arg.Image,
+		arg.WholeSale,
 	)
 	return err
 }

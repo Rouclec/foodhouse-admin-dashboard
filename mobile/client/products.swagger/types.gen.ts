@@ -8,14 +8,10 @@ export type ProductsCreateProductBody = {
     categoryId?: string;
     name?: string;
     unitType?: productsgrpcUnitType;
-    amount?: productsgrpcAmount;
+    amount?: typesAmount;
     description?: string;
     image?: string;
-};
-
-export type productsgrpcAmount = {
-    value?: string;
-    currencyIsoCode?: string;
+    wholeSale?: boolean;
 };
 
 export type productsgrpcCategory = {
@@ -66,7 +62,7 @@ export type productsgrpcProduct = {
     category?: productsgrpcCategory;
     name?: string;
     unitType?: productsgrpcUnitType;
-    amount?: productsgrpcAmount;
+    amount?: typesAmount;
     description?: string;
     image?: string;
     createdBy?: string;
@@ -84,9 +80,10 @@ export type ProductsUpdateProductBody = {
     categoryId?: string;
     name?: string;
     unitType?: productsgrpcUnitType;
-    amount?: productsgrpcAmount;
+    amount?: typesAmount;
     description?: string;
     image?: string;
+    wholeSale?: boolean;
 };
 
 export type protobufAny = {
@@ -97,6 +94,11 @@ export type rpcStatus = {
     code?: number;
     message?: string;
     details?: Array<protobufAny>;
+};
+
+export type typesAmount = {
+    value?: string;
+    currencyIsoCode?: string;
 };
 
 export type ProductsCreateCategoryData = {

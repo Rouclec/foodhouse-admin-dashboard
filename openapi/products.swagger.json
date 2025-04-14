@@ -461,13 +461,16 @@
           "$ref": "#/definitions/productsgrpcUnitType"
         },
         "amount": {
-          "$ref": "#/definitions/productsgrpcAmount"
+          "$ref": "#/definitions/typesAmount"
         },
         "description": {
           "type": "string"
         },
         "image": {
           "type": "string"
+        },
+        "wholeSale": {
+          "type": "boolean"
         }
       }
     },
@@ -484,25 +487,16 @@
           "$ref": "#/definitions/productsgrpcUnitType"
         },
         "amount": {
-          "$ref": "#/definitions/productsgrpcAmount"
+          "$ref": "#/definitions/typesAmount"
         },
         "description": {
           "type": "string"
         },
         "image": {
           "type": "string"
-        }
-      }
-    },
-    "productsgrpcAmount": {
-      "type": "object",
-      "properties": {
-        "value": {
-          "type": "string",
-          "format": "int64"
         },
-        "currencyIsoCode": {
-          "type": "string"
+        "wholeSale": {
+          "type": "boolean"
         }
       }
     },
@@ -624,7 +618,7 @@
           "$ref": "#/definitions/productsgrpcUnitType"
         },
         "amount": {
-          "$ref": "#/definitions/productsgrpcAmount"
+          "$ref": "#/definitions/typesAmount"
         },
         "description": {
           "type": "string"
@@ -687,6 +681,18 @@
             "type": "object",
             "$ref": "#/definitions/protobufAny"
           }
+        }
+      }
+    },
+    "typesAmount": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string",
+          "format": "int64"
+        },
+        "currencyIsoCode": {
+          "type": "string"
         }
       }
     }

@@ -1,0 +1,384 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "orders.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Orders"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/public/orders/health-check": {
+      "get": {
+        "operationId": "Orders_HealthCheck",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcHealthCheckResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/v1/{userId}/order/{orderNumber}/get-order-details": {
+      "get": {
+        "operationId": "Orders_GetOrderDetails",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcGetOrderDetailsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "orderNumber",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/v1/{userId}/orders/create-order": {
+      "post": {
+        "operationId": "Orders_CreateOrder",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcCreateOrderResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/OrdersCreateOrderBody"
+            }
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/v1/{userId}/orders/{orderNumber}/confirm-delivery": {
+      "put": {
+        "operationId": "Orders_ConfirmDelivery",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcConfirmDeliveryResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "orderNumber",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/OrdersConfirmDeliveryBody"
+            }
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/v1/{userId}/orders/{orderNumber}/dispatch-order": {
+      "put": {
+        "operationId": "Orders_DispatchOrder",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcDispatchOrderResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "orderNumber",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/OrdersDispatchOrderBody"
+            }
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "OrdersConfirmDeliveryBody": {
+      "type": "object"
+    },
+    "OrdersCreateOrderBody": {
+      "type": "object",
+      "properties": {
+        "order": {
+          "$ref": "#/definitions/ordersgrpcOrder"
+        }
+      }
+    },
+    "OrdersDispatchOrderBody": {
+      "type": "object"
+    },
+    "ordersgrpcConfirmDeliveryResponse": {
+      "type": "object"
+    },
+    "ordersgrpcConfirmOrderPaymentResponse": {
+      "type": "object"
+    },
+    "ordersgrpcCreateOrderResponse": {
+      "type": "object",
+      "properties": {
+        "order": {
+          "$ref": "#/definitions/ordersgrpcOrder"
+        }
+      }
+    },
+    "ordersgrpcDispatchOrderResponse": {
+      "type": "object"
+    },
+    "ordersgrpcGetOrderDetailsResponse": {
+      "type": "object",
+      "properties": {
+        "order": {
+          "$ref": "#/definitions/ordersgrpcOrder"
+        },
+        "auditLog": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ordersgrpcOrderAuditLog"
+          }
+        }
+      }
+    },
+    "ordersgrpcHealthCheckResponse": {
+      "type": "object"
+    },
+    "ordersgrpcOrder": {
+      "type": "object",
+      "properties": {
+        "orderNumber": {
+          "type": "string"
+        },
+        "deliveryLocation": {
+          "$ref": "#/definitions/typesPoint"
+        },
+        "price": {
+          "$ref": "#/definitions/typesAmount"
+        },
+        "status": {
+          "$ref": "#/definitions/ordersgrpcOrderStatus"
+        },
+        "rating": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "review": {
+          "type": "string"
+        },
+        "product": {
+          "type": "string"
+        },
+        "createdBy": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "ordersgrpcOrderAuditLog": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "actor": {
+          "type": "string"
+        },
+        "action": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "before": {
+          "$ref": "#/definitions/ordersgrpcOrder"
+        },
+        "after": {
+          "$ref": "#/definitions/ordersgrpcOrder"
+        }
+      }
+    },
+    "ordersgrpcOrderStatus": {
+      "type": "string",
+      "enum": [
+        "OrderStatus_UNSPECIFIED",
+        "OrderStatus_CREATED",
+        "OrderStatus_PAID",
+        "OrderStatus_IN_TRANSIT",
+        "OrderStatus_DELIVERED"
+      ],
+      "default": "OrderStatus_UNSPECIFIED"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "typesAmount": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string",
+          "format": "int64"
+        },
+        "currencyIsoCode": {
+          "type": "string"
+        }
+      }
+    },
+    "typesPoint": {
+      "type": "object",
+      "properties": {
+        "lon": {
+          "type": "number",
+          "format": "double"
+        },
+        "lat": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    }
+  }
+}

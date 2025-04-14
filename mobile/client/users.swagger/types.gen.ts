@@ -10,13 +10,18 @@ export type rpcStatus = {
     details?: Array<protobufAny>;
 };
 
+export type typesPoint = {
+    lon?: number;
+    lat?: number;
+};
+
 export type UsersCompleteRegistrationBody = {
     firstName?: string;
     lastName?: string;
     email?: string;
     address?: string;
     profileImage?: string;
-    locationCoordinates?: usersgrpcPoint;
+    locationCoordinates?: typesPoint;
 };
 
 export type UsersCreateSubscriptionBody = {
@@ -123,11 +128,6 @@ export type usersgrpcPaymentMethod = {
     methodId?: string;
 };
 
-export type usersgrpcPoint = {
-    lon?: number;
-    lat?: number;
-};
-
 export type usersgrpcRefreshAccessTokenRequest = {
     refreshToken?: string;
 };
@@ -216,7 +216,7 @@ export type usersgrpcUser = {
     firstName?: string;
     lastName?: string;
     residenceCountryIsoCode?: string;
-    locationCoordinates?: usersgrpcPoint;
+    locationCoordinates?: typesPoint;
     profileImage?: string;
     address?: string;
     createdAt?: string;
