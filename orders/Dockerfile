@@ -14,7 +14,7 @@ RUN apk add --no-cache curl
 
 
 # Copy the source code for orders service
-COPY products ./orders
+COPY orders ./orders
 COPY grpc ./grpc
 # COPY sms ./sms
 # COPY mutations ./mutations
