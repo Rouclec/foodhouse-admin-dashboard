@@ -20,7 +20,7 @@ Parameters:
   ProductsImageTag:
     Type: String
     Description: This is the docker image and tag (image:tag) that should be deployed for the products service.
-  OrderssImageTag:
+  OrdersImageTag:
     Type: String
     Description: This is the docker image and tag (image:tag) that should be deployed for the orders service.
   JsonproxyImageTag:
