@@ -25,6 +25,8 @@ const (
 	Orders_DispatchOrder_FullMethodName       = "/ordersgrpc.Orders/DispatchOrder"
 	Orders_ConfirmDelivery_FullMethodName     = "/ordersgrpc.Orders/ConfirmDelivery"
 	Orders_HealthCheck_FullMethodName         = "/ordersgrpc.Orders/HealthCheck"
+	Orders_ListUserOrders_FullMethodName      = "/ordersgrpc.Orders/ListUserOrders"
+	Orders_ListFarmerOrders_FullMethodName    = "/ordersgrpc.Orders/ListFarmerOrders"
 )
 
 // OrdersClient is the client API for Orders service.
@@ -37,6 +39,8 @@ type OrdersClient interface {
 	DispatchOrder(ctx context.Context, in *DispatchOrderRequest, opts ...grpc.CallOption) (*DispatchOrderResponse, error)
 	ConfirmDelivery(ctx context.Context, in *ConfirmDeliveryRequest, opts ...grpc.CallOption) (*ConfirmDeliveryResponse, error)
 	HealthCheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
+	ListUserOrders(ctx context.Context, in *ListUserOrdersRequest, opts ...grpc.CallOption) (*ListUserOrdersResponse, error)
+	ListFarmerOrders(ctx context.Context, in *ListFarmerOrdersRequest, opts ...grpc.CallOption) (*ListFarmerOrdersResponse, error)
 }
 
 type ordersClient struct {
@@ -107,6 +111,26 @@ func (c *ordersClient) HealthCheck(ctx context.Context, in *HealthCheckRequest, 
 	return out, nil
 }
 
+func (c *ordersClient) ListUserOrders(ctx context.Context, in *ListUserOrdersRequest, opts ...grpc.CallOption) (*ListUserOrdersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListUserOrdersResponse)
+	err := c.cc.Invoke(ctx, Orders_ListUserOrders_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ordersClient) ListFarmerOrders(ctx context.Context, in *ListFarmerOrdersRequest, opts ...grpc.CallOption) (*ListFarmerOrdersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListFarmerOrdersResponse)
+	err := c.cc.Invoke(ctx, Orders_ListFarmerOrders_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrdersServer is the server API for Orders service.
 // All implementations must embed UnimplementedOrdersServer
 // for forward compatibility.
@@ -117,6 +141,8 @@ type OrdersServer interface {
 	DispatchOrder(context.Context, *DispatchOrderRequest) (*DispatchOrderResponse, error)
 	ConfirmDelivery(context.Context, *ConfirmDeliveryRequest) (*ConfirmDeliveryResponse, error)
 	HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
+	ListUserOrders(context.Context, *ListUserOrdersRequest) (*ListUserOrdersResponse, error)
+	ListFarmerOrders(context.Context, *ListFarmerOrdersRequest) (*ListFarmerOrdersResponse, error)
 	mustEmbedUnimplementedOrdersServer()
 }
 
@@ -144,6 +170,12 @@ func (UnimplementedOrdersServer) ConfirmDelivery(context.Context, *ConfirmDelive
 }
 func (UnimplementedOrdersServer) HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HealthCheck not implemented")
+}
+func (UnimplementedOrdersServer) ListUserOrders(context.Context, *ListUserOrdersRequest) (*ListUserOrdersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListUserOrders not implemented")
+}
+func (UnimplementedOrdersServer) ListFarmerOrders(context.Context, *ListFarmerOrdersRequest) (*ListFarmerOrdersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListFarmerOrders not implemented")
 }
 func (UnimplementedOrdersServer) mustEmbedUnimplementedOrdersServer() {}
 func (UnimplementedOrdersServer) testEmbeddedByValue()                {}
@@ -274,6 +306,42 @@ func _Orders_HealthCheck_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Orders_ListUserOrders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListUserOrdersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).ListUserOrders(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_ListUserOrders_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).ListUserOrders(ctx, req.(*ListUserOrdersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orders_ListFarmerOrders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListFarmerOrdersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).ListFarmerOrders(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_ListFarmerOrders_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).ListFarmerOrders(ctx, req.(*ListFarmerOrdersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Orders_ServiceDesc is the grpc.ServiceDesc for Orders service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -304,6 +372,14 @@ var Orders_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "HealthCheck",
 			Handler:    _Orders_HealthCheck_Handler,
+		},
+		{
+			MethodName: "ListUserOrders",
+			Handler:    _Orders_ListUserOrders_Handler,
+		},
+		{
+			MethodName: "ListFarmerOrders",
+			Handler:    _Orders_ListFarmerOrders_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -56,6 +56,21 @@ func (mr *MockQuerierMockRecorder) CreateCategory(ctx, arg any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCategory", reflect.TypeOf((*MockQuerier)(nil).CreateCategory), ctx, arg)
 }
 
+// CreatePriceType mocks base method.
+func (m *MockQuerier) CreatePriceType(ctx context.Context, arg sqlc.CreatePriceTypeParams) (sqlc.PriceType, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreatePriceType", ctx, arg)
+	ret0, _ := ret[0].(sqlc.PriceType)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreatePriceType indicates an expected call of CreatePriceType.
+func (mr *MockQuerierMockRecorder) CreatePriceType(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePriceType", reflect.TypeOf((*MockQuerier)(nil).CreatePriceType), ctx, arg)
+}
+
 // CreateProduct mocks base method.
 func (m *MockQuerier) CreateProduct(ctx context.Context, arg sqlc.CreateProductParams) (sqlc.Product, error) {
 	m.ctrl.T.Helper()
@@ -71,6 +86,35 @@ func (mr *MockQuerierMockRecorder) CreateProduct(ctx, arg any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateProduct", reflect.TypeOf((*MockQuerier)(nil).CreateProduct), ctx, arg)
 }
 
+// CreateProductName mocks base method.
+func (m *MockQuerier) CreateProductName(ctx context.Context, arg sqlc.CreateProductNameParams) (sqlc.ProductName, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateProductName", ctx, arg)
+	ret0, _ := ret[0].(sqlc.ProductName)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateProductName indicates an expected call of CreateProductName.
+func (mr *MockQuerierMockRecorder) CreateProductName(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateProductName", reflect.TypeOf((*MockQuerier)(nil).CreateProductName), ctx, arg)
+}
+
+// DeletePriceType mocks base method.
+func (m *MockQuerier) DeletePriceType(ctx context.Context, id string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeletePriceType", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeletePriceType indicates an expected call of DeletePriceType.
+func (mr *MockQuerierMockRecorder) DeletePriceType(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeletePriceType", reflect.TypeOf((*MockQuerier)(nil).DeletePriceType), ctx, id)
+}
+
 // DeleteProduct mocks base method.
 func (m *MockQuerier) DeleteProduct(ctx context.Context, id string) error {
 	m.ctrl.T.Helper()
@@ -83,6 +127,20 @@ func (m *MockQuerier) DeleteProduct(ctx context.Context, id string) error {
 func (mr *MockQuerierMockRecorder) DeleteProduct(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProduct", reflect.TypeOf((*MockQuerier)(nil).DeleteProduct), ctx, id)
+}
+
+// DeleteProductName mocks base method.
+func (m *MockQuerier) DeleteProductName(ctx context.Context, name string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteProductName", ctx, name)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteProductName indicates an expected call of DeleteProductName.
+func (mr *MockQuerierMockRecorder) DeleteProductName(ctx, name any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProductName", reflect.TypeOf((*MockQuerier)(nil).DeleteProductName), ctx, name)
 }
 
 // GetCategory mocks base method.
@@ -158,6 +216,36 @@ func (m *MockQuerier) ListCategories(ctx context.Context) ([]sqlc.Category, erro
 func (mr *MockQuerierMockRecorder) ListCategories(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListCategories", reflect.TypeOf((*MockQuerier)(nil).ListCategories), ctx)
+}
+
+// ListPriceTypesByCategory mocks base method.
+func (m *MockQuerier) ListPriceTypesByCategory(ctx context.Context, categoryID string) ([]sqlc.PriceType, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListPriceTypesByCategory", ctx, categoryID)
+	ret0, _ := ret[0].([]sqlc.PriceType)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListPriceTypesByCategory indicates an expected call of ListPriceTypesByCategory.
+func (mr *MockQuerierMockRecorder) ListPriceTypesByCategory(ctx, categoryID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListPriceTypesByCategory", reflect.TypeOf((*MockQuerier)(nil).ListPriceTypesByCategory), ctx, categoryID)
+}
+
+// ListProductNamesByCategory mocks base method.
+func (m *MockQuerier) ListProductNamesByCategory(ctx context.Context, categoryID string) ([]sqlc.ProductName, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListProductNamesByCategory", ctx, categoryID)
+	ret0, _ := ret[0].([]sqlc.ProductName)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListProductNamesByCategory indicates an expected call of ListProductNamesByCategory.
+func (mr *MockQuerierMockRecorder) ListProductNamesByCategory(ctx, categoryID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListProductNamesByCategory", reflect.TypeOf((*MockQuerier)(nil).ListProductNamesByCategory), ctx, categoryID)
 }
 
 // ListProducts mocks base method.

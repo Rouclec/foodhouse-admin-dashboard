@@ -54,6 +54,154 @@
         ]
       }
     },
+    "/v1/admin/{userId}/products/create-price-type": {
+      "post": {
+        "operationId": "Products_CreatePriceType",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/productsgrpcCreatePriceTypeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ProductsCreatePriceTypeBody"
+            }
+          }
+        ],
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/v1/admin/{userId}/products/create-product-name": {
+      "post": {
+        "operationId": "Products_CreateProductName",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/productsgrpcCreateProductNameResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ProductsCreateProductNameBody"
+            }
+          }
+        ],
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/v1/admin/{userId}/products/{name}/delete-product-name": {
+      "delete": {
+        "operationId": "Products_DeleteProductName",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/productsgrpcDeleteProductNameResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/v1/admin/{userId}/products/{priceTypeId}/delete-price-type": {
+      "delete": {
+        "operationId": "Products_DeletePriceType",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/productsgrpcDeletePriceTypeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "priceTypeId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Products"
+        ]
+      }
+    },
     "/v1/public/products/get-categories": {
       "get": {
         "operationId": "Products_ListCategories",
@@ -166,6 +314,66 @@
             "required": false,
             "type": "integer",
             "format": "int32"
+          }
+        ],
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/v1/public/products/{categoryId}/list-price-types-by-category": {
+      "get": {
+        "operationId": "Products_ListPriceTypesByCategory",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/productsgrpcListPriceTypesByCategoryResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "categoryId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/v1/public/products/{categoryId}/list-product-names-by-category": {
+      "get": {
+        "operationId": "Products_ListProductNamesByCategory",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/productsgrpcListProductNamesByCategoryResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "categoryId",
+            "in": "path",
+            "required": true,
+            "type": "string"
           }
         ],
         "tags": [
@@ -448,6 +656,17 @@
         }
       }
     },
+    "ProductsCreatePriceTypeBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "categoryId": {
+          "type": "string"
+        }
+      }
+    },
     "ProductsCreateProductBody": {
       "type": "object",
       "properties": {
@@ -458,7 +677,7 @@
           "type": "string"
         },
         "unitType": {
-          "$ref": "#/definitions/productsgrpcUnitType"
+          "type": "string"
         },
         "amount": {
           "$ref": "#/definitions/typesAmount"
@@ -474,6 +693,17 @@
         }
       }
     },
+    "ProductsCreateProductNameBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "categoryId": {
+          "type": "string"
+        }
+      }
+    },
     "ProductsUpdateProductBody": {
       "type": "object",
       "properties": {
@@ -484,7 +714,7 @@
           "type": "string"
         },
         "unitType": {
-          "$ref": "#/definitions/productsgrpcUnitType"
+          "type": "string"
         },
         "amount": {
           "$ref": "#/definitions/typesAmount"
@@ -525,6 +755,22 @@
         }
       }
     },
+    "productsgrpcCreatePriceTypeResponse": {
+      "type": "object",
+      "properties": {
+        "priceType": {
+          "$ref": "#/definitions/productsgrpcPriceType"
+        }
+      }
+    },
+    "productsgrpcCreateProductNameResponse": {
+      "type": "object",
+      "properties": {
+        "productName": {
+          "$ref": "#/definitions/productsgrpcProductName"
+        }
+      }
+    },
     "productsgrpcCreateProductResponse": {
       "type": "object",
       "properties": {
@@ -532,6 +778,12 @@
           "$ref": "#/definitions/productsgrpcProduct"
         }
       }
+    },
+    "productsgrpcDeletePriceTypeResponse": {
+      "type": "object"
+    },
+    "productsgrpcDeleteProductNameResponse": {
+      "type": "object"
     },
     "productsgrpcDeleteProductResponse": {
       "type": "object",
@@ -587,6 +839,30 @@
         }
       }
     },
+    "productsgrpcListPriceTypesByCategoryResponse": {
+      "type": "object",
+      "properties": {
+        "priceTypes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/productsgrpcPriceType"
+          }
+        }
+      }
+    },
+    "productsgrpcListProductNamesByCategoryResponse": {
+      "type": "object",
+      "properties": {
+        "productNames": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/productsgrpcProductName"
+          }
+        }
+      }
+    },
     "productsgrpcListProductsResponse": {
       "type": "object",
       "properties": {
@@ -598,6 +874,23 @@
           }
         },
         "nextKey": {
+          "type": "string"
+        }
+      }
+    },
+    "productsgrpcPriceType": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "categoryId": {
           "type": "string"
         }
       }
@@ -615,7 +908,7 @@
           "type": "string"
         },
         "unitType": {
-          "$ref": "#/definitions/productsgrpcUnitType"
+          "type": "string"
         },
         "amount": {
           "$ref": "#/definitions/typesAmount"
@@ -639,14 +932,19 @@
         }
       }
     },
-    "productsgrpcUnitType": {
-      "type": "string",
-      "enum": [
-        "UnitType_UNSPECIFIED",
-        "UnitType_KILOGRAM",
-        "UnitType_LITRES"
-      ],
-      "default": "UnitType_UNSPECIFIED"
+    "productsgrpcProductName": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "categoryId": {
+          "type": "string"
+        }
+      }
     },
     "productsgrpcUpdateProductResponse": {
       "type": "object",

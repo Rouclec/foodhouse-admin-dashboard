@@ -91,16 +91,10 @@ func (i *Impl) CreateProduct(ctx context.Context, req *productsgrpc.CreateProduc
 		return nil, status.Errorf(codes.InvalidArgument, "error getting category %v", err)
 	}
 
-	unitType, ok := productsgrpc.UnitType_value[req.GetUnitType().String()]
-
-	if !ok {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid unit type %v", req.GetUnitType().String())
-	}
-
 	product, err := i.repo.Do().CreateProduct(ctx, sqlc.CreateProductParams{
 		CategoryID:      req.GetCategoryId(),
 		Name:            req.GetName(),
-		UnitType:        req.GetUnitType().String(),
+		UnitType:        req.GetUnitType(),
 		Value:           req.GetAmount().GetValue(),
 		CurrencyIsoCode: req.GetAmount().GetCurrencyIsoCode(),
 		Description:     req.GetDescription(),
@@ -121,7 +115,7 @@ func (i *Impl) CreateProduct(ctx context.Context, req *productsgrpc.CreateProduc
 				Slug: category.Slug,
 			},
 			Name:     product.Name,
-			UnitType: productsgrpc.UnitType(unitType),
+			UnitType: product.UnitType,
 			Amount: &types.Amount{
 				Value:           product.Value,
 				CurrencyIsoCode: product.CurrencyIsoCode,
@@ -283,16 +277,10 @@ func (i *Impl) UpdateProduct(ctx context.Context, req *productsgrpc.UpdateProduc
 
 	i.logger.Debug().Interface("product found: ", product).Msg("Product for update")
 
-	_, ok := productsgrpc.UnitType_value[req.GetUnitType().String()]
-
-	if !ok {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid unit type %v", req.GetUnitType().String())
-	}
-
 	arg := sqlc.UpdateProductParams{
 		CategoryID:      req.GetCategoryId(),
 		Name:            req.GetName(),
-		UnitType:        req.GetUnitType().String(),
+		UnitType:        req.GetUnitType(),
 		Value:           req.Amount.GetValue(),
 		CurrencyIsoCode: req.GetAmount().GetCurrencyIsoCode(),
 		Description:     req.GetDescription(),
@@ -380,4 +368,117 @@ func (i *Impl) ListCategories(ctx context.Context, req *productsgrpc.ListCategor
 	return &productsgrpc.ListCategoriesResponse{
 		Categories: protoCategories,
 	}, nil
+}
+
+// CreatePriceType implements productsgrpc.ProductsServer.
+func (i *Impl) CreatePriceType(ctx context.Context, req *productsgrpc.CreatePriceTypeRequest) (*productsgrpc.CreatePriceTypeResponse, error) {
+	_, err := i.repo.Do().GetCategory(ctx, req.GetCategoryId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error fetching category %v ", err)
+	}
+
+	args := sqlc.CreatePriceTypeParams{
+		Name:       req.GetName(),
+		Slug:       slug.Make(req.GetName()),
+		CategoryID: req.GetCategoryId(),
+	}
+
+	priceType, err := i.repo.Do().CreatePriceType(ctx, args)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error creating price type %v", err)
+	}
+	return &productsgrpc.CreatePriceTypeResponse{
+		PriceType: &productsgrpc.PriceType{
+			Id:         priceType.ID,
+			Name:       priceType.Name,
+			Slug:       priceType.Slug,
+			CategoryId: priceType.CategoryID,
+		},
+	}, nil
+}
+
+// CreateProductName implements productsgrpc.ProductsServer.
+func (i *Impl) CreateProductName(ctx context.Context, req *productsgrpc.CreateProductNameRequest) (*productsgrpc.CreateProductNameResponse, error) {
+	_, err := i.repo.Do().GetCategory(ctx, req.GetCategoryId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error fetching category %v ", err)
+	}
+
+	args := sqlc.CreateProductNameParams{
+		Name:       req.GetName(),
+		Slug:       slug.Make(req.GetName()),
+		CategoryID: req.GetCategoryId(),
+	}
+
+	productName, err := i.repo.Do().CreateProductName(ctx, args)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error creating product name %v", err)
+	}
+	return &productsgrpc.CreateProductNameResponse{
+		ProductName: &productsgrpc.ProductName{
+			Name:       productName.Name,
+			Slug:       productName.Slug,
+			CategoryId: productName.CategoryID,
+		},
+	}, nil
+}
+
+// DeletePriceType implements productsgrpc.ProductsServer.
+func (i *Impl) DeletePriceType(ctx context.Context, req *productsgrpc.DeletePriceTypeRequest) (*productsgrpc.DeletePriceTypeResponse, error) {
+	err := i.repo.Do().DeletePriceType(ctx, req.GetPriceTypeId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error deleting price type %v", err)
+	}
+
+	return &productsgrpc.DeletePriceTypeResponse{}, nil
+}
+
+// DeleteProductName implements productsgrpc.ProductsServer.
+func (i *Impl) DeleteProductName(ctx context.Context, req *productsgrpc.DeleteProductNameRequest) (*productsgrpc.DeleteProductNameResponse, error) {
+	err := i.repo.Do().DeleteProductName(ctx, req.GetName())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error deleting product name %v", err)
+	}
+
+	return &productsgrpc.DeleteProductNameResponse{}, nil
+}
+
+// ListPriceTypesByCategory implements productsgrpc.ProductsServer.
+func (i *Impl) ListPriceTypesByCategory(ctx context.Context, req *productsgrpc.ListPriceTypesByCategoryRequest) (*productsgrpc.ListPriceTypesByCategoryResponse, error) {
+	sqlcPriceTypes, err := i.repo.Do().ListPriceTypesByCategory(ctx, req.GetCategoryId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting price types %v", err)
+	}
+
+	protoPriceTypes, err := converters.SqlcToProtoPriceTypes(sqlcPriceTypes)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error converting sqlc to proto price types, %v", err)
+	}
+
+	return &productsgrpc.ListPriceTypesByCategoryResponse{PriceTypes: protoPriceTypes}, nil
+}
+
+// ListProductNamesByCategory implements productsgrpc.ProductsServer.
+func (i *Impl) ListProductNamesByCategory(ctx context.Context, req *productsgrpc.ListProductNamesByCategoryRequest) (*productsgrpc.ListProductNamesByCategoryResponse, error) {
+	sqlcProductNames, err := i.repo.Do().ListProductNamesByCategory(ctx, req.GetCategoryId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting product names %v", err)
+	}
+
+	protoProductNames, err := converters.SqlcToProtoProductNames(sqlcProductNames)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error converting sqlc to proto product names, %v", err)
+	}
+
+	return &productsgrpc.ListProductNamesByCategoryResponse{ProductNames: protoProductNames}, nil
 }

@@ -9,17 +9,20 @@ import (
 )
 
 type Order struct {
-	OrderNumber      int64              `json:"order_number"`
-	DeliveryLocation pgtype.Point       `json:"delivery_location"`
-	PriceValue       *int64             `json:"price_value"`
-	PriceCurrency    *string            `json:"price_currency"`
-	Status           string             `json:"status"`
-	Rating           pgtype.Numeric     `json:"rating"`
-	Review           string             `json:"review"`
-	Product          *string            `json:"product"`
-	CreatedBy        *string            `json:"created_by"`
-	CreatedAt        pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
+	OrderNumber       int64              `json:"order_number"`
+	DeliveryLocation  pgtype.Point       `json:"delivery_location"`
+	PriceValue        *int64             `json:"price_value"`
+	PriceCurrency     *string            `json:"price_currency"`
+	Status            string             `json:"status"`
+	Rating            pgtype.Numeric     `json:"rating"`
+	Review            string             `json:"review"`
+	Product           *string            `json:"product"`
+	CreatedBy         *string            `json:"created_by"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
+	SecretKey         *string            `json:"secret_key"`
+	ProductOwner      *string            `json:"product_owner"`
+	PayoutPhoneNumber *string            `json:"payout_phone_number"`
 }
 
 type OrdersAudit struct {
@@ -31,4 +34,14 @@ type OrdersAudit struct {
 	Reason         string             `json:"reason"`
 	Before         []byte             `json:"before"`
 	After          []byte             `json:"after"`
+}
+
+type Payment struct {
+	ID             string  `json:"id"`
+	OrderNumber    int64   `json:"order_number"`
+	PriceValue     *int64  `json:"price_value"`
+	PriceCurrency  *string `json:"price_currency"`
+	Status         string  `json:"status"`
+	ExternalRef    string  `json:"external_ref"`
+	OrderSecretKey *string `json:"order_secret_key"`
 }

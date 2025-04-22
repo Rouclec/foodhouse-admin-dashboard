@@ -15,6 +15,7 @@ import (
 	"github.com/foodhouse/foodhouseapp/grpc/go/ordersgrpc"
 	"github.com/foodhouse/foodhouseapp/orders/db/repo"
 	"github.com/foodhouse/foodhouseapp/orders/orders"
+	"github.com/foodhouse/foodhouseapp/payment"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
@@ -36,6 +37,8 @@ type Config struct {
 	// EnableDevMethods is a flag that enables development methods in the gRPC server.
 	// These methods can leak sensitive data and should not be enabled in production.
 	EnableDevMethods bool `conf:"env:ENABLE_DEV_METHODS,default:false"`
+
+	CampayConfig CampayConfig
 }
 
 type DBConfig struct {
@@ -45,6 +48,13 @@ type DBConfig struct {
 	DBPort      uint16 `conf:"env:DB_PORT,required"`
 	DBName      string `conf:"env:DB_Name,required"`
 	TLSDisabled bool   `conf:"env:DB_TLS_DISABLED"`
+}
+
+type CampayConfig struct {
+	CampayUsername string `conf:"env:CAMPAY_USERNAME,required"`
+	CampayPassword string `conf:"env:CAMPAY_PASSWORD,required"`
+	CampayBaseUrl  string `conf:"env:CAMPAY_BASE_URL,required"`
+	CampayWebHook  string `conf:"env:CAMPAY_WEBHOOK,required"`
 }
 
 func main() {
@@ -98,7 +108,13 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 	grpcServer := grpc.NewServer(svrOpts...)
 	reflection.Register(grpcServer)
 
-	ordersgrpc.RegisterOrdersServer(grpcServer, orders.NewOrders(ordersRepo, logger, config.EnableDevMethods))
+	paymentService, err := payment.NewCampayProvider(config.CampayConfig.CampayUsername, config.CampayConfig.CampayPassword, config.CampayConfig.CampayBaseUrl, config.CampayConfig.CampayWebHook)
+
+	if err != nil {
+		return fmt.Errorf("error initializing campay provider: %w", err)
+	}
+
+	ordersgrpc.RegisterOrdersServer(grpcServer, orders.NewOrders(ordersRepo, logger, config.EnableDevMethods, paymentService))
 
 	logger.Info().Msg("Successfully registered ordersgrpc...")
 

@@ -36,6 +36,30 @@ func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) 
 	return i, err
 }
 
+const createPriceType = `-- name: CreatePriceType :one
+INSERT INTO price_types (name, slug, category_id)
+VALUES ($1, $2, $3)
+RETURNING id, name, slug, category_id
+`
+
+type CreatePriceTypeParams struct {
+	Name       string `json:"name"`
+	Slug       string `json:"slug"`
+	CategoryID string `json:"category_id"`
+}
+
+func (q *Queries) CreatePriceType(ctx context.Context, arg CreatePriceTypeParams) (PriceType, error) {
+	row := q.db.QueryRow(ctx, createPriceType, arg.Name, arg.Slug, arg.CategoryID)
+	var i PriceType
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Slug,
+		&i.CategoryID,
+	)
+	return i, err
+}
+
 const createProduct = `-- name: CreateProduct :one
 INSERT INTO product (
   category_id, name, unit_type, value, currency_iso_code,
@@ -89,6 +113,34 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 	return i, err
 }
 
+const createProductName = `-- name: CreateProductName :one
+INSERT INTO product_names (name, slug, category_id)
+VALUES ($1, $2, $3)
+RETURNING name, slug, category_id
+`
+
+type CreateProductNameParams struct {
+	Name       string `json:"name"`
+	Slug       string `json:"slug"`
+	CategoryID string `json:"category_id"`
+}
+
+func (q *Queries) CreateProductName(ctx context.Context, arg CreateProductNameParams) (ProductName, error) {
+	row := q.db.QueryRow(ctx, createProductName, arg.Name, arg.Slug, arg.CategoryID)
+	var i ProductName
+	err := row.Scan(&i.Name, &i.Slug, &i.CategoryID)
+	return i, err
+}
+
+const deletePriceType = `-- name: DeletePriceType :exec
+DELETE FROM price_types WHERE id = $1
+`
+
+func (q *Queries) DeletePriceType(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, deletePriceType, id)
+	return err
+}
+
 const deleteProduct = `-- name: DeleteProduct :exec
 DELETE FROM product
 WHERE id = $1
@@ -96,6 +148,15 @@ WHERE id = $1
 
 func (q *Queries) DeleteProduct(ctx context.Context, id string) error {
 	_, err := q.db.Exec(ctx, deleteProduct, id)
+	return err
+}
+
+const deleteProductName = `-- name: DeleteProductName :exec
+DELETE FROM product_names WHERE name = $1
+`
+
+func (q *Queries) DeleteProductName(ctx context.Context, name string) error {
+	_, err := q.db.Exec(ctx, deleteProductName, name)
 	return err
 }
 
@@ -247,6 +308,61 @@ func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
 			&i.Slug,
 			&i.CreatedBy,
 		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listPriceTypesByCategory = `-- name: ListPriceTypesByCategory :many
+SELECT id, name, slug, category_id FROM price_types WHERE category_id = $1
+ORDER BY slug ASC
+`
+
+func (q *Queries) ListPriceTypesByCategory(ctx context.Context, categoryID string) ([]PriceType, error) {
+	rows, err := q.db.Query(ctx, listPriceTypesByCategory, categoryID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []PriceType{}
+	for rows.Next() {
+		var i PriceType
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Slug,
+			&i.CategoryID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listProductNamesByCategory = `-- name: ListProductNamesByCategory :many
+SELECT name, slug, category_id FROM product_names WHERE category_id = $1
+ORDER BY slug ASC
+`
+
+func (q *Queries) ListProductNamesByCategory(ctx context.Context, categoryID string) ([]ProductName, error) {
+	rows, err := q.db.Query(ctx, listProductNamesByCategory, categoryID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ProductName{}
+	for rows.Next() {
+		var i ProductName
+		if err := rows.Scan(&i.Name, &i.Slug, &i.CategoryID); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

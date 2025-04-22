@@ -1,8 +1,6 @@
 package converters
 
 import (
-	"fmt"
-
 	"github.com/foodhouse/foodhouseapp/grpc/go/productsgrpc"
 	"github.com/foodhouse/foodhouseapp/grpc/go/types"
 	"github.com/foodhouse/foodhouseapp/products/db/sqlc"
@@ -25,11 +23,6 @@ func SqlcToProtoProducts(sqlcProducts []sqlc.Product) ([]*productsgrpc.Product, 
 }
 
 func SqlcToProtoProduct(sqlcProduct sqlc.Product, sqlcCategory *sqlc.Category) (*productsgrpc.Product, error) {
-	unitType, ok := productsgrpc.UnitType_value[sqlcProduct.UnitType]
-
-	if !ok {
-		return nil, fmt.Errorf("invalid unit type %v", sqlcProduct.UnitType)
-	}
 
 	// Build a minimal category with just the ID if category is nil
 	category := &productsgrpc.Category{Id: sqlcProduct.CategoryID}
@@ -42,7 +35,7 @@ func SqlcToProtoProduct(sqlcProduct sqlc.Product, sqlcCategory *sqlc.Category) (
 		Id:       sqlcProduct.ID,
 		Category: category, // Category will be nil if sqlcCategory is nil
 		Name:     sqlcProduct.Name,
-		UnitType: productsgrpc.UnitType(unitType),
+		UnitType: sqlcProduct.UnitType,
 		Amount: &types.Amount{
 			Value:           sqlcProduct.Value,
 			CurrencyIsoCode: sqlcProduct.CurrencyIsoCode,
@@ -69,4 +62,35 @@ func SqlcToProtoCategories(sqlcCategories []sqlc.Category) ([]*productsgrpc.Cate
 	}
 
 	return protoCategories, nil
+}
+
+func SqlcToProtoPriceTypes(sqlcPriceTypes []sqlc.PriceType) ([]*productsgrpc.PriceType, error) {
+	protoPriceTypes := make([]*productsgrpc.PriceType, 0, len(sqlcPriceTypes))
+
+	for _, pt := range sqlcPriceTypes {
+		protoPriceType := &productsgrpc.PriceType{
+			Id:         pt.ID,
+			Name:       pt.Name,
+			Slug:       pt.Slug,
+			CategoryId: pt.CategoryID,
+		}
+		protoPriceTypes = append(protoPriceTypes, protoPriceType)
+	}
+
+	return protoPriceTypes, nil
+}
+
+func SqlcToProtoProductNames(sqlcProductNames []sqlc.ProductName) ([]*productsgrpc.ProductName, error) {
+	protoProductNames := make([]*productsgrpc.ProductName, 0, len(sqlcProductNames))
+
+	for _, pn := range sqlcProductNames {
+		protoProductName := &productsgrpc.ProductName{
+			Name:       pn.Name,
+			Slug:       pn.Slug,
+			CategoryId: pn.CategoryID,
+		}
+		protoProductNames = append(protoProductNames, protoProductName)
+	}
+
+	return protoProductNames, nil
 }

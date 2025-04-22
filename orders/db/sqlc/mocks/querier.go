@@ -70,6 +70,21 @@ func (mr *MockQuerierMockRecorder) CreateOrderAuditLog(ctx, arg any) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrderAuditLog", reflect.TypeOf((*MockQuerier)(nil).CreateOrderAuditLog), ctx, arg)
 }
 
+// CreatePayment mocks base method.
+func (m *MockQuerier) CreatePayment(ctx context.Context, arg sqlc.CreatePaymentParams) (sqlc.Payment, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreatePayment", ctx, arg)
+	ret0, _ := ret[0].(sqlc.Payment)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreatePayment indicates an expected call of CreatePayment.
+func (mr *MockQuerierMockRecorder) CreatePayment(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePayment", reflect.TypeOf((*MockQuerier)(nil).CreatePayment), ctx, arg)
+}
+
 // GetOrderByOrderNumber mocks base method.
 func (m *MockQuerier) GetOrderByOrderNumber(ctx context.Context, orderNumber int64) (sqlc.Order, error) {
 	m.ctrl.T.Helper()
@@ -85,19 +100,79 @@ func (mr *MockQuerierMockRecorder) GetOrderByOrderNumber(ctx, orderNumber any) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderByOrderNumber", reflect.TypeOf((*MockQuerier)(nil).GetOrderByOrderNumber), ctx, orderNumber)
 }
 
-// GetUserOrders mocks base method.
-func (m *MockQuerier) GetUserOrders(ctx context.Context, arg sqlc.GetUserOrdersParams) ([]sqlc.Order, error) {
+// GetPaymentByExternalReference mocks base method.
+func (m *MockQuerier) GetPaymentByExternalReference(ctx context.Context, externalRef string) (sqlc.Payment, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserOrders", ctx, arg)
+	ret := m.ctrl.Call(m, "GetPaymentByExternalReference", ctx, externalRef)
+	ret0, _ := ret[0].(sqlc.Payment)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPaymentByExternalReference indicates an expected call of GetPaymentByExternalReference.
+func (mr *MockQuerierMockRecorder) GetPaymentByExternalReference(ctx, externalRef any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPaymentByExternalReference", reflect.TypeOf((*MockQuerier)(nil).GetPaymentByExternalReference), ctx, externalRef)
+}
+
+// GetUserOrderBySecretKey mocks base method.
+func (m *MockQuerier) GetUserOrderBySecretKey(ctx context.Context, arg sqlc.GetUserOrderBySecretKeyParams) (sqlc.Order, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserOrderBySecretKey", ctx, arg)
+	ret0, _ := ret[0].(sqlc.Order)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserOrderBySecretKey indicates an expected call of GetUserOrderBySecretKey.
+func (mr *MockQuerierMockRecorder) GetUserOrderBySecretKey(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserOrderBySecretKey", reflect.TypeOf((*MockQuerier)(nil).GetUserOrderBySecretKey), ctx, arg)
+}
+
+// ListFarmerOrders mocks base method.
+func (m *MockQuerier) ListFarmerOrders(ctx context.Context, arg sqlc.ListFarmerOrdersParams) ([]sqlc.Order, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListFarmerOrders", ctx, arg)
 	ret0, _ := ret[0].([]sqlc.Order)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetUserOrders indicates an expected call of GetUserOrders.
-func (mr *MockQuerierMockRecorder) GetUserOrders(ctx, arg any) *gomock.Call {
+// ListFarmerOrders indicates an expected call of ListFarmerOrders.
+func (mr *MockQuerierMockRecorder) ListFarmerOrders(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserOrders", reflect.TypeOf((*MockQuerier)(nil).GetUserOrders), ctx, arg)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListFarmerOrders", reflect.TypeOf((*MockQuerier)(nil).ListFarmerOrders), ctx, arg)
+}
+
+// ListOrderAuditLogs mocks base method.
+func (m *MockQuerier) ListOrderAuditLogs(ctx context.Context, orderNumber int64) ([]sqlc.OrdersAudit, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListOrderAuditLogs", ctx, orderNumber)
+	ret0, _ := ret[0].([]sqlc.OrdersAudit)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListOrderAuditLogs indicates an expected call of ListOrderAuditLogs.
+func (mr *MockQuerierMockRecorder) ListOrderAuditLogs(ctx, orderNumber any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListOrderAuditLogs", reflect.TypeOf((*MockQuerier)(nil).ListOrderAuditLogs), ctx, orderNumber)
+}
+
+// ListUserOrders mocks base method.
+func (m *MockQuerier) ListUserOrders(ctx context.Context, arg sqlc.ListUserOrdersParams) ([]sqlc.Order, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListUserOrders", ctx, arg)
+	ret0, _ := ret[0].([]sqlc.Order)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListUserOrders indicates an expected call of ListUserOrders.
+func (mr *MockQuerierMockRecorder) ListUserOrders(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListUserOrders", reflect.TypeOf((*MockQuerier)(nil).ListUserOrders), ctx, arg)
 }
 
 // ReviewOrder mocks base method.
@@ -126,4 +201,32 @@ func (m *MockQuerier) UpdateOrderStatus(ctx context.Context, arg sqlc.UpdateOrde
 func (mr *MockQuerierMockRecorder) UpdateOrderStatus(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOrderStatus", reflect.TypeOf((*MockQuerier)(nil).UpdateOrderStatus), ctx, arg)
+}
+
+// UpdatePaymentStatusByExternalReference mocks base method.
+func (m *MockQuerier) UpdatePaymentStatusByExternalReference(ctx context.Context, arg sqlc.UpdatePaymentStatusByExternalReferenceParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdatePaymentStatusByExternalReference", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdatePaymentStatusByExternalReference indicates an expected call of UpdatePaymentStatusByExternalReference.
+func (mr *MockQuerierMockRecorder) UpdatePaymentStatusByExternalReference(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePaymentStatusByExternalReference", reflect.TypeOf((*MockQuerier)(nil).UpdatePaymentStatusByExternalReference), ctx, arg)
+}
+
+// UpdatePaymentStatusBySecretKey mocks base method.
+func (m *MockQuerier) UpdatePaymentStatusBySecretKey(ctx context.Context, arg sqlc.UpdatePaymentStatusBySecretKeyParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdatePaymentStatusBySecretKey", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdatePaymentStatusBySecretKey indicates an expected call of UpdatePaymentStatusBySecretKey.
+func (mr *MockQuerierMockRecorder) UpdatePaymentStatusBySecretKey(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePaymentStatusBySecretKey", reflect.TypeOf((*MockQuerier)(nil).UpdatePaymentStatusBySecretKey), ctx, arg)
 }

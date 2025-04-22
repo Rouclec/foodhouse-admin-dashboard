@@ -83,3 +83,28 @@ SELECT
 FROM product p
 JOIN categories c ON p.category_id = c.id
 WHERE p.id = $1;
+
+-- name: CreateProductName :one
+INSERT INTO product_names (name, slug, category_id)
+VALUES ($1, $2, $3)
+RETURNING *;
+
+-- name: CreatePriceType :one
+INSERT INTO price_types (name, slug, category_id)
+VALUES ($1, $2, $3)
+RETURNING *; 
+
+
+-- name: DeleteProductName :exec
+DELETE FROM product_names WHERE name = $1;
+
+-- name: DeletePriceType :exec
+DELETE FROM price_types WHERE id = $1;
+
+-- name: ListProductNamesByCategory :many
+SELECT * FROM product_names WHERE category_id = $1
+ORDER BY slug ASC;
+
+-- name: ListPriceTypesByCategory :many
+SELECT * FROM price_types WHERE category_id = $1
+ORDER BY slug ASC;

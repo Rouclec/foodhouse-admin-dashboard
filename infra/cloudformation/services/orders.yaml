@@ -26,6 +26,9 @@ Parameters:
   DbAdminSecretArn:
     Type: String
 
+  CampaySecretArn:
+    Type: String
+
   CustomResourcesServiceToken:
     Type: String
     Description: The ARN of the lambda that deploys custom resoures (needed for created an application specific database)
@@ -115,6 +118,14 @@ Resources:
               ValueFrom: !Sub "${DbAdminSecretArn}:port::"
             - Name: DB_PASSWORD
               ValueFrom: !Sub "${AppDatabaseSecret}:password::"
+            - Name: CAMPAY_USERNAME
+              ValueFrom: !Sub "${CampaySecretArn}::username::"
+            - Name: CAMPAY_PASSWORD
+              ValueFrom: !Sub "${CampaySecretArn}::password::"
+            - Name: CAMPAY_BASE_URL
+              ValueFrom: !Sub "${CampaySecretArn}::base_url::"
+            - Name: CAMPAY_WEBHOOK
+              ValueFrom: !Sub "${CampaySecretArn}::webhook_url::"
 
   # We create a data in the RDS instance for the application.
   # We do this with a custom Cloudformation resource that will run a lambda function.

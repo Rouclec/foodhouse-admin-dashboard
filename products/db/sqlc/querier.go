@@ -10,13 +10,19 @@ import (
 
 type Querier interface {
 	CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error)
+	CreatePriceType(ctx context.Context, arg CreatePriceTypeParams) (PriceType, error)
 	CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error)
+	CreateProductName(ctx context.Context, arg CreateProductNameParams) (ProductName, error)
+	DeletePriceType(ctx context.Context, id string) error
 	DeleteProduct(ctx context.Context, id string) error
+	DeleteProductName(ctx context.Context, name string) error
 	GetCategory(ctx context.Context, id string) (Category, error)
 	GetProduct(ctx context.Context, id string) (Product, error)
 	GetProductForUpdate(ctx context.Context, id string) (Product, error)
 	GetProductWithCategory(ctx context.Context, id string) (GetProductWithCategoryRow, error)
 	ListCategories(ctx context.Context) ([]Category, error)
+	ListPriceTypesByCategory(ctx context.Context, categoryID string) ([]PriceType, error)
+	ListProductNamesByCategory(ctx context.Context, categoryID string) ([]ProductName, error)
 	ListProducts(ctx context.Context, arg ListProductsParams) ([]Product, error)
 	UpdateProduct(ctx context.Context, arg UpdateProductParams) error
 }

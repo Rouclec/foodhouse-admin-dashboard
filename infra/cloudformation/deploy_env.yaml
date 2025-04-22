@@ -319,6 +319,7 @@ Resources:
         LogGroupName: !Ref LogGroup
         ClusterArn: !GetAtt EcsStack.Outputs.ClusterArn
         DbAdminSecretArn: !GetAtt "RdsStack.Outputs.AdminSecretArn"
+        CampaySecretArn: !GetAtt "RdsStack.Outputs.CampaySecretArn"
         DomainName: !Ref DomainName
         SubnetIds:
           !Join [

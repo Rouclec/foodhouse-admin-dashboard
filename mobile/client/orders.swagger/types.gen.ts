@@ -4,6 +4,7 @@ export type OrdersConfirmDeliveryBody = unknown;
 
 export type OrdersCreateOrderBody = {
     order?: ordersgrpcOrder;
+    phoneNumber?: string;
 };
 
 export type OrdersDispatchOrderBody = unknown;
@@ -25,6 +26,16 @@ export type ordersgrpcGetOrderDetailsResponse = {
 
 export type ordersgrpcHealthCheckResponse = unknown;
 
+export type ordersgrpcListFarmerOrdersResponse = {
+    orders?: Array<ordersgrpcOrder>;
+    nextKey?: string;
+};
+
+export type ordersgrpcListUserOrdersResponse = {
+    orders?: Array<ordersgrpcOrder>;
+    nextKey?: string;
+};
+
 export type ordersgrpcOrder = {
     orderNumber?: string;
     deliveryLocation?: typesPoint;
@@ -36,6 +47,9 @@ export type ordersgrpcOrder = {
     createdBy?: string;
     createdAt?: string;
     updatedAt?: string;
+    secretKey?: string;
+    productOwner?: string;
+    payoutPhoneNumber?: string;
 };
 
 export type ordersgrpcOrderAuditLog = {
@@ -47,7 +61,7 @@ export type ordersgrpcOrderAuditLog = {
     after?: ordersgrpcOrder;
 };
 
-export type ordersgrpcOrderStatus = 'OrderStatus_UNSPECIFIED' | 'OrderStatus_CREATED' | 'OrderStatus_PAID' | 'OrderStatus_IN_TRANSIT' | 'OrderStatus_DELIVERED';
+export type ordersgrpcOrderStatus = 'OrderStatus_UNSPECIFIED' | 'OrderStatus_CREATED' | 'OrderStatus_PAYMENT_SUCCESSFUL' | 'OrderStatus_PAYMENT_FAILED' | 'OrderStatus_IN_TRANSIT' | 'OrderStatus_DELIVERED';
 
 export type protobufAny = {
     [key: string]: unknown;
@@ -69,9 +83,76 @@ export type typesPoint = {
     lat?: number;
 };
 
+export type OrdersConfirmOrderPaymentData = {
+    query?: {
+        /**
+         * "Transaction amount",
+         */
+        amount?: string;
+        /**
+         * "CamPay Reference",
+         */
+        code?: string;
+        /**
+         * "Transaction currency",
+         */
+        currency?: string;
+        /**
+         * "collect" or "withdraw". This shows the kind of
+         */
+        endpoint?: string;
+        /**
+         * The reference on the platform that initiated the transaction.
+         */
+        externalReference?: string;
+        /**
+         * "MTN or ORANGE",
+         */
+        operator?: string;
+        /**
+         * "Mobile Operator Reference"
+         */
+        operatorReference?: string;
+        /**
+         * The phone number that initiated the transaction
+         */
+        phoneNumber?: string;
+        /**
+         * "Reference of the transaction. A valid UUID4",
+         */
+        reference?: string;
+        /**
+         * "jwt token. You can validate this request that is coming from
+         */
+        signature?: string;
+        /**
+         * "SUCCESSFUL" or "FAILED",
+         */
+        status?: string;
+    };
+};
+
+export type OrdersConfirmOrderPaymentResponse = (ordersgrpcConfirmOrderPaymentResponse);
+
+export type OrdersConfirmOrderPaymentError = (rpcStatus);
+
 export type OrdersHealthCheckResponse = (ordersgrpcHealthCheckResponse);
 
 export type OrdersHealthCheckError = (rpcStatus);
+
+export type OrdersListFarmerOrdersData = {
+    path: {
+        farmerId: string;
+    };
+    query?: {
+        count?: number;
+        startKey?: string;
+    };
+};
+
+export type OrdersListFarmerOrdersResponse = (ordersgrpcListFarmerOrdersResponse);
+
+export type OrdersListFarmerOrdersError = (rpcStatus);
 
 export type OrdersGetOrderDetailsData = {
     path: {
@@ -95,17 +176,19 @@ export type OrdersCreateOrderResponse = (ordersgrpcCreateOrderResponse);
 
 export type OrdersCreateOrderError = (rpcStatus);
 
-export type OrdersConfirmDeliveryData = {
-    body: OrdersConfirmDeliveryBody;
+export type OrdersListUserOrdersData = {
     path: {
-        orderNumber: string;
         userId: string;
+    };
+    query?: {
+        count?: number;
+        startKey?: string;
     };
 };
 
-export type OrdersConfirmDeliveryResponse = (ordersgrpcConfirmDeliveryResponse);
+export type OrdersListUserOrdersResponse = (ordersgrpcListUserOrdersResponse);
 
-export type OrdersConfirmDeliveryError = (rpcStatus);
+export type OrdersListUserOrdersError = (rpcStatus);
 
 export type OrdersDispatchOrderData = {
     body: OrdersDispatchOrderBody;
@@ -118,3 +201,15 @@ export type OrdersDispatchOrderData = {
 export type OrdersDispatchOrderResponse = (ordersgrpcDispatchOrderResponse);
 
 export type OrdersDispatchOrderError = (rpcStatus);
+
+export type OrdersConfirmDeliveryData = {
+    body: OrdersConfirmDeliveryBody;
+    path: {
+        secretKey: string;
+        userId: string;
+    };
+};
+
+export type OrdersConfirmDeliveryResponse = (ordersgrpcConfirmDeliveryResponse);
+
+export type OrdersConfirmDeliveryError = (rpcStatus);

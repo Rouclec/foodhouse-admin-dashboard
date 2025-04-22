@@ -12,9 +12,18 @@ import "types/amount.proto";
 enum OrderStatus {
   OrderStatus_UNSPECIFIED = 0;
   OrderStatus_CREATED = 1;
-  OrderStatus_PAID = 2;
-  OrderStatus_IN_TRANSIT = 3;
-  OrderStatus_DELIVERED = 4;
+  OrderStatus_PAYMENT_SUCCESSFUL = 2;
+  OrderStatus_PAYMENT_FAILED = 3;
+  OrderStatus_IN_TRANSIT = 4;
+  OrderStatus_DELIVERED = 5;
+}
+
+enum PaymentStatus {
+  PaymentStatus_UNSPECIFIED = 0;
+  PaymentStatus_INITIATED = 1;
+  PaymentStatus_COMPLETED = 2;
+  PaymentStatus_FAILED = 3;
+  PaymentStatus_CANCELED = 4;
 }
 
 message Order {
@@ -28,6 +37,9 @@ message Order {
   string created_by = 8;
   google.protobuf.Timestamp created_at = 9;
   google.protobuf.Timestamp updated_at = 10;
+  string secret_key = 11;
+  string product_owner = 12;
+  string payout_phone_number = 13;
 }
 
 message OrderAuditLog {
@@ -42,6 +54,7 @@ message OrderAuditLog {
 message CreateOrderRequest {
   string user_id = 1;
   Order order = 2;
+  string phone_number = 3;
 }
 
 message CreateOrderResponse { Order order = 1; }
@@ -56,7 +69,34 @@ message GetOrderDetailsResponse {
   repeated OrderAuditLog audit_log = 2;
 }
 
-message ConfirmOrderPaymentRequest { int64 order_number = 1; }
+message ConfirmOrderPaymentRequest {
+  string status = 1; // "SUCCESSFUL" or "FAILED",
+
+  string reference = 2; // "Reference of the transaction. A valid UUID4",
+
+  string amount = 3; //"Transaction amount",
+
+  string currency = 4; //"Transaction currency",
+
+  string operator = 5; // "MTN or ORANGE",
+
+  string code = 6; // "CamPay Reference",
+
+  string operator_reference = 7; // "Mobile Operator Reference"
+
+  string signature =
+      8; // "jwt token. You can validate this request that is coming from
+         // CamPay by using your app webhook key to validate the jwt token"
+
+  string endpoint = 9; // "collect" or "withdraw". This shows the kind of
+                       // transaction that was performed. Deposits are
+                       // "collect" while Withdrawals are "withdraw".
+
+  string external_reference =
+      10; // The reference on the platform that initiated the transaction.
+
+  string phone_number = 11; // The phone number that initiated the transaction
+}
 message ConfirmOrderPaymentResponse {}
 
 message DispatchOrderRequest {
@@ -67,7 +107,7 @@ message DispatchOrderRequest {
 message DispatchOrderResponse {}
 
 message ConfirmDeliveryRequest {
-  int64 order_number = 1;
+  string secret_key = 1;
   string user_id = 2;
 }
 
@@ -75,6 +115,28 @@ message ConfirmDeliveryResponse {}
 
 message HealthCheckRequest {}
 message HealthCheckResponse {}
+
+message ListUserOrdersRequest {
+  string user_id = 1;
+  int32 count = 2;
+  string start_key = 3;
+}
+
+message ListUserOrdersResponse {
+  repeated Order orders = 1;
+  string next_key = 2;
+}
+
+message ListFarmerOrdersRequest {
+  string farmer_id = 1;
+  int32 count = 2;
+  string start_key = 3;
+}
+
+message ListFarmerOrdersResponse {
+  repeated Order orders = 1;
+  string next_key = 2;
+}
 
 service Orders {
 
@@ -93,7 +155,11 @@ service Orders {
   }
 
   rpc ConfirmOrderPayment(ConfirmOrderPaymentRequest)
-      returns (ConfirmOrderPaymentResponse) {}
+      returns (ConfirmOrderPaymentResponse) {
+    option (google.api.http) = {
+      get : "/v1/public/confirm-order-payment"
+    };
+  }
 
   rpc DispatchOrder(DispatchOrderRequest) returns (DispatchOrderResponse) {
     option (google.api.http) = {
@@ -105,7 +171,7 @@ service Orders {
   rpc ConfirmDelivery(ConfirmDeliveryRequest)
       returns (ConfirmDeliveryResponse) {
     option (google.api.http) = {
-      put : "/v1/{user_id}/orders/{order_number}/confirm-delivery"
+      put : "/v1/{user_id}/orders/{secret_key}/confirm-delivery"
       body : "*"
     };
   }
@@ -113,6 +179,19 @@ service Orders {
   rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {
     option (google.api.http) = {
       get : "/v1/public/orders/health-check"
+    };
+  }
+
+  rpc ListUserOrders(ListUserOrdersRequest) returns (ListUserOrdersResponse) {
+    option (google.api.http) = {
+      get : "/v1/{user_id}/orders/list-user-orders"
+    };
+  }
+
+  rpc ListFarmerOrders(ListFarmerOrdersRequest)
+      returns (ListFarmerOrdersResponse) {
+    option (google.api.http) = {
+      get : "/v1/{farmer_id}/orders/list-farmer-orders"
     };
   }
 }

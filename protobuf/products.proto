@@ -8,12 +8,6 @@ import "google/protobuf/timestamp.proto";
 import "google/api/annotations.proto";
 import "types/amount.proto";
 
-enum UnitType {
-  UnitType_UNSPECIFIED = 0;
-  UnitType_KILOGRAM = 1;
-  UnitType_LITRES = 2;
-}
-
 message Category {
   string id = 1;
   string name = 2;
@@ -30,13 +24,26 @@ message Product {
   string id = 1;
   Category category = 2;
   string name = 3;
-  UnitType unit_type = 4;
+  string unit_type = 4;
   types.Amount amount = 5;
   string description = 6;
   string image = 7;
   string created_by = 8;
   google.protobuf.Timestamp created_at = 9;
   google.protobuf.Timestamp updated_at = 10;
+}
+
+message ProductName {
+  string name = 1;
+  string slug = 2;
+  string category_id = 3;
+}
+
+message PriceType {
+  string id = 1;
+  string name = 2;
+  string slug = 3;
+  string category_id = 4;
 }
 
 message CreateCategoryRequest {
@@ -50,7 +57,7 @@ message CreateProductRequest {
   string user_id = 1;
   string category_id = 2;
   string name = 3;
-  UnitType unit_type = 4;
+  string unit_type = 4;
   types.Amount amount = 5;
   string description = 6;
   string image = 7;
@@ -72,7 +79,7 @@ message UpdateProductRequest {
   string product_id = 2;
   string category_id = 3;
   string name = 4;
-  UnitType unit_type = 5;
+  string unit_type = 5;
   types.Amount amount = 6;
   string description = 7;
   string image = 8;
@@ -133,6 +140,43 @@ message GetFarmerProductResponse { Product product = 1; }
 
 message HealthCheckRequest {}
 message HealthCheckResponse {}
+
+message CreateProductNameRequest {
+  string name = 1;
+  string category_id = 2;
+  string user_id = 3;
+}
+
+message CreateProductNameResponse { ProductName product_name = 1; }
+
+message DeleteProductNameRequest {
+  string name = 1;
+  string user_id = 2;
+}
+message DeleteProductNameResponse {}
+
+message CreatePriceTypeRequest {
+  string name = 1;
+  string category_id = 2;
+  string user_id = 3;
+}
+
+message CreatePriceTypeResponse { PriceType price_type = 1; }
+
+message DeletePriceTypeRequest {
+  string price_type_id = 1;
+  string user_id = 2;
+}
+
+message DeletePriceTypeResponse {}
+
+message ListProductNamesByCategoryRequest { string category_id = 1; }
+message ListProductNamesByCategoryResponse {
+  repeated ProductName product_names = 1;
+}
+
+message ListPriceTypesByCategoryRequest { string category_id = 1; }
+message ListPriceTypesByCategoryResponse { repeated PriceType price_types = 1; }
 
 service Products {
 
@@ -198,6 +242,50 @@ service Products {
   rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {
     option (google.api.http) = {
       get : "/v1/public/products/health-check"
+    };
+  }
+
+  rpc CreateProductName(CreateProductNameRequest)
+      returns (CreateProductNameResponse) {
+    option (google.api.http) = {
+      post : "/v1/admin/{user_id}/products/create-product-name"
+      body : "*"
+    };
+  }
+
+  rpc DeleteProductName(DeleteProductNameRequest)
+      returns (DeleteProductNameResponse) {
+    option (google.api.http) = {
+      delete : "/v1/admin/{user_id}/products/{name}/delete-product-name"
+    };
+  }
+
+  rpc CreatePriceType(CreatePriceTypeRequest)
+      returns (CreatePriceTypeResponse) {
+    option (google.api.http) = {
+      post : "/v1/admin/{user_id}/products/create-price-type"
+      body : "*"
+    };
+  }
+
+  rpc DeletePriceType(DeletePriceTypeRequest)
+      returns (DeletePriceTypeResponse) {
+    option (google.api.http) = {
+      delete : "/v1/admin/{user_id}/products/{price_type_id}/delete-price-type"
+    };
+  }
+
+  rpc ListProductNamesByCategory(ListProductNamesByCategoryRequest)
+      returns (ListProductNamesByCategoryResponse) {
+    option (google.api.http) = {
+      get : "/v1/public/products/{category_id}/list-product-names-by-category"
+    };
+  }
+
+  rpc ListPriceTypesByCategory(ListPriceTypesByCategoryRequest)
+      returns (ListPriceTypesByCategoryResponse) {
+    option (google.api.http) = {
+      get : "/v1/public/products/{category_id}/list-price-types-by-category"
     };
   }
 }

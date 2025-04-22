@@ -1,9 +1,14 @@
 module github.com/foodhouse/foodhouseapp
 
-go 1.23.4
+go 1.23.0
+
+toolchain go1.23.4
+
+replace github.com/Iknite-Space/campay-go-sdk => github.com/asonganyirouclec/campay-go-sdk v0.0.0-20250422160644-66a1478378c6
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
+	github.com/Iknite-Space/campay-go-sdk v0.0.0-20240903104453-b9d172534ded
 	github.com/ardanlabs/conf/v3 v3.4.0
 	github.com/aws/aws-sdk-go v1.49.6
 	github.com/golang-migrate/migrate/v4 v4.18.2
@@ -20,7 +25,7 @@ require (
 	github.com/rs/zerolog v1.33.0
 	github.com/stretchr/testify v1.9.0
 	github.com/twilio/twilio-go v1.24.0
-	go.uber.org/mock v0.5.0
+	go.uber.org/mock v0.5.1
 	golang.org/x/crypto v0.33.0
 	google.golang.org/api v0.169.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250303144028-a0af3efb3deb
@@ -46,6 +51,7 @@ require (
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
+	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect

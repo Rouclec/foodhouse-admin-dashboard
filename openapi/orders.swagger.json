@@ -16,6 +16,107 @@
     "application/json"
   ],
   "paths": {
+    "/v1/public/confirm-order-payment": {
+      "get": {
+        "operationId": "Orders_ConfirmOrderPayment",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcConfirmOrderPaymentResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "status",
+            "description": "\"SUCCESSFUL\" or \"FAILED\",",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "reference",
+            "description": "\"Reference of the transaction. A valid UUID4\",",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "amount",
+            "description": "\"Transaction amount\",",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "currency",
+            "description": "\"Transaction currency\",",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "operator",
+            "description": "\"MTN or ORANGE\",",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "code",
+            "description": "\"CamPay Reference\",",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "operatorReference",
+            "description": "\"Mobile Operator Reference\"",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "signature",
+            "description": "\"jwt token. You can validate this request that is coming from",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "endpoint",
+            "description": "\"collect\" or \"withdraw\". This shows the kind of",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "externalReference",
+            "description": "The reference on the platform that initiated the transaction.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "phoneNumber",
+            "description": "The phone number that initiated the transaction",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/public/orders/health-check": {
       "get": {
         "operationId": "Orders_HealthCheck",
@@ -33,6 +134,49 @@
             }
           }
         },
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/v1/{farmerId}/orders/list-farmer-orders": {
+      "get": {
+        "operationId": "Orders_ListFarmerOrders",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcListFarmerOrdersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "farmerId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "startKey",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
         "tags": [
           "Orders"
         ]
@@ -113,14 +257,14 @@
         ]
       }
     },
-    "/v1/{userId}/orders/{orderNumber}/confirm-delivery": {
-      "put": {
-        "operationId": "Orders_ConfirmDelivery",
+    "/v1/{userId}/orders/list-user-orders": {
+      "get": {
+        "operationId": "Orders_ListUserOrders",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/ordersgrpcConfirmDeliveryResponse"
+              "$ref": "#/definitions/ordersgrpcListUserOrdersResponse"
             }
           },
           "default": {
@@ -138,19 +282,17 @@
             "type": "string"
           },
           {
-            "name": "orderNumber",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "int64"
+            "name": "count",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
           },
           {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/OrdersConfirmDeliveryBody"
-            }
+            "name": "startKey",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -202,6 +344,50 @@
           "Orders"
         ]
       }
+    },
+    "/v1/{userId}/orders/{secretKey}/confirm-delivery": {
+      "put": {
+        "operationId": "Orders_ConfirmDelivery",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcConfirmDeliveryResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "secretKey",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/OrdersConfirmDeliveryBody"
+            }
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
     }
   },
   "definitions": {
@@ -213,6 +399,9 @@
       "properties": {
         "order": {
           "$ref": "#/definitions/ordersgrpcOrder"
+        },
+        "phoneNumber": {
+          "type": "string"
         }
       }
     },
@@ -254,6 +443,36 @@
     "ordersgrpcHealthCheckResponse": {
       "type": "object"
     },
+    "ordersgrpcListFarmerOrdersResponse": {
+      "type": "object",
+      "properties": {
+        "orders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ordersgrpcOrder"
+          }
+        },
+        "nextKey": {
+          "type": "string"
+        }
+      }
+    },
+    "ordersgrpcListUserOrdersResponse": {
+      "type": "object",
+      "properties": {
+        "orders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ordersgrpcOrder"
+          }
+        },
+        "nextKey": {
+          "type": "string"
+        }
+      }
+    },
     "ordersgrpcOrder": {
       "type": "object",
       "properties": {
@@ -289,6 +508,15 @@
         "updatedAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "secretKey": {
+          "type": "string"
+        },
+        "productOwner": {
+          "type": "string"
+        },
+        "payoutPhoneNumber": {
+          "type": "string"
         }
       }
     },
@@ -321,7 +549,8 @@
       "enum": [
         "OrderStatus_UNSPECIFIED",
         "OrderStatus_CREATED",
-        "OrderStatus_PAID",
+        "OrderStatus_PAYMENT_SUCCESSFUL",
+        "OrderStatus_PAYMENT_FAILED",
         "OrderStatus_IN_TRANSIT",
         "OrderStatus_DELIVERED"
       ],

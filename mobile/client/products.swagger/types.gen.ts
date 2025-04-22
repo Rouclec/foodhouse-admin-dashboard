@@ -4,14 +4,24 @@ export type ProductsCreateCategoryBody = {
     name?: string;
 };
 
+export type ProductsCreatePriceTypeBody = {
+    name?: string;
+    categoryId?: string;
+};
+
 export type ProductsCreateProductBody = {
     categoryId?: string;
     name?: string;
-    unitType?: productsgrpcUnitType;
+    unitType?: string;
     amount?: typesAmount;
     description?: string;
     image?: string;
     wholeSale?: boolean;
+};
+
+export type ProductsCreateProductNameBody = {
+    name?: string;
+    categoryId?: string;
 };
 
 export type productsgrpcCategory = {
@@ -25,9 +35,21 @@ export type productsgrpcCreateCategoryResponse = {
     category?: productsgrpcCategory;
 };
 
+export type productsgrpcCreatePriceTypeResponse = {
+    priceType?: productsgrpcPriceType;
+};
+
+export type productsgrpcCreateProductNameResponse = {
+    productName?: productsgrpcProductName;
+};
+
 export type productsgrpcCreateProductResponse = {
     product?: productsgrpcProduct;
 };
+
+export type productsgrpcDeletePriceTypeResponse = unknown;
+
+export type productsgrpcDeleteProductNameResponse = unknown;
 
 export type productsgrpcDeleteProductResponse = {
     message?: string;
@@ -52,16 +74,31 @@ export type productsgrpcListFarmerProductsResponse = {
     nextKey?: string;
 };
 
+export type productsgrpcListPriceTypesByCategoryResponse = {
+    priceTypes?: Array<productsgrpcPriceType>;
+};
+
+export type productsgrpcListProductNamesByCategoryResponse = {
+    productNames?: Array<productsgrpcProductName>;
+};
+
 export type productsgrpcListProductsResponse = {
     products?: Array<productsgrpcProduct>;
     nextKey?: string;
+};
+
+export type productsgrpcPriceType = {
+    id?: string;
+    name?: string;
+    slug?: string;
+    categoryId?: string;
 };
 
 export type productsgrpcProduct = {
     id?: string;
     category?: productsgrpcCategory;
     name?: string;
-    unitType?: productsgrpcUnitType;
+    unitType?: string;
     amount?: typesAmount;
     description?: string;
     image?: string;
@@ -70,7 +107,11 @@ export type productsgrpcProduct = {
     updatedAt?: string;
 };
 
-export type productsgrpcUnitType = 'UnitType_UNSPECIFIED' | 'UnitType_KILOGRAM' | 'UnitType_LITRES';
+export type productsgrpcProductName = {
+    name?: string;
+    slug?: string;
+    categoryId?: string;
+};
 
 export type productsgrpcUpdateProductResponse = {
     message?: string;
@@ -79,7 +120,7 @@ export type productsgrpcUpdateProductResponse = {
 export type ProductsUpdateProductBody = {
     categoryId?: string;
     name?: string;
-    unitType?: productsgrpcUnitType;
+    unitType?: string;
     amount?: typesAmount;
     description?: string;
     image?: string;
@@ -112,6 +153,50 @@ export type ProductsCreateCategoryResponse = (productsgrpcCreateCategoryResponse
 
 export type ProductsCreateCategoryError = (rpcStatus);
 
+export type ProductsCreatePriceTypeData = {
+    body: ProductsCreatePriceTypeBody;
+    path: {
+        userId: string;
+    };
+};
+
+export type ProductsCreatePriceTypeResponse = (productsgrpcCreatePriceTypeResponse);
+
+export type ProductsCreatePriceTypeError = (rpcStatus);
+
+export type ProductsCreateProductNameData = {
+    body: ProductsCreateProductNameBody;
+    path: {
+        userId: string;
+    };
+};
+
+export type ProductsCreateProductNameResponse = (productsgrpcCreateProductNameResponse);
+
+export type ProductsCreateProductNameError = (rpcStatus);
+
+export type ProductsDeleteProductNameData = {
+    path: {
+        name: string;
+        userId: string;
+    };
+};
+
+export type ProductsDeleteProductNameResponse = (productsgrpcDeleteProductNameResponse);
+
+export type ProductsDeleteProductNameError = (rpcStatus);
+
+export type ProductsDeletePriceTypeData = {
+    path: {
+        priceTypeId: string;
+        userId: string;
+    };
+};
+
+export type ProductsDeletePriceTypeResponse = (productsgrpcDeletePriceTypeResponse);
+
+export type ProductsDeletePriceTypeError = (rpcStatus);
+
 export type ProductsListCategoriesResponse = (productsgrpcListCategoriesResponse);
 
 export type ProductsListCategoriesError = (rpcStatus);
@@ -136,6 +221,26 @@ export type ProductsListProductsData = {
 export type ProductsListProductsResponse = (productsgrpcListProductsResponse);
 
 export type ProductsListProductsError = (rpcStatus);
+
+export type ProductsListPriceTypesByCategoryData = {
+    path: {
+        categoryId: string;
+    };
+};
+
+export type ProductsListPriceTypesByCategoryResponse = (productsgrpcListPriceTypesByCategoryResponse);
+
+export type ProductsListPriceTypesByCategoryError = (rpcStatus);
+
+export type ProductsListProductNamesByCategoryData = {
+    path: {
+        categoryId: string;
+    };
+};
+
+export type ProductsListProductNamesByCategoryResponse = (productsgrpcListProductNamesByCategoryResponse);
+
+export type ProductsListProductNamesByCategoryError = (rpcStatus);
 
 export type ProductsGetProductData = {
     path: {
