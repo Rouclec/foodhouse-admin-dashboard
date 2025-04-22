@@ -166,6 +166,7 @@ Resources:
                 Resource:
                   - !Ref AppDatabaseSecret
                   - !Ref DbAdminSecretArn
+                  - !Ref CampaySecretArn
 
   # A role for the containers
   TaskRole:
