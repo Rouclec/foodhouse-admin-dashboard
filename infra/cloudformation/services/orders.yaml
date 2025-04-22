@@ -121,11 +121,11 @@ Resources:
             - Name: DB_PASSWORD
               ValueFrom: !Sub "${AppDatabaseSecret}:password::"
             - Name: CAMPAY_USERNAME
-              ValueFrom: !Sub "${CampaySecretArn}::username::"
+              ValueFrom: !Sub "${CampaySecretArn}:username::"
             - Name: CAMPAY_PASSWORD
-              ValueFrom: !Sub "${CampaySecretArn}::password::"
+              ValueFrom: !Sub "${CampaySecretArn}:password::"
             - Name: CAMPAY_BASE_URL
-              ValueFrom: !Sub "${CampaySecretArn}::base_url::"
+              ValueFrom: !Sub "${CampaySecretArn}:base_url::"
 
   # We create a data in the RDS instance for the application.
   # We do this with a custom Cloudformation resource that will run a lambda function.
