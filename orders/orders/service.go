@@ -437,7 +437,7 @@ func (i *Impl) GetOrderDetails(ctx context.Context, req *ordersgrpc.GetOrderDeta
 		return nil, status.Errorf(codes.Internal, "error getting order with number %v. why?: %v", req.GetOrderNumber(), err)
 	}
 
-	i.logger.Debug().Msgf("sqlc order %v", sqlcOrder)
+	i.logger.Debug().Msgf("sqlc order: %v", sqlcOrder)
 
 	sqlcAuditLogs, err := i.repo.Do().ListOrderAuditLogs(ctx, req.GetOrderNumber())
 
