@@ -311,6 +311,7 @@ Resources:
     DependsOn:
       - VpcStack
       - RdsStack
+      - ThirdPartySecretsStack
     Properties:
       Parameters:
         EnvId: !Ref "EnvId"
@@ -319,7 +320,7 @@ Resources:
         LogGroupName: !Ref LogGroup
         ClusterArn: !GetAtt EcsStack.Outputs.ClusterArn
         DbAdminSecretArn: !GetAtt "RdsStack.Outputs.AdminSecretArn"
-        CampaySecretArn: !GetAtt "RdsStack.Outputs.CampaySecretArn"
+        CampaySecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.CampaySecretArn"
         DomainName: !Ref DomainName
         SubnetIds:
           !Join [

@@ -106,6 +106,8 @@ Resources:
               Value: "/app/migrations"
             - Name: ENABLE_DEV_METHODS
               Value: "true"
+            - Name: CAMPAY_WEBHOOK
+              Value: !Sub "https://api.${DomainName}/v1/public/confirm-order-payment"
 
           Secrets:
             - Name: DB_NAME
@@ -124,8 +126,6 @@ Resources:
               ValueFrom: !Sub "${CampaySecretArn}::password::"
             - Name: CAMPAY_BASE_URL
               ValueFrom: !Sub "${CampaySecretArn}::base_url::"
-            - Name: CAMPAY_WEBHOOK
-              ValueFrom: !Sub "${CampaySecretArn}::webhook_url::"
 
   # We create a data in the RDS instance for the application.
   # We do this with a custom Cloudformation resource that will run a lambda function.
