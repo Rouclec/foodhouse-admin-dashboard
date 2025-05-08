@@ -7,60 +7,63 @@ FoodHouse is a **microservices-based backend system** designed for a food delive
 ---
 
 ## Project Structure
+
+```plaintext
 food-house/
-├── users/ # User management service
-│ ├── users/ # Core service logic
-│ ├── db/ # Database migrations and queries
-│ ├── cmd/ # Entry points (e.g., gRPC service)
-│ ├── Dockerfile # Container definition
-│ └── Makefile # Build, test, and deployment commands
-├── orders/ # Order management service
-│ ├── orders/ # Core service logic
-│ ├── db/ # Database migrations and queries
-│ ├── cmd/ # Entry points
-│ ├── Dockerfile # Container definition
-│ └── Makefile # Build, test, and deployment commands
-├── products/ # Product management service
-│ ├── products/ # Core service logic
-│ ├── db/ # Database migrations and queries
-│ ├── cmd/ # Entry points
-│ ├── Dockerfile # Container definition
-│ └── Makefile # Build, test, and deployment commands
-├── payment/ # Payment processing service
-│ ├── payment.go # Payment logic
-│ └── campay.go # Campay payment integration
-├── protobuf/ # Protocol buffer definitions
-│ ├── users.proto # User service API definitions
-│ ├── orders.proto # Order service API definitions
-│ ├── products.proto # Product service API definitions
-│ └── types/ # Shared protobuf types
-├── grpc/ # Generated gRPC code
-│ └── go/ # Go-specific generated code
-│ ├── usersgrpc/ # Generated code for users service
-│ ├── ordersgrpc/ # Generated code for orders service
-│ └── productsgrpc/ # Generated code for products service
-├── openapi/ # OpenAPI (Swagger) specifications
-│ ├── users.swagger.json # OpenAPI spec for users service
-│ ├── orders.swagger.json # OpenAPI spec for orders service
-│ └── products.swagger.json # OpenAPI spec for products service
-├── mobile/ # Mobile client integration
-│ └── client/ # Swagger-generated client code
-│ ├── orders.swagger/ # Client for orders service
-│ ├── products.swagger/ # Client for products service
-│ └── users.swagger/ # Client for users service
-├── infra/ # Infrastructure as code
-│ ├── cloudformation/ # AWS CloudFormation templates
-│ └── Makefile # Infrastructure build and deployment commands
-├── jsonproxy/ # JSON proxy service
-│ ├── cmd/ # Entry points
-│ ├── Dockerfile # Container definition
-│ └── Makefile # Build, test, and deployment commands
-├── googleapis/ # Google API integrations or proto files
-├── openapi-ts.ts # TypeScript OpenAPI-related code
-├── package.json # Node.js dependencies
-├── go.mod # Go module dependencies
-├── Makefile # Root-level build, test, and deployment commands
-└── README.md # Project documentation
+├── users/                  # User management service
+│   ├── users/              # Core service logic
+│   ├── db/                 # Database migrations and queries
+│   ├── cmd/                # Entry points (e.g., gRPC service)
+│   ├── Dockerfile          # Container definition
+│   └── Makefile            # Build, test, and deployment commands
+├── orders/                 # Order management service
+│   ├── orders/             # Core service logic
+│   ├── db/                 # Database migrations and queries
+│   ├── cmd/                # Entry points
+│   ├── Dockerfile          # Container definition
+│   └── Makefile            # Build, test, and deployment commands
+├── products/               # Product management service
+│   ├── products/           # Core service logic
+│   ├── db/                 # Database migrations and queries
+│   ├── cmd/                # Entry points
+│   ├── Dockerfile          # Container definition
+│   └── Makefile            # Build, test, and deployment commands
+├── payment/                # Payment processing service
+│   ├── payment.go          # Payment logic
+│   └── campay.go           # Campay payment integration
+├── protobuf/               # Protocol buffer definitions
+│   ├── users.proto         # User service API definitions
+│   ├── orders.proto        # Order service API definitions
+│   ├── products.proto      # Product service API definitions
+│   └── types/              # Shared protobuf types
+├── grpc/                   # Generated gRPC code
+│   └── go/                 # Go-specific generated code
+│       ├── usersgrpc/      # Generated code for users service
+│       ├── ordersgrpc/     # Generated code for orders service
+│       └── productsgrpc/   # Generated code for products service
+├── openapi/                # OpenAPI (Swagger) specifications
+│   ├── users.swagger.json  # OpenAPI spec for users service
+│   ├── orders.swagger.json # OpenAPI spec for orders service
+│   └── products.swagger.json # OpenAPI spec for products service
+├── mobile/                 # Mobile client integration
+│   └── client/             # Swagger-generated client code
+│       ├── orders.swagger/ # Client for orders service
+│       ├── products.swagger/ # Client for products service
+│       └── users.swagger/  # Client for users service
+├── infra/                  # Infrastructure as code
+│   ├── cloudformation/     # AWS CloudFormation templates
+│   └── Makefile            # Infrastructure build and deployment commands
+├── jsonproxy/              # JSON proxy service
+│   ├── cmd/                # Entry points
+│   ├── Dockerfile          # Container definition
+│   └── Makefile            # Build, test, and deployment commands
+├── googleapis/             # Google API integrations or proto files
+├── openapi-ts.ts           # TypeScript OpenAPI-related code
+├── package.json            # Node.js dependencies
+├── go.mod                  # Go module dependencies
+├── Makefile                # Root-level build, test, and deployment commands
+└── README.md               # Project documentation
+```
 
 ---
 
