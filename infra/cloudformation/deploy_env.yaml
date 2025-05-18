@@ -240,6 +240,7 @@ Resources:
         FirebaseServiceAccountSecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.FirebaseServiceAccountSecretArn"
         GoogleChatClientSecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.GoogleChatClientSecretArn"
         FirebaseSdkSecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.FirebaseSdkSecretArn"
+        InfoBipClientSecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.InfoBipClientSecretArn"
         DomainName: !Ref DomainName
         SubnetIds:
           !Join [

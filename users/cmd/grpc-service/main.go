@@ -48,6 +48,11 @@ type Config struct {
 
 			FromPhoneNumber string `conf:"env:FROM_PHONE_NUMBER,required"`
 		}
+		InfoBip struct {
+			BaseURL string `conf:"env:INFO_BIP_BASE_URL,required"`
+
+			APIKey string `conf:"env:INFO_BIP_API_KEY,required"`
+		}
 		GoogleChat struct {
 			WebhookURL string `conf:"env:GOOGLE_CHAT_WEBHOOK_URL"`
 		}
@@ -132,13 +137,19 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 		return fmt.Errorf("failed to create otp generator: %w", err)
 	}
 
-	twilioSmsSender, err := sms.NewSmsSenderTwilio(config.Sms.Twilio.AccountSID,
-		config.Sms.Twilio.AuthToken, config.Sms.Twilio.FromPhoneNumber)
+	// twilioSmsSender, err := sms.NewSmsSenderTwilio(config.Sms.Twilio.AccountSID,
+	// 	config.Sms.Twilio.AuthToken, config.Sms.Twilio.FromPhoneNumber)
+	// if err != nil {
+	// 	return fmt.Errorf("failed to create twilio sms sender: %w", err)
+	// }
+
+	infoBipSender, err := sms.NewSmsSenderInfobip(config.Sms.InfoBip.BaseURL, config.Sms.InfoBip.APIKey)
+
 	if err != nil {
-		return fmt.Errorf("failed to create twilio sms sender: %w", err)
+		return fmt.Errorf("failed to create info bip sms sender: %w", err)
 	}
 
-	smsSender := sms.NewSmsSenderFanout(twilioSmsSender)
+	smsSender := sms.NewSmsSenderFanout(infoBipSender)
 	if config.Sms.GoogleChat.WebhookURL != "" {
 		googleChatWebhookSender, smsErr := sms.NewSmsSenderGoogleChat(config.Sms.GoogleChat.WebhookURL)
 		if smsErr != nil {

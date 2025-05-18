@@ -43,6 +43,9 @@ Parameters:
   TwilioClientSecretArn:
     Type: String
 
+  InfoBipClientSecretArn:
+    Type: String
+
   GoogleChatClientSecretArn:
     Type: String
   
@@ -144,6 +147,10 @@ Resources:
               ValueFrom: !Sub "${TwilioClientSecretArn}:from_phone_number::"
             - Name: GOOGLE_CHAT_WEBHOOK_URL
               ValueFrom: !Sub "${GoogleChatClientSecretArn}:webhook_url::"
+            - Name: INFO_BIP_BASE_URL
+              ValueFrom: !Sub "${InfoBipClientSecretArn}:base_url::"
+            - Name: INFO_BIP_API_KEY
+              ValueFrom: !Sub "${InfoBipClientSecretArn}:api_key::"
             - Name: FIREBASE_SERVICE_ACCOUNT_JSON
               ValueFrom: !Sub "${FirebaseServiceAccountSecretArn}:::"
             - Name: FIREBASE_API_KEY
@@ -192,6 +199,7 @@ Resources:
                   - !Ref GoogleChatClientSecretArn
                   - !Ref FirebaseServiceAccountSecretArn
                   - !Ref FirebaseSdkSecretArn
+                  - !Ref InfoBipClientSecretArn
 
   # A role for the containers
   TaskRole:
