@@ -2,7 +2,7 @@ import { StyleSheet, Dimensions } from "react-native";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-const styles = StyleSheet.create({
+export const loginstyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
@@ -130,4 +130,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default styles;
+

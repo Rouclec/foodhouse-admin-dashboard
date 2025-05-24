@@ -1,11 +1,10 @@
 import { StyleSheet, Dimensions } from "react-native";
 
 
-const DOT_SIZE = 15;
-const DOT_SPACING = 10;
-const { width, height } = Dimensions.get('window');
+// const DOT_SIZE = 10;
 
-const styles = StyleSheet.create({
+
+export const onboardingStyles = StyleSheet.create({
   imageContainer: {
     flex: 1,
     width: '100%',
@@ -47,15 +46,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignSelf: 'center',
-    gap: DOT_SPACING,
+    gap: 10,
   },
   dot: {
-    width: DOT_SIZE,
-    height: DOT_SIZE,
-    borderRadius: DOT_SIZE / 2,
-    backgroundColor: '#6dcd47',
-    marginHorizontal: DOT_SPACING / 2,
-  },
+  height: 10,
+  borderRadius: 5,
+  backgroundColor: '#6dcd47',
+  marginHorizontal: 5,
+},
+
   buttonContainer: {
     position: 'absolute',
     bottom: 40,
@@ -78,5 +77,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default styles;
+
 

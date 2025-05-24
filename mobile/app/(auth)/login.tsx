@@ -6,7 +6,9 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { usersAuthenticateMutation } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { Context, ContextType } from "../_layout";
-import styles from "@/styles/(auth)/loginStyles";
+import { loginstyles } from "@/styles";
+import { Colors } from "@/constants";
+
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -15,7 +17,6 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-   const [userId, setUserId] = useState<string>();
 
   const { user, setUser } = useContext(Context) as ContextType;
 
@@ -113,26 +114,23 @@ export default function Login() {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Custom Header with Circular Logo */}
-      <View style={styles.header}>
+    <View style={loginstyles.container}>
+      <View style={loginstyles.header}>
         <TouchableOpacity 
-          style={styles.backButton}
+          style={loginstyles.backButton}
           onPress={() => router.replace('/onboarding')}
         >
           <MaterialCommunityIcons name="arrow-left" size={24} color="#000" />
         </TouchableOpacity>
         
-        <View style={styles.logoCircle}>
-          <Text style={styles.logoText}>Food House</Text>
+        <View style={loginstyles.logoCircle}>
+          <Text style={loginstyles.logoText}>Food House</Text>
         </View>
       </View>
-
-      {/* Login Form Content */}
-      <View style={styles.content}>
-        <Text style={styles.loginTitle}>Log in to your account</Text>
+      <View style={loginstyles.content}>
+        <Text style={loginstyles.loginTitle}>Log in to your account</Text>
         
-        {error && <Text style={styles.errorMessage}>{errorMessage}</Text>}
+        {error && <Text style={loginstyles.errorMessage}>{errorMessage}</Text>}
         
         <TextInput
           mode="outlined"
@@ -140,7 +138,7 @@ export default function Login() {
           value={fields.email}
           onChangeText={(text) => handleInputChange("email", text)}
           error={!!errors.email}
-          style={styles.input}
+          style={loginstyles.input}
           theme={{ 
             colors: { 
               primary: '#6dcd47',
@@ -158,7 +156,7 @@ export default function Login() {
             />
           }
         />
-        {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
+        {errors.email ? <Text style={loginstyles.errorText}>{errors.email}</Text> : null}
         
         <TextInput
           mode="outlined"
@@ -167,7 +165,7 @@ export default function Login() {
           value={fields.password}
           onChangeText={(text) => handleInputChange("password", text)}
           error={!!errors.password}
-          style={styles.input}
+          style={loginstyles.input}
           theme={{ 
             colors: { 
               primary: '#6dcd47',
@@ -193,14 +191,14 @@ export default function Login() {
             />
           }
         />
-        {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
+        {errors.password ? <Text style={loginstyles.errorText}>{errors.password}</Text> : null}
         
-        <TouchableOpacity style={styles.forgotPassword}>
-          <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+        <TouchableOpacity style={loginstyles.forgotPassword}>
+          <Text style={loginstyles.forgotPasswordText}>Forgot password?</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
-          style={styles.loginButton}
+          style={loginstyles.loginButton}
           onPress={handleLogIn}
           disabled={loading}
           activeOpacity={0.8}
@@ -208,32 +206,32 @@ export default function Login() {
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.loginButtonText}>Login</Text>
+            <Text style={loginstyles.loginButtonText}>Login</Text>
           )}
         </TouchableOpacity>
         
-        <View style={styles.dividerContainer}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>or continue with</Text>
-          <View style={styles.dividerLine} />
+        <View style={loginstyles.dividerContainer}>
+          <View style={loginstyles.dividerLine} />
+          <Text style={loginstyles.dividerText}>or continue with</Text>
+          <View style={loginstyles.dividerLine} />
         </View>
         
-        <View style={styles.socialIconsContainer}>
-          <TouchableOpacity style={styles.socialIcon}>
-            <MaterialCommunityIcons name="facebook" size={24} color="#1877F2" />
+        <View style={loginstyles.socialIconsContainer}>
+          <TouchableOpacity style={loginstyles.socialIcon}>
+            <MaterialCommunityIcons name="facebook" size={24} color={Colors.primary[100]} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.socialIcon}>
-            <MaterialCommunityIcons name="google" size={24} color="#DB4437" />
+          <TouchableOpacity style={loginstyles.socialIcon}>
+            <MaterialCommunityIcons name="google" size={24} color={Colors.primary[200]} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.socialIcon}>
-            <MaterialCommunityIcons name="apple" size={24} color="#000" />
+          <TouchableOpacity style={loginstyles.socialIcon}>
+            <MaterialCommunityIcons name="apple" size={24}  />
           </TouchableOpacity>
         </View>
         
-        <View style={styles.registerContainer}>
-          <Text style={styles.registerText}>Don't have an account? </Text>
+        <View style={loginstyles.registerContainer}>
+          <Text style={loginstyles.registerText}>Don't have an account? </Text>
           <TouchableOpacity onPress={() => router.replace("/signup")}>
-            <Text style={styles.registerLink}>Register Now</Text>
+            <Text style={loginstyles.registerLink}>Register Now</Text>
           </TouchableOpacity>
         </View>
       </View>

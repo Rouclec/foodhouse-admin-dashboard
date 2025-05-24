@@ -15,7 +15,7 @@ import Animated, {
   interpolate,
   Extrapolate,
 } from 'react-native-reanimated';
-import styles from '@/styles/(auth)/onboarding';
+import { onboardingStyles } from '@/styles';
 
 const onboardingSlides = [
   {
@@ -71,47 +71,43 @@ export default function OnboardingScreen() {
             key={slide.id}
             style={{ width, justifyContent: 'center', alignItems: 'center' }}
           >
-            <View style={styles.imageContainer}>
+            <View style={onboardingStyles.imageContainer}>
               <Image
                 source={slide.image}
-                style={styles.image}
+                style={onboardingStyles.image}
                
               />
             </View>
-            <View style={styles.textContainer}>
-              <Text style={styles.title}>{slide.title}</Text>
-              <Text style={styles.description}>{slide.description}</Text>
+            <View style={onboardingStyles.textContainer}>
+              <Text style={onboardingStyles.title}>{slide.title}</Text>
+              <Text style={onboardingStyles.description}>{slide.description}</Text>
             </View>
           </View>
         ))}
       </Animated.ScrollView>
 
       {/* Pagination Dots */}
-      <View style={styles.dotContainer}>
+      <View style={onboardingStyles.dotContainer}>
   {onboardingSlides.map((_, i) => {
     const animatedDotStyle = useAnimatedStyle(() => {
-      const inputRange = [
-        (i - 1) * width,
-        i * width,
-        (i + 1) * width,
-      ];
+      const inputRange = [(i - 1) * width, i * width, (i + 1) * width];
 
-      const scale = interpolate(
+      const widthAnimated = interpolate(
         scrollX.value,
         inputRange,
-        [1, 1.6, 1],
+        [10, 30, 10], 
         Extrapolate.CLAMP
       );
 
       const opacity = interpolate(
         scrollX.value,
         inputRange,
-        [0.4, 1, 0.4],
+        [0.5, 1, 0.5],
         Extrapolate.CLAMP
       );
 
       return {
-        transform: [{ scale }],
+        width: widthAnimated,
         opacity,
       };
     });
@@ -119,7 +115,7 @@ export default function OnboardingScreen() {
     return (
       <Animated.View
         key={i}
-        style={[styles.dot, animatedDotStyle]}
+        style={[onboardingStyles.dot, animatedDotStyle]}
       />
     );
   })}
@@ -127,9 +123,9 @@ export default function OnboardingScreen() {
 
 
       {/* Button */}
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={handleGetStarted} style={styles.button}>
-          <Text style={styles.buttonText}>Get Started</Text>
+      <View style={onboardingStyles.buttonContainer}>
+        <TouchableOpacity onPress={handleGetStarted} style={onboardingStyles.button}>
+          <Text style={onboardingStyles.buttonText}>Get Started</Text>
         </TouchableOpacity>
       </View>
     </View>

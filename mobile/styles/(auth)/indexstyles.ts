@@ -4,7 +4,7 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 const imageWidth = screenWidth / 3.5;
 const imageHeight = (imageWidth * 16) / 11;
 
-const styles = StyleSheet.create({
+export const index1 = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#6dcd47",
@@ -83,5 +83,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default styles;
+
 
