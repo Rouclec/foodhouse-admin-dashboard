@@ -1,81 +1,74 @@
 import { StyleSheet, Dimensions } from "react-native";
 
 
-
+const DOT_SIZE = 15;
+const DOT_SPACING = 10;
 const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
-  container: {
+  imageContainer: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  safeArea: {
-    flex: 1,
-  },
-  topSection: {
-    flex: 0.5,
+    width: '100%',
     backgroundColor: '#D8FFC9',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: 30
+    paddingTop: 40,
   },
   image: {
-    width: width * 0.8,
-    height: height * 0.8,
-    borderRadius: 34,
-  },
-  bottomSection: {
-    flex: 0.5,
-    paddingHorizontal: 30,
-    paddingTop: 20,
-    paddingBottom: 20,
+    width: '90%',
+    height: '80%',
+    borderRadius: 20,
+    marginTop: 20,
   },
   textContainer: {
-    flex: 0.7,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  description: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    lineHeight: 24,
-    paddingHorizontal: 10,
-  },
-  progressContainer: {
-    flex: 0.3,
-    justifyContent: 'center',
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 20,
     alignItems: 'center',
   },
-  dotsContainer: {
+  title: {
+    fontSize: 34,
+    lineHeight: 42,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  description: {
+    fontSize: 20,
+    lineHeight: 26,
+    color: '#616161',
+    paddingHorizontal: 10,
+    fontFamily: "urbanist",
+  },
+  dotContainer: {
+    position: 'absolute',
+    bottom: 120,
     flexDirection: 'row',
-    marginBottom: 20,
+    justifyContent: 'center',
+    alignSelf: 'center',
+    gap: DOT_SPACING,
   },
   dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginHorizontal: 5,
-  },
-  activeDot: {
+    width: DOT_SIZE,
+    height: DOT_SIZE,
+    borderRadius: DOT_SIZE / 2,
     backgroundColor: '#6dcd47',
-    width: 20,
+    marginHorizontal: DOT_SPACING / 2,
   },
-  inactiveDot: {
-    backgroundColor: '#e0e0e0',
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 40,
+    width: '100%',
+    alignItems: 'center',
   },
   button: {
     backgroundColor: '#6dcd47',
     paddingVertical: 15,
     paddingHorizontal: 40,
     borderRadius: 30,
-    elevation: 3,
-    width: '100%',
+    width: '80%',
+    height: 58,
     alignItems: 'center',
   },
   buttonText: {

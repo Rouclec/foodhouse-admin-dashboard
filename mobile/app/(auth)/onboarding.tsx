@@ -1,8 +1,21 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions, PanResponder, Animated, SafeAreaView, ScrollView } from 'react-native';
+import React from 'react';
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  useWindowDimensions,
+} from 'react-native';
 import { useRouter } from 'expo-router';
+import Animated, {
+  useSharedValue,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  interpolate,
+  Extrapolate,
+} from 'react-native-reanimated';
 import styles from '@/styles/(auth)/onboarding';
-
 
 const onboardingSlides = [
   {
@@ -25,96 +38,102 @@ const onboardingSlides = [
   },
 ];
 
+
+
 export default function OnboardingScreen() {
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const { width } = useWindowDimensions();
   const router = useRouter();
-  const pan = useRef(new Animated.ValueXY()).current;
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onPanResponderMove: Animated.event([null, { dx: pan.x }], { useNativeDriver: false }),
-      onPanResponderRelease: (e, gestureState) => {
-        if (gestureState.dx > 50 && currentSlide > 0) {
-          // Swipe right
-          handlePrevious();
-        } else if (gestureState.dx < -50 && currentSlide < onboardingSlides.length - 1) {
-          // Swipe left
-          handleNext();
-        } else {
-          // Reset position if not swiped enough
-          Animated.spring(pan, {
-            toValue: { x: 0, y: 0 },
-            useNativeDriver: false
-          }).start();
-        }
-      },
-    })
-  ).current;
 
-  const handleNext = () => {
-    if (currentSlide < onboardingSlides.length - 1) {
-      setCurrentSlide(currentSlide + 1);
-      pan.setValue({ x: 0, y: 0 });
-    }
-  };
+  const scrollX = useSharedValue(0);
 
-  const handlePrevious = () => {
-    if (currentSlide > 0) {
-      setCurrentSlide(currentSlide - 1);
-      pan.setValue({ x: 0, y: 0 });
-    }
-  };
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollX.value = event.contentOffset.x;
+    },
+  });
 
   const handleGetStarted = () => {
-    router.replace('/login');
+    router.replace("/login");
   };
 
   return (
-    <View style={styles.container} {...panResponder.panHandlers}>
-            <SafeAreaView style={styles.safeArea}>
-      <View style={styles.topSection}>
-        <Image 
-          source={onboardingSlides[currentSlide].image} 
-          style={styles.image}
-          resizeMode="contain"
-        />
-      </View>
-      <View style={styles.bottomSection}>
-        <View style={styles.textContainer}>
-          <Text style={styles.title}>{onboardingSlides[currentSlide].title}</Text>
-          <Text style={styles.description}>{onboardingSlides[currentSlide].description}</Text>
-        </View>
-
-        <View style={styles.progressContainer}>
-          <View style={styles.dotsContainer}>
-            {onboardingSlides.map((_, index) => (
-              <View 
-                key={index}
-                style={[
-                  styles.dot,
-                  index === currentSlide ? styles.activeDot : styles.inactiveDot
-                ]}
-              />
-            ))}
-          </View>
-
-          <TouchableOpacity 
-            style={styles.button} 
-            onPress={currentSlide === onboardingSlides.length - 1 ? handleGetStarted : handleNext}
+    <View style={{ flex: 1, }}>
+      <Animated.ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
+        {onboardingSlides.map((slide, index) => (
+          <View
+            key={slide.id}
+            style={{ width, justifyContent: 'center', alignItems: 'center' }}
           >
-            <Text style={styles.buttonText}>
-              {currentSlide === onboardingSlides.length - 1 ? 'Get Started' : 'Next'}
-            </Text>
-          </TouchableOpacity>
-        </View>
+            <View style={styles.imageContainer}>
+              <Image
+                source={slide.image}
+                style={styles.image}
+               
+              />
+            </View>
+            <View style={styles.textContainer}>
+              <Text style={styles.title}>{slide.title}</Text>
+              <Text style={styles.description}>{slide.description}</Text>
+            </View>
+          </View>
+        ))}
+      </Animated.ScrollView>
+
+      {/* Pagination Dots */}
+      <View style={styles.dotContainer}>
+  {onboardingSlides.map((_, i) => {
+    const animatedDotStyle = useAnimatedStyle(() => {
+      const inputRange = [
+        (i - 1) * width,
+        i * width,
+        (i + 1) * width,
+      ];
+
+      const scale = interpolate(
+        scrollX.value,
+        inputRange,
+        [1, 1.6, 1],
+        Extrapolate.CLAMP
+      );
+
+      const opacity = interpolate(
+        scrollX.value,
+        inputRange,
+        [0.4, 1, 0.4],
+        Extrapolate.CLAMP
+      );
+
+      return {
+        transform: [{ scale }],
+        opacity,
+      };
+    });
+
+    return (
+      <Animated.View
+        key={i}
+        style={[styles.dot, animatedDotStyle]}
+      />
+    );
+  })}
+</View>
+
+
+      {/* Button */}
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity onPress={handleGetStarted} style={styles.button}>
+          <Text style={styles.buttonText}>Get Started</Text>
+        </TouchableOpacity>
       </View>
-        </SafeAreaView>
-        
-        
-     
     </View>
   );
 }
-
 
 
