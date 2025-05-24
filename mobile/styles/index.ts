@@ -1,4 +1,4 @@
-import { authIndexStyles } from "./(auth)/index.styles";
+import { authIndexStyles } from "./(auth)/indexstyles";
 import { buyerIndexStyles } from "./(buyer)/index.styles";
 import { farmerIndexStyles } from "./(farmer)/index.styles";
 import { componentIndexStyles } from "./components/index.styles";
