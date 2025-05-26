@@ -1,57 +1,112 @@
-import React from 'react';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Tabs } from 'expo-router';
-import { Pressable } from 'react-native';
+import React from "react";
+import { Tabs } from "expo-router";
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
-
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
-  color: string;
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
-}
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, View } from "react-native";
+import { Icon, Text } from "react-native-paper";
+import { tabStyles as styles } from "@/styles";
+import { Colors } from "@/constants";
+import { FontAwesome5, FontAwesome6, Ionicons } from "@expo/vector-icons";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
-      }}>
+        headerShown: false,
+        tabBarShowLabel: false,
+        tabBarStyle: [styles.tabBar, { paddingBottom: insets.bottom }],
+      }}
+      initialRouteName="index"
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? 'light'].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
+          tabBarIcon: ({ focused }) => (
+            <View style={styles.tabItem}>
+              <Icon
+                source={focused ? "cart" : "cart-outline"}
+                size={24}
+                color={focused ? Colors.primary[500] : Colors.grey["9e"]}
+              />
+              <Text style={[styles.tabItemText, focused && styles.focusedText]}>
+                Orders
+              </Text>
+            </View>
           ),
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="my-products"
         options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          tabBarIcon: ({ focused }) => (
+            <View style={styles.tabItem}>
+              <Icon
+                source={"package-variant-closed"}
+                size={24}
+                color={focused ? Colors.primary[500] : Colors.grey["9e"]}
+              />
+              <Text style={[styles.tabItemText, focused && styles.focusedText]}>
+                My Products
+              </Text>
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="sales"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <View style={styles.tabItem}>
+              <Icon
+                source={focused ? "text-box" : "text-box-outline"}
+                size={24}
+                color={focused ? Colors.primary[500] : Colors.grey["9e"]}
+              />
+              <Text style={[styles.tabItemText, focused && styles.focusedText]}>
+                Sales
+              </Text>
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="system-chat"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <View style={styles.tabItem}>
+              <Ionicons
+                name={
+                  focused
+                    ? "chatbubble-ellipses"
+                    : "chatbubble-ellipses-outline"
+                }
+                size={24}
+                color={focused ? Colors.primary[500] : Colors.grey["9e"]}
+              />
+              <Text style={[styles.tabItemText, focused && styles.focusedText]}>
+                System Chat
+              </Text>
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <View style={styles.tabItem}>
+              <FontAwesome5
+                name={focused ? "user-alt" : "user"}
+                size={24}
+                color={focused ? Colors.primary[500] : Colors.grey["9e"]}
+              />
+              <Text style={[styles.tabItemText, focused && styles.focusedText]}>
+                Profile
+              </Text>
+            </View>
+          ),
         }}
       />
     </Tabs>

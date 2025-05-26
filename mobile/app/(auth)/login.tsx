@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,17 +12,22 @@ import {
 import { Icon, TextInput } from "react-native-paper";
 import { Link, router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useMutation } from "@tanstack/react-query";
-import { usersAuthenticateMutation } from "@/client/users.swagger/@tanstack/react-query.gen";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  usersAuthenticateMutation,
+  usersGetUserByIdOptions,
+} from "@/client/users.swagger/@tanstack/react-query.gen";
 import { Context, ContextType } from "../_layout";
 import { loginstyles } from "@/styles";
 import { Colors } from "@/constants";
 import i18n from "@/i18n";
+import { storeData, updateAuthHeader } from "@/utils";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [fields, setFields] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({ email: "", password: "" });
+  const [userId, setUserId] = useState<string>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -57,14 +62,18 @@ export default function Login() {
       setError(true);
       setTimeout(() => setError(false), 5000);
     },
-    onSuccess: async () => {
+    onSuccess: async (data) => {
       try {
         const role = user?.role;
+        updateAuthHeader(data?.tokens?.accessToken ?? "");
+        await storeData("@refreshToken", data?.tokens?.refreshToken);
+        await storeData("@userId", data?.userId);
+        setUserId(data?.userId);
 
         if (role === "USER_ROLE_FARMER") {
-          router.replace("/(farmer)/two");
+          router.replace("/(farmer)");
         } else {
-          router.replace("/(buyer)/two");
+          router.replace("/(buyer)");
         }
       } catch (err) {
         console.error("Error handling login success:", err);
@@ -120,6 +129,25 @@ export default function Login() {
       setLoading(false);
     }
   };
+
+  const { data: userData } = useQuery({
+    ...usersGetUserByIdOptions({
+      path: {
+        userId: userId ?? "",
+      },
+    }),
+    enabled: !!userId,
+  });
+
+  useEffect(() => {
+    if (user) {
+      if (user?.role === "USER_ROLE_FARMER") {
+        router.replace("/(farmer)");
+      } else {
+        router.replace("/(buyer)");
+      }
+    }
+  }, [user]);
 
   return (
     <>
@@ -177,6 +205,7 @@ export default function Login() {
                     size={20}
                   />
                 }
+                autoCapitalize="none"
               />
               {errors.email ? (
                 <Text style={loginstyles.errorText}>{errors.email}</Text>

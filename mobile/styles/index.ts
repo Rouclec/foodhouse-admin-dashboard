@@ -11,6 +11,7 @@ import { onboardingStyles } from "./(auth)/onboarding.styles";
 import { forgotPasswordIndexStyles } from "./(auth)/(forgot-password)/index.style";
 import { forgotPasswordVerifyOtpStyles } from "./(auth)/(forgot-password)/verify-otp.styles";
 import { createNewPasswordStyles } from "./(auth)/(forgot-password)/create-new-password.styles";
+import { tabStyles } from "./(farmer)/_layout.styles";
 
 export {
   buyerIndexStyles,
@@ -26,4 +27,5 @@ export {
   forgotPasswordIndexStyles,
   forgotPasswordVerifyOtpStyles,
   createNewPasswordStyles,
+  tabStyles,
 };
