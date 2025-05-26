@@ -1,34 +1,42 @@
-import { Keyboard, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StyleSheet,  TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import CountrySelect from '@/components/general/CountrySelect'
-import { CAMEROON, Colors, countries } from '@/constants'
-import { Appbar, Button, Icon, TextInput, Text } from 'react-native-paper';
-import PhoneNumberInput from '@/components/general/PhoneNumberInput';
-import { useRouter } from 'expo-router';
-import { usersSendSignupSmsOtpMutation } from '@/client/users.swagger/@tanstack/react-query.gen';
-import { useMutation } from '@tanstack/react-query';
-import { defaultStyles } from '@/styles';
-import { signupStyles  } from '@/styles';
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
+import React, { useEffect, useState } from "react";
+import CountrySelect from "@/components/general/CountrySelect";
+import { CAMEROON, Colors, countries } from "@/constants";
+import { Appbar, Button, Icon, TextInput, Text } from "react-native-paper";
+import PhoneNumberInput from "@/components/general/PhoneNumberInput";
+import { useRouter } from "expo-router";
+import { usersSendSignupSmsOtpMutation } from "@/client/users.swagger/@tanstack/react-query.gen";
+import { useMutation } from "@tanstack/react-query";
+import { defaultStyles } from "@/styles";
+import { signupStyles } from "@/styles";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const Info = () => {
-  const [country, setCountry] = useState(CAMEROON); 
-  const [callingCode, setCallingCode] = useState(country?.dial_code || '237'); // Use country's calling code
-  const [mobile, setMobile] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [country, setCountry] = useState(CAMEROON);
+  const [callingCode, setCallingCode] = useState(country?.dial_code || "237"); // Use country's calling code
+  const [mobile, setMobile] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
-  const [isChecked, setIsChecked] = useState(false); 
 
   const router = useRouter();
 
-  // Update calling code when country changes
   useEffect(() => {
     if (country?.dial_code) {
       setCallingCode(country.dial_code);
@@ -44,7 +52,7 @@ const Info = () => {
         },
       });
     } catch (error) {
-      console.error('Error signing up: ', error);
+      console.error("Error signing up: ", error);
     } finally {
       setLoading(false);
     }
@@ -52,7 +60,7 @@ const Info = () => {
 
   const { mutateAsync } = useMutation({
     ...usersSendSignupSmsOtpMutation(),
-    onError: async error => {
+    onError: async (error) => {
       setErrorMessage(() => {
         const errorData = error?.response?.data;
 
@@ -60,16 +68,16 @@ const Info = () => {
           return errorData?.message;
         }
 
-        let message = 'An unknown error occurred';
+        let message = "An unknown error occurred";
 
-        if (typeof errorData === 'string') {
+        if (typeof errorData === "string") {
           try {
             const firstObject = JSON.parse(
-              (errorData as string).match(/\{.*?\}/s)?.[0] || '{}',
+              (errorData as string).match(/\{.*?\}/s)?.[0] || "{}"
             );
             if (firstObject?.message) message = `${firstObject.message}`;
           } catch (parseError) {
-            console.error('Error parsing error response:', parseError);
+            console.error("Error parsing error response:", parseError);
           }
         }
 
@@ -78,14 +86,15 @@ const Info = () => {
       setError(true);
       setError(false);
     },
-    onSuccess: data => {
+    onSuccess: (data) => {
       router.push({
-        pathname: '/verify-otp',
+        pathname: "/verify-otp",
         params: {
           requestId: data.requestId,
           phoneNumber: `${callingCode}${mobile}`,
-          country: country?.code, 
-          password,
+          email, 
+          password, 
+        
         },
       });
     },
@@ -93,33 +102,34 @@ const Info = () => {
 
   return (
     <>
-      <Appbar.Header dark={false} style={signupStyles.appHeader}>
+      <Appbar.Header dark={false}>
         <TouchableOpacity
           style={signupStyles.closeIconContainer}
-          onPress={() => router.back()}>
+          onPress={() => router.back()}
+        >
           <Icon name="arrow-left" size={24} color="#000" />
         </TouchableOpacity>
+        <Text variant="headlineMedium" style={signupStyles.heading}>
+          Create Farmer Account
+        </Text>
       </Appbar.Header>
-      
+
       <KeyboardAvoidingView
         style={signupStyles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}>
-        
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+      >
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
           <SafeAreaView style={signupStyles.mainConatiner}>
-            <Text variant="headlineMedium" style={signupStyles.heading}>
-              Farmers Account
-            </Text>
             <ScrollView
               style={signupStyles.scrollContainer}
-              showsVerticalScrollIndicator={false}>
+              showsVerticalScrollIndicator={false}
+            >
               <View style={signupStyles.allInput}>
-                <Text style={signupStyles.label}>Confirm Password</Text>
                 <CountrySelect
                   setCountry={setCountry}
                   containerStyle={signupStyles.countryCodeContainer}
-                  countries={countries} 
+                  countries={countries}
                   country={country}
                 />
                 <PhoneNumberInput
@@ -130,7 +140,6 @@ const Info = () => {
                   containerStyle={signupStyles.phoneNumberInputContainerStyle}
                 />
 
-               
                 <TextInput
                   mode="outlined"
                   label="Email"
@@ -141,7 +150,7 @@ const Info = () => {
                   error={email?.length > 0 && !emailRegex.test(email)}
                   outlineStyle={signupStyles.outlineInput}
                   style={signupStyles.input}
-                  theme={{ colors: { onSurfaceVariant: Colors.grey['e8'] } }}
+                  theme={{ colors: { onSurfaceVariant: Colors.grey["e8"] } }}
                 />
 
                 <TextInput
@@ -155,20 +164,22 @@ const Info = () => {
                   style={signupStyles.input}
                   outlineStyle={signupStyles.outlineInput}
                   contentStyle={signupStyles.inputContentStyle}
-                  theme={{ colors: { onSurfaceVariant: Colors.grey['e8'] } }}
+                  theme={{ colors: { onSurfaceVariant: Colors.grey["e8"] } }}
                   error={password.length > 0 && password.length < 12}
                   right={
                     <TextInput.Icon
-                      icon={showPassword ? 'eye-off' : 'eye'}
+                      icon={showPassword ? "eye-off" : "eye"}
                       onPress={() => setShowPassword(!showPassword)}
                       size={16}
-                      color={Colors.primary[300]}
+                      color={Colors.grey["e7"]}
                       style={defaultStyles.iconContainer}
                     />
                   }
                 />
                 {password.length > 0 && password.length < 12 && (
-                  <Text style={[signupStyles.errorTextDark, signupStyles.margin20]}>
+                  <Text
+                    style={[signupStyles.errorTextDark, signupStyles.margin20]}
+                  >
                     Should be atleast 12 characters
                   </Text>
                 )}
@@ -181,7 +192,7 @@ const Info = () => {
                   mode="outlined"
                   outlineStyle={signupStyles.outlineInput}
                   style={signupStyles.input}
-                  theme={{ colors: { onSurfaceVariant: Colors.grey['e8'] } }}
+                  theme={{ colors: { onSurfaceVariant: Colors.grey["e8"] } }}
                   error={
                     password?.length > 0 &&
                     confirmPassword?.length > 0 &&
@@ -189,18 +200,20 @@ const Info = () => {
                   }
                   right={
                     <TextInput.Icon
-                      icon={showConfirmPassword ? 'eye-off' : 'eye'}
+                      icon={showConfirmPassword ? "eye-off" : "eye"}
                       onPress={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }
                       size={16}
-                      color={Colors.primary[300]}
+                      color={Colors.grey["e7"]}
                       style={defaultStyles.iconContainer}
                     />
                   }
                 />
                 {confirmPassword.length > 0 && confirmPassword !== password && (
-                  <Text style={[signupStyles.errorTextDark, signupStyles.margin20]}>
+                  <Text
+                    style={[signupStyles.errorTextDark, signupStyles.margin20]}
+                  >
                     Passwords do not match
                   </Text>
                 )}
@@ -212,20 +225,21 @@ const Info = () => {
           <Button
             mode="contained"
             onPress={handleSignUp}
-            textColor={Colors.light['10']}
-            buttonColor={Colors.primary['500']}
+            textColor={Colors.light["10"]}
+            buttonColor={Colors.primary["500"]}
             style={defaultStyles.button}
             loading={loading}
             disabled={
               loading ||
               !country ||
               !mobile ||
+              !email ||
               !password ||
-              !isChecked ||
               password.length < 12 ||
               password !== confirmPassword
-            }>
-            Sign up
+            }
+          >
+            Create Account
           </Button>
         </View>
       </KeyboardAvoidingView>

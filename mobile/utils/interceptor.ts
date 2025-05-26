@@ -60,11 +60,11 @@ const updateAuthHeader = (newToken: string) => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handleResponseError = async (error: any) => {
-  const originalRequest = error.config;
+  const originalRequest = error?.config;
   if (
-    error.response.status === 401 &&
-    !originalRequest._retry &&
-    (error.response.data as string).includes("ID token has expired")
+    error?.response?.status === 401 &&
+    !originalRequest?._retry &&
+    (error?.response?.data as string).includes("ID token has expired")
   ) {
     originalRequest._retry = true; // Mark the request as retried to avoid infinite loops.
     try {
@@ -77,7 +77,7 @@ const handleResponseError = async (error: any) => {
         }
       );
 
-      const { accessToken } = response.data;
+      const { accessToken } = response?.data;
 
       updateAuthHeader(accessToken);
       // TODO Find a way to update the access token in the session

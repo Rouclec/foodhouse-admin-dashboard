@@ -16,9 +16,9 @@ export const phoneNumberInputStyles = StyleSheet.create({
     height: 57,
     justifyContent: 'center',
     padding: 16,
-    borderRadius: 4,
+    borderRadius: 14,
     borderWidth: 0.5,
-    borderColor: Colors.primary['300'],
+    borderColor: Colors.grey['ea'],
   },
   countryCodeText: {
     fontSize: 14,
@@ -42,14 +42,14 @@ export const phoneNumberInputStyles = StyleSheet.create({
     flexGrow: 1,
     height: 56,
     fontSize: 16,
-    borderRadius: 4,
+    borderRadius: 14,
     paddingHorizontal: 16,
     bottom: 6,
     marginLeft: 20,
   },
   outlineInput: {
     borderWidth: 0.5,
-    borderColor: Colors.primary['300'],
+    borderColor: Colors.grey['ea'],
   },
   searchInput: {
     backgroundColor: 'transparent',
@@ -72,7 +72,7 @@ export const phoneNumberInputStyles = StyleSheet.create({
     marginRight: 4,
     alignItems: 'center',
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 14,
     padding: 8,
   },
   countryItem: {

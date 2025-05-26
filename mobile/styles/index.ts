@@ -10,6 +10,7 @@ import { index1 } from "./(auth)/indexstyles";
 import { loginstyles } from "./(auth)/loginStyles";
 import { onboardingStyles } from "./(auth)/onboarding";
 import { signupStyles } from "./(auth)/signupstyles";
+import { verifyOtpStyles } from "./(auth)/verify-otpstyles";
 export {
   buyerIndexStyles,
   farmerIndexStyles,
@@ -22,5 +23,5 @@ export {
   loginstyles,
  onboardingStyles,
  signupStyles,
-  
+  verifyOtpStyles,
 };

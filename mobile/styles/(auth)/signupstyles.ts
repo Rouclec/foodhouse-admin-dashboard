@@ -5,11 +5,9 @@ export const signupStyles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: Colors.primary['disabled'],
+    backgroundColor: "#FFFFFF",
   },
-  appHeader: {
-    backgroundColor: Colors.primary['disabled'],
-  },
+  
    label: {
     fontSize: 16,
     color: '#333',
@@ -27,6 +25,7 @@ export const signupStyles = StyleSheet.create({
   },
   mainConatiner: {
     flex: 1,
+    backgroundColor: "fff",
   },
   heading: {
     marginTop: 4,
@@ -35,14 +34,14 @@ export const signupStyles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 600,
     lineHeight: 32,
-    color: Colors.primary[500],
+    // color: Colors.primary[500],
   },
   scrollContainer: {
     flexGrow: 1,
     marginTop: 12,
+    backgroundColor: "ff0000"
   },
   allInput: {
-    
     gap: 34,
     paddingBottom: Platform.OS === 'ios' ? 0 : 120,
   },
@@ -63,30 +62,30 @@ export const signupStyles = StyleSheet.create({
     letterSpacing: 0.4,
   },
   input: {
-    backgroundColor: Colors.grey['bg'],
+    backgroundColor: Colors.grey['ea'],
     flexGrow: 1,
     height: 56,
     fontSize: 14,
-    borderRadius: 4,
+    borderRadius: 14,
     paddingHorizontal: 16,
     borderWidth: 0.5,
     borderColor: 'transparent',
-    color: Colors.grey['surface'],
+    color: Colors.grey['e8'],
   },
   outlineInput: {
-    borderWidth: 0.5,
-    borderColor: Colors.primary['300'],
+    borderWidth: 2,
+    borderColor: Colors.grey['ea'],
   },
   focusedInput: {
     backgroundColor: Colors.grey['ea'],
     flexGrow: 1,
     height: 64,
     fontSize: 18,
-    borderRadius: 4,
+    borderRadius: 14,
     paddingHorizontal: 16,
-    borderColor: Colors.primary['300'],
+    borderColor: Colors.grey['ea'],
     borderWidth: 2,
-    color: Colors.grey['ea'],
+    color: Colors.grey['e7'],
   },
   inputContentStyle: { justifyContent: 'center' },
   buttonText: {
@@ -144,8 +143,55 @@ export const signupStyles = StyleSheet.create({
     height: 57,
     justifyContent: 'center',
     padding: 16,
-    borderRadius: 4,
+    borderRadius: 14,
     borderWidth: 0.5,
-    borderColor: Colors.primary['300'],
+    borderColor: Colors.grey['ea'],
+  },
+  imageContainer: {
+    alignItems: "center",
+    marginVertical: 20,
+  },
+  imageUpload: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: Colors.grey['ea'],
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: Colors.grey['ea'],
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
+  addImageContainer: {
+    position: "relative",
+    width: 100,
+    height: 100,
+    alignItems: "center",
+    justifyContent: "center",
+    
+  },
+  cameraIcon: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: Colors.primary[500],
+    borderRadius: 40,
+  },
+  account: {
+color: "#ccc",
+backgroundColor: Colors.grey['ea']
+  },
+  modalContainer: {
+    backgroundColor: "white",
+    padding: 20,
+    margin: 20,
+    borderRadius: 8,
+  },
+  modalContent: {
+    width: "100%",
   },
 });

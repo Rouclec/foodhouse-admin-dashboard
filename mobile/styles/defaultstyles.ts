@@ -8,7 +8,6 @@ export const defaultStyles = StyleSheet.create({
     position: 'absolute',
     alignSelf: 'center',
     bottom: Platform.OS === 'ios' ? 32 : 16,
-    backgroundColor: Colors.primary['disabled'],
     height: 64,
     width: width - 32,
   },
@@ -19,7 +18,7 @@ export const defaultStyles = StyleSheet.create({
     bottom: 0,
     paddingBottom: 32,
     width: width,
-    backgroundColor: Colors.grey['bg'],
+   
     paddingHorizontal: 16,
     rowGap: 12,
   },
@@ -27,7 +26,7 @@ export const defaultStyles = StyleSheet.create({
     flex: 1,
     padding: 20,
     paddingTop: 0,
-    backgroundColor: Colors.primary['disabled'],
+    
   },
   appHeader: {
     backgroundColor: Colors.primary['disabled'],
@@ -49,10 +48,11 @@ export const defaultStyles = StyleSheet.create({
     flexGrow: 1,
   },
   button: {
+    width: "100%",
     height: 56,
-    justifyContent: 'center',
-    borderRadius: 16,
-    width: '100%',
+    borderRadius: 28,
+    justifyContent: "center",
+    alignItems: "center",
   },
   buttonText: {
     color: Colors.light['10'],
