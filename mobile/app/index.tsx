@@ -146,7 +146,7 @@ export default function Index() {
     <View style={styles.splash}>
       <View style={styles.textWrapper}>
         <Text style={styles.text} variant="titleLarge">
-          Food House
+          FoodHouse
         </Text>
       </View>
 

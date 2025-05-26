@@ -1,3 +1,40 @@
 {
-  "hello": "Bonjour"
+  "hello": "Bonjour",
+  "(auth)": {
+    "index": {
+      "welcomeTo": "Bienvenue à",
+      "discoverFresh": "Découvrez des produits locaux frais et des articles essentiels livrés directement à votre porte, tout en soutenant notre communauté d'agriculteurs et de vendeurs locaux qui proposent leurs meilleurs produits à un public plus large.",
+      "continue": "Continuer"
+    },
+    "onboarding": {
+      "1": {
+        "title": "Achetez frais, achetez pas cher",
+        "description": "Profitez de produits frais de la ferme à des prix abordables. En supprimant les intermédiaires, nous vous permettons d'acheter directement auprès des agriculteurs et d’économiser sur chaque achat sans compromettre la qualité."
+      },
+      "2": {
+        "title": "Mangez frais, grandissez fort",
+        "description": "Mangez frais, grandissez fort. Alimentez votre corps avec les ingrédients les plus frais. Nos agriculteurs fournissent des produits riches en nutriments qui vous aident à rester en bonne santé et fort, pour un mode de vie sain pour vous et votre famille. Commencez dès maintenant."
+      },
+      "3": {
+        "title": "Mangez sain, vivez plus longtemps",
+        "description": "Priorisez votre santé avec la fraîcheur de la ferme à votre table. Notre plateforme propose des options alimentaires saines et biologiques qui favorisent une vie plus longue et plus saine. Commencez votre chemin vers une meilleure vie dès aujourd’hui !"
+      },
+      "getStarted": "Commencer"
+    },
+    "login": {
+      "anUnknownError": "Une erreur inconnue s'est produite",
+      "errorParsing": "Erreur lors de l'analyse de la réponse d'erreur : ",
+      "emailRequired": "L'adresse e-mail est requise",
+      "invalidEmail": "Veuillez entrer une adresse e-mail valide",
+      "passwordRequired": "Le mot de passe est requis",
+      "loginTo": "Connectez-vous à votre compte",
+      "email": "E-mail",
+      "password": "Mot de passe",
+      "forgotPassword": "Mot de passe oublié ?",
+      "login": "Connexion",
+      "orContinueWith": "ou continuer avec",
+      "dontHaveAnAccount": "Vous n'avez pas de compte ?",
+      "registerNow": "Inscrivez-vous maintenant"
+    }
+  }
 }
