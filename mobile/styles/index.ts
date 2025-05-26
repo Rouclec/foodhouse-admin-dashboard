@@ -9,6 +9,7 @@ import { DatePickerStyles } from "./components/general/DatePickerStyles";
 import { index1 } from "./(auth)/indexstyles";
 import { loginstyles } from "./(auth)/loginStyles";
 import { onboardingStyles } from "./(auth)/onboarding";
+import { signupStyles } from "./(auth)/signupstyles";
 export {
   buyerIndexStyles,
   farmerIndexStyles,
@@ -20,5 +21,6 @@ export {
   index1,
   loginstyles,
  onboardingStyles,
+ signupStyles,
   
 };
