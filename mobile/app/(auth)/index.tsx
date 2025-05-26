@@ -1,12 +1,14 @@
-import { router } from 'expo-router';
-import { Dimensions, ImageBackground, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { index1 } from '@/styles';
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
-
-// Define image dimensions
-const imageWidth = screenWidth / 3.5;
-const imageHeight = (imageWidth * 14) / 11;
+import { router } from "expo-router";
+import {
+  ImageBackground,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { index1 } from "@/styles";
+import i18n from "@/i18n";
 
 export default function TabOneScreen() {
   return (
@@ -22,7 +24,7 @@ export default function TabOneScreen() {
                 require("@/assets/images/rectangle12.png"),
               ].map((source, index) => (
                 <View key={index} style={index1.imageWrapper}>
-                  <ImageBackground source={source} style={index1.image}/>
+                  <ImageBackground source={source} style={index1.image} />
                 </View>
               ))}
             </View>
@@ -34,7 +36,7 @@ export default function TabOneScreen() {
                 require("@/assets/images/rectangle14.png"),
               ].map((source, index) => (
                 <View key={index} style={index1.imageWrapper}>
-                  <ImageBackground source={source} style={index1.image}/>
+                  <ImageBackground source={source} style={index1.image} />
                 </View>
               ))}
             </View>
@@ -45,7 +47,7 @@ export default function TabOneScreen() {
                 require("@/assets/images/rectangle16.png"),
               ].map((source, index) => (
                 <View key={index} style={index1.imageWrapper}>
-                  <ImageBackground source={source} style={index1.image}/>
+                  <ImageBackground source={source} style={index1.image} />
                 </View>
               ))}
             </View>
@@ -57,7 +59,7 @@ export default function TabOneScreen() {
                 require("@/assets/images/rectangle15.png"),
               ].map((source, index) => (
                 <View key={index} style={index1.imageWrapper}>
-                  <ImageBackground source={source} style={index1.image}/>
+                  <ImageBackground source={source} style={index1.image} />
                 </View>
               ))}
             </View>
@@ -65,29 +67,29 @@ export default function TabOneScreen() {
 
           <View style={index1.textContainer}>
             <Text style={index1.headingH1}>
-              Welcome To{"\n"}
+              {i18n.t("(auth).index.welcomeTo")}
+              {"\n"}
               <Text style={{ fontWeight: "bold" }}>FoodHouse</Text>
             </Text>
-            
+
             <Text style={index1.subText}>
-              Discover fresh local produce and essentials delivered right to your doorstep, 
-              while supporting our community of farmers and local sellers who bring their 
-              best products to a wider audience.
+              {i18n.t("(auth).index.discoverFresh")}
             </Text>
           </View>
         </SafeAreaView>
       </ScrollView>
 
       <View style={index1.buttonContainer}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={index1.button}
           onPress={() => router.replace("/onboarding")}
           activeOpacity={0.8}
         >
-          <Text style={index1.buttonText}>Continue</Text>
+          <Text style={index1.buttonText}>
+            {i18n.t("(auth).index.continue")}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 }
-

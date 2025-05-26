@@ -2,6 +2,7 @@ export default {
   grey: {
     bg: "#EAE7F2",
     "3c": "#3C3C3C",
+    "61": "#616161",
     "79": "#797777",
     e1: "#E1E3E7",
     a4: "#A4A4A4",
@@ -39,7 +40,7 @@ export default {
   errorDark: "#a10202",
   primary: {
     "50": "#C0C1FF",
-    "300": "#4D4FCC",
+    "300": "#D8FFC9",
     "400": "#E0DEFF",
     "500": "#6dcd47",
     "200": "DB4437",

@@ -1,3 +1,40 @@
 {
-  "hello": "Hello"
+  "hello": "Hello",
+  "(auth)": {
+    "index": {
+      "welcomeTo": "Welcome To",
+      "discoverFresh": "Discover fresh local produce and essentials delivered right to your doorstep, while supporting our community of farmers and local sellers who bring their best products to a wider audience.",
+      "continue": "Continue"
+    },
+    "onboarding": {
+      "1": {
+        "title": "Buy Fresh, Buy Cheap",
+        "description": "Enjoy farm-fresh product at affordable prices. By cutting out the middleman. We make it easy for you to buy directly from farmers and save on every purchase without compromising on quality"
+      },
+      "2": {
+        "title": "Eat fresh, Grow strong",
+        "description": "Eat Fresh, Grow strong Fuel your body with the freshest ingredients. Our farmers provide nutrient-rich produce that help you stay healthy and strong, supporting a wholesome lifestyle for you and your family. Gets started"
+      },
+      "3": {
+        "title": "Eat healthy, Live Longer",
+        "description": "Prioritize your health with farm-to-table freshness. Our platform offers healthy, organic food options that promote a longer healthier life. Start your journey to better living today!"
+      },
+      "getStarted": "Get Started"
+    },
+    "login": {
+      "anUnknownError": "An unknown error occured",
+      "errorParsing": "Error parsing error response: ",
+      "emailRequired": "Email is required",
+      "invalidEmail": "Please enter a valid email",
+      "passwordRequired": "Password is required",
+      "loginTo": "Log in to your account",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "login": "Login",
+      "orContinueWith": "or continue with",
+      "dontHaveAnAccount": "Don't have an account?",
+      "registerNow": "Register Now"
+    }
+  }
 }

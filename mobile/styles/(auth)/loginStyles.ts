@@ -1,3 +1,4 @@
+import { Colors } from "@/constants";
 import { StyleSheet, Dimensions } from "react-native";
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -5,31 +6,29 @@ const { width: screenWidth } = Dimensions.get("window");
 export const loginstyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.light[10],
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     paddingHorizontal: 15,
     paddingTop: 50,
     paddingBottom: 20,
   },
   backButton: {
     padding: 8,
-    zIndex: 1,
+    width: 40,
+    height: 40,
+    alignItems: "flex-start",
+    justifyContent: "center",
   },
   logoCircle: {
+    marginTop: 40,
     width: 160,
     height: 160,
     borderRadius: 80,
-    backgroundColor: "#6dcd47",
+    backgroundColor: Colors.primary[500],
     justifyContent: "center",
     alignItems: "center",
-    position: "absolute",
-    left: "50%",
-    top: 104,
-    marginLeft: -80,
+    alignSelf: "center",
   },
   logoText: {
     color: "#fff",
@@ -41,7 +40,7 @@ export const loginstyles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 200,
+    paddingTop: 32,
   },
   loginTitle: {
     fontSize: 24,
@@ -95,12 +94,12 @@ export const loginstyles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: "#e0e0e0",
+    backgroundColor: Colors.grey["border"],
   },
   dividerText: {
     width: 120,
     textAlign: "center",
-    color: "#9e9e9e",
+    color: Colors.grey["61"],
   },
   socialIconsContainer: {
     flexDirection: "row",
@@ -122,12 +121,10 @@ export const loginstyles = StyleSheet.create({
     justifyContent: "center",
   },
   registerText: {
-    color: "#9e9e9e",
+    color: Colors.grey["61"],
   },
   registerLink: {
-    color: "#6dcd47",
+    color: Colors.primary[500],
     fontWeight: "bold",
   },
 });
-
-
