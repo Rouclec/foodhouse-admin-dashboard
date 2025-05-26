@@ -35,6 +35,35 @@
       "orContinueWith": "or continue with",
       "dontHaveAnAccount": "Don't have an account?",
       "registerNow": "Register Now"
+    },
+    "(forgot-password)": {
+      "index": {
+        "forgotPassword": "Forgot Password",
+        "enterYourEmail": "Enter your email to reset your password. We will send you an OTP for verification.",
+        "email": "Email",
+        "enterEmail": "Enter your email",
+        "invalidEmail": "Please enter a valid email",
+        "continue": "Continue",
+        "unknownError": "An unknown error occured"
+      },
+      "verify-otp": {
+        "forgotPassword": "Forgot Password",
+        "aCodeHasBeenSentTo": "A code has been sent to ",
+        "resendCode": "Resend code",
+        "in": "in",
+        "verifyOtp": "Verify otp"
+      },
+      "create-new-password": {
+        "createNewPassword": "Create new password",
+        "password": "Password",
+        "confirmPassword": "Confirm password",
+        "passwordMustBe": "Password must be at least 12 characters",
+        "passwordsDoNot": "Passwords do not match",
+        "continue": "Continue",
+        "yourPasswordHasBeenReset": "Your password has been reset successfully. You will be redirected to the login page in a few seconds.",
+        "unknownError": "An unknown error occured",
+        "passwordReset": "Password Reset!"
+      }
     }
   }
 }

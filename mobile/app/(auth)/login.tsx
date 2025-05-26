@@ -10,7 +10,7 @@ import {
   Platform,
 } from "react-native";
 import { Icon, TextInput } from "react-native-paper";
-import { router } from "expo-router";
+import { Link, router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation } from "@tanstack/react-query";
 import { usersAuthenticateMutation } from "@/client/users.swagger/@tanstack/react-query.gen";
@@ -164,7 +164,7 @@ export default function Login() {
                 theme={{
                   colors: {
                     primary: Colors.primary[500],
-                    background: "#FAFAFA",
+                    background: Colors.grey["fa"],
                     error: Colors.error,
                   },
                   roundness: 10,
@@ -219,11 +219,14 @@ export default function Login() {
                 <Text style={loginstyles.errorText}>{errors.password}</Text>
               ) : null}
 
-              <TouchableOpacity style={loginstyles.forgotPassword}>
+              <Link
+                style={loginstyles.forgotPassword}
+                href={"/(auth)/(forgot-password)"}
+              >
                 <Text style={loginstyles.forgotPasswordText}>
                   {i18n.t("(auth).login.forgotPassword")}
                 </Text>
-              </TouchableOpacity>
+              </Link>
 
               <TouchableOpacity
                 style={loginstyles.loginButton}
