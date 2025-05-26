@@ -187,6 +187,7 @@ func TestSignup(t *testing.T) {
 	defer ctrl.Finish()
 
 	testOtpStr := "123456"
+	testEmail := "testuser@foodhouse.com"
 	failedPassword := "foodh2025"
 	validPassword := "F00Dh0u532025"
 	requestID := uuid.NewString()
@@ -201,6 +202,25 @@ func TestSignup(t *testing.T) {
 		expectedError error
 		expectedResp  *usersgrpc.SignupResponse
 	}{
+		"invalidEmail": {
+			setupMocks: func(mockRepo *mocks.MockUsersRepo,
+				_ *sqlc_mocks.MockQuerier,
+				_ *usersMocks.MockTokenManager,
+				_ *usersMocks.MockOtpGenerator) {
+				mockRepo.EXPECT().Begin(gomock.Any()).Times(0)
+			},
+			request: &usersgrpc.SignupRequest{
+				PhoneFactor: &usersgrpc.AuthFactor{
+					Type:        usersgrpc.FactorType_FACTOR_TYPE_SMS_OTP,
+					Id:          requestID,
+					SecretValue: testOtpStr,
+				},
+				UserType: usersgrpc.UserType_USER_TYPE_FARMER,
+				Password: failedPassword,
+			},
+			expectedError: fmt.Errorf("Invalid email"),
+			expectedResp:  nil,
+		},
 		"PasswordLengthBelowMinimum": {
 			setupMocks: func(mockRepo *mocks.MockUsersRepo,
 				_ *sqlc_mocks.MockQuerier,
@@ -214,6 +234,7 @@ func TestSignup(t *testing.T) {
 					Id:          requestID,
 					SecretValue: testOtpStr,
 				},
+				Email:    testEmail,
 				UserType: usersgrpc.UserType_USER_TYPE_FARMER,
 				Password: failedPassword,
 			},
@@ -234,6 +255,7 @@ func TestSignup(t *testing.T) {
 					Id:          requestID,
 					SecretValue: "wrongOTP",
 				},
+				Email: testEmail,
 				UserType: usersgrpc.UserType_USER_TYPE_FARMER,
 				Password: validPassword,
 			},
@@ -257,6 +279,7 @@ func TestSignup(t *testing.T) {
 					Id:          requestID,
 					SecretValue: testOtpStr,
 				},
+				Email: testEmail,
 				UserType: usersgrpc.UserType_USER_TYPE_FARMER,
 				Password: validPassword,
 			},
