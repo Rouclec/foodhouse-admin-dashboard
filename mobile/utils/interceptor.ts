@@ -60,11 +60,13 @@ const updateAuthHeader = (newToken: string) => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handleResponseError = async (error: any) => {
+  console.log(error?.response, "error response");
   const originalRequest = error?.config;
   if (
     error?.response?.status === 401 &&
     !originalRequest?._retry &&
-    (error?.response?.data as string).includes("ID token has expired")
+    typeof error?.response?.data === "string" &&
+    (error?.response?.data ?? "")?.includes("ID token has expired")
   ) {
     originalRequest._retry = true; // Mark the request as retried to avoid infinite loops.
     try {

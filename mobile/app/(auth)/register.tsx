@@ -100,7 +100,7 @@ const Register = () => {
 
             <SafeAreaView style={styles.checkboxContainer}>
               <Text style={styles.accountText}>Already have an account?</Text>
-              <TouchableOpacity onPress={() => router.push('/profile')}>
+              <TouchableOpacity onPress={() => router.push('/profilePage')}>
                 <Text style={styles.link}>Login</Text>
               </TouchableOpacity>
             </SafeAreaView>
