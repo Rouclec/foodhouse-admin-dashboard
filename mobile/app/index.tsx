@@ -12,7 +12,7 @@ import {
 } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { indexStyles as styles } from "@/styles";
 import { Text } from "react-native-paper";
-import { Chase, } from "react-native-animated-spinkit";
+import { Chase } from "react-native-animated-spinkit";
 import { Colors } from "@/constants";
 
 export default function Index() {

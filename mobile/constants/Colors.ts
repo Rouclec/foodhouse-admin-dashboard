@@ -23,6 +23,8 @@ export default {
     e18: "#DBD8E3",
     e19: "#D4D4D4",
     e20: "#9A9A9A",
+    "9e": "#9E9E9E",
+    fa: "#FAFAFA",
   },
   dark: {
     "0": "#000000",
