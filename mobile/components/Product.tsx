@@ -26,7 +26,8 @@ export const Product: FC<Props> = ({ product }) => {
         <Text>
           {product.amount?.currencyIsoCode} {product.amount?.value}
           {/* <Text>{product.unitType}</Text> */}
-          <Text>/kg</Text> {/* Use actual unit type*/}
+          <Text>{product.unitType?.slug?.replace("per_", "/")}</Text>{" "}
+          {/* Use actual unit type*/}
         </Text>
       </View>
     </View>

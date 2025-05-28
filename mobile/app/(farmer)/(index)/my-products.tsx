@@ -74,7 +74,6 @@ export default function MyProducts() {
         userId: user?.userId ?? "",
       },
       query: {
-        categoryId: "",
         count: count,
         // "maxAmount.currencyIsoCode": "XAF",
         // "maxAmount.value": "10000000000",

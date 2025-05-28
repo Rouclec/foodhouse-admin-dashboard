@@ -385,19 +385,19 @@ SELECT
 FROM product p
 LEFT JOIN price_types pt ON p.unit_type = pt.id
 WHERE
-  ($1::varchar = '' OR created_by = $1::varchar) AND
-  ($2::varchar = '' OR category_id = $2::varchar) AND
-  ($3::bigint = 0 OR value >= $3::bigint) AND
+  ($1::varchar = '' OR p.created_by = $1::varchar) AND
+  ($2::varchar = '' OR p.category_id = $2::varchar) AND
+  ($3::bigint = 0 OR p.value >= $3::bigint) AND
   (
-    $4::bigint = 0 OR value <= COALESCE($4::bigint, 9223372036854775807)
+    $4::bigint = 0 OR p.value <= COALESCE($4::bigint, 9223372036854775807)
   ) AND
   (
     $5::text = '' OR
-    name ILIKE '%' || $5::text || '%' OR
-    description ILIKE '%' || $5::text || '%'
+    p.name ILIKE '%' || $5::text || '%' OR
+    p.description ILIKE '%' || $5::text || '%'
   ) AND
-  ($6::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at < $6::timestamptz)
-ORDER BY created_at DESC
+  ($6::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR p.created_at < $6::timestamptz)
+ORDER BY p.created_at DESC
 LIMIT $7::int
 `
 
