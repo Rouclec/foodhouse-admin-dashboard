@@ -3,10 +3,8 @@ import {
   Animated,
   Dimensions,
   FlatList,
-  Keyboard,
   KeyboardAvoidingView,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { defaultStyles, myProductStyles as styles } from "@/styles";
@@ -27,6 +25,7 @@ import { Feather } from "@expo/vector-icons";
 import { Colors } from "@/constants";
 import { Chase } from "react-native-animated-spinkit";
 import { Product } from "@/components";
+import { useIsFocused } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");
 export default function MyProducts() {
@@ -68,7 +67,11 @@ export default function MyProducts() {
   const router = useRouter();
 
   const { user } = useContext(Context) as ContextType;
-  const { isLoading: isProductsLoading, data } = useQuery({
+  const {
+    isLoading: isProductsLoading,
+    data,
+    refetch,
+  } = useQuery({
     ...productsListFarmerProductsOptions({
       path: {
         userId: user?.userId ?? "",
@@ -85,7 +88,13 @@ export default function MyProducts() {
     }),
   });
 
-  console.log({ data });
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (isFocused) {
+      refetch();
+    }
+  }, [isFocused]);
 
   return (
     <>
@@ -94,7 +103,6 @@ export default function MyProducts() {
         behavior={"padding"}
         keyboardVerticalOffset={0}
       >
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
           <View style={[defaultStyles.flex, defaultStyles.relativeContainer]}>
             <Appbar.Header
               dark={false}
@@ -208,7 +216,6 @@ export default function MyProducts() {
               <Icon source={"plus"} size={36} color={Colors.light[10]} />
             </TouchableOpacity>
           </View>
-        </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </>
   );
