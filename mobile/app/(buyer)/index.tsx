@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 export default function TabOneScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Buyer</Text>
+      <Text style={styles.title}>Farmer</Text>
       <View style={styles.separator} />
       {/* <EditScreenInfo path="app/(tabs)/index.tsx" /> */}
     </View>

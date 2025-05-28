@@ -14,7 +14,7 @@ type Props = {
   maximumDate?: Date;
 };
 
-const DatePicker: FC<Props> = ({
+export const DatePicker: FC<Props> = ({
   placeholder,
   date,
   setDate,
@@ -57,5 +57,3 @@ const DatePicker: FC<Props> = ({
     </View>
   );
 };
-
-export default DatePicker;
