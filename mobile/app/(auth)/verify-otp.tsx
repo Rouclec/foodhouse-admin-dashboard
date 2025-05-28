@@ -29,7 +29,7 @@ import { defaultStyles, verifyOtpStyles as styles } from '@/styles';
 import { delay, storeData, updateAuthHeader } from '@/utils';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Context, ContextType } from '../_layout';
-
+import i18n from '@/i18n';
 
 const VerifyOtpScreen: FC = () => {
   const { requestId, email, password, phoneNumber } = useLocalSearchParams();
@@ -39,7 +39,6 @@ const VerifyOtpScreen: FC = () => {
 
   const router = useRouter();
   const [currentTimeLeft, setCurrentTimeLeft] = useState(120);
-
   const [, setRetries] = useState(0);
   const [timeLeft, setTimeLeft] = useState(currentTimeLeft);
   const [otp, setOtp] = useState('');
@@ -48,8 +47,10 @@ const VerifyOtpScreen: FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>();
   const [error, setError] = useState(false);
   const [userId, setUserId] = useState<string>();
+  const { role, setUserRole } = useContext(Context) as ContextType;
 
   const { setUser } = useContext(Context) as ContextType;
+
   const handleVerifyOtp = async () => {
     try {
       setLoading(true);
@@ -62,13 +63,14 @@ const VerifyOtpScreen: FC = () => {
           },
           email: email as string,
           password: password as string,
-          
+          userType: role,
         },
       });
-
-      setShowModal(true);
     } catch (error) {
       console.error('Error verifying otp', error);
+      setError(true);
+      await delay(5000);
+      setError(false);
     } finally {
       setLoading(false);
     }
@@ -101,7 +103,7 @@ const VerifyOtpScreen: FC = () => {
       setTimeLeft(prevTime => prevTime - 1);
     }, 1000);
 
-    return () => clearInterval(timer); // Cleanup interval on component unmount
+    return () => clearInterval(timer); 
   }, [timeLeft]);
 
   const { mutateAsync } = useMutation({
@@ -118,7 +120,7 @@ const VerifyOtpScreen: FC = () => {
 
         if (typeof errorData === 'string') {
           try {
-            // Extract only the first JSON object
+            
             const firstObject = JSON.parse(
               (errorData as string).match(/\{.*?\}/s)?.[0] || '{}',
             );
@@ -140,6 +142,7 @@ const VerifyOtpScreen: FC = () => {
       await storeData('@refreshToken', data?.tokens?.refreshToken);
       await storeData('@userId', data?.userId);
       setUserId(data?.userId);
+      router.push('/profile-page');
     },
   });
 
@@ -211,19 +214,18 @@ const VerifyOtpScreen: FC = () => {
                 style={styles.backArrow}
               />
               <Text style={styles.headingText} variant="headlineMedium">
-                Verify your phone number
+                {i18n.t('(auth).verifyOtp.verifyNumber')}
               </Text>
             </Appbar.Header>
             <View style={styles.headingTextContainer}>
-              
               <Text style={styles.subHeadingText}>
-                Code has been sent to {phoneNumber}
+                {i18n.t('(auth).verifyOtp.codeSent')} {phoneNumber}
               </Text>
             </View>
             <ScrollView style={styles.scrollView}>
               <View style={styles.otpContainer}>
                 <PaperOtpInput
-                  maxLength={6}
+                  maxLength={4}
                   onPinChange={pin => {
                     setOtp(pin);
                     if (pin.length === 4) {
@@ -239,7 +241,7 @@ const VerifyOtpScreen: FC = () => {
                     onPress={handleResendOTP}
                     disabled={timeLeft > 0}>
                     <Text style={styles.link}>
-                      Resend code in 
+                      {i18n.t('(auth).verifyOtp.resendCode')}
                       {timeLeft > 0 && (
                         <Text style={styles.link}>
                           {' '}
@@ -262,13 +264,13 @@ const VerifyOtpScreen: FC = () => {
             </ScrollView>
           </View>
         </TouchableWithoutFeedback>
-        <View style={defaultStyles.bottomContainer}>
+        <View style={defaultStyles.bottomButtonContainer}>
           <Button
             mode="contained"
             textColor={Colors.light['0']}
             buttonColor={Colors.primary['500']}
             style={defaultStyles.button}
-            disabled={otp.length < 6 || loading}
+            disabled={otp.length < 4 || loading}
             loading={loading}
             onPress={handleVerifyOtp}
             labelStyle={styles.dialogLabel}>
@@ -276,37 +278,6 @@ const VerifyOtpScreen: FC = () => {
           </Button>
         </View>
       </KeyboardAvoidingView>
-
-      <Portal>
-        <Dialog
-          visible={showModal}
-          onDismiss={() => {}}
-          style={styles.dialogContainer}>
-          <Dialog.Icon icon="check-circle" color={Colors.success} size={40} />
-          <Dialog.Title style={styles.dialogTitle}>
-            Phone number verified!
-          </Dialog.Title>
-          <Dialog.Content>
-            <Text style={styles.dialogContent}>
-              You can now proceed to setup your VsorPay profile
-            </Text>
-          </Dialog.Content>
-          <Dialog.Actions style={styles.dialogActionContainer}>
-            <Button
-              mode="contained"
-              textColor={Colors.light['0']}
-              buttonColor={Colors.grey['3c']}
-              style={styles.dialogActionButton}
-              onPress={() => {
-                setShowModal(false);
-                router.push('/profile');
-              }}
-              labelStyle={styles.dialogLabel}>
-              Continue
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
       <Snackbar
         visible={error}
         onDismiss={() => {}}

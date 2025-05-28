@@ -36,6 +36,23 @@
       "dontHaveAnAccount": "Don't have an account?",
       "registerNow": "Register Now"
     },
+    
+    "verifyOtp": {
+      "verifyNumber": "verify your phone number",
+      "codeSent": "Code has been sent to",
+      "verify": "verify",
+      "phoneNumberVerified": "Phone Number verified!",
+      "setupProfile": "You can now proceed to setup your Farmer's Profile",
+      "continue": "continue",
+      "resendCode": "Resend code in"
+    },
+    "profile": {
+      "completeRegistration": "Complete Registration",
+      "firstName": "Enter First Name",
+      "lastName": "Enter last Name",
+      "email": "Enter Email",
+      "address": "Enter Address"
+    },
     "(forgot-password)": {
       "index": {
         "forgotPassword": "Forgot Password",
@@ -64,6 +81,26 @@
         "unknownError": "An unknown error occured",
         "passwordReset": "Password Reset!"
       }
+    },
+    "register": {
+      "createAccount": "Create Account",
+      "registerNewAccount": "Register New Account",
+      "description": "What describes you the best?",
+      "buyer": "buyer",
+      "seller": "Farmer or Seller",
+      "button":  "Next",
+      "havingAccount": "Already have an account?",
+      "login": "Login"
+    },
+    "createAccount": {
+      "farmerAccount": "Create Farmer Account",
+      "buyerAccount": "Create Buyer Account",
+      "createPassword": "Create Password",
+      "createAccount": "Create Account",
+      "enterEmail": "Enter Your Email",
+      "reEnterPassword": "Re-enter your password",
+      "placeholder": "Password must be atleast 12 characters",
+      "passwordMustBe": "Password must be at least 12 characters"
     }
   }
 }

@@ -8,6 +8,7 @@ export const index1 = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#6dcd47",
+    
   },
   scrollContent: {
     flexGrow: 1,
@@ -38,6 +39,7 @@ export const index1 = StyleSheet.create({
     flexDirection: "row",
     left: -imageWidth / 5,
     top: screenHeight * 0.05,
+   
   },
   imageRows: {},
   imageRow2: {

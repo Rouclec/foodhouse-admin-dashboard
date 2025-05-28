@@ -2,9 +2,9 @@ import Colors from '@/constants/Colors';
 import { StyleSheet } from 'react-native';
 
 export const verifyOtpStyles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.primary['disabled'] },
+  container: { flex: 1, backgroundColor: "#FFFFFF",},
   appHeader: {
-    backgroundColor: Colors.primary['disabled'],
+    backgroundColor: "#FFFFFF",
     marginBottom: 16,
   },
   headingTextContainer: {

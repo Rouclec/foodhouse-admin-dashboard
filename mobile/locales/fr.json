@@ -35,6 +35,38 @@
       "orContinueWith": "ou continuer avec",
       "dontHaveAnAccount": "Vous n'avez pas de compte ?",
       "registerNow": "Inscrivez-vous maintenant"
-    }
+    },
+  "register": {
+  "createAccount": "Créer un compte",
+  "RegisterNewAccount": "Enregistrer un nouveau compte",
+  "description": "Qu'est-ce qui vous décrit le mieux ?",
+  "buyer": "acheteur",
+  "seller": "Agriculteur ou Vendeur",
+  "button": "Suivant",
+  "havingAccount": "Vous avez déjà un compte ?",
+  "login": "Connexion"
+  },
+  "createAccount": {
+  "farmerAccount": "Créer un compte agriculteur",
+  "createPassword": "Créer un mot de passe",
+  "createAccount": "Créer un compte"
+},
+"verifyOtp": {
+  "verifyNumber": "vérifiez votre numéro de téléphone",
+  "codeSent": "Le code a été envoyé à",
+  "verify": "vérifier",
+  "phoneNumberVerified": "Numéro de téléphone vérifié !",
+  "setupProfile": "Vous pouvez maintenant configurer le profil de l'agriculteur",
+  "continue": "continuer",
+  "resendCode": "Renvoyer le code dans"
+},
+"profile": {
+  "completeRegistration": "Terminer l'inscription",
+  "firstName": "Entrez le prénom",
+  "lastName": "Entrez le nom de famille",
+  "email": "Entrez l'e-mail",
+  "address": "Entrez l'adresse"
+}
+
   }
 }

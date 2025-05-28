@@ -194,4 +194,47 @@ backgroundColor: Colors.grey['ea']
   modalContent: {
     width: "100%",
   },
+
+  content: {
+    paddingHorizontal: 20,
+    paddingVertical: 50,
+  },
+  roleContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  roleCard: {
+    width: "48%",
+    aspectRatio: 1,
+    borderRadius: 12,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#fff",
+  },
+  selectedRoleCard: {
+    borderColor: Colors.primary["500"],
+    borderWidth: 3,
+    backgroundColor: Colors.primary["500"],
+  },
+  roleImageBackground: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  roleImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+  textOverlay: {
+    backgroundColor: "rgba(0,0,0,0.5)",
+    paddingVertical: 12,
+    alignItems: "center",
+    width: "100%",
+  },
+  roleText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "white",
+  },
 });

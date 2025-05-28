@@ -4,12 +4,11 @@ import {
   Platform,
   SafeAreaView,
   ScrollView,
-  StyleSheet,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import CountrySelect from "@/components/general/CountrySelect";
 import { CAMEROON, Colors, countries } from "@/constants";
 import { Appbar, Button, Icon, TextInput, Text } from "react-native-paper";
@@ -19,6 +18,8 @@ import { usersSendSignupSmsOtpMutation } from "@/client/users.swagger/@tanstack/
 import { useMutation } from "@tanstack/react-query";
 import { defaultStyles } from "@/styles";
 import { signupStyles } from "@/styles";
+import i18n from "@/i18n";
+import { Context, ContextType } from "../_layout";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -36,6 +37,7 @@ const Info = () => {
   const [errorMessage, setErrorMessage] = useState<string>();
 
   const router = useRouter();
+ const {role, setUserRole} = useContext(Context) as ContextType;
 
   useEffect(() => {
     if (country?.dial_code) {
@@ -92,9 +94,9 @@ const Info = () => {
         params: {
           requestId: data.requestId,
           phoneNumber: `${callingCode}${mobile}`,
-          email, 
-          password, 
-        
+          email,
+          password,
+          role: role || "USER_ROLE_UNSPECIFIED",
         },
       });
     },
@@ -107,10 +109,15 @@ const Info = () => {
           style={signupStyles.closeIconContainer}
           onPress={() => router.back()}
         >
-          <Icon name="arrow-left" size={24} color="#000" />
+          <Icon source="arrow-left" size={24} color="#000" />
         </TouchableOpacity>
         <Text variant="headlineMedium" style={signupStyles.heading}>
-          Create Farmer Account
+          {/* {i18n.t("(auth).createAccount.farmerAccount")} */}
+          {i18n.t(
+            `(auth).createAccount.${
+              role === "USER_TYPE_FARMER" ? "farmerAccount" : "buyerAccount"
+            }`
+          )}
         </Text>
       </Appbar.Header>
 
@@ -142,7 +149,7 @@ const Info = () => {
 
                 <TextInput
                   mode="outlined"
-                  label="Email"
+                  label={i18n.t("(auth).createAccount.enterEmail")}
                   value={email}
                   onChangeText={setEmail}
                   keyboardType="email-address"
@@ -154,13 +161,13 @@ const Info = () => {
                 />
 
                 <TextInput
-                  label="Create Password"
+                  label={i18n.t("(auth).createAccount.createPassword")}
                   value={password}
                   onChangeText={setPassword}
                   autoCapitalize="none"
                   secureTextEntry={!showPassword}
                   mode="outlined"
-                  placeholder="12 characters or more"
+                  placeholder={i18n.t("(auth).createAccount.placeholder")}
                   style={signupStyles.input}
                   outlineStyle={signupStyles.outlineInput}
                   contentStyle={signupStyles.inputContentStyle}
@@ -172,7 +179,6 @@ const Info = () => {
                       onPress={() => setShowPassword(!showPassword)}
                       size={16}
                       color={Colors.grey["e7"]}
-                      style={defaultStyles.iconContainer}
                     />
                   }
                 />
@@ -180,11 +186,11 @@ const Info = () => {
                   <Text
                     style={[signupStyles.errorTextDark, signupStyles.margin20]}
                   >
-                    Should be atleast 12 characters
+                    {i18n.t("(auth).createAccount.passwordMustBe")}
                   </Text>
                 )}
                 <TextInput
-                  label="Confirm Password"
+                  label={i18n.t("(auth).createAccount.reEnterPassword")}
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
                   autoCapitalize="none"
@@ -206,7 +212,7 @@ const Info = () => {
                       }
                       size={16}
                       color={Colors.grey["e7"]}
-                      style={defaultStyles.iconContainer}
+                      // style={defaultStyles.iconContainer}
                     />
                   }
                 />
@@ -214,14 +220,16 @@ const Info = () => {
                   <Text
                     style={[signupStyles.errorTextDark, signupStyles.margin20]}
                   >
-                    Passwords do not match
+                    {i18n.t(
+                      "(forgot-password).creare-new-password.passwordsDoNot"
+                    )}
                   </Text>
                 )}
               </View>
             </ScrollView>
           </SafeAreaView>
         </TouchableWithoutFeedback>
-        <View style={defaultStyles.bottomContainer}>
+        <View style={defaultStyles.bottomButtonContainer}>
           <Button
             mode="contained"
             onPress={handleSignUp}
@@ -239,7 +247,7 @@ const Info = () => {
               password !== confirmPassword
             }
           >
-            Create Account
+            {i18n.t("(auth).createAccount.createAccount")}
           </Button>
         </View>
       </KeyboardAvoidingView>
