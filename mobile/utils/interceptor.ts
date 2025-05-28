@@ -60,7 +60,6 @@ const updateAuthHeader = (newToken: string) => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handleResponseError = async (error: any) => {
-  console.log(error?.response, "error response");
   const originalRequest = error?.config;
   if (
     error?.response?.status === 401 &&

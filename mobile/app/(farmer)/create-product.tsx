@@ -3,11 +3,9 @@ import { useRouter } from "expo-router";
 import React, { useContext, useState } from "react";
 import {
   Image,
-  Keyboard,
   KeyboardAvoidingView,
   ScrollView,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import {
@@ -224,11 +222,6 @@ export default function ForgotPasswordEmailOtp() {
         behavior={"padding"}
         keyboardVerticalOffset={0}
       >
-        <TouchableWithoutFeedback
-          onPress={() => {
-            Keyboard.dismiss();
-          }}
-        >
           <View style={defaultStyles.flex}>
             <Appbar.Header dark={false} style={defaultStyles.appHeader}>
               <TouchableOpacity
@@ -426,7 +419,6 @@ export default function ForgotPasswordEmailOtp() {
               </View>
             </ScrollView>
           </View>
-        </TouchableWithoutFeedback>
         <View style={defaultStyles.bottomButtonContainer}>
           <View style={styles.flexButtonContainer}>
             <Button

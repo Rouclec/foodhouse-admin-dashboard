@@ -5,7 +5,6 @@ import {
   View,
   KeyboardAvoidingView,
   Keyboard,
-  TouchableWithoutFeedback,
   Image,
   TouchableOpacity,
   ScrollView,
@@ -89,124 +88,122 @@ export default function CreateNewPassword() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
       >
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-          <View style={defaultStyles.flex}>
-            <Appbar.Header dark={false} style={defaultStyles.appHeader}>
-              <TouchableOpacity
-                onPress={() => router.back()}
-                style={defaultStyles.backButtonContainer}
-              >
-                <Icon source={"arrow-left"} size={24} />
-              </TouchableOpacity>
-              <Text variant="titleMedium" style={defaultStyles.heading}>
-                {i18n.t(
-                  "(auth).(forgot-password).create-new-password.createNewPassword"
-                )}
-              </Text>
-              <View />
-            </Appbar.Header>
-            <ScrollView
-              contentContainerStyle={defaultStyles.scrollContainer}
-              showsVerticalScrollIndicator={false}
-              nestedScrollEnabled={true}
-              keyboardShouldPersistTaps="handled"
+        <View style={defaultStyles.flex}>
+          <Appbar.Header dark={false} style={defaultStyles.appHeader}>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={defaultStyles.backButtonContainer}
             >
-              <View style={styles.contentContainer}>
-                <View style={styles.illustrationImageContainer}>
-                  <Image
-                    source={require("@/assets/images/create-new-password-illustration.png")}
-                  />
-                </View>
-                <View style={defaultStyles.inputsContainer}>
-                  <TextInput
-                    mode="outlined"
-                    label={i18n.t(
-                      "(auth).(forgot-password).create-new-password.password"
-                    )}
-                    secureTextEntry={!showPassword}
-                    value={password}
-                    onChangeText={(text) => setPassword(text)}
-                    error={!!password && password.length < 12}
-                    style={defaultStyles.input}
-                    theme={{
-                      colors: {
-                        primary: Colors.primary[500],
-                        background: Colors.grey["fa"],
-                        error: Colors.error,
-                      },
-                      roundness: 10,
-                    }}
-                    outlineColor={Colors.grey["bg"]}
-                    left={
-                      <TextInput.Icon
-                        icon="lock-outline"
-                        color={Colors.grey["61"]}
-                        size={20}
-                      />
-                    }
-                    right={
-                      <TextInput.Icon
-                        icon={showPassword ? "eye-off" : "eye"}
-                        onPress={() => setShowPassword(!showPassword)}
-                        color={Colors.grey[61]}
-                        size={20}
-                      />
-                    }
-                  />
-                  {!!password && password?.length < 12 ? (
-                    <Text style={defaultStyles.errorText}>
-                      {i18n.t(
-                        "(auth).(forgot-password).create-new-password.passwordMustBe"
-                      )}
-                    </Text>
-                  ) : null}
-                  <TextInput
-                    mode="outlined"
-                    label={i18n.t(
-                      "(auth).(forgot-password).create-new-password.confirmPassword"
-                    )}
-                    secureTextEntry={!showPassword}
-                    value={confirmPassword}
-                    onChangeText={(text) => setConfirmPassword(text)}
-                    error={!!confirmPassword && confirmPassword !== password}
-                    style={defaultStyles.input}
-                    theme={{
-                      colors: {
-                        primary: Colors.primary[500],
-                        background: Colors.grey["fa"],
-                        error: Colors.error,
-                      },
-                      roundness: 10,
-                    }}
-                    outlineColor={Colors.grey["bg"]}
-                    left={
-                      <TextInput.Icon
-                        icon="lock-outline"
-                        color={Colors.grey["61"]}
-                        size={20}
-                      />
-                    }
-                    right={
-                      <TextInput.Icon
-                        icon={showPassword ? "eye-off" : "eye"}
-                        onPress={() => setShowPassword(!showPassword)}
-                        color={Colors.grey[61]}
-                        size={20}
-                      />
-                    }
-                  />
-                  {!!confirmPassword && confirmPassword !== password ? (
-                    <Text style={defaultStyles.errorText}>
-                      {i18n.t(
-                        "(auth).(forgot-password).create-new-password.passwordsDoNot"
-                      )}
-                    </Text>
-                  ) : null}
-                </View>
+              <Icon source={"arrow-left"} size={24} />
+            </TouchableOpacity>
+            <Text variant="titleMedium" style={defaultStyles.heading}>
+              {i18n.t(
+                "(auth).(forgot-password).create-new-password.createNewPassword"
+              )}
+            </Text>
+            <View />
+          </Appbar.Header>
+          <ScrollView
+            contentContainerStyle={defaultStyles.scrollContainer}
+            showsVerticalScrollIndicator={false}
+            nestedScrollEnabled={true}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.contentContainer}>
+              <View style={styles.illustrationImageContainer}>
+                <Image
+                  source={require("@/assets/images/create-new-password-illustration.png")}
+                />
               </View>
-            </ScrollView>
-          </View>
-        </TouchableWithoutFeedback>
+              <View style={defaultStyles.inputsContainer}>
+                <TextInput
+                  mode="outlined"
+                  label={i18n.t(
+                    "(auth).(forgot-password).create-new-password.password"
+                  )}
+                  secureTextEntry={!showPassword}
+                  value={password}
+                  onChangeText={(text) => setPassword(text)}
+                  error={!!password && password.length < 12}
+                  style={defaultStyles.input}
+                  theme={{
+                    colors: {
+                      primary: Colors.primary[500],
+                      background: Colors.grey["fa"],
+                      error: Colors.error,
+                    },
+                    roundness: 10,
+                  }}
+                  outlineColor={Colors.grey["bg"]}
+                  left={
+                    <TextInput.Icon
+                      icon="lock-outline"
+                      color={Colors.grey["61"]}
+                      size={20}
+                    />
+                  }
+                  right={
+                    <TextInput.Icon
+                      icon={showPassword ? "eye-off" : "eye"}
+                      onPress={() => setShowPassword(!showPassword)}
+                      color={Colors.grey[61]}
+                      size={20}
+                    />
+                  }
+                />
+                {!!password && password?.length < 12 ? (
+                  <Text style={defaultStyles.errorText}>
+                    {i18n.t(
+                      "(auth).(forgot-password).create-new-password.passwordMustBe"
+                    )}
+                  </Text>
+                ) : null}
+                <TextInput
+                  mode="outlined"
+                  label={i18n.t(
+                    "(auth).(forgot-password).create-new-password.confirmPassword"
+                  )}
+                  secureTextEntry={!showPassword}
+                  value={confirmPassword}
+                  onChangeText={(text) => setConfirmPassword(text)}
+                  error={!!confirmPassword && confirmPassword !== password}
+                  style={defaultStyles.input}
+                  theme={{
+                    colors: {
+                      primary: Colors.primary[500],
+                      background: Colors.grey["fa"],
+                      error: Colors.error,
+                    },
+                    roundness: 10,
+                  }}
+                  outlineColor={Colors.grey["bg"]}
+                  left={
+                    <TextInput.Icon
+                      icon="lock-outline"
+                      color={Colors.grey["61"]}
+                      size={20}
+                    />
+                  }
+                  right={
+                    <TextInput.Icon
+                      icon={showPassword ? "eye-off" : "eye"}
+                      onPress={() => setShowPassword(!showPassword)}
+                      color={Colors.grey[61]}
+                      size={20}
+                    />
+                  }
+                />
+                {!!confirmPassword && confirmPassword !== password ? (
+                  <Text style={defaultStyles.errorText}>
+                    {i18n.t(
+                      "(auth).(forgot-password).create-new-password.passwordsDoNot"
+                    )}
+                  </Text>
+                ) : null}
+              </View>
+            </View>
+          </ScrollView>
+        </View>
       </KeyboardAvoidingView>
       <View style={defaultStyles.bottomButtonContainer}>
         <Button

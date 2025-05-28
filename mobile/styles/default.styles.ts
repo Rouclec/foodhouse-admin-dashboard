@@ -7,7 +7,7 @@ export const defaultStyles = StyleSheet.create({
   container: {
     flex: 1,
     gap: 32,
-    paddingHorizontal: 16,
+    paddingHorizontal: 24,
     paddingTop: 16,
     backgroundColor: Colors.light["10"],
   },

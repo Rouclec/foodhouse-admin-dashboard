@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   KeyboardAvoidingView,
-  TouchableWithoutFeedback,
   Keyboard,
   Platform,
 } from "react-native";
@@ -156,163 +155,158 @@ export default function Login() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
       >
-        <TouchableWithoutFeedback
-          onPress={() => Keyboard.dismiss()}
-          accessible={false}
-        >
-          <View style={loginstyles.container}>
-            <View style={loginstyles.header}>
-              <TouchableOpacity
-                style={loginstyles.backButton}
-                onPress={() => router.replace("/onboarding")}
-              >
-                <Icon source="arrow-left" size={24} color={Colors.dark[0]} />
-              </TouchableOpacity>
+        <View style={loginstyles.container}>
+          <View style={loginstyles.header}>
+            <TouchableOpacity
+              style={loginstyles.backButton}
+              onPress={() => router.replace("/onboarding")}
+            >
+              <Icon source="arrow-left" size={24} color={Colors.dark[0]} />
+            </TouchableOpacity>
 
-              <View style={loginstyles.logoCircle}>
-                <Text style={loginstyles.logoText}>Food House</Text>
-              </View>
-            </View>
-            <View style={loginstyles.content}>
-              <Text style={loginstyles.loginTitle}>
-                {i18n.t("(auth).login.loginTo")}
-              </Text>
-
-              {error && (
-                <Text style={loginstyles.errorMessage}>{errorMessage}</Text>
-              )}
-
-              <TextInput
-                mode="outlined"
-                label={i18n.t("(auth).login.email")}
-                value={fields.email}
-                onChangeText={(text) => handleInputChange("email", text)}
-                error={!!errors.email}
-                style={loginstyles.input}
-                theme={{
-                  colors: {
-                    primary: Colors.primary[500],
-                    background: Colors.grey["fa"],
-                    error: Colors.error,
-                  },
-                  roundness: 10,
-                }}
-                outlineColor={Colors.grey["bg"]}
-                left={
-                  <TextInput.Icon
-                    icon="email-outline"
-                    color={Colors.grey["61"]}
-                    size={20}
-                  />
-                }
-                autoCapitalize="none"
-              />
-              {errors.email ? (
-                <Text style={loginstyles.errorText}>{errors.email}</Text>
-              ) : null}
-
-              <TextInput
-                mode="outlined"
-                label={i18n.t("(auth).login.password")}
-                secureTextEntry={!showPassword}
-                value={fields.password}
-                onChangeText={(text) => handleInputChange("password", text)}
-                error={!!errors.password}
-                style={loginstyles.input}
-                theme={{
-                  colors: {
-                    primary: Colors.primary[500],
-                    background: "#FAFAFA",
-                    error: Colors.error,
-                  },
-                  roundness: 10,
-                }}
-                outlineColor={Colors.grey["bg"]}
-                left={
-                  <TextInput.Icon
-                    icon="lock-outline"
-                    color={Colors.grey["61"]}
-                    size={20}
-                  />
-                }
-                right={
-                  <TextInput.Icon
-                    icon={showPassword ? "eye-off" : "eye"}
-                    onPress={() => setShowPassword(!showPassword)}
-                    color={Colors.grey[61]}
-                    size={20}
-                  />
-                }
-              />
-              {errors.password ? (
-                <Text style={loginstyles.errorText}>{errors.password}</Text>
-              ) : null}
-
-              <Link
-                style={loginstyles.forgotPassword}
-                href={"/(auth)/(forgot-password)"}
-              >
-                <Text style={loginstyles.forgotPasswordText}>
-                  {i18n.t("(auth).login.forgotPassword")}
-                </Text>
-              </Link>
-
-              <TouchableOpacity
-                style={loginstyles.loginButton}
-                onPress={handleLogIn}
-                disabled={loading}
-                activeOpacity={0.8}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={loginstyles.loginButtonText}>
-                    {i18n.t("(auth).login.login")}
-                  </Text>
-                )}
-              </TouchableOpacity>
-
-              <View style={loginstyles.dividerContainer}>
-                <View style={loginstyles.dividerLine} />
-                <Text style={loginstyles.dividerText}>
-                  {i18n.t("(auth).login.orContinueWith")}
-                </Text>
-                <View style={loginstyles.dividerLine} />
-              </View>
-
-              <View style={loginstyles.socialIconsContainer}>
-                <TouchableOpacity style={loginstyles.socialIcon}>
-                  <MaterialCommunityIcons
-                    name="facebook"
-                    size={24}
-                    color={Colors.primary[100]}
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity style={loginstyles.socialIcon}>
-                  <MaterialCommunityIcons
-                    name="google"
-                    size={24}
-                    color={Colors.primary[200]}
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity style={loginstyles.socialIcon}>
-                  <MaterialCommunityIcons name="apple" size={24} />
-                </TouchableOpacity>
-              </View>
-
-              <View style={loginstyles.registerContainer}>
-                <Text style={loginstyles.registerText}>
-                  {i18n.t("(auth).login.dontHaveAnAccount")}{" "}
-                </Text>
-                <TouchableOpacity onPress={() => router.replace("/signup")}>
-                  <Text style={loginstyles.registerLink}>
-                    {i18n.t("(auth).login.registerNow")}
-                  </Text>
-                </TouchableOpacity>
-              </View>
+            <View style={loginstyles.logoCircle}>
+              <Text style={loginstyles.logoText}>Food House</Text>
             </View>
           </View>
-        </TouchableWithoutFeedback>
+          <View style={loginstyles.content}>
+            <Text style={loginstyles.loginTitle}>
+              {i18n.t("(auth).login.loginTo")}
+            </Text>
+
+            {error && (
+              <Text style={loginstyles.errorMessage}>{errorMessage}</Text>
+            )}
+
+            <TextInput
+              mode="outlined"
+              label={i18n.t("(auth).login.email")}
+              value={fields.email}
+              onChangeText={(text) => handleInputChange("email", text)}
+              error={!!errors.email}
+              style={loginstyles.input}
+              theme={{
+                colors: {
+                  primary: Colors.primary[500],
+                  background: Colors.grey["fa"],
+                  error: Colors.error,
+                },
+                roundness: 10,
+              }}
+              outlineColor={Colors.grey["bg"]}
+              left={
+                <TextInput.Icon
+                  icon="email-outline"
+                  color={Colors.grey["61"]}
+                  size={20}
+                />
+              }
+              autoCapitalize="none"
+            />
+            {errors.email ? (
+              <Text style={loginstyles.errorText}>{errors.email}</Text>
+            ) : null}
+
+            <TextInput
+              mode="outlined"
+              label={i18n.t("(auth).login.password")}
+              secureTextEntry={!showPassword}
+              value={fields.password}
+              onChangeText={(text) => handleInputChange("password", text)}
+              error={!!errors.password}
+              style={loginstyles.input}
+              theme={{
+                colors: {
+                  primary: Colors.primary[500],
+                  background: "#FAFAFA",
+                  error: Colors.error,
+                },
+                roundness: 10,
+              }}
+              outlineColor={Colors.grey["bg"]}
+              left={
+                <TextInput.Icon
+                  icon="lock-outline"
+                  color={Colors.grey["61"]}
+                  size={20}
+                />
+              }
+              right={
+                <TextInput.Icon
+                  icon={showPassword ? "eye-off" : "eye"}
+                  onPress={() => setShowPassword(!showPassword)}
+                  color={Colors.grey[61]}
+                  size={20}
+                />
+              }
+            />
+            {errors.password ? (
+              <Text style={loginstyles.errorText}>{errors.password}</Text>
+            ) : null}
+
+            <Link
+              style={loginstyles.forgotPassword}
+              href={"/(auth)/(forgot-password)"}
+            >
+              <Text style={loginstyles.forgotPasswordText}>
+                {i18n.t("(auth).login.forgotPassword")}
+              </Text>
+            </Link>
+
+            <TouchableOpacity
+              style={loginstyles.loginButton}
+              onPress={handleLogIn}
+              disabled={loading}
+              activeOpacity={0.8}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={loginstyles.loginButtonText}>
+                  {i18n.t("(auth).login.login")}
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            <View style={loginstyles.dividerContainer}>
+              <View style={loginstyles.dividerLine} />
+              <Text style={loginstyles.dividerText}>
+                {i18n.t("(auth).login.orContinueWith")}
+              </Text>
+              <View style={loginstyles.dividerLine} />
+            </View>
+
+            <View style={loginstyles.socialIconsContainer}>
+              <TouchableOpacity style={loginstyles.socialIcon}>
+                <MaterialCommunityIcons
+                  name="facebook"
+                  size={24}
+                  color={Colors.primary[100]}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity style={loginstyles.socialIcon}>
+                <MaterialCommunityIcons
+                  name="google"
+                  size={24}
+                  color={Colors.primary[200]}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity style={loginstyles.socialIcon}>
+                <MaterialCommunityIcons name="apple" size={24} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={loginstyles.registerContainer}>
+              <Text style={loginstyles.registerText}>
+                {i18n.t("(auth).login.dontHaveAnAccount")}{" "}
+              </Text>
+              <TouchableOpacity onPress={() => router.replace("/signup")}>
+                <Text style={loginstyles.registerLink}>
+                  {i18n.t("(auth).login.registerNow")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       </KeyboardAvoidingView>
     </>
   );
