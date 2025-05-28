@@ -1,3 +1,4 @@
+import { Link } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 
 export default function TabOneScreen() {
@@ -5,6 +6,7 @@ export default function TabOneScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Farmer</Text>
       <View style={styles.separator} />
+      <Link href={"/(farmer)/create-product"}>Create product</Link>
       {/* <EditScreenInfo path="app/(tabs)/index.tsx" /> */}
     </View>
   );
