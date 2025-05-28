@@ -165,6 +165,12 @@ export const defaultStyles = StyleSheet.create({
     alignSelf: "center",
     marginHorizontal: 0,
   },
+  dialogSuccessContainer: {
+    backgroundColor: Colors.light[10],
+    alignItems: "center",
+    padding: 32,
+    borderRadius: 48,
+  },
   paddingHorizontal: {
     marginTop: 16,
     paddingLeft: 12,
@@ -213,4 +219,14 @@ export const defaultStyles = StyleSheet.create({
     overflowX: "hidden",
   },
   dialogContentContainer: { paddingTop: 0, paddingBottom: 2 },
+  successImage: { width: 180, height: 180 },
+  primaryText: {
+    color: Colors.primary[500],
+  },
+  bodyText: {
+    fontSize: 16,
+    lineHeight: 22,
+    letterSpacing: 0.2,
+    textAlign: "center",
+  },
 });

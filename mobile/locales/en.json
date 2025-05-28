@@ -77,10 +77,22 @@
       "productName": "Product name",
       "priceType": "Price type",
       "price": "Price",
-      "description": "Description"
+      "description": "Description",
+      "unknownError": "An unknown error occured",
+      "pleaseSelectAnImage": "Please select an image for this product",
+      "pleaseEnterAProductName": "Please enter a product name",
+      "pleaseEnterAPriceType": "Please enter a price type",
+      "pleaseSelectACategory": "Please select a category",
+      "pleaseEnterThePrice": "Please enter the product price",
+      "pleaseEnterADescription": "Please enter the product description",
+      "congratulations": "Congratulations",
+      "yourProductHasBeenUploaded": "Your product has been uploaded"
     }
   },
   "components": {
+    "Dropdown": {
+      "noData": "No data"
+    },
     "ImagePicker": {
       "photoGalery": "Photo Galery",
       "camera": "Camera",

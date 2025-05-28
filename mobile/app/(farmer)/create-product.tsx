@@ -1,6 +1,6 @@
 import Colors from "@/constants/Colors";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   Image,
   Keyboard,
@@ -13,7 +13,10 @@ import {
 import {
   Appbar,
   Button,
+  Dialog,
+  HelperText,
   Icon,
+  Portal,
   Snackbar,
   Text,
   TextInput,
@@ -24,42 +27,194 @@ import i18n from "@/i18n";
 import { CurrencySelect, Dropdown, ImagePicker } from "@/components";
 import { CAMEROON } from "@/constants";
 import { Country } from "@/interface";
-import { uploadImage } from "@/utils";
+import { delay, uploadImage } from "@/utils";
 import moment from "moment";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  productsCreateProductMutation,
+  productsListCategoriesOptions,
+  productsListPriceTypesByCategoryOptions,
+  productsListProductNamesByCategoryOptions,
+} from "@/client/products.swagger/@tanstack/react-query.gen";
+import { Context, ContextType } from "../_layout";
 
 export default function ForgotPasswordEmailOtp() {
+  const { user } = useContext(Context) as ContextType;
   const router = useRouter();
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(false);
   const [productCategory, setProductCateogry] = useState<string>();
+  const [priceType, setPriceType] = useState<string>();
+  const [productName, setProductName] = useState<string>();
+  const [price, setPrice] = useState<string>();
   const [currencyCountry, setCurrencyCountry] = useState<Country>(CAMEROON);
+  const [description, setDescription] = useState<string>();
   const [image, setImage] = useState<ExpoImagePicker.ImagePickerAsset>();
   const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [validationError, setValidationError] = useState({
+    productCategory: "",
+    productName: "",
+    priceType: "",
+    price: "",
+    description: "",
+  });
 
   const onImagePickerClose = () => {
     setIsImagePickerVisible(false);
   };
 
-  const handleImageUpload = async () => {
-    if (image?.uri) {
-      setLoading(true);
-      try {
-        const downloadURL = await uploadImage({
-          uri: image.uri,
-          directory: "/products",
-          filename: `${
-            image?.fileName ?? "product"
-          }-${moment().toLocaleString()}`,
+  const handleCreateProduct = async () => {
+    try {
+      if (!productCategory) {
+        setValidationError((prev) => {
+          return {
+            ...prev,
+            productCategory: i18n.t(
+              "(farmer).create-product.pleaseSelectACategory"
+            ),
+          };
         });
-        console.log("Image uploaded successfully:", downloadURL);
-        // Use the downloadURL to display the image or store it in your database
-      } catch (error) {
-        console.error("Image upload failed:", error);
-      } finally {
-        setLoading(false);
       }
+      if (!productName) {
+        setValidationError((prev) => {
+          return {
+            ...prev,
+            productName: i18n.t(
+              "(farmer).create-product.pleaseEnterAProductName"
+            ),
+          };
+        });
+      }
+      if (!priceType) {
+        setValidationError((prev) => {
+          return {
+            ...prev,
+            priceType: i18n.t("(farmer).create-product.pleaseEnterAPriceType"),
+          };
+        });
+      }
+      if (!price) {
+        setValidationError((prev) => {
+          return {
+            ...prev,
+            price: i18n.t("(farmer).create-product.pleaseEnterThePrice"),
+          };
+        });
+      }
+      if (!description) {
+        setValidationError((prev) => {
+          return {
+            ...prev,
+            description: i18n.t(
+              "(farmer).create-product.pleaseEnterADescription"
+            ),
+          };
+        });
+      }
+
+      if (!image?.uri) {
+        setError(i18n.t("(farmer).create-product.pleaseSelectAnImage"));
+        await delay(5000);
+        setError(undefined);
+      }
+
+      if (
+        !image?.uri ||
+        !productCategory ||
+        !productName ||
+        !priceType ||
+        !price ||
+        !description
+      )
+        return;
+
+      setLoading(true);
+      const downloadURL = await uploadImage({
+        uri: image.uri,
+        directory: "/products",
+        filename: `${
+          image?.fileName ?? "product"
+        }-${moment().toLocaleString()}`,
+      });
+
+      await mutateAsync({
+        body: {
+          categoryId: productCategory,
+          name: productName,
+          unitType: priceType,
+          amount: {
+            value: price,
+            currencyIsoCode: currencyCountry.currency_code,
+          },
+          description: description,
+          image: downloadURL,
+          wholeSale: false,
+        },
+        path: {
+          userId: user?.userId ?? "",
+        },
+      });
+    } catch (error) {
+    } finally {
+      setLoading(false);
     }
   };
+
+  const resetInputs = () => {
+    setValidationError({
+      productCategory: "",
+      productName: "",
+      priceType: "",
+      price: "",
+      description: "",
+    });
+    setProductCateogry("undefined");
+    setProductName("");
+    setPrice("");
+    setImage(undefined);
+    setPriceType("");
+    setDescription("");
+  };
+
+  const { mutateAsync } = useMutation({
+    ...productsCreateProductMutation(),
+    onSuccess: async () => {
+      setShowSuccessModal(true);
+      resetInputs();
+      await delay(3000);
+      setShowSuccessModal(false);
+    },
+    onError: async (error) => {
+      setError(
+        error?.response?.data?.message ??
+          i18n.t("(farmer).create-product.unknownError")
+      );
+      await delay(5000);
+      setError(undefined);
+    },
+  });
+  const { data: categories, isLoading: isCategoriesLoading } = useQuery({
+    ...productsListCategoriesOptions(),
+  });
+
+  const { data: priceTypes, isLoading: isPriceTypesLoading } = useQuery({
+    ...productsListPriceTypesByCategoryOptions({
+      path: {
+        categoryId: productCategory ?? "",
+      },
+    }),
+    enabled: !!productCategory,
+  });
+
+  const { data: productNames, isLoading: isProductNamesLoading } = useQuery({
+    ...productsListProductNamesByCategoryOptions({
+      path: {
+        categoryId: productCategory ?? "",
+      },
+    }),
+    enabled: !!productCategory,
+  });
 
   return (
     <>
@@ -100,92 +255,133 @@ export default function ForgotPasswordEmailOtp() {
                   label={i18n.t("(farmer).create-product.productCategory")}
                   value={productCategory}
                   onSelect={(value) => setProductCateogry(value)}
-                  data={[
-                    {
-                      label: "Foo",
-                      value: "baa",
-                    },
-                    {
-                      label: "Foo",
-                      value: "baa",
-                    },
-                    {
-                      label: "Foo",
-                      value: "baa",
-                    },
-                  ]}
+                  data={(categories?.categories ?? [])?.map((category) => {
+                    return {
+                      label: category.name ?? "",
+                      value: category.id ?? "",
+                    };
+                  })}
+                  loading={isCategoriesLoading}
+                  onFocus={() => {
+                    setValidationError((prev) => {
+                      return {
+                        ...prev,
+                        productCategory: "",
+                      };
+                    });
+                  }}
+                  error={validationError.productCategory}
                 />
                 <Dropdown
                   label={i18n.t("(farmer).create-product.productName")}
-                  value={productCategory}
-                  onSelect={(value) => setProductCateogry(value)}
-                  data={[
-                    {
-                      label: "Foo",
-                      value: "baa",
-                    },
-                    {
-                      label: "Foo",
-                      value: "baa",
-                    },
-                    {
-                      label: "Foo",
-                      value: "baa",
-                    },
-                  ]}
+                  value={productName}
+                  onSelect={(value) => setProductName(value)}
+                  data={(productNames?.productNames ?? [])?.map(
+                    (productName) => {
+                      return {
+                        label: productName.name ?? "",
+                        value: productName.name ?? "",
+                      };
+                    }
+                  )}
+                  loading={isProductNamesLoading}
+                  onFocus={() => {
+                    setValidationError((prev) => {
+                      return {
+                        ...prev,
+                        productName: "",
+                      };
+                    });
+                  }}
+                  error={validationError.productName}
                 />
                 <Dropdown
                   label={i18n.t("(farmer).create-product.priceType")}
-                  value={productCategory}
-                  onSelect={(value) => setProductCateogry(value)}
-                  data={[
-                    {
-                      label: "Foo",
-                      value: "baa",
-                    },
-                    {
-                      label: "Foo",
-                      value: "baa",
-                    },
-                    {
-                      label: "Foo",
-                      value: "baa",
-                    },
-                  ]}
+                  value={priceType}
+                  onSelect={(value) => setPriceType(value)}
+                  data={(priceTypes?.priceTypes ?? [])?.map((priceType) => {
+                    return {
+                      label: priceType.name ?? "",
+                      value: priceType.id ?? "",
+                    };
+                  })}
+                  loading={isPriceTypesLoading}
+                  onFocus={() => {
+                    setValidationError((prev) => {
+                      return {
+                        ...prev,
+                        priceType: "",
+                      };
+                    });
+                  }}
+                  error={validationError.priceType}
                 />
                 <CurrencySelect
                   setCountry={setCurrencyCountry}
                   country={currencyCountry}
                 />
-                <TextInput
-                  label={i18n.t("(farmer).create-product.price")}
-                  mode="outlined"
-                  style={defaultStyles.input}
-                  theme={{
-                    colors: {
-                      primary: Colors.primary[500],
-                      background: Colors.grey["fa"],
-                      error: Colors.error,
-                    },
-                    roundness: 10,
-                  }}
-                  outlineColor={Colors.grey["bg"]}
-                />
-                <TextInput
-                  label={i18n.t("(farmer).create-product.description")}
-                  mode="outlined"
-                  multiline
-                  style={[defaultStyles.input, styles.textArea]}
-                  theme={{
-                    colors: {
-                      primary: Colors.primary[500],
-                      background: Colors.grey["fa"],
-                      error: Colors.error,
-                    },
-                    roundness: 10,
-                  }}
-                  outlineColor={Colors.grey["bg"]}
-                />
+                <View>
+                  <TextInput
+                    label={i18n.t("(farmer).create-product.price")}
+                    mode="outlined"
+                    keyboardType="numeric"
+                    value={price}
+                    onChangeText={(text) => setPrice(text)}
+                    style={defaultStyles.input}
+                    theme={{
+                      colors: {
+                        primary: Colors.primary[500],
+                        background: Colors.grey["fa"],
+                        error: Colors.error,
+                      },
+                      roundness: 10,
+                    }}
+                    outlineColor={Colors.grey["bg"]}
+                    error={!!validationError.price}
+                    onFocus={() => {
+                      setValidationError((prev) => {
+                        return {
+                          ...prev,
+                          price: "",
+                        };
+                      });
+                    }}
+                  />
+                  <HelperText type="error" style={defaultStyles.errorText}>
+                    {validationError.price}
+                  </HelperText>
+                </View>
+                <View>
+                  <TextInput
+                    label={i18n.t("(farmer).create-product.description")}
+                    mode="outlined"
+                    multiline
+                    value={description}
+                    onChangeText={(text) => setDescription(text)}
+                    style={[defaultStyles.input, styles.textArea]}
+                    theme={{
+                      colors: {
+                        primary: Colors.primary[500],
+                        background: Colors.grey["fa"],
+                        error: Colors.error,
+                      },
+                      roundness: 10,
+                    }}
+                    outlineColor={Colors.grey["bg"]}
+                    error={!!validationError.description}
+                    onFocus={() => {
+                      setValidationError((prev) => {
+                        return {
+                          ...prev,
+                          description: "",
+                        };
+                      });
+                    }}
+                  />
+                  <HelperText type="error" style={defaultStyles.errorText}>
+                    {validationError.description}
+                  </HelperText>
+                </View>
                 <View style={styles.addImageContainer}>
                   <Text variant="titleLarge" style={styles.addImageTitle}>
                     {i18n.t("(farmer).create-product.productImage")}
@@ -252,7 +448,7 @@ export default function ForgotPasswordEmailOtp() {
               style={[defaultStyles.button, styles.button]}
               loading={loading}
               disabled={loading}
-              onPress={handleImageUpload}
+              onPress={handleCreateProduct}
             >
               <Text style={defaultStyles.buttonText}>
                 {i18n.t("(farmer).create-product.post")}
@@ -268,6 +464,30 @@ export default function ForgotPasswordEmailOtp() {
         visible={isImagePickerVisible}
         aspect={[16, 9]}
       />
+      <Portal>
+        <Dialog
+          visible={showSuccessModal}
+          onDismiss={() => {}}
+          style={defaultStyles.dialogSuccessContainer}
+        >
+          <Dialog.Content>
+            <Image
+              source={require("@/assets/images/success.png")}
+              style={defaultStyles.successImage}
+            />
+          </Dialog.Content>
+          <Dialog.Content>
+            <Text variant="titleLarge" style={defaultStyles.primaryText}>
+              {i18n.t("(farmer).create-product.congratulations")}
+            </Text>
+          </Dialog.Content>
+          <Dialog.Content>
+            <Text style={defaultStyles.bodyText}>
+              {i18n.t("(farmer).create-product.yourProductHasBeenUploaded")}
+            </Text>
+          </Dialog.Content>
+        </Dialog>
+      </Portal>
       <Snackbar
         visible={!!error}
         onDismiss={() => {}}

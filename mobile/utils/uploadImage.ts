@@ -6,7 +6,12 @@ type props = {
   filename: string;
   directory?: string;
 };
-export const uploadImage = async ({ uri, directory, filename }: props) => {
+
+export const uploadImage = async ({
+  uri,
+  directory,
+  filename,
+}: props): Promise<string> => {
   try {
     const response = await fetch(uri);
     const blob = await response.blob();
@@ -15,7 +20,7 @@ export const uploadImage = async ({ uri, directory, filename }: props) => {
       : ref(storage, `images/${filename}`);
     const uploadTask = uploadBytesResumable(storageRef, blob);
 
-    return new Promise((resolve, reject) => {
+    return new Promise<string>((resolve, reject) => {
       uploadTask.on(
         "state_changed",
         (snapshot) => {
