@@ -15,6 +15,8 @@ import { tabStyles } from "./(farmer)/(index)/_layout.styles";
 import { createProductStyles } from "./(farmer)/create-product.styles";
 import { dropdownStyles } from "./components/general/Dropdown.styles";
 import { imagePickerStyles } from "./components/general/ImagePicker.styles";
+import { myProductStyles } from "./(farmer)/(index)/my-products.styles";
+import { productStyles } from "./components/Product.styles";
 
 export {
   buyerIndexStyles,
@@ -34,4 +36,6 @@ export {
   createProductStyles,
   dropdownStyles,
   imagePickerStyles,
+  myProductStyles,
+  productStyles,
 };

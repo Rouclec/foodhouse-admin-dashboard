@@ -11,6 +11,34 @@ export const defaultStyles = StyleSheet.create({
     paddingTop: 16,
     backgroundColor: Colors.light["10"],
   },
+  center: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  listFooterComponent: {
+    paddingVertical: 12,
+  },
+  listFooterIndicator: { transform: [{ scale: 1.4 }], marginTop: 4 },
+  noItemsContainer: {
+    paddingBottom: 26,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    paddingLeft: 22,
+    paddingVertical: 12,
+    marginBottom: 14,
+  },
+  noItems: {
+    color: Colors.dark[10],
+    fontSize: 24,
+    lineHeight: 36,
+    fontWeight: "400",
+  },
+  paddingVertical: {
+    paddingTop: 24,
+    paddingBottom: 32,
+  },
   heading: {
     marginLeft: -56,
     textAlign: "center",

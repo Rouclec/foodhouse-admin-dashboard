@@ -114,8 +114,10 @@ func (i *Impl) CreateProduct(ctx context.Context, req *productsgrpc.CreateProduc
 				Name: category.Name,
 				Slug: category.Slug,
 			},
-			Name:     product.Name,
-			UnitType: product.UnitType,
+			Name: product.Name,
+			UnitType: &productsgrpc.PriceType{
+				Id: product.UnitType,
+			},
 			Amount: &types.Amount{
 				Value:           product.Value,
 				CurrencyIsoCode: product.CurrencyIsoCode,
@@ -305,19 +307,13 @@ func (i *Impl) UpdateProduct(ctx context.Context, req *productsgrpc.UpdateProduc
 
 // GetFarmerProduct implements productsgrpc.ProductsServer.
 func (i *Impl) GetFarmerProduct(ctx context.Context, req *productsgrpc.GetFarmerProductRequest) (*productsgrpc.GetFarmerProductResponse, error) {
-	product, err := i.repo.Do().GetProduct(ctx, req.GetProductId())
+	product, err := i.repo.Do().GetProductWithCategory(ctx, req.GetProductId())
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error getting product %v", err)
 	}
 
-	category, err := i.repo.Do().GetCategory(ctx, product.CategoryID)
-
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error fetching category %v for product with id %v", err, req.GetProductId())
-	}
-
-	protoProduct, err := converters.SqlcToProtoProduct(product, &category)
+	protoProduct, err := converters.SqlcToProtoProduct(product)
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error converting proto product to grpc %v", err)
@@ -329,19 +325,13 @@ func (i *Impl) GetFarmerProduct(ctx context.Context, req *productsgrpc.GetFarmer
 
 // GetProduct implements productsgrpc.ProductsServer.
 func (i *Impl) GetProduct(ctx context.Context, req *productsgrpc.GetProductRequest) (*productsgrpc.GetProductResponse, error) {
-	product, err := i.repo.Do().GetProduct(ctx, req.GetProductId())
+	product, err := i.repo.Do().GetProductWithCategory(ctx, req.GetProductId())
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error getting product %v", err)
 	}
 
-	category, err := i.repo.Do().GetCategory(ctx, product.CategoryID)
-
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error fetching category %v for product with id %v", err, req.GetProductId())
-	}
-
-	protoProduct, err := converters.SqlcToProtoProduct(product, &category)
+	protoProduct, err := converters.SqlcToProtoProduct(product)
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error converting proto product to grpc %v", err)

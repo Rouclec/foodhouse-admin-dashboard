@@ -77,7 +77,6 @@
       "productName": "Product name",
       "priceType": "Price type",
       "price": "Price",
-      "description": "Description",
       "unknownError": "An unknown error occured",
       "pleaseSelectAnImage": "Please select an image for this product",
       "pleaseEnterAProductName": "Please enter a product name",
@@ -86,7 +85,13 @@
       "pleaseEnterThePrice": "Please enter the product price",
       "pleaseEnterADescription": "Please enter the product description",
       "congratulations": "Congratulations",
-      "yourProductHasBeenUploaded": "Your product has been uploaded"
+      "yourProductHasBeenUploaded": "Your product has been uploaded",
+      "description": "Description"
+    },
+    "my-products": {
+      "myProducts": "My products",
+      "products": "Products",
+      "noProductsFound": "No products found"
     }
   },
   "components": {

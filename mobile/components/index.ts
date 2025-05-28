@@ -4,6 +4,7 @@ import { CountrySelect } from "./general/CountrySelect";
 import { Dropdown } from "./general/Dropdown";
 import { ImagePicker } from "./general/ImagePicker";
 import { CurrencySelect } from "./general/CurrencySelect";
+import { Product } from "./Product";
 
 export {
   CountryList,
@@ -12,4 +13,5 @@ export {
   Dropdown,
   CurrencySelect,
   ImagePicker,
+  Product,
 };
