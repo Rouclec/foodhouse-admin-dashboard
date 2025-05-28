@@ -65,5 +65,28 @@
         "passwordReset": "Password Reset!"
       }
     }
+  },
+  "(farmer)": {
+    "create-product": {
+      "addNewProduct": "Add New Product",
+      "cancel": "Cancel",
+      "post": "Post",
+      "productImage": "Product Image",
+      "uploadImage": "Upload an image (.jpg, .png, .jpeg).\nNot more than 10MB",
+      "productCategory": "Product category",
+      "productName": "Product name",
+      "priceType": "Price type",
+      "price": "Price",
+      "description": "Description"
+    }
+  },
+  "components": {
+    "ImagePicker": {
+      "photoGalery": "Photo Galery",
+      "camera": "Camera",
+      "cancel": "Cancel",
+      "permissionDenied": "Permission Denied",
+      "allowAccessToGallery": "Please allow access to gallery"
+    }
   }
 }

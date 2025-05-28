@@ -1,5 +1,5 @@
 import { buyerIndexStyles } from "./(buyer)/index.styles";
-import { farmerIndexStyles } from "./(farmer)/index.styles";
+import { farmerIndexStyles } from "./(farmer)/(index)/index.styles";
 import { componentIndexStyles } from "./components/index.styles";
 import { indexStyles } from "./index.styles";
 import { defaultStyles } from "./default.styles";
@@ -11,6 +11,10 @@ import { onboardingStyles } from "./(auth)/onboarding.styles";
 import { forgotPasswordIndexStyles } from "./(auth)/(forgot-password)/index.style";
 import { forgotPasswordVerifyOtpStyles } from "./(auth)/(forgot-password)/verify-otp.styles";
 import { createNewPasswordStyles } from "./(auth)/(forgot-password)/create-new-password.styles";
+import { tabStyles } from "./(farmer)/(index)/_layout.styles";
+import { createProductStyles } from "./(farmer)/create-product.styles";
+import { dropdownStyles } from "./components/general/Dropdown.styles";
+import { imagePickerStyles } from "./components/general/ImagePicker.styles";
 
 export {
   buyerIndexStyles,
@@ -26,4 +30,8 @@ export {
   forgotPasswordIndexStyles,
   forgotPasswordVerifyOtpStyles,
   createNewPasswordStyles,
+  tabStyles,
+  createProductStyles,
+  dropdownStyles,
+  imagePickerStyles,
 };

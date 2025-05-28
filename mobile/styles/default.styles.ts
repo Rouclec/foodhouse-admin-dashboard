@@ -52,22 +52,22 @@ export const defaultStyles = StyleSheet.create({
   contentContainer: {
     // flex: 1,
     // justifyContent: 'center',
-    backgroundColor: "red",
     gap: 4,
     paddingVertical: 16,
   },
   scrollContainer: {
     flexGrow: 1,
-    flex: 1,
   },
   bottomButtonContainer: {
-    // position: 'absolute',
+    // position: "absolute",
     alignSelf: "center",
     bottom: 0,
     backgroundColor: Colors.light["10"],
-    height: 96,
+    // backgroundColor: "transparent",
+    // height: 96,
+    height: "auto",
     width: width,
-    paddingBottom: 24,
+    paddingBottom: 32,
     paddingHorizontal: 32,
     rowGap: 12,
     paddingTop: 12,
@@ -90,14 +90,12 @@ export const defaultStyles = StyleSheet.create({
     minHeight: 48,
     minWidth: 124,
   },
-  //   secondaryButton: {
-  //     borderWidth: 1,
-  //     borderColor: Colors.dark[0.1],
-  //     backgroundColor: Colors.secondary[10],
-  //   },
+  secondaryButton: {
+    borderWidth: 1,
+    backgroundColor: Colors.primary[50],
+  },
   secondaryButtonText: {
-    color: Colors.dark[0],
-    fontFamily: "gentium",
+    color: Colors.primary[500],
   },
   gentiumText: {
     fontFamily: "gentium",
@@ -147,7 +145,7 @@ export const defaultStyles = StyleSheet.create({
   },
   inputsContainer: {
     marginTop: 16,
-    paddingBottom: 96,
+    paddingBottom: 48,
     rowGap: 8,
   },
   outlineStyle: {

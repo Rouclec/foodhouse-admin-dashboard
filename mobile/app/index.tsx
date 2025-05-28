@@ -55,18 +55,13 @@ export default function Index() {
     if (!(loaded && appIsReady)) return;
     const timeLeft = Math.max(delay, 0);
     const timeout = setTimeout(() => {
-      //   if (user) {
-      //     if (
-      //       user?.identityDocument?.type !==
-      //         'IDENTITY_DOCUMENT_TYPE_UNSPECIFIED' ||
-      //       user?.status !== 'USER_STATUS_CREATED'
-      //     ) {
-      //       return router.replace('/(tabs)');
-      //     } else {
-      //       return router.replace('/verify-id');
-      //     }
-      //   }
-      //   return router.replace('/onboarding');
+      if (user) {
+        if (user?.role === "USER_ROLE_FARMER") {
+          return router.replace("/(farmer)");
+        } else {
+          return router.replace("/(buyer)");
+        }
+      }
       return router.replace("/(auth)");
     }, timeLeft);
 

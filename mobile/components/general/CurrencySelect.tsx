@@ -37,7 +37,7 @@ interface Props {
   labelTextStyle?: TextStyle;
 }
 
-export const CountrySelect: FC<Props> = ({
+export const CurrencySelect: FC<Props> = ({
   setCountry,
   containerStyle,
   countries = allCountries,
@@ -98,21 +98,9 @@ export const CountrySelect: FC<Props> = ({
   return (
     <View style={containerStyle} testID="country-select-component">
       <View style={styles.mainContainer}>
-        {/* <TouchableOpacity
-          onPress={() => setShowCountries(true)}
-          activeOpacity={0.7}
-        >
-          <View style={styles.countryContainer}>
-            <View style={styles.flexContainer}>
-              <Text style={styles.countryCodeText}>{country?.emoji}</Text>
-              <Text style={styles.countryCodeText}>{country?.name}</Text>
-            </View>
-
-            <Icon color={Colors.dark[0]} size={24} source={"chevron-down"} />
-          </View>
-        </TouchableOpacity> */}
         <TouchableOpacity
           activeOpacity={0.7}
+          onPress={() => setShowCountries(true)}
           onLayout={onInputLayout}
           style={[
             styles.inputContainer,
@@ -134,14 +122,14 @@ export const CountrySelect: FC<Props> = ({
               labelTextStyle,
             ]}
           >
-            Country
+            Currency
           </Animated.Text>
           <View style={styles.flexContainer}>
             <Text style={[styles.countryCodeText, valueTextStyle]}>
               {country?.emoji}
             </Text>
             <Text style={[styles.countryCodeText, valueTextStyle]}>
-              {country?.name}
+              {country?.currency_code}
             </Text>
           </View>
           <Animated.View style={{ transform: [{ rotate }] }}>
@@ -153,6 +141,7 @@ export const CountrySelect: FC<Props> = ({
         visible={showCountries}
         setVisible={setShowCountries}
         setCountry={setCountry}
+        showCurrency={true}
         countries={countries}
       />
     </View>
