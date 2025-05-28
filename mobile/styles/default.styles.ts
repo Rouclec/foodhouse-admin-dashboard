@@ -183,6 +183,9 @@ export const defaultStyles = StyleSheet.create({
   linkText: {
     color: Colors.primary[300],
   },
+  relativeContainer: {
+    position: "relative",
+  },
   dialogContainer: {
     backgroundColor: Colors.light["10"],
     borderRadius: 8,

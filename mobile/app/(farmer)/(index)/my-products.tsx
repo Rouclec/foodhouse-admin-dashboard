@@ -95,7 +95,7 @@ export default function MyProducts() {
         keyboardVerticalOffset={0}
       >
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-          <View style={defaultStyles.flex}>
+          <View style={[defaultStyles.flex, defaultStyles.relativeContainer]}>
             <Appbar.Header
               dark={false}
               style={[defaultStyles.appHeader, styles.appHeader]}
@@ -201,6 +201,12 @@ export default function MyProducts() {
                 }
               />
             )}
+            <TouchableOpacity
+              style={styles.addProductButton}
+              onPress={() => router.push("/(farmer)/create-product")}
+            >
+              <Icon source={"plus"} size={36} color={Colors.light[10]} />
+            </TouchableOpacity>
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
