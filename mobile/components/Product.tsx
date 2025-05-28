@@ -1,35 +1,43 @@
 import { productsgrpcProduct } from "@/client/products.swagger";
 import React, { FC } from "react";
-import { View, Text, Image } from "react-native";
-import { productStyles as styles } from "@/styles";
+import { View, Image, TouchableOpacity } from "react-native";
+import { defaultStyles, productStyles as styles } from "@/styles";
+import { Text } from "react-native-paper";
 
 interface Props {
   product: productsgrpcProduct;
+  OnPress?: () => void;
 }
-export const Product: FC<Props> = ({ product }) => {
+export const Product: FC<Props> = ({ product, OnPress }) => {
   return (
-    <View style={styles.container}>
+    <TouchableOpacity
+      style={styles.container}
+      onPress={() => OnPress?.()}
+      disabled={!OnPress}
+    >
       <Image
         source={{ uri: product.image ?? "" }}
         style={styles.productImage}
       />
       <View style={styles.productDescriptionContainer}>
-        <Text>{product.name}</Text>
-        <View style={styles.ratingsContainer}>
+        <Text variant="titleLarge" style={styles.productName}>{product.name}</Text>
+        {/* <View style={styles.ratingsContainer}>
           <Text>star</Text>
           <View />
           <Text>4.5</Text>
           <View>
             <Text>New</Text>
           </View>
-        </View>
-        <Text>
+        </View> */}
+        <Text style={defaultStyles.primaryText}>
           {product.amount?.currencyIsoCode} {product.amount?.value}
           {/* <Text>{product.unitType}</Text> */}
-          <Text>{product.unitType?.slug?.replace("per_", "/")}</Text>{" "}
+          <Text style={styles.greyText}>
+            {product.unitType?.slug?.replace("per_", "/")}
+          </Text>{" "}
           {/* Use actual unit type*/}
         </Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };

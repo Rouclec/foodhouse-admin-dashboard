@@ -1,3 +1,4 @@
+import { Colors } from "@/constants";
 import { StyleSheet } from "react-native";
 
 export const productStyles = StyleSheet.create({
@@ -12,11 +13,18 @@ export const productStyles = StyleSheet.create({
   },
   productDescriptionContainer: {
     width: "100%",
-    rowGap: 10,
+    rowGap: 4,
+  },
+  productName: {
+    fontSize: 18,
+    lineHeight: 22,
   },
   ratingsContainer: {
     flexDirection: "row",
     alignItems: "center",
     columnGap: 4,
+  },
+  greyText: {
+    color: Colors.grey["61"],
   },
 });

@@ -48,4 +48,15 @@ export const myProductStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
+  addProductButton: {
+    position: "absolute",
+    right: 24,
+    backgroundColor: Colors.primary[500],
+    width: 64,
+    height: 64,
+    borderRadius: 64,
+    bottom: 56,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 });
