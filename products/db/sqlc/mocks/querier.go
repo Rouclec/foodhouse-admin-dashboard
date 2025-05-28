@@ -249,10 +249,10 @@ func (mr *MockQuerierMockRecorder) ListProductNamesByCategory(ctx, categoryID an
 }
 
 // ListProducts mocks base method.
-func (m *MockQuerier) ListProducts(ctx context.Context, arg sqlc.ListProductsParams) ([]sqlc.Product, error) {
+func (m *MockQuerier) ListProducts(ctx context.Context, arg sqlc.ListProductsParams) ([]sqlc.ListProductsRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListProducts", ctx, arg)
-	ret0, _ := ret[0].([]sqlc.Product)
+	ret0, _ := ret[0].([]sqlc.ListProductsRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

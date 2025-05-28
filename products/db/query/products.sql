@@ -37,8 +37,11 @@ DELETE FROM product
 WHERE id = $1;
 
 -- name: ListProducts :many
-SELECT *
-FROM product
+SELECT
+  p.*,
+  pt.slug AS unit_type_slug
+FROM product p
+LEFT JOIN price_types pt ON p.unit_type = pt.id
 WHERE
   (sqlc.arg(created_by)::varchar = '' OR created_by = sqlc.arg(created_by)::varchar) AND
   (sqlc.arg(category_id)::varchar = '' OR category_id = sqlc.arg(category_id)::varchar) AND
@@ -78,10 +81,13 @@ SELECT
   c.id AS category_id,
   c.name AS category_name,
   c.slug AS category_slug,
-  c.created_by AS category_created_by
+  c.created_by AS category_created_by,
+
+  pt.slug as unit_type_slug
 
 FROM product p
 JOIN categories c ON p.category_id = c.id
+JOIN price_types pt ON p.unit_type = pt.id
 WHERE p.id = $1;
 
 -- name: CreateProductName :one

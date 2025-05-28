@@ -71,7 +71,7 @@ export default function Login() {
         setUserId(data?.userId);
 
         if (role === "USER_ROLE_FARMER") {
-          router.replace("/(farmer)");
+          router.replace("/(farmer)/(index)");
         } else {
           router.replace("/(buyer)");
         }
@@ -142,7 +142,7 @@ export default function Login() {
   useEffect(() => {
     if (user) {
       if (user?.role === "USER_ROLE_FARMER") {
-        router.replace("/(farmer)");
+        router.replace("/(farmer)/(index)");
       } else {
         router.replace("/(buyer)");
       }

@@ -241,10 +241,13 @@ SELECT
   c.id AS category_id,
   c.name AS category_name,
   c.slug AS category_slug,
-  c.created_by AS category_created_by
+  c.created_by AS category_created_by,
+
+  pt.slug as unit_type_slug
 
 FROM product p
 JOIN categories c ON p.category_id = c.id
+JOIN price_types pt ON p.unit_type = pt.id
 WHERE p.id = $1
 `
 
@@ -264,6 +267,7 @@ type GetProductWithCategoryRow struct {
 	CategoryName      string             `json:"category_name"`
 	CategorySlug      string             `json:"category_slug"`
 	CategoryCreatedBy *string            `json:"category_created_by"`
+	UnitTypeSlug      string             `json:"unit_type_slug"`
 }
 
 func (q *Queries) GetProductWithCategory(ctx context.Context, id string) (GetProductWithCategoryRow, error) {
@@ -285,6 +289,7 @@ func (q *Queries) GetProductWithCategory(ctx context.Context, id string) (GetPro
 		&i.CategoryName,
 		&i.CategorySlug,
 		&i.CategoryCreatedBy,
+		&i.UnitTypeSlug,
 	)
 	return i, err
 }
@@ -374,8 +379,11 @@ func (q *Queries) ListProductNamesByCategory(ctx context.Context, categoryID str
 }
 
 const listProducts = `-- name: ListProducts :many
-SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale
-FROM product
+SELECT
+  p.id, p.category_id, p.name, p.unit_type, p.value, p.currency_iso_code, p.description, p.image, p.created_by, p.created_at, p.updated_at, p.whole_sale,
+  pt.slug AS unit_type_slug
+FROM product p
+LEFT JOIN price_types pt ON p.unit_type = pt.id
 WHERE
   ($1::varchar = '' OR created_by = $1::varchar) AND
   ($2::varchar = '' OR category_id = $2::varchar) AND
@@ -403,7 +411,23 @@ type ListProductsParams struct {
 	Count         int32     `json:"count"`
 }
 
-func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]Product, error) {
+type ListProductsRow struct {
+	ID              string             `json:"id"`
+	CategoryID      string             `json:"category_id"`
+	Name            string             `json:"name"`
+	UnitType        string             `json:"unit_type"`
+	Value           int64              `json:"value"`
+	CurrencyIsoCode string             `json:"currency_iso_code"`
+	Description     string             `json:"description"`
+	Image           string             `json:"image"`
+	CreatedBy       *string            `json:"created_by"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	WholeSale       bool               `json:"whole_sale"`
+	UnitTypeSlug    string             `json:"unit_type_slug"`
+}
+
+func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]ListProductsRow, error) {
 	rows, err := q.db.Query(ctx, listProducts,
 		arg.CreatedBy,
 		arg.CategoryID,
@@ -417,9 +441,9 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]P
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Product{}
+	items := []ListProductsRow{}
 	for rows.Next() {
-		var i Product
+		var i ListProductsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.CategoryID,
@@ -433,6 +457,7 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]P
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.WholeSale,
+			&i.UnitTypeSlug,
 		); err != nil {
 			return nil, err
 		}

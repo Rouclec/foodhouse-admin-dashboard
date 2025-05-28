@@ -1,72 +1,210 @@
-import { usersRevokeRefreshTokenMutation } from "@/client/users.swagger/@tanstack/react-query.gen";
-import { clearStorage, readData, updateAuthHeader } from "@/utils";
-import { useMutation } from "@tanstack/react-query";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  Dimensions,
+  FlatList,
+  Keyboard,
+  KeyboardAvoidingView,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
+import { defaultStyles, myProductStyles as styles } from "@/styles";
+import { useQuery } from "@tanstack/react-query";
+import { productsListFarmerProductsOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
+import { useContext } from "react";
+import { Context, ContextType } from "@/app/_layout";
+import {
+  ActivityIndicator,
+  Appbar,
+  Icon,
+  Text,
+  TextInput,
+} from "react-native-paper";
+import i18n from "@/i18n";
 import { useRouter } from "expo-router";
-import { useContext, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { Button } from "react-native-paper";
-import { Context, ContextType } from "../../_layout";
+import { Feather } from "@expo/vector-icons";
+import { Colors } from "@/constants";
+import { Chase } from "react-native-animated-spinkit";
+import { Product } from "@/components";
 
-export default function TabTwoScreen() {
-  const [loading, setLoading] = useState(false);
-  const { setUser } = useContext(Context) as ContextType;
+const { width } = Dimensions.get("window");
+export default function MyProducts() {
+  const [hasReachedEnd, setHasReachedEnd] = useState(false);
+  const [searchVisible, setSearchVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debounceQuery, setDebounceQuery] = useState("");
+  const [count, setCount] = useState(10);
 
-  const router = useRouter();
+  const slideAnim = useRef(new Animated.Value(width)).current;
 
-  const handleLogout = async () => {
-    try {
-      setLoading(true);
-      const refreshToken = await readData("@refreshToken");
-
-      await revokeRefreshToken({
-        body: {
-          refreshToken,
-        },
-      });
-
-      await clearStorage();
-      updateAuthHeader("");
-      setUser(undefined);
-      router.replace("/onboarding");
-    } catch (error) {
-      console.error({ error }, "logging out");
-    } finally {
-      setLoading(false);
+  const toggleSearch = () => {
+    if (searchVisible) {
+      Animated.timing(slideAnim, {
+        toValue: width,
+        duration: 500,
+        useNativeDriver: true,
+      }).start(() => setSearchVisible(false));
+      setSearchQuery("");
+      setDebounceQuery("");
+    } else {
+      setSearchVisible(true);
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
     }
   };
 
-  const { mutateAsync: revokeRefreshToken } = useMutation({
-    ...usersRevokeRefreshTokenMutation(),
-    onError: async (error) => {
-      console.error("error logging out: ", error);
-    },
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebounceQuery(searchQuery);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  const router = useRouter();
+
+  const { user } = useContext(Context) as ContextType;
+  const { isLoading: isProductsLoading, data } = useQuery({
+    ...productsListFarmerProductsOptions({
+      path: {
+        userId: user?.userId ?? "",
+      },
+      query: {
+        categoryId: "",
+        count: count,
+        // "maxAmount.currencyIsoCode": "XAF",
+        // "maxAmount.value": "10000000000",
+        // "minAmount.currencyIsoCode": "XAF",
+        // "minAmount.value": "0",
+        search: debounceQuery,
+        startKey: "",
+      },
+    }),
   });
 
+  console.log({ data });
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab Two</Text>
-      <Button onPress={handleLogout} loading={loading} disabled={loading}>
-        <Text>Logout</Text>
-      </Button>
-      <View style={styles.separator} />
-      {/* <EditScreenInfo path="app/(tabs)/two.tsx" /> */}
-    </View>
+    <>
+      <KeyboardAvoidingView
+        style={defaultStyles.container}
+        behavior={"padding"}
+        keyboardVerticalOffset={0}
+      >
+        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+          <View style={defaultStyles.flex}>
+            <Appbar.Header
+              dark={false}
+              style={[defaultStyles.appHeader, styles.appHeader]}
+            >
+              {!searchVisible && (
+                <Text variant="titleMedium" style={styles.title}>
+                  {i18n.t("(farmer).my-products.myProducts")}
+                </Text>
+              )}
+
+              {!searchVisible && (
+                <TouchableOpacity onPress={toggleSearch} style={styles.icon}>
+                  <Feather name="search" size={24} />
+                </TouchableOpacity>
+              )}
+
+              {searchVisible && (
+                <Animated.View
+                  style={[
+                    styles.searchContainer,
+                    { transform: [{ translateX: slideAnim }] },
+                  ]}
+                >
+                  <TextInput
+                    label="Search products"
+                    style={[defaultStyles.input, styles.searchInput]}
+                    autoFocus
+                    value={searchQuery}
+                    onChangeText={(text) => setSearchQuery(text)}
+                    mode="outlined"
+                    theme={{
+                      colors: {
+                        primary: Colors.primary[500],
+                        background: Colors.grey["fa"],
+                        error: Colors.error,
+                      },
+                      roundness: 10,
+                    }}
+                  />
+                  <TouchableOpacity
+                    onPress={toggleSearch}
+                    style={styles.closeIcon}
+                  >
+                    <Icon source={"close"} size={24} color={Colors.dark[0]} />
+                  </TouchableOpacity>
+                </Animated.View>
+              )}
+            </Appbar.Header>
+            <Text variant="titleMedium" style={styles.title}>
+              {i18n.t("(farmer).my-products.products")}
+            </Text>
+            {isProductsLoading && !data ? (
+              <View style={[defaultStyles.container, defaultStyles.center]}>
+                <Chase size={64} color={Colors.primary[500]} />
+              </View>
+            ) : (
+              <FlatList
+                data={data?.products}
+                keyExtractor={(item, index) => item.id ?? index.toString()}
+                contentContainerStyle={[
+                  defaultStyles.paddingVertical,
+                  styles.flatListContentContainer,
+                ]}
+                ListEmptyComponent={
+                  <View style={defaultStyles.noItemsContainer}>
+                    <Text style={defaultStyles.noItems}>
+                      {i18n.t("(farmer).my-products.noProductsFound")}
+                    </Text>
+                  </View>
+                }
+                numColumns={2}
+                columnWrapperStyle={styles.flatListColumnWrapper}
+                showsVerticalScrollIndicator={false}
+                onEndReached={() => {
+                  if (!hasReachedEnd) {
+                    setHasReachedEnd(true);
+                  }
+                }}
+                renderItem={({ item }) => {
+                  return <Product product={item} />;
+                }}
+                onScrollBeginDrag={() => {
+                  // Reset flag when user starts dragging
+                  setHasReachedEnd(false);
+                }}
+                onScrollEndDrag={() => {
+                  if (hasReachedEnd && data?.nextKey) {
+                    setCount((prev) => prev + 10);
+                    setHasReachedEnd(false);
+                  }
+                }}
+                ListFooterComponent={() =>
+                  data?.nextKey ? (
+                    <View style={defaultStyles.listFooterComponent}>
+                      {hasReachedEnd && (
+                        <ActivityIndicator
+                          color={Colors.primary[500]}
+                          style={defaultStyles.listFooterIndicator}
+                        />
+                      )}
+                    </View>
+                  ) : null
+                }
+              />
+            )}
+          </View>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: "80%",
-  },
-});

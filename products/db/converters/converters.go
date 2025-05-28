@@ -7,11 +7,11 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func SqlcToProtoProducts(sqlcProducts []sqlc.Product) ([]*productsgrpc.Product, error) {
+func SqlcToProtoProducts(sqlcProducts []sqlc.ListProductsRow) ([]*productsgrpc.Product, error) {
 	protoProducts := make([]*productsgrpc.Product, 0, len(sqlcProducts))
 
 	for _, t := range sqlcProducts {
-		protoProduct, err := SqlcToProtoProduct(t, nil)
+		protoProduct, err := SqlcToProtoProductRow(t, nil)
 
 		if err != nil {
 			return nil, err
@@ -22,7 +22,7 @@ func SqlcToProtoProducts(sqlcProducts []sqlc.Product) ([]*productsgrpc.Product, 
 	return protoProducts, nil
 }
 
-func SqlcToProtoProduct(sqlcProduct sqlc.Product, sqlcCategory *sqlc.Category) (*productsgrpc.Product, error) {
+func SqlcToProtoProductRow(sqlcProduct sqlc.ListProductsRow, sqlcCategory *sqlc.Category) (*productsgrpc.Product, error) {
 
 	// Build a minimal category with just the ID if category is nil
 	category := &productsgrpc.Category{Id: sqlcProduct.CategoryID}
@@ -35,7 +35,10 @@ func SqlcToProtoProduct(sqlcProduct sqlc.Product, sqlcCategory *sqlc.Category) (
 		Id:       sqlcProduct.ID,
 		Category: category, // Category will be nil if sqlcCategory is nil
 		Name:     sqlcProduct.Name,
-		UnitType: sqlcProduct.UnitType,
+		UnitType: &productsgrpc.PriceType{
+			Id:   sqlcProduct.UnitType,
+			Slug: sqlcProduct.UnitTypeSlug,
+		},
 		Amount: &types.Amount{
 			Value:           sqlcProduct.Value,
 			CurrencyIsoCode: sqlcProduct.CurrencyIsoCode,
@@ -43,6 +46,28 @@ func SqlcToProtoProduct(sqlcProduct sqlc.Product, sqlcCategory *sqlc.Category) (
 		Description: sqlcProduct.Description,
 		Image:       sqlcProduct.Image,
 		CreatedBy:   *sqlcProduct.CreatedBy,
+		CreatedAt:   timestamppb.New(sqlcProduct.CreatedAt.Time),
+		UpdatedAt:   timestamppb.New(sqlcProduct.UpdatedAt.Time),
+	}, nil
+}
+
+func SqlcToProtoProduct(sqlcProduct sqlc.GetProductWithCategoryRow) (*productsgrpc.Product, error) {
+
+	return &productsgrpc.Product{
+		Id:       sqlcProduct.ProductID,
+		Category: &productsgrpc.Category{Id: sqlcProduct.CategoryID, Name: sqlcProduct.CategoryName, Slug: sqlcProduct.CategorySlug}, // Category will be nil if sqlcCategory is nil
+		Name:     sqlcProduct.ProductName,
+		UnitType: &productsgrpc.PriceType{
+			Id:   sqlcProduct.UnitType,
+			Slug: sqlcProduct.UnitTypeSlug,
+		},
+		Amount: &types.Amount{
+			Value:           sqlcProduct.Value,
+			CurrencyIsoCode: sqlcProduct.CurrencyIsoCode,
+		},
+		Description: sqlcProduct.Description,
+		Image:       sqlcProduct.Image,
+		CreatedBy:   *sqlcProduct.ProductCreatedBy,
 		CreatedAt:   timestamppb.New(sqlcProduct.CreatedAt.Time),
 		UpdatedAt:   timestamppb.New(sqlcProduct.UpdatedAt.Time),
 	}, nil
