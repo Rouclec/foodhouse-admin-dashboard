@@ -232,23 +232,23 @@ export default function CreateNewPassword() {
         <Dialog
           visible={showModal}
           onDismiss={() => {}}
-          style={styles.dialogContainer}
+          style={defaultStyles.dialogSuccessContainer}
         >
           <Dialog.Content>
             <Image
               source={require("@/assets/images/success.png")}
-              style={styles.successImage}
+              style={defaultStyles.successImage}
             />
           </Dialog.Content>
           <Dialog.Content>
-            <Text variant="titleLarge" style={styles.dialogTitle}>
+            <Text variant="titleLarge" style={defaultStyles.primaryText}>
               {i18n.t(
                 "(auth).(forgot-password).create-new-password.passwordReset"
               )}
             </Text>
           </Dialog.Content>
           <Dialog.Content>
-            <Text style={styles.dialogContent}>
+            <Text style={defaultStyles.bodyText}>
               {i18n.t(
                 "(auth).(forgot-password).create-new-password.yourPasswordHasBeenReset"
               )}
