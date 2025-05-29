@@ -37,22 +37,25 @@ DELETE FROM product
 WHERE id = $1;
 
 -- name: ListProducts :many
-SELECT *
-FROM product
+SELECT
+  p.*,
+  pt.slug AS unit_type_slug
+FROM product p
+LEFT JOIN price_types pt ON p.unit_type = pt.id
 WHERE
-  (sqlc.arg(created_by)::varchar = '' OR created_by = sqlc.arg(created_by)::varchar) AND
-  (sqlc.arg(category_id)::varchar = '' OR category_id = sqlc.arg(category_id)::varchar) AND
-  (sqlc.arg(min_value)::bigint = 0 OR value >= sqlc.arg(min_value)::bigint) AND
+  (sqlc.arg(created_by)::varchar = '' OR p.created_by = sqlc.arg(created_by)::varchar) AND
+  (sqlc.arg(category_id)::varchar = '' OR p.category_id = sqlc.arg(category_id)::varchar) AND
+  (sqlc.arg(min_value)::bigint = 0 OR p.value >= sqlc.arg(min_value)::bigint) AND
   (
-    sqlc.arg(max_value)::bigint = 0 OR value <= COALESCE(sqlc.arg(max_value)::bigint, 9223372036854775807)
+    sqlc.arg(max_value)::bigint = 0 OR p.value <= COALESCE(sqlc.arg(max_value)::bigint, 9223372036854775807)
   ) AND
   (
     sqlc.arg(search)::text = '' OR
-    name ILIKE '%' || sqlc.arg(search)::text || '%' OR
-    description ILIKE '%' || sqlc.arg(search)::text || '%'
+    p.name ILIKE '%' || sqlc.arg(search)::text || '%' OR
+    p.description ILIKE '%' || sqlc.arg(search)::text || '%'
   ) AND
-  (sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at < sqlc.arg(created_before)::timestamptz)
-ORDER BY created_at DESC
+  (sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR p.created_at < sqlc.arg(created_before)::timestamptz)
+ORDER BY p.created_at DESC
 LIMIT sqlc.arg(count)::int;
 
 -- name: GetProductForUpdate :one
@@ -78,10 +81,13 @@ SELECT
   c.id AS category_id,
   c.name AS category_name,
   c.slug AS category_slug,
-  c.created_by AS category_created_by
+  c.created_by AS category_created_by,
+
+  pt.slug as unit_type_slug
 
 FROM product p
 JOIN categories c ON p.category_id = c.id
+JOIN price_types pt ON p.unit_type = pt.id
 WHERE p.id = $1;
 
 -- name: CreateProductName :one

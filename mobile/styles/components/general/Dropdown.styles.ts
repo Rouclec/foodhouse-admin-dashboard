@@ -48,6 +48,11 @@ export const dropdownStyles = StyleSheet.create({
   },
   itemText: {
     fontSize: 16,
-    color: "#333",
+    color: Colors.dark[10],
+  },
+  noDataText: {
+    textAlign: "center",
+    color: Colors.grey["3c"],
+    fontSize: 16,
   },
 });

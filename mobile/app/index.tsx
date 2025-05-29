@@ -58,7 +58,6 @@ export default function Index() {
       if (user) {
         if (user?.role === "USER_ROLE_FARMER") {
           return router.replace("/(farmer)/(index)");
-          
         } else {
           return router.replace("/(buyer)");
         }

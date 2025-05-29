@@ -7,9 +7,37 @@ export const defaultStyles = StyleSheet.create({
   container: {
     flex: 1,
     gap: 32,
-    paddingHorizontal: 16,
+    paddingHorizontal: 24,
     paddingTop: 16,
     backgroundColor: Colors.light["10"],
+  },
+  center: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  listFooterComponent: {
+    paddingVertical: 12,
+  },
+  listFooterIndicator: { transform: [{ scale: 1.4 }], marginTop: 4 },
+  noItemsContainer: {
+    paddingBottom: 26,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    paddingLeft: 22,
+    paddingVertical: 12,
+    marginBottom: 14,
+  },
+  noItems: {
+    color: Colors.dark[10],
+    fontSize: 24,
+    lineHeight: 36,
+    fontWeight: "400",
+  },
+  paddingVertical: {
+    paddingTop: 24,
+    paddingBottom: 32,
   },
   heading: {
     marginLeft: -56,
@@ -155,6 +183,9 @@ export const defaultStyles = StyleSheet.create({
   linkText: {
     color: Colors.primary[300],
   },
+  relativeContainer: {
+    position: "relative",
+  },
   dialogContainer: {
     backgroundColor: Colors.light["10"],
     borderRadius: 8,
@@ -164,6 +195,12 @@ export const defaultStyles = StyleSheet.create({
     width: width * 0.94,
     alignSelf: "center",
     marginHorizontal: 0,
+  },
+  dialogSuccessContainer: {
+    backgroundColor: Colors.light[10],
+    alignItems: "center",
+    padding: 32,
+    borderRadius: 48,
   },
   paddingHorizontal: {
     marginTop: 16,
@@ -213,4 +250,14 @@ export const defaultStyles = StyleSheet.create({
     overflowX: "hidden",
   },
   dialogContentContainer: { paddingTop: 0, paddingBottom: 2 },
+  successImage: { width: 180, height: 180 },
+  primaryText: {
+    color: Colors.primary[500],
+  },
+  bodyText: {
+    fontSize: 16,
+    lineHeight: 22,
+    letterSpacing: 0.2,
+    textAlign: "center",
+  },
 });

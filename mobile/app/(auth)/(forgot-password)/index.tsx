@@ -5,7 +5,6 @@ import {
   View,
   KeyboardAvoidingView,
   Keyboard,
-  TouchableWithoutFeedback,
   Image,
   TouchableOpacity,
   ScrollView,
@@ -79,77 +78,75 @@ export default function ForgotPassword() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
       >
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-          <View style={defaultStyles.flex}>
-            <Appbar.Header dark={false} style={defaultStyles.appHeader}>
-              <TouchableOpacity
-                onPress={() => router.back()}
-                style={defaultStyles.backButtonContainer}
-              >
-                <Icon source={"arrow-left"} size={24} />
-              </TouchableOpacity>
-              <Text variant="titleMedium" style={defaultStyles.heading}>
-                {i18n.t("(auth).(forgot-password).index.forgotPassword")}
-              </Text>
-              <View />
-            </Appbar.Header>
-            <ScrollView
-              contentContainerStyle={defaultStyles.scrollContainer}
-              showsVerticalScrollIndicator={false}
-              nestedScrollEnabled={true}
-              keyboardShouldPersistTaps="handled"
+        <View style={defaultStyles.flex}>
+          <Appbar.Header dark={false} style={defaultStyles.appHeader}>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={defaultStyles.backButtonContainer}
             >
-              <View style={styles.contentContainer}>
-                <View style={styles.illustrationImageContainer}>
-                  <Image
-                    source={require("@/assets/images/forgot-password-illustration.png")}
-                  />
-                </View>
-                <View>
-                  <Text style={defaultStyles.subheaderText}>
-                    {i18n.t("(auth).(forgot-password).index.enterYourEmail")}
-                  </Text>
-                </View>
-                <View style={defaultStyles.inputsContainer}>
-                  <TextInput
-                    mode="outlined"
-                    label={i18n.t("(auth).(forgot-password).index.email")}
-                    value={email}
-                    onChangeText={(text) => setEmail(text)}
-                    error={
-                      !!email &&
-                      ((!!email?.length && email?.length < 3) ||
-                        !emailRegex.test(email ?? ""))
-                    }
-                    style={defaultStyles.input}
-                    theme={{
-                      colors: {
-                        primary: Colors.primary[500],
-                        background: Colors.grey["fa"],
-                        error: Colors.error,
-                      },
-                      roundness: 10,
-                    }}
-                    outlineColor={Colors.grey["bg"]}
-                    left={
-                      <TextInput.Icon
-                        icon="email-outline"
-                        color={Colors.grey["61"]}
-                        size={20}
-                      />
-                    }
-                    autoCapitalize="none"
-                  />
-                  {!!email && !emailRegex.test(email) && (
-                    <HelperText type="error">
-                      {i18n.t("(auth).(forgot-password).index.invalidEmail")}
-                    </HelperText>
-                  )}
-                </View>
+              <Icon source={"arrow-left"} size={24} />
+            </TouchableOpacity>
+            <Text variant="titleMedium" style={defaultStyles.heading}>
+              {i18n.t("(auth).(forgot-password).index.forgotPassword")}
+            </Text>
+            <View />
+          </Appbar.Header>
+          <ScrollView
+            contentContainerStyle={defaultStyles.scrollContainer}
+            showsVerticalScrollIndicator={false}
+            nestedScrollEnabled={true}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.contentContainer}>
+              <View style={styles.illustrationImageContainer}>
+                <Image
+                  source={require("@/assets/images/forgot-password-illustration.png")}
+                />
               </View>
-            </ScrollView>
-          </View>
-        </TouchableWithoutFeedback>
+              <View>
+                <Text style={defaultStyles.subheaderText}>
+                  {i18n.t("(auth).(forgot-password).index.enterYourEmail")}
+                </Text>
+              </View>
+              <View style={defaultStyles.inputsContainer}>
+                <TextInput
+                  mode="outlined"
+                  label={i18n.t("(auth).(forgot-password).index.email")}
+                  value={email}
+                  onChangeText={(text) => setEmail(text)}
+                  error={
+                    !!email &&
+                    ((!!email?.length && email?.length < 3) ||
+                      !emailRegex.test(email ?? ""))
+                  }
+                  style={defaultStyles.input}
+                  theme={{
+                    colors: {
+                      primary: Colors.primary[500],
+                      background: Colors.grey["fa"],
+                      error: Colors.error,
+                    },
+                    roundness: 10,
+                  }}
+                  outlineColor={Colors.grey["bg"]}
+                  left={
+                    <TextInput.Icon
+                      icon="email-outline"
+                      color={Colors.grey["61"]}
+                      size={20}
+                    />
+                  }
+                  autoCapitalize="none"
+                />
+                {!!email && !emailRegex.test(email) && (
+                  <HelperText type="error">
+                    {i18n.t("(auth).(forgot-password).index.invalidEmail")}
+                  </HelperText>
+                )}
+              </View>
+            </View>
+          </ScrollView>
+        </View>
       </KeyboardAvoidingView>
       <View style={defaultStyles.bottomButtonContainer}>
         <Button

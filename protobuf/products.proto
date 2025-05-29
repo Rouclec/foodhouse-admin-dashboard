@@ -24,7 +24,7 @@ message Product {
   string id = 1;
   Category category = 2;
   string name = 3;
-  string unit_type = 4;
+  PriceType unit_type = 4;
   types.Amount amount = 5;
   string description = 6;
   string image = 7;

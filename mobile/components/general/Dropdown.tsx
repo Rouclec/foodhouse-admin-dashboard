@@ -9,10 +9,12 @@ import {
   TextStyle,
   LayoutChangeEvent,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { Colors } from "@/constants";
-import { dropdownStyles as styles } from "@/styles";
-import { Icon } from "react-native-paper";
+import { defaultStyles, dropdownStyles as styles } from "@/styles";
+import { HelperText, Icon } from "react-native-paper";
+import i18n from "@/i18n";
 
 interface DropdownItem {
   label: string;
@@ -31,6 +33,10 @@ interface DropdownProps {
   labelColor?: string;
   valueTextStyle?: TextStyle;
   labelTextStyle?: TextStyle;
+  loading?: boolean;
+  onFocus?: () => void;
+  onBlur?: () => void;
+  error?: string;
 }
 
 export const Dropdown: React.FC<DropdownProps> = ({
@@ -45,6 +51,10 @@ export const Dropdown: React.FC<DropdownProps> = ({
   labelColor = Colors.grey["61"],
   valueTextStyle,
   labelTextStyle,
+  loading = false,
+  onFocus = () => {},
+  onBlur = () => {},
+  error,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const animation = useRef(new Animated.Value(0)).current;
@@ -94,6 +104,10 @@ export const Dropdown: React.FC<DropdownProps> = ({
 
   const toggleDropdown = () => setIsFocused((prev) => !prev);
 
+  useEffect(() => {
+    isFocused ? onFocus?.() : onBlur?.();
+  }, [isFocused]);
+
   const handleSelect = (item: DropdownItem) => {
     onSelect(item.value);
     setIsFocused(false);
@@ -112,6 +126,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
           styles.inputContainer,
           inputContainerStyle,
           isFocused && { borderColor: activeColor, borderWidth: 2 },
+          !!error && { borderColor: Colors.error },
         ]}
       >
         <Animated.Text
@@ -123,7 +138,11 @@ export const Dropdown: React.FC<DropdownProps> = ({
                 { scale: labelScale },
                 { translateX: labelTranslateX },
               ],
-              color: isFocused ? activeColor : labelColor,
+              color: !!error
+                ? Colors.error
+                : isFocused
+                ? activeColor
+                : labelColor,
             },
             labelTextStyle,
           ]}
@@ -134,25 +153,49 @@ export const Dropdown: React.FC<DropdownProps> = ({
           {selectedValue?.label ?? ""}
         </Text>
         <Animated.View style={{ transform: [{ rotate }] }}>
-          <Icon color={iconColor} size={24} source={"chevron-down"} />
+          <Icon
+            color={error ? Colors.error : iconColor}
+            size={24}
+            source={"chevron-down"}
+          />
         </Animated.View>
       </TouchableOpacity>
+      {!!error && (
+        <HelperText style={defaultStyles.errorText} type="error">
+          {error}
+        </HelperText>
+      )}
 
       {isFocused && (
         <View style={[styles.dropdown, dropdownStyle]}>
           <ScrollView>
-            {data.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                style={[
-                  styles.item,
-                  index === data?.length - 1 && { borderBottomWidth: 0 },
-                ]}
-                onPress={() => handleSelect(item)}
-              >
-                <Text style={styles.itemText}>{item.label}</Text>
-              </TouchableOpacity>
-            ))}
+            {loading ? (
+              <ActivityIndicator />
+            ) : data.length === 0 ? (
+              <>
+                <TouchableOpacity
+                  style={[styles.item, { borderBottomWidth: 0 }]}
+                  disabled
+                >
+                  <Text style={styles.noDataText}>
+                    {i18n.t("components.Dropdown.noData")}
+                  </Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              data.map((item, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.item,
+                    index === data?.length - 1 && { borderBottomWidth: 0 },
+                  ]}
+                  onPress={() => handleSelect(item)}
+                >
+                  <Text style={styles.itemText}>{item.label}</Text>
+                </TouchableOpacity>
+              ))
+            )}
           </ScrollView>
         </View>
       )}

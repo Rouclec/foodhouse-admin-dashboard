@@ -7,7 +7,6 @@ import {
   Platform,
   ScrollView,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { Appbar, Button, Icon, Snackbar, Text } from "react-native-paper";
@@ -178,79 +177,73 @@ export default function ForgotPasswordEmailOtp() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
       >
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-          <View style={defaultStyles.flex}>
-            <Appbar.Header dark={false} style={defaultStyles.appHeader}>
-              <TouchableOpacity
-                onPress={() => router.back()}
-                style={defaultStyles.backButtonContainer}
-              >
-                <Icon source={"arrow-left"} size={24} />
-              </TouchableOpacity>
-              <Text variant="titleMedium" style={defaultStyles.heading}>
-                {i18n.t("(auth).(forgot-password).verify-otp.forgotPassword")}
-              </Text>
-              <View />
-            </Appbar.Header>
-            <View style={styles.directionContainer}>
-              <Text style={styles.direction}>
-                {i18n.t(
-                  "(auth).(forgot-password).verify-otp.aCodeHasBeenSentTo"
-                )}{" "}
-                {email}
-              </Text>
-            </View>
-            <ScrollView
-              contentContainerStyle={defaultStyles.scrollContainer}
-              showsVerticalScrollIndicator={false}
-              nestedScrollEnabled={true}
-              keyboardShouldPersistTaps="handled"
+        <View style={defaultStyles.flex}>
+          <Appbar.Header dark={false} style={defaultStyles.appHeader}>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={defaultStyles.backButtonContainer}
             >
-              <View style={styles.otpContainer}>
-                <PaperOtpInput
-                  maxLength={4}
-                  onPinChange={(pin) => {
-                    setOtp(pin);
-                    if (pin.length === 6) {
-                      Keyboard.dismiss();
-                    }
-                  }}
-                  otpTextStyle={styles.otpText}
-                  otpBoxStyle={styles.otpBox}
-                  otpBorderFocusedColor={Colors.primary[300]}
-                  otpBorderColor={Colors.grey["border"]}
-                />
-                <View style={styles.resendTextContainer}>
-                  <TouchableOpacity
-                    onPress={handleResendOTP}
-                    disabled={timeLeft > 0}
-                  >
-                    <Text style={timeLeft > 0 ? styles.text : styles.link}>
-                      {i18n.t("(auth).(forgot-password).verify-otp.resendCode")}
-                      {timeLeft > 0 && (
-                        <Text style={styles.link}>
-                          {" "}
-                          {i18n.t(
-                            "(auth).(forgot-password).verify-otp.in"
-                          )}{" "}
-                          {Math.floor(timeLeft / 60).toLocaleString("en-US", {
-                            minimumIntegerDigits: 2,
-                            useGrouping: false,
-                          })}
-                          :
-                          {Math.ceil(timeLeft % 60).toLocaleString("en-US", {
-                            minimumIntegerDigits: 2,
-                            useGrouping: false,
-                          })}
-                        </Text>
-                      )}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </ScrollView>
+              <Icon source={"arrow-left"} size={24} />
+            </TouchableOpacity>
+            <Text variant="titleMedium" style={defaultStyles.heading}>
+              {i18n.t("(auth).(forgot-password).verify-otp.forgotPassword")}
+            </Text>
+            <View />
+          </Appbar.Header>
+          <View style={styles.directionContainer}>
+            <Text style={styles.direction}>
+              {i18n.t("(auth).(forgot-password).verify-otp.aCodeHasBeenSentTo")}{" "}
+              {email}
+            </Text>
           </View>
-        </TouchableWithoutFeedback>
+          <ScrollView
+            contentContainerStyle={defaultStyles.scrollContainer}
+            showsVerticalScrollIndicator={false}
+            nestedScrollEnabled={true}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.otpContainer}>
+              <PaperOtpInput
+                maxLength={4}
+                onPinChange={(pin) => {
+                  setOtp(pin);
+                  if (pin.length === 6) {
+                    Keyboard.dismiss();
+                  }
+                }}
+                otpTextStyle={styles.otpText}
+                otpBoxStyle={styles.otpBox}
+                otpBorderFocusedColor={Colors.primary[300]}
+                otpBorderColor={Colors.grey["border"]}
+              />
+              <View style={styles.resendTextContainer}>
+                <TouchableOpacity
+                  onPress={handleResendOTP}
+                  disabled={timeLeft > 0}
+                >
+                  <Text style={timeLeft > 0 ? styles.text : styles.link}>
+                    {i18n.t("(auth).(forgot-password).verify-otp.resendCode")}
+                    {timeLeft > 0 && (
+                      <Text style={styles.link}>
+                        {" "}
+                        {i18n.t("(auth).(forgot-password).verify-otp.in")}{" "}
+                        {Math.floor(timeLeft / 60).toLocaleString("en-US", {
+                          minimumIntegerDigits: 2,
+                          useGrouping: false,
+                        })}
+                        :
+                        {Math.ceil(timeLeft % 60).toLocaleString("en-US", {
+                          minimumIntegerDigits: 2,
+                          useGrouping: false,
+                        })}
+                      </Text>
+                    )}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ScrollView>
+        </View>
         <View style={defaultStyles.bottomButtonContainer}>
           <Button
             mode="contained"

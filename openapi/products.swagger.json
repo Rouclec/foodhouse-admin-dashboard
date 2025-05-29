@@ -908,7 +908,7 @@
           "type": "string"
         },
         "unitType": {
-          "type": "string"
+          "$ref": "#/definitions/productsgrpcPriceType"
         },
         "amount": {
           "$ref": "#/definitions/typesAmount"
