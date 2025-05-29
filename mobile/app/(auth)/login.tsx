@@ -92,6 +92,7 @@ export default function Login() {
       console.log({ data });
       try {
           updateAuthHeader(data?.tokens?.accessToken ?? "")
+          await storeData("@refreshToken", data?.tokens?.refreshToken);
           storeData("@userId", data?.userId);
           setUserId(data?.userId ?? "")
       } catch (err) {
