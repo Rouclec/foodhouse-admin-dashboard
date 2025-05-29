@@ -23,7 +23,13 @@ const Register = () => {
 
   return (
     <>
-      <Appbar.Header dark={false}>
+
+      <KeyboardAvoidingView
+        style={signupStyles.container}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+      >
+         <Appbar.Header dark={false}>
         <TouchableOpacity
           style={signupStyles.closeIconContainer}
           onPress={() => router.back()}
@@ -34,13 +40,6 @@ const Register = () => {
          {i18n.t("(auth).register.createAccount")}
         </Text>
       </Appbar.Header>
-
-      <KeyboardAvoidingView
-        style={signupStyles.container}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
-      >
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
           <SafeAreaView style={defaultStyles.mainContainer}>
             <ScrollView
               style={signupStyles.scrollContainer}
@@ -118,7 +117,6 @@ const Register = () => {
               </View>
             </View>
           </SafeAreaView>
-        </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </>
   );

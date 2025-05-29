@@ -104,8 +104,6 @@ const Info = () => {
 
   return (
     <>
-  
-
       <KeyboardAvoidingView
         style={signupStyles.container}
         behavior={Platform.OS === "ios" ? "padding" : undefined}

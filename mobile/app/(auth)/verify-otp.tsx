@@ -205,7 +205,6 @@ const VerifyOtpScreen: FC = () => {
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}>
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
           <View style={styles.container}>
             <Appbar.Header dark={false} style={styles.appHeader}>
               <Appbar.BackAction
@@ -262,7 +261,6 @@ const VerifyOtpScreen: FC = () => {
               </View>
             </ScrollView>
           </View>
-        </TouchableWithoutFeedback>
         <View style={defaultStyles.bottomButtonContainer}>
           <Button
             mode="contained"

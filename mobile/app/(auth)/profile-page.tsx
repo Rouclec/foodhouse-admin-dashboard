@@ -138,7 +138,12 @@ const ProfilePage = () => {
 
   return (
     <>
-      <Appbar.Header dark={false}>
+      <KeyboardAvoidingView
+        style={signupStyles.container}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+      >
+        <Appbar.Header dark={false}>
         <TouchableOpacity
           style={signupStyles.closeIconContainer}
           onPress={() => router.back()}
@@ -149,13 +154,6 @@ const ProfilePage = () => {
           {i18n.t("(auth).profile.completeRegistration")}
         </Text>
       </Appbar.Header>
-
-      <KeyboardAvoidingView
-        style={signupStyles.container}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
-      >
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
           <SafeAreaView style={signupStyles.mainConatiner}>
             <ScrollView
               style={signupStyles.scrollContainer}
@@ -232,7 +230,6 @@ const ProfilePage = () => {
               </View>
             </ScrollView>
           </SafeAreaView>
-        </TouchableWithoutFeedback>
 
         <View style={imagePickerStyles.bottomContainer}>
           <Button
