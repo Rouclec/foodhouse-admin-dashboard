@@ -35,4 +35,26 @@ export const imagePickerStyles = StyleSheet.create({
     color: Colors.primary[500],
     fontSize: 18,
   },
+    bottomContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      padding: 16,
+    },
+    button1: {
+      flex: 1,
+      marginHorizontal: 10,
+      paddingVertical: 4,
+      height: 50,
+      borderRadius: 28,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: Colors.primary[500],
+    },
+    skipButton: {
+      borderColor: "#e8e8e8",
+      backgroundColor: Colors.primary[300],
+    },
+    skipButtonText: {
+      color: "black",
+    },
 });

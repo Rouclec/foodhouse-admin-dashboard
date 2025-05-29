@@ -126,7 +126,6 @@ const Info = () => {
           )}
         </Text>
       </Appbar.Header>
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
           <SafeAreaView style={signupStyles.mainConatiner}>
             <ScrollView
               style={signupStyles.scrollContainer}
@@ -228,7 +227,7 @@ const Info = () => {
               </View>
             </ScrollView>
           </SafeAreaView>
-        </TouchableWithoutFeedback>
+        
         <View style={defaultStyles.bottomButtonContainer}>
           <Button
             mode="contained"

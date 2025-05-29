@@ -25,7 +25,7 @@ import {
   Snackbar,
 } from "react-native-paper";
 import * as Camera from "expo-camera";
-import { signupStyles } from "@/styles";
+import { imagePickerStyles, signupStyles } from "@/styles";
 import { router } from "expo-router";
 import { Colors } from "@/constants";
 import { usersCompleteRegistrationMutation } from "@/client/users.swagger/@tanstack/react-query.gen";
@@ -234,12 +234,12 @@ const ProfilePage = () => {
           </SafeAreaView>
         </TouchableWithoutFeedback>
 
-        <View style={styles.bottomContainer}>
+        <View style={imagePickerStyles.bottomContainer}>
           <Button
             mode="outlined"
             onPress={() => router.back()}
-            style={[styles.button, styles.skipButton]}
-            labelStyle={styles.skipButtonText}
+            style={[imagePickerStyles.button, imagePickerStyles.skipButton]}
+            labelStyle={imagePickerStyles.skipButtonText}
           >
             Skip
           </Button>
@@ -247,7 +247,7 @@ const ProfilePage = () => {
           <Button
             mode="contained"
             onPress={handleComplete}
-            style={styles.button}
+            style={imagePickerStyles.button1}
             disabled={!firstName || !lastName || !email || !address || loading}
             loading={loading}
           >
@@ -273,21 +273,21 @@ const ProfilePage = () => {
         <Dialog
           visible={successModalVisible}
           onDismiss={() => setSuccessModalVisible(false)}
-          style={styles.dialogContainer}
+          style={defaultStyles.dialogContainer}
         >
           <Dialog.Content>
             <Image
               source={require("@/assets/images/success.png")}
-              style={styles.successImage}
+              style={defaultStyles.successImage}
             />
           </Dialog.Content>
           <Dialog.Content>
-            <Text variant="titleLarge" style={styles.dialogTitle}>
+            <Text variant="titleLarge" style={defaultStyles.primaryText}>
               {i18n.t("(auth).profile.congratulations")}
             </Text>
           </Dialog.Content>
           <Dialog.Content>
-            <Text style={styles.dialogContent}>
+            <Text style={defaultStyles.bodyText}>
               {i18n.t("(auth).profile.registrationCompleteMessage")}
             </Text>
           </Dialog.Content>
@@ -309,59 +309,4 @@ const ProfilePage = () => {
 
 export default ProfilePage;
 
-const styles = StyleSheet.create({
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginLeft: 4,
-  },
-  input: {
-    backgroundColor: "white",
-  },
-  outlineInput: {
-    borderRadius: 8,
-    borderWidth: 1,
-  },
-  bottomContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    padding: 16,
-  },
-  button: {
-    flex: 1,
-    marginHorizontal: 10,
-    paddingVertical: 4,
-    height: 50,
-    borderRadius: 28,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: Colors.primary[500],
-  },
-  skipButton: {
-    borderColor: "#e8e8e8",
-    backgroundColor: Colors.primary[300],
-  },
-  skipButtonText: {
-    color: "black",
-  },
-  dialogContainer: {
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  successImage: {
-    width: 100,
-    height: 100,
-    marginBottom: 20,
-  },
-  dialogTitle: {
-    textAlign: "center",
-    marginBottom: 10,
-    fontWeight: "bold",
-  },
-  dialogContent: {
-    textAlign: "center",
-    marginBottom: 20,
-  },
-});
+

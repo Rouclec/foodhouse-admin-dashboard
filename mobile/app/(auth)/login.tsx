@@ -54,7 +54,7 @@ export default function Login() {
           router.replace("/(farmer)/(index)");
           
         } else {
-          router.replace("/(buyer)/two");
+          router.replace("/(buyer)/index");
           
         }
     }
@@ -308,7 +308,6 @@ export default function Login() {
               </View>
             </View>
           </View>
-        </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </>
   );
