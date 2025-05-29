@@ -103,119 +103,119 @@ export default function MyProducts() {
         behavior={"padding"}
         keyboardVerticalOffset={0}
       >
-          <View style={[defaultStyles.flex, defaultStyles.relativeContainer]}>
-            <Appbar.Header
-              dark={false}
-              style={[defaultStyles.appHeader, styles.appHeader]}
-            >
-              {!searchVisible && (
-                <Text variant="titleMedium" style={styles.title}>
-                  {i18n.t("(farmer).my-products.myProducts")}
-                </Text>
-              )}
-
-              {!searchVisible && (
-                <TouchableOpacity onPress={toggleSearch} style={styles.icon}>
-                  <Feather name="search" size={24} />
-                </TouchableOpacity>
-              )}
-
-              {searchVisible && (
-                <Animated.View
-                  style={[
-                    styles.searchContainer,
-                    { transform: [{ translateX: slideAnim }] },
-                  ]}
-                >
-                  <TextInput
-                    label="Search products"
-                    style={[defaultStyles.input, styles.searchInput]}
-                    autoFocus
-                    value={searchQuery}
-                    onChangeText={(text) => setSearchQuery(text)}
-                    mode="outlined"
-                    theme={{
-                      colors: {
-                        primary: Colors.primary[500],
-                        background: Colors.grey["fa"],
-                        error: Colors.error,
-                      },
-                      roundness: 10,
-                    }}
-                  />
-                  <TouchableOpacity
-                    onPress={toggleSearch}
-                    style={styles.closeIcon}
-                  >
-                    <Icon source={"close"} size={24} color={Colors.dark[0]} />
-                  </TouchableOpacity>
-                </Animated.View>
-              )}
-            </Appbar.Header>
-            <Text variant="titleMedium" style={styles.title}>
-              {i18n.t("(farmer).my-products.products")}
-            </Text>
-            {isProductsLoading && !data ? (
-              <View style={[defaultStyles.container, defaultStyles.center]}>
-                <Chase size={64} color={Colors.primary[500]} />
-              </View>
-            ) : (
-              <FlatList
-                data={data?.products}
-                keyExtractor={(item, index) => item.id ?? index.toString()}
-                contentContainerStyle={[
-                  defaultStyles.paddingVertical,
-                  styles.flatListContentContainer,
-                ]}
-                ListEmptyComponent={
-                  <View style={defaultStyles.noItemsContainer}>
-                    <Text style={defaultStyles.noItems}>
-                      {i18n.t("(farmer).my-products.noProductsFound")}
-                    </Text>
-                  </View>
-                }
-                numColumns={2}
-                columnWrapperStyle={styles.flatListColumnWrapper}
-                showsVerticalScrollIndicator={false}
-                onEndReached={() => {
-                  if (!hasReachedEnd) {
-                    setHasReachedEnd(true);
-                  }
-                }}
-                renderItem={({ item }) => {
-                  return <Product product={item} />;
-                }}
-                onScrollBeginDrag={() => {
-                  // Reset flag when user starts dragging
-                  setHasReachedEnd(false);
-                }}
-                onScrollEndDrag={() => {
-                  if (hasReachedEnd && data?.nextKey) {
-                    setCount((prev) => prev + 10);
-                    setHasReachedEnd(false);
-                  }
-                }}
-                ListFooterComponent={() =>
-                  data?.nextKey ? (
-                    <View style={defaultStyles.listFooterComponent}>
-                      {hasReachedEnd && (
-                        <ActivityIndicator
-                          color={Colors.primary[500]}
-                          style={defaultStyles.listFooterIndicator}
-                        />
-                      )}
-                    </View>
-                  ) : null
-                }
-              />
+        <View style={[defaultStyles.flex, defaultStyles.relativeContainer]}>
+          <Appbar.Header
+            dark={false}
+            style={[defaultStyles.appHeader, styles.appHeader]}
+          >
+            {!searchVisible && (
+              <Text variant="titleMedium" style={styles.title}>
+                {i18n.t("(farmer).(index).my-products.myProducts")}
+              </Text>
             )}
-            <TouchableOpacity
-              style={styles.addProductButton}
-              onPress={() => router.push("/(farmer)/create-product")}
-            >
-              <Icon source={"plus"} size={36} color={Colors.light[10]} />
-            </TouchableOpacity>
-          </View>
+
+            {!searchVisible && (
+              <TouchableOpacity onPress={toggleSearch} style={styles.icon}>
+                <Feather name="search" size={24} />
+              </TouchableOpacity>
+            )}
+
+            {searchVisible && (
+              <Animated.View
+                style={[
+                  styles.searchContainer,
+                  { transform: [{ translateX: slideAnim }] },
+                ]}
+              >
+                <TextInput
+                  label={i18n.t("(farmer).(index).my-products.searchProducts")}
+                  style={[defaultStyles.input, styles.searchInput]}
+                  autoFocus
+                  value={searchQuery}
+                  onChangeText={(text) => setSearchQuery(text)}
+                  mode="outlined"
+                  theme={{
+                    colors: {
+                      primary: Colors.primary[500],
+                      background: Colors.grey["fa"],
+                      error: Colors.error,
+                    },
+                    roundness: 10,
+                  }}
+                />
+                <TouchableOpacity
+                  onPress={toggleSearch}
+                  style={styles.closeIcon}
+                >
+                  <Icon source={"close"} size={24} color={Colors.dark[0]} />
+                </TouchableOpacity>
+              </Animated.View>
+            )}
+          </Appbar.Header>
+          <Text variant="titleMedium" style={styles.title}>
+            {i18n.t("(farmer).(index).my-products.products")}
+          </Text>
+          {isProductsLoading && !data ? (
+            <View style={[defaultStyles.container, defaultStyles.center]}>
+              <Chase size={64} color={Colors.primary[500]} />
+            </View>
+          ) : (
+            <FlatList
+              data={data?.products}
+              keyExtractor={(item, index) => item.id ?? index.toString()}
+              contentContainerStyle={[
+                defaultStyles.paddingVertical,
+                styles.flatListContentContainer,
+              ]}
+              ListEmptyComponent={
+                <View style={defaultStyles.noItemsContainer}>
+                  <Text style={defaultStyles.noItems}>
+                    {i18n.t("(farmer).(index).my-products.noProductsFound")}
+                  </Text>
+                </View>
+              }
+              numColumns={2}
+              columnWrapperStyle={styles.flatListColumnWrapper}
+              showsVerticalScrollIndicator={false}
+              onEndReached={() => {
+                if (!hasReachedEnd) {
+                  setHasReachedEnd(true);
+                }
+              }}
+              renderItem={({ item }) => {
+                return <Product product={item} />;
+              }}
+              onScrollBeginDrag={() => {
+                // Reset flag when user starts dragging
+                setHasReachedEnd(false);
+              }}
+              onScrollEndDrag={() => {
+                if (hasReachedEnd && data?.nextKey) {
+                  setCount((prev) => prev + 10);
+                  setHasReachedEnd(false);
+                }
+              }}
+              ListFooterComponent={() =>
+                data?.nextKey ? (
+                  <View style={defaultStyles.listFooterComponent}>
+                    {hasReachedEnd && (
+                      <ActivityIndicator
+                        color={Colors.primary[500]}
+                        style={defaultStyles.listFooterIndicator}
+                      />
+                    )}
+                  </View>
+                ) : null
+              }
+            />
+          )}
+          <TouchableOpacity
+            style={styles.addProductButton}
+            onPress={() => router.push("/(farmer)/create-product")}
+          >
+            <Icon source={"plus"} size={36} color={Colors.light[10]} />
+          </TouchableOpacity>
+        </View>
       </KeyboardAvoidingView>
     </>
   );

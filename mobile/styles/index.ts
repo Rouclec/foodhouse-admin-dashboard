@@ -17,6 +17,7 @@ import { dropdownStyles } from "./components/general/Dropdown.styles";
 import { imagePickerStyles } from "./components/general/ImagePicker.styles";
 import { myProductStyles } from "./(farmer)/(index)/my-products.styles";
 import { productStyles } from "./components/Product.styles";
+import { buyerProductsStyles } from "./(buyer)/(index)/index.styles";
 
 // import { defaultStyles } from "./defaultstyles";
 // import { phoneNumberInputStyles } from "./components/general/PhoneNumberInputStyles";
@@ -49,4 +50,5 @@ export {
   imagePickerStyles,
   myProductStyles,
   productStyles,
+  buyerProductsStyles
 };

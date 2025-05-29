@@ -132,10 +132,25 @@
       "yourProductHasBeenUploaded": "Your product has been uploaded",
       "description": "Description"
     },
-    "my-products": {
-      "myProducts": "My products",
-      "products": "Products",
-      "noProductsFound": "No products found"
+    "(index)": {
+      "my-products": {
+        "myProducts": "My products",
+        "products": "Products",
+        "noProductsFound": "No products found",
+        "searchProducts": "Search products"
+      }
+    }
+  },
+  "(buyer)": {
+    "(index)": {
+      "products": {
+        "products": "Products",
+        "searchProducts": "Search products",
+        "goodMorning": "Good morning",
+        "categories": "Categories",
+        "noProductsFound": "No products found",
+        "all": "All"
+      }
     }
   },
   "components": {
