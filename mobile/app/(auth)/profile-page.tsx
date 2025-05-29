@@ -1,4 +1,3 @@
-
 import React, { useContext, useState } from "react";
 import {
   Keyboard,
@@ -19,12 +18,12 @@ import {
   Icon,
   TextInput,
   Button,
-  Modal,
+  Dialog,
   Portal,
   Text,
   Avatar,
+  Snackbar,
 } from "react-native-paper";
-import * as ImagePicker from "expo-image-picker";
 import * as Camera from "expo-camera";
 import { signupStyles } from "@/styles";
 import { router } from "expo-router";
@@ -35,379 +34,280 @@ import { delay } from "@/utils";
 import { Context, ContextType } from "../_layout";
 import { getDownloadURL, ref, storage, uploadBytes } from "@/firebase";
 import i18n from "@/i18n";
+import { ImagePicker } from "@/components";
+import { defaultStyles } from "@/styles";
 
 const ProfilePage = () => {
- 
-    //  const { user } = useContext(Context) as ContextType;
-    const { user } = useContext(Context) as ContextType;
-    
-     const [firstName, setFirstName] = useState("");
-     const [lastName, setLastName] = useState("");
-     const [email, setEmail] = useState("");
-     const [address, setAddress] = useState("");
-     const [loading, setLoading] = useState(false);
-     const [profileImage, setProfileImage] = useState<string | null>(null);
-     const [visible, setVisible] = useState(false);
-     const [errorMessage, setErrorMessage] = useState<string>();
-     const [error, setError] = useState(false);
-     const [cameraPermission, requestCameraPermission] = Camera.useCameraPermissions();
-     //const [galleryPermission, requestGalleryPermission] = ImagePicker.useMediaLibraryPermissions();
-     const [successModalVisible, setSuccessModalVisible] = useState(false);
-   
-     const showModal = () => setVisible(true);
-     const hideModal = () => setVisible(false);
-   
-     const uploadImageToFirebase = async (uri: string) => {
-       try {
-         // Fetch the image file
-         const response = await fetch(uri);
-         const blob = await response.blob();
-         
-         // Create a unique filename
-         const filename = `profile_${user?.userId}_${Date.now()}.jpg`;
-         const storageRef = ref(storage, `profile_images/${filename}`);
-   
-         // Upload the file
-         await uploadBytes(storageRef, blob);
-   
-         // Get the download URL
-         return await getDownloadURL(storageRef);
-       } catch (error) {
-         console.error('Error uploading image:', error);
-         throw error;
-       }
-     };
-   
-     const handleCamera = async () => {
-       try {
-         const { status } = await requestCameraPermission();
-         if (status !== 'granted') {
-           Alert.alert(
-             'Permission required',
-             'Please allow camera access in settings to take photos',
-             [
-               { text: 'Cancel', style: 'cancel' },
-               { text: 'Open Settings', onPress: () => Linking.openSettings() }
-             ]
-           );
-           return;
-         }
-   
-         let result = await ImagePicker.launchCameraAsync({
-           mediaTypes: ImagePicker.MediaTypeOptions.Images,
-           allowsEditing: true,
-           aspect: [1, 1],
-           quality: 0.7,
-         });
-   
-         if (!result.canceled && result.assets?.length) {
-           setProfileImage(result.assets[0].uri);
-         }
-       } catch (error) {
-         Alert.alert('Error', 'Failed to open camera');
-       } finally {
-         hideModal();
-       }
-     };
-   
-     const handleGallery = async () => {
-       try {
-         const galleryStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
-         if (!galleryStatus.granted) {
-           Alert.alert(
-             "Permission required",
-             "Please allow photo library access",
-             [
-               { text: "Cancel", style: "cancel" },
-               { text: "Open Settings", onPress: () => Linking.openSettings() },
-             ]
-           );
-           return;
-         }
-   
-         let result = await ImagePicker.launchImageLibraryAsync({
-           mediaTypes: ImagePicker.MediaTypeOptions.Images,
-           allowsEditing: true,
-           aspect: [1, 1],
-           quality: 0.7,
-         });
-   
-         if (!result.canceled && result.assets?.length) {
-           setProfileImage(result.assets[0].uri);
-         }
-       } catch (error) {
-         Alert.alert("Error", "Failed to open gallery");
-       } finally {
-         hideModal();
-       }
-     };
-   
-   
-     const { mutateAsync: updateUserRegistration } = useMutation({
-       ...usersCompleteRegistrationMutation(),
-       onError: async error => {
-         setErrorMessage(() => {
-           const errorData = error?.response?.data;
-   
-           if (errorData?.message) {
-             return errorData?.message;
-           }
-   
-           let message = 'An unknown error occurred';
-   
-           if (typeof errorData === 'string') {
-             try {
-               // Extract only the first JSON object
-               const firstObject = JSON.parse(
-                 (errorData as string).match(/\{.*?\}/s)?.[0] || '{}',
-               );
-               if (firstObject?.message) message = `${firstObject.message}`;
-             } catch (parseError) {
-               console.error('Error parsing error response:', parseError);
-             }
-           }
-   
-           return message;
-         });
-         setError(true);
-         await delay(5000);
-         setError(false);
-       },
-       onSuccess: async () => {
-         setSuccessModalVisible(true);
-         
-         // Redirect to home after 3 seconds
-         setTimeout(() => {
-           router.replace('/login');
-         }, 3000);
-       },
-     });
-      const handleComplete = async () => {
-       try {
-         setLoading(true);
-         
-         let imageUrl = null;
-         if (profileImage) {
-           imageUrl = await uploadImageToFirebase(profileImage);
-         }
-   
-         const data = {
-           firstName,
-           lastName,
-           email,
-           address,
-           profileImage: imageUrl || undefined,
-         };
-   
-         await updateUserRegistration({
-           body: data,
-           path: {
-             userId: user?.userId ?? '',
-           },
-         });
-       } catch (error) {
-         console.error('Error completing registration:', error);
-         Alert.alert('Error', 'Failed to complete registration');
-       } finally {
-         setLoading(false);
-       }
-     };
-   
-     return (
-       <>
-         <Appbar.Header dark={false}>
-           <TouchableOpacity
-             style={signupStyles.closeIconContainer}
-             onPress={() => router.back()}
-           >
-             <Icon source="arrow-left" size={24} color="#000" />
-           </TouchableOpacity>
-           <Text variant="headlineMedium" style={signupStyles.heading}>
-             {i18n.t("(auth).profile.completeRegistration")}
-           </Text>
-         </Appbar.Header>
-   
-         <KeyboardAvoidingView
-           style={signupStyles.container}
-           behavior={Platform.OS === "ios" ? "padding" : undefined}
-           keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
-         >
-           <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-             <SafeAreaView style={signupStyles.mainConatiner}>
-               <ScrollView
-                 style={signupStyles.scrollContainer}
-                 showsVerticalScrollIndicator={false}
-               >
-                 <View style={signupStyles.allInput}>
-                   <View style={signupStyles.imageContainer}>
-                     <TouchableOpacity
-                       onPress={showModal}
-                       style={signupStyles.imageUpload}
-                     >
-                       {profileImage ? (
-                         <Image
-                           source={{ uri: profileImage }}
-                           style={signupStyles.profileImage}
-                         />
-                       ) : (
-                         <View style={signupStyles.addImageContainer}>
-                           <Avatar.Icon size={120} icon="account" style={signupStyles.account}/>
-                           <Avatar.Icon
-                             size={24}
-                             icon="camera"
-                             color="#fff"
-                             style={signupStyles.cameraIcon}
-                           />
-                         </View>
-                       )}
-                     </TouchableOpacity>
-                   </View>
-   
-                   {/* <Text style={styles.sectionTitle}>First Name</Text> */}
-                   <TextInput
-                     placeholder={i18n.t("(auth).profile.firstName")}
-                     value={firstName}
-                     onChangeText={setFirstName}
-                     mode="outlined"
-                     outlineStyle={signupStyles.outlineInput}
-                     style={signupStyles.input}
-                   />
-   
-                   {/* <Text style={styles.sectionTitle}>Last Name</Text> */}
-                   <TextInput
-                     placeholder={i18n.t("(auth).profile.lastName")}
-                     value={lastName}
-                     onChangeText={setLastName}
-                     mode="outlined"
-                     outlineStyle={signupStyles.outlineInput}
-                     style={signupStyles.input}
-                   />
-   
-                   {/* <Text style={styles.sectionTitle}>Email</Text> */}
-                   <TextInput
-                     placeholder={i18n.t("(auth).profile.email")}
-                     value={email}
-                     onChangeText={setEmail}
-                     mode="outlined"
-                     outlineStyle={signupStyles.outlineInput}
-                     style={signupStyles.input}
-                     keyboardType="email-address"
-                     autoCapitalize="none"
-                   />
-   
-                   {/* <Text style={styles.sectionTitle}>Address</Text> */}
-                   <TextInput
-                     placeholder={i18n.t("(auth).profile.address")}
-                     value={address}
-                     onChangeText={setAddress}
-                     mode="outlined"
-                     outlineStyle={signupStyles.outlineInput}
-                     style={signupStyles.input}
-                     multiline
-                     numberOfLines={3}
-                   />
-                 </View>
-               </ScrollView>
-             </SafeAreaView>
-           </TouchableWithoutFeedback>
-   
-           <Portal>
-             <Modal
-               visible={visible}
-               onDismiss={hideModal}
-               contentContainerStyle={styles.modalContainer}
-             >
-               <View style={styles.modalContent}>
-                 <Text style={styles.modalTitle}>Photo Gallery</Text>
-                 <Button
-                   mode="contained"
-                   onPress={handleCamera}
-                   style={styles.modalButton}
-                   icon="camera"
-                 >
-                   Camera
-                 </Button>
-                 <Button
-                   mode="contained"
-                   onPress={handleGallery}
-                   style={styles.modalButton}
-                   icon="image"
-                 >
-                   Gallery
-                 </Button>
-                 <Button
-                   mode="outlined"
-                   onPress={hideModal}
-                   style={styles.modalButton}
-                 >
-                   Cancel
-                 </Button>
-               </View>
-             </Modal>
-           </Portal>
-   
-           <View style={styles.bottomContainer}>
-             <Button
-               mode="outlined"
-               onPress={() => router.back()}
-               style={[styles.button, styles.skipButton]}
-               labelStyle={styles.skipButtonText}
-             >
-               Skip
-             </Button>
-   
-             <Button
-               mode="contained"
-               onPress={handleComplete}
-               style={styles.button}
-               disabled={!firstName || !lastName || !email || !address}
-             >
-               Complete
-             </Button>
-           </View>
-         </KeyboardAvoidingView>
-   
-         <Modal 
-           visible={successModalVisible} 
-           onDismiss={() => setSuccessModalVisible(false)}
-           contentContainerStyle={styles.successModalContainer}
-         >
-           <View style={styles.successModalContent}>
-             <Icon 
-               source="check-circle" 
-               size={48} 
-               color="#4CAF50" 
-               // style={styles.successIcon}
-             />
-             <Text style={styles.successTitle}>Congratulations!</Text>
-             <Text style={styles.successText}>
-               Your account is ready to use. You will be redirected to the Home page in a few seconds.
-             </Text>
-             
-             <View style={styles.successButtonContainer}>
-               <Button
-                 mode="outlined"
-                 onPress={() => router.replace('/login')}
-                 style={styles.successButton}
-               >
-                 Skip
-               </Button>
-               <Button
-                 mode="contained"
-                 onPress={() => router.replace('/login')}
-                 style={styles.successButton}
-               >
-                 Complete
-               </Button>
-             </View>
-           </View>
-         </Modal>
-       </>
-   )
- 
-}
+  const { user } = useContext(Context) as ContextType;
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string>();
+  const [error, setError] = useState(false);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
+  const { role } = useContext(Context) as ContextType;
 
-export default ProfilePage
+  const uploadImageToFirebase = async (uri: string) => {
+    try {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      const filename = `profile_${user?.userId}_${Date.now()}.jpg`;
+      const storageRef = ref(storage, `profile_images/${filename}`);
+      await uploadBytes(storageRef, blob);
+      return await getDownloadURL(storageRef);
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw error;
+    }
+  };
+
+  const { mutateAsync: updateUserRegistration } = useMutation({
+    ...usersCompleteRegistrationMutation(),
+    onError: async (error) => {
+      setErrorMessage(() => {
+        const errorData = error?.response?.data;
+        if (errorData?.message) {
+          return errorData?.message;
+        }
+        let message = "An unknown error occurred";
+        if (typeof errorData === "string") {
+          try {
+            const firstObject = JSON.parse(
+              (errorData as string).match(/\{.*?\}/s)?.[0] || "{}"
+            );
+            if (firstObject?.message) message = `${firstObject.message}`;
+          } catch (parseError) {
+            console.error("Error parsing error response:", parseError);
+          }
+        }
+        return message;
+      });
+      setError(true);
+      await delay(5000);
+      setError(false);
+    },
+    onSuccess: async () => {
+      setSuccessModalVisible(true);
+      setTimeout(() => {
+        if (role === "USER_TYPE_FARMER") {
+          router.replace("/(farmer)/(index)");
+          
+        } else {
+          router.replace("/(buyer)/two");
+          
+        }
+      }, 3000);
+    },
+  });
+
+  console.log(user);
+
+  const handleComplete = async () => {
+    try {
+      setLoading(true);
+      let imageUrl = null;
+      if (profileImage) {
+        imageUrl = await uploadImageToFirebase(profileImage);
+      }
+
+      const data = {
+        firstName,
+        lastName,
+        email,
+        address,
+        profileImage: imageUrl || undefined,
+      };
+
+      await updateUserRegistration({
+        body: data,
+        path: {
+          userId: user?.userId ?? "",
+        },
+      });
+    } catch (error) {
+      console.error("Error completing registration:", error);
+      Alert.alert("Error", "Failed to complete registration");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <Appbar.Header dark={false}>
+        <TouchableOpacity
+          style={signupStyles.closeIconContainer}
+          onPress={() => router.back()}
+        >
+          <Icon source="arrow-left" size={24} color="#000" />
+        </TouchableOpacity>
+        <Text variant="headlineMedium" style={signupStyles.heading}>
+          {i18n.t("(auth).profile.completeRegistration")}
+        </Text>
+      </Appbar.Header>
+
+      <KeyboardAvoidingView
+        style={signupStyles.container}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+      >
+        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+          <SafeAreaView style={signupStyles.mainConatiner}>
+            <ScrollView
+              style={signupStyles.scrollContainer}
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={signupStyles.allInput}>
+                <View style={signupStyles.imageContainer}>
+                  <TouchableOpacity
+                    onPress={() => setIsImagePickerVisible(true)}
+                    style={signupStyles.imageUpload}
+                  >
+                    {profileImage ? (
+                      <Image
+                        source={{ uri: profileImage }}
+                        style={signupStyles.profileImage}
+                      />
+                    ) : (
+                      <View style={signupStyles.addImageContainer}>
+                        <Avatar.Icon
+                          size={120}
+                          icon="account"
+                          style={signupStyles.account}
+                        />
+                        <Avatar.Icon
+                          size={24}
+                          icon="camera"
+                          color="#fff"
+                          style={signupStyles.cameraIcon}
+                        />
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                </View>
+
+                <TextInput
+                  placeholder={i18n.t("(auth).profile.firstName")}
+                  value={firstName}
+                  onChangeText={setFirstName}
+                  mode="outlined"
+                  outlineStyle={signupStyles.outlineInput}
+                  style={signupStyles.input}
+                />
+
+                <TextInput
+                  placeholder={i18n.t("(auth).profile.lastName")}
+                  value={lastName}
+                  onChangeText={setLastName}
+                  mode="outlined"
+                  outlineStyle={signupStyles.outlineInput}
+                  style={signupStyles.input}
+                />
+
+                <TextInput
+                  placeholder={i18n.t("(auth).profile.email")}
+                  value={email}
+                  onChangeText={setEmail}
+                  mode="outlined"
+                  outlineStyle={signupStyles.outlineInput}
+                  style={signupStyles.input}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+
+                <TextInput
+                  placeholder={i18n.t("(auth).profile.address")}
+                  value={address}
+                  onChangeText={setAddress}
+                  mode="outlined"
+                  outlineStyle={signupStyles.outlineInput}
+                  style={signupStyles.input}
+                  multiline
+                  numberOfLines={3}
+                />
+              </View>
+            </ScrollView>
+          </SafeAreaView>
+        </TouchableWithoutFeedback>
+
+        <View style={styles.bottomContainer}>
+          <Button
+            mode="outlined"
+            onPress={() => router.back()}
+            style={[styles.button, styles.skipButton]}
+            labelStyle={styles.skipButtonText}
+          >
+            Skip
+          </Button>
+
+          <Button
+            mode="contained"
+            onPress={handleComplete}
+            style={styles.button}
+            disabled={!firstName || !lastName || !email || !address || loading}
+            loading={loading}
+          >
+            Complete
+          </Button>
+        </View>
+      </KeyboardAvoidingView>
+
+      {/* Image Picker Component */}
+      <ImagePicker
+        visible={isImagePickerVisible}
+        setImage={(asset) => {
+          if (asset) {
+            setProfileImage(asset.uri);
+          }
+        }}
+        onClose={() => setIsImagePickerVisible(false)}
+        aspect={[1, 1]}
+      />
+
+      {/* Success Modal */}
+      <Portal>
+        <Dialog
+          visible={successModalVisible}
+          onDismiss={() => setSuccessModalVisible(false)}
+          style={styles.dialogContainer}
+        >
+          <Dialog.Content>
+            <Image
+              source={require("@/assets/images/success.png")}
+              style={styles.successImage}
+            />
+          </Dialog.Content>
+          <Dialog.Content>
+            <Text variant="titleLarge" style={styles.dialogTitle}>
+              {i18n.t("(auth).profile.congratulations")}
+            </Text>
+          </Dialog.Content>
+          <Dialog.Content>
+            <Text style={styles.dialogContent}>
+              {i18n.t("(auth).profile.registrationCompleteMessage")}
+            </Text>
+          </Dialog.Content>
+        </Dialog>
+      </Portal>
+
+      {/* Error Snackbar */}
+      <Snackbar
+        visible={error}
+        onDismiss={() => setError(false)}
+        duration={3000}
+        style={defaultStyles.snackbar}
+      >
+        <Text style={defaultStyles.errorText}>{errorMessage}</Text>
+      </Snackbar>
+    </>
+  );
+};
+
+export default ProfilePage;
 
 const styles = StyleSheet.create({
   sectionTitle: {
@@ -430,15 +330,12 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     marginHorizontal: 10,
-
     paddingVertical: 4,
-
     height: 50,
     borderRadius: 28,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: Colors.primary[500],
-    color: "fff",
   },
   skipButton: {
     borderColor: "#e8e8e8",
@@ -447,57 +344,24 @@ const styles = StyleSheet.create({
   skipButtonText: {
     color: "black",
   },
-  
-  modalContainer: {
+  dialogContainer: {
     backgroundColor: "white",
     padding: 20,
-    margin: 20,
     borderRadius: 8,
+    alignItems: "center",
   },
-  modalContent: {
-    width: "100%",
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
+  successImage: {
+    width: 100,
+    height: 100,
     marginBottom: 20,
+  },
+  dialogTitle: {
     textAlign: "center",
+    marginBottom: 10,
+    fontWeight: "bold",
   },
-  modalButton: {
-    marginVertical: 8,
-  },
-   successModalContainer: {
-    backgroundColor: 'white',
-    padding: 20,
-    margin: 20,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  successModalContent: {
-    width: '100%',
-    alignItems: 'center',
-  },
-  successIcon: {
-    marginBottom: 16,
-  },
-  successTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  successText: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  successButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  successButton: {
-    flex: 1,
-    marginHorizontal: 8,
+  dialogContent: {
+    textAlign: "center",
+    marginBottom: 20,
   },
 });

@@ -38,10 +38,11 @@ export const signupStyles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    marginTop: 12,
-    backgroundColor: "ff0000"
+    marginTop: 18,
+    
   },
   allInput: {
+    top: 10,
     gap: 34,
     paddingBottom: Platform.OS === 'ios' ? 0 : 120,
   },
@@ -49,8 +50,9 @@ export const signupStyles = StyleSheet.create({
     textAlign: 'left',
     width: '100%',
     color: Colors.grey['79'],
-    fontSize: 12,
+    fontSize: 16,
     lineHeight: 16,
+    marginBottom: 10,
   },
   subheadingFull: {
     marginBottom: 20,
@@ -197,7 +199,7 @@ backgroundColor: Colors.grey['ea']
 
   content: {
     paddingHorizontal: 20,
-    paddingVertical: 50,
+    paddingVertical: 40,
   },
   roleContainer: {
     flexDirection: "row",

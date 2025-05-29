@@ -43,6 +43,7 @@ export const phoneNumberInputStyles = StyleSheet.create({
   },
   countryCodeText: {
     fontSize: 16,
+    marginLeft: 2,
     // color: Colors.grey["surface"],
   },
   divider: {
@@ -128,8 +129,15 @@ export const phoneNumberInputStyles = StyleSheet.create({
     borderWidth: 1,
   },
   flexContainer: {
-    flexDirection: "row",
-    columnGap: 16,
-    paddingHorizontal: 12,
+    // flexDirection: "row",
+    // columnGap: 16,
+    // paddingHorizontal: 50,
+     flexDirection: 'row',
+    width: '100%',
+    alignItems: 'center',
+    height: 64,
+    justifyContent: 'space-between',
+    padding: 16,
+    borderRadius: 4,
   },
 });

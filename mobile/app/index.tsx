@@ -57,7 +57,8 @@ export default function Index() {
     const timeout = setTimeout(() => {
       if (user) {
         if (user?.role === "USER_ROLE_FARMER") {
-          return router.replace("/(farmer)");
+          return router.replace("/(farmer)/(index)");
+          
         } else {
           return router.replace("/(buyer)");
         }

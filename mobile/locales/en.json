@@ -51,7 +51,9 @@
       "firstName": "Enter First Name",
       "lastName": "Enter last Name",
       "email": "Enter Email",
-      "address": "Enter Address"
+      "address": "Enter Address",
+      "congratulations": "Congratulations",
+      "registrationCompleteMessage": "Your account is ready to use, you will be redirected to the home page in a few seconds"
     },
     "(forgot-password)": {
       "index": {

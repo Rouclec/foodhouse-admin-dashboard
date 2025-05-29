@@ -139,7 +139,6 @@ const VerifyOtpScreen: FC = () => {
     onSuccess: async data => {
       setTimeLeft(0);
       updateAuthHeader(data.tokens?.accessToken!);
-      await storeData('@refreshToken', data?.tokens?.refreshToken);
       await storeData('@userId', data?.userId);
       setUserId(data?.userId);
       router.push('/profile-page');

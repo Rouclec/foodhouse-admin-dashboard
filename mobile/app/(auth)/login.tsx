@@ -16,6 +16,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   usersAuthenticateMutation,
   usersGetUserByIdOptions,
+  usersRefreshAccessTokenMutation,
 } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { Context, ContextType } from "../_layout";
 import { loginstyles } from "@/styles";
@@ -27,12 +28,38 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [fields, setFields] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({ email: "", password: "" });
-  const [userId, setUserId] = useState<string>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
+  const [userId, setUserId] = useState<string>();
   const { user, setUser } = useContext(Context) as ContextType;
+
+ 
+  // Fetch user data if userId exists
+  const { data: userData } = useQuery({
+    ...usersGetUserByIdOptions({
+      path: {
+        userId: userId ?? "",
+      },
+    }),
+    enabled: !!userId, 
+  });
+
+  useEffect(() => {
+    if (userData?.user) {
+      setUser(userData.user);
+       console.log("data from context", userData)
+        const role = userData?.user?.role;
+
+        if (role === "USER_TYPE_FARMER") {
+          router.replace("/(farmer)/(index)");
+          
+        } else {
+          router.replace("/(buyer)/two");
+          
+        }
+    }
+  }, [userData]);
 
   const { mutateAsync: authenticate } = useMutation({
     ...usersAuthenticateMutation(),
@@ -63,18 +90,11 @@ export default function Login() {
       setTimeout(() => setError(false), 5000);
     },
     onSuccess: async (data) => {
+      console.log({ data });
       try {
-        const role = user?.role;
-        updateAuthHeader(data?.tokens?.accessToken ?? "");
-        await storeData("@refreshToken", data?.tokens?.refreshToken);
-        await storeData("@userId", data?.userId);
-        setUserId(data?.userId);
-
-        if (role === "USER_ROLE_FARMER") {
-          router.replace("/(farmer)");
-        } else {
-          router.replace("/(buyer)");
-        }
+          updateAuthHeader(data?.tokens?.accessToken ?? "")
+          storeData("@userId", data?.userId);
+          setUserId(data?.userId ?? "")
       } catch (err) {
         console.error("Error handling login success:", err);
       }
@@ -129,25 +149,6 @@ export default function Login() {
       setLoading(false);
     }
   };
-
-  const { data: userData } = useQuery({
-    ...usersGetUserByIdOptions({
-      path: {
-        userId: userId ?? "",
-      },
-    }),
-    enabled: !!userId,
-  });
-
-  useEffect(() => {
-    if (user) {
-      if (user?.role === "USER_ROLE_FARMER") {
-        router.replace("/(farmer)");
-      } else {
-        router.replace("/(buyer)");
-      }
-    }
-  }, [user]);
 
   return (
     <>
@@ -205,7 +206,6 @@ export default function Login() {
                     size={20}
                   />
                 }
-                autoCapitalize="none"
               />
               {errors.email ? (
                 <Text style={loginstyles.errorText}>{errors.email}</Text>

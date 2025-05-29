@@ -36,6 +36,7 @@ export const loginstyles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     paddingHorizontal: 5,
+    lineHeight: 32,
   },
   content: {
     flex: 1,
@@ -45,9 +46,10 @@ export const loginstyles = StyleSheet.create({
   loginTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 30,
+    marginBottom: 10,
     color: "#000",
-    textAlign: "center",
+    textAlign: "left",
+    lineHeight: 40,
   },
   input: {
     marginBottom: 5,

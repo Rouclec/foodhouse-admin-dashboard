@@ -20,7 +20,7 @@ import { Colors, countries as allCountries } from '@/constants';
 import { Country } from '@/interface';
 import { phoneNumberInputStyles as styles } from '@/styles';
 import { Icon, TextInput } from 'react-native-paper';
-import CountryList from './CountryList';
+import { CountryList } from './CountryList';
 
 interface Props {
   containerStyle?: StyleProp<ViewStyle>;

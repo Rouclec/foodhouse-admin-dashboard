@@ -51,7 +51,7 @@ const Register = () => {
               </View>
 
               <View style={signupStyles.content}>
-                <Text style={signupStyles.heading}>{i18n.t("(auth).register.registerNewAccount")}</Text>
+                <Text style={loginstyles.loginTitle}>{i18n.t("(auth).register.registerNewAccount")}</Text>
                 <Text style={signupStyles.subheading}>
                   {i18n.t("(auth).register.description")}
                 </Text>
@@ -112,7 +112,7 @@ const Register = () => {
                 <Text style={loginstyles.registerText}>
                    {i18n.t("(auth).register.havingAccount")}
                 </Text>
-                <TouchableOpacity onPress={() => router.replace("/profile-page")}>
+                <TouchableOpacity onPress={() => router.replace("/login")}>
                   <Text style={loginstyles.registerLink}> {i18n.t("(auth).register.login")}</Text>
                 </TouchableOpacity>
               </View>

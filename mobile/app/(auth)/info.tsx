@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
-import CountrySelect from "@/components/general/CountrySelect";
+import { CountrySelect } from "@/components/general/CountrySelect";
 import { CAMEROON, Colors, countries } from "@/constants";
 import { Appbar, Button, Icon, TextInput, Text } from "react-native-paper";
 import PhoneNumberInput from "@/components/general/PhoneNumberInput";
@@ -104,7 +104,14 @@ const Info = () => {
 
   return (
     <>
-      <Appbar.Header dark={false}>
+  
+
+      <KeyboardAvoidingView
+        style={signupStyles.container}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+      >
+            <Appbar.Header dark={false}>
         <TouchableOpacity
           style={signupStyles.closeIconContainer}
           onPress={() => router.back()}
@@ -112,7 +119,6 @@ const Info = () => {
           <Icon source="arrow-left" size={24} color="#000" />
         </TouchableOpacity>
         <Text variant="headlineMedium" style={signupStyles.heading}>
-          {/* {i18n.t("(auth).createAccount.farmerAccount")} */}
           {i18n.t(
             `(auth).createAccount.${
               role === "USER_TYPE_FARMER" ? "farmerAccount" : "buyerAccount"
@@ -120,12 +126,6 @@ const Info = () => {
           )}
         </Text>
       </Appbar.Header>
-
-      <KeyboardAvoidingView
-        style={signupStyles.container}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
-      >
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
           <SafeAreaView style={signupStyles.mainConatiner}>
             <ScrollView
@@ -212,7 +212,7 @@ const Info = () => {
                       }
                       size={16}
                       color={Colors.grey["e7"]}
-                      // style={defaultStyles.iconContainer}
+                      
                     />
                   }
                 />

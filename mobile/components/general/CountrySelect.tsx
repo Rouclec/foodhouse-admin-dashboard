@@ -114,13 +114,14 @@ export const CountrySelect: FC<Props> = ({
         <TouchableOpacity
           activeOpacity={0.7}
           onLayout={onInputLayout}
+          onPress={() => setShowCountries(true)}
           style={[
             styles.inputContainer,
             containerStyle,
             isFocused && { borderColor: activeColor, borderWidth: 2 },
           ]}
         >
-          <Animated.Text
+          {/* <Animated.Text
             style={[
               styles.label,
               {
@@ -135,7 +136,7 @@ export const CountrySelect: FC<Props> = ({
             ]}
           >
             Country
-          </Animated.Text>
+          </Animated.Text> */}
           <View style={styles.flexContainer}>
             <Text style={[styles.countryCodeText, valueTextStyle]}>
               {country?.emoji}
