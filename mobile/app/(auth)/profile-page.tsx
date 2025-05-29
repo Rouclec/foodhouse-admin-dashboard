@@ -10,8 +10,6 @@ import {
   TouchableWithoutFeedback,
   View,
   Image,
-  Alert,
-  Linking,
 } from "react-native";
 import {
   Appbar,
@@ -24,18 +22,17 @@ import {
   Avatar,
   Snackbar,
 } from "react-native-paper";
-import * as Camera from "expo-camera";
 import { imagePickerStyles, signupStyles } from "@/styles";
 import { router } from "expo-router";
-import { Colors } from "@/constants";
 import { usersCompleteRegistrationMutation } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { useMutation } from "@tanstack/react-query";
-import { delay } from "@/utils";
+import { delay, uploadImage } from "@/utils";
 import { Context, ContextType } from "../_layout";
-import { getDownloadURL, ref, storage, uploadBytes } from "@/firebase";
 import i18n from "@/i18n";
 import { ImagePicker } from "@/components";
 import { defaultStyles } from "@/styles";
+import { Chase } from "react-native-animated-spinkit";
+import { Colors } from "@/constants";
 
 const ProfilePage = () => {
   const { user } = useContext(Context) as ContextType;
@@ -51,41 +48,12 @@ const ProfilePage = () => {
   const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
   const { role } = useContext(Context) as ContextType;
 
-  const uploadImageToFirebase = async (uri: string) => {
-    try {
-      const response = await fetch(uri);
-      const blob = await response.blob();
-      const filename = `profile_${user?.userId}_${Date.now()}.jpg`;
-      const storageRef = ref(storage, `profile_images/${filename}`);
-      await uploadBytes(storageRef, blob);
-      return await getDownloadURL(storageRef);
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      throw error;
-    }
-  };
-
   const { mutateAsync: updateUserRegistration } = useMutation({
     ...usersCompleteRegistrationMutation(),
     onError: async (error) => {
-      setErrorMessage(() => {
-        const errorData = error?.response?.data;
-        if (errorData?.message) {
-          return errorData?.message;
-        }
-        let message = "An unknown error occurred";
-        if (typeof errorData === "string") {
-          try {
-            const firstObject = JSON.parse(
-              (errorData as string).match(/\{.*?\}/s)?.[0] || "{}"
-            );
-            if (firstObject?.message) message = `${firstObject.message}`;
-          } catch (parseError) {
-            console.error("Error parsing error response:", parseError);
-          }
-        }
-        return message;
-      });
+      setErrorMessage(
+        error?.response?.data?.message ?? i18n.t("(auth).profile.unknownError")
+      );
       setError(true);
       await delay(5000);
       setError(false);
@@ -95,23 +63,24 @@ const ProfilePage = () => {
       setTimeout(() => {
         if (role === "USER_TYPE_FARMER") {
           router.replace("/(farmer)/(index)");
-          
         } else {
-          router.replace("/(buyer)/two");
-          
+          router.replace("/variety");
         }
       }, 3000);
     },
   });
 
-  console.log(user);
-
   const handleComplete = async () => {
     try {
       setLoading(true);
       let imageUrl = null;
+
       if (profileImage) {
-        imageUrl = await uploadImageToFirebase(profileImage);
+        imageUrl = await uploadImage({
+          uri: profileImage,
+          filename: `profile_${user?.userId}_${Date.now()}.jpg`,
+          directory: "profile_images",
+        });
       }
 
       const data = {
@@ -130,12 +99,14 @@ const ProfilePage = () => {
       });
     } catch (error) {
       console.error("Error completing registration:", error);
-      Alert.alert("Error", "Failed to complete registration");
+      setErrorMessage(i18n.t("(auth).profile.uploadError"));
+      setError(true);
+      await delay(5000);
+      setError(false);
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <>
       <KeyboardAvoidingView
@@ -144,98 +115,100 @@ const ProfilePage = () => {
         keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
       >
         <Appbar.Header dark={false}>
-        <TouchableOpacity
-          style={signupStyles.closeIconContainer}
-          onPress={() => router.back()}
-        >
-          <Icon source="arrow-left" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text variant="headlineMedium" style={signupStyles.heading}>
-          {i18n.t("(auth).profile.completeRegistration")}
-        </Text>
-      </Appbar.Header>
-          <SafeAreaView style={signupStyles.mainConatiner}>
-            <ScrollView
-              style={signupStyles.scrollContainer}
-              showsVerticalScrollIndicator={false}
-            >
-              <View style={signupStyles.allInput}>
-                <View style={signupStyles.imageContainer}>
-                  <TouchableOpacity
-                    onPress={() => setIsImagePickerVisible(true)}
-                    style={signupStyles.imageUpload}
-                  >
-                    {profileImage ? (
-                      <Image
-                        source={{ uri: profileImage }}
-                        style={signupStyles.profileImage}
+          <TouchableOpacity
+            style={signupStyles.closeIconContainer}
+            onPress={() => router.back()}
+          >
+            <Icon source="arrow-left" size={24} color="#000" />
+          </TouchableOpacity>
+          <Text variant="headlineMedium" style={signupStyles.heading}>
+            {i18n.t("(auth).profile.completeRegistration")}
+          </Text>
+        </Appbar.Header>
+        <SafeAreaView style={signupStyles.mainConatiner}>
+          <ScrollView
+            contentContainerStyle={defaultStyles.scrollContainer}
+            showsVerticalScrollIndicator={false}
+            nestedScrollEnabled={true}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={signupStyles.allInput}>
+              <View style={signupStyles.imageContainer}>
+                <TouchableOpacity
+                  onPress={() => setIsImagePickerVisible(true)}
+                  style={signupStyles.imageUpload}
+                >
+                  {profileImage ? (
+                    <Image
+                      source={{ uri: profileImage }}
+                      style={signupStyles.profileImage}
+                    />
+                  ) : (
+                    <View style={signupStyles.addImageContainer}>
+                      <Avatar.Icon
+                        size={120}
+                        icon="account"
+                        style={signupStyles.account}
                       />
-                    ) : (
-                      <View style={signupStyles.addImageContainer}>
-                        <Avatar.Icon
-                          size={120}
-                          icon="account"
-                          style={signupStyles.account}
-                        />
-                        <Avatar.Icon
-                          size={24}
-                          icon="camera"
-                          color="#fff"
-                          style={signupStyles.cameraIcon}
-                        />
-                      </View>
-                    )}
-                  </TouchableOpacity>
-                </View>
-
-                <TextInput
-                  placeholder={i18n.t("(auth).profile.firstName")}
-                  value={firstName}
-                  onChangeText={setFirstName}
-                  mode="outlined"
-                  outlineStyle={signupStyles.outlineInput}
-                  style={signupStyles.input}
-                />
-
-                <TextInput
-                  placeholder={i18n.t("(auth).profile.lastName")}
-                  value={lastName}
-                  onChangeText={setLastName}
-                  mode="outlined"
-                  outlineStyle={signupStyles.outlineInput}
-                  style={signupStyles.input}
-                />
-
-                <TextInput
-                  placeholder={i18n.t("(auth).profile.email")}
-                  value={email}
-                  onChangeText={setEmail}
-                  mode="outlined"
-                  outlineStyle={signupStyles.outlineInput}
-                  style={signupStyles.input}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-
-                <TextInput
-                  placeholder={i18n.t("(auth).profile.address")}
-                  value={address}
-                  onChangeText={setAddress}
-                  mode="outlined"
-                  outlineStyle={signupStyles.outlineInput}
-                  style={signupStyles.input}
-                  multiline
-                  numberOfLines={3}
-                />
+                      <Avatar.Icon
+                        size={24}
+                        icon="camera"
+                        color="#fff"
+                        style={signupStyles.cameraIcon}
+                      />
+                    </View>
+                  )}
+                </TouchableOpacity>
               </View>
-            </ScrollView>
-          </SafeAreaView>
+
+              <TextInput
+                placeholder={i18n.t("(auth).profile.firstName")}
+                value={firstName}
+                onChangeText={setFirstName}
+                mode="outlined"
+                outlineStyle={signupStyles.outlineInput}
+                style={signupStyles.input}
+              />
+
+              <TextInput
+                placeholder={i18n.t("(auth).profile.lastName")}
+                value={lastName}
+                onChangeText={setLastName}
+                mode="outlined"
+                outlineStyle={signupStyles.outlineInput}
+                style={signupStyles.input}
+              />
+
+              <TextInput
+                placeholder={i18n.t("(auth).profile.email")}
+                value={email}
+                onChangeText={setEmail}
+                mode="outlined"
+                outlineStyle={signupStyles.outlineInput}
+                style={signupStyles.input}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+
+              <TextInput
+                placeholder={i18n.t("(auth).profile.address")}
+                value={address}
+                onChangeText={setAddress}
+                mode="outlined"
+                outlineStyle={signupStyles.outlineInput}
+                style={signupStyles.input}
+                multiline
+                numberOfLines={3}
+              />
+            </View>
+          </ScrollView>
+        </SafeAreaView>
 
         <View style={imagePickerStyles.bottomContainer}>
           <Button
             mode="outlined"
-            onPress={() => router.back()}
-            style={[imagePickerStyles.button, imagePickerStyles.skipButton]}
+            onPress={() => router.replace("/(farmer)/(index)")}
+            style={[imagePickerStyles.button1, imagePickerStyles.skipButton]}
             labelStyle={imagePickerStyles.skipButtonText}
           >
             Skip
@@ -265,12 +238,11 @@ const ProfilePage = () => {
         aspect={[1, 1]}
       />
 
-      {/* Success Modal */}
       <Portal>
         <Dialog
           visible={successModalVisible}
-          onDismiss={() => setSuccessModalVisible(false)}
-          style={defaultStyles.dialogContainer}
+          onDismiss={() => {}}
+          style={defaultStyles.dialogSuccessContainer}
         >
           <Dialog.Content>
             <Image
@@ -288,13 +260,15 @@ const ProfilePage = () => {
               {i18n.t("(auth).profile.registrationCompleteMessage")}
             </Text>
           </Dialog.Content>
+          <Dialog.Content>
+            <Chase size={56} color={Colors.primary[500]} />
+          </Dialog.Content>
         </Dialog>
       </Portal>
 
-      {/* Error Snackbar */}
       <Snackbar
-        visible={error}
-        onDismiss={() => setError(false)}
+        visible={!!error}
+        onDismiss={() => {}}
         duration={3000}
         style={defaultStyles.snackbar}
       >
@@ -305,5 +279,3 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
-
-

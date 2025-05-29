@@ -51,7 +51,7 @@ export const signupStyles = StyleSheet.create({
     width: '100%',
     color: Colors.grey['79'],
     fontSize: 16,
-    lineHeight: 16,
+    lineHeight: 20,
     marginBottom: 10,
   },
   subheadingFull: {

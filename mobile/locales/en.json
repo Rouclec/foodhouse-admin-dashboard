@@ -52,8 +52,13 @@
       "lastName": "Enter last Name",
       "email": "Enter Email",
       "address": "Enter Address",
+      "unknownError": "An unknown error occured",
       "congratulations": "Congratulations",
       "registrationCompleteMessage": "Your account is ready to use, you will be redirected to the home page in a few seconds"
+    },
+    "variety": {
+      "description": "Welcome to Food House app! Choose Your Variety and explore a wide range of products tailored to your preferences.",
+      "header": "Choose your variety"
     },
     "(forgot-password)": {
       "index": {

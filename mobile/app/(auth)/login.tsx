@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Keyboard,
   Platform,
+  ScrollView,
 } from "react-native";
 import { Icon, TextInput } from "react-native-paper";
 import { Link, router } from "expo-router";
@@ -18,10 +19,10 @@ import {
   usersRefreshAccessTokenMutation,
 } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { Context, ContextType } from "../_layout";
-import { loginstyles } from "@/styles";
+import { defaultStyles, loginstyles } from "@/styles";
 import { Colors } from "@/constants";
 import i18n from "@/i18n";
-import { storeData, updateAuthHeader } from "@/utils";
+import { delay, storeData, updateAuthHeader } from "@/utils";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -47,14 +48,15 @@ export default function Login() {
   useEffect(() => {
     if (userData?.user) {
       setUser(userData.user);
-       console.log("data from context", userData)
         const role = userData?.user?.role;
 
         if (role === "USER_TYPE_FARMER") {
-          router.replace("/(farmer)/(index)");
+          // router.replace("/(farmer)/(index)");
+          router.replace("/profile-page")
           
         } else {
-          router.replace("/(buyer)/index");
+          // router.replace("/(buyer)/index");
+          router.replace("/profile-page")
           
         }
     }
@@ -63,33 +65,15 @@ export default function Login() {
   const { mutateAsync: authenticate } = useMutation({
     ...usersAuthenticateMutation(),
     onError: async (error) => {
-      setErrorMessage(() => {
-        const errorData = error?.response?.data;
-
-        if (errorData?.message) {
-          return errorData?.message;
-        }
-
-        let message = i18n.t("(auth).login.anUnknownError");
-
-        if (typeof errorData === "string") {
-          try {
-            const firstObject = JSON.parse(
-              (errorData as string).match(/\{.*?\}/s)?.[0] || "{}"
+      setErrorMessage(
+              error?.response?.data?.message ??
+                i18n.t("(auth).login.anUnknownError")
             );
-            if (firstObject?.message) message = `${firstObject.message}`;
-          } catch (parseError) {
-            console.error(i18n.t("(auth).login.errorParsing"), parseError);
-          }
-        }
-
-        return message;
-      });
       setError(true);
-      setTimeout(() => setError(false), 5000);
+      await delay(5000);
+      setError(false);
     },
     onSuccess: async (data) => {
-      console.log({ data });
       try {
           updateAuthHeader(data?.tokens?.accessToken ?? "")
           await storeData("@refreshToken", data?.tokens?.refreshToken);
@@ -170,6 +154,12 @@ export default function Login() {
               <Text style={loginstyles.logoText}>Food House</Text>
             </View>
           </View>
+           <ScrollView
+                      contentContainerStyle={defaultStyles.scrollContainer}
+                      showsVerticalScrollIndicator={false}
+                      nestedScrollEnabled={true}
+                      keyboardShouldPersistTaps="handled"
+                    >
           <View style={loginstyles.content}>
             <Text style={loginstyles.loginTitle}>
               {i18n.t("(auth).login.loginTo")}
@@ -307,6 +297,7 @@ export default function Login() {
                 </TouchableOpacity>
               </View>
             </View>
+            </ScrollView>
           </View>
       </KeyboardAvoidingView>
     </>
