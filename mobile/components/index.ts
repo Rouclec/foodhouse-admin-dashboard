@@ -5,6 +5,7 @@ import { Dropdown } from "./general/Dropdown";
 import { ImagePicker } from "./general/ImagePicker";
 import { CurrencySelect } from "./general/CurrencySelect";
 import { Product } from "./Product";
+import { FilterBottomSheet } from "./(buyer)/(index)/FilterBottomSheet";
 
 export {
   CountryList,
@@ -14,4 +15,5 @@ export {
   CurrencySelect,
   ImagePicker,
   Product,
+  FilterBottomSheet,
 };

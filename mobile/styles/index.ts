@@ -17,6 +17,7 @@ import { dropdownStyles } from "./components/general/Dropdown.styles";
 import { imagePickerStyles } from "./components/general/ImagePicker.styles";
 import { myProductStyles } from "./(farmer)/(index)/my-products.styles";
 import { productStyles } from "./components/Product.styles";
+import { buyerProductsStyles } from "./(buyer)/(index)/index.styles";
 
 // import { defaultStyles } from "./defaultstyles";
 // import { phoneNumberInputStyles } from "./components/general/PhoneNumberInputStyles";
@@ -26,6 +27,7 @@ import { productStyles } from "./components/Product.styles";
 // import { onboardingStyles } from "./(auth)/onboarding";
 import { signupStyles } from "./(auth)/signupstyles";
 import { verifyOtpStyles } from "./(auth)/verify-otpstyles";
+import { filterBottomSheetStyles } from "./components/(buyer)/(index)/FilterBottomSheet.styles";
 export {
   buyerIndexStyles,
   farmerIndexStyles,
@@ -40,8 +42,8 @@ export {
   forgotPasswordIndexStyles,
   forgotPasswordVerifyOtpStyles,
   createNewPasswordStyles,
-//  onboardingStyles,
- signupStyles,
+  //  onboardingStyles,
+  signupStyles,
   verifyOtpStyles,
   tabStyles,
   createProductStyles,
@@ -49,4 +51,6 @@ export {
   imagePickerStyles,
   myProductStyles,
   productStyles,
+  buyerProductsStyles,
+  filterBottomSheetStyles,
 };

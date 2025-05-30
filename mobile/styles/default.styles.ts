@@ -118,6 +118,9 @@ export const defaultStyles = StyleSheet.create({
     minHeight: 48,
     minWidth: 124,
   },
+  primaryButton: {
+    backgroundColor: Colors.primary[500],
+  },
   secondaryButton: {
     borderWidth: 1,
     backgroundColor: Colors.primary[50],
@@ -258,6 +261,9 @@ export const defaultStyles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 22,
     letterSpacing: 0.2,
+    textAlign: "center",
+  },
+  textCenter: {
     textAlign: "center",
   },
 });
