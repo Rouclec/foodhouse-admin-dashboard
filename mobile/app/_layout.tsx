@@ -3,7 +3,7 @@ import * as SplashScreen from "expo-splash-screen";
 import React, { createContext, useState } from "react";
 import "react-native-reanimated";
 
-import { usersgrpcUser } from "@/client/users.swagger";
+import { usersgrpcUser, usersgrpcUserType } from "@/client/users.swagger";
 import { useReactQueryDevTools } from "@dev-plugins/react-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -42,11 +42,13 @@ const client = new QueryClient();
 
 interface ContextInfo {
   user: usersgrpcUser | undefined;
+  role: usersgrpcUserType | undefined;
 }
 
 interface ContextSetters {
   // eslint-disable-next-line no-unused-vars
   setUser: (user: usersgrpcUser | undefined) => void;
+  setUserRole: (role: usersgrpcUserType | undefined) => void;
 }
 
 export interface ContextType extends ContextInfo, ContextSetters {}
@@ -100,6 +102,7 @@ function RootLayoutNav() {
 
   const initialState: ContextInfo = {
     user: undefined,
+    role: undefined,
   };
 
   const [contextInfo, setContextInfo] = useState(initialState);
@@ -108,8 +111,12 @@ function RootLayoutNav() {
     setContextInfo((prevState) => ({ ...prevState, user }));
   }
 
+  function setUserRole(role: usersgrpcUserType | undefined) {
+    setContextInfo((prevState) => ({ ...prevState, role }));
+  }
   const contextSetters: ContextSetters = {
     setUser,
+    setUserRole,
   };
 
   return (

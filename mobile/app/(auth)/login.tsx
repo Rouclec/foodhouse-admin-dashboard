@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Keyboard,
   Platform,
+  ScrollView,
 } from "react-native";
 import { Icon, TextInput } from "react-native-paper";
 import { Link, router } from "expo-router";
@@ -15,65 +16,69 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   usersAuthenticateMutation,
   usersGetUserByIdOptions,
+  usersRefreshAccessTokenMutation,
 } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { Context, ContextType } from "../_layout";
-import { loginstyles } from "@/styles";
+import { defaultStyles, loginstyles } from "@/styles";
 import { Colors } from "@/constants";
 import i18n from "@/i18n";
-import { storeData, updateAuthHeader } from "@/utils";
+import { delay, storeData, updateAuthHeader } from "@/utils";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [fields, setFields] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({ email: "", password: "" });
-  const [userId, setUserId] = useState<string>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
+  const [userId, setUserId] = useState<string>();
   const { user, setUser } = useContext(Context) as ContextType;
+
+ 
+  // Fetch user data if userId exists
+  const { data: userData } = useQuery({
+    ...usersGetUserByIdOptions({
+      path: {
+        userId: userId ?? "",
+      },
+    }),
+    enabled: !!userId, 
+  });
+
+  useEffect(() => {
+    if (userData?.user) {
+      setUser(userData.user);
+        const role = userData?.user?.role;
+
+        if (role === "USER_TYPE_FARMER") {
+          // router.replace("/(farmer)/(index)");
+          router.replace("/profile-page")
+          
+        } else {
+          // router.replace("/(buyer)/index");
+          router.replace("/profile-page")
+          
+        }
+    }
+  }, [userData]);
 
   const { mutateAsync: authenticate } = useMutation({
     ...usersAuthenticateMutation(),
     onError: async (error) => {
-      setErrorMessage(() => {
-        const errorData = error?.response?.data;
-
-        if (errorData?.message) {
-          return errorData?.message;
-        }
-
-        let message = i18n.t("(auth).login.anUnknownError");
-
-        if (typeof errorData === "string") {
-          try {
-            const firstObject = JSON.parse(
-              (errorData as string).match(/\{.*?\}/s)?.[0] || "{}"
+      setErrorMessage(
+              error?.response?.data?.message ??
+                i18n.t("(auth).login.anUnknownError")
             );
-            if (firstObject?.message) message = `${firstObject.message}`;
-          } catch (parseError) {
-            console.error(i18n.t("(auth).login.errorParsing"), parseError);
-          }
-        }
-
-        return message;
-      });
       setError(true);
-      setTimeout(() => setError(false), 5000);
+      await delay(5000);
+      setError(false);
     },
     onSuccess: async (data) => {
       try {
-        const role = user?.role;
-        updateAuthHeader(data?.tokens?.accessToken ?? "");
-        await storeData("@refreshToken", data?.tokens?.refreshToken);
-        await storeData("@userId", data?.userId);
-        setUserId(data?.userId);
-
-        if (role === "USER_ROLE_FARMER") {
-          router.replace("/(farmer)/(index)");
-        } else {
-          router.replace("/(buyer)");
-        }
+          updateAuthHeader(data?.tokens?.accessToken ?? "")
+          await storeData("@refreshToken", data?.tokens?.refreshToken);
+          storeData("@userId", data?.userId);
+          setUserId(data?.userId ?? "")
       } catch (err) {
         console.error("Error handling login success:", err);
       }
@@ -129,25 +134,6 @@ export default function Login() {
     }
   };
 
-  const { data: userData } = useQuery({
-    ...usersGetUserByIdOptions({
-      path: {
-        userId: userId ?? "",
-      },
-    }),
-    enabled: !!userId,
-  });
-
-  useEffect(() => {
-    if (user) {
-      if (user?.role === "USER_ROLE_FARMER") {
-        router.replace("/(farmer)/(index)");
-      } else {
-        router.replace("/(buyer)");
-      }
-    }
-  }, [user]);
-
   return (
     <>
       <KeyboardAvoidingView
@@ -168,6 +154,12 @@ export default function Login() {
               <Text style={loginstyles.logoText}>Food House</Text>
             </View>
           </View>
+           <ScrollView
+                      contentContainerStyle={defaultStyles.scrollContainer}
+                      showsVerticalScrollIndicator={false}
+                      nestedScrollEnabled={true}
+                      keyboardShouldPersistTaps="handled"
+                    >
           <View style={loginstyles.content}>
             <Text style={loginstyles.loginTitle}>
               {i18n.t("(auth).login.loginTo")}
@@ -177,34 +169,33 @@ export default function Login() {
               <Text style={loginstyles.errorMessage}>{errorMessage}</Text>
             )}
 
-            <TextInput
-              mode="outlined"
-              label={i18n.t("(auth).login.email")}
-              value={fields.email}
-              onChangeText={(text) => handleInputChange("email", text)}
-              error={!!errors.email}
-              style={loginstyles.input}
-              theme={{
-                colors: {
-                  primary: Colors.primary[500],
-                  background: Colors.grey["fa"],
-                  error: Colors.error,
-                },
-                roundness: 10,
-              }}
-              outlineColor={Colors.grey["bg"]}
-              left={
-                <TextInput.Icon
-                  icon="email-outline"
-                  color={Colors.grey["61"]}
-                  size={20}
-                />
-              }
-              autoCapitalize="none"
-            />
-            {errors.email ? (
-              <Text style={loginstyles.errorText}>{errors.email}</Text>
-            ) : null}
+              <TextInput
+                mode="outlined"
+                label={i18n.t("(auth).login.email")}
+                value={fields.email}
+                onChangeText={(text) => handleInputChange("email", text)}
+                error={!!errors.email}
+                style={loginstyles.input}
+                theme={{
+                  colors: {
+                    primary: Colors.primary[500],
+                    background: Colors.grey["fa"],
+                    error: Colors.error,
+                  },
+                  roundness: 10,
+                }}
+                outlineColor={Colors.grey["bg"]}
+                left={
+                  <TextInput.Icon
+                    icon="email-outline"
+                    color={Colors.grey["61"]}
+                    size={20}
+                  />
+                }
+              />
+              {errors.email ? (
+                <Text style={loginstyles.errorText}>{errors.email}</Text>
+              ) : null}
 
             <TextInput
               mode="outlined"
@@ -295,18 +286,19 @@ export default function Login() {
               </TouchableOpacity>
             </View>
 
-            <View style={loginstyles.registerContainer}>
-              <Text style={loginstyles.registerText}>
-                {i18n.t("(auth).login.dontHaveAnAccount")}{" "}
-              </Text>
-              <TouchableOpacity onPress={() => router.replace("/signup")}>
-                <Text style={loginstyles.registerLink}>
-                  {i18n.t("(auth).login.registerNow")}
+              <View style={loginstyles.registerContainer}>
+                <Text style={loginstyles.registerText}>
+                  {i18n.t("(auth).login.dontHaveAnAccount")}{" "}
                 </Text>
-              </TouchableOpacity>
+                <TouchableOpacity onPress={() => router.replace("/register")}>
+                  <Text style={loginstyles.registerLink}>
+                    {i18n.t("(auth).login.registerNow")}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
+            </ScrollView>
           </View>
-        </View>
       </KeyboardAvoidingView>
     </>
   );

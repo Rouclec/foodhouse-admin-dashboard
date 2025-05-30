@@ -18,6 +18,14 @@ import { imagePickerStyles } from "./components/general/ImagePicker.styles";
 import { myProductStyles } from "./(farmer)/(index)/my-products.styles";
 import { productStyles } from "./components/Product.styles";
 
+// import { defaultStyles } from "./defaultstyles";
+// import { phoneNumberInputStyles } from "./components/general/PhoneNumberInputStyles";
+// import { DatePickerStyles } from "./components/general/DatePickerStyles";
+// import { index1 } from "./(auth)/indexstyles";
+// import { loginstyles } from "./(auth)/loginStyles";
+// import { onboardingStyles } from "./(auth)/onboarding";
+import { signupStyles } from "./(auth)/signupstyles";
+import { verifyOtpStyles } from "./(auth)/verify-otpstyles";
 export {
   buyerIndexStyles,
   farmerIndexStyles,
@@ -32,6 +40,9 @@ export {
   forgotPasswordIndexStyles,
   forgotPasswordVerifyOtpStyles,
   createNewPasswordStyles,
+//  onboardingStyles,
+ signupStyles,
+  verifyOtpStyles,
   tabStyles,
   createProductStyles,
   dropdownStyles,

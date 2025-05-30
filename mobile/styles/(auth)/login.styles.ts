@@ -36,6 +36,7 @@ export const loginstyles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     paddingHorizontal: 5,
+    lineHeight: 32,
   },
   content: {
     flex: 1,
@@ -45,13 +46,14 @@ export const loginstyles = StyleSheet.create({
   loginTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 30,
+    marginBottom: 10,
     color: "#000",
-    textAlign: "center",
+    textAlign: "left",
+    lineHeight: 40,
   },
   input: {
     marginBottom: 5,
-    backgroundColor: "#FAFAFA",
+    backgroundColor: Colors.grey["fa"],
   },
   errorText: {
     color: "#FF0000",
@@ -75,7 +77,7 @@ export const loginstyles = StyleSheet.create({
   loginButton: {
     width: "100%",
     height: 56,
-    backgroundColor: "#6dcd47",
+    backgroundColor: Colors.primary[500],
     borderRadius: 28,
     justifyContent: "center",
     alignItems: "center",
@@ -111,7 +113,7 @@ export const loginstyles = StyleSheet.create({
     height: 60,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
+    borderColor:  Colors.grey["border"],
     justifyContent: "center",
     alignItems: "center",
     marginHorizontal: 10,
@@ -126,5 +128,45 @@ export const loginstyles = StyleSheet.create({
   registerLink: {
     color: Colors.primary[500],
     fontWeight: "bold",
+  },
+
+  varietiesContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-around",
+  },
+  varietyCard: {
+    width: "45%",
+    backgroundColor: "#fff",
+    borderRadius: 36,
+    padding: 16,
+    marginBottom: 16,
+    height: 155,
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor:  Colors.grey["border"],
+  },
+  selectedVarietyCard: {
+    borderColor: Colors.primary[500],
+  },
+  varietyImage: {
+    width: 80,
+    height: 80,
+    marginBottom: 8,
+    borderRadius: 24,
+  },
+ 
+  varietyName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 4,
+    textAlign: "center",
+  },
+  selectedVarietyText: {
+    color: Colors.primary[500],
+  },
+  varietySubtitle: {
+    fontSize: 14,
+    textAlign: "center",
   },
 });
