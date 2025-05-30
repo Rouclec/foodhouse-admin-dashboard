@@ -25,7 +25,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const Info = () => {
   const [country, setCountry] = useState(CAMEROON);
-  const [callingCode, setCallingCode] = useState(country?.dial_code || "237"); // Use country's calling code
+  const [callingCode, setCallingCode] = useState(country?.dial_code || "237"); 
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,7 +37,7 @@ const Info = () => {
   const [errorMessage, setErrorMessage] = useState<string>();
 
   const router = useRouter();
-  const { role, setUserRole } = useContext(Context) as ContextType;
+  const { role } = useContext(Context) as ContextType;
 
   useEffect(() => {
     if (country?.dial_code) {
