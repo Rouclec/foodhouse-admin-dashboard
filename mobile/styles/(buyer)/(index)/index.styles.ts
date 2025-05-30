@@ -1,7 +1,7 @@
 import { Colors } from "@/constants";
 import { Dimensions, StyleSheet } from "react-native";
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 export const buyerProductsStyles = StyleSheet.create({
   bgWhite: {
     backgroundColor: Colors.light[10],
@@ -153,11 +153,11 @@ export const buyerProductsStyles = StyleSheet.create({
     position: "absolute",
     backgroundColor: Colors.light[10],
     zIndex: 99,
-    bottom: -64,
+    bottom: -height,
     left: 0,
     width: width,
     marginLeft: 0,
     right: 0,
-    height: 480,
+    height: height + 428,
   },
 });
