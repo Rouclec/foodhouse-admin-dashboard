@@ -27,6 +27,7 @@ import { buyerProductsStyles } from "./(buyer)/(index)/index.styles";
 // import { onboardingStyles } from "./(auth)/onboarding";
 import { signupStyles } from "./(auth)/signupstyles";
 import { verifyOtpStyles } from "./(auth)/verify-otpstyles";
+import { filterBottomSheetStyles } from "./components/(buyer)/(index)/FilterBottomSheet.styles";
 export {
   buyerIndexStyles,
   farmerIndexStyles,
@@ -41,8 +42,8 @@ export {
   forgotPasswordIndexStyles,
   forgotPasswordVerifyOtpStyles,
   createNewPasswordStyles,
-//  onboardingStyles,
- signupStyles,
+  //  onboardingStyles,
+  signupStyles,
   verifyOtpStyles,
   tabStyles,
   createProductStyles,
@@ -50,5 +51,6 @@ export {
   imagePickerStyles,
   myProductStyles,
   productStyles,
-  buyerProductsStyles
+  buyerProductsStyles,
+  filterBottomSheetStyles,
 };

@@ -36,7 +36,7 @@
       "dontHaveAnAccount": "Don't have an account?",
       "registerNow": "Register Now"
     },
-    
+
     "verifyOtp": {
       "verifyNumber": "verify your phone number",
       "codeSent": "Code has been sent to",
@@ -95,7 +95,7 @@
       "description": "What describes you the best?",
       "buyer": "buyer",
       "seller": "Farmer or Seller",
-      "button":  "Next",
+      "button": "Next",
       "havingAccount": "Already have an account?",
       "login": "Login"
     },
@@ -147,9 +147,16 @@
         "products": "Products",
         "searchProducts": "Search products",
         "goodMorning": "Good morning",
+        "goodAfternoon": "Good afternoon",
+        "goodEvening": "Good evening",
         "categories": "Categories",
         "noProductsFound": "No products found",
-        "all": "All"
+        "all": "All",
+        "filter": "Filter",
+        "priceRange": "Price Range",
+        "ratings": "Ratings",
+        "close": "Close",
+        "apply": "Apply"
       }
     }
   },

@@ -23,6 +23,7 @@ export const buyerProductsStyles = StyleSheet.create({
     justifyContent: "center",
   },
   appHeaderTopContainer: {
+    paddingTop: 12,
     width: "100%",
     flexDirection: "row",
     alignItems: "center",
@@ -58,9 +59,11 @@ export const buyerProductsStyles = StyleSheet.create({
   },
   title: {
     marginTop: 24,
-    marginHorizontal: 24,
     fontSize: 20,
     fontWeight: "bold",
+  },
+  marginHorizontal24: {
+    marginHorizontal: 24,
   },
   separator: {
     marginVertical: 30,
@@ -125,17 +128,24 @@ export const buyerProductsStyles = StyleSheet.create({
     lineHeight: 24,
   },
   horizontalFlatList: {
-    paddingLeft: 24,
     paddingVertical: 12,
     flex: 1,
   },
+
   horizontailFlatListContent: {
-    paddingRight: 24,
     columnGap: 32,
-    alignItems: "center",
+    alignItems: "flex-start",
     height: "100%",
   },
+  paddingRight24: {
+    paddingRight: 24,
+  },
+  paddingLeft24: {
+    paddingLeft: 24,
+  },
   categoryItem: {
+    flexDirection: "row",
+    columnGap: 4,
     height: 40,
     paddingHorizontal: 20,
     alignItems: "center",
@@ -150,14 +160,82 @@ export const buyerProductsStyles = StyleSheet.create({
     height: 64,
   },
   filtersContainer: {
-    position: "absolute",
+    height: "100%",
+    alignItems: "center",
+    paddingBottom: 24,
+  },
+  mainFilterContainer: {
+    marginVertical: 24,
+    paddingBottom: 24,
+    flexGrow: 1,
+    borderTopWidth: 0.5,
+    borderBottomWidth: 0.5,
+    borderColor: Colors.grey["border"],
+  },
+  halfButton: {
+    width: "45%",
+  },
+  bottomButtonContainer: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  silderContainer: {
+    // alignItems: "center",
+    marginLeft: 16,
+  },
+  sliderTrack: {
+    width: "100%",
+    height: 8,
+    borderRadius: 20,
+  },
+  sliderSelectedStyle: { backgroundColor: Colors.primary[500] },
+  marker: {
+    width: 28,
+    height: 28,
+    borderRadius: 28,
     backgroundColor: Colors.light[10],
-    zIndex: 99,
-    bottom: -height,
-    left: 0,
-    width: width,
-    marginLeft: 0,
-    right: 0,
-    height: height + 428,
+    borderWidth: 6,
+    borderColor: Colors.primary[500],
+    marginTop: 8,
+  },
+
+  tooltipContainer: {
+    position: "absolute",
+    top: -20,
+    right: -16,
+  },
+  tooltip: {
+    backgroundColor: Colors.primary[500],
+    padding: 1,
+    borderRadius: 2,
+    width: 56,
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tooltipText: {
+    color: "white",
+    fontSize: 14,
+    flexShrink: 1,
+    overflow: "hidden",
+  },
+  tooltipArrow: {
+    position: "absolute",
+    bottom: -4, // position below the tooltip box
+    left: "50%",
+    marginLeft: -4, // half of border width to center it
+    width: 0,
+    height: 0,
+    borderLeftWidth: 4,
+    borderRightWidth: 4,
+    borderTopWidth: 4,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderTopColor: Colors.primary[500],
+  },
+  ratingText: {
+    fontSize: 16,
   },
 });

@@ -1,7 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
+  Animated,
+  Dimensions,
   FlatList,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   SafeAreaView,
   TouchableOpacity,
@@ -17,6 +26,7 @@ import { useContext } from "react";
 import { Context, ContextType } from "@/app/_layout";
 import {
   ActivityIndicator,
+  Button,
   Dialog,
   Icon,
   Portal,
@@ -27,9 +37,14 @@ import i18n from "@/i18n";
 import { useRouter } from "expo-router";
 import { CAMEROON, Colors, countries } from "@/constants";
 import { Chase } from "react-native-animated-spinkit";
-import { Product } from "@/components";
+import { FilterBottomSheet, Product } from "@/components";
 import { useIsFocused } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
+import { FilterBottomSheetRef } from "@/components/(buyer)/(index)/FilterBottomSheet";
+import MultiSlider from "@ptomasroos/react-native-multi-slider";
+
+const HOUR_OF_DAY = new Date().getHours();
+const { width } = Dimensions.get("window");
 
 export default function BuyerProducts() {
   const [hasReachedEnd, setHasReachedEnd] = useState(false);
@@ -88,6 +103,16 @@ export default function BuyerProducts() {
     }
   }, [isFocused]);
 
+  // control variables for filter container
+  const sheetRef = useRef<FilterBottomSheetRef>(null);
+  const [filterSelectedCategoryId, setFilterSelectedCategoryId] =
+    useState<string>();
+  const [filterSelectedMinValue, setFilterSelectedMinValue] =
+    useState<string>();
+  const [filterSelectedMaxValue, setFilterSelectedMaxValue] =
+    useState<string>();
+  const [filterSelectedRating, setFilterSelectedRating] = useState<number>();
+
   return (
     <>
       <KeyboardAvoidingView
@@ -118,7 +143,12 @@ export default function BuyerProducts() {
                     </View>
                     <View>
                       <Text style={styles.greetingsText} variant="bodyLarge">
-                        {i18n.t("(buyer).(index).products.goodMorning")} 👋
+                        {HOUR_OF_DAY < 12
+                          ? i18n.t("(buyer).(index).products.goodMorning")
+                          : HOUR_OF_DAY < 17
+                          ? i18n.t("(buyer).(index).products.goodAfternoon")
+                          : i18n.t("(buyer).(index).products.goodEvening")}{" "}
+                        👋
                       </Text>
                       <Text style={styles.nameText} variant="titleLarge">
                         {user?.firstName} {user?.lastName}
@@ -161,6 +191,10 @@ export default function BuyerProducts() {
                   }
                   right={
                     <TextInput.Icon
+                      onPress={(e) => {
+                        Keyboard.dismiss(); // pressing the text input opens the keyboard, so we dismiss it at once, since that is not what we want here
+                        sheetRef.current?.open();
+                      }}
                       icon={() => (
                         <Image
                           source={require("@/assets/images/filter-icon.jpg")}
@@ -180,7 +214,10 @@ export default function BuyerProducts() {
               </View>
             </SafeAreaView>
           </View>
-          <Text variant="titleMedium" style={styles.title}>
+          <Text
+            variant="titleMedium"
+            style={[styles.title, styles.marginHorizontal24]}
+          >
             {i18n.t("(buyer).(index).products.categories")}
           </Text>
           {isCategoriesLoading ? (
@@ -192,9 +229,12 @@ export default function BuyerProducts() {
               <FlatList
                 horizontal
                 data={categories?.categories}
-                contentContainerStyle={styles.horizontailFlatListContent}
+                contentContainerStyle={[
+                  styles.horizontailFlatListContent,
+                  styles.paddingRight24,
+                ]}
                 showsHorizontalScrollIndicator={false}
-                style={styles.horizontalFlatList}
+                style={[styles.horizontalFlatList, styles.paddingLeft24]}
                 keyExtractor={(item, index) => item?.id ?? index.toString()}
                 ListHeaderComponent={() => (
                   <TouchableOpacity
@@ -241,7 +281,10 @@ export default function BuyerProducts() {
               />
             </View>
           )}
-          <Text variant="titleMedium" style={styles.title}>
+          <Text
+            variant="titleMedium"
+            style={[styles.title, styles.marginHorizontal24]}
+          >
             {i18n.t("(buyer).(index).products.products")}
           </Text>
           {isProductsLoading && !data ? (
@@ -272,7 +315,19 @@ export default function BuyerProducts() {
                 }
               }}
               renderItem={({ item }) => {
-                return <Product product={item} OnPress={() => {}} />;
+                return (
+                  <Product
+                    product={item}
+                    OnPress={() =>
+                      router.push({
+                        pathname: "/product-details",
+                        params: {
+                          product: JSON.stringify(item),
+                        },
+                      })
+                    }
+                  />
+                );
               }}
               onScrollBeginDrag={() => {
                 // Reset flag when user starts dragging
@@ -298,17 +353,261 @@ export default function BuyerProducts() {
               }
             />
           )}
-          <View style={styles.filtersContainer}>
-            <Portal>
-              <Dialog visible={true} style={styles.filtersContainer}>
-                <Dialog.Content>
-                  <Text>Filter container</Text>
-                </Dialog.Content>
-              </Dialog>
-            </Portal>
-          </View>
         </View>
       </KeyboardAvoidingView>
+      <FilterBottomSheet ref={sheetRef} sheetHeight={548}>
+        <View style={styles.filtersContainer}>
+          <Text variant="titleMedium" style={styles.title}>
+            {i18n.t("(buyer).(index).products.filter")}
+          </Text>
+          <View style={styles.mainFilterContainer}>
+            <View>
+              <Text variant="titleMedium" style={styles.title}>
+                {i18n.t("(buyer).(index).products.categories")}
+              </Text>
+              {isCategoriesLoading ? (
+                <View style={defaultStyles.center}>
+                  <Chase size={24} color={Colors.primary[500]} />
+                </View>
+              ) : (
+                <View style={styles.flatListContainer}>
+                  <FlatList
+                    horizontal
+                    data={categories?.categories}
+                    contentContainerStyle={styles.horizontailFlatListContent}
+                    showsHorizontalScrollIndicator={false}
+                    style={styles.horizontalFlatList}
+                    keyExtractor={(item, index) => item?.id ?? index.toString()}
+                    ListHeaderComponent={() => (
+                      <TouchableOpacity
+                        style={[
+                          styles.categoryItem,
+                          !filterSelectedCategoryId &&
+                            styles.selectedCategoryItem,
+                        ]}
+                        onPress={() => setFilterSelectedCategoryId(undefined)}
+                      >
+                        <Text
+                          style={{
+                            color: !filterSelectedCategoryId
+                              ? Colors.light[10]
+                              : Colors.dark[10],
+                          }}
+                        >
+                          {i18n.t("(buyer).(index).products.all")}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                    renderItem={({ item }) => {
+                      return (
+                        <TouchableOpacity
+                          style={[
+                            styles.categoryItem,
+                            filterSelectedCategoryId === item?.id &&
+                              styles.selectedCategoryItem,
+                          ]}
+                          onPress={() => setFilterSelectedCategoryId(item?.id)}
+                        >
+                          <Text
+                            style={{
+                              color:
+                                filterSelectedCategoryId === item?.id
+                                  ? Colors.light[10]
+                                  : Colors.dark[10],
+                            }}
+                          >
+                            {item.name}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    }}
+                  />
+                </View>
+              )}
+            </View>
+            <View>
+              <Text variant="titleMedium" style={styles.title}>
+                {i18n.t("(buyer).(index).products.priceRange")}
+              </Text>
+              <MultiSlider
+                onValuesChangeStart={() => {}}
+                onValuesChangeFinish={(e) => {
+                  setFilterSelectedMinValue(e[0].toString());
+                  setFilterSelectedMaxValue(e[1].toString());
+                }}
+                values={[2000, 200000]}
+                isMarkersSeparated
+                min={500}
+                max={200000}
+                containerStyle={styles.silderContainer}
+                trackStyle={styles.sliderTrack}
+                selectedStyle={styles.sliderSelectedStyle}
+                sliderLength={width - 72}
+                customMarkerLeft={(e) => (
+                  <View style={defaultStyles.relativeContainer}>
+                    <View style={styles.tooltipContainer}>
+                      <View style={styles.tooltip}>
+                        <Text style={styles.tooltipText}>{e.currentValue}</Text>
+                        <View style={styles.tooltipArrow} />
+                      </View>
+                    </View>
+                    <View style={styles.marker} />
+                  </View>
+                )}
+                customMarkerRight={(e) => (
+                  <View
+                    style={[
+                      defaultStyles.relativeContainer,
+                      defaultStyles.center,
+                    ]}
+                  >
+                    <View style={styles.tooltipContainer}>
+                      <View style={styles.tooltip}>
+                        <Text
+                          variant="titleMedium"
+                          style={styles.tooltipText}
+                          numberOfLines={1}
+                        >
+                          {e.currentValue}
+                        </Text>
+                        <View style={styles.tooltipArrow} />
+                      </View>
+                    </View>
+                    <View style={styles.marker} />
+                  </View>
+                )}
+              />
+            </View>
+            <View>
+              <Text variant="titleMedium" style={styles.title}>
+                {i18n.t("(buyer).(index).products.ratings")}
+              </Text>
+              <View style={styles.flatListContainer}>
+                <FlatList
+                  horizontal
+                  data={[1, 2, 3, 4, 5]}
+                  contentContainerStyle={styles.horizontailFlatListContent}
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.horizontalFlatList}
+                  keyExtractor={(_item, index) => index.toString()}
+                  ListHeaderComponent={() => (
+                    <TouchableOpacity
+                      style={[
+                        styles.categoryItem,
+                        !filterSelectedRating && styles.selectedCategoryItem,
+                      ]}
+                      onPress={() => setFilterSelectedRating(undefined)}
+                    >
+                      <Icon
+                        source={"star"}
+                        size={24}
+                        color={
+                          !filterSelectedRating
+                            ? Colors.light[10]
+                            : Colors.dark[10]
+                        }
+                      />
+                      <Text
+                        style={{
+                          color: !filterSelectedRating
+                            ? Colors.light[10]
+                            : Colors.dark[10],
+                        }}
+                      >
+                        {i18n.t("(buyer).(index).products.all")}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                  renderItem={({ item }) => {
+                    return (
+                      <TouchableOpacity
+                        style={[
+                          styles.categoryItem,
+                          filterSelectedRating === item &&
+                            styles.selectedCategoryItem,
+                        ]}
+                        onPress={() => setFilterSelectedRating(item)}
+                      >
+                        <Icon
+                          source={"star"}
+                          size={24}
+                          color={
+                            filterSelectedRating === item
+                              ? Colors.light[10]
+                              : Colors.dark[10]
+                          }
+                        />
+                        <Text
+                          variant="titleMedium"
+                          style={[
+                            {
+                              color:
+                                filterSelectedRating === item
+                                  ? Colors.light[10]
+                                  : Colors.dark[10],
+                            },
+                            styles.ratingText,
+                          ]}
+                        >
+                          {item}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  }}
+                />
+              </View>
+            </View>
+          </View>
+          <View style={styles.bottomButtonContainer}>
+            <Button
+              style={[
+                defaultStyles.button,
+                defaultStyles.secondaryButton,
+                styles.halfButton,
+              ]}
+              onPress={() => {
+                sheetRef?.current?.close();
+
+                // clear the states
+                setFilterSelectedCategoryId(undefined);
+                setFilterSelectedMinValue(undefined);
+                setFilterSelectedMaxValue(undefined);
+                setFilterSelectedRating(undefined);
+              }}
+            >
+              <Text style={defaultStyles.secondaryButtonText}>
+                {i18n.t("(buyer).(index).products.close")}
+              </Text>
+            </Button>
+            <Button
+              style={[
+                defaultStyles.button,
+                defaultStyles.primaryButton,
+                styles.halfButton,
+              ]}
+              onPress={() => {
+                setSelectedCategoryId(filterSelectedCategoryId);
+                // set the rating
+                setMinAmount(filterSelectedMinValue);
+                setMaxAmount(filterSelectedMaxValue);
+
+                // clear the states
+                setFilterSelectedCategoryId(undefined);
+                setFilterSelectedMinValue(undefined);
+                setFilterSelectedMaxValue(undefined);
+                setFilterSelectedRating(undefined);
+
+                // close the sheet
+                sheetRef?.current?.close();
+              }}
+            >
+              <Text style={defaultStyles.buttonText}>
+                {i18n.t("(buyer).(index).products.apply")}
+              </Text>
+            </Button>
+          </View>
+        </View>
+      </FilterBottomSheet>
     </>
   );
 }
