@@ -157,7 +157,7 @@ export default function MyProducts() {
           </Text>
           {isProductsLoading && !data ? (
             <View style={[defaultStyles.container, defaultStyles.center]}>
-              <Chase size={64} color={Colors.primary[500]} />
+              <Chase size={56} color={Colors.primary[500]} />
             </View>
           ) : (
             <FlatList

@@ -22,6 +22,7 @@ const (
 	Users_SendSignupSmsOtp_FullMethodName              = "/usersgrpc.Users/SendSignupSmsOtp"
 	Users_Signup_FullMethodName                        = "/usersgrpc.Users/Signup"
 	Users_GetUserByID_FullMethodName                   = "/usersgrpc.Users/GetUserByID"
+	Users_GetFarmerByID_FullMethodName                 = "/usersgrpc.Users/GetFarmerByID"
 	Users_CompleteRegistration_FullMethodName          = "/usersgrpc.Users/CompleteRegistration"
 	Users_HealthCheck_FullMethodName                   = "/usersgrpc.Users/HealthCheck"
 	Users_RefreshAccessToken_FullMethodName            = "/usersgrpc.Users/RefreshAccessToken"
@@ -51,6 +52,7 @@ type UsersClient interface {
 	SendSignupSmsOtp(ctx context.Context, in *SendSignupSmsOtpRequest, opts ...grpc.CallOption) (*SendSignUpSmsOtpResponse, error)
 	Signup(ctx context.Context, in *SignupRequest, opts ...grpc.CallOption) (*SignupResponse, error)
 	GetUserByID(ctx context.Context, in *GetUserByIDRequest, opts ...grpc.CallOption) (*GetUserByIDResponse, error)
+	GetFarmerByID(ctx context.Context, in *GetFarmerByIDRequest, opts ...grpc.CallOption) (*GetFarmerByIDResponse, error)
 	CompleteRegistration(ctx context.Context, in *CompleteRegistrationRequest, opts ...grpc.CallOption) (*CompleteRegistrationResponse, error)
 	HealthCheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
 	RefreshAccessToken(ctx context.Context, in *RefreshAccessTokenRequest, opts ...grpc.CallOption) (*RefreshAccessTokenResponse, error)
@@ -105,6 +107,16 @@ func (c *usersClient) GetUserByID(ctx context.Context, in *GetUserByIDRequest, o
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetUserByIDResponse)
 	err := c.cc.Invoke(ctx, Users_GetUserByID_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersClient) GetFarmerByID(ctx context.Context, in *GetFarmerByIDRequest, opts ...grpc.CallOption) (*GetFarmerByIDResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetFarmerByIDResponse)
+	err := c.cc.Invoke(ctx, Users_GetFarmerByID_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -318,6 +330,7 @@ type UsersServer interface {
 	SendSignupSmsOtp(context.Context, *SendSignupSmsOtpRequest) (*SendSignUpSmsOtpResponse, error)
 	Signup(context.Context, *SignupRequest) (*SignupResponse, error)
 	GetUserByID(context.Context, *GetUserByIDRequest) (*GetUserByIDResponse, error)
+	GetFarmerByID(context.Context, *GetFarmerByIDRequest) (*GetFarmerByIDResponse, error)
 	CompleteRegistration(context.Context, *CompleteRegistrationRequest) (*CompleteRegistrationResponse, error)
 	HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
 	RefreshAccessToken(context.Context, *RefreshAccessTokenRequest) (*RefreshAccessTokenResponse, error)
@@ -356,6 +369,9 @@ func (UnimplementedUsersServer) Signup(context.Context, *SignupRequest) (*Signup
 }
 func (UnimplementedUsersServer) GetUserByID(context.Context, *GetUserByIDRequest) (*GetUserByIDResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserByID not implemented")
+}
+func (UnimplementedUsersServer) GetFarmerByID(context.Context, *GetFarmerByIDRequest) (*GetFarmerByIDResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFarmerByID not implemented")
 }
 func (UnimplementedUsersServer) CompleteRegistration(context.Context, *CompleteRegistrationRequest) (*CompleteRegistrationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CompleteRegistration not implemented")
@@ -488,6 +504,24 @@ func _Users_GetUserByID_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersServer).GetUserByID(ctx, req.(*GetUserByIDRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Users_GetFarmerByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetFarmerByIDRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).GetFarmerByID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Users_GetFarmerByID_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).GetFarmerByID(ctx, req.(*GetFarmerByIDRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -870,6 +904,10 @@ var Users_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserByID",
 			Handler:    _Users_GetUserByID_Handler,
+		},
+		{
+			MethodName: "GetFarmerByID",
+			Handler:    _Users_GetFarmerByID_Handler,
 		},
 		{
 			MethodName: "CompleteRegistration",

@@ -1140,3 +1140,32 @@ func (i *Impl) Subscribe(ctx context.Context,
 		},
 	}, nil
 }
+
+// GetFarmerByID implements usersgrpc.UsersServer.
+func (i *Impl) GetFarmerByID(
+	ctx context.Context,
+	req *usersgrpc.GetFarmerByIDRequest) (*usersgrpc.GetFarmerByIDResponse, error) {
+	i.logger.Debug().Msgf("farmer id in request %v", req.GetFarmerId())
+
+	foundUser, err := i.repo.Do().GetFarmer(ctx, req.GetFarmerId())
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "User not found: %v", err)
+	}
+
+	i.logger.Debug().Interface("User found", foundUser).Msg("User from DB")
+
+	return &usersgrpc.GetFarmerByIDResponse{
+		User: &usersgrpc.User{
+			UserId:                  foundUser.ID,
+			PhoneNumber:             foundUser.PhoneNumber,
+			Email:                   safeString(foundUser.Email),
+			FirstName:               safeString(foundUser.FirstName),
+			LastName:                safeString(foundUser.LastName),
+			ResidenceCountryIsoCode: foundUser.ResidenceCountryIsoCode,
+			ProfileImage:            safeString(&foundUser.ProfileImage),
+			Address:                 safeString(foundUser.Address),
+			CreatedAt:               timestamppb.New(foundUser.CreatedAt.Time),
+			UpdatedAt:               timestamppb.New(foundUser.UpdatedAt.Time),
+		},
+	}, nil
+}

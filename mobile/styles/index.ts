@@ -28,6 +28,8 @@ import { buyerProductsStyles } from "./(buyer)/(index)/index.styles";
 import { signupStyles } from "./(auth)/signupstyles";
 import { verifyOtpStyles } from "./(auth)/verify-otpstyles";
 import { filterBottomSheetStyles } from "./components/(buyer)/(index)/FilterBottomSheet.styles";
+import { productDetailsStyles } from "./(buyer)/product-details.styles";
+
 export {
   buyerIndexStyles,
   farmerIndexStyles,
@@ -53,4 +55,5 @@ export {
   productStyles,
   buyerProductsStyles,
   filterBottomSheetStyles,
+  productDetailsStyles,
 };
