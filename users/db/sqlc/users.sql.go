@@ -79,7 +79,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 }
 
 const getFarmer = `-- name: GetFarmer :one
-SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at FROM users WHERE id = $1 AND role = "USER_ROLE_FARMER"
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at FROM users WHERE id = $1 AND role = 'USER_ROLE_FARMER'
 `
 
 func (q *Queries) GetFarmer(ctx context.Context, id string) (User, error) {

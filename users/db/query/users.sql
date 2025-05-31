@@ -17,7 +17,7 @@ RETURNING
 SELECT * FROM users WHERE id = $1;
 
 -- name: GetFarmer :one
-SELECT * FROM users WHERE id = $1 AND role = "USER_ROLE_FARMER";
+SELECT * FROM users WHERE id = $1 AND role = 'USER_ROLE_FARMER';
 
 -- name: GetUserForUpdate :one
 SELECT * FROM users WHERE id = $1 FOR UPDATE;
