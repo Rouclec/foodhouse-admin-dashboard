@@ -216,6 +216,7 @@ export default function ProductDetails() {
                 defaultStyles.primaryButton,
                 styles.halfContainer,
               ]}
+              onPress={() => router.push("/(buyer)/(order)")}
             >
               <Text style={defaultStyles.buttonText}>
                 {i18n.t("(buyer).product-details.orderNow")}
