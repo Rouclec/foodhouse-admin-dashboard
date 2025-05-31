@@ -1,6 +1,6 @@
 export default {
   grey: {
-    bg: "#EAE7F2",
+    bg: "#10101014",
     "3c": "#3C3C3C",
     "61": "#616161",
     "79": "#797777",
@@ -28,6 +28,7 @@ export default {
     "9e": "#9E9E9E",
     fa: "#FAFAFA",
     f8: "#F8F8F8",
+    "75": "#757575",
   },
   dark: {
     "0.8": "#000000CC",
@@ -63,4 +64,5 @@ export default {
   },
   success: "#006C4D",
   border: "#777585",
+  blue: "#335EF7",
 };
