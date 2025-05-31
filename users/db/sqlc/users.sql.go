@@ -78,6 +78,31 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
+const getFarmer = `-- name: GetFarmer :one
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at FROM users WHERE id = $1 AND role = 'USER_ROLE_FARMER'
+`
+
+func (q *Queries) GetFarmer(ctx context.Context, id string) (User, error) {
+	row := q.db.QueryRow(ctx, getFarmer, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Role,
+		&i.PhoneNumber,
+		&i.Email,
+		&i.FirstName,
+		&i.LastName,
+		&i.ResidenceCountryIsoCode,
+		&i.Address,
+		&i.LocationCoordinates,
+		&i.ProfileImage,
+		&i.Password,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getUser = `-- name: GetUser :one
 SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at FROM users WHERE id = $1
 `

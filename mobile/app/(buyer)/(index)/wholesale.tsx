@@ -5,7 +5,7 @@ import { useRouter } from "expo-router";
 import { useContext, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Button } from "react-native-paper";
-import { Context, ContextType } from "../_layout";
+import { Context, ContextType } from "../../_layout";
 
 export default function TabTwoScreen() {
   const [loading, setLoading] = useState(false);

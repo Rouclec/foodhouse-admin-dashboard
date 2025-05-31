@@ -247,6 +247,21 @@ func (mr *MockQuerierMockRecorder) GetAllUserSubscriptions(ctx any) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllUserSubscriptions", reflect.TypeOf((*MockQuerier)(nil).GetAllUserSubscriptions), ctx)
 }
 
+// GetFarmer mocks base method.
+func (m *MockQuerier) GetFarmer(ctx context.Context, id string) (sqlc.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFarmer", ctx, id)
+	ret0, _ := ret[0].(sqlc.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFarmer indicates an expected call of GetFarmer.
+func (mr *MockQuerierMockRecorder) GetFarmer(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFarmer", reflect.TypeOf((*MockQuerier)(nil).GetFarmer), ctx, id)
+}
+
 // GetLatestSentOtpByFactor mocks base method.
 func (m *MockQuerier) GetLatestSentOtpByFactor(ctx context.Context, arg sqlc.GetLatestSentOtpByFactorParams) ([]sqlc.SentOtp, error) {
 	m.ctrl.T.Helper()

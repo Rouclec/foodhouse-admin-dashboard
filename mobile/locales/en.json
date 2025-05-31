@@ -36,7 +36,7 @@
       "dontHaveAnAccount": "Don't have an account?",
       "registerNow": "Register Now"
     },
-    
+
     "verifyOtp": {
       "verifyNumber": "verify your phone number",
       "codeSent": "Code has been sent to",
@@ -95,7 +95,7 @@
       "description": "What describes you the best?",
       "buyer": "buyer",
       "seller": "Farmer or Seller",
-      "button":  "Next",
+      "button": "Next",
       "havingAccount": "Already have an account?",
       "login": "Login"
     },
@@ -163,10 +163,35 @@
       "yourProductHasBeenUploaded": "Your product has been uploaded",
       "description": "Description"
     },
-    "my-products": {
-      "myProducts": "My products",
-      "products": "Products",
-      "noProductsFound": "No products found"
+    "(index)": {
+      "my-products": {
+        "myProducts": "My products",
+        "products": "Products",
+        "noProductsFound": "No products found",
+        "searchProducts": "Search products"
+      }
+    }
+  },
+  "(buyer)": {
+    "(index)": {
+      "products": {
+        "products": "Products",
+        "searchProducts": "Search products",
+        "goodMorning": "Good morning",
+        "goodAfternoon": "Good afternoon",
+        "goodEvening": "Good evening",
+        "categories": "Categories",
+        "noProductsFound": "No products found",
+        "all": "All",
+        "filter": "Filter",
+        "priceRange": "Price Range",
+        "ratings": "Ratings",
+        "close": "Close",
+        "apply": "Apply"
+      }
+    },
+    "product-details": {
+      "couldNotLoad": "Could not load product details"
     }
   },
   "components": {

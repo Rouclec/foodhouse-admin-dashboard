@@ -163,6 +163,17 @@ message GetUserByIDResponse {
   User user = 1; // User details
 }
 
+// Request message for GetFarmerByID
+message GetFarmerByIDRequest {
+  string user_id = 1;   // ID of the user fetching the farmer
+  string farmer_id = 2; // ID of the farmer to be fetched
+}
+
+// Response message for GetFarmerByID
+message GetFarmerByIDResponse {
+  User user = 1; // User details
+}
+
 // Request message for UpdateUser
 message CompleteRegistrationRequest {
   string user_id = 1;
@@ -342,6 +353,12 @@ service Users {
   rpc GetUserByID(GetUserByIDRequest) returns (GetUserByIDResponse) {
     option (google.api.http) = {
       get : "/v1/users/{user_id}/get-user-by-id"
+    };
+  }
+
+  rpc GetFarmerByID(GetFarmerByIDRequest) returns (GetFarmerByIDResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/{farmer_id}/get-farmer-by-id"
     };
   }
 

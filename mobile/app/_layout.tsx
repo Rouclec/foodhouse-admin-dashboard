@@ -15,6 +15,8 @@ import {
 import { MD3Type } from "react-native-paper/lib/typescript/types";
 import { Colors } from "@/constants";
 import { StatusBar } from "expo-status-bar";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { defaultStyles } from "@/styles";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -123,13 +125,15 @@ function RootLayoutNav() {
     <QueryClientProvider client={client}>
       <Context.Provider value={{ ...contextInfo, ...contextSetters }}>
         <PaperProvider theme={theme}>
-          <Stack initialRouteName="index">
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen name="(farmer)" options={{ headerShown: false }} />
-            <Stack.Screen name="(buyer)" options={{ headerShown: false }} />
-            <Stack.Screen name="modal" options={{ presentation: "modal" }} />
-          </Stack>
+          <GestureHandlerRootView style={defaultStyles.flex}>
+            <Stack initialRouteName="index">
+              <Stack.Screen name="index" options={{ headerShown: false }} />
+              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+              <Stack.Screen name="(farmer)" options={{ headerShown: false }} />
+              <Stack.Screen name="(buyer)" options={{ headerShown: false }} />
+              <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+            </Stack>
+          </GestureHandlerRootView>
         </PaperProvider>
       </Context.Provider>
     </QueryClientProvider>
