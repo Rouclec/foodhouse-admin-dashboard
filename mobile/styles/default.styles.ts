@@ -11,6 +11,9 @@ export const defaultStyles = StyleSheet.create({
     paddingTop: 16,
     backgroundColor: Colors.light["10"],
   },
+  bgWhite: {
+    backgroundColor: Colors.light[10],
+  },
   center: {
     alignItems: "center",
     justifyContent: "center",

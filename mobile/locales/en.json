@@ -160,7 +160,11 @@
       }
     },
     "product-details": {
-      "couldNotLoad": "Could not load product details"
+      "couldNotLoad": "Could not load product details",
+      "description": "Description",
+      "farmer": "Farmer",
+      "orderNow": "Order now",
+      "price": "Price"
     }
   },
   "components": {

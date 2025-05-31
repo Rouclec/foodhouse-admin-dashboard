@@ -1,8 +1,10 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useContext, useEffect, useState } from "react";
 import {
+  Image,
   ImageBackground,
   KeyboardAvoidingView,
+  SafeAreaView,
   ScrollView,
   TouchableOpacity,
   View,
@@ -10,7 +12,7 @@ import {
 import { defaultStyles, productDetailsStyles as styles } from "@/styles";
 import { Colors } from "@/constants";
 import { Chase } from "react-native-animated-spinkit";
-import { Appbar, Icon, Text } from "react-native-paper";
+import { Appbar, Button, Icon, Text } from "react-native-paper";
 import i18n from "@/i18n";
 import { Context, ContextType } from "../_layout";
 import { useQuery } from "@tanstack/react-query";
@@ -52,8 +54,6 @@ export default function ProductDetails() {
     }),
     enabled: !!data,
   });
-
-  console.log({ farmer });
 
   if (isLoading) {
     return (
@@ -121,18 +121,12 @@ export default function ProductDetails() {
 
   return (
     <>
-      {/* <KeyboardAvoidingView
-        style={defaultStyles.flex}
-        behavior={"padding"}
-        keyboardVerticalOffset={0}
-      > */}
-      <View style={defaultStyles.flex}>
+      <View style={[defaultStyles.flex, defaultStyles.bgWhite]}>
         <ImageBackground
           source={{ uri: data?.product?.image }}
           style={styles.imageBackground}
           resizeMethod="auto"
         >
-          {/* <SafeAreaView> */}
           <Appbar.Header
             style={[defaultStyles.appHeader, styles.bgTransparent]}
           >
@@ -143,7 +137,6 @@ export default function ProductDetails() {
               <Icon source={"arrow-left"} size={24} color={Colors.light[10]} />
             </TouchableOpacity>
           </Appbar.Header>
-          {/* </SafeAreaView> */}
         </ImageBackground>
         <ScrollView
           contentContainerStyle={defaultStyles.scrollContainer}
@@ -151,12 +144,86 @@ export default function ProductDetails() {
           nestedScrollEnabled={true}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={[defaultStyles.center, styles.notFoundContainer]}>
-            <Text>{data?.product?.name}</Text>
+          <View style={styles.contentContainer}>
+            <View>
+              <Text variant="titleMedium" style={styles.productName}>
+                {data?.product?.name}
+              </Text>
+              {/* <View>
+                Product rating container
+              </View> */}
+            </View>
+            <View style={styles.rowGap12}>
+              <Text variant="titleMedium">
+                {i18n.t("(buyer).product-details.description")}
+              </Text>
+              <Text style={styles.justifyText} variant="bodyLarge">
+                {data?.product?.description}
+              </Text>
+            </View>
+            <View style={styles.rowGap12}>
+              <Text variant="titleMedium">
+                {i18n.t("(buyer).product-details.farmer")}
+              </Text>
+              <View style={styles.farmerDetailscontainer}>
+                <View style={styles.farmerProfileImageContainer}>
+                  {farmer?.user?.profileImage ? (
+                    <Image
+                      source={{ uri: farmer?.user?.profileImage }}
+                      style={styles.profileImage}
+                    />
+                  ) : (
+                    <Image
+                      source={require("@/assets/images/avatar.png")}
+                      style={styles.avatar}
+                    />
+                  )}
+                </View>
+                <View style={styles.nameAndCheckContainer}>
+                  <Text variant="titleMedium" style={styles.farmerName}>
+                    {farmer?.user?.firstName} {farmer?.user?.lastName}
+                  </Text>
+                  <Icon
+                    source={"check-decagram"}
+                    color={Colors.blue}
+                    size={18}
+                  />
+                </View>
+              </View>
+            </View>
           </View>
         </ScrollView>
+        <SafeAreaView>
+          <View
+            style={[defaultStyles.bottomContainerWithContent, styles.flexRow]}
+          >
+            <View>
+              <Text style={styles.priceLabel}>
+                {i18n.t("(buyer).product-details.price")}
+              </Text>
+              <Text style={styles.price} variant="titleMedium">
+                {data?.product?.amount?.currencyIsoCode}
+                {data?.product?.amount?.value}
+                <Text style={styles.greyText}>
+                  {" "}
+                  {data?.product?.unitType?.slug?.replace("per_", "/")}
+                </Text>
+              </Text>
+            </View>
+            <Button
+              style={[
+                defaultStyles.button,
+                defaultStyles.primaryButton,
+                styles.halfContainer,
+              ]}
+            >
+              <Text style={defaultStyles.buttonText}>
+                {i18n.t("(buyer).product-details.orderNow")}
+              </Text>
+            </Button>
+          </View>
+        </SafeAreaView>
       </View>
-      {/* </KeyboardAvoidingView> */}
     </>
   );
 }
