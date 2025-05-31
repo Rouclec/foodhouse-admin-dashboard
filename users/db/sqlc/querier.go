@@ -23,6 +23,7 @@ type Querier interface {
 	DeleteUserPaymentMethod(ctx context.Context, id string) error
 	GetAllSubscriptions(ctx context.Context) ([]Subscription, error)
 	GetAllUserSubscriptions(ctx context.Context) ([]UserSubscription, error)
+	GetFarmer(ctx context.Context, id string) (User, error)
 	GetLatestSentOtpByFactor(ctx context.Context, arg GetLatestSentOtpByFactorParams) ([]SentOtp, error)
 	GetPaymentByExternalReference(ctx context.Context, externalRef string) (Payment, error)
 	GetPaymentById(ctx context.Context, id string) (Payment, error)

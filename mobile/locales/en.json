@@ -158,6 +158,9 @@
         "close": "Close",
         "apply": "Apply"
       }
+    },
+    "product-details": {
+      "couldNotLoad": "Could not load product details"
     }
   },
   "components": {

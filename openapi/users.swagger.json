@@ -798,6 +798,44 @@
           "Users"
         ]
       }
+    },
+    "/v1/users/{userId}/{farmerId}/get-farmer-by-id": {
+      "get": {
+        "operationId": "Users_GetFarmerByID",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcGetFarmerByIDResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "description": "ID of the user fetching the farmer",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "farmerId",
+            "description": "ID of the farmer to be fetched",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
     }
   },
   "definitions": {
@@ -1069,6 +1107,16 @@
         "FACTOR_TYPE_EMAIL_OTP"
       ],
       "default": "FACTOR_TYPE_UNSPECIFIED"
+    },
+    "usersgrpcGetFarmerByIDResponse": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "$ref": "#/definitions/usersgrpcUser",
+          "title": "User details"
+        }
+      },
+      "title": "Response message for GetFarmerByID"
     },
     "usersgrpcGetUserActiveSubscriptionResponse": {
       "type": "object",

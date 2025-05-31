@@ -90,6 +90,10 @@ export type usersgrpcDeleteUserPaymentMethodResponse = {
 
 export type usersgrpcFactorType = 'FACTOR_TYPE_UNSPECIFIED' | 'FACTOR_TYPE_EMAIL_PASSWORD' | 'FACTOR_TYPE_SMS_OTP' | 'FACTOR_TYPE_EMAIL_OTP';
 
+export type usersgrpcGetFarmerByIDResponse = {
+    user?: usersgrpcUser;
+};
+
 export type usersgrpcGetUserActiveSubscriptionResponse = {
     userSubscription?: usersgrpcUserSubscription;
 };
@@ -503,3 +507,20 @@ export type UsersGetUserSubscriptionsData = {
 export type UsersGetUserSubscriptionsResponse = (usersgrpcGetUserSubscriptionsResponse);
 
 export type UsersGetUserSubscriptionsError = (rpcStatus);
+
+export type UsersGetFarmerByIdData = {
+    path: {
+        /**
+         * ID of the farmer to be fetched
+         */
+        farmerId: string;
+        /**
+         * ID of the user fetching the farmer
+         */
+        userId: string;
+    };
+};
+
+export type UsersGetFarmerByIdResponse = (usersgrpcGetFarmerByIDResponse);
+
+export type UsersGetFarmerByIdError = (rpcStatus);

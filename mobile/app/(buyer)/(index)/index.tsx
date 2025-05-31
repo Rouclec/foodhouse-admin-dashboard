@@ -1,12 +1,5 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  Animated,
   Dimensions,
   FlatList,
   Image,
@@ -27,9 +20,7 @@ import { Context, ContextType } from "@/app/_layout";
 import {
   ActivityIndicator,
   Button,
-  Dialog,
   Icon,
-  Portal,
   Text,
   TextInput,
 } from "react-native-paper";
@@ -289,7 +280,7 @@ export default function BuyerProducts() {
           </Text>
           {isProductsLoading && !data ? (
             <View style={[defaultStyles.container, defaultStyles.center]}>
-              <Chase size={64} color={Colors.primary[500]} />
+              <Chase size={56} color={Colors.primary[500]} />
             </View>
           ) : (
             <FlatList
@@ -322,7 +313,7 @@ export default function BuyerProducts() {
                       router.push({
                         pathname: "/product-details",
                         params: {
-                          product: JSON.stringify(item),
+                          productId: item?.id,
                         },
                       })
                     }

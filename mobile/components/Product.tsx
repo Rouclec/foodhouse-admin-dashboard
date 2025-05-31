@@ -20,7 +20,9 @@ export const Product: FC<Props> = ({ product, OnPress }) => {
         style={styles.productImage}
       />
       <View style={styles.productDescriptionContainer}>
-        <Text variant="titleLarge" style={styles.productName}>{product.name}</Text>
+        <Text variant="titleLarge" style={styles.productName}>
+          {product.name}
+        </Text>
         {/* <View style={styles.ratingsContainer}>
           <Text>star</Text>
           <View />
