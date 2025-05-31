@@ -26,6 +26,7 @@ import { productStyles } from "./components/Product.styles";
 // import { onboardingStyles } from "./(auth)/onboarding";
 import { signupStyles } from "./(auth)/signupstyles";
 import { verifyOtpStyles } from "./(auth)/verify-otpstyles";
+import { styles } from "./(auth)/(subsciption-flow)/index.style";
 export {
   buyerIndexStyles,
   farmerIndexStyles,
@@ -49,4 +50,5 @@ export {
   imagePickerStyles,
   myProductStyles,
   productStyles,
+  styles,
 };

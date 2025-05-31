@@ -156,7 +156,7 @@ const ProfilePage = () => {
                         color="#fff"
                         style={signupStyles.cameraIcon}
                       />
-                    </View>
+                    </View> 
                   )}
                 </TouchableOpacity>
               </View>
