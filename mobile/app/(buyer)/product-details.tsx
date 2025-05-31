@@ -3,7 +3,6 @@ import React, { useContext, useEffect, useState } from "react";
 import {
   ImageBackground,
   KeyboardAvoidingView,
-  SafeAreaView,
   ScrollView,
   TouchableOpacity,
   View,
@@ -16,8 +15,7 @@ import i18n from "@/i18n";
 import { Context, ContextType } from "../_layout";
 import { useQuery } from "@tanstack/react-query";
 import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
-import { usersGetUserById } from "@/client/users.swagger";
-import { usersGetUserByIdOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
+import { usersGetFarmerByIdOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
 
 export default function ProductDetails() {
   const { user } = useContext(Context) as ContextType;
@@ -46,9 +44,10 @@ export default function ProductDetails() {
   });
 
   const { data: farmer, isLoading: isFarmerLoading } = useQuery({
-    ...usersGetUserByIdOptions({
+    ...usersGetFarmerByIdOptions({
       path: {
-        userId: data?.product?.createdBy ?? "",
+        farmerId: data?.product?.createdBy ?? "",
+        userId: user?.userId ?? "",
       },
     }),
     enabled: !!data,
