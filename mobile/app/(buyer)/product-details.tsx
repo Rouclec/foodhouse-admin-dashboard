@@ -45,7 +45,7 @@ export default function ProductDetails() {
     enabled: !!productId,
   });
 
-  const { data: farmer, isLoading: isFarmerLoading } = useQuery({
+  const { data: farmer, isLoading: _isFarmerLoading } = useQuery({
     ...usersGetFarmerByIdOptions({
       path: {
         farmerId: data?.product?.createdBy ?? "",
@@ -216,7 +216,14 @@ export default function ProductDetails() {
                 defaultStyles.primaryButton,
                 styles.halfContainer,
               ]}
-              onPress={() => router.push("/(buyer)/(order)")}
+              onPress={() =>
+                router.push({
+                  pathname: "/(buyer)/(order)",
+                  params: {
+                    productId: data?.product?.id,
+                  },
+                })
+              }
             >
               <Text style={defaultStyles.buttonText}>
                 {i18n.t("(buyer).product-details.orderNow")}
