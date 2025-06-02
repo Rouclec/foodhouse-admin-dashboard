@@ -194,6 +194,17 @@ message ListDeliveryPointsResponse {
   string next_key = 2;
 }
 
+message ListDeliveryCitiesRequest {
+  string user_id = 2;
+  int32 count = 3;
+  string start_key = 4;
+}
+
+message ListDeliveryCitiesResponse {
+  repeated string cities = 1;
+  string next_key = 2;
+}
+
 message HealthCheckRequest {}
 message HealthCheckResponse {}
 
@@ -304,4 +315,12 @@ service Orders {
       get : "/v1/users/{user_id}/orders/list-delivery-points"
     };
   }
+
+  rpc ListDeliveryCities(ListDeliveryCitiesRequest)
+      returns (ListDeliveryCitiesResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/orders/list-delivery-cities"
+    };
+  }
+
 }

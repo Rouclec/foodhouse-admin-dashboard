@@ -19,6 +19,7 @@ type Querier interface {
 	ListDeliveryPoints(ctx context.Context, arg ListDeliveryPointsParams) ([]DeliveryPoint, error)
 	ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersParams) ([]Order, error)
 	ListOrderAuditLogs(ctx context.Context, orderNumber int64) ([]OrdersAudit, error)
+	ListUniqueCities(ctx context.Context) ([]string, error)
 	ListUserOrders(ctx context.Context, arg ListUserOrdersParams) ([]Order, error)
 	ReviewOrder(ctx context.Context, arg ReviewOrderParams) error
 	UpdateOrderStatus(ctx context.Context, arg UpdateOrderStatusParams) error

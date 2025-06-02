@@ -880,3 +880,38 @@ func (i *Impl) ListDeliveryPoints(ctx context.Context, req *ordersgrpc.ListDeliv
 		NextKey:        nextKey,
 	}, nil
 }
+
+// ListDeliveryCities implements ordersgrpc.OrdersServer.
+func (i *Impl) ListDeliveryCities(ctx context.Context, req *ordersgrpc.ListDeliveryCitiesRequest) (*ordersgrpc.ListDeliveryCitiesResponse, error) {
+	var err error
+	startKey := time.Now().Add(time.Hour)
+
+	count := int(req.GetCount())
+	if count == 0 {
+		count = 20 // or whatever default you want
+	}
+
+	if req.GetStartKey() != "" {
+		startKey, err = time.Parse(time.RFC3339, req.GetStartKey())
+		if err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "Invalid start key")
+		}
+	}
+
+	i.logger.Debug().Msgf("Start key %v", startKey)
+
+	// args := sqlc.ListUniqueCitiesParams{
+	// 	CreatedBefore: startKey,
+	// 	Count:         int32(count), // Convert count to int32
+	// }
+
+	cities, err := i.repo.Do().ListUniqueCities(ctx)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error lissting cities %v", err)
+	}
+
+	return &ordersgrpc.ListDeliveryCitiesResponse{
+		Cities: cities,
+	}, nil
+}

@@ -190,6 +190,21 @@ func (mr *MockQuerierMockRecorder) ListOrderAuditLogs(ctx, orderNumber any) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListOrderAuditLogs", reflect.TypeOf((*MockQuerier)(nil).ListOrderAuditLogs), ctx, orderNumber)
 }
 
+// ListUniqueCities mocks base method.
+func (m *MockQuerier) ListUniqueCities(ctx context.Context) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListUniqueCities", ctx)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListUniqueCities indicates an expected call of ListUniqueCities.
+func (mr *MockQuerierMockRecorder) ListUniqueCities(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListUniqueCities", reflect.TypeOf((*MockQuerier)(nil).ListUniqueCities), ctx)
+}
+
 // ListUserOrders mocks base method.
 func (m *MockQuerier) ListUserOrders(ctx context.Context, arg sqlc.ListUserOrdersParams) ([]sqlc.Order, error) {
 	m.ctrl.T.Helper()
