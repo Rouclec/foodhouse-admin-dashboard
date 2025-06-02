@@ -2,9 +2,9 @@ import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/r
 import { Colors } from "@/constants";
 import i18n from "@/i18n";
 import { defaultStyles } from "@/styles";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   KeyboardAvoidingView,
@@ -18,9 +18,13 @@ import { checkoutStyles as styles } from "@/styles";
 import { formatAmount } from "@/utils/amountFormater";
 import * as Location from "expo-location";
 import { Region } from "react-native-maps";
+import { ordersCreateOrderMutation } from "@/client/orders.swagger/@tanstack/react-query.gen";
+import { Context, ContextType } from "@/app/_layout";
 
 export default function Checkout() {
   const router = useRouter();
+
+  const { user } = useContext(Context) as ContextType;
 
   const [productId, setProductId] = useState<string>();
   const [errorLoadingProduct, setErrorLoadingProduct] = useState(false);
@@ -53,7 +57,7 @@ export default function Checkout() {
   });
 
   useEffect(() => {
-    setTotalPrice(parseFloat(data?.product?.amount?.value ?? "") * quantity);
+    setTotalPrice((data?.product?.amount?.value ?? 0) * quantity);
   }, [data, quantity]);
 
   useEffect(() => {
@@ -90,6 +94,40 @@ export default function Checkout() {
 
     handleUseCurrentLocation();
   }, []);
+
+  const { mutateAsync } = useMutation({
+    ...ordersCreateOrderMutation(),
+    onSuccess: (data) => {
+      console.log({ data }, "create order data");
+    },
+    onError: (error) => {
+      console.log({ error }, "creating order");
+    },
+  });
+
+  const handleCreateOrder = async () => {
+    try {
+      setLoading(true);
+      await mutateAsync({
+        body: {
+          productId: productId,
+          quantity: quantity.toString(),
+          deliveryLocation: {
+            address: location?.description,
+            lon: location?.region?.longitude,
+            lat: location?.region?.latitude,
+          },
+        },
+        path: {
+          userId: user?.userId ?? "",
+        },
+      });
+    } catch (error) {
+      console.error("error creating order ", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -338,7 +376,10 @@ export default function Checkout() {
         </View>
       </KeyboardAvoidingView>
       <View style={defaultStyles.bottomButtonContainer}>
-        <Button style={[defaultStyles.button, defaultStyles.primaryButton]}>
+        <Button
+          style={[defaultStyles.button, defaultStyles.primaryButton]}
+          onPress={handleCreateOrder}
+        >
           <Text variant="titleMedium" style={defaultStyles?.buttonText}>
             {i18n.t("(buyer).(order).index.confirmPayment")}{" "}
             {data?.product?.amount?.currencyIsoCode}{" "}

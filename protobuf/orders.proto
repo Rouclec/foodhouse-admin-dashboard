@@ -187,7 +187,7 @@ service Orders {
 
   rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {
     option (google.api.http) = {
-      post : "/v1/{user_id}/orders/create-order"
+      post : "/v1/users/{user_id}/orders/create-order"
       body : "*"
     };
   }
@@ -195,7 +195,7 @@ service Orders {
   rpc GetOrderDetails(GetOrderDetailsRequest)
       returns (GetOrderDetailsResponse) {
     option (google.api.http) = {
-      get : "/v1/{user_id}/order/{order_number}/get-order-details"
+      get : "/v1/users/{user_id}/order/{order_number}/get-order-details"
     };
   }
 
@@ -207,7 +207,7 @@ service Orders {
 
   rpc DispatchOrder(DispatchOrderRequest) returns (DispatchOrderResponse) {
     option (google.api.http) = {
-      put : "/v1/{user_id}/orders/{order_number}/dispatch-order"
+      put : "/v1/users/{user_id}/orders/{order_number}/dispatch-order"
       body : "*"
     };
   }
@@ -215,7 +215,7 @@ service Orders {
   rpc ConfirmDelivery(ConfirmDeliveryRequest)
       returns (ConfirmDeliveryResponse) {
     option (google.api.http) = {
-      put : "/v1/{user_id}/orders/{secret_key}/confirm-delivery"
+      put : "/v1/users/{user_id}/orders/{secret_key}/confirm-delivery"
       body : "*"
     };
   }
@@ -228,21 +228,21 @@ service Orders {
 
   rpc ListUserOrders(ListUserOrdersRequest) returns (ListUserOrdersResponse) {
     option (google.api.http) = {
-      get : "/v1/{user_id}/orders/list-user-orders"
+      get : "/v1/users/{user_id}/orders/list-user-orders"
     };
   }
 
   rpc ListFarmerOrders(ListFarmerOrdersRequest)
       returns (ListFarmerOrdersResponse) {
     option (google.api.http) = {
-      get : "/v1/{farmer_id}/orders/list-farmer-orders"
+      get : "/v1/users/{farmer_id}/orders/list-farmer-orders"
     };
   }
 
   rpc InitiatePayment(InitiatePaymentRequest)
       returns (InitiatePaymentResponse) {
     option (google.api.http) = {
-      post : "/v1/{user_id}/orders/initiate-payment"
+      post : "/v1/users/{user_id}/orders/initiate-payment"
       body : "*"
     };
   }
