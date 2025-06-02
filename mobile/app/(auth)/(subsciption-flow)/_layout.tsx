@@ -1,7 +1,7 @@
 import { Stack } from "expo-router";
 import React from "react";
 
-export default function ForgotPassword() {
+export default function subsciptionFlow() {
   return (
     <Stack screenOptions={{ headerShown: false }} initialRouteName="index">
       <Stack.Screen name="index" options={{ headerShown: false }} />
