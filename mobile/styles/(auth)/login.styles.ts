@@ -1,12 +1,11 @@
 import { Colors } from "@/constants";
-import { StyleSheet, Dimensions } from "react-native";
+import { StyleSheet } from "react-native";
 
-const { width: screenWidth } = Dimensions.get("window");
 
 export const loginstyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light[10],
+    backgroundColor: Colors.light['bg'],
   },
   header: {
     paddingHorizontal: 15,

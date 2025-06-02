@@ -29,6 +29,7 @@ import { signupStyles } from "./(auth)/signupstyles";
 import { verifyOtpStyles } from "./(auth)/verify-otpstyles";
 import { filterBottomSheetStyles } from "./components/(buyer)/(index)/FilterBottomSheet.styles";
 import { productDetailsStyles } from "./(buyer)/product-details.styles";
+import { checkoutStyles } from "./(buyer)/(order)/index.styles";
 
 export {
   buyerIndexStyles,
@@ -56,4 +57,5 @@ export {
   buyerProductsStyles,
   filterBottomSheetStyles,
   productDetailsStyles,
+  checkoutStyles,
 };

@@ -9,10 +9,10 @@ export const defaultStyles = StyleSheet.create({
     gap: 32,
     paddingHorizontal: 24,
     paddingTop: 16,
-    backgroundColor: Colors.light["10"],
+    backgroundColor: Colors.light["bg"],
   },
   bgWhite: {
-    backgroundColor: Colors.light[10],
+    backgroundColor: Colors.light["bg"],
   },
   center: {
     alignItems: "center",
@@ -93,7 +93,7 @@ export const defaultStyles = StyleSheet.create({
     // position: "absolute",
     alignSelf: "center",
     bottom: 0,
-    backgroundColor: Colors.light["10"],
+    backgroundColor: Colors.light["bg"],
     // backgroundColor: "transparent",
     // height: 96,
     height: "auto",
@@ -109,7 +109,7 @@ export const defaultStyles = StyleSheet.create({
     alignSelf: "center",
     bottom: 0,
     paddingBottom: 24,
-    backgroundColor: Colors.light["10"],
+    backgroundColor: Colors.light["bg"],
     width: width,
     paddingHorizontal: 16,
     rowGap: 12,
@@ -149,7 +149,7 @@ export const defaultStyles = StyleSheet.create({
   appHeader: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.light[10],
+    backgroundColor: Colors.light['bg'],
     justifyContent: "space-between",
   },
   headerTextContainer: {

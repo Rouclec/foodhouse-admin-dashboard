@@ -4,11 +4,9 @@ import React, { useState } from "react";
 import {
   View,
   KeyboardAvoidingView,
-  Keyboard,
   Image,
   TouchableOpacity,
   ScrollView,
-  Platform,
 } from "react-native";
 import {
   Appbar,
@@ -85,8 +83,8 @@ export default function CreateNewPassword() {
     <>
       <KeyboardAvoidingView
         style={defaultStyles.container}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+        behavior={"padding"}
+        keyboardVerticalOffset={0}
       >
         <View style={defaultStyles.flex}>
           <Appbar.Header dark={false} style={defaultStyles.appHeader}>

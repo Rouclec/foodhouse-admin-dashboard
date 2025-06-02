@@ -40,6 +40,7 @@ export default {
   },
   light: {
     "0": "#F6F6F6",
+    bg: "#F3F3F3",
     "10": "#FFFFFF",
     "10.87": "#FFFFFFDE",
     surface: "#F2EFFA",

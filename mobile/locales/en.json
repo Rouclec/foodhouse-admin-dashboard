@@ -165,6 +165,23 @@
       "farmer": "Farmer",
       "orderNow": "Order now",
       "price": "Price"
+    },
+    "(order)": {
+      "index": {
+        "checkout": "Checkout",
+        "couldNotLoad": "Could not load product details",
+        "order": "Order",
+        "shippingAddress": "Shipping Address",
+        "confirmPayment": "Confirm Payment",
+        "amount": "Amount",
+        "delivery": "Delivery",
+        "transactionCharges": "Transaction charges",
+        "serviceCharges": "Service charges",
+        "total": "Total",
+        "pleaseAcceptPermissions": "Please accept permissions to access your location",
+        "errorGettingLocation": "Error getting location",
+        "currentLocation": "Current location"
+      }
     }
   },
   "components": {
