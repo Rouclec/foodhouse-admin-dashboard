@@ -666,14 +666,11 @@ func (i *Impl) SendEmailOtp(ctx context.Context,
 
 func (i *Impl) ChangePassword(ctx context.Context, req *usersgrpc.ChangePasswordRequest) (
 	*usersgrpc.ChangePasswordResponse, error) {
-	if req.GetEmailFactor().GetType() != usersgrpc.FactorType_FACTOR_TYPE_EMAIL_OTP {
-		return nil, status.Error(codes.InvalidArgument, "email factor must be an EMAIL_OTP")
-	}
 
-	// Verify the request_id and OTP here
-	userEmail, err := i.otpGenerator.VerifyOtpAuthFactor(ctx, req.GetEmailFactor())
+	// Verify the auth factor here
+	userID, err := i.validateAuthFactor(ctx, req.GetEmailFactor())
 	if err != nil {
-		return nil, status.Errorf(codes.Unauthenticated, "Failed to validate OTP: %v", err)
+		return nil, status.Errorf(codes.Unauthenticated, "Failed to validate factor: %v", err)
 	}
 
 	// Checking the password for minimum length
@@ -703,9 +700,9 @@ func (i *Impl) ChangePassword(ctx context.Context, req *usersgrpc.ChangePassword
 	}()
 
 	// Fetching the user by email
-	foundUser, err := querier.GetUserByEmail(ctx, &userEmail)
+	foundUser, err := querier.GetUser(ctx, userID)
 	if err != nil {
-		return nil, status.Errorf(codes.NotFound, "Could not fetch the user by email: %v", err)
+		return nil, status.Errorf(codes.NotFound, "Could not fetch the user by id: %v", err)
 	}
 
 	arg := sqlc.UpdateUserPasswordParams{
