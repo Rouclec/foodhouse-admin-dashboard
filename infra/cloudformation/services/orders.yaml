@@ -42,9 +42,10 @@ Parameters:
   
   UsersHostPort:
     Type: String
-
-	ProductsHostPort:
+  
+  ProductsHostPort:
     Type: String
+    
   # The following are optional parameters and are treated more like constants.
   ContainerPort:
     Type: Number
