@@ -274,8 +274,8 @@
             "name": "minAmount.value",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "int64"
+            "type": "number",
+            "format": "double"
           },
           {
             "name": "minAmount.currencyIsoCode",
@@ -287,8 +287,8 @@
             "name": "maxAmount.value",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "int64"
+            "type": "number",
+            "format": "double"
           },
           {
             "name": "maxAmount.currencyIsoCode",
@@ -445,8 +445,8 @@
             "name": "minAmount.value",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "int64"
+            "type": "number",
+            "format": "double"
           },
           {
             "name": "minAmount.currencyIsoCode",
@@ -458,8 +458,8 @@
             "name": "maxAmount.value",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "int64"
+            "type": "number",
+            "format": "double"
           },
           {
             "name": "maxAmount.currencyIsoCode",
@@ -986,8 +986,8 @@
       "type": "object",
       "properties": {
         "value": {
-          "type": "string",
-          "format": "int64"
+          "type": "number",
+          "format": "double"
         },
         "currencyIsoCode": {
           "type": "string"

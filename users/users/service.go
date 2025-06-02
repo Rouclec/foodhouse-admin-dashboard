@@ -878,9 +878,11 @@ func (i *Impl) CreateSubscription(ctx context.Context,
 			Title:       subscription.Title,
 			Description: subscription.Description,
 			// Convert microseconds back to days
-			Duration:        subscription.Duration.Microseconds / (24 * 60 * 60 * OneMillion),
-			Amount:          subscription.Amount,
-			CurrencyIsoCode: subscription.CurrencyIsoCode,
+			Duration: subscription.Duration.Microseconds / (24 * 60 * 60 * OneMillion),
+			Amount: &types.Amount{
+				Value:           subscription.Amount,
+				CurrencyIsoCode: subscription.CurrencyIsoCode,
+			},
 		},
 	}, nil
 }
@@ -953,9 +955,11 @@ func (i *Impl) UpdateSubscription(ctx context.Context,
 			Title:       updatedSubscription.Title,
 			Description: updatedSubscription.Description,
 			// Convert microseconds back to days
-			Duration:        updatedSubscription.Duration.Microseconds / (24 * 60 * 60 * OneMillion),
-			Amount:          updatedSubscription.Amount,
-			CurrencyIsoCode: updatedSubscription.CurrencyIsoCode,
+			Duration: updatedSubscription.Duration.Microseconds / (24 * 60 * 60 * OneMillion),
+			Amount: &types.Amount{
+				Value:           updatedSubscription.Amount,
+				CurrencyIsoCode: updatedSubscription.CurrencyIsoCode,
+			},
 		},
 	}, nil
 }
@@ -1026,11 +1030,13 @@ func (i *Impl) GetUserActiveSubscription(ctx context.Context,
 			UserId: activeUserSubscription.UserID,
 			Active: activeUserSubscription.Active,
 			Subscription: &usersgrpc.Subscription{
-				Id:              subscription.ID,
-				Title:           subscription.Title,
-				Description:     subscription.Description,
-				Amount:          subscription.Amount,
-				CurrencyIsoCode: subscription.CurrencyIsoCode,
+				Id:          subscription.ID,
+				Title:       subscription.Title,
+				Description: subscription.Description,
+				Amount: &types.Amount{
+					Value:           subscription.Amount,
+					CurrencyIsoCode: subscription.CurrencyIsoCode,
+				},
 			},
 			CreatedAt: timestamppb.New(activeUserSubscription.CreatedAt.Time),
 			UpdatedAt: timestamppb.New(activeUserSubscription.UpdatedAt.Time),
@@ -1104,15 +1110,15 @@ func (i *Impl) Subscribe(ctx context.Context,
 		return nil, status.Error(codes.Internal, fmt.Sprintf("error creating user subscription %v", err))
 	}
 
-	// create a payment with the external ref as the
-	createPaymentArgs := &sqlc.CreatePaymentParams{
-		ExternalRef:     userSubscription.ID,
-		Amount:          subscription.Amount,
-		CurrencyIsoCode: req.GetCurrencyIsoCode(),
-		Method:          req.GetPaymentMethod().GetMethod(),
-	}
+	// // create a payment with the external ref as the
+	// createPaymentArgs := &sqlc.CreatePaymentParams{
+	// 	ExternalRef:     userSubscription.ID,
+	// 	Amount:          subscription.Amount,
+	// 	CurrencyIsoCode: req.GetCurrencyIsoCode(),
+	// 	Method:          req.GetPaymentMethod().GetMethod(),
+	// }
 
-	payment, err := querier.CreatePayment(ctx, *createPaymentArgs)
+	// payment, err := querier.CreatePayment(ctx, *createPaymentArgs)
 
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("error creating payment %v", err))
@@ -1124,8 +1130,8 @@ func (i *Impl) Subscribe(ctx context.Context,
 	}
 
 	return &usersgrpc.SubscribeResponse{
-		PaymentId:  payment.ID,
-		PaymentRef: payment.ExternalRef,
+		// PaymentId:  payment.ID,
+		// PaymentRef: payment.ExternalRef,
 		UserSubscription: &usersgrpc.UserSubscription{
 			Id:        userSubscription.ID,
 			Active:    userSubscription.Active,
@@ -1166,6 +1172,41 @@ func (i *Impl) GetFarmerByID(
 			Address:                 safeString(foundUser.Address),
 			CreatedAt:               timestamppb.New(foundUser.CreatedAt.Time),
 			UpdatedAt:               timestamppb.New(foundUser.UpdatedAt.Time),
+		},
+	}, nil
+}
+
+// GetUserSubscriptionById implements usersgrpc.UsersServer.
+func (i *Impl) GetUserSubscriptionById(ctx context.Context, req *usersgrpc.GetUserSubscriptionByIdRequest) (*usersgrpc.GetUserSubscriptionByIdResponse, error) {
+	userSubscription, err := i.repo.Do().GetUserSubscriptionByID(ctx, req.GetUserSubscriptionId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Error getting user active subscription : %v", err)
+	}
+
+	subscription, err := i.repo.Do().GetSubscriptionByID(ctx, userSubscription.SubscriptionID)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Error fetching subscription : %v", err)
+	}
+
+	return &usersgrpc.GetUserSubscriptionByIdResponse{
+		UserSubscription: &usersgrpc.UserSubscription{
+			Id:     userSubscription.ID,
+			UserId: userSubscription.UserID,
+			Active: userSubscription.Active,
+			Subscription: &usersgrpc.Subscription{
+				Id:          subscription.ID,
+				Title:       subscription.Title,
+				Description: subscription.Description,
+				Amount: &types.Amount{
+					Value:           subscription.Amount,
+					CurrencyIsoCode: subscription.CurrencyIsoCode,
+				},
+			},
+			CreatedAt: timestamppb.New(userSubscription.CreatedAt.Time),
+			UpdatedAt: timestamppb.New(userSubscription.UpdatedAt.Time),
+			ExpiresAt: timestamppb.New(userSubscription.ExpiresAt),
 		},
 	}, nil
 }

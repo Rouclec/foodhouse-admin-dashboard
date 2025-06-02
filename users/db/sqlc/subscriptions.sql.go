@@ -21,7 +21,7 @@ type CreateSubscriptionParams struct {
 	Title           string          `json:"title"`
 	Description     string          `json:"description"`
 	Duration        pgtype.Interval `json:"duration"`
-	Amount          int64           `json:"amount"`
+	Amount          float64         `json:"amount"`
 	CurrencyIsoCode string          `json:"currency_iso_code"`
 }
 
@@ -135,7 +135,7 @@ type UpdateSubscriptionParams struct {
 	Title           string          `json:"title"`
 	Description     string          `json:"description"`
 	Duration        pgtype.Interval `json:"duration"`
-	Amount          int64           `json:"amount"`
+	Amount          float64         `json:"amount"`
 	CurrencyIsoCode string          `json:"currency_iso_code"`
 	ID              string          `json:"id"`
 }

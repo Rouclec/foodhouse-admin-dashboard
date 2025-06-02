@@ -15,10 +15,6 @@ message Category {
   string created_by = 8;
 }
 
-message Amount {
-  int64 value = 1;
-  string currency_iso_code = 2;
-}
 
 message Product {
   string id = 1;

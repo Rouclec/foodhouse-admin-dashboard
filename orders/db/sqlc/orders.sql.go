@@ -24,11 +24,13 @@ INSERT INTO orders (
     product_owner,
     payout_phone_number,
     rating, 
-    review
+    review,
+    delivery_address,
+    quantity
 )
 VALUES (
     $1::point,    -- Enforcing as POINT (casting delivery_location)
-    $2::bigint,         -- Enforcing as BIGINT
+    $2::float,         -- Enforcing as BIGINT
     $3::varchar(3),  -- Enforcing as VARCHAR(3)
     $4::text,                -- Enforcing as TEXT
     $5::text,               -- Enforcing as TEXT
@@ -37,14 +39,16 @@ VALUES (
     $8::varchar(36),   -- Enforcing as VARCHAR(36)
     $9::varchar(36), 
     1, -- Default rating
-    '' -- Default review
+    '', -- Default review
+    $10::text,
+    $11::bigint
 )
-RETURNING order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number
+RETURNING order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity
 `
 
 type CreateOrderParams struct {
 	DeliveryLocation  pgtype.Point `json:"delivery_location"`
-	PriceValue        int64        `json:"price_value"`
+	PriceValue        float64      `json:"price_value"`
 	PriceCurrency     string       `json:"price_currency"`
 	Status            string       `json:"status"`
 	Product           string       `json:"product"`
@@ -52,6 +56,8 @@ type CreateOrderParams struct {
 	SecretKey         string       `json:"secret_key"`
 	ProductOwner      string       `json:"product_owner"`
 	PayoutPhoneNumber string       `json:"payout_phone_number"`
+	DeliveryAddress   string       `json:"delivery_address"`
+	Quantity          int64        `json:"quantity"`
 }
 
 func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error) {
@@ -65,6 +71,8 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 		arg.SecretKey,
 		arg.ProductOwner,
 		arg.PayoutPhoneNumber,
+		arg.DeliveryAddress,
+		arg.Quantity,
 	)
 	var i Order
 	err := row.Scan(
@@ -82,6 +90,8 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 		&i.SecretKey,
 		&i.ProductOwner,
 		&i.PayoutPhoneNumber,
+		&i.DeliveryAddress,
+		&i.Quantity,
 	)
 	return i, err
 }
@@ -124,42 +134,55 @@ func (q *Queries) CreateOrderAuditLog(ctx context.Context, arg CreateOrderAuditL
 }
 
 const createPayment = `-- name: CreatePayment :one
-INSERT INTO payments (order_number, price_value, price_currency, status, external_ref)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id, order_number, price_value, price_currency, status, external_ref, order_secret_key
+INSERT INTO payments (payment_entity, entity_id, amount_value, amount_currency, status, created_by, expires_at, method, account_number)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+RETURNING id, status, payment_entity, entity_id, amount_value, amount_currency, created_by, expires_at, created_at, updated_at, method, account_number
 `
 
 type CreatePaymentParams struct {
-	OrderNumber   int64   `json:"order_number"`
-	PriceValue    *int64  `json:"price_value"`
-	PriceCurrency *string `json:"price_currency"`
-	Status        string  `json:"status"`
-	ExternalRef   string  `json:"external_ref"`
+	PaymentEntity  string             `json:"payment_entity"`
+	EntityID       string             `json:"entity_id"`
+	AmountValue    *float64           `json:"amount_value"`
+	AmountCurrency *string            `json:"amount_currency"`
+	Status         string             `json:"status"`
+	CreatedBy      string             `json:"created_by"`
+	ExpiresAt      pgtype.Timestamptz `json:"expires_at"`
+	Method         string             `json:"method"`
+	AccountNumber  string             `json:"account_number"`
 }
 
 func (q *Queries) CreatePayment(ctx context.Context, arg CreatePaymentParams) (Payment, error) {
 	row := q.db.QueryRow(ctx, createPayment,
-		arg.OrderNumber,
-		arg.PriceValue,
-		arg.PriceCurrency,
+		arg.PaymentEntity,
+		arg.EntityID,
+		arg.AmountValue,
+		arg.AmountCurrency,
 		arg.Status,
-		arg.ExternalRef,
+		arg.CreatedBy,
+		arg.ExpiresAt,
+		arg.Method,
+		arg.AccountNumber,
 	)
 	var i Payment
 	err := row.Scan(
 		&i.ID,
-		&i.OrderNumber,
-		&i.PriceValue,
-		&i.PriceCurrency,
 		&i.Status,
-		&i.ExternalRef,
-		&i.OrderSecretKey,
+		&i.PaymentEntity,
+		&i.EntityID,
+		&i.AmountValue,
+		&i.AmountCurrency,
+		&i.CreatedBy,
+		&i.ExpiresAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Method,
+		&i.AccountNumber,
 	)
 	return i, err
 }
 
 const getOrderByOrderNumber = `-- name: GetOrderByOrderNumber :one
-SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number FROM orders WHERE order_number = $1
+SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity FROM orders WHERE order_number = $1
 `
 
 func (q *Queries) GetOrderByOrderNumber(ctx context.Context, orderNumber int64) (Order, error) {
@@ -180,32 +203,39 @@ func (q *Queries) GetOrderByOrderNumber(ctx context.Context, orderNumber int64) 
 		&i.SecretKey,
 		&i.ProductOwner,
 		&i.PayoutPhoneNumber,
+		&i.DeliveryAddress,
+		&i.Quantity,
 	)
 	return i, err
 }
 
-const getPaymentByExternalReference = `-- name: GetPaymentByExternalReference :one
-SELECT id, order_number, price_value, price_currency, status, external_ref, order_secret_key from payments WHERE external_ref = $1
+const getPaymentById = `-- name: GetPaymentById :one
+SELECT id, status, payment_entity, entity_id, amount_value, amount_currency, created_by, expires_at, created_at, updated_at, method, account_number from payments WHERE id = $1
 LIMIT 1
 `
 
-func (q *Queries) GetPaymentByExternalReference(ctx context.Context, externalRef string) (Payment, error) {
-	row := q.db.QueryRow(ctx, getPaymentByExternalReference, externalRef)
+func (q *Queries) GetPaymentById(ctx context.Context, id string) (Payment, error) {
+	row := q.db.QueryRow(ctx, getPaymentById, id)
 	var i Payment
 	err := row.Scan(
 		&i.ID,
-		&i.OrderNumber,
-		&i.PriceValue,
-		&i.PriceCurrency,
 		&i.Status,
-		&i.ExternalRef,
-		&i.OrderSecretKey,
+		&i.PaymentEntity,
+		&i.EntityID,
+		&i.AmountValue,
+		&i.AmountCurrency,
+		&i.CreatedBy,
+		&i.ExpiresAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Method,
+		&i.AccountNumber,
 	)
 	return i, err
 }
 
 const getUserOrderBySecretKey = `-- name: GetUserOrderBySecretKey :one
-SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number FROM orders WHERE secret_key = $1 AND created_by = $2
+SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity FROM orders WHERE secret_key = $1 AND created_by = $2
 `
 
 type GetUserOrderBySecretKeyParams struct {
@@ -231,12 +261,14 @@ func (q *Queries) GetUserOrderBySecretKey(ctx context.Context, arg GetUserOrderB
 		&i.SecretKey,
 		&i.ProductOwner,
 		&i.PayoutPhoneNumber,
+		&i.DeliveryAddress,
+		&i.Quantity,
 	)
 	return i, err
 }
 
 const listFarmerOrders = `-- name: ListFarmerOrders :many
-SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number FROM orders 
+SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity FROM orders 
 WHERE product_owner = $1
 AND 
   ($2::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at < $2::timestamptz)
@@ -274,6 +306,8 @@ func (q *Queries) ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersPara
 			&i.SecretKey,
 			&i.ProductOwner,
 			&i.PayoutPhoneNumber,
+			&i.DeliveryAddress,
+			&i.Quantity,
 		); err != nil {
 			return nil, err
 		}
@@ -319,7 +353,7 @@ func (q *Queries) ListOrderAuditLogs(ctx context.Context, orderNumber int64) ([]
 }
 
 const listUserOrders = `-- name: ListUserOrders :many
-SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number FROM orders 
+SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity FROM orders 
 WHERE created_by = $1
 AND 
   ($2::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at < $2::timestamptz)
@@ -357,6 +391,8 @@ func (q *Queries) ListUserOrders(ctx context.Context, arg ListUserOrdersParams) 
 			&i.SecretKey,
 			&i.ProductOwner,
 			&i.PayoutPhoneNumber,
+			&i.DeliveryAddress,
+			&i.Quantity,
 		); err != nil {
 			return nil, err
 		}
@@ -397,30 +433,16 @@ func (q *Queries) UpdateOrderStatus(ctx context.Context, arg UpdateOrderStatusPa
 	return err
 }
 
-const updatePaymentStatusByExternalReference = `-- name: UpdatePaymentStatusByExternalReference :exec
-UPDATE payments SET status = $2 WHERE external_ref = $1
+const updatePaymentStatus = `-- name: UpdatePaymentStatus :exec
+UPDATE payments SET status = $2 WHERE id = $1
 `
 
-type UpdatePaymentStatusByExternalReferenceParams struct {
-	ExternalRef string `json:"external_ref"`
-	Status      string `json:"status"`
+type UpdatePaymentStatusParams struct {
+	ID     string `json:"id"`
+	Status string `json:"status"`
 }
 
-func (q *Queries) UpdatePaymentStatusByExternalReference(ctx context.Context, arg UpdatePaymentStatusByExternalReferenceParams) error {
-	_, err := q.db.Exec(ctx, updatePaymentStatusByExternalReference, arg.ExternalRef, arg.Status)
-	return err
-}
-
-const updatePaymentStatusBySecretKey = `-- name: UpdatePaymentStatusBySecretKey :exec
-UPDATE payments SET status = $2 WHERE order_secret_key = $1
-`
-
-type UpdatePaymentStatusBySecretKeyParams struct {
-	OrderSecretKey *string `json:"order_secret_key"`
-	Status         string  `json:"status"`
-}
-
-func (q *Queries) UpdatePaymentStatusBySecretKey(ctx context.Context, arg UpdatePaymentStatusBySecretKeyParams) error {
-	_, err := q.db.Exec(ctx, updatePaymentStatusBySecretKey, arg.OrderSecretKey, arg.Status)
+func (q *Queries) UpdatePaymentStatus(ctx context.Context, arg UpdatePaymentStatusParams) error {
+	_, err := q.db.Exec(ctx, updatePaymentStatus, arg.ID, arg.Status)
 	return err
 }

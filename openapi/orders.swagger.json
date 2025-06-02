@@ -16,14 +16,14 @@
     "application/json"
   ],
   "paths": {
-    "/v1/public/confirm-order-payment": {
+    "/v1/public/confirm-payment": {
       "get": {
-        "operationId": "Orders_ConfirmOrderPayment",
+        "operationId": "Orders_ConfirmPayment",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/ordersgrpcConfirmOrderPaymentResponse"
+              "$ref": "#/definitions/ordersgrpcConfirmPaymentResponse"
             }
           },
           "default": {
@@ -257,6 +257,44 @@
         ]
       }
     },
+    "/v1/{userId}/orders/initiate-payment": {
+      "post": {
+        "operationId": "Orders_InitiatePayment",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcInitiatePaymentResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/OrdersInitiatePaymentBody"
+            }
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/{userId}/orders/list-user-orders": {
       "get": {
         "operationId": "Orders_ListUserOrders",
@@ -397,21 +435,53 @@
     "OrdersCreateOrderBody": {
       "type": "object",
       "properties": {
-        "order": {
-          "$ref": "#/definitions/ordersgrpcOrder"
-        },
-        "phoneNumber": {
+        "productId": {
           "type": "string"
+        },
+        "quantity": {
+          "type": "string",
+          "format": "int64"
+        },
+        "deliveryLocation": {
+          "$ref": "#/definitions/typesPoint"
         }
       }
     },
     "OrdersDispatchOrderBody": {
       "type": "object"
     },
+    "OrdersInitiatePaymentBody": {
+      "type": "object",
+      "properties": {
+        "paymentEntity": {
+          "$ref": "#/definitions/ordersgrpcPaymentEntity"
+        },
+        "entityId": {
+          "type": "string"
+        },
+        "amount": {
+          "$ref": "#/definitions/typesAmount"
+        },
+        "account": {
+          "$ref": "#/definitions/ordersgrpcAccount"
+        }
+      }
+    },
+    "ordersgrpcAccount": {
+      "type": "object",
+      "properties": {
+        "paymentMethod": {
+          "$ref": "#/definitions/ordersgrpcPaymentMethodType"
+        },
+        "accountNumber": {
+          "type": "string"
+        }
+      }
+    },
     "ordersgrpcConfirmDeliveryResponse": {
       "type": "object"
     },
-    "ordersgrpcConfirmOrderPaymentResponse": {
+    "ordersgrpcConfirmPaymentResponse": {
       "type": "object"
     },
     "ordersgrpcCreateOrderResponse": {
@@ -442,6 +512,14 @@
     },
     "ordersgrpcHealthCheckResponse": {
       "type": "object"
+    },
+    "ordersgrpcInitiatePaymentResponse": {
+      "type": "object",
+      "properties": {
+        "payment": {
+          "$ref": "#/definitions/ordersgrpcPayment"
+        }
+      }
     },
     "ordersgrpcListFarmerOrdersResponse": {
       "type": "object",
@@ -552,9 +630,78 @@
         "OrderStatus_PAYMENT_SUCCESSFUL",
         "OrderStatus_PAYMENT_FAILED",
         "OrderStatus_IN_TRANSIT",
-        "OrderStatus_DELIVERED"
+        "OrderStatus_DELIVERED",
+        "OrderStatus_APPROVED"
       ],
       "default": "OrderStatus_UNSPECIFIED"
+    },
+    "ordersgrpcPayment": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "paymentEntity": {
+          "$ref": "#/definitions/ordersgrpcPaymentEntity"
+        },
+        "entityId": {
+          "type": "string"
+        },
+        "amount": {
+          "$ref": "#/definitions/typesAmount"
+        },
+        "createdBy": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "$ref": "#/definitions/ordersgrpcPaymentStatus"
+        },
+        "account": {
+          "$ref": "#/definitions/ordersgrpcAccount"
+        }
+      }
+    },
+    "ordersgrpcPaymentEntity": {
+      "type": "string",
+      "enum": [
+        "PaymentEntity_UNSPECIFIED",
+        "PaymentEntity_ORDER",
+        "PaymentEntity_SUBSCRIPTION"
+      ],
+      "default": "PaymentEntity_UNSPECIFIED"
+    },
+    "ordersgrpcPaymentMethodType": {
+      "type": "string",
+      "enum": [
+        "PaymentMethodType_UNSPECIFIED",
+        "PaymentMethodType_MOBILE_MONEY",
+        "PaymentMethodType_ORANGE_MONEY",
+        "PaymentMethodType_CREDIT_CARD"
+      ],
+      "default": "PaymentMethodType_UNSPECIFIED"
+    },
+    "ordersgrpcPaymentStatus": {
+      "type": "string",
+      "enum": [
+        "PaymentStatus_UNSPECIFIED",
+        "PaymentStatus_INITIATED",
+        "PaymentStatus_COMPLETED",
+        "PaymentStatus_FAILED",
+        "PaymentStatus_CANCELED"
+      ],
+      "default": "PaymentStatus_UNSPECIFIED"
     },
     "protobufAny": {
       "type": "object",
@@ -588,8 +735,8 @@
       "type": "object",
       "properties": {
         "value": {
-          "type": "string",
-          "format": "int64"
+          "type": "number",
+          "format": "double"
         },
         "currencyIsoCode": {
           "type": "string"
@@ -606,6 +753,9 @@
         "lat": {
           "type": "number",
           "format": "double"
+        },
+        "address": {
+          "type": "string"
         }
       }
     }
