@@ -20,6 +20,7 @@ type Querier interface {
 	CreateUserSubscription(ctx context.Context, arg CreateUserSubscriptionParams) (UserSubscription, error)
 	DeleteSubscription(ctx context.Context, id string) error
 	DeleteUserPaymentMethod(ctx context.Context, id string) error
+	DeleteUserSubscription(ctx context.Context, id string) error
 	GetAllSubscriptions(ctx context.Context) ([]Subscription, error)
 	GetAllUserSubscriptions(ctx context.Context) ([]UserSubscription, error)
 	GetFarmer(ctx context.Context, id string) (User, error)

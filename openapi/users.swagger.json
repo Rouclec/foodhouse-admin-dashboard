@@ -1029,6 +1029,9 @@
         }
       }
     },
+    "usersgrpcActivateUserSubscriptionResponse": {
+      "type": "object"
+    },
     "usersgrpcAdditionalFactor": {
       "type": "object",
       "properties": {
@@ -1148,6 +1151,9 @@
         }
       },
       "title": "Delete User Payment Method Response"
+    },
+    "usersgrpcDeleteUserSubscriptionResponse": {
+      "type": "object"
     },
     "usersgrpcFactorType": {
       "type": "string",
@@ -1405,12 +1411,6 @@
     "usersgrpcSubscribeResponse": {
       "type": "object",
       "properties": {
-        "paymentId": {
-          "type": "string"
-        },
-        "paymentRef": {
-          "type": "string"
-        },
         "userSubscription": {
           "$ref": "#/definitions/usersgrpcUserSubscription"
         }

@@ -156,6 +156,13 @@ message ConfirmDeliveryRequest {
   string user_id = 2;
 }
 
+message ApproveOrderRequest {
+  string order_id = 1;
+  string user_id = 2;
+}
+
+message ApproveOrderResponse {}
+
 message ConfirmDeliveryResponse {}
 
 message HealthCheckRequest {}
@@ -195,7 +202,7 @@ service Orders {
   rpc GetOrderDetails(GetOrderDetailsRequest)
       returns (GetOrderDetailsResponse) {
     option (google.api.http) = {
-      get : "/v1/users/{user_id}/order/{order_number}/get-order-details"
+      get : "/v1/users/{user_id}/orders/{order_number}/get-order-details"
     };
   }
 
@@ -216,6 +223,13 @@ service Orders {
       returns (ConfirmDeliveryResponse) {
     option (google.api.http) = {
       put : "/v1/users/{user_id}/orders/{secret_key}/confirm-delivery"
+      body : "*"
+    };
+  }
+
+  rpc ApproveOrder(ApproveOrderRequest) returns (ApproveOrderResponse) {
+    option (google.api.http) = {
+      put : "/v1/users/{user_id}/orders/{order_id}/approve-order"
       body : "*"
     };
   }

@@ -45,8 +45,12 @@ const (
 
 	PaymentStatusFailed = "FAILED"
 
-	TotalPercentage = float64(1.08)
+	TotalPercentage = 1.08
 )
+
+var supportedCurrencies = map[string]struct{}{
+	"XAF": {},
+}
 
 // Impl is the implementation of the products service.
 type Impl struct {
@@ -172,126 +176,179 @@ func (i *Impl) ConfirmDelivery(ctx context.Context, req *ordersgrpc.ConfirmDeliv
 
 // ConfirmPayment implements ordersgrpc.OrdersServer.
 func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymentRequest) (*ordersgrpc.ConfirmPaymentResponse, error) {
-	// querier, tx, err := i.repo.Begin(ctx)
-	// if err != nil {
-	// 	return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)
-	// }
+	// TODO: add valiadation to confirm that request is coming from campay
+	querier, tx, err := i.repo.Begin(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)
+	}
 
-	// i.logger.Debug().Msgf("payment id %v", req.GetExternalReference())
-	// i.logger.Debug().Msgf("payment status %v", req.GetStatus())
+	i.logger.Debug().Msgf("payment id %v", req.GetExternalReference())
+	i.logger.Debug().Msgf("payment status %v", req.GetStatus())
 
-	// // Proper rollback handling
-	// defer func() {
-	// 	err = tx.Rollback(ctx)
-	// 	if err != nil && !errors.Is(err, sql.ErrTxDone) {
-	// 		i.logger.Err(err).Msgf("Failed to rollback transaction: %v", req)
-	// 	}
-	// }()
+	// Proper rollback handling
+	defer func() {
+		err = tx.Rollback(ctx)
+		if err != nil && !errors.Is(err, sql.ErrTxDone) {
+			i.logger.Err(err).Msgf("Failed to rollback transaction: %v", req)
+		}
+	}()
 
-	// payment, err := querier.GetPaymentById(ctx, req.GetExternalReference())
+	payment, err := querier.GetPaymentById(ctx, req.GetExternalReference())
 
-	// if err != nil {
-	// 	i.logger.Debug().Msgf("error getting payment %v", err)
-	// 	return nil, status.Errorf(codes.Internal, "error getting payment %v", err)
-	// }
+	if err != nil {
+		i.logger.Debug().Msgf("error getting payment %v", err)
+		return nil, status.Errorf(codes.Internal, "error getting payment %v", err)
+	}
 
-	// if payment.PaymentEntity == ordersgrpc.PaymentEntity_UNSPECIFIED {
-	// 	return nil, status.Errorf(codes.InvalidArgument, "payment entity is unspecified")
-	// }
+	if payment.PaymentEntity == ordersgrpc.PaymentEntity_PaymentEntity_UNSPECIFIED.String() {
+		return nil, status.Errorf(codes.InvalidArgument, "payment entity is unspecified")
+	}
 
-	// if payment.PaymentEntity == ordersgrpc.PaymentEntity_ORDER {
-	// 	orderId, err := strconv.ParseInt(payment.EntityID, 10, 64)
+	// case for when payment is for an order
+	if payment.PaymentEntity == ordersgrpc.PaymentEntity_PaymentEntity_ORDER.String() {
+		orderId, err := strconv.ParseInt(payment.EntityID, 10, 64)
 
-	// 	if err != nil {
-	// 		return nil, status.Errorf(codes.Internal, "error parsing order id %v", err)
-	// 	}
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error parsing order id %v", err)
+		}
 
-	// 	order, err := querier.GetOrderByOrderNumber(ctx, orderId)
-	// }
+		order, err := querier.GetOrderByOrderNumber(ctx, orderId)
 
-	// if payment.PaymentEntity == ordersgrpc.PaymentEntity_SUBSCRIPTION {
-	// 	subscription, err := i.userService.GetSubscriptionByID(ctx, &usersgrpc.GetSubscriptionByIDRequest{
-	// 		SubscriptionId: payment.EntityID,
-	// 	})
+		if err != nil {
+			i.logger.Debug().Msgf("error getting order for payment with ref %v, why: %v", req.GetExternalReference(), err)
+			return nil, status.Errorf(codes.Internal, "error getting order for payment with ref %v, why: %v", req.GetExternalReference(), err)
+		}
 
-	// 	if err != nil {
-	// 		return nil, status.Errorf(codes.Internal, "error getting subscription %v", err)
-	// 	}
-	// }
+		beforeBytes, err := protojson.Marshal(converters.SqlcOrderToProto(order))
 
-	// order, err := querier.GetOrderByOrderNumber(ctx, payment.EntityId)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
+		}
 
-	// if err != nil {
-	// 	i.logger.Debug().Msgf("error getting order for payment with ref %v, why: %v", req.GetExternalReference(), err)
-	// 	return nil, status.Errorf(codes.Internal, "error getting order for payment with ref %v, why: %v", req.GetExternalReference(), err)
-	// }
+		var updatedPaymentStatus ordersgrpc.PaymentStatus
+		var updatedOrderStatus ordersgrpc.OrderStatus
 
-	// beforeBytes, err := protojson.Marshal(converters.SqlcOrderToProto(order))
+		if req.GetStatus() == PaymentStatusSuccessful {
+			updatedPaymentStatus = ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED
+			updatedOrderStatus = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL
+		} else {
+			updatedPaymentStatus = ordersgrpc.PaymentStatus_PaymentStatus_FAILED
+			updatedOrderStatus = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED
+		}
 
-	// if err != nil {
-	// 	return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
-	// }
+		err = querier.UpdatePaymentStatus(ctx, sqlc.UpdatePaymentStatusParams{
+			ID:     req.GetExternalReference(),
+			Status: updatedPaymentStatus.String(),
+		})
 
-	// var updatedPaymentStatus ordersgrpc.PaymentStatus
-	// var updatedOrderStatus ordersgrpc.OrderStatus
+		if err != nil {
+			i.logger.Debug().Msgf("Error updating payment status %v", err)
+			return nil, status.Errorf(codes.Internal, "error updating payment status %v", err)
+		}
 
-	// if req.GetStatus() == PaymentStatusSuccessful {
-	// 	updatedPaymentStatus = ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED
-	// 	updatedOrderStatus = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL
-	// } else {
-	// 	updatedPaymentStatus = ordersgrpc.PaymentStatus_PaymentStatus_FAILED
-	// 	updatedOrderStatus = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED
-	// }
+		err = querier.UpdateOrderStatus(ctx, sqlc.UpdateOrderStatusParams{
+			OrderNumber: order.OrderNumber,
+			Status:      updatedOrderStatus.String(),
+		})
 
-	// err = querier.UpdatePaymentStatusByExternalReference(ctx, sqlc.UpdatePaymentStatusByExternalReferenceParams{
-	// 	ExternalRef: req.GetExternalReference(),
-	// 	Status:      updatedPaymentStatus.String(),
-	// })
+		if err != nil {
+			i.logger.Debug().Msgf("Error updating order status %v", err)
+			return nil, status.Errorf(codes.Internal, "error updating order status %v", err)
+		}
 
-	// if err != nil {
-	// 	i.logger.Debug().Msgf("Error updating payment status %v", err)
-	// 	return nil, status.Errorf(codes.Internal, "error updating payment status %v", err)
-	// }
+		updatedOrder, err := querier.GetOrderByOrderNumber(ctx, order.OrderNumber)
 
-	// err = querier.UpdateOrderStatus(ctx, sqlc.UpdateOrderStatusParams{
-	// 	OrderNumber: order.OrderNumber,
-	// 	Status:      updatedOrderStatus.String(),
-	// })
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error getting updated order %v", err)
+		}
 
-	// if err != nil {
-	// 	i.logger.Debug().Msgf("Error updating order status %v", err)
-	// 	return nil, status.Errorf(codes.Internal, "error updating order status %v", err)
-	// }
+		afterBytes, err := protojson.Marshal(converters.SqlcOrderToProto(updatedOrder))
 
-	// updatedOrder, err := querier.GetOrderByOrderNumber(ctx, order.OrderNumber)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
+		}
 
-	// if err != nil {
-	// 	return nil, status.Errorf(codes.Internal, "error getting updated order %v", err)
-	// }
+		err = querier.CreateOrderAuditLog(ctx, sqlc.CreateOrderAuditLogParams{
+			OrderNumber:    order.OrderNumber,
+			EventTimestamp: pgtype.Timestamptz{Time: time.Now(), Valid: true},
+			Actor:          "campay",
+			Action:         "ConfirmOrderPayment",
+			Reason:         "Payment webhook has returned",
+			Before:         beforeBytes,
+			After:          afterBytes,
+		})
 
-	// afterBytes, err := protojson.Marshal(converters.SqlcOrderToProto(updatedOrder))
+		err = tx.Commit(ctx)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
+		}
 
-	// if err != nil {
-	// 	return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
-	// }
+		return &ordersgrpc.ConfirmPaymentResponse{}, nil
+	}
 
-	// err = querier.CreateOrderAuditLog(ctx, sqlc.CreateOrderAuditLogParams{
-	// 	OrderNumber:    order.OrderNumber,
-	// 	EventTimestamp: pgtype.Timestamptz{Time: time.Now(), Valid: true},
-	// 	Actor:          "campay",
-	// 	Action:         "ConfirmOrderPayment",
-	// 	Reason:         "Payment webhook has returned",
-	// 	Before:         beforeBytes,
-	// 	After:          afterBytes,
-	// })
+	// case for when payment is for subscription
+	if payment.PaymentEntity == ordersgrpc.PaymentEntity_PaymentEntity_SUBSCRIPTION.String() {
+		i.logger.Debug().Msgf("user subscription id ", payment.EntityID)
 
-	// err = tx.Commit(ctx)
-	// if err != nil {
-	// 	return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
-	// }
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error getting subscription %v", err)
+		}
 
-	// return &ordersgrpc.ConfirmOrderPaymentResponse{}, nil
-	panic("unimplemented")
+		if err != nil {
+			i.logger.Debug().Msgf("error getting order for payment with ref %v, why: %v", req.GetExternalReference(), err)
+			return nil, status.Errorf(codes.Internal, "error getting order for payment with ref %v, why: %v", req.GetExternalReference(), err)
+		}
+
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
+		}
+
+		var updatedPaymentStatus ordersgrpc.PaymentStatus
+
+		if req.GetStatus() != PaymentStatusSuccessful {
+			_, err := i.userService.DeleteUserSubscription(ctx, &usersgrpc.DeleteUserSubscriptionRequest{
+				UserSubscriptionId: payment.EntityID,
+			})
+
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "error confirming payment %v", err)
+			}
+
+			err = tx.Commit(ctx)
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
+			}
+			return &ordersgrpc.ConfirmPaymentResponse{}, nil
+		}
+
+		err = querier.UpdatePaymentStatus(ctx, sqlc.UpdatePaymentStatusParams{
+			ID:     req.GetExternalReference(),
+			Status: updatedPaymentStatus.String(),
+		})
+
+		if err != nil {
+			i.logger.Debug().Msgf("Error updating payment status %v", err)
+			return nil, status.Errorf(codes.Internal, "error updating payment status %v", err)
+		}
+
+		_, err = i.userService.ActivateUserSubscription(ctx, &usersgrpc.ActivateUserSubscriptionRequest{
+			UserSubscriptionId: payment.EntityID,
+		})
+
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error confirming payment %v", err)
+		}
+
+		err = tx.Commit(ctx)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
+		}
+
+		return &ordersgrpc.ConfirmPaymentResponse{}, nil
+
+	}
+
+	return &ordersgrpc.ConfirmPaymentResponse{}, nil
 }
 
 // CreateOrder implements ordersgrpc.OrdersServer.
@@ -594,6 +651,11 @@ func formatPhoneNumber(phoneNumber string) (string, error) {
 	return phonenumbers.Format(parsedNumber, phonenumbers.E164), nil
 }
 
+func IsSupportedCurrency(code string) bool {
+	_, ok := supportedCurrencies[code]
+	return ok
+}
+
 // InitiatePayment implements ordersgrpc.OrdersServer.
 func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaymentRequest) (*ordersgrpc.InitiatePaymentResponse, error) {
 
@@ -616,6 +678,10 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 
 	if req.GetAccount().PaymentMethod != ordersgrpc.PaymentMethodType_PaymentMethodType_MOBILE_MONEY && req.GetAccount().PaymentMethod != ordersgrpc.PaymentMethodType_PaymentMethodType_ORANGE_MONEY {
 		return nil, status.Errorf(codes.Internal, "payment method %s not supported", req.GetAccount().GetPaymentMethod())
+	}
+
+	if _, ok := supportedCurrencies[req.GetAmount().GetCurrencyIsoCode()]; !ok {
+		return nil, status.Errorf(codes.Internal, "currency %s is not supported", req.GetAmount().GetCurrencyIsoCode())
 	}
 
 	payment, err := querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
@@ -641,6 +707,18 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 
 	i.logger.Debug().Msgf("Formated number log %v", formattedNumber)
 
+	supportedCurrencies := []string{"XAF"}
+	currencySupported := false
+	for _, c := range supportedCurrencies {
+		currencySupported = req.GetAmount().GetCurrencyIsoCode() == c
+		if currencySupported {
+			break
+		}
+	}
+	if !currencySupported {
+		return nil, status.Errorf(codes.Internal, "currency %s is not supported", req.GetAmount().GetCurrencyIsoCode())
+	}
+
 	_, err = i.paymentService.RequestPayment(ctx, formattedNumber, *payment.AmountValue, *payment.AmountCurrency, fmt.Sprintf("payment for entity: %s  with id: %s", req.GetPaymentEntity(), req.GetEntityId()), &payment.ID)
 
 	if err != nil {
@@ -663,4 +741,9 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 			ExpiresAt: timestamppb.New(payment.ExpiresAt.Time),
 		},
 	}, nil
+}
+
+// ApproveOrder implements ordersgrpc.OrdersServer.
+func (i *Impl) ApproveOrder(context.Context, *ordersgrpc.ApproveOrderRequest) (*ordersgrpc.ApproveOrderResponse, error) {
+	panic("unimplemented")
 }
