@@ -9,7 +9,7 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Appbar, Button, Icon, Text } from "react-native-paper";
 import { Colors } from "@/constants";
-import { defaultStyles, styles } from "@/styles";
+import { defaultStyles, selectionSubscriptionStyles } from "@/styles";
 
 const PaymentMethodsPage = () => {
   const router = useRouter();
@@ -30,29 +30,23 @@ const PaymentMethodsPage = () => {
       name: "Orange Money",
       icon: require("@/assets/images/orange-money.png"),
     },
-    {
-      id: "card",
-      name: "Mastercard / Visa",
-      icon: require("@/assets/images/mastercard_visa.png"),
-    },
   ];
-
 
   const handleNext = () => {
     if (selectedMethod) {
       router.push({
         pathname: "/payment-account",
         params: {
-          ...params, 
-          paymentMethod: selectedMethod
-        }
+          ...params,
+          paymentMethod: selectedMethod,
+        },
       });
     }
   };
 
   return (
     <>
-      <Appbar.Header dark={false}>
+      <Appbar.Header dark={false} style={defaultStyles.appHeader}>
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title="Payment Methods" />
       </Appbar.Header>
@@ -62,25 +56,30 @@ const PaymentMethodsPage = () => {
           To proceed, please add your payment methods.
         </Text>
 
-        <View style={styles.plansContainer}>
+        <View style={selectionSubscriptionStyles.plansContainer}>
           {paymentMethods.map((method) => (
             <TouchableOpacity
               key={method.id}
               style={[
-                styles.planCard, 
-                styles.methodCard
+                selectionSubscriptionStyles.planCard,
+                selectionSubscriptionStyles.methodCard,
               ]}
               onPress={() => setSelectedMethod(method.id)}
             >
-              <Image source={method.icon} style={styles.methodIcon} />
-              <Text style={styles.planPrice}>{method.name}</Text>
-              <View style={styles.planSelector}>
-                                  <View style={[styles.selectionCircle]}>
-                                    {selectedMethod === method.id && (
-                                      <View style={styles.innerCircle} />
-                                    )}
-                                  </View>
-                                </View>
+              <Image
+                source={method.icon}
+                style={selectionSubscriptionStyles.methodIcon}
+              />
+              <Text style={selectionSubscriptionStyles.planPrice}>
+                {method.name}
+              </Text>
+              <View style={selectionSubscriptionStyles.planSelector}>
+                <View style={[selectionSubscriptionStyles.selectionCircle]}>
+                  {selectedMethod === method.id && (
+                    <View style={selectionSubscriptionStyles.innerCircle} />
+                  )}
+                </View>
+              </View>
             </TouchableOpacity>
           ))}
         </View>

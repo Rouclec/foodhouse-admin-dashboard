@@ -27,7 +27,7 @@ import { buyerProductsStyles } from "./(buyer)/(index)/index.styles";
 // import { onboardingStyles } from "./(auth)/onboarding";
 import { signupStyles } from "./(auth)/signupstyles";
 import { verifyOtpStyles } from "./(auth)/verify-otpstyles";
-import { styles } from "./(auth)/(subsciption-flow)/index.style";
+import { selectionSubscriptionStyles } from "./(auth)/(subsciption-flow)/index.style";
 import { filterBottomSheetStyles } from "./components/(buyer)/(index)/FilterBottomSheet.styles";
 import { productDetailsStyles } from "./(buyer)/product-details.styles";
 import { checkoutStyles } from "./(buyer)/(order)/index.styles";
@@ -55,7 +55,7 @@ export {
   imagePickerStyles,
   myProductStyles,
   productStyles,
-  styles,
+  selectionSubscriptionStyles,
   filterBottomSheetStyles,
   productDetailsStyles,
   checkoutStyles,

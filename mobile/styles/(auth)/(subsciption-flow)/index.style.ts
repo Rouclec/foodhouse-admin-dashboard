@@ -1,7 +1,7 @@
 import Colors from "@/constants/Colors";
 import { StyleSheet } from "react-native";
 
-export const styles = StyleSheet.create({
+export const selectionSubscriptionStyles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
     width: "100%",
@@ -72,7 +72,7 @@ export const styles = StyleSheet.create({
   },
   benefitText: {
     fontSize: 16,
-    color: Colors.grey.bg,
+    color: "#fff",
     flex: 1,
   },
   plansContainer: {

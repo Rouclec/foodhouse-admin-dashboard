@@ -16,7 +16,6 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   usersAuthenticateMutation,
   usersGetUserByIdOptions,
-  usersRefreshAccessTokenMutation,
 } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { Context, ContextType } from "../_layout";
 import { defaultStyles, loginstyles } from "@/styles";
@@ -51,12 +50,10 @@ export default function Login() {
         const role = userData?.user?.role;
 
         if (role === "USER_TYPE_FARMER") {
-          // router.replace("/(farmer)/(index)");
-          router.replace("/profile-page")
+          router.replace("/(farmer)/(index)");
           
         } else {
-          // router.replace("/(buyer)/index");
-          router.replace("/profile-page")
+          router.replace("/(buyer)/(index)");
           
         }
     }
@@ -290,7 +287,7 @@ export default function Login() {
                 <Text style={loginstyles.registerText}>
                   {i18n.t("(auth).login.dontHaveAnAccount")}{" "}
                 </Text>
-                <TouchableOpacity onPress={() => router.replace("/register")}>
+                <TouchableOpacity onPress={() => router.replace("/(auth)/(subsciption-flow)")}>
                   <Text style={loginstyles.registerLink}>
                     {i18n.t("(auth).login.registerNow")}
                   </Text>

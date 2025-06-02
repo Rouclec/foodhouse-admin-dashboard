@@ -138,7 +138,7 @@ const Info = () => {
                 error={email?.length > 0 && !emailRegex.test(email)}
                 outlineStyle={signupStyles.outlineInput}
                 style={signupStyles.input}
-                theme={{ colors: { onSurfaceVariant: Colors.grey["e8"] } }}
+                theme={{ roundness: 15, colors: { onSurfaceVariant: Colors.grey["e8"] } }}
               />
 
               <TextInput
@@ -152,7 +152,7 @@ const Info = () => {
                 style={signupStyles.input}
                 outlineStyle={signupStyles.outlineInput}
                 contentStyle={signupStyles.inputContentStyle}
-                theme={{ colors: { onSurfaceVariant: Colors.grey["e8"] } }}
+                theme={{roundness: 15, colors: { onSurfaceVariant: Colors.grey["e8"] } }}
                 error={password.length > 0 && password.length < 12}
                 right={
                   <TextInput.Icon
@@ -179,7 +179,7 @@ const Info = () => {
                 mode="outlined"
                 outlineStyle={signupStyles.outlineInput}
                 style={signupStyles.input}
-                theme={{ colors: { onSurfaceVariant: Colors.grey["e8"] } }}
+                theme={{roundness: 15, colors: { onSurfaceVariant: Colors.grey["e8"] } }}
                 error={
                   password?.length > 0 &&
                   confirmPassword?.length > 0 &&

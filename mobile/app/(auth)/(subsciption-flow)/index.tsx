@@ -9,7 +9,7 @@ import {
 import { useRouter } from "expo-router";
 import {Button, Text } from "react-native-paper";
 import { LinearGradient } from "expo-linear-gradient";
-import { defaultStyles, imagePickerStyles, styles } from "@/styles";
+import { defaultStyles, imagePickerStyles, selectionSubscriptionStyles } from "@/styles";
 import i18n from "@/i18n";
 
 export default function Index() {
@@ -61,7 +61,7 @@ export default function Index() {
     <>
       <ImageBackground
         source={require("@/assets/images/background-overlay-image.png")}
-        style={styles.backgroundImage}
+        style={selectionSubscriptionStyles.backgroundImage}
         resizeMode="cover"
       >
         <LinearGradient
@@ -71,7 +71,7 @@ export default function Index() {
             "rgba(255,255,255,1)",
           ]}
           locations={[0, 0.5, 2]}
-          style={styles.gradientOverlay}
+          style={selectionSubscriptionStyles.gradientOverlay}
         />
 
         <ScrollView
@@ -79,60 +79,60 @@ export default function Index() {
           showsVerticalScrollIndicator={false}
           nestedScrollEnabled={true}
         >
-          <View style={styles.contentContainer}>
-            <Text style={styles.mainTitle}> {i18n.t("(auth).(subsciption-flow).index.heading")}</Text>
-            <Text style={styles.subTitle}>{i18n.t("(auth).(subsciption-flow).index.subtitle")}</Text>
+          <View style={selectionSubscriptionStyles.contentContainer}>
+            <Text style={selectionSubscriptionStyles.mainTitle}> {i18n.t("(auth).(subsciption-flow).index.heading")}</Text>
+            <Text style={selectionSubscriptionStyles.subTitle}>{i18n.t("(auth).(subsciption-flow).index.subtitle")}</Text>
 
-            <View style={styles.benefitsContainer}>
-              <View style={styles.benefitItem}>
-                <View style={styles.bulletPoint} />
-                <Text style={styles.benefitText}>
+            <View style={selectionSubscriptionStyles.benefitsContainer}>
+              <View style={selectionSubscriptionStyles.benefitItem}>
+                <View style={selectionSubscriptionStyles.bulletPoint} />
+                <Text style={selectionSubscriptionStyles.benefitText}>
                  {i18n.t("(auth).(subsciption-flow).index.benefit1")}
                 </Text>
               </View>
-              <View style={styles.benefitItem}>
-                <View style={styles.bulletPoint} />
-                <Text style={styles.benefitText}>
+              <View style={selectionSubscriptionStyles.benefitItem}>
+                <View style={selectionSubscriptionStyles.bulletPoint} />
+                <Text style={selectionSubscriptionStyles.benefitText}>
                   {i18n.t("(auth).(subsciption-flow).index.benefit2")}
                 </Text>
               </View>
-              <View style={styles.benefitItem}>
-                <View style={styles.bulletPoint} />
-                <Text style={styles.benefitText}>{i18n.t("(auth).(subsciption-flow).index.benefit3")}</Text>
+              <View style={selectionSubscriptionStyles.benefitItem}>
+                <View style={selectionSubscriptionStyles.bulletPoint} />
+                <Text style={selectionSubscriptionStyles.benefitText}>{i18n.t("(auth).(subsciption-flow).index.benefit3")}</Text>
               </View>
             </View>
 
-            <View style={styles.plansContainer}>
+            <View style={selectionSubscriptionStyles.plansContainer}>
               {plans.map((plan, index) => (
                 <TouchableOpacity
                   key={index}
                   style={[
-                    styles.planCard,
+                    selectionSubscriptionStyles.planCard,
                     selectedPlan === plan.duration
-                      ? styles.selectedPlanCard
+                      ? selectionSubscriptionStyles.selectedPlanCard
                       : null,
                   ]}
                   onPress={() => setSelectedPlan(plan.duration)}
                 >
-                  <View style={styles.planSelector}>
-                    <View style={[styles.selectionCircle]}>
+                  <View style={selectionSubscriptionStyles.planSelector}>
+                    <View style={[selectionSubscriptionStyles.selectionCircle]}>
                       {selectedPlan === plan.duration && (
-                        <View style={styles.innerCircle} />
+                        <View style={selectionSubscriptionStyles.innerCircle} />
                       )}
                     </View>
                   </View>
 
-                  <View style={styles.planDetails}>
-                    <Text style={styles.planDuration}>{plan.duration}</Text>
-                    <Text style={styles.planDescription}>
+                  <View style={selectionSubscriptionStyles.planDetails}>
+                    <Text style={selectionSubscriptionStyles.planDuration}>{plan.duration}</Text>
+                    <Text style={selectionSubscriptionStyles.planDescription}>
                       {plan.description}
                     </Text>
                   </View>
 
-                  <View style={styles.planPriceContainer}>
-                    <Text style={styles.currencyText}>FCFA</Text>
-                    <Text style={styles.priceValue}>{plan.amount}</Text>
-                    <Text style={styles.priceDuration}>/m</Text>
+                  <View style={selectionSubscriptionStyles.planPriceContainer}>
+                    <Text style={selectionSubscriptionStyles.currencyText}>FCFA</Text>
+                    <Text style={selectionSubscriptionStyles.priceValue}>{plan.amount}</Text>
+                    <Text style={selectionSubscriptionStyles.priceDuration}>/m</Text>
                   </View>
                 </TouchableOpacity>
               ))}
@@ -143,7 +143,7 @@ export default function Index() {
         <View style={imagePickerStyles.bottomContainer}>
           <Button
             mode="outlined"
-            onPress={() => router.back()}
+            onPress={() => router.replace("/(buyer)/(index)")}
             style={[imagePickerStyles.button1, imagePickerStyles.skipButton]}
             labelStyle={imagePickerStyles.skipButtonText}
           >

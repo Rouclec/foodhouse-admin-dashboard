@@ -131,7 +131,7 @@
         "details": "Enter your phone number to innitiate payment",
         "button": "Next",
         "mtn": "MTN mobile money account number",
-        "orange": "Orange money account Number",
+        "orange": "Enter your Orange money account Number",
         "cardDetails": "Mastercard details",
         "cardNumber": "Enter your card number",
         "cardholderName": "Holders name",
