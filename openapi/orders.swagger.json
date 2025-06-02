@@ -182,43 +182,6 @@
         ]
       }
     },
-    "/v1/users/{userId}/order/{orderNumber}/get-order-details": {
-      "get": {
-        "operationId": "Orders_GetOrderDetails",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/ordersgrpcGetOrderDetailsResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "orderNumber",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "int64"
-          }
-        ],
-        "tags": [
-          "Orders"
-        ]
-      }
-    },
     "/v1/users/{userId}/orders/create-order": {
       "post": {
         "operationId": "Orders_CreateOrder",
@@ -338,6 +301,50 @@
         ]
       }
     },
+    "/v1/users/{userId}/orders/{orderId}/approve-order": {
+      "put": {
+        "operationId": "Orders_ApproveOrder",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcApproveOrderResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/OrdersApproveOrderBody"
+            }
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/users/{userId}/orders/{orderNumber}/dispatch-order": {
       "put": {
         "operationId": "Orders_DispatchOrder",
@@ -376,6 +383,43 @@
             "schema": {
               "$ref": "#/definitions/OrdersDispatchOrderBody"
             }
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/v1/users/{userId}/orders/{orderNumber}/get-order-details": {
+      "get": {
+        "operationId": "Orders_GetOrderDetails",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcGetOrderDetailsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "orderNumber",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
           }
         ],
         "tags": [
@@ -429,6 +473,9 @@
     }
   },
   "definitions": {
+    "OrdersApproveOrderBody": {
+      "type": "object"
+    },
     "OrdersConfirmDeliveryBody": {
       "type": "object"
     },
@@ -477,6 +524,9 @@
           "type": "string"
         }
       }
+    },
+    "ordersgrpcApproveOrderResponse": {
+      "type": "object"
     },
     "ordersgrpcConfirmDeliveryResponse": {
       "type": "object"

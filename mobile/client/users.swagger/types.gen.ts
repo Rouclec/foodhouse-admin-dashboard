@@ -43,6 +43,8 @@ export type UsersGrantAdminBody = {
     residenceCountryIsoCode?: string;
 };
 
+export type usersgrpcActivateUserSubscriptionResponse = unknown;
+
 /**
  * Request and response messages for gRPC methods.
  */
@@ -93,6 +95,8 @@ export type usersgrpcDeleteSubscriptionResponse = {
 export type usersgrpcDeleteUserPaymentMethodResponse = {
     message?: string;
 };
+
+export type usersgrpcDeleteUserSubscriptionResponse = unknown;
 
 export type usersgrpcFactorType = 'FACTOR_TYPE_UNSPECIFIED' | 'FACTOR_TYPE_EMAIL_PASSWORD' | 'FACTOR_TYPE_SMS_OTP' | 'FACTOR_TYPE_EMAIL_OTP';
 
@@ -199,8 +203,6 @@ export type usersgrpcSignupResponse = {
 };
 
 export type usersgrpcSubscribeResponse = {
-    paymentId?: string;
-    paymentRef?: string;
     userSubscription?: usersgrpcUserSubscription;
 };
 

@@ -290,11 +290,15 @@ message SubscribeRequest {
   PaymentMethod payment_method = 5;
 }
 
-message SubscribeResponse {
-  string payment_id = 1;
-  string payment_ref = 2;
-  UserSubscription user_subscription = 3;
-}
+message SubscribeResponse { UserSubscription user_subscription = 3; }
+
+message ActivateUserSubscriptionRequest { string user_subscription_id = 1; }
+
+message ActivateUserSubscriptionResponse {}
+
+message DeleteUserSubscriptionRequest { string user_subscription_id = 1; }
+
+message DeleteUserSubscriptionResponse {}
 
 // UserPaymentMethod
 message UserPaymentMethod {
@@ -487,6 +491,12 @@ service Users {
       body : "*"
     };
   }
+
+  rpc ActivateUserSubscription(ActivateUserSubscriptionRequest)
+      returns (ActivateUserSubscriptionResponse) {}
+
+  rpc DeleteUserSubscription(DeleteUserSubscriptionRequest)
+      returns (DeleteUserSubscriptionResponse) {}
 
   rpc GetUserSubscriptions(GetUserSubscriptionsRequest)
       returns (GetUserSubscriptionsResponse) {

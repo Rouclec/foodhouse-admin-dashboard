@@ -1110,16 +1110,6 @@ func (i *Impl) Subscribe(ctx context.Context,
 		return nil, status.Error(codes.Internal, fmt.Sprintf("error creating user subscription %v", err))
 	}
 
-	// // create a payment with the external ref as the
-	// createPaymentArgs := &sqlc.CreatePaymentParams{
-	// 	ExternalRef:     userSubscription.ID,
-	// 	Amount:          subscription.Amount,
-	// 	CurrencyIsoCode: req.GetCurrencyIsoCode(),
-	// 	Method:          req.GetPaymentMethod().GetMethod(),
-	// }
-
-	// payment, err := querier.CreatePayment(ctx, *createPaymentArgs)
-
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("error creating payment %v", err))
 	}
@@ -1130,8 +1120,6 @@ func (i *Impl) Subscribe(ctx context.Context,
 	}
 
 	return &usersgrpc.SubscribeResponse{
-		// PaymentId:  payment.ID,
-		// PaymentRef: payment.ExternalRef,
 		UserSubscription: &usersgrpc.UserSubscription{
 			Id:        userSubscription.ID,
 			Active:    userSubscription.Active,
@@ -1199,4 +1187,26 @@ func (i *Impl) GetUserSubscriptionByID(ctx context.Context,
 			ExpiresAt: timestamppb.New(userSubscription.ExpiresAt),
 		},
 	}, nil
+}
+
+// ActivateUserSubscription implements usersgrpc.UsersServer.
+func (i *Impl) ActivateUserSubscription(ctx context.Context, req *usersgrpc.ActivateUserSubscriptionRequest) (*usersgrpc.ActivateUserSubscriptionResponse, error) {
+	err := i.repo.Do().ActivateUserSubscription(ctx, req.GetUserSubscriptionId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error activating user subscription %v", err)
+	}
+
+	return &usersgrpc.ActivateUserSubscriptionResponse{}, nil
+}
+
+// DeleteUserSubscription implements usersgrpc.UsersServer.
+func (i *Impl) DeleteUserSubscription(ctx context.Context, req *usersgrpc.DeleteUserSubscriptionRequest) (*usersgrpc.DeleteUserSubscriptionResponse, error) {
+	err := i.repo.Do().DeleteUserSubscription(ctx, req.GetUserSubscriptionId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error deleting user subscription %v", err)
+	}
+
+	return &usersgrpc.DeleteUserSubscriptionResponse{}, nil
 }
