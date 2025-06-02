@@ -22,48 +22,48 @@ export const ordersHealthCheck = <ThrowOnError extends boolean = false>(options?
 export const ordersListFarmerOrders = <ThrowOnError extends boolean = false>(options: OptionsLegacyParser<OrdersListFarmerOrdersData, ThrowOnError>) => {
     return (options?.client ?? client).get<OrdersListFarmerOrdersResponse, OrdersListFarmerOrdersError, ThrowOnError>({
         ...options,
-        url: '/v1/{farmerId}/orders/list-farmer-orders'
+        url: '/v1/users/{farmerId}/orders/list-farmer-orders'
     });
 };
 
 export const ordersGetOrderDetails = <ThrowOnError extends boolean = false>(options: OptionsLegacyParser<OrdersGetOrderDetailsData, ThrowOnError>) => {
     return (options?.client ?? client).get<OrdersGetOrderDetailsResponse, OrdersGetOrderDetailsError, ThrowOnError>({
         ...options,
-        url: '/v1/{userId}/order/{orderNumber}/get-order-details'
+        url: '/v1/users/{userId}/order/{orderNumber}/get-order-details'
     });
 };
 
 export const ordersCreateOrder = <ThrowOnError extends boolean = false>(options: OptionsLegacyParser<OrdersCreateOrderData, ThrowOnError>) => {
     return (options?.client ?? client).post<OrdersCreateOrderResponse, OrdersCreateOrderError, ThrowOnError>({
         ...options,
-        url: '/v1/{userId}/orders/create-order'
+        url: '/v1/users/{userId}/orders/create-order'
     });
 };
 
 export const ordersInitiatePayment = <ThrowOnError extends boolean = false>(options: OptionsLegacyParser<OrdersInitiatePaymentData, ThrowOnError>) => {
     return (options?.client ?? client).post<OrdersInitiatePaymentResponse, OrdersInitiatePaymentError, ThrowOnError>({
         ...options,
-        url: '/v1/{userId}/orders/initiate-payment'
+        url: '/v1/users/{userId}/orders/initiate-payment'
     });
 };
 
 export const ordersListUserOrders = <ThrowOnError extends boolean = false>(options: OptionsLegacyParser<OrdersListUserOrdersData, ThrowOnError>) => {
     return (options?.client ?? client).get<OrdersListUserOrdersResponse, OrdersListUserOrdersError, ThrowOnError>({
         ...options,
-        url: '/v1/{userId}/orders/list-user-orders'
+        url: '/v1/users/{userId}/orders/list-user-orders'
     });
 };
 
 export const ordersDispatchOrder = <ThrowOnError extends boolean = false>(options: OptionsLegacyParser<OrdersDispatchOrderData, ThrowOnError>) => {
     return (options?.client ?? client).put<OrdersDispatchOrderResponse, OrdersDispatchOrderError, ThrowOnError>({
         ...options,
-        url: '/v1/{userId}/orders/{orderNumber}/dispatch-order'
+        url: '/v1/users/{userId}/orders/{orderNumber}/dispatch-order'
     });
 };
 
 export const ordersConfirmDelivery = <ThrowOnError extends boolean = false>(options: OptionsLegacyParser<OrdersConfirmDeliveryData, ThrowOnError>) => {
     return (options?.client ?? client).put<OrdersConfirmDeliveryResponse, OrdersConfirmDeliveryError, ThrowOnError>({
         ...options,
-        url: '/v1/{userId}/orders/{secretKey}/confirm-delivery'
+        url: '/v1/users/{userId}/orders/{secretKey}/confirm-delivery'
     });
 };
