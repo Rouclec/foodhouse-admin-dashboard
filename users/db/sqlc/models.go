@@ -10,17 +10,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type Payment struct {
-	ID              string             `json:"id"`
-	ExternalRef     string             `json:"external_ref"`
-	Amount          int64              `json:"amount"`
-	Status          string             `json:"status"`
-	CurrencyIsoCode string             `json:"currency_iso_code"`
-	Method          string             `json:"method"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
-}
-
 type RefreshToken struct {
 	Token     string             `json:"token"`
 	UserID    string             `json:"user_id"`
@@ -44,7 +33,7 @@ type Subscription struct {
 	Title           string          `json:"title"`
 	Description     string          `json:"description"`
 	Duration        pgtype.Interval `json:"duration"`
-	Amount          int64           `json:"amount"`
+	Amount          float64         `json:"amount"`
 	CurrencyIsoCode string          `json:"currency_iso_code"`
 }
 

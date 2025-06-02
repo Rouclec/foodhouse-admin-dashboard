@@ -13,15 +13,14 @@ type Querier interface {
 	CreateOrderAuditLog(ctx context.Context, arg CreateOrderAuditLogParams) error
 	CreatePayment(ctx context.Context, arg CreatePaymentParams) (Payment, error)
 	GetOrderByOrderNumber(ctx context.Context, orderNumber int64) (Order, error)
-	GetPaymentByExternalReference(ctx context.Context, externalRef string) (Payment, error)
+	GetPaymentById(ctx context.Context, id string) (Payment, error)
 	GetUserOrderBySecretKey(ctx context.Context, arg GetUserOrderBySecretKeyParams) (Order, error)
 	ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersParams) ([]Order, error)
 	ListOrderAuditLogs(ctx context.Context, orderNumber int64) ([]OrdersAudit, error)
 	ListUserOrders(ctx context.Context, arg ListUserOrdersParams) ([]Order, error)
 	ReviewOrder(ctx context.Context, arg ReviewOrderParams) error
 	UpdateOrderStatus(ctx context.Context, arg UpdateOrderStatusParams) error
-	UpdatePaymentStatusByExternalReference(ctx context.Context, arg UpdatePaymentStatusByExternalReferenceParams) error
-	UpdatePaymentStatusBySecretKey(ctx context.Context, arg UpdatePaymentStatusBySecretKeyParams) error
+	UpdatePaymentStatus(ctx context.Context, arg UpdatePaymentStatusParams) error
 }
 
 var _ Querier = (*Queries)(nil)

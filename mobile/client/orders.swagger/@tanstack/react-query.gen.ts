@@ -2,8 +2,8 @@
 
 import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
-import type { OrdersConfirmOrderPaymentData, OrdersListFarmerOrdersData, OrdersGetOrderDetailsData, OrdersCreateOrderData, OrdersCreateOrderError, OrdersCreateOrderResponse, OrdersListUserOrdersData, OrdersDispatchOrderData, OrdersDispatchOrderError, OrdersDispatchOrderResponse, OrdersConfirmDeliveryData, OrdersConfirmDeliveryError, OrdersConfirmDeliveryResponse } from '../types.gen';
-import { client, ordersConfirmOrderPayment, ordersHealthCheck, ordersListFarmerOrders, ordersGetOrderDetails, ordersCreateOrder, ordersListUserOrders, ordersDispatchOrder, ordersConfirmDelivery } from '../sdk.gen';
+import type { OrdersConfirmPaymentData, OrdersListFarmerOrdersData, OrdersGetOrderDetailsData, OrdersCreateOrderData, OrdersCreateOrderError, OrdersCreateOrderResponse, OrdersInitiatePaymentData, OrdersInitiatePaymentError, OrdersInitiatePaymentResponse, OrdersListUserOrdersData, OrdersDispatchOrderData, OrdersDispatchOrderError, OrdersDispatchOrderResponse, OrdersConfirmDeliveryData, OrdersConfirmDeliveryError, OrdersConfirmDeliveryResponse } from '../types.gen';
+import { client, ordersConfirmPayment, ordersHealthCheck, ordersListFarmerOrders, ordersGetOrderDetails, ordersCreateOrder, ordersInitiatePayment, ordersListUserOrders, ordersDispatchOrder, ordersConfirmDelivery } from '../sdk.gen';
 import type { AxiosError } from 'axios';
 
 type QueryKey<TOptions extends OptionsLegacyParser> = [
@@ -33,14 +33,14 @@ const createQueryKey = <TOptions extends OptionsLegacyParser>(id: string, option
     return params;
 };
 
-export const ordersConfirmOrderPaymentQueryKey = (options?: OptionsLegacyParser<OrdersConfirmOrderPaymentData>) => [
-    createQueryKey('ordersConfirmOrderPayment', options)
+export const ordersConfirmPaymentQueryKey = (options?: OptionsLegacyParser<OrdersConfirmPaymentData>) => [
+    createQueryKey('ordersConfirmPayment', options)
 ];
 
-export const ordersConfirmOrderPaymentOptions = (options?: OptionsLegacyParser<OrdersConfirmOrderPaymentData>) => {
+export const ordersConfirmPaymentOptions = (options?: OptionsLegacyParser<OrdersConfirmPaymentData>) => {
     return queryOptions({
         queryFn: async ({ queryKey, signal }) => {
-            const { data } = await ordersConfirmOrderPayment({
+            const { data } = await ordersConfirmPayment({
                 ...options,
                 ...queryKey[0],
                 signal,
@@ -48,7 +48,7 @@ export const ordersConfirmOrderPaymentOptions = (options?: OptionsLegacyParser<O
             });
             return data;
         },
-        queryKey: ordersConfirmOrderPaymentQueryKey(options)
+        queryKey: ordersConfirmPaymentQueryKey(options)
     });
 };
 
@@ -132,6 +132,39 @@ export const ordersCreateOrderMutation = (options?: Partial<OptionsLegacyParser<
     const mutationOptions: UseMutationOptions<OrdersCreateOrderResponse, AxiosError<OrdersCreateOrderError>, OptionsLegacyParser<OrdersCreateOrderData>> = {
         mutationFn: async (localOptions) => {
             const { data } = await ordersCreateOrder({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const ordersInitiatePaymentQueryKey = (options: OptionsLegacyParser<OrdersInitiatePaymentData>) => [
+    createQueryKey('ordersInitiatePayment', options)
+];
+
+export const ordersInitiatePaymentOptions = (options: OptionsLegacyParser<OrdersInitiatePaymentData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await ordersInitiatePayment({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: ordersInitiatePaymentQueryKey(options)
+    });
+};
+
+export const ordersInitiatePaymentMutation = (options?: Partial<OptionsLegacyParser<OrdersInitiatePaymentData>>) => {
+    const mutationOptions: UseMutationOptions<OrdersInitiatePaymentResponse, AxiosError<OrdersInitiatePaymentError>, OptionsLegacyParser<OrdersInitiatePaymentData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await ordersInitiatePayment({
                 ...options,
                 ...localOptions,
                 throwOnError: true

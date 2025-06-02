@@ -7,6 +7,7 @@ option go_package = "github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc";
 import "google/protobuf/timestamp.proto";
 import "google/api/annotations.proto";
 import "types/point.proto";
+import "types/amount.proto";
 
 enum UserRole {
   USER_ROLE_UNSPECIFIED = 0;
@@ -74,8 +75,7 @@ message Subscription {
   string title = 2;
   string description = 3;
   int64 duration = 4;
-  int64 amount = 5;
-  string currency_iso_code = 6;
+  types.Amount amount = 5;
 }
 
 message PaymentMethod {
@@ -257,7 +257,7 @@ message CreateSubscriptionRequest {
   string description = 3;
   // This is the number of days which the subscription is valid for
   int64 duration = 4;
-  int64 amount = 5;
+  double amount = 5;
   string currency_iso_code = 6;
 }
 
@@ -269,7 +269,7 @@ message UpdateSubscriptionRequest {
   string title = 3;
   string description = 4;
   int64 duration = 5;
-  int64 amount = 6;
+  double amount = 6;
   string currency_iso_code = 7;
 }
 
@@ -285,7 +285,7 @@ message DeleteSubscriptionResponse { string message = 1; }
 message SubscribeRequest {
   string user_id = 1;
   string subscription_id = 2;
-  int64 amount = 3;
+  double amount = 3;
   string currency_iso_code = 4;
   PaymentMethod payment_method = 5;
 }
@@ -326,6 +326,15 @@ message GetUserSubscriptionsRequest { string user_id = 1; }
 
 message GetUserSubscriptionsResponse {
   repeated UserSubscription user_subscriptions = 1;
+}
+
+message GetUserSubscriptionByIdRequest { 
+  string user_id = 1; 
+  string user_subscription_id = 2;
+}
+
+message GetUserSubscriptionByIdResponse {
+  UserSubscription user_subscription = 1;
 }
 
 message GetUserActiveSubscriptionRequest { string user_id = 1; }
@@ -450,7 +459,7 @@ service Users {
   rpc CreateSubscription(CreateSubscriptionRequest)
       returns (CreateSubscriptionResponse) {
     option (google.api.http) = {
-      post : "/v1/admin/{admin_user_id}/users/create-subscription"
+      post : "/v1/admin/{admin_user_id}/subscription/create-subscription"
       body : "*"
     };
   }
@@ -458,7 +467,7 @@ service Users {
   rpc UpdateSubscription(UpdateSubscriptionRequest)
       returns (UpdateSubscriptionResponse) {
     option (google.api.http) = {
-      put : "/v1/admin/{admin_user_id}/users/update-subscription/"
+      put : "/v1/admin/{admin_user_id}/subscription/update-subscription/"
             "{subscription_id}"
       body : "*"
     };
@@ -467,14 +476,14 @@ service Users {
   rpc DeleteSubscription(DeleteSubscriptionRequst)
       returns (DeleteSubscriptionResponse) {
     option (google.api.http) = {
-      delete : "/v1/admin/{admin_user_id}/users/delete-subscription/"
+      delete : "/v1/admin/{admin_user_id}/subscription/delete-subscription/"
                "{subscription_id}"
     };
   }
 
   rpc Subscribe(SubscribeRequest) returns (SubscribeResponse) {
     option (google.api.http) = {
-      post : "/v1/users/{user_id}/subscribe"
+      post : "/v1/users/{user_id}/subdcription/subscribe"
       body : "*"
     };
   }
@@ -482,14 +491,21 @@ service Users {
   rpc GetUserSubscriptions(GetUserSubscriptionsRequest)
       returns (GetUserSubscriptionsResponse) {
     option (google.api.http) = {
-      get : "/v1/users/{user_id}/users/get-user-subscriptions"
+      get : "/v1/users/{user_id}/subscription/get-user-subscriptions"
     };
   }
 
   rpc GetUserActiveSubscription(GetUserActiveSubscriptionRequest)
       returns (GetUserActiveSubscriptionResponse) {
     option (google.api.http) = {
-      get : "/v1/users/{user_id}/users/get-user-active-subscription"
+      get : "/v1/users/{user_id}/subscription/get-user-active-subscription"
+    };
+  }
+
+  rpc GetUserSubscriptionById(GetUserSubscriptionByIdRequest)
+      returns (GetUserSubscriptionByIdResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/subscription/{user_subscription_id}/get-user-subscription-by-id"
     };
   }
 

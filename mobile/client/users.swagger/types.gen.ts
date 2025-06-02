@@ -10,9 +10,15 @@ export type rpcStatus = {
     details?: Array<protobufAny>;
 };
 
+export type typesAmount = {
+    value?: number;
+    currencyIsoCode?: string;
+};
+
 export type typesPoint = {
     lon?: number;
     lat?: number;
+    address?: string;
 };
 
 export type UsersCompleteRegistrationBody = {
@@ -28,7 +34,7 @@ export type UsersCreateSubscriptionBody = {
     title?: string;
     description?: string;
     duration?: string;
-    amount?: string;
+    amount?: number;
     currencyIsoCode?: string;
 };
 
@@ -104,6 +110,10 @@ export type usersgrpcGetUserByIDResponse = {
 
 export type usersgrpcGetUserPaymentMethodsByUserIDResponse = {
     userPaymentMethods?: Array<usersgrpcUserPaymentMethod>;
+};
+
+export type usersgrpcGetUserSubscriptionByIdResponse = {
+    userSubscription?: usersgrpcUserSubscription;
 };
 
 export type usersgrpcGetUserSubscriptionsResponse = {
@@ -199,8 +209,7 @@ export type usersgrpcSubscription = {
     title?: string;
     description?: string;
     duration?: string;
-    amount?: string;
-    currencyIsoCode?: string;
+    amount?: typesAmount;
 };
 
 export type usersgrpcTokens = {
@@ -258,7 +267,7 @@ export type usersgrpcVerifyOtpResponse = {
 
 export type UsersSubscribeBody = {
     subscriptionId?: string;
-    amount?: string;
+    amount?: number;
     currencyIsoCode?: string;
     paymentMethod?: usersgrpcPaymentMethod;
 };
@@ -267,7 +276,7 @@ export type UsersUpdateSubscriptionBody = {
     title?: string;
     description?: string;
     duration?: string;
-    amount?: string;
+    amount?: number;
     currencyIsoCode?: string;
 };
 
@@ -292,6 +301,18 @@ export type UsersDeleteSubscriptionData = {
 export type UsersDeleteSubscriptionResponse = (usersgrpcDeleteSubscriptionResponse);
 
 export type UsersDeleteSubscriptionError = (rpcStatus);
+
+export type UsersUpdateSubscriptionData = {
+    body: UsersUpdateSubscriptionBody;
+    path: {
+        adminUserId: string;
+        subscriptionId: string;
+    };
+};
+
+export type UsersUpdateSubscriptionResponse = (usersgrpcUpdateSubscriptionResponse);
+
+export type UsersUpdateSubscriptionError = (rpcStatus);
 
 export type UsersGrantAdminData = {
     body: UsersGrantAdminBody;
@@ -327,18 +348,6 @@ export type UsersListUsersData = {
 export type UsersListUsersResponse = (usersgrpcListUsersResponse);
 
 export type UsersListUsersError = (rpcStatus);
-
-export type UsersUpdateSubscriptionData = {
-    body: UsersUpdateSubscriptionBody;
-    path: {
-        adminUserId: string;
-        subscriptionId: string;
-    };
-};
-
-export type UsersUpdateSubscriptionResponse = (usersgrpcUpdateSubscriptionResponse);
-
-export type UsersUpdateSubscriptionError = (rpcStatus);
 
 export type UsersRevokeRefreshTokenData = {
     body: usersgrpcRevokeRefreshTokenRequest;
@@ -485,6 +494,27 @@ export type UsersGetUserActiveSubscriptionResponse = (usersgrpcGetUserActiveSubs
 
 export type UsersGetUserActiveSubscriptionError = (rpcStatus);
 
+export type UsersGetUserSubscriptionsData = {
+    path: {
+        userId: string;
+    };
+};
+
+export type UsersGetUserSubscriptionsResponse = (usersgrpcGetUserSubscriptionsResponse);
+
+export type UsersGetUserSubscriptionsError = (rpcStatus);
+
+export type UsersGetUserSubscriptionByIdData = {
+    path: {
+        userId: string;
+        userSubscriptionId: string;
+    };
+};
+
+export type UsersGetUserSubscriptionByIdResponse = (usersgrpcGetUserSubscriptionByIdResponse);
+
+export type UsersGetUserSubscriptionByIdError = (rpcStatus);
+
 export type UsersGetUserPaymentMethodsByUserIdData = {
     path: {
         /**
@@ -497,16 +527,6 @@ export type UsersGetUserPaymentMethodsByUserIdData = {
 export type UsersGetUserPaymentMethodsByUserIdResponse = (usersgrpcGetUserPaymentMethodsByUserIDResponse);
 
 export type UsersGetUserPaymentMethodsByUserIdError = (rpcStatus);
-
-export type UsersGetUserSubscriptionsData = {
-    path: {
-        userId: string;
-    };
-};
-
-export type UsersGetUserSubscriptionsResponse = (usersgrpcGetUserSubscriptionsResponse);
-
-export type UsersGetUserSubscriptionsError = (rpcStatus);
 
 export type UsersGetFarmerByIdData = {
     path: {

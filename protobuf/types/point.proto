@@ -8,4 +8,5 @@ option go_package = "github.com/foodhouse/foodhouseapp/grpc/go/types";
 message Point {
   double lon = 1;
   double lat = 2;
+  string address = 3;
 }

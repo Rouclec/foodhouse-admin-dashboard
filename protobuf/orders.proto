@@ -16,6 +16,7 @@ enum OrderStatus {
   OrderStatus_PAYMENT_FAILED = 3;
   OrderStatus_IN_TRANSIT = 4;
   OrderStatus_DELIVERED = 5;
+  OrderStatus_APPROVED = 6;
 }
 
 enum PaymentStatus {
@@ -53,8 +54,9 @@ message OrderAuditLog {
 
 message CreateOrderRequest {
   string user_id = 1;
-  Order order = 2;
-  string phone_number = 3;
+  string product_id = 2;
+  int64 quantity = 3;
+  types.Point delivery_location = 4;
 }
 
 message CreateOrderResponse { Order order = 1; }
@@ -69,7 +71,49 @@ message GetOrderDetailsResponse {
   repeated OrderAuditLog audit_log = 2;
 }
 
-message ConfirmOrderPaymentRequest {
+enum PaymentEntity {
+  PaymentEntity_UNSPECIFIED = 0;
+  PaymentEntity_ORDER = 1;
+  PaymentEntity_SUBSCRIPTION = 2;
+}
+
+enum PaymentMethodType {
+  PaymentMethodType_UNSPECIFIED = 0;
+  PaymentMethodType_MOBILE_MONEY = 1;
+  PaymentMethodType_ORANGE_MONEY = 2;
+  PaymentMethodType_CREDIT_CARD = 3;
+}
+
+message Account {
+  PaymentMethodType payment_method = 1;
+  string account_number = 2;
+}
+
+message Payment {
+  string id = 1;
+  PaymentEntity payment_entity = 2;
+  string entity_id = 3;
+  types.Amount amount = 4;
+  string created_by = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp expires_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+  PaymentStatus status = 9;
+  Account account = 10;
+}
+
+message InitiatePaymentRequest {
+
+  PaymentEntity payment_entity = 1;
+  string entity_id = 2;
+  string user_id = 3;
+  types.Amount amount = 4;
+  Account account = 5;
+}
+
+message InitiatePaymentResponse { Payment payment = 1; }
+
+message ConfirmPaymentRequest {
   string status = 1; // "SUCCESSFUL" or "FAILED",
 
   string reference = 2; // "Reference of the transaction. A valid UUID4",
@@ -97,7 +141,8 @@ message ConfirmOrderPaymentRequest {
 
   string phone_number = 11; // The phone number that initiated the transaction
 }
-message ConfirmOrderPaymentResponse {}
+
+message ConfirmPaymentResponse {}
 
 message DispatchOrderRequest {
   int64 order_number = 1;
@@ -154,10 +199,10 @@ service Orders {
     };
   }
 
-  rpc ConfirmOrderPayment(ConfirmOrderPaymentRequest)
-      returns (ConfirmOrderPaymentResponse) {
+  rpc ConfirmPayment(ConfirmPaymentRequest)
+      returns (ConfirmPaymentResponse) {
     option (google.api.http) = {
-      get : "/v1/public/confirm-order-payment"
+      get : "/v1/public/confirm-payment"
     };
   }
 
@@ -192,6 +237,14 @@ service Orders {
       returns (ListFarmerOrdersResponse) {
     option (google.api.http) = {
       get : "/v1/{farmer_id}/orders/list-farmer-orders"
+    };
+  }
+
+  rpc InitiatePayment(InitiatePaymentRequest)
+      returns (InitiatePaymentResponse) {
+    option (google.api.http) = {
+      post : "/v1/{user_id}/orders/initiate-payment"
+      body : "*"
     };
   }
 }

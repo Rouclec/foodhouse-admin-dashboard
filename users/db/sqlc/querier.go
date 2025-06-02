@@ -12,7 +12,6 @@ type Querier interface {
 	ActivateUserSubscription(ctx context.Context, id string) error
 	CountSentOtpsToFactorToday(ctx context.Context, factor string) (int64, error)
 	CountUsers(ctx context.Context, arg CountUsersParams) (int64, error)
-	CreatePayment(ctx context.Context, arg CreatePaymentParams) (Payment, error)
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) error
 	CreateSentOtp(ctx context.Context, arg CreateSentOtpParams) (SentOtp, error)
 	CreateSubscription(ctx context.Context, arg CreateSubscriptionParams) (Subscription, error)
@@ -25,9 +24,6 @@ type Querier interface {
 	GetAllUserSubscriptions(ctx context.Context) ([]UserSubscription, error)
 	GetFarmer(ctx context.Context, id string) (User, error)
 	GetLatestSentOtpByFactor(ctx context.Context, arg GetLatestSentOtpByFactorParams) ([]SentOtp, error)
-	GetPaymentByExternalReference(ctx context.Context, externalRef string) (Payment, error)
-	GetPaymentById(ctx context.Context, id string) (Payment, error)
-	GetPaymentForUpdate(ctx context.Context, id string) (Payment, error)
 	GetRefreshToken(ctx context.Context, token string) (RefreshToken, error)
 	GetSentOtpByRequestId(ctx context.Context, requestID string) (SentOtp, error)
 	GetSubscriptionByID(ctx context.Context, id string) (Subscription, error)
@@ -40,7 +36,6 @@ type Querier interface {
 	GetUserPaymentMethodsByUserID(ctx context.Context, userID string) ([]UserPaymentMethod, error)
 	GetUserSubscriptionByID(ctx context.Context, id string) (UserSubscription, error)
 	RevokeRefreshToken(ctx context.Context, token string) error
-	UpdatePaymentStatus(ctx context.Context, arg UpdatePaymentStatusParams) error
 	UpdateSentOtp(ctx context.Context, arg UpdateSentOtpParams) error
 	UpdateSubscription(ctx context.Context, arg UpdateSubscriptionParams) (Subscription, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)

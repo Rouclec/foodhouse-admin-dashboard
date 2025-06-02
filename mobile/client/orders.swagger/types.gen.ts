@@ -3,15 +3,21 @@
 export type OrdersConfirmDeliveryBody = unknown;
 
 export type OrdersCreateOrderBody = {
-    order?: ordersgrpcOrder;
-    phoneNumber?: string;
+    productId?: string;
+    quantity?: string;
+    deliveryLocation?: typesPoint;
 };
 
 export type OrdersDispatchOrderBody = unknown;
 
+export type ordersgrpcAccount = {
+    paymentMethod?: ordersgrpcPaymentMethodType;
+    accountNumber?: string;
+};
+
 export type ordersgrpcConfirmDeliveryResponse = unknown;
 
-export type ordersgrpcConfirmOrderPaymentResponse = unknown;
+export type ordersgrpcConfirmPaymentResponse = unknown;
 
 export type ordersgrpcCreateOrderResponse = {
     order?: ordersgrpcOrder;
@@ -25,6 +31,10 @@ export type ordersgrpcGetOrderDetailsResponse = {
 };
 
 export type ordersgrpcHealthCheckResponse = unknown;
+
+export type ordersgrpcInitiatePaymentResponse = {
+    payment?: ordersgrpcPayment;
+};
 
 export type ordersgrpcListFarmerOrdersResponse = {
     orders?: Array<ordersgrpcOrder>;
@@ -61,7 +71,33 @@ export type ordersgrpcOrderAuditLog = {
     after?: ordersgrpcOrder;
 };
 
-export type ordersgrpcOrderStatus = 'OrderStatus_UNSPECIFIED' | 'OrderStatus_CREATED' | 'OrderStatus_PAYMENT_SUCCESSFUL' | 'OrderStatus_PAYMENT_FAILED' | 'OrderStatus_IN_TRANSIT' | 'OrderStatus_DELIVERED';
+export type ordersgrpcOrderStatus = 'OrderStatus_UNSPECIFIED' | 'OrderStatus_CREATED' | 'OrderStatus_PAYMENT_SUCCESSFUL' | 'OrderStatus_PAYMENT_FAILED' | 'OrderStatus_IN_TRANSIT' | 'OrderStatus_DELIVERED' | 'OrderStatus_APPROVED';
+
+export type ordersgrpcPayment = {
+    id?: string;
+    paymentEntity?: ordersgrpcPaymentEntity;
+    entityId?: string;
+    amount?: typesAmount;
+    createdBy?: string;
+    createdAt?: string;
+    expiresAt?: string;
+    updatedAt?: string;
+    status?: ordersgrpcPaymentStatus;
+    account?: ordersgrpcAccount;
+};
+
+export type ordersgrpcPaymentEntity = 'PaymentEntity_UNSPECIFIED' | 'PaymentEntity_ORDER' | 'PaymentEntity_SUBSCRIPTION';
+
+export type ordersgrpcPaymentMethodType = 'PaymentMethodType_UNSPECIFIED' | 'PaymentMethodType_MOBILE_MONEY' | 'PaymentMethodType_ORANGE_MONEY' | 'PaymentMethodType_CREDIT_CARD';
+
+export type ordersgrpcPaymentStatus = 'PaymentStatus_UNSPECIFIED' | 'PaymentStatus_INITIATED' | 'PaymentStatus_COMPLETED' | 'PaymentStatus_FAILED' | 'PaymentStatus_CANCELED';
+
+export type OrdersInitiatePaymentBody = {
+    paymentEntity?: ordersgrpcPaymentEntity;
+    entityId?: string;
+    amount?: typesAmount;
+    account?: ordersgrpcAccount;
+};
 
 export type protobufAny = {
     [key: string]: unknown;
@@ -74,16 +110,17 @@ export type rpcStatus = {
 };
 
 export type typesAmount = {
-    value?: string;
+    value?: number;
     currencyIsoCode?: string;
 };
 
 export type typesPoint = {
     lon?: number;
     lat?: number;
+    address?: string;
 };
 
-export type OrdersConfirmOrderPaymentData = {
+export type OrdersConfirmPaymentData = {
     query?: {
         /**
          * "Transaction amount",
@@ -132,9 +169,9 @@ export type OrdersConfirmOrderPaymentData = {
     };
 };
 
-export type OrdersConfirmOrderPaymentResponse = (ordersgrpcConfirmOrderPaymentResponse);
+export type OrdersConfirmPaymentResponse = (ordersgrpcConfirmPaymentResponse);
 
-export type OrdersConfirmOrderPaymentError = (rpcStatus);
+export type OrdersConfirmPaymentError = (rpcStatus);
 
 export type OrdersHealthCheckResponse = (ordersgrpcHealthCheckResponse);
 
@@ -175,6 +212,17 @@ export type OrdersCreateOrderData = {
 export type OrdersCreateOrderResponse = (ordersgrpcCreateOrderResponse);
 
 export type OrdersCreateOrderError = (rpcStatus);
+
+export type OrdersInitiatePaymentData = {
+    body: OrdersInitiatePaymentBody;
+    path: {
+        userId: string;
+    };
+};
+
+export type OrdersInitiatePaymentResponse = (ordersgrpcInitiatePaymentResponse);
+
+export type OrdersInitiatePaymentError = (rpcStatus);
 
 export type OrdersListUserOrdersData = {
     path: {

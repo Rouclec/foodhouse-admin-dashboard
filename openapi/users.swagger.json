@@ -16,7 +16,7 @@
     "application/json"
   ],
   "paths": {
-    "/v1/admin/{adminUserId}/users/create-subscription": {
+    "/v1/admin/{adminUserId}/subscription/create-subscription": {
       "post": {
         "operationId": "Users_CreateSubscription",
         "responses": {
@@ -54,7 +54,7 @@
         ]
       }
     },
-    "/v1/admin/{adminUserId}/users/delete-subscription/{subscriptionId}": {
+    "/v1/admin/{adminUserId}/subscription/delete-subscription/{subscriptionId}": {
       "delete": {
         "operationId": "Users_DeleteSubscription",
         "responses": {
@@ -83,6 +83,50 @@
             "in": "path",
             "required": true,
             "type": "string"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/admin/{adminUserId}/subscription/update-subscription/{subscriptionId}": {
+      "put": {
+        "operationId": "Users_UpdateSubscription",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcUpdateSubscriptionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "subscriptionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UsersUpdateSubscriptionBody"
+            }
           }
         ],
         "tags": [
@@ -173,50 +217,6 @@
             "in": "query",
             "required": false,
             "type": "string"
-          }
-        ],
-        "tags": [
-          "Users"
-        ]
-      }
-    },
-    "/v1/admin/{adminUserId}/users/update-subscription/{subscriptionId}": {
-      "put": {
-        "operationId": "Users_UpdateSubscription",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/usersgrpcUpdateSubscriptionResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "adminUserId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "subscriptionId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/UsersUpdateSubscriptionBody"
-            }
           }
         ],
         "tags": [
@@ -670,7 +670,7 @@
         ]
       }
     },
-    "/v1/users/{userId}/subscribe": {
+    "/v1/users/{userId}/subdcription/subscribe": {
       "post": {
         "operationId": "Users_Subscribe",
         "responses": {
@@ -708,7 +708,7 @@
         ]
       }
     },
-    "/v1/users/{userId}/users/get-user-active-subscription": {
+    "/v1/users/{userId}/subscription/get-user-active-subscription": {
       "get": {
         "operationId": "Users_GetUserActiveSubscription",
         "responses": {
@@ -728,6 +728,72 @@
         "parameters": [
           {
             "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/users/{userId}/subscription/get-user-subscriptions": {
+      "get": {
+        "operationId": "Users_GetUserSubscriptions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcGetUserSubscriptionsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/users/{userId}/subscription/{userSubscriptionId}/get-user-subscription-by-id": {
+      "get": {
+        "operationId": "Users_GetUserSubscriptionById",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcGetUserSubscriptionByIdResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "userSubscriptionId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -759,36 +825,6 @@
           {
             "name": "userId",
             "description": "UUID as string",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Users"
-        ]
-      }
-    },
-    "/v1/users/{userId}/users/get-user-subscriptions": {
-      "get": {
-        "operationId": "Users_GetUserSubscriptions",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/usersgrpcGetUserSubscriptionsResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "userId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -878,8 +914,8 @@
           "title": "This is the number of days which the subscription is valid for"
         },
         "amount": {
-          "type": "string",
-          "format": "int64"
+          "type": "number",
+          "format": "double"
         },
         "currencyIsoCode": {
           "type": "string"
@@ -904,8 +940,8 @@
           "type": "string"
         },
         "amount": {
-          "type": "string",
-          "format": "int64"
+          "type": "number",
+          "format": "double"
         },
         "currencyIsoCode": {
           "type": "string"
@@ -929,8 +965,8 @@
           "format": "int64"
         },
         "amount": {
-          "type": "string",
-          "format": "int64"
+          "type": "number",
+          "format": "double"
         },
         "currencyIsoCode": {
           "type": "string"
@@ -965,6 +1001,18 @@
         }
       }
     },
+    "typesAmount": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number",
+          "format": "double"
+        },
+        "currencyIsoCode": {
+          "type": "string"
+        }
+      }
+    },
     "typesPoint": {
       "type": "object",
       "properties": {
@@ -975,6 +1023,9 @@
         "lat": {
           "type": "number",
           "format": "double"
+        },
+        "address": {
+          "type": "string"
         }
       }
     },
@@ -1145,6 +1196,14 @@
             "type": "object",
             "$ref": "#/definitions/usersgrpcUserPaymentMethod"
           }
+        }
+      }
+    },
+    "usersgrpcGetUserSubscriptionByIdResponse": {
+      "type": "object",
+      "properties": {
+        "userSubscription": {
+          "$ref": "#/definitions/usersgrpcUserSubscription"
         }
       }
     },
@@ -1374,11 +1433,7 @@
           "format": "int64"
         },
         "amount": {
-          "type": "string",
-          "format": "int64"
-        },
-        "currencyIsoCode": {
-          "type": "string"
+          "$ref": "#/definitions/typesAmount"
         }
       }
     },

@@ -26,14 +26,14 @@ func NewCampayProvider(campayUsername string, campayPassword string, campayBaseU
 	}, nil
 }
 
-func (cp *CampayProvider) RequestPayment(ctx context.Context, from string, amount int64, currency string, description string, externalReference *string) (*string, error) {
+func (cp *CampayProvider) RequestPayment(ctx context.Context, from string, amount float64, currency string, description string, externalReference *string) (*string, error) {
 	campayClient, err := campay.NewPaymentClient(cp.CampayUserName, cp.CampayPassword, cp.CampayBaseUrl)
 
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf(`One of these is not valid: %s--%s--%s`, cp.CampayUserName, cp.CampayPassword, cp.CampayBaseUrl))
 	}
 
-	amountStr := strconv.FormatInt(amount, 10)
+	amountStr := strconv.FormatFloat(amount, 'f', 2, 64)
 
 	campayPaymentRequirement := campay.CampayPaymentsRequest{
 		Amount:      amountStr,
@@ -51,14 +51,14 @@ func (cp *CampayProvider) RequestPayment(ctx context.Context, from string, amoun
 	return &response.Reference, nil
 }
 
-func (cp *CampayProvider) WithdrawFunds(ctx context.Context, to string, amount int64, currency string, description string, externalReference *string) (*string, error) {
+func (cp *CampayProvider) WithdrawFunds(ctx context.Context, to string, amount float64, currency string, description string, externalReference *string) (*string, error) {
 	campayClient, err := campay.NewPaymentClient(cp.CampayUserName, cp.CampayPassword, cp.CampayBaseUrl)
 
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf(`One of these is not valid: %s--%s--%s`, cp.CampayUserName, cp.CampayPassword, cp.CampayBaseUrl))
 	}
 
-	amountStr := strconv.FormatInt(amount, 10)
+	amountStr := strconv.FormatFloat(amount, 'f', 2, 64)
 
 	campayPaymentRequirement := campay.WithdrawalRequest{
 		Amount:      amountStr,

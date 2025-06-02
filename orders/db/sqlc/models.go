@@ -11,7 +11,7 @@ import (
 type Order struct {
 	OrderNumber       int64              `json:"order_number"`
 	DeliveryLocation  pgtype.Point       `json:"delivery_location"`
-	PriceValue        *int64             `json:"price_value"`
+	PriceValue        *float64           `json:"price_value"`
 	PriceCurrency     *string            `json:"price_currency"`
 	Status            string             `json:"status"`
 	Rating            pgtype.Numeric     `json:"rating"`
@@ -23,6 +23,8 @@ type Order struct {
 	SecretKey         *string            `json:"secret_key"`
 	ProductOwner      *string            `json:"product_owner"`
 	PayoutPhoneNumber *string            `json:"payout_phone_number"`
+	DeliveryAddress   string             `json:"delivery_address"`
+	Quantity          *int64             `json:"quantity"`
 }
 
 type OrdersAudit struct {
@@ -37,11 +39,16 @@ type OrdersAudit struct {
 }
 
 type Payment struct {
-	ID             string  `json:"id"`
-	OrderNumber    int64   `json:"order_number"`
-	PriceValue     *int64  `json:"price_value"`
-	PriceCurrency  *string `json:"price_currency"`
-	Status         string  `json:"status"`
-	ExternalRef    string  `json:"external_ref"`
-	OrderSecretKey *string `json:"order_secret_key"`
+	ID             string             `json:"id"`
+	Status         string             `json:"status"`
+	PaymentEntity  string             `json:"payment_entity"`
+	EntityID       string             `json:"entity_id"`
+	AmountValue    *float64           `json:"amount_value"`
+	AmountCurrency *string            `json:"amount_currency"`
+	CreatedBy      string             `json:"created_by"`
+	ExpiresAt      pgtype.Timestamptz `json:"expires_at"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+	Method         string             `json:"method"`
+	AccountNumber  string             `json:"account_number"`
 }
