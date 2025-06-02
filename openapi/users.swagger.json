@@ -770,12 +770,12 @@
     },
     "/v1/users/{userId}/subscription/{userSubscriptionId}/get-user-subscription-by-id": {
       "get": {
-        "operationId": "Users_GetUserSubscriptionById",
+        "operationId": "Users_GetUserSubscriptionByID",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/usersgrpcGetUserSubscriptionByIdResponse"
+              "$ref": "#/definitions/usersgrpcGetUserSubscriptionByIDResponse"
             }
           },
           "default": {
@@ -1199,7 +1199,7 @@
         }
       }
     },
-    "usersgrpcGetUserSubscriptionByIdResponse": {
+    "usersgrpcGetUserSubscriptionByIDResponse": {
       "type": "object",
       "properties": {
         "userSubscription": {

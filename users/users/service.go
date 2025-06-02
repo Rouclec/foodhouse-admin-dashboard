@@ -1176,33 +1176,23 @@ func (i *Impl) GetFarmerByID(
 	}, nil
 }
 
-// GetUserSubscriptionById implements usersgrpc.UsersServer.
-func (i *Impl) GetUserSubscriptionById(ctx context.Context, req *usersgrpc.GetUserSubscriptionByIdRequest) (*usersgrpc.GetUserSubscriptionByIdResponse, error) {
+// GetUserSubscriptionByID implements usersgrpc.UsersServer.
+func (i *Impl) GetUserSubscriptionByID(ctx context.Context,
+	req *usersgrpc.GetUserSubscriptionByIDRequest) (
+	*usersgrpc.GetUserSubscriptionByIDResponse, error) {
 	userSubscription, err := i.repo.Do().GetUserSubscriptionByID(ctx, req.GetUserSubscriptionId())
 
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Error getting user active subscription : %v", err)
+		return nil, status.Errorf(codes.Internal, "Error getting user subscription by id : %v", err)
 	}
 
-	subscription, err := i.repo.Do().GetSubscriptionByID(ctx, userSubscription.SubscriptionID)
-
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Error fetching subscription : %v", err)
-	}
-
-	return &usersgrpc.GetUserSubscriptionByIdResponse{
+	return &usersgrpc.GetUserSubscriptionByIDResponse{
 		UserSubscription: &usersgrpc.UserSubscription{
 			Id:     userSubscription.ID,
 			UserId: userSubscription.UserID,
 			Active: userSubscription.Active,
 			Subscription: &usersgrpc.Subscription{
-				Id:          subscription.ID,
-				Title:       subscription.Title,
-				Description: subscription.Description,
-				Amount: &types.Amount{
-					Value:           subscription.Amount,
-					CurrencyIsoCode: subscription.CurrencyIsoCode,
-				},
+				Id: userSubscription.SubscriptionID,
 			},
 			CreatedAt: timestamppb.New(userSubscription.CreatedAt.Time),
 			UpdatedAt: timestamppb.New(userSubscription.UpdatedAt.Time),

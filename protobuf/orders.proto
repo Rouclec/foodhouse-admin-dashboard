@@ -199,8 +199,7 @@ service Orders {
     };
   }
 
-  rpc ConfirmPayment(ConfirmPaymentRequest)
-      returns (ConfirmPaymentResponse) {
+  rpc ConfirmPayment(ConfirmPaymentRequest) returns (ConfirmPaymentResponse) {
     option (google.api.http) = {
       get : "/v1/public/confirm-payment"
     };

@@ -328,12 +328,12 @@ message GetUserSubscriptionsResponse {
   repeated UserSubscription user_subscriptions = 1;
 }
 
-message GetUserSubscriptionByIdRequest { 
-  string user_id = 1; 
+message GetUserSubscriptionByIDRequest {
+  string user_id = 1;
   string user_subscription_id = 2;
 }
 
-message GetUserSubscriptionByIdResponse {
+message GetUserSubscriptionByIDResponse {
   UserSubscription user_subscription = 1;
 }
 
@@ -502,10 +502,11 @@ service Users {
     };
   }
 
-  rpc GetUserSubscriptionById(GetUserSubscriptionByIdRequest)
-      returns (GetUserSubscriptionByIdResponse) {
+  rpc GetUserSubscriptionByID(GetUserSubscriptionByIDRequest)
+      returns (GetUserSubscriptionByIDResponse) {
     option (google.api.http) = {
-      get : "/v1/users/{user_id}/subscription/{user_subscription_id}/get-user-subscription-by-id"
+      get : "/v1/users/{user_id}/subscription/{user_subscription_id}/"
+            "get-user-subscription-by-id"
     };
   }
 

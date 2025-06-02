@@ -112,7 +112,7 @@ export type usersgrpcGetUserPaymentMethodsByUserIDResponse = {
     userPaymentMethods?: Array<usersgrpcUserPaymentMethod>;
 };
 
-export type usersgrpcGetUserSubscriptionByIdResponse = {
+export type usersgrpcGetUserSubscriptionByIDResponse = {
     userSubscription?: usersgrpcUserSubscription;
 };
 
@@ -511,7 +511,7 @@ export type UsersGetUserSubscriptionByIdData = {
     };
 };
 
-export type UsersGetUserSubscriptionByIdResponse = (usersgrpcGetUserSubscriptionByIdResponse);
+export type UsersGetUserSubscriptionByIdResponse = (usersgrpcGetUserSubscriptionByIDResponse);
 
 export type UsersGetUserSubscriptionByIdError = (rpcStatus);
 
