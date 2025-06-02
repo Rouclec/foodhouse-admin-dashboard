@@ -41,6 +41,21 @@ func (m *MockQuerier) EXPECT() *MockQuerierMockRecorder {
 	return m.recorder
 }
 
+// CreateDeliveryPoint mocks base method.
+func (m *MockQuerier) CreateDeliveryPoint(ctx context.Context, arg sqlc.CreateDeliveryPointParams) (sqlc.DeliveryPoint, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateDeliveryPoint", ctx, arg)
+	ret0, _ := ret[0].(sqlc.DeliveryPoint)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateDeliveryPoint indicates an expected call of CreateDeliveryPoint.
+func (mr *MockQuerierMockRecorder) CreateDeliveryPoint(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateDeliveryPoint", reflect.TypeOf((*MockQuerier)(nil).CreateDeliveryPoint), ctx, arg)
+}
+
 // CreateOrder mocks base method.
 func (m *MockQuerier) CreateOrder(ctx context.Context, arg sqlc.CreateOrderParams) (sqlc.Order, error) {
 	m.ctrl.T.Helper()
@@ -128,6 +143,21 @@ func (m *MockQuerier) GetUserOrderBySecretKey(ctx context.Context, arg sqlc.GetU
 func (mr *MockQuerierMockRecorder) GetUserOrderBySecretKey(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserOrderBySecretKey", reflect.TypeOf((*MockQuerier)(nil).GetUserOrderBySecretKey), ctx, arg)
+}
+
+// ListDeliveryPoints mocks base method.
+func (m *MockQuerier) ListDeliveryPoints(ctx context.Context, arg sqlc.ListDeliveryPointsParams) ([]sqlc.DeliveryPoint, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListDeliveryPoints", ctx, arg)
+	ret0, _ := ret[0].([]sqlc.DeliveryPoint)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListDeliveryPoints indicates an expected call of ListDeliveryPoints.
+func (mr *MockQuerierMockRecorder) ListDeliveryPoints(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListDeliveryPoints", reflect.TypeOf((*MockQuerier)(nil).ListDeliveryPoints), ctx, arg)
 }
 
 // ListFarmerOrders mocks base method.

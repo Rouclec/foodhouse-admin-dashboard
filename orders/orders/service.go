@@ -744,6 +744,139 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 }
 
 // ApproveOrder implements ordersgrpc.OrdersServer.
-func (i *Impl) ApproveOrder(context.Context, *ordersgrpc.ApproveOrderRequest) (*ordersgrpc.ApproveOrderResponse, error) {
-	panic("unimplemented")
+func (i *Impl) ApproveOrder(ctx context.Context, req *ordersgrpc.ApproveOrderRequest) (*ordersgrpc.ApproveOrderResponse, error) {
+
+	orderNumber, err := strconv.ParseInt(req.GetOrderId(), 10, 64)
+
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid order number %s", req.GetOrderId())
+	}
+
+	order, err := i.repo.Do().GetOrderByOrderNumber(ctx, orderNumber)
+
+	if err != nil {
+		i.logger.Debug().Msgf("error getting order with id %s why: %v", req.GetOrderId(), err)
+		return nil, status.Errorf(codes.Internal, "error getting order with id %s why: %v", req.GetOrderId(), err)
+	}
+
+	beforeBytes, err := protojson.Marshal(converters.SqlcOrderToProto(order))
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
+	}
+
+	err = i.repo.Do().UpdateOrderStatus(ctx, sqlc.UpdateOrderStatusParams{
+		OrderNumber: order.OrderNumber,
+		Status:      ordersgrpc.OrderStatus_OrderStatus_APPROVED.String(),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error updating order status %v", err)
+	}
+
+	updatedOrder, err := i.repo.Do().GetOrderByOrderNumber(ctx, order.OrderNumber)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting updated order %v", err)
+	}
+
+	afterBytes, err := protojson.Marshal(converters.SqlcOrderToProto(updatedOrder))
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
+	}
+
+	err = i.repo.Do().CreateOrderAuditLog(ctx, sqlc.CreateOrderAuditLogParams{
+		OrderNumber:    order.OrderNumber,
+		EventTimestamp: pgtype.Timestamptz{Time: time.Now(), Valid: true},
+		Actor:          req.GetUserId(),
+		Action:         "ApproveOrder",
+		Reason:         "Farmer has approved this order, and they are processing it",
+		Before:         beforeBytes,
+		After:          afterBytes,
+	})
+
+	if err != nil {
+		i.logger.Debug().Msgf("Error creating order logs %v", err)
+		return nil, status.Errorf(codes.Internal, "error creating order logs %v", err)
+	}
+
+	return &ordersgrpc.ApproveOrderResponse{}, nil
+}
+
+// CreateDeliveryPoint implements ordersgrpc.OrdersServer.
+func (i *Impl) CreateDeliveryPoint(ctx context.Context, req *ordersgrpc.CreateDeliveryPointRequest) (*ordersgrpc.CreateDeliveryPointResponse, error) {
+	deliveryPoint, err := i.repo.Do().CreateDeliveryPoint(ctx, sqlc.CreateDeliveryPointParams{
+		DeliveryLocation: pgtype.Point{P: pgtype.Vec2{X: float64(req.GetAddress().GetLon()),
+			Y: float64(req.GetAddress().GetLat())},
+			Valid: true},
+		LocationName:      req.GetAddress().GetAddress(),
+		DeliveryPointName: req.GetDeliveryPointName(),
+		City:              req.GetCity(),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error creating delivery point %v", err)
+	}
+
+	return &ordersgrpc.CreateDeliveryPointResponse{
+		DeliveryPoint: &ordersgrpc.DeliveryPoint{
+			Id: deliveryPoint.ID,
+			Address: &types.Point{
+				Address: deliveryPoint.LocationName,
+				Lon:     deliveryPoint.DeliveryLocation.P.X,
+				Lat:     deliveryPoint.DeliveryLocation.P.Y,
+			},
+			City:              deliveryPoint.City,
+			DeliveryPointName: deliveryPoint.DeliveryPointName,
+			CreatedAt:         timestamppb.New(deliveryPoint.CreatedAt.Time),
+		},
+	}, nil
+}
+
+// ListDeliveryPoints implements ordersgrpc.OrdersServer.
+func (i *Impl) ListDeliveryPoints(ctx context.Context, req *ordersgrpc.ListDeliveryPointsRequest) (*ordersgrpc.ListDeliveryPointsResponse, error) {
+	var err error
+	startKey := time.Now().Add(time.Hour)
+
+	count := int(req.GetCount())
+
+	if count == 0 {
+		count = 10
+	}
+
+	if req.GetStartKey() != "" {
+		startKey, err = time.Parse(time.RFC3339, req.GetStartKey())
+		if err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "Invalid start key")
+		}
+	}
+
+	args := sqlc.ListDeliveryPointsParams{
+		City:          req.GetCity(),
+		CreatedBefore: startKey,
+		Count:         int32(count),
+	}
+
+	deliveryPoints, err := i.repo.Do().ListDeliveryPoints(ctx, args)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "errror fetching products %v", err)
+	}
+
+	protoDeliveryPoints, err := converters.SqlcToProtoDeliveryPoints(deliveryPoints)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error converting sqlc to proto delivery points %v", err)
+	}
+
+	nextKey := ""
+
+	if len(protoDeliveryPoints) >= count {
+		nextKey = protoDeliveryPoints[len(protoDeliveryPoints)-1].GetCreatedAt().AsTime().Format(time.RFC3339)
+	}
+
+	return &ordersgrpc.ListDeliveryPointsResponse{
+		DeliveryPoints: protoDeliveryPoints,
+		NextKey:        nextKey,
+	}, nil
 }

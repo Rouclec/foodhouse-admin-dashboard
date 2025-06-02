@@ -19,16 +19,18 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Orders_CreateOrder_FullMethodName      = "/ordersgrpc.Orders/CreateOrder"
-	Orders_GetOrderDetails_FullMethodName  = "/ordersgrpc.Orders/GetOrderDetails"
-	Orders_ConfirmPayment_FullMethodName   = "/ordersgrpc.Orders/ConfirmPayment"
-	Orders_DispatchOrder_FullMethodName    = "/ordersgrpc.Orders/DispatchOrder"
-	Orders_ConfirmDelivery_FullMethodName  = "/ordersgrpc.Orders/ConfirmDelivery"
-	Orders_ApproveOrder_FullMethodName     = "/ordersgrpc.Orders/ApproveOrder"
-	Orders_HealthCheck_FullMethodName      = "/ordersgrpc.Orders/HealthCheck"
-	Orders_ListUserOrders_FullMethodName   = "/ordersgrpc.Orders/ListUserOrders"
-	Orders_ListFarmerOrders_FullMethodName = "/ordersgrpc.Orders/ListFarmerOrders"
-	Orders_InitiatePayment_FullMethodName  = "/ordersgrpc.Orders/InitiatePayment"
+	Orders_CreateOrder_FullMethodName         = "/ordersgrpc.Orders/CreateOrder"
+	Orders_GetOrderDetails_FullMethodName     = "/ordersgrpc.Orders/GetOrderDetails"
+	Orders_ConfirmPayment_FullMethodName      = "/ordersgrpc.Orders/ConfirmPayment"
+	Orders_DispatchOrder_FullMethodName       = "/ordersgrpc.Orders/DispatchOrder"
+	Orders_ConfirmDelivery_FullMethodName     = "/ordersgrpc.Orders/ConfirmDelivery"
+	Orders_ApproveOrder_FullMethodName        = "/ordersgrpc.Orders/ApproveOrder"
+	Orders_HealthCheck_FullMethodName         = "/ordersgrpc.Orders/HealthCheck"
+	Orders_ListUserOrders_FullMethodName      = "/ordersgrpc.Orders/ListUserOrders"
+	Orders_ListFarmerOrders_FullMethodName    = "/ordersgrpc.Orders/ListFarmerOrders"
+	Orders_InitiatePayment_FullMethodName     = "/ordersgrpc.Orders/InitiatePayment"
+	Orders_CreateDeliveryPoint_FullMethodName = "/ordersgrpc.Orders/CreateDeliveryPoint"
+	Orders_ListDeliveryPoints_FullMethodName  = "/ordersgrpc.Orders/ListDeliveryPoints"
 )
 
 // OrdersClient is the client API for Orders service.
@@ -45,6 +47,8 @@ type OrdersClient interface {
 	ListUserOrders(ctx context.Context, in *ListUserOrdersRequest, opts ...grpc.CallOption) (*ListUserOrdersResponse, error)
 	ListFarmerOrders(ctx context.Context, in *ListFarmerOrdersRequest, opts ...grpc.CallOption) (*ListFarmerOrdersResponse, error)
 	InitiatePayment(ctx context.Context, in *InitiatePaymentRequest, opts ...grpc.CallOption) (*InitiatePaymentResponse, error)
+	CreateDeliveryPoint(ctx context.Context, in *CreateDeliveryPointRequest, opts ...grpc.CallOption) (*CreateDeliveryPointResponse, error)
+	ListDeliveryPoints(ctx context.Context, in *ListDeliveryPointsRequest, opts ...grpc.CallOption) (*ListDeliveryPointsResponse, error)
 }
 
 type ordersClient struct {
@@ -155,6 +159,26 @@ func (c *ordersClient) InitiatePayment(ctx context.Context, in *InitiatePaymentR
 	return out, nil
 }
 
+func (c *ordersClient) CreateDeliveryPoint(ctx context.Context, in *CreateDeliveryPointRequest, opts ...grpc.CallOption) (*CreateDeliveryPointResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateDeliveryPointResponse)
+	err := c.cc.Invoke(ctx, Orders_CreateDeliveryPoint_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ordersClient) ListDeliveryPoints(ctx context.Context, in *ListDeliveryPointsRequest, opts ...grpc.CallOption) (*ListDeliveryPointsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDeliveryPointsResponse)
+	err := c.cc.Invoke(ctx, Orders_ListDeliveryPoints_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrdersServer is the server API for Orders service.
 // All implementations must embed UnimplementedOrdersServer
 // for forward compatibility.
@@ -169,6 +193,8 @@ type OrdersServer interface {
 	ListUserOrders(context.Context, *ListUserOrdersRequest) (*ListUserOrdersResponse, error)
 	ListFarmerOrders(context.Context, *ListFarmerOrdersRequest) (*ListFarmerOrdersResponse, error)
 	InitiatePayment(context.Context, *InitiatePaymentRequest) (*InitiatePaymentResponse, error)
+	CreateDeliveryPoint(context.Context, *CreateDeliveryPointRequest) (*CreateDeliveryPointResponse, error)
+	ListDeliveryPoints(context.Context, *ListDeliveryPointsRequest) (*ListDeliveryPointsResponse, error)
 	mustEmbedUnimplementedOrdersServer()
 }
 
@@ -208,6 +234,12 @@ func (UnimplementedOrdersServer) ListFarmerOrders(context.Context, *ListFarmerOr
 }
 func (UnimplementedOrdersServer) InitiatePayment(context.Context, *InitiatePaymentRequest) (*InitiatePaymentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InitiatePayment not implemented")
+}
+func (UnimplementedOrdersServer) CreateDeliveryPoint(context.Context, *CreateDeliveryPointRequest) (*CreateDeliveryPointResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateDeliveryPoint not implemented")
+}
+func (UnimplementedOrdersServer) ListDeliveryPoints(context.Context, *ListDeliveryPointsRequest) (*ListDeliveryPointsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListDeliveryPoints not implemented")
 }
 func (UnimplementedOrdersServer) mustEmbedUnimplementedOrdersServer() {}
 func (UnimplementedOrdersServer) testEmbeddedByValue()                {}
@@ -410,6 +442,42 @@ func _Orders_InitiatePayment_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Orders_CreateDeliveryPoint_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateDeliveryPointRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).CreateDeliveryPoint(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_CreateDeliveryPoint_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).CreateDeliveryPoint(ctx, req.(*CreateDeliveryPointRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orders_ListDeliveryPoints_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDeliveryPointsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).ListDeliveryPoints(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_ListDeliveryPoints_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).ListDeliveryPoints(ctx, req.(*ListDeliveryPointsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Orders_ServiceDesc is the grpc.ServiceDesc for Orders service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -456,6 +524,14 @@ var Orders_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "InitiatePayment",
 			Handler:    _Orders_InitiatePayment_Handler,
+		},
+		{
+			MethodName: "CreateDeliveryPoint",
+			Handler:    _Orders_CreateDeliveryPoint_Handler,
+		},
+		{
+			MethodName: "ListDeliveryPoints",
+			Handler:    _Orders_ListDeliveryPoints_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
