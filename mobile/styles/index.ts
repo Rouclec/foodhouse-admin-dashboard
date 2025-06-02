@@ -30,6 +30,7 @@ import { verifyOtpStyles } from "./(auth)/verify-otpstyles";
 import { styles } from "./(auth)/(subsciption-flow)/index.style";
 import { filterBottomSheetStyles } from "./components/(buyer)/(index)/FilterBottomSheet.styles";
 import { productDetailsStyles } from "./(buyer)/product-details.styles";
+import { checkoutStyles } from "./(buyer)/(order)/index.styles";
 
 export {
   buyerIndexStyles,
@@ -56,4 +57,6 @@ export {
   productStyles,
   styles,
   filterBottomSheetStyles,
+  productDetailsStyles,
+  checkoutStyles,
 };

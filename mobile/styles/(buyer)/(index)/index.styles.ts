@@ -4,7 +4,7 @@ import { Dimensions, StyleSheet } from "react-native";
 const { width, height } = Dimensions.get("window");
 export const buyerProductsStyles = StyleSheet.create({
   bgWhite: {
-    backgroundColor: Colors.light[10],
+    backgroundColor: Colors.light['bg'],
   },
   appHeader: {
     backgroundColor: Colors.primary[500],
