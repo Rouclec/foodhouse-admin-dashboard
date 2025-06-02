@@ -139,7 +139,7 @@
         ]
       }
     },
-    "/v1/{farmerId}/orders/list-farmer-orders": {
+    "/v1/users/{farmerId}/orders/list-farmer-orders": {
       "get": {
         "operationId": "Orders_ListFarmerOrders",
         "responses": {
@@ -182,7 +182,7 @@
         ]
       }
     },
-    "/v1/{userId}/order/{orderNumber}/get-order-details": {
+    "/v1/users/{userId}/order/{orderNumber}/get-order-details": {
       "get": {
         "operationId": "Orders_GetOrderDetails",
         "responses": {
@@ -219,7 +219,7 @@
         ]
       }
     },
-    "/v1/{userId}/orders/create-order": {
+    "/v1/users/{userId}/orders/create-order": {
       "post": {
         "operationId": "Orders_CreateOrder",
         "responses": {
@@ -257,7 +257,7 @@
         ]
       }
     },
-    "/v1/{userId}/orders/initiate-payment": {
+    "/v1/users/{userId}/orders/initiate-payment": {
       "post": {
         "operationId": "Orders_InitiatePayment",
         "responses": {
@@ -295,7 +295,7 @@
         ]
       }
     },
-    "/v1/{userId}/orders/list-user-orders": {
+    "/v1/users/{userId}/orders/list-user-orders": {
       "get": {
         "operationId": "Orders_ListUserOrders",
         "responses": {
@@ -338,7 +338,7 @@
         ]
       }
     },
-    "/v1/{userId}/orders/{orderNumber}/dispatch-order": {
+    "/v1/users/{userId}/orders/{orderNumber}/dispatch-order": {
       "put": {
         "operationId": "Orders_DispatchOrder",
         "responses": {
@@ -383,7 +383,7 @@
         ]
       }
     },
-    "/v1/{userId}/orders/{secretKey}/confirm-delivery": {
+    "/v1/users/{userId}/orders/{secretKey}/confirm-delivery": {
       "put": {
         "operationId": "Orders_ConfirmDelivery",
         "responses": {

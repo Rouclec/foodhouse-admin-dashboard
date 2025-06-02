@@ -592,7 +592,7 @@ func RegisterOrdersHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/ordersgrpc.Orders/CreateOrder", runtime.WithHTTPPathPattern("/v1/{user_id}/orders/create-order"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/ordersgrpc.Orders/CreateOrder", runtime.WithHTTPPathPattern("/v1/users/{user_id}/orders/create-order"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -617,7 +617,7 @@ func RegisterOrdersHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/ordersgrpc.Orders/GetOrderDetails", runtime.WithHTTPPathPattern("/v1/{user_id}/order/{order_number}/get-order-details"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/ordersgrpc.Orders/GetOrderDetails", runtime.WithHTTPPathPattern("/v1/users/{user_id}/order/{order_number}/get-order-details"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -667,7 +667,7 @@ func RegisterOrdersHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/ordersgrpc.Orders/DispatchOrder", runtime.WithHTTPPathPattern("/v1/{user_id}/orders/{order_number}/dispatch-order"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/ordersgrpc.Orders/DispatchOrder", runtime.WithHTTPPathPattern("/v1/users/{user_id}/orders/{order_number}/dispatch-order"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -692,7 +692,7 @@ func RegisterOrdersHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/ordersgrpc.Orders/ConfirmDelivery", runtime.WithHTTPPathPattern("/v1/{user_id}/orders/{secret_key}/confirm-delivery"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/ordersgrpc.Orders/ConfirmDelivery", runtime.WithHTTPPathPattern("/v1/users/{user_id}/orders/{secret_key}/confirm-delivery"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -742,7 +742,7 @@ func RegisterOrdersHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/ordersgrpc.Orders/ListUserOrders", runtime.WithHTTPPathPattern("/v1/{user_id}/orders/list-user-orders"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/ordersgrpc.Orders/ListUserOrders", runtime.WithHTTPPathPattern("/v1/users/{user_id}/orders/list-user-orders"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -767,7 +767,7 @@ func RegisterOrdersHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/ordersgrpc.Orders/ListFarmerOrders", runtime.WithHTTPPathPattern("/v1/{farmer_id}/orders/list-farmer-orders"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/ordersgrpc.Orders/ListFarmerOrders", runtime.WithHTTPPathPattern("/v1/users/{farmer_id}/orders/list-farmer-orders"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -792,7 +792,7 @@ func RegisterOrdersHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/ordersgrpc.Orders/InitiatePayment", runtime.WithHTTPPathPattern("/v1/{user_id}/orders/initiate-payment"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/ordersgrpc.Orders/InitiatePayment", runtime.WithHTTPPathPattern("/v1/users/{user_id}/orders/initiate-payment"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -856,7 +856,7 @@ func RegisterOrdersHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/ordersgrpc.Orders/CreateOrder", runtime.WithHTTPPathPattern("/v1/{user_id}/orders/create-order"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/ordersgrpc.Orders/CreateOrder", runtime.WithHTTPPathPattern("/v1/users/{user_id}/orders/create-order"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -878,7 +878,7 @@ func RegisterOrdersHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/ordersgrpc.Orders/GetOrderDetails", runtime.WithHTTPPathPattern("/v1/{user_id}/order/{order_number}/get-order-details"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/ordersgrpc.Orders/GetOrderDetails", runtime.WithHTTPPathPattern("/v1/users/{user_id}/order/{order_number}/get-order-details"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -922,7 +922,7 @@ func RegisterOrdersHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/ordersgrpc.Orders/DispatchOrder", runtime.WithHTTPPathPattern("/v1/{user_id}/orders/{order_number}/dispatch-order"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/ordersgrpc.Orders/DispatchOrder", runtime.WithHTTPPathPattern("/v1/users/{user_id}/orders/{order_number}/dispatch-order"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -944,7 +944,7 @@ func RegisterOrdersHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/ordersgrpc.Orders/ConfirmDelivery", runtime.WithHTTPPathPattern("/v1/{user_id}/orders/{secret_key}/confirm-delivery"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/ordersgrpc.Orders/ConfirmDelivery", runtime.WithHTTPPathPattern("/v1/users/{user_id}/orders/{secret_key}/confirm-delivery"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -988,7 +988,7 @@ func RegisterOrdersHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/ordersgrpc.Orders/ListUserOrders", runtime.WithHTTPPathPattern("/v1/{user_id}/orders/list-user-orders"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/ordersgrpc.Orders/ListUserOrders", runtime.WithHTTPPathPattern("/v1/users/{user_id}/orders/list-user-orders"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1010,7 +1010,7 @@ func RegisterOrdersHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/ordersgrpc.Orders/ListFarmerOrders", runtime.WithHTTPPathPattern("/v1/{farmer_id}/orders/list-farmer-orders"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/ordersgrpc.Orders/ListFarmerOrders", runtime.WithHTTPPathPattern("/v1/users/{farmer_id}/orders/list-farmer-orders"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1032,7 +1032,7 @@ func RegisterOrdersHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/ordersgrpc.Orders/InitiatePayment", runtime.WithHTTPPathPattern("/v1/{user_id}/orders/initiate-payment"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/ordersgrpc.Orders/InitiatePayment", runtime.WithHTTPPathPattern("/v1/users/{user_id}/orders/initiate-payment"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1052,23 +1052,23 @@ func RegisterOrdersHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 }
 
 var (
-	pattern_Orders_CreateOrder_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 2, 3}, []string{"v1", "user_id", "orders", "create-order"}, ""))
+	pattern_Orders_CreateOrder_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4}, []string{"v1", "users", "user_id", "orders", "create-order"}, ""))
 
-	pattern_Orders_GetOrderDetails_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"v1", "user_id", "order", "order_number", "get-order-details"}, ""))
+	pattern_Orders_GetOrderDetails_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"v1", "users", "user_id", "order", "order_number", "get-order-details"}, ""))
 
 	pattern_Orders_ConfirmPayment_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "public", "confirm-payment"}, ""))
 
-	pattern_Orders_DispatchOrder_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"v1", "user_id", "orders", "order_number", "dispatch-order"}, ""))
+	pattern_Orders_DispatchOrder_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"v1", "users", "user_id", "orders", "order_number", "dispatch-order"}, ""))
 
-	pattern_Orders_ConfirmDelivery_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"v1", "user_id", "orders", "secret_key", "confirm-delivery"}, ""))
+	pattern_Orders_ConfirmDelivery_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"v1", "users", "user_id", "orders", "secret_key", "confirm-delivery"}, ""))
 
 	pattern_Orders_HealthCheck_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"v1", "public", "orders", "health-check"}, ""))
 
-	pattern_Orders_ListUserOrders_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 2, 3}, []string{"v1", "user_id", "orders", "list-user-orders"}, ""))
+	pattern_Orders_ListUserOrders_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4}, []string{"v1", "users", "user_id", "orders", "list-user-orders"}, ""))
 
-	pattern_Orders_ListFarmerOrders_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 2, 3}, []string{"v1", "farmer_id", "orders", "list-farmer-orders"}, ""))
+	pattern_Orders_ListFarmerOrders_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4}, []string{"v1", "users", "farmer_id", "orders", "list-farmer-orders"}, ""))
 
-	pattern_Orders_InitiatePayment_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1, 2, 2, 2, 3}, []string{"v1", "user_id", "orders", "initiate-payment"}, ""))
+	pattern_Orders_InitiatePayment_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4}, []string{"v1", "users", "user_id", "orders", "initiate-payment"}, ""))
 )
 
 var (
