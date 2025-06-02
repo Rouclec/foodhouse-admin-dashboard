@@ -287,7 +287,7 @@ export default function Login() {
                 <Text style={loginstyles.registerText}>
                   {i18n.t("(auth).login.dontHaveAnAccount")}{" "}
                 </Text>
-                <TouchableOpacity onPress={() => router.replace("/(auth)/(subsciption-flow)")}>
+                <TouchableOpacity onPress={() => router.replace("/(auth)/register")}>
                   <Text style={loginstyles.registerLink}>
                     {i18n.t("(auth).login.registerNow")}
                   </Text>
