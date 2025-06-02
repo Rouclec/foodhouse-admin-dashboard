@@ -15,7 +15,6 @@ message Category {
   string created_by = 8;
 }
 
-
 message Product {
   string id = 1;
   Category category = 2;

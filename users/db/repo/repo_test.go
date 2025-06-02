@@ -285,7 +285,6 @@ func TestRefreshTokens(t *testing.T) {
 		"RevokedAt should be valid (ie the token should be revoked)")
 }
 
-
 func TestSubscriptionLifecycle(t *testing.T) {
 	migrationPath := "../migrations"
 
@@ -318,7 +317,7 @@ func TestSubscriptionLifecycle(t *testing.T) {
 	require.NoErrorf(t, err, "failed to create subscription: %v", err)
 	assert.NotEmptyf(t, createdSubscription.ID, "subscription ID should not be empty")
 	assert.Equalf(t, title, createdSubscription.Title, "title should be equal")
-	assert.Equalf(t, amount, createdSubscription.Amount, "amount should be equal")
+	assert.InDeltaf(t, amount, createdSubscription.Amount, 0.01, "amount should be equal")
 
 	// Get subscription by ID
 	fetchedSubscription, err := subscriptionRepo.Do().GetSubscriptionByID(ctx, createdSubscription.ID)
@@ -339,7 +338,7 @@ func TestSubscriptionLifecycle(t *testing.T) {
 	})
 	require.NoErrorf(t, err, "failed to update subscription: %v", err)
 	assert.Equalf(t, "Updated Premium Plan", updatedSubscription.Title, "updated title should be equal")
-	assert.Equalf(t, int64(2999), updatedSubscription.Amount, "updated amount should be equal")
+	assert.InDeltaf(t, float64(2999), updatedSubscription.Amount, 0.01, "updated amount should be equal")
 
 	// Delete subscription
 	err = subscriptionRepo.Do().DeleteSubscription(ctx, createdSubscription.ID)

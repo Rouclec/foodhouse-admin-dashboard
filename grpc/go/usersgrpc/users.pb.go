@@ -3272,7 +3272,7 @@ func (x *GetUserSubscriptionsResponse) GetUserSubscriptions() []*UserSubscriptio
 	return nil
 }
 
-type GetUserSubscriptionByIdRequest struct {
+type GetUserSubscriptionByIDRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -3281,20 +3281,20 @@ type GetUserSubscriptionByIdRequest struct {
 	UserSubscriptionId string `protobuf:"bytes,2,opt,name=user_subscription_id,json=userSubscriptionId,proto3" json:"user_subscription_id,omitempty"`
 }
 
-func (x *GetUserSubscriptionByIdRequest) Reset() {
-	*x = GetUserSubscriptionByIdRequest{}
+func (x *GetUserSubscriptionByIDRequest) Reset() {
+	*x = GetUserSubscriptionByIDRequest{}
 	mi := &file_users_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetUserSubscriptionByIdRequest) String() string {
+func (x *GetUserSubscriptionByIDRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetUserSubscriptionByIdRequest) ProtoMessage() {}
+func (*GetUserSubscriptionByIDRequest) ProtoMessage() {}
 
-func (x *GetUserSubscriptionByIdRequest) ProtoReflect() protoreflect.Message {
+func (x *GetUserSubscriptionByIDRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_users_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3306,26 +3306,26 @@ func (x *GetUserSubscriptionByIdRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetUserSubscriptionByIdRequest.ProtoReflect.Descriptor instead.
-func (*GetUserSubscriptionByIdRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetUserSubscriptionByIDRequest.ProtoReflect.Descriptor instead.
+func (*GetUserSubscriptionByIDRequest) Descriptor() ([]byte, []int) {
 	return file_users_proto_rawDescGZIP(), []int{54}
 }
 
-func (x *GetUserSubscriptionByIdRequest) GetUserId() string {
+func (x *GetUserSubscriptionByIDRequest) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
 	return ""
 }
 
-func (x *GetUserSubscriptionByIdRequest) GetUserSubscriptionId() string {
+func (x *GetUserSubscriptionByIDRequest) GetUserSubscriptionId() string {
 	if x != nil {
 		return x.UserSubscriptionId
 	}
 	return ""
 }
 
-type GetUserSubscriptionByIdResponse struct {
+type GetUserSubscriptionByIDResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -3333,20 +3333,20 @@ type GetUserSubscriptionByIdResponse struct {
 	UserSubscription *UserSubscription `protobuf:"bytes,1,opt,name=user_subscription,json=userSubscription,proto3" json:"user_subscription,omitempty"`
 }
 
-func (x *GetUserSubscriptionByIdResponse) Reset() {
-	*x = GetUserSubscriptionByIdResponse{}
+func (x *GetUserSubscriptionByIDResponse) Reset() {
+	*x = GetUserSubscriptionByIDResponse{}
 	mi := &file_users_proto_msgTypes[55]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetUserSubscriptionByIdResponse) String() string {
+func (x *GetUserSubscriptionByIDResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetUserSubscriptionByIdResponse) ProtoMessage() {}
+func (*GetUserSubscriptionByIDResponse) ProtoMessage() {}
 
-func (x *GetUserSubscriptionByIdResponse) ProtoReflect() protoreflect.Message {
+func (x *GetUserSubscriptionByIDResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_users_proto_msgTypes[55]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3358,12 +3358,12 @@ func (x *GetUserSubscriptionByIdResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetUserSubscriptionByIdResponse.ProtoReflect.Descriptor instead.
-func (*GetUserSubscriptionByIdResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetUserSubscriptionByIDResponse.ProtoReflect.Descriptor instead.
+func (*GetUserSubscriptionByIDResponse) Descriptor() ([]byte, []int) {
 	return file_users_proto_rawDescGZIP(), []int{55}
 }
 
-func (x *GetUserSubscriptionByIdResponse) GetUserSubscription() *UserSubscription {
+func (x *GetUserSubscriptionByIDResponse) GetUserSubscription() *UserSubscription {
 	if x != nil {
 		return x.UserSubscription
 	}
@@ -3850,14 +3850,14 @@ var file_users_proto_rawDesc = []byte{
 	0x62, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x11, 0x75, 0x73, 0x65, 0x72,
 	0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x22, 0x6b, 0x0a,
 	0x1e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x70,
-	0x74, 0x69, 0x6f, 0x6e, 0x42, 0x79, 0x49, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x74, 0x69, 0x6f, 0x6e, 0x42, 0x79, 0x49, 0x44, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
 	0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
 	0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x30, 0x0a, 0x14, 0x75, 0x73, 0x65, 0x72,
 	0x5f, 0x73, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64,
 	0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x12, 0x75, 0x73, 0x65, 0x72, 0x53, 0x75, 0x62, 0x73,
 	0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x22, 0x6b, 0x0a, 0x1f, 0x47, 0x65,
 	0x74, 0x55, 0x73, 0x65, 0x72, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f,
-	0x6e, 0x42, 0x79, 0x49, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x48, 0x0a,
+	0x6e, 0x42, 0x79, 0x49, 0x44, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x48, 0x0a,
 	0x11, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x73, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69,
 	0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1b, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x73,
 	0x67, 0x72, 0x70, 0x63, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69,
@@ -4097,12 +4097,12 @@ var file_users_proto_rawDesc = []byte{
 	0x2d, 0x75, 0x73, 0x65, 0x72, 0x2d, 0x61, 0x63, 0x74, 0x69, 0x76, 0x65, 0x2d, 0x73, 0x75, 0x62,
 	0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0xcd, 0x01, 0x0a, 0x17, 0x47, 0x65,
 	0x74, 0x55, 0x73, 0x65, 0x72, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f,
-	0x6e, 0x42, 0x79, 0x49, 0x64, 0x12, 0x29, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x73, 0x67, 0x72, 0x70,
+	0x6e, 0x42, 0x79, 0x49, 0x44, 0x12, 0x29, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x73, 0x67, 0x72, 0x70,
 	0x63, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69,
-	0x70, 0x74, 0x69, 0x6f, 0x6e, 0x42, 0x79, 0x49, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x70, 0x74, 0x69, 0x6f, 0x6e, 0x42, 0x79, 0x49, 0x44, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
 	0x1a, 0x2a, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x73, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x47, 0x65, 0x74,
 	0x55, 0x73, 0x65, 0x72, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e,
-	0x42, 0x79, 0x49, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x5b, 0x82, 0xd3,
+	0x42, 0x79, 0x49, 0x44, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x5b, 0x82, 0xd3,
 	0xe4, 0x93, 0x02, 0x55, 0x12, 0x53, 0x2f, 0x76, 0x31, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x73, 0x2f,
 	0x7b, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x7d, 0x2f, 0x73, 0x75, 0x62, 0x73, 0x63, 0x72,
 	0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x2f, 0x7b, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x73, 0x75, 0x62,
@@ -4213,8 +4213,8 @@ var file_users_proto_goTypes = []any{
 	(*GetUserPaymentMethodsByUserIDResponse)(nil), // 55: usersgrpc.GetUserPaymentMethodsByUserIDResponse
 	(*GetUserSubscriptionsRequest)(nil),           // 56: usersgrpc.GetUserSubscriptionsRequest
 	(*GetUserSubscriptionsResponse)(nil),          // 57: usersgrpc.GetUserSubscriptionsResponse
-	(*GetUserSubscriptionByIdRequest)(nil),        // 58: usersgrpc.GetUserSubscriptionByIdRequest
-	(*GetUserSubscriptionByIdResponse)(nil),       // 59: usersgrpc.GetUserSubscriptionByIdResponse
+	(*GetUserSubscriptionByIDRequest)(nil),        // 58: usersgrpc.GetUserSubscriptionByIDRequest
+	(*GetUserSubscriptionByIDResponse)(nil),       // 59: usersgrpc.GetUserSubscriptionByIDResponse
 	(*GetUserActiveSubscriptionRequest)(nil),      // 60: usersgrpc.GetUserActiveSubscriptionRequest
 	(*GetUserActiveSubscriptionResponse)(nil),     // 61: usersgrpc.GetUserActiveSubscriptionResponse
 	(*types.Point)(nil),                           // 62: types.Point
@@ -4256,7 +4256,7 @@ var file_users_proto_depIdxs = []int32{
 	63, // 31: usersgrpc.UserPaymentMethod.created_at:type_name -> google.protobuf.Timestamp
 	51, // 32: usersgrpc.GetUserPaymentMethodsByUserIDResponse.user_payment_methods:type_name -> usersgrpc.UserPaymentMethod
 	10, // 33: usersgrpc.GetUserSubscriptionsResponse.user_subscriptions:type_name -> usersgrpc.UserSubscription
-	10, // 34: usersgrpc.GetUserSubscriptionByIdResponse.user_subscription:type_name -> usersgrpc.UserSubscription
+	10, // 34: usersgrpc.GetUserSubscriptionByIDResponse.user_subscription:type_name -> usersgrpc.UserSubscription
 	10, // 35: usersgrpc.GetUserActiveSubscriptionResponse.user_subscription:type_name -> usersgrpc.UserSubscription
 	17, // 36: usersgrpc.Users.SendSignupSmsOtp:input_type -> usersgrpc.SendSignupSmsOtpRequest
 	21, // 37: usersgrpc.Users.Signup:input_type -> usersgrpc.SignupRequest
@@ -4280,7 +4280,7 @@ var file_users_proto_depIdxs = []int32{
 	49, // 55: usersgrpc.Users.Subscribe:input_type -> usersgrpc.SubscribeRequest
 	56, // 56: usersgrpc.Users.GetUserSubscriptions:input_type -> usersgrpc.GetUserSubscriptionsRequest
 	60, // 57: usersgrpc.Users.GetUserActiveSubscription:input_type -> usersgrpc.GetUserActiveSubscriptionRequest
-	58, // 58: usersgrpc.Users.GetUserSubscriptionById:input_type -> usersgrpc.GetUserSubscriptionByIdRequest
+	58, // 58: usersgrpc.Users.GetUserSubscriptionByID:input_type -> usersgrpc.GetUserSubscriptionByIDRequest
 	54, // 59: usersgrpc.Users.GetUserPaymentMethodsByUserID:input_type -> usersgrpc.GetUserPaymentMethodsByUserIDRequest
 	52, // 60: usersgrpc.Users.DeleteUserPaymentMethod:input_type -> usersgrpc.DeleteUserPaymentMethodRequest
 	18, // 61: usersgrpc.Users.SendSignupSmsOtp:output_type -> usersgrpc.SendSignUpSmsOtpResponse
@@ -4305,7 +4305,7 @@ var file_users_proto_depIdxs = []int32{
 	50, // 80: usersgrpc.Users.Subscribe:output_type -> usersgrpc.SubscribeResponse
 	57, // 81: usersgrpc.Users.GetUserSubscriptions:output_type -> usersgrpc.GetUserSubscriptionsResponse
 	61, // 82: usersgrpc.Users.GetUserActiveSubscription:output_type -> usersgrpc.GetUserActiveSubscriptionResponse
-	59, // 83: usersgrpc.Users.GetUserSubscriptionById:output_type -> usersgrpc.GetUserSubscriptionByIdResponse
+	59, // 83: usersgrpc.Users.GetUserSubscriptionByID:output_type -> usersgrpc.GetUserSubscriptionByIDResponse
 	55, // 84: usersgrpc.Users.GetUserPaymentMethodsByUserID:output_type -> usersgrpc.GetUserPaymentMethodsByUserIDResponse
 	53, // 85: usersgrpc.Users.DeleteUserPaymentMethod:output_type -> usersgrpc.DeleteUserPaymentMethodResponse
 	61, // [61:86] is the sub-list for method output_type
