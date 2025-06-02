@@ -639,7 +639,7 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 		return nil, status.Errorf(codes.InvalidArgument, "invalid phone number: %v", err)
 	}
 
-	i.logger.Debug().Msgf("Formated number %v", formattedNumber)
+	i.logger.Debug().Msgf("Formated number log %v", formattedNumber)
 
 	_, err = i.paymentService.RequestPayment(ctx, formattedNumber, *payment.AmountValue, *payment.AmountCurrency, fmt.Sprintf("payment for entity: %s  with id: %s", req.GetPaymentEntity(), req.GetEntityId()), &payment.ID)
 
