@@ -31,6 +31,7 @@ const (
 	Orders_InitiatePayment_FullMethodName     = "/ordersgrpc.Orders/InitiatePayment"
 	Orders_CreateDeliveryPoint_FullMethodName = "/ordersgrpc.Orders/CreateDeliveryPoint"
 	Orders_ListDeliveryPoints_FullMethodName  = "/ordersgrpc.Orders/ListDeliveryPoints"
+	Orders_ListDeliveryCities_FullMethodName  = "/ordersgrpc.Orders/ListDeliveryCities"
 )
 
 // OrdersClient is the client API for Orders service.
@@ -49,6 +50,7 @@ type OrdersClient interface {
 	InitiatePayment(ctx context.Context, in *InitiatePaymentRequest, opts ...grpc.CallOption) (*InitiatePaymentResponse, error)
 	CreateDeliveryPoint(ctx context.Context, in *CreateDeliveryPointRequest, opts ...grpc.CallOption) (*CreateDeliveryPointResponse, error)
 	ListDeliveryPoints(ctx context.Context, in *ListDeliveryPointsRequest, opts ...grpc.CallOption) (*ListDeliveryPointsResponse, error)
+	ListDeliveryCities(ctx context.Context, in *ListDeliveryCitiesRequest, opts ...grpc.CallOption) (*ListDeliveryCitiesResponse, error)
 }
 
 type ordersClient struct {
@@ -179,6 +181,16 @@ func (c *ordersClient) ListDeliveryPoints(ctx context.Context, in *ListDeliveryP
 	return out, nil
 }
 
+func (c *ordersClient) ListDeliveryCities(ctx context.Context, in *ListDeliveryCitiesRequest, opts ...grpc.CallOption) (*ListDeliveryCitiesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDeliveryCitiesResponse)
+	err := c.cc.Invoke(ctx, Orders_ListDeliveryCities_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrdersServer is the server API for Orders service.
 // All implementations must embed UnimplementedOrdersServer
 // for forward compatibility.
@@ -195,6 +207,7 @@ type OrdersServer interface {
 	InitiatePayment(context.Context, *InitiatePaymentRequest) (*InitiatePaymentResponse, error)
 	CreateDeliveryPoint(context.Context, *CreateDeliveryPointRequest) (*CreateDeliveryPointResponse, error)
 	ListDeliveryPoints(context.Context, *ListDeliveryPointsRequest) (*ListDeliveryPointsResponse, error)
+	ListDeliveryCities(context.Context, *ListDeliveryCitiesRequest) (*ListDeliveryCitiesResponse, error)
 	mustEmbedUnimplementedOrdersServer()
 }
 
@@ -240,6 +253,9 @@ func (UnimplementedOrdersServer) CreateDeliveryPoint(context.Context, *CreateDel
 }
 func (UnimplementedOrdersServer) ListDeliveryPoints(context.Context, *ListDeliveryPointsRequest) (*ListDeliveryPointsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListDeliveryPoints not implemented")
+}
+func (UnimplementedOrdersServer) ListDeliveryCities(context.Context, *ListDeliveryCitiesRequest) (*ListDeliveryCitiesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListDeliveryCities not implemented")
 }
 func (UnimplementedOrdersServer) mustEmbedUnimplementedOrdersServer() {}
 func (UnimplementedOrdersServer) testEmbeddedByValue()                {}
@@ -478,6 +494,24 @@ func _Orders_ListDeliveryPoints_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Orders_ListDeliveryCities_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDeliveryCitiesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).ListDeliveryCities(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_ListDeliveryCities_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).ListDeliveryCities(ctx, req.(*ListDeliveryCitiesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Orders_ServiceDesc is the grpc.ServiceDesc for Orders service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -532,6 +566,10 @@ var Orders_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListDeliveryPoints",
 			Handler:    _Orders_ListDeliveryPoints_Handler,
+		},
+		{
+			MethodName: "ListDeliveryCities",
+			Handler:    _Orders_ListDeliveryCities_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

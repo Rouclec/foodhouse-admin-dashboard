@@ -86,3 +86,29 @@ func (q *Queries) ListDeliveryPoints(ctx context.Context, arg ListDeliveryPoints
 	}
 	return items, nil
 }
+
+const listUniqueCities = `-- name: ListUniqueCities :many
+SELECT DISTINCT city
+FROM delivery_points
+ORDER BY city ASC
+`
+
+func (q *Queries) ListUniqueCities(ctx context.Context) ([]string, error) {
+	rows, err := q.db.Query(ctx, listUniqueCities)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []string{}
+	for rows.Next() {
+		var city string
+		if err := rows.Scan(&city); err != nil {
+			return nil, err
+		}
+		items = append(items, city)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

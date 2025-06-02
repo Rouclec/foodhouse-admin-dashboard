@@ -58,6 +58,11 @@ export type ordersgrpcInitiatePaymentResponse = {
     payment?: ordersgrpcPayment;
 };
 
+export type ordersgrpcListDeliveryCitiesResponse = {
+    cities?: Array<(string)>;
+    nextKey?: string;
+};
+
 export type ordersgrpcListDeliveryPointsResponse = {
     deliveryPoints?: Array<ordersgrpcDeliveryPoint>;
     nextKey?: string;
@@ -250,6 +255,20 @@ export type OrdersInitiatePaymentData = {
 export type OrdersInitiatePaymentResponse = (ordersgrpcInitiatePaymentResponse);
 
 export type OrdersInitiatePaymentError = (rpcStatus);
+
+export type OrdersListDeliveryCitiesData = {
+    path: {
+        userId: string;
+    };
+    query?: {
+        count?: number;
+        startKey?: string;
+    };
+};
+
+export type OrdersListDeliveryCitiesResponse = (ordersgrpcListDeliveryCitiesResponse);
+
+export type OrdersListDeliveryCitiesError = (rpcStatus);
 
 export type OrdersListDeliveryPointsData = {
     path: {

@@ -2,9 +2,9 @@
 
 import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
-import type { OrdersCreateDeliveryPointData, OrdersCreateDeliveryPointError, OrdersCreateDeliveryPointResponse, OrdersConfirmPaymentData, OrdersListFarmerOrdersData, OrdersCreateOrderData, OrdersCreateOrderError, OrdersCreateOrderResponse, OrdersInitiatePaymentData, OrdersInitiatePaymentError, OrdersInitiatePaymentResponse, OrdersListDeliveryPointsData, OrdersListUserOrdersData, OrdersApproveOrderData, OrdersApproveOrderError, OrdersApproveOrderResponse, OrdersDispatchOrderData, OrdersDispatchOrderError, OrdersDispatchOrderResponse, OrdersGetOrderDetailsData, OrdersConfirmDeliveryData, OrdersConfirmDeliveryError, OrdersConfirmDeliveryResponse } from '../types.gen';
+import type { OrdersCreateDeliveryPointData, OrdersCreateDeliveryPointError, OrdersCreateDeliveryPointResponse, OrdersConfirmPaymentData, OrdersListFarmerOrdersData, OrdersCreateOrderData, OrdersCreateOrderError, OrdersCreateOrderResponse, OrdersInitiatePaymentData, OrdersInitiatePaymentError, OrdersInitiatePaymentResponse, OrdersListDeliveryCitiesData, OrdersListDeliveryPointsData, OrdersListUserOrdersData, OrdersApproveOrderData, OrdersApproveOrderError, OrdersApproveOrderResponse, OrdersDispatchOrderData, OrdersDispatchOrderError, OrdersDispatchOrderResponse, OrdersGetOrderDetailsData, OrdersConfirmDeliveryData, OrdersConfirmDeliveryError, OrdersConfirmDeliveryResponse } from '../types.gen';
 import type { AxiosError } from 'axios';
-import { client, ordersCreateDeliveryPoint, ordersConfirmPayment, ordersHealthCheck, ordersListFarmerOrders, ordersCreateOrder, ordersInitiatePayment, ordersListDeliveryPoints, ordersListUserOrders, ordersApproveOrder, ordersDispatchOrder, ordersGetOrderDetails, ordersConfirmDelivery } from '../sdk.gen';
+import { client, ordersCreateDeliveryPoint, ordersConfirmPayment, ordersHealthCheck, ordersListFarmerOrders, ordersCreateOrder, ordersInitiatePayment, ordersListDeliveryCities, ordersListDeliveryPoints, ordersListUserOrders, ordersApproveOrder, ordersDispatchOrder, ordersGetOrderDetails, ordersConfirmDelivery } from '../sdk.gen';
 
 type QueryKey<TOptions extends OptionsLegacyParser> = [
     Pick<TOptions, 'baseURL' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -187,6 +187,25 @@ export const ordersInitiatePaymentMutation = (options?: Partial<OptionsLegacyPar
         }
     };
     return mutationOptions;
+};
+
+export const ordersListDeliveryCitiesQueryKey = (options: OptionsLegacyParser<OrdersListDeliveryCitiesData>) => [
+    createQueryKey('ordersListDeliveryCities', options)
+];
+
+export const ordersListDeliveryCitiesOptions = (options: OptionsLegacyParser<OrdersListDeliveryCitiesData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await ordersListDeliveryCities({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: ordersListDeliveryCitiesQueryKey(options)
+    });
 };
 
 export const ordersListDeliveryPointsQueryKey = (options: OptionsLegacyParser<OrdersListDeliveryPointsData>) => [

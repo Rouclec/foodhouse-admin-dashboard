@@ -296,6 +296,49 @@
         ]
       }
     },
+    "/v1/users/{userId}/orders/list-delivery-cities": {
+      "get": {
+        "operationId": "Orders_ListDeliveryCities",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcListDeliveryCitiesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "startKey",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/users/{userId}/orders/list-delivery-points": {
       "get": {
         "operationId": "Orders_ListDeliveryPoints",
@@ -698,6 +741,20 @@
       "properties": {
         "payment": {
           "$ref": "#/definitions/ordersgrpcPayment"
+        }
+      }
+    },
+    "ordersgrpcListDeliveryCitiesResponse": {
+      "type": "object",
+      "properties": {
+        "cities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "nextKey": {
+          "type": "string"
         }
       }
     },
