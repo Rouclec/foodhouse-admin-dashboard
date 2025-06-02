@@ -16,6 +16,44 @@
     "application/json"
   ],
   "paths": {
+    "/v1/admin/{userId}/orders/create-delivery-point": {
+      "post": {
+        "operationId": "Orders_CreateDeliveryPoint",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcCreateDeliveryPointResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/OrdersCreateDeliveryPointBody"
+            }
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/public/confirm-payment": {
       "get": {
         "operationId": "Orders_ConfirmPayment",
@@ -258,6 +296,55 @@
         ]
       }
     },
+    "/v1/users/{userId}/orders/list-delivery-points": {
+      "get": {
+        "operationId": "Orders_ListDeliveryPoints",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcListDeliveryPointsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "startKey",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/users/{userId}/orders/list-user-orders": {
       "get": {
         "operationId": "Orders_ListUserOrders",
@@ -479,6 +566,20 @@
     "OrdersConfirmDeliveryBody": {
       "type": "object"
     },
+    "OrdersCreateDeliveryPointBody": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "$ref": "#/definitions/typesPoint"
+        },
+        "city": {
+          "type": "string"
+        },
+        "deliveryPointName": {
+          "type": "string"
+        }
+      }
+    },
     "OrdersCreateOrderBody": {
       "type": "object",
       "properties": {
@@ -534,11 +635,40 @@
     "ordersgrpcConfirmPaymentResponse": {
       "type": "object"
     },
+    "ordersgrpcCreateDeliveryPointResponse": {
+      "type": "object",
+      "properties": {
+        "deliveryPoint": {
+          "$ref": "#/definitions/ordersgrpcDeliveryPoint"
+        }
+      }
+    },
     "ordersgrpcCreateOrderResponse": {
       "type": "object",
       "properties": {
         "order": {
           "$ref": "#/definitions/ordersgrpcOrder"
+        }
+      }
+    },
+    "ordersgrpcDeliveryPoint": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "address": {
+          "$ref": "#/definitions/typesPoint"
+        },
+        "deliveryPointName": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
@@ -568,6 +698,21 @@
       "properties": {
         "payment": {
           "$ref": "#/definitions/ordersgrpcPayment"
+        }
+      }
+    },
+    "ordersgrpcListDeliveryPointsResponse": {
+      "type": "object",
+      "properties": {
+        "deliveryPoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ordersgrpcDeliveryPoint"
+          }
+        },
+        "nextKey": {
+          "type": "string"
         }
       }
     },

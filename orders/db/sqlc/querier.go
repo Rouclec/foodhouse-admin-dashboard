@@ -9,12 +9,14 @@ import (
 )
 
 type Querier interface {
+	CreateDeliveryPoint(ctx context.Context, arg CreateDeliveryPointParams) (DeliveryPoint, error)
 	CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error)
 	CreateOrderAuditLog(ctx context.Context, arg CreateOrderAuditLogParams) error
 	CreatePayment(ctx context.Context, arg CreatePaymentParams) (Payment, error)
 	GetOrderByOrderNumber(ctx context.Context, orderNumber int64) (Order, error)
 	GetPaymentById(ctx context.Context, id string) (Payment, error)
 	GetUserOrderBySecretKey(ctx context.Context, arg GetUserOrderBySecretKeyParams) (Order, error)
+	ListDeliveryPoints(ctx context.Context, arg ListDeliveryPointsParams) ([]DeliveryPoint, error)
 	ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersParams) ([]Order, error)
 	ListOrderAuditLogs(ctx context.Context, orderNumber int64) ([]OrdersAudit, error)
 	ListUserOrders(ctx context.Context, arg ListUserOrdersParams) ([]Order, error)

@@ -4,6 +4,12 @@ export type OrdersApproveOrderBody = unknown;
 
 export type OrdersConfirmDeliveryBody = unknown;
 
+export type OrdersCreateDeliveryPointBody = {
+    address?: typesPoint;
+    city?: string;
+    deliveryPointName?: string;
+};
+
 export type OrdersCreateOrderBody = {
     productId?: string;
     quantity?: string;
@@ -23,8 +29,20 @@ export type ordersgrpcConfirmDeliveryResponse = unknown;
 
 export type ordersgrpcConfirmPaymentResponse = unknown;
 
+export type ordersgrpcCreateDeliveryPointResponse = {
+    deliveryPoint?: ordersgrpcDeliveryPoint;
+};
+
 export type ordersgrpcCreateOrderResponse = {
     order?: ordersgrpcOrder;
+};
+
+export type ordersgrpcDeliveryPoint = {
+    id?: string;
+    address?: typesPoint;
+    deliveryPointName?: string;
+    city?: string;
+    createdAt?: string;
 };
 
 export type ordersgrpcDispatchOrderResponse = unknown;
@@ -38,6 +56,11 @@ export type ordersgrpcHealthCheckResponse = unknown;
 
 export type ordersgrpcInitiatePaymentResponse = {
     payment?: ordersgrpcPayment;
+};
+
+export type ordersgrpcListDeliveryPointsResponse = {
+    deliveryPoints?: Array<ordersgrpcDeliveryPoint>;
+    nextKey?: string;
 };
 
 export type ordersgrpcListFarmerOrdersResponse = {
@@ -123,6 +146,17 @@ export type typesPoint = {
     lat?: number;
     address?: string;
 };
+
+export type OrdersCreateDeliveryPointData = {
+    body: OrdersCreateDeliveryPointBody;
+    path: {
+        userId: string;
+    };
+};
+
+export type OrdersCreateDeliveryPointResponse = (ordersgrpcCreateDeliveryPointResponse);
+
+export type OrdersCreateDeliveryPointError = (rpcStatus);
 
 export type OrdersConfirmPaymentData = {
     query?: {
@@ -216,6 +250,21 @@ export type OrdersInitiatePaymentData = {
 export type OrdersInitiatePaymentResponse = (ordersgrpcInitiatePaymentResponse);
 
 export type OrdersInitiatePaymentError = (rpcStatus);
+
+export type OrdersListDeliveryPointsData = {
+    path: {
+        userId: string;
+    };
+    query?: {
+        city?: string;
+        count?: number;
+        startKey?: string;
+    };
+};
+
+export type OrdersListDeliveryPointsResponse = (ordersgrpcListDeliveryPointsResponse);
+
+export type OrdersListDeliveryPointsError = (rpcStatus);
 
 export type OrdersListUserOrdersData = {
     path: {

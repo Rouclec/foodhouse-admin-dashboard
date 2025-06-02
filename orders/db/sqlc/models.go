@@ -8,6 +8,15 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type DeliveryPoint struct {
+	ID                string             `json:"id"`
+	DeliveryLocation  pgtype.Point       `json:"delivery_location"`
+	LocationName      string             `json:"location_name"`
+	DeliveryPointName string             `json:"delivery_point_name"`
+	City              string             `json:"city"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+}
+
 type Order struct {
 	OrderNumber       int64              `json:"order_number"`
 	DeliveryLocation  pgtype.Point       `json:"delivery_location"`

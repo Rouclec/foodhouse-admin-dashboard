@@ -1190,7 +1190,9 @@ func (i *Impl) GetUserSubscriptionByID(ctx context.Context,
 }
 
 // ActivateUserSubscription implements usersgrpc.UsersServer.
-func (i *Impl) ActivateUserSubscription(ctx context.Context, req *usersgrpc.ActivateUserSubscriptionRequest) (*usersgrpc.ActivateUserSubscriptionResponse, error) {
+func (i *Impl) ActivateUserSubscription(ctx context.Context,
+	req *usersgrpc.ActivateUserSubscriptionRequest) (
+	*usersgrpc.ActivateUserSubscriptionResponse, error) {
 	err := i.repo.Do().ActivateUserSubscription(ctx, req.GetUserSubscriptionId())
 
 	if err != nil {
@@ -1201,7 +1203,9 @@ func (i *Impl) ActivateUserSubscription(ctx context.Context, req *usersgrpc.Acti
 }
 
 // DeleteUserSubscription implements usersgrpc.UsersServer.
-func (i *Impl) DeleteUserSubscription(ctx context.Context, req *usersgrpc.DeleteUserSubscriptionRequest) (*usersgrpc.DeleteUserSubscriptionResponse, error) {
+func (i *Impl) DeleteUserSubscription(ctx context.Context,
+	req *usersgrpc.DeleteUserSubscriptionRequest) (
+	*usersgrpc.DeleteUserSubscriptionResponse, error) {
 	err := i.repo.Do().DeleteUserSubscription(ctx, req.GetUserSubscriptionId())
 
 	if err != nil {

@@ -156,6 +156,8 @@ message ConfirmDeliveryRequest {
   string user_id = 2;
 }
 
+message ConfirmDeliveryResponse {}
+
 message ApproveOrderRequest {
   string order_id = 1;
   string user_id = 2;
@@ -163,7 +165,34 @@ message ApproveOrderRequest {
 
 message ApproveOrderResponse {}
 
-message ConfirmDeliveryResponse {}
+message DeliveryPoint {
+  string id = 1;
+  types.Point address = 2;
+  string delivery_point_name = 3;
+  string city = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+
+message CreateDeliveryPointRequest {
+  types.Point address = 1;
+  string city = 2;
+  string delivery_point_name = 3;
+  string user_id = 4;
+}
+
+message CreateDeliveryPointResponse { DeliveryPoint delivery_point = 1; }
+
+message ListDeliveryPointsRequest {
+  string city = 1;
+  string user_id = 2;
+  int32 count = 3;
+  string start_key = 4;
+}
+
+message ListDeliveryPointsResponse {
+  repeated DeliveryPoint delivery_points = 1;
+  string next_key = 2;
+}
 
 message HealthCheckRequest {}
 message HealthCheckResponse {}
@@ -258,6 +287,21 @@ service Orders {
     option (google.api.http) = {
       post : "/v1/users/{user_id}/orders/initiate-payment"
       body : "*"
+    };
+  }
+
+  rpc CreateDeliveryPoint(CreateDeliveryPointRequest)
+      returns (CreateDeliveryPointResponse) {
+    option (google.api.http) = {
+      post : "/v1/admin/{user_id}/orders/create-delivery-point"
+      body : "*"
+    };
+  }
+
+  rpc ListDeliveryPoints(ListDeliveryPointsRequest)
+      returns (ListDeliveryPointsResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/orders/list-delivery-points"
     };
   }
 }

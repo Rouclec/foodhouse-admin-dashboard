@@ -2,9 +2,9 @@
 
 import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
-import type { OrdersConfirmPaymentData, OrdersListFarmerOrdersData, OrdersCreateOrderData, OrdersCreateOrderError, OrdersCreateOrderResponse, OrdersInitiatePaymentData, OrdersInitiatePaymentError, OrdersInitiatePaymentResponse, OrdersListUserOrdersData, OrdersApproveOrderData, OrdersApproveOrderError, OrdersApproveOrderResponse, OrdersDispatchOrderData, OrdersDispatchOrderError, OrdersDispatchOrderResponse, OrdersGetOrderDetailsData, OrdersConfirmDeliveryData, OrdersConfirmDeliveryError, OrdersConfirmDeliveryResponse } from '../types.gen';
-import { client, ordersConfirmPayment, ordersHealthCheck, ordersListFarmerOrders, ordersCreateOrder, ordersInitiatePayment, ordersListUserOrders, ordersApproveOrder, ordersDispatchOrder, ordersGetOrderDetails, ordersConfirmDelivery } from '../sdk.gen';
+import type { OrdersCreateDeliveryPointData, OrdersCreateDeliveryPointError, OrdersCreateDeliveryPointResponse, OrdersConfirmPaymentData, OrdersListFarmerOrdersData, OrdersCreateOrderData, OrdersCreateOrderError, OrdersCreateOrderResponse, OrdersInitiatePaymentData, OrdersInitiatePaymentError, OrdersInitiatePaymentResponse, OrdersListDeliveryPointsData, OrdersListUserOrdersData, OrdersApproveOrderData, OrdersApproveOrderError, OrdersApproveOrderResponse, OrdersDispatchOrderData, OrdersDispatchOrderError, OrdersDispatchOrderResponse, OrdersGetOrderDetailsData, OrdersConfirmDeliveryData, OrdersConfirmDeliveryError, OrdersConfirmDeliveryResponse } from '../types.gen';
 import type { AxiosError } from 'axios';
+import { client, ordersCreateDeliveryPoint, ordersConfirmPayment, ordersHealthCheck, ordersListFarmerOrders, ordersCreateOrder, ordersInitiatePayment, ordersListDeliveryPoints, ordersListUserOrders, ordersApproveOrder, ordersDispatchOrder, ordersGetOrderDetails, ordersConfirmDelivery } from '../sdk.gen';
 
 type QueryKey<TOptions extends OptionsLegacyParser> = [
     Pick<TOptions, 'baseURL' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -31,6 +31,39 @@ const createQueryKey = <TOptions extends OptionsLegacyParser>(id: string, option
         params.query = options.query;
     }
     return params;
+};
+
+export const ordersCreateDeliveryPointQueryKey = (options: OptionsLegacyParser<OrdersCreateDeliveryPointData>) => [
+    createQueryKey('ordersCreateDeliveryPoint', options)
+];
+
+export const ordersCreateDeliveryPointOptions = (options: OptionsLegacyParser<OrdersCreateDeliveryPointData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await ordersCreateDeliveryPoint({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: ordersCreateDeliveryPointQueryKey(options)
+    });
+};
+
+export const ordersCreateDeliveryPointMutation = (options?: Partial<OptionsLegacyParser<OrdersCreateDeliveryPointData>>) => {
+    const mutationOptions: UseMutationOptions<OrdersCreateDeliveryPointResponse, AxiosError<OrdersCreateDeliveryPointError>, OptionsLegacyParser<OrdersCreateDeliveryPointData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await ordersCreateDeliveryPoint({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
 };
 
 export const ordersConfirmPaymentQueryKey = (options?: OptionsLegacyParser<OrdersConfirmPaymentData>) => [
@@ -154,6 +187,25 @@ export const ordersInitiatePaymentMutation = (options?: Partial<OptionsLegacyPar
         }
     };
     return mutationOptions;
+};
+
+export const ordersListDeliveryPointsQueryKey = (options: OptionsLegacyParser<OrdersListDeliveryPointsData>) => [
+    createQueryKey('ordersListDeliveryPoints', options)
+];
+
+export const ordersListDeliveryPointsOptions = (options: OptionsLegacyParser<OrdersListDeliveryPointsData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await ordersListDeliveryPoints({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: ordersListDeliveryPointsQueryKey(options)
+    });
 };
 
 export const ordersListUserOrdersQueryKey = (options: OptionsLegacyParser<OrdersListUserOrdersData>) => [
