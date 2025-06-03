@@ -168,6 +168,15 @@
     },
     "(order)": {
       "index": {
+        "deliveryMethod": "Delivery method",
+        "continue": "Continue",
+        "chooseDeliveryMethod": "Choose how you'd like your order to be delivered",
+        "homeDelivery": "Home Delivery",
+        "deliveredTo": "Delivered to a location of your choice",
+        "pickupPoint": "Pickup Point",
+        "collectFrom": "Collect from a nearby location"
+      },
+      "checkout": {
         "checkout": "Checkout",
         "couldNotLoad": "Could not load product details",
         "order": "Order",
@@ -181,6 +190,11 @@
         "pleaseAcceptPermissions": "Please accept permissions to access your location",
         "errorGettingLocation": "Error getting location",
         "currentLocation": "Current location"
+      },
+      "select-pickup-point": {
+        "selectPickupPoint": "Select Pickup Point",
+        "proceedToCheckout": "Proceed to checkout",
+        "enterCity": "Enter your city"
       }
     }
   },
