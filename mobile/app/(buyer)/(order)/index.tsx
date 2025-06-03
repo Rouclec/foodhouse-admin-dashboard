@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { View, KeyboardAvoidingView } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
-import { Appbar, Button, Icon, RadioButton, Text } from "react-native-paper";
+import { Appbar, Button, Icon, Text } from "react-native-paper";
 import { deliveryMethodStyles as styles } from "@/styles";
 import { Colors } from "@/constants";
 

@@ -16,7 +16,7 @@ export const deliveryMethodStyles = StyleSheet.create({
   iconContainer: {
     width: 56,
     height: 56,
-    borderRadius: 40,
+    borderRadius: 56,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: Colors["blue-10"],
@@ -41,7 +41,7 @@ export const deliveryMethodStyles = StyleSheet.create({
   checkInnercontainer: {
     width: 12,
     height: 12,
-    borderRadius: 16,
+    borderRadius: 12,
   },
   checkPrimaryOutterContainer: {
     borderColor: Colors.primary[500],

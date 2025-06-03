@@ -194,7 +194,19 @@
       "select-pickup-point": {
         "selectPickupPoint": "Select Pickup Point",
         "proceedToCheckout": "Proceed to checkout",
-        "enterCity": "Enter your city"
+        "enterCity": "Enter your city",
+        "noPickupPointsIn": "No pickup points in",
+        "availablePickup": "Available pickup locations"
+      },
+      "delivery-address": {
+        "deliveryAddress": "Delivery Address",
+        "proceedToCheckout": "Proceed to checkout",
+        "pleaseAcceptPermissions": "Please accept permissions to access your location",
+        "errorGettingLocation": "Error getting location",
+        "addressDetails": "Address Details",
+        "useCurrentLocation": "Use my current location",
+        "enterYourAddress": "Enter your address",
+        "addressHere": "Address here"
       }
     }
   },
