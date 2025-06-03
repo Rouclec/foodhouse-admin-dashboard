@@ -14,14 +14,34 @@
       "backgroundColor": "#6DCD47"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.foodhousecmr.foodhouse",
+      "config": {
+        "googleMapsApiKey": "AIzaSyC7YxZaDfv19RlCXKZrULvfC9XQ_vDacuU"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#6DCD47"
+        "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "softwareKeyboardLayoutMode": "pan",
+      "package": "com.foodhousecmr.foodhouse",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyC7YxZaDfv19RlCXKZrULvfC9XQ_vDacuU"
+        }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_LOCATION"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -67,6 +87,12 @@
         "projectId": "2cebe744-985e-4d89-8e7e-5a795ca5c815"
       }
     },
-    "owner": "foodhouse_user"
+    "owner": "foodhouse_user",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/2cebe744-985e-4d89-8e7e-5a795ca5c815"
+    }
   }
 }
