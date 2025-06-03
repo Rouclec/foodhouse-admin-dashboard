@@ -21,7 +21,6 @@ type Querier interface {
 	DeleteSubscription(ctx context.Context, id string) error
 	DeleteUserPaymentMethod(ctx context.Context, id string) error
 	DeleteUserSubscription(ctx context.Context, id string) error
-	GetAllSubscriptions(ctx context.Context) ([]Subscription, error)
 	GetAllUserSubscriptions(ctx context.Context) ([]UserSubscription, error)
 	GetFarmer(ctx context.Context, id string) (User, error)
 	GetLatestSentOtpByFactor(ctx context.Context, arg GetLatestSentOtpByFactorParams) ([]SentOtp, error)
@@ -36,6 +35,7 @@ type Querier interface {
 	GetUserForUpdate(ctx context.Context, id string) (User, error)
 	GetUserPaymentMethodsByUserID(ctx context.Context, userID string) ([]UserPaymentMethod, error)
 	GetUserSubscriptionByID(ctx context.Context, id string) (UserSubscription, error)
+	ListSubsriptions(ctx context.Context) ([]Subscription, error)
 	RevokeRefreshToken(ctx context.Context, token string) error
 	UpdateSentOtp(ctx context.Context, arg UpdateSentOtpParams) error
 	UpdateSubscription(ctx context.Context, arg UpdateSubscriptionParams) (Subscription, error)

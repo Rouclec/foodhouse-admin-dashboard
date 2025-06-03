@@ -46,6 +46,7 @@ const (
 	Users_GetUserSubscriptionByID_FullMethodName       = "/usersgrpc.Users/GetUserSubscriptionByID"
 	Users_GetUserPaymentMethodsByUserID_FullMethodName = "/usersgrpc.Users/GetUserPaymentMethodsByUserID"
 	Users_DeleteUserPaymentMethod_FullMethodName       = "/usersgrpc.Users/DeleteUserPaymentMethod"
+	Users_ListSubscriptions_FullMethodName             = "/usersgrpc.Users/ListSubscriptions"
 )
 
 // UsersClient is the client API for Users service.
@@ -79,6 +80,7 @@ type UsersClient interface {
 	GetUserSubscriptionByID(ctx context.Context, in *GetUserSubscriptionByIDRequest, opts ...grpc.CallOption) (*GetUserSubscriptionByIDResponse, error)
 	GetUserPaymentMethodsByUserID(ctx context.Context, in *GetUserPaymentMethodsByUserIDRequest, opts ...grpc.CallOption) (*GetUserPaymentMethodsByUserIDResponse, error)
 	DeleteUserPaymentMethod(ctx context.Context, in *DeleteUserPaymentMethodRequest, opts ...grpc.CallOption) (*DeleteUserPaymentMethodResponse, error)
+	ListSubscriptions(ctx context.Context, in *ListSubscriptionsRequest, opts ...grpc.CallOption) (*ListSubscriptionsResponse, error)
 }
 
 type usersClient struct {
@@ -359,6 +361,16 @@ func (c *usersClient) DeleteUserPaymentMethod(ctx context.Context, in *DeleteUse
 	return out, nil
 }
 
+func (c *usersClient) ListSubscriptions(ctx context.Context, in *ListSubscriptionsRequest, opts ...grpc.CallOption) (*ListSubscriptionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListSubscriptionsResponse)
+	err := c.cc.Invoke(ctx, Users_ListSubscriptions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsersServer is the server API for Users service.
 // All implementations must embed UnimplementedUsersServer
 // for forward compatibility.
@@ -390,6 +402,7 @@ type UsersServer interface {
 	GetUserSubscriptionByID(context.Context, *GetUserSubscriptionByIDRequest) (*GetUserSubscriptionByIDResponse, error)
 	GetUserPaymentMethodsByUserID(context.Context, *GetUserPaymentMethodsByUserIDRequest) (*GetUserPaymentMethodsByUserIDResponse, error)
 	DeleteUserPaymentMethod(context.Context, *DeleteUserPaymentMethodRequest) (*DeleteUserPaymentMethodResponse, error)
+	ListSubscriptions(context.Context, *ListSubscriptionsRequest) (*ListSubscriptionsResponse, error)
 	mustEmbedUnimplementedUsersServer()
 }
 
@@ -480,6 +493,9 @@ func (UnimplementedUsersServer) GetUserPaymentMethodsByUserID(context.Context, *
 }
 func (UnimplementedUsersServer) DeleteUserPaymentMethod(context.Context, *DeleteUserPaymentMethodRequest) (*DeleteUserPaymentMethodResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteUserPaymentMethod not implemented")
+}
+func (UnimplementedUsersServer) ListSubscriptions(context.Context, *ListSubscriptionsRequest) (*ListSubscriptionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListSubscriptions not implemented")
 }
 func (UnimplementedUsersServer) mustEmbedUnimplementedUsersServer() {}
 func (UnimplementedUsersServer) testEmbeddedByValue()               {}
@@ -988,6 +1004,24 @@ func _Users_DeleteUserPaymentMethod_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Users_ListSubscriptions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListSubscriptionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).ListSubscriptions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Users_ListSubscriptions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).ListSubscriptions(ctx, req.(*ListSubscriptionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Users_ServiceDesc is the grpc.ServiceDesc for Users service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1102,6 +1136,10 @@ var Users_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteUserPaymentMethod",
 			Handler:    _Users_DeleteUserPaymentMethod_Handler,
+		},
+		{
+			MethodName: "ListSubscriptions",
+			Handler:    _Users_ListSubscriptions_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -74,6 +74,7 @@ message Subscription {
   string id = 1;
   string title = 2;
   string description = 3;
+  // duration in weeks
   int64 duration = 4;
   types.Amount amount = 5;
 }
@@ -281,6 +282,9 @@ message DeleteSubscriptionRequst {
 }
 
 message DeleteSubscriptionResponse { string message = 1; }
+
+message ListSubscriptionsRequest { string user_id = 1; }
+message ListSubscriptionsResponse { repeated Subscription subscriptions = 1; }
 
 message SubscribeRequest {
   string user_id = 1;
@@ -532,6 +536,13 @@ service Users {
     option (google.api.http) = {
       delete : "/v1/users/{user_id}/delete-user-payment-method/"
                "{payment_method_id}"
+    };
+  }
+
+  rpc ListSubscriptions(ListSubscriptionsRequest)
+      returns (ListSubscriptionsResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/subscription/list-subscription"
     };
   }
 }
