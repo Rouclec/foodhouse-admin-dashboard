@@ -666,7 +666,6 @@ func (i *Impl) SendEmailOtp(ctx context.Context,
 
 func (i *Impl) ChangePassword(ctx context.Context, req *usersgrpc.ChangePasswordRequest) (
 	*usersgrpc.ChangePasswordResponse, error) {
-
 	// Verify the auth factor here
 	userID, err := i.validateAuthFactor(ctx, req.GetEmailFactor())
 	if err != nil {
