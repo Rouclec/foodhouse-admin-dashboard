@@ -35,7 +35,7 @@ const PaymentMethodsPage = () => {
   const handleNext = () => {
     if (selectedMethod) {
       router.push({
-        pathname: "/payment-account",
+        pathname: "/(payment)/paymentAccount",
         params: {
           ...params,
           paymentMethod: selectedMethod,

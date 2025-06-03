@@ -49,7 +49,7 @@ export default function Login() {
       setUser(userData.user);
         const role = userData?.user?.role;
 
-        if (role === "USER_TYPE_FARMER") {
+        if (role === "USER_ROLE_FARMER") {
           router.replace("/(farmer)/(index)");
           
         } else {
@@ -173,6 +173,7 @@ export default function Login() {
                 onChangeText={(text) => handleInputChange("email", text)}
                 error={!!errors.email}
                 style={loginstyles.input}
+                 autoCapitalize="none"
                 theme={{
                   colors: {
                     primary: Colors.primary[500],
@@ -202,6 +203,7 @@ export default function Login() {
               onChangeText={(text) => handleInputChange("password", text)}
               error={!!errors.password}
               style={loginstyles.input}
+               autoCapitalize="none"
               theme={{
                 colors: {
                   primary: Colors.primary[500],
@@ -287,7 +289,7 @@ export default function Login() {
                 <Text style={loginstyles.registerText}>
                   {i18n.t("(auth).login.dontHaveAnAccount")}{" "}
                 </Text>
-                <TouchableOpacity onPress={() => router.replace("/(auth)/register")}>
+                <TouchableOpacity onPress={() => router.replace("/(farmer)/(index)")}>
                   <Text style={loginstyles.registerLink}>
                     {i18n.t("(auth).login.registerNow")}
                   </Text>

@@ -31,6 +31,7 @@ import { selectionSubscriptionStyles } from "./(auth)/(subsciption-flow)/index.s
 import { filterBottomSheetStyles } from "./components/(buyer)/(index)/FilterBottomSheet.styles";
 import { productDetailsStyles } from "./(buyer)/product-details.styles";
 import { checkoutStyles } from "./(buyer)/(order)/index.styles";
+import { profileFlowStyles } from "./(farmer)/profileFlow.styles";
 
 export {
   buyerIndexStyles,
@@ -59,4 +60,5 @@ export {
   filterBottomSheetStyles,
   productDetailsStyles,
   checkoutStyles,
+  profileFlowStyles,
 };
