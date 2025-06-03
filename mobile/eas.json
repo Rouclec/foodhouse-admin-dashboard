@@ -8,7 +8,10 @@
       "developmentClient": true,
       "distribution": "internal",
       "channel": "development",
-      "env": { "NODE_ENV": "development", "KOTLIN_VERSION": "1.9.25" },
+      "env": {
+        "NODE_ENV": "development",
+        "KOTLIN_VERSION": "1.9.25"
+      },
       "ios": {
         "simulator": true
       }
@@ -17,12 +20,18 @@
       "developmentClient": true,
       "distribution": "internal",
       "channel": "development",
-      "env": { "NODE_ENV": "development", "KOTLIN_VERSION": "1.9.25" }
+      "env": {
+        "NODE_ENV": "development",
+        "KOTLIN_VERSION": "1.9.25"
+      }
     },
     "preview-device": {
       "distribution": "internal",
       "channel": "preview",
-      "env": { "NODE_ENV": "development", "KOTLIN_VERSION": "1.9.25" },
+      "env": {
+        "NODE_ENV": "development",
+        "KOTLIN_VERSION": "1.9.25"
+      },
       "android": {
         "buildType": "apk"
       }
@@ -33,14 +42,18 @@
       "android": {
         "buildType": "app-bundle"
       },
-      "env": { "KOTLIN_VERSION": "1.9.25" },
+      "env": {
+        "KOTLIN_VERSION": "1.9.25"
+      },
       "ios": {
         "simulator": true
       }
     },
     "production": {
       "channel": "production",
-      "env": { "KOTLIN_VERSION": "1.9.25" },
+      "env": {
+        "KOTLIN_VERSION": "1.9.25"
+      },
       "android": {
         "buildType": "app-bundle"
       },
@@ -48,7 +61,9 @@
     },
     "pre-production": {
       "channel": "production",
-      "env": { "KOTLIN_VERSION": "1.9.25" },
+      "env": {
+        "KOTLIN_VERSION": "1.9.25"
+      },
       "android": {
         "buildType": "apk"
       },
