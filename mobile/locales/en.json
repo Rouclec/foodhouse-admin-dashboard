@@ -192,6 +192,13 @@
         "ratings": "Ratings",
         "close": "Close",
         "apply": "Apply"
+      },
+      "orders": {
+        "myOrders": "My Orders",
+        "searchOrder": "Search order",
+        "noOrdersFound": "No orders found",
+        "writeReview": "Write review",
+        "trackOrder": "Track order"
       }
     },
     "product-details": {
