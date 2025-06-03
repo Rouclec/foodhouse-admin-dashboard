@@ -25,6 +25,10 @@ export type ordersgrpcAccount = {
 
 export type ordersgrpcApproveOrderResponse = unknown;
 
+export type ordersgrpcCheckPaymentStatusResponse = {
+    status?: ordersgrpcPaymentStatus;
+};
+
 export type ordersgrpcConfirmDeliveryResponse = unknown;
 
 export type ordersgrpcConfirmPaymentResponse = unknown;
@@ -335,6 +339,17 @@ export type OrdersGetOrderDetailsData = {
 export type OrdersGetOrderDetailsResponse = (ordersgrpcGetOrderDetailsResponse);
 
 export type OrdersGetOrderDetailsError = (rpcStatus);
+
+export type OrdersCheckPaymentStatusData = {
+    path: {
+        paymentId: string;
+        userId: string;
+    };
+};
+
+export type OrdersCheckPaymentStatusResponse = (ordersgrpcCheckPaymentStatusResponse);
+
+export type OrdersCheckPaymentStatusError = (rpcStatus);
 
 export type OrdersConfirmDeliveryData = {
     body: OrdersConfirmDeliveryBody;

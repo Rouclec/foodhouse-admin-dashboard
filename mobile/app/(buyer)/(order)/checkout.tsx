@@ -13,22 +13,24 @@ import {
   Image,
 } from "react-native";
 import { Chase } from "react-native-animated-spinkit";
-import { Appbar, Button, Icon, Text } from "react-native-paper";
+import { Appbar, Button, Icon, Snackbar, Text } from "react-native-paper";
 import { checkoutStyles as styles } from "@/styles";
 import { formatAmount } from "@/utils/amountFormater";
 import { ordersCreateOrderMutation } from "@/client/orders.swagger/@tanstack/react-query.gen";
 import { Context, ContextType } from "@/app/_layout";
+import { delay } from "@/utils";
 
 export default function Checkout() {
   const router = useRouter();
 
-  const { user, productId, deliveryLocation } = useContext(
+  const { user, productId, deliveryLocation, setPaymentData } = useContext(
     Context
   ) as ContextType;
 
   const [quantity, setQuantity] = useState(1);
   const [totalPrice, setTotalPrice] = useState<number>();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>();
 
   const { data, isError, isLoading } = useQuery({
     ...productsGetProductOptions({
@@ -46,10 +48,20 @@ export default function Checkout() {
   const { mutateAsync } = useMutation({
     ...ordersCreateOrderMutation(),
     onSuccess: (data) => {
-      console.log({ data }, "create order data");
+      setPaymentData({
+        entity: "PaymentEntity_ORDER",
+        entityId: data?.order?.orderNumber ?? "",
+        nextScreen: "/(buyer)/(index)",
+      });
+      router.push("/(payment)");
     },
-    onError: (error) => {
-      console.log({ error }, "creating order");
+    onError: async (error) => {
+      setError(
+        error?.response?.data?.message ??
+          i18n.t("(buyer).(order).checkout.unknownError")
+      );
+      await delay(5000);
+      setError(undefined);
     },
   });
 
@@ -339,6 +351,14 @@ export default function Checkout() {
           </Text>
         </Button>
       </View>
+      <Snackbar
+        visible={!!error}
+        onDismiss={() => {}}
+        duration={3000}
+        style={defaultStyles.snackbar}
+      >
+        <Text style={defaultStyles.errorText}>{error}</Text>
+      </Snackbar>
     </>
   );
 }

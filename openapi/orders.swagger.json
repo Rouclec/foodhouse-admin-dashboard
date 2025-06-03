@@ -589,6 +589,42 @@
         ]
       }
     },
+    "/v1/users/{userId}/orders/{paymentId}/check-payment-status": {
+      "get": {
+        "operationId": "Orders_CheckPaymentStatus",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcCheckPaymentStatusResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "paymentId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/users/{userId}/orders/{secretKey}/confirm-delivery": {
       "put": {
         "operationId": "Orders_ConfirmDelivery",
@@ -703,6 +739,14 @@
     },
     "ordersgrpcApproveOrderResponse": {
       "type": "object"
+    },
+    "ordersgrpcCheckPaymentStatusResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/ordersgrpcPaymentStatus"
+        }
+      }
     },
     "ordersgrpcConfirmDeliveryResponse": {
       "type": "object"
