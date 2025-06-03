@@ -564,6 +564,7 @@ func (i *Impl) ListFarmerOrders(ctx context.Context, req *ordersgrpc.ListFarmerO
 	orders, err := i.repo.Do().ListFarmerOrders(ctx, sqlc.ListFarmerOrdersParams{
 		ProductOwner:  &req.FarmerId,
 		CreatedBefore: startKey,
+		Status:        req.GetStatus().String(),
 		Count:         int32(count), // Convert count to int32
 	})
 
@@ -605,6 +606,7 @@ func (i *Impl) ListUserOrders(ctx context.Context, req *ordersgrpc.ListUserOrder
 
 	orders, err := i.repo.Do().ListUserOrders(ctx, sqlc.ListUserOrdersParams{
 		CreatedBy:     &req.UserId,
+		Status:        req.GetStatus().String(),
 		CreatedBefore: startKey,
 		Count:         int32(count), // Convert count to int32
 	})

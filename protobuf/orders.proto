@@ -212,6 +212,7 @@ message ListUserOrdersRequest {
   string user_id = 1;
   int32 count = 2;
   string start_key = 3;
+  OrderStatus status = 4;
 }
 
 message ListUserOrdersResponse {
@@ -223,6 +224,7 @@ message ListFarmerOrdersRequest {
   string farmer_id = 1;
   int32 count = 2;
   string start_key = 3;
+  OrderStatus status = 4;
 }
 
 message ListFarmerOrdersResponse {

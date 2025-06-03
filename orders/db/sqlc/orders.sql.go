@@ -268,22 +268,32 @@ func (q *Queries) GetUserOrderBySecretKey(ctx context.Context, arg GetUserOrderB
 }
 
 const listFarmerOrders = `-- name: ListFarmerOrders :many
-SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity FROM orders 
+SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity 
+FROM orders 
 WHERE product_owner = $1
-AND 
-  ($2::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at < $2::timestamptz)
+  AND ($2::varchar = '' OR status = $2::varchar)
+  AND (
+    $3::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+    OR created_at < $3::timestamptz
+  )
 ORDER BY created_at DESC
-LIMIT $3::int
+LIMIT $4::int
 `
 
 type ListFarmerOrdersParams struct {
 	ProductOwner  *string   `json:"product_owner"`
+	Status        string    `json:"status"`
 	CreatedBefore time.Time `json:"created_before"`
 	Count         int32     `json:"count"`
 }
 
 func (q *Queries) ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersParams) ([]Order, error) {
-	rows, err := q.db.Query(ctx, listFarmerOrders, arg.ProductOwner, arg.CreatedBefore, arg.Count)
+	rows, err := q.db.Query(ctx, listFarmerOrders,
+		arg.ProductOwner,
+		arg.Status,
+		arg.CreatedBefore,
+		arg.Count,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -355,20 +365,27 @@ func (q *Queries) ListOrderAuditLogs(ctx context.Context, orderNumber int64) ([]
 const listUserOrders = `-- name: ListUserOrders :many
 SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity FROM orders 
 WHERE created_by = $1
+AND ($2::varchar = '' OR status = $2::varchar)
 AND 
-  ($2::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at < $2::timestamptz)
+  ($3::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at < $3::timestamptz)
 ORDER BY created_at DESC
-LIMIT $3::int
+LIMIT $4::int
 `
 
 type ListUserOrdersParams struct {
 	CreatedBy     *string   `json:"created_by"`
+	Status        string    `json:"status"`
 	CreatedBefore time.Time `json:"created_before"`
 	Count         int32     `json:"count"`
 }
 
 func (q *Queries) ListUserOrders(ctx context.Context, arg ListUserOrdersParams) ([]Order, error) {
-	rows, err := q.db.Query(ctx, listUserOrders, arg.CreatedBy, arg.CreatedBefore, arg.Count)
+	rows, err := q.db.Query(ctx, listUserOrders,
+		arg.CreatedBy,
+		arg.Status,
+		arg.CreatedBefore,
+		arg.Count,
+	)
 	if err != nil {
 		return nil, err
 	}

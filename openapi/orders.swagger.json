@@ -213,6 +213,22 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "OrderStatus_UNSPECIFIED",
+              "OrderStatus_CREATED",
+              "OrderStatus_PAYMENT_SUCCESSFUL",
+              "OrderStatus_PAYMENT_FAILED",
+              "OrderStatus_IN_TRANSIT",
+              "OrderStatus_DELIVERED",
+              "OrderStatus_APPROVED"
+            ],
+            "default": "OrderStatus_UNSPECIFIED"
           }
         ],
         "tags": [
@@ -424,6 +440,22 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "OrderStatus_UNSPECIFIED",
+              "OrderStatus_CREATED",
+              "OrderStatus_PAYMENT_SUCCESSFUL",
+              "OrderStatus_PAYMENT_FAILED",
+              "OrderStatus_IN_TRANSIT",
+              "OrderStatus_DELIVERED",
+              "OrderStatus_APPROVED"
+            ],
+            "default": "OrderStatus_UNSPECIFIED"
           }
         ],
         "tags": [
