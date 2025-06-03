@@ -20,7 +20,6 @@
       "env": { "NODE_ENV": "development", "KOTLIN_VERSION": "1.9.25" }
     },
     "preview-device": {
-      "developmentClient": true,
       "distribution": "internal",
       "channel": "preview",
       "env": { "NODE_ENV": "development", "KOTLIN_VERSION": "1.9.25" },
