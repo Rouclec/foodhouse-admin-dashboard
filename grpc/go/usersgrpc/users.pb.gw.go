@@ -1205,6 +1205,58 @@ func local_request_Users_DeleteUserPaymentMethod_0(ctx context.Context, marshale
 
 }
 
+func request_Users_ListSubscriptions_0(ctx context.Context, marshaler runtime.Marshaler, client UsersClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListSubscriptionsRequest
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["user_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
+	}
+
+	protoReq.UserId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
+	}
+
+	msg, err := client.ListSubscriptions(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_Users_ListSubscriptions_0(ctx context.Context, marshaler runtime.Marshaler, server UsersServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListSubscriptionsRequest
+	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["user_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
+	}
+
+	protoReq.UserId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
+	}
+
+	msg, err := server.ListSubscriptions(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
 // RegisterUsersHandlerServer registers the http handlers for service Users to "mux".
 // UnaryRPC     :call UsersServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
@@ -1837,6 +1889,31 @@ func RegisterUsersHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 
 	})
 
+	mux.Handle("GET", pattern_Users_ListSubscriptions_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/usersgrpc.Users/ListSubscriptions", runtime.WithHTTPPathPattern("/v1/users/{user_id}/subscription/list-subscription"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_Users_ListSubscriptions_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Users_ListSubscriptions_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
 	return nil
 }
 
@@ -2428,6 +2505,28 @@ func RegisterUsersHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 
 	})
 
+	mux.Handle("GET", pattern_Users_ListSubscriptions_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/usersgrpc.Users/ListSubscriptions", runtime.WithHTTPPathPattern("/v1/users/{user_id}/subscription/list-subscription"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Users_ListSubscriptions_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Users_ListSubscriptions_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
 	return nil
 }
 
@@ -2481,6 +2580,8 @@ var (
 	pattern_Users_GetUserPaymentMethodsByUserID_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 1, 2, 3}, []string{"v1", "users", "user_id", "get-user-payment-methods-by-user-id"}, ""))
 
 	pattern_Users_DeleteUserPaymentMethod_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"v1", "users", "user_id", "delete-user-payment-method", "payment_method_id"}, ""))
+
+	pattern_Users_ListSubscriptions_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4}, []string{"v1", "users", "user_id", "subscription", "list-subscription"}, ""))
 )
 
 var (
@@ -2533,4 +2634,6 @@ var (
 	forward_Users_GetUserPaymentMethodsByUserID_0 = runtime.ForwardResponseMessage
 
 	forward_Users_DeleteUserPaymentMethod_0 = runtime.ForwardResponseMessage
+
+	forward_Users_ListSubscriptions_0 = runtime.ForwardResponseMessage
 )

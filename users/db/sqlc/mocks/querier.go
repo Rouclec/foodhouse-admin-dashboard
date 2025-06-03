@@ -216,21 +216,6 @@ func (mr *MockQuerierMockRecorder) DeleteUserSubscription(ctx, id any) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUserSubscription", reflect.TypeOf((*MockQuerier)(nil).DeleteUserSubscription), ctx, id)
 }
 
-// GetAllSubscriptions mocks base method.
-func (m *MockQuerier) GetAllSubscriptions(ctx context.Context) ([]sqlc.Subscription, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAllSubscriptions", ctx)
-	ret0, _ := ret[0].([]sqlc.Subscription)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetAllSubscriptions indicates an expected call of GetAllSubscriptions.
-func (mr *MockQuerierMockRecorder) GetAllSubscriptions(ctx any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllSubscriptions", reflect.TypeOf((*MockQuerier)(nil).GetAllSubscriptions), ctx)
-}
-
 // GetAllUserSubscriptions mocks base method.
 func (m *MockQuerier) GetAllUserSubscriptions(ctx context.Context) ([]sqlc.UserSubscription, error) {
 	m.ctrl.T.Helper()
@@ -439,6 +424,21 @@ func (m *MockQuerier) GetUserSubscriptionByID(ctx context.Context, id string) (s
 func (mr *MockQuerierMockRecorder) GetUserSubscriptionByID(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserSubscriptionByID", reflect.TypeOf((*MockQuerier)(nil).GetUserSubscriptionByID), ctx, id)
+}
+
+// ListSubsriptions mocks base method.
+func (m *MockQuerier) ListSubsriptions(ctx context.Context) ([]sqlc.Subscription, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListSubsriptions", ctx)
+	ret0, _ := ret[0].([]sqlc.Subscription)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListSubsriptions indicates an expected call of ListSubsriptions.
+func (mr *MockQuerierMockRecorder) ListSubsriptions(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSubsriptions", reflect.TypeOf((*MockQuerier)(nil).ListSubsriptions), ctx)
 }
 
 // RevokeRefreshToken mocks base method.

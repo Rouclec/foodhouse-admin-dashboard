@@ -12,6 +12,7 @@ import (
 	"github.com/foodhouse/foodhouseapp/grpc/go/types"
 	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
 	"github.com/foodhouse/foodhouseapp/sms"
+	"github.com/foodhouse/foodhouseapp/users/db/converters"
 	"github.com/foodhouse/foodhouseapp/users/db/repo"
 	"github.com/foodhouse/foodhouseapp/users/db/sqlc"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -1209,4 +1210,25 @@ func (i *Impl) DeleteUserSubscription(ctx context.Context,
 	}
 
 	return &usersgrpc.DeleteUserSubscriptionResponse{}, nil
+}
+
+// ListSubscriptions implements usersgrpc.UsersServer.
+func (i *Impl) ListSubscriptions(ctx context.Context,
+	_ *usersgrpc.ListSubscriptionsRequest) (
+	*usersgrpc.ListSubscriptionsResponse, error) {
+	subscriptions, err := i.repo.Do().ListSubsriptions(ctx)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error fetching subscriptions %v", err)
+	}
+
+	protoSubscriptions, err := converters.SqlcToProtoSubscriptions(subscriptions)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error converting sqlc to proto subscriptions %v", err)
+	}
+
+	return &usersgrpc.ListSubscriptionsResponse{
+		Subscriptions: protoSubscriptions,
+	}, nil
 }

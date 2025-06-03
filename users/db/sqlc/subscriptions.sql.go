@@ -54,37 +54,6 @@ func (q *Queries) DeleteSubscription(ctx context.Context, id string) error {
 	return err
 }
 
-const getAllSubscriptions = `-- name: GetAllSubscriptions :many
-SELECT id, title, description, duration, amount, currency_iso_code FROM subscriptions
-`
-
-func (q *Queries) GetAllSubscriptions(ctx context.Context) ([]Subscription, error) {
-	rows, err := q.db.Query(ctx, getAllSubscriptions)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Subscription{}
-	for rows.Next() {
-		var i Subscription
-		if err := rows.Scan(
-			&i.ID,
-			&i.Title,
-			&i.Description,
-			&i.Duration,
-			&i.Amount,
-			&i.CurrencyIsoCode,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getSubscriptionByID = `-- name: GetSubscriptionByID :one
 SELECT id, title, description, duration, amount, currency_iso_code FROM subscriptions WHERE id = $1
 `
@@ -119,6 +88,37 @@ func (q *Queries) GetSubscriptionForUpdate(ctx context.Context, id string) (Subs
 		&i.CurrencyIsoCode,
 	)
 	return i, err
+}
+
+const listSubsriptions = `-- name: ListSubsriptions :many
+SELECT id, title, description, duration, amount, currency_iso_code FROM subscriptions ORDER BY amount ASC
+`
+
+func (q *Queries) ListSubsriptions(ctx context.Context) ([]Subscription, error) {
+	rows, err := q.db.Query(ctx, listSubsriptions)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Subscription{}
+	for rows.Next() {
+		var i Subscription
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.Duration,
+			&i.Amount,
+			&i.CurrencyIsoCode,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const updateSubscription = `-- name: UpdateSubscription :one
