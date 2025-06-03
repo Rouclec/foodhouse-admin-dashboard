@@ -32,7 +32,11 @@ export default function Checkout() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
 
-  const { data, isError, isLoading } = useQuery({
+  const {
+    data: productData,
+    isError,
+    isLoading,
+  } = useQuery({
     ...productsGetProductOptions({
       path: {
         productId: productId ?? "",
@@ -42,8 +46,8 @@ export default function Checkout() {
   });
 
   useEffect(() => {
-    setTotalPrice((data?.product?.amount?.value ?? 0) * quantity);
-  }, [data, quantity]);
+    setTotalPrice((productData?.product?.amount?.value ?? 0) * quantity);
+  }, [productData, quantity]);
 
   const { mutateAsync } = useMutation({
     ...ordersCreateOrderMutation(),
@@ -52,6 +56,10 @@ export default function Checkout() {
         entity: "PaymentEntity_ORDER",
         entityId: data?.order?.orderNumber ?? "",
         nextScreen: "/(buyer)/(index)",
+        amount: {
+          value: totalPrice,
+          currencyIsoCode: productData?.product?.amount?.currencyIsoCode,
+        },
       });
       router.push("/(payment)");
     },
@@ -188,17 +196,22 @@ export default function Checkout() {
               </Text>
               <View style={styles.orderDetailsContainer}>
                 <Image
-                  source={{ uri: data?.product?.image }}
+                  source={{ uri: productData?.product?.image }}
                   style={styles.productImage}
                 />
                 <View style={styles.rightContainer}>
-                  <Text variant="titleMedium">{data?.product?.name}</Text>
+                  <Text variant="titleMedium">
+                    {productData?.product?.name}
+                  </Text>
                   <Text style={styles.price}>
-                    {data?.product?.amount?.currencyIsoCode}{" "}
-                    {data?.product?.amount?.value}
+                    {productData?.product?.amount?.currencyIsoCode}{" "}
+                    {productData?.product?.amount?.value}
                     <Text style={styles.greyText}>
                       {" "}
-                      {data?.product?.unitType?.slug?.replace("per_", "/")}
+                      {productData?.product?.unitType?.slug?.replace(
+                        "per_",
+                        "/"
+                      )}
                     </Text>
                   </Text>
                   <View style={styles.buttonsContainer}>
@@ -249,18 +262,15 @@ export default function Checkout() {
                     />
                   </View>
                 </View>
-                {loading ? (
-                  <Chase size={24} color={Colors.primary[500]} />
-                ) : (
-                  <View style={styles.rowGap8}>
-                    <Text variant="titleMedium" style={styles.text16}>
-                      {deliveryLocation?.description}
-                    </Text>
-                    <Text style={styles.textSmall}>
-                      {deliveryLocation?.address}
-                    </Text>
-                  </View>
-                )}
+
+                <View style={styles.rowGap8}>
+                  <Text variant="titleMedium" style={styles.text16}>
+                    {deliveryLocation?.description}
+                  </Text>
+                  <Text style={styles.textSmall}>
+                    {deliveryLocation?.address}
+                  </Text>
+                </View>
                 <TouchableOpacity
                   onPress={() => router.push("/(buyer)/(order)")}
                 >
@@ -273,7 +283,7 @@ export default function Checkout() {
                     {i18n.t("(buyer).(order).checkout.amount")}
                   </Text>
                   <Text style={styles.textAlignRight} variant="titleMedium">
-                    {data?.product?.amount?.currencyIsoCode}{" "}
+                    {productData?.product?.amount?.currencyIsoCode}{" "}
                     {formatAmount(totalPrice?.toString() ?? "", {
                       decimalPlaces: 2,
                     })}
@@ -284,7 +294,7 @@ export default function Checkout() {
                     {i18n.t("(buyer).(order).checkout.delivery")}
                   </Text>
                   <Text style={styles.textAlignRight} variant="titleMedium">
-                    {data?.product?.amount?.currencyIsoCode}{" "}
+                    {productData?.product?.amount?.currencyIsoCode}{" "}
                     {formatAmount("0", {
                       decimalPlaces: 2,
                     })}
@@ -295,7 +305,7 @@ export default function Checkout() {
                     {i18n.t("(buyer).(order).checkout.transactionCharges")}
                   </Text>
                   <Text style={styles.textAlignRight} variant="titleMedium">
-                    {data?.product?.amount?.currencyIsoCode}{" "}
+                    {productData?.product?.amount?.currencyIsoCode}{" "}
                     {formatAmount(
                       ((totalPrice ?? 0) * 0.03)?.toString() ?? "",
                       {
@@ -309,7 +319,7 @@ export default function Checkout() {
                     {i18n.t("(buyer).(order).checkout.serviceCharges")}
                   </Text>
                   <Text style={styles.textAlignRight} variant="titleMedium">
-                    {data?.product?.amount?.currencyIsoCode}{" "}
+                    {productData?.product?.amount?.currencyIsoCode}{" "}
                     {formatAmount(
                       ((totalPrice ?? 0) * 0.05)?.toString() ?? "",
                       {
@@ -323,7 +333,7 @@ export default function Checkout() {
                     {i18n.t("(buyer).(order).checkout.total")}
                   </Text>
                   <Text style={styles.textAlignRight} variant="titleMedium">
-                    {data?.product?.amount?.currencyIsoCode}{" "}
+                    {productData?.product?.amount?.currencyIsoCode}{" "}
                     {formatAmount(
                       ((totalPrice ?? 0) * 1.08)?.toString() ?? "",
                       {
@@ -339,12 +349,18 @@ export default function Checkout() {
       </KeyboardAvoidingView>
       <View style={defaultStyles.bottomButtonContainer}>
         <Button
-          style={[defaultStyles.button, defaultStyles.primaryButton]}
+          style={[
+            defaultStyles.button,
+            defaultStyles.primaryButton,
+            loading && defaultStyles.greyButton,
+          ]}
+          loading={loading}
+          disabled={loading}
           onPress={handleCreateOrder}
         >
           <Text variant="titleMedium" style={defaultStyles?.buttonText}>
             {i18n.t("(buyer).(order).checkout.confirmPayment")}{" "}
-            {data?.product?.amount?.currencyIsoCode}{" "}
+            {productData?.product?.amount?.currencyIsoCode}{" "}
             {formatAmount(((totalPrice ?? 0) * 1.08)?.toString() ?? "", {
               decimalPlaces: 2,
             })}
