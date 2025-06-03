@@ -136,8 +136,12 @@
         "cardNumber": "Enter your card number",
         "cardholderName": "Holders name",
         "cvv": "source",
-        "paymentcompleteMessage": "Your subscription has been approved",
-        "approval": "Dial *126# to approve your payment"
+        "paymentSuccessful": "Payment Successful",
+        "paymentCompleteMessage": "Your payment has been completed successfully",
+        "paymentFailed": "Payment Failed",
+        "paymentFailedMessage": "Your payment did not complete successfully",
+        "instructionMoMo": "Dial *126# to confirm your payment",
+        "instructionOM": "Dial #156# to confirm your payment"
       }
     }
   },
