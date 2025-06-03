@@ -47,7 +47,7 @@ const VarietyPage = () => {
   };
 
   const handleContinue = () => {
-    router.push("/(buyer)");
+    router.push("/(auth)/subscribe");
   };
 
   return (

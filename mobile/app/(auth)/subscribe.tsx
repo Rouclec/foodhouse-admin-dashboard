@@ -47,7 +47,7 @@ export default function Index() {
   if (selectedPlan) {
     const selectedPlanData = plans.find(plan => plan.duration === selectedPlan);
     router.push({
-      pathname: "/payment-method",
+      pathname: "/(payment)",
       params: { 
         planDuration: selectedPlan,
         planAmount: selectedPlanData?.amount,
