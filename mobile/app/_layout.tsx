@@ -18,6 +18,7 @@ import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { defaultStyles } from "@/styles";
 import { Region } from "react-native-maps";
+import { ordersgrpcPaymentEntity } from "@/client/orders.swagger";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -54,6 +55,13 @@ interface ContextInfo {
         region: Region;
       }
     | undefined;
+  paymentData:
+    | {
+        entity: ordersgrpcPaymentEntity;
+        entityId: string;
+        nextScreen: string;
+      }
+    | undefined;
 }
 
 interface ContextSetters {
@@ -67,6 +75,15 @@ interface ContextSetters {
           description: string;
           address: string;
           region: Region;
+        }
+      | undefined
+  ) => void;
+  setPaymentData: (
+    data:
+      | {
+          entity: ordersgrpcPaymentEntity;
+          entityId: string;
+          nextScreen: string;
         }
       | undefined
   ) => void;
@@ -126,6 +143,7 @@ function RootLayoutNav() {
     role: undefined,
     productId: undefined,
     deliveryLocation: undefined,
+    paymentData: undefined,
   };
 
   const [contextInfo, setContextInfo] = useState(initialState);
@@ -157,11 +175,27 @@ function RootLayoutNav() {
     }));
   }
 
+  function setPaymentData(
+    data:
+      | {
+          entity: ordersgrpcPaymentEntity;
+          entityId: string;
+          nextScreen: string;
+        }
+      | undefined
+  ) {
+    setContextInfo((prevState) => ({
+      ...prevState,
+      paymentData: data,
+    }));
+  }
+
   const contextSetters: ContextSetters = {
     setUser,
     setUserRole,
     setDeliveryLocation,
     setProductId,
+    setPaymentData,
   };
 
   return (

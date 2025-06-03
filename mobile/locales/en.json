@@ -111,7 +111,7 @@
     },
     "(subsciption-flow)": {
       "index": {
-        "heading":"Be a VIP",
+        "heading": "Be a VIP",
         "subtitle": "Get Unlimited Access",
         "benefit1": "Enjoy our app without ads and restrictions",
         "benefit2": "Unlimited Calls with System",
@@ -121,7 +121,7 @@
         "duration1": "1 month",
         "duration2": "6 Months",
         "duration3": "12 Months",
-        "description": "Pay once, cancel any time" 
+        "description": "Pay once, cancel any time"
       },
       "payment-method": {
         "description": "To proceed, please add your payment methods."
@@ -220,7 +220,8 @@
         "total": "Total",
         "pleaseAcceptPermissions": "Please accept permissions to access your location",
         "errorGettingLocation": "Error getting location",
-        "currentLocation": "Current location"
+        "currentLocation": "Current location",
+        "unknownError": "An unknown error occured"
       },
       "select-pickup-point": {
         "selectPickupPoint": "Select Pickup Point",

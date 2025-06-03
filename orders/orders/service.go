@@ -923,3 +923,35 @@ func (i *Impl) ListDeliveryCities(ctx context.Context, req *ordersgrpc.ListDeliv
 		Cities: cities,
 	}, nil
 }
+
+func ParsePaymentStatus(status string) (ordersgrpc.PaymentStatus, error) {
+	if val, ok := ordersgrpc.PaymentStatus_value[status]; ok {
+		return ordersgrpc.PaymentStatus(val), nil
+	}
+	return ordersgrpc.PaymentStatus_PaymentStatus_UNSPECIFIED, fmt.Errorf("invalid payment status: %s", status)
+}
+
+// CheckPaymentStatus implements ordersgrpc.OrdersServer.
+func (i *Impl) CheckPaymentStatus(ctx context.Context, req *ordersgrpc.CheckPaymentStatusRequest) (*ordersgrpc.CheckPaymentStatusResponse, error) {
+	i.logger.Debug().Msgf("payment id ", req.GetPaymentId())
+
+	payment, err := i.repo.Do().GetPaymentById(ctx, req.GetPaymentId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error fetching payment %v", err)
+	}
+
+	if payment.CreatedBy != req.GetUserId() {
+		return nil, status.Error(codes.PermissionDenied, "user does not have permission to fetch this payment")
+	}
+
+	paymentStatus, err := ParsePaymentStatus(payment.Status)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "cannot parse status %v.", err)
+	}
+
+	return &ordersgrpc.CheckPaymentStatusResponse{
+		Status: paymentStatus,
+	}, nil
+}
