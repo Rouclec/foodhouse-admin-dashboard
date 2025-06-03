@@ -41,6 +41,7 @@ export const loginstyles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 32,
+    margin: 12
   },
   loginTitle: {
     fontSize: 24,

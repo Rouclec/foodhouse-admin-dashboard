@@ -66,7 +66,23 @@
   "lastName": "Entrez le nom de famille",
   "email": "Entrez l'e-mail",
   "address": "Entrez l'adresse"
+},
+"(subsciption-flow)": {
+  "index": {
+    "heading": "Devenez VIP",
+    "subtitle": "Accès illimité",
+    "benefit1": "Profitez de notre application sans publicités ni restrictions",
+    "benefit2": "Appels illimités avec le système",
+    "benefit3": "Suivi de commande facile",
+    "button1": "Passer",
+    "button2": "S’abonner maintenant",
+    "duration1": "1 mois",
+    "duration2": "6 mois",
+    "duration3": "12 mois",
+    "description": "Payez une fois, annulez à tout moment"
+  }
 }
+
 
   }
 }

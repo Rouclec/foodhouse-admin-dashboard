@@ -39,6 +39,7 @@ export const imagePickerStyles = StyleSheet.create({
       flexDirection: "row",
       justifyContent: "space-between",
       padding: 16,
+      marginBottom: 16,
     },
     button1: {
       flex: 1,

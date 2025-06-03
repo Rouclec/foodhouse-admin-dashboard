@@ -174,6 +174,7 @@ function RootLayoutNav() {
               <Stack.Screen name="(auth)" options={{ headerShown: false }} />
               <Stack.Screen name="(farmer)" options={{ headerShown: false }} />
               <Stack.Screen name="(buyer)" options={{ headerShown: false }} />
+              <Stack.Screen name="(payment)" options={{ headerShown: false }} />
               <Stack.Screen name="modal" options={{ presentation: "modal" }} />
             </Stack>
           </GestureHandlerRootView>

@@ -156,7 +156,7 @@ const ProfilePage = () => {
                         color="#fff"
                         style={signupStyles.cameraIcon}
                       />
-                    </View>
+                    </View> 
                   )}
                 </TouchableOpacity>
               </View>
@@ -166,6 +166,7 @@ const ProfilePage = () => {
                 value={firstName}
                 onChangeText={setFirstName}
                 mode="outlined"
+                theme={{roundness: 15, colors: { onSurfaceVariant: Colors.grey["e8"] } }}
                 outlineStyle={signupStyles.outlineInput}
                 style={signupStyles.input}
               />
@@ -175,6 +176,7 @@ const ProfilePage = () => {
                 value={lastName}
                 onChangeText={setLastName}
                 mode="outlined"
+                theme={{roundness: 15, colors: { onSurfaceVariant: Colors.grey["e8"] } }}
                 outlineStyle={signupStyles.outlineInput}
                 style={signupStyles.input}
               />
@@ -184,6 +186,7 @@ const ProfilePage = () => {
                 value={email}
                 onChangeText={setEmail}
                 mode="outlined"
+                theme={{roundness: 15, colors: { onSurfaceVariant: Colors.grey["e8"] } }}
                 outlineStyle={signupStyles.outlineInput}
                 style={signupStyles.input}
                 keyboardType="email-address"
@@ -195,6 +198,7 @@ const ProfilePage = () => {
                 value={address}
                 onChangeText={setAddress}
                 mode="outlined"
+                theme={{roundness: 15, colors: { onSurfaceVariant: Colors.grey["e8"] } }}
                 outlineStyle={signupStyles.outlineInput}
                 style={signupStyles.input}
                 multiline

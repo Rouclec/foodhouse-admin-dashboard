@@ -114,11 +114,11 @@ export default function BuyerProducts() {
         <View
           style={[
             defaultStyles.flex,
-            styles.bgWhite,
+            // styles.bgWhite,
             defaultStyles.relativeContainer,
           ]}
         >
-          <View style={styles.appHeader}>
+          <View style={defaultStyles.appHeader}>
             <SafeAreaView style={styles.safeArea}>
               <View style={styles.appHeaderContent}>
                 <View style={styles.appHeaderTopContainer}>

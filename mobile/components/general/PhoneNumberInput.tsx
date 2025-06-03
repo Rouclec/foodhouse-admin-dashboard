@@ -140,7 +140,7 @@ const PhoneNumberInput: FC<Props> = ({
           inputMode="numeric"
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          theme={{ colors: { onSurfaceVariant: Colors.grey['e8'] } }}
+          theme={{roundness: 15, colors: { onSurfaceVariant: Colors.grey['e8'] } }}
         />
       </View>
       <CountryList

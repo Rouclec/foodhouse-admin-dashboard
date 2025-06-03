@@ -47,13 +47,13 @@ export default function Login() {
       setUser(userData.user);
       const role = userData?.user?.role;
 
-      if (role === "USER_ROLE_FARMER") {
-        // router.replace("/(farmer)/(index)");
-        router.replace("/profile-page");
-      } else {
-        // router.replace("/(buyer)/index");
-        router.replace("/profile-page");
-      }
+        if (role === "USER_ROLE_FARMER") {
+          router.replace("/(farmer)/(index)");
+          
+        } else {
+          router.replace("/(buyer)/(index)");
+          
+        }
     }
   }, [userData]);
 
@@ -285,7 +285,7 @@ export default function Login() {
                 <Text style={loginstyles.registerText}>
                   {i18n.t("(auth).login.dontHaveAnAccount")}{" "}
                 </Text>
-                <TouchableOpacity onPress={() => router.replace("/register")}>
+                <TouchableOpacity onPress={() => router.replace("/(auth)/register")}>
                   <Text style={loginstyles.registerLink}>
                     {i18n.t("(auth).login.registerNow")}
                   </Text>

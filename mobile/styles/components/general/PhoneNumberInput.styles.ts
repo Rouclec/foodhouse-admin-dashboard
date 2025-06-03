@@ -1,11 +1,11 @@
-// import { Colors } from '@/constants';
+
 import { Colors } from "@/constants";
 import { StyleSheet } from "react-native";
 
 export const phoneNumberInputStyles = StyleSheet.create({
   mainContainer: {
     flexDirection: "row",
-    columnGap: 8,
+    columnGap: 4,
   },
   inputContainer: {
     borderWidth: 1,

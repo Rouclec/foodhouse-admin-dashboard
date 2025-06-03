@@ -108,6 +108,37 @@
       "reEnterPassword": "Re-enter your password",
       "placeholder": "Password must be atleast 12 characters",
       "passwordMustBe": "Password must be at least 12 characters"
+    },
+    "(subsciption-flow)": {
+      "index": {
+        "heading":"Be a VIP",
+        "subtitle": "Get Unlimited Access",
+        "benefit1": "Enjoy our app without ads and restrictions",
+        "benefit2": "Unlimited Calls with System",
+        "benefit3": "Easy Order Tracking",
+        "button1": "Skip",
+        "button2": "Subscribe Now",
+        "duration1": "1 month",
+        "duration2": "6 Months",
+        "duration3": "12 Months",
+        "description": "Pay once, cancel any time" 
+      },
+      "payment-method": {
+        "description": "To proceed, please add your payment methods."
+      },
+      "account": {
+        "heading": "Make Payment",
+        "details": "Enter your phone number to innitiate payment",
+        "button": "Next",
+        "mtn": "MTN mobile money account number",
+        "orange": "Enter your Orange money account Number",
+        "cardDetails": "Mastercard details",
+        "cardNumber": "Enter your card number",
+        "cardholderName": "Holders name",
+        "cvv": "source",
+        "paymentcompleteMessage": "Your subscription has been approved",
+        "approval": "Dial *126# to approve your payment"
+      }
     }
   },
   "(farmer)": {
