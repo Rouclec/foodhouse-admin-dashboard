@@ -134,6 +134,10 @@ export type usersgrpcLastOtpForFactorResponse = {
     otp?: string;
 };
 
+export type usersgrpcListSubscriptionsResponse = {
+    subscriptions?: Array<usersgrpcSubscription>;
+};
+
 export type usersgrpcListUsersResponse = {
     users?: Array<usersgrpcUser>;
     nextKey?: string;
@@ -505,6 +509,16 @@ export type UsersGetUserSubscriptionsData = {
 export type UsersGetUserSubscriptionsResponse = (usersgrpcGetUserSubscriptionsResponse);
 
 export type UsersGetUserSubscriptionsError = (rpcStatus);
+
+export type UsersListSubscriptionsData = {
+    path: {
+        userId: string;
+    };
+};
+
+export type UsersListSubscriptionsResponse = (usersgrpcListSubscriptionsResponse);
+
+export type UsersListSubscriptionsError = (rpcStatus);
 
 export type UsersGetUserSubscriptionByIdData = {
     path: {

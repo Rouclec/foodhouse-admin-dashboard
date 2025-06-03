@@ -768,6 +768,36 @@
         ]
       }
     },
+    "/v1/users/{userId}/subscription/list-subscription": {
+      "get": {
+        "operationId": "Users_ListSubscriptions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcListSubscriptionsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
     "/v1/users/{userId}/subscription/{userSubscriptionId}/get-user-subscription-by-id": {
       "get": {
         "operationId": "Users_GetUserSubscriptionByID",
@@ -1244,6 +1274,18 @@
         }
       }
     },
+    "usersgrpcListSubscriptionsResponse": {
+      "type": "object",
+      "properties": {
+        "subscriptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/usersgrpcSubscription"
+          }
+        }
+      }
+    },
     "usersgrpcListUsersResponse": {
       "type": "object",
       "properties": {
@@ -1430,7 +1472,8 @@
         },
         "duration": {
           "type": "string",
-          "format": "int64"
+          "format": "int64",
+          "title": "duration in weeks"
         },
         "amount": {
           "$ref": "#/definitions/typesAmount"
