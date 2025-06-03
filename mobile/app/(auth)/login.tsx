@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   KeyboardAvoidingView,
-  Keyboard,
   Platform,
   ScrollView,
 } from "react-native";
@@ -16,7 +15,6 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   usersAuthenticateMutation,
   usersGetUserByIdOptions,
-  usersRefreshAccessTokenMutation,
 } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { Context, ContextType } from "../_layout";
 import { defaultStyles, loginstyles } from "@/styles";
@@ -34,7 +32,6 @@ export default function Login() {
   const [userId, setUserId] = useState<string>();
   const { user, setUser } = useContext(Context) as ContextType;
 
- 
   // Fetch user data if userId exists
   const { data: userData } = useQuery({
     ...usersGetUserByIdOptions({
@@ -42,23 +39,21 @@ export default function Login() {
         userId: userId ?? "",
       },
     }),
-    enabled: !!userId, 
+    enabled: !!userId,
   });
 
   useEffect(() => {
     if (userData?.user) {
       setUser(userData.user);
-        const role = userData?.user?.role;
+      const role = userData?.user?.role;
 
-        if (role === "USER_TYPE_FARMER") {
-          // router.replace("/(farmer)/(index)");
-          router.replace("/profile-page")
-          
-        } else {
-          // router.replace("/(buyer)/index");
-          router.replace("/profile-page")
-          
-        }
+      if (role === "USER_ROLE_FARMER") {
+        // router.replace("/(farmer)/(index)");
+        router.replace("/profile-page");
+      } else {
+        // router.replace("/(buyer)/index");
+        router.replace("/profile-page");
+      }
     }
   }, [userData]);
 
@@ -66,19 +61,18 @@ export default function Login() {
     ...usersAuthenticateMutation(),
     onError: async (error) => {
       setErrorMessage(
-              error?.response?.data?.message ??
-                i18n.t("(auth).login.anUnknownError")
-            );
+        error?.response?.data?.message ?? i18n.t("(auth).login.anUnknownError")
+      );
       setError(true);
       await delay(5000);
       setError(false);
     },
     onSuccess: async (data) => {
       try {
-          updateAuthHeader(data?.tokens?.accessToken ?? "")
-          await storeData("@refreshToken", data?.tokens?.refreshToken);
-          storeData("@userId", data?.userId);
-          setUserId(data?.userId ?? "")
+        updateAuthHeader(data?.tokens?.accessToken ?? "");
+        await storeData("@refreshToken", data?.tokens?.refreshToken);
+        storeData("@userId", data?.userId);
+        setUserId(data?.userId ?? "");
       } catch (err) {
         console.error("Error handling login success:", err);
       }
@@ -154,25 +148,26 @@ export default function Login() {
               <Text style={loginstyles.logoText}>Food House</Text>
             </View>
           </View>
-           <ScrollView
-                      contentContainerStyle={defaultStyles.scrollContainer}
-                      showsVerticalScrollIndicator={false}
-                      nestedScrollEnabled={true}
-                      keyboardShouldPersistTaps="handled"
-                    >
-          <View style={loginstyles.content}>
-            <Text style={loginstyles.loginTitle}>
-              {i18n.t("(auth).login.loginTo")}
-            </Text>
+          <ScrollView
+            contentContainerStyle={defaultStyles.scrollContainer}
+            showsVerticalScrollIndicator={false}
+            nestedScrollEnabled={true}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={loginstyles.content}>
+              <Text style={loginstyles.loginTitle}>
+                {i18n.t("(auth).login.loginTo")}
+              </Text>
 
-            {error && (
-              <Text style={loginstyles.errorMessage}>{errorMessage}</Text>
-            )}
+              {error && (
+                <Text style={loginstyles.errorMessage}>{errorMessage}</Text>
+              )}
 
               <TextInput
                 mode="outlined"
                 label={i18n.t("(auth).login.email")}
                 value={fields.email}
+                autoCapitalize="none"
                 onChangeText={(text) => handleInputChange("email", text)}
                 error={!!errors.email}
                 style={loginstyles.input}
@@ -197,94 +192,94 @@ export default function Login() {
                 <Text style={loginstyles.errorText}>{errors.email}</Text>
               ) : null}
 
-            <TextInput
-              mode="outlined"
-              label={i18n.t("(auth).login.password")}
-              secureTextEntry={!showPassword}
-              value={fields.password}
-              onChangeText={(text) => handleInputChange("password", text)}
-              error={!!errors.password}
-              style={loginstyles.input}
-              theme={{
-                colors: {
-                  primary: Colors.primary[500],
-                  background: "#FAFAFA",
-                  error: Colors.error,
-                },
-                roundness: 10,
-              }}
-              outlineColor={Colors.grey["bg"]}
-              left={
-                <TextInput.Icon
-                  icon="lock-outline"
-                  color={Colors.grey["61"]}
-                  size={20}
-                />
-              }
-              right={
-                <TextInput.Icon
-                  icon={showPassword ? "eye-off" : "eye"}
-                  onPress={() => setShowPassword(!showPassword)}
-                  color={Colors.grey[61]}
-                  size={20}
-                />
-              }
-            />
-            {errors.password ? (
-              <Text style={loginstyles.errorText}>{errors.password}</Text>
-            ) : null}
+              <TextInput
+                mode="outlined"
+                label={i18n.t("(auth).login.password")}
+                secureTextEntry={!showPassword}
+                value={fields.password}
+                onChangeText={(text) => handleInputChange("password", text)}
+                error={!!errors.password}
+                style={loginstyles.input}
+                theme={{
+                  colors: {
+                    primary: Colors.primary[500],
+                    background: "#FAFAFA",
+                    error: Colors.error,
+                  },
+                  roundness: 10,
+                }}
+                outlineColor={Colors.grey["bg"]}
+                left={
+                  <TextInput.Icon
+                    icon="lock-outline"
+                    color={Colors.grey["61"]}
+                    size={20}
+                  />
+                }
+                right={
+                  <TextInput.Icon
+                    icon={showPassword ? "eye-off" : "eye"}
+                    onPress={() => setShowPassword(!showPassword)}
+                    color={Colors.grey[61]}
+                    size={20}
+                  />
+                }
+              />
+              {errors.password ? (
+                <Text style={loginstyles.errorText}>{errors.password}</Text>
+              ) : null}
 
-            <Link
-              style={loginstyles.forgotPassword}
-              href={"/(auth)/(forgot-password)"}
-            >
-              <Text style={loginstyles.forgotPasswordText}>
-                {i18n.t("(auth).login.forgotPassword")}
-              </Text>
-            </Link>
-
-            <TouchableOpacity
-              style={loginstyles.loginButton}
-              onPress={handleLogIn}
-              disabled={loading}
-              activeOpacity={0.8}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={loginstyles.loginButtonText}>
-                  {i18n.t("(auth).login.login")}
+              <Link
+                style={loginstyles.forgotPassword}
+                href={"/(auth)/(forgot-password)"}
+              >
+                <Text style={loginstyles.forgotPasswordText}>
+                  {i18n.t("(auth).login.forgotPassword")}
                 </Text>
-              )}
-            </TouchableOpacity>
+              </Link>
 
-            <View style={loginstyles.dividerContainer}>
-              <View style={loginstyles.dividerLine} />
-              <Text style={loginstyles.dividerText}>
-                {i18n.t("(auth).login.orContinueWith")}
-              </Text>
-              <View style={loginstyles.dividerLine} />
-            </View>
+              <TouchableOpacity
+                style={loginstyles.loginButton}
+                onPress={handleLogIn}
+                disabled={loading}
+                activeOpacity={0.8}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={loginstyles.loginButtonText}>
+                    {i18n.t("(auth).login.login")}
+                  </Text>
+                )}
+              </TouchableOpacity>
 
-            <View style={loginstyles.socialIconsContainer}>
-              <TouchableOpacity style={loginstyles.socialIcon}>
-                <MaterialCommunityIcons
-                  name="facebook"
-                  size={24}
-                  color={Colors.primary[100]}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity style={loginstyles.socialIcon}>
-                <MaterialCommunityIcons
-                  name="google"
-                  size={24}
-                  color={Colors.primary[200]}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity style={loginstyles.socialIcon}>
-                <MaterialCommunityIcons name="apple" size={24} />
-              </TouchableOpacity>
-            </View>
+              <View style={loginstyles.dividerContainer}>
+                <View style={loginstyles.dividerLine} />
+                <Text style={loginstyles.dividerText}>
+                  {i18n.t("(auth).login.orContinueWith")}
+                </Text>
+                <View style={loginstyles.dividerLine} />
+              </View>
+
+              <View style={loginstyles.socialIconsContainer}>
+                <TouchableOpacity style={loginstyles.socialIcon}>
+                  <MaterialCommunityIcons
+                    name="facebook"
+                    size={24}
+                    color={Colors.primary[100]}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity style={loginstyles.socialIcon}>
+                  <MaterialCommunityIcons
+                    name="google"
+                    size={24}
+                    color={Colors.primary[200]}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity style={loginstyles.socialIcon}>
+                  <MaterialCommunityIcons name="apple" size={24} />
+                </TouchableOpacity>
+              </View>
 
               <View style={loginstyles.registerContainer}>
                 <Text style={loginstyles.registerText}>
@@ -297,8 +292,8 @@ export default function Login() {
                 </TouchableOpacity>
               </View>
             </View>
-            </ScrollView>
-          </View>
+          </ScrollView>
+        </View>
       </KeyboardAvoidingView>
     </>
   );

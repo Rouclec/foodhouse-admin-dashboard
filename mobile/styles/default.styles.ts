@@ -149,7 +149,7 @@ export const defaultStyles = StyleSheet.create({
   appHeader: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.light['bg'],
+    backgroundColor: Colors.light["bg"],
     justifyContent: "space-between",
   },
   headerTextContainer: {
@@ -268,5 +268,11 @@ export const defaultStyles = StyleSheet.create({
   },
   textCenter: {
     textAlign: "center",
+  },
+  innerButtonContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center", // center contents
+    columnGap: 8,
   },
 });

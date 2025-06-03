@@ -47,9 +47,15 @@ const listDeliveryPoints = `-- name: ListDeliveryPoints :many
 SELECT id, delivery_location, location_name, delivery_point_name, city, created_at 
 FROM delivery_points
 WHERE
-  ($1::varchar = '' OR city = $1::varchar) 
+  (
+    $1::varchar = '' 
+    OR LOWER(city) ILIKE '%' || LOWER($1::varchar) || '%'
+  )
   AND
-  ($2::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at < $2::timestamptz)
+  (
+    $2::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+    OR created_at < $2::timestamptz
+  )
 ORDER BY created_at DESC
 LIMIT $3::int
 `
