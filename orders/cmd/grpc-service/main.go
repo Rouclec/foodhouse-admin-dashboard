@@ -13,6 +13,8 @@ import (
 
 	"github.com/ardanlabs/conf/v3"
 	"github.com/foodhouse/foodhouseapp/grpc/go/ordersgrpc"
+	"github.com/foodhouse/foodhouseapp/grpc/go/productsgrpc"
+	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
 	"github.com/foodhouse/foodhouseapp/orders/db/repo"
 	"github.com/foodhouse/foodhouseapp/orders/orders"
 	"github.com/foodhouse/foodhouseapp/payment"
@@ -22,6 +24,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -31,6 +34,8 @@ type Config struct {
 	DB DBConfig
 
 	ListenPort uint `conf:"env:LISTEN_PORT,required"`
+	UsersHostPort string `conf:"env:USERS_HOST_PORT,required"`
+	ProductsHostPort string `conf:"env:PRODUCTS_HOST_PORT,required"`
 
 	MigrationPath string `conf:"env:MIGRATION_PATH,required"`
 
@@ -98,6 +103,19 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 
 	ordersRepo := repo.NewOrdersRepo(db)
 
+	usersConn, err := grpc.NewClient(config.UsersHostPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return fmt.Errorf("failed to create gRPC connection: %w", err)
+	}
+	defer usersConn.Close()
+	usersClient := usersgrpc.NewUsersClient(usersConn)
+
+	productsConn, err := grpc.NewClient(config.ProductsHostPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return fmt.Errorf("failed to create gRPC connection: %w", err)
+	}
+	defer productsConn.Close()
+	productsClient := productsgrpc.NewProductsClient(productsConn)
 	// First Start the gRPC server
 	svrOpts := []grpc.ServerOption{
 		grpc.ChainUnaryInterceptor(
@@ -114,7 +132,7 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 		return fmt.Errorf("error initializing campay provider: %w", err)
 	}
 
-	ordersgrpc.RegisterOrdersServer(grpcServer, orders.NewOrders(ordersRepo, logger, config.EnableDevMethods, paymentService))
+	ordersgrpc.RegisterOrdersServer(grpcServer, orders.NewOrders(ordersRepo, logger, config.EnableDevMethods, paymentService, usersClient, productsClient))
 
 	logger.Info().Msg("Successfully registered ordersgrpc...")
 

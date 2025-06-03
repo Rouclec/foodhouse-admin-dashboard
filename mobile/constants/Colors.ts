@@ -66,4 +66,5 @@ export default {
   success: "#006C4D",
   border: "#777585",
   blue: "#335EF7",
+  "blue-10": "#335EF71A",
 };

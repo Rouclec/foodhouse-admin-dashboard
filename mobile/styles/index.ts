@@ -18,6 +18,8 @@ import { imagePickerStyles } from "./components/general/ImagePicker.styles";
 import { myProductStyles } from "./(farmer)/(index)/my-products.styles";
 import { productStyles } from "./components/Product.styles";
 import { buyerProductsStyles } from "./(buyer)/(index)/index.styles";
+import { deliveryMethodStyles } from "./(buyer)/(order)/index.styles";
+import { deliveryAddressStyles } from "./(buyer)/(order)/delivery-address.styles";
 
 // import { defaultStyles } from "./defaultstyles";
 // import { phoneNumberInputStyles } from "./components/general/PhoneNumberInputStyles";
@@ -30,7 +32,8 @@ import { verifyOtpStyles } from "./(auth)/verify-otpstyles";
 import { selectionSubscriptionStyles } from "./(auth)/(subsciption-flow)/index.style";
 import { filterBottomSheetStyles } from "./components/(buyer)/(index)/FilterBottomSheet.styles";
 import { productDetailsStyles } from "./(buyer)/product-details.styles";
-import { checkoutStyles } from "./(buyer)/(order)/index.styles";
+import { checkoutStyles } from "./(buyer)/(order)/checkout.styles";
+import { selectPickupLocationStyles } from "./(buyer)/(order)/select-pickup-location.styles";
 
 export {
   buyerIndexStyles,
@@ -59,4 +62,7 @@ export {
   filterBottomSheetStyles,
   productDetailsStyles,
   checkoutStyles,
+  deliveryMethodStyles,
+  selectPickupLocationStyles,
+  deliveryAddressStyles,
 };

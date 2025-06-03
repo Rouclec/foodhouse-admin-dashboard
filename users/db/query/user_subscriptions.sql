@@ -20,3 +20,6 @@ FROM user_subscriptions
 WHERE user_id = $1 
 AND active = TRUE 
 LIMIT 1;
+
+-- name: DeleteUserSubscription :exec
+DELETE from user_subscriptions WHERE id = $1;

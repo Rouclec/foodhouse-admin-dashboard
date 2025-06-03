@@ -1,106 +1,55 @@
 import { Colors } from "@/constants";
-import { lstat } from "fs";
 import { StyleSheet } from "react-native";
 
-export const checkoutStyles = StyleSheet.create({
-  notFoundContainer: {
-    flexGrow: 1,
-    marginBottom: 96,
+export const deliveryMethodStyles = StyleSheet.create({
+  marginVertical12: {
+    marginVertical: 12,
   },
-  orderContainer: {
-    rowGap: 24,
-  },
-  orderDetailsContainer: {
+  card: {
     backgroundColor: Colors.light[10],
     padding: 20,
     borderRadius: 16,
     flexDirection: "row",
     columnGap: 16,
-  },
-  rightContainer: {
-    rowGap: 12,
-  },
-  productImage: {
-    width: 102,
-    height: 102,
-    borderRadius: 12,
-  },
-  buttonsContainer: {
-    flexDirection: "row",
     alignItems: "center",
-    columnGap: 12,
   },
-  quantityButton: {
-    width: 32,
-    height: 32,
+  iconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 56,
     alignItems: "center",
     justifyContent: "center",
-    borderColor: Colors.dark[10],
-    borderWidth: 1,
-    borderRadius: 12,
+    backgroundColor: Colors["blue-10"],
   },
-  inactiveButton: {
-    borderColor: Colors.grey["bd"],
+  primaryBg: {
+    backgroundColor: Colors.primary[50],
   },
-  inactiveText: {
-    color: Colors.grey["bd"],
-  },
-  textCenter: {
-    textAlign: "center",
-  },
-  price: {
-    color: Colors.primary[500],
-    fontSize: 18,
-  },
-  greyText: {
-    color: Colors.grey["61"],
-  },
-  flexRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    columnGap: 16,
-  },
-  outterLocationIconContainer: {
-    width: 52,
-    height: 52,
-    borderRadius: 52,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: Colors.primary["50"],
-  },
-  innerLocationIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 20,
-    backgroundColor: Colors.primary["500"],
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  rowGap8: {
-    rowGap: 8,
+  textsContainer: {
+    flexGrow: 1,
     flexShrink: 1,
+    rowGap: 8,
   },
-  textSmall: {
-    fontSize: 14,
-    color: Colors.grey["61"],
-  },
-  flexColumn: {
-    flexDirection: "column",
-  },
-  rowItem: {
-    width: "100%",
-    flexDirection: "row",
+  checkOutterContainer: {
+    width: 18,
+    height: 18,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: Colors.blue,
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 22,
+    justifyContent: "center",
   },
-  textAlignRight: {
-    textAlign: "right",
-    fontSize: 16,
+  checkInnercontainer: {
+    width: 12,
+    height: 12,
+    borderRadius: 12,
   },
-  lastRowItem: {
-    borderTopWidth: 1,
-    borderTopColor: Colors.grey["border"],
+  checkPrimaryOutterContainer: {
+    borderColor: Colors.primary[500],
+  },
+  blueChecked: {
+    backgroundColor: Colors.blue,
+  },
+  primaryChecked: {
+    backgroundColor: Colors.primary[500],
   },
 });

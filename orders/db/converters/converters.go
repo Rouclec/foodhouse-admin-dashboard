@@ -118,3 +118,22 @@ func SqlcToProtoOrderAuditLogs(sqlcOrderAuditLogs []sqlc.OrdersAudit) (
 	}
 	return protoOrderAuditLogs, nil
 }
+
+func SqlcToProtoDeliveryPoints(sqlcDeliveryPoints []sqlc.DeliveryPoint) ([]*ordersgrpc.DeliveryPoint, error){
+	protoDeliveryPoints := make([]*ordersgrpc.DeliveryPoint, len(sqlcDeliveryPoints))
+
+	for i, dp := range sqlcDeliveryPoints {
+		protoDeliveryPoints[i] = &ordersgrpc.DeliveryPoint{
+			Id: dp.ID,
+			Address: &types.Point{
+				Address: dp.LocationName,
+				Lon:     dp.DeliveryLocation.P.X,
+				Lat:     dp.DeliveryLocation.P.Y,
+			},
+			City:              dp.City,
+			DeliveryPointName: dp.DeliveryPointName,
+			CreatedAt:         timestamppb.New(dp.CreatedAt.Time),
+		}
+	}
+	return protoDeliveryPoints, nil
+}

@@ -54,6 +54,15 @@ func (q *Queries) CreateUserSubscription(ctx context.Context, arg CreateUserSubs
 	return i, err
 }
 
+const deleteUserSubscription = `-- name: DeleteUserSubscription :exec
+DELETE from user_subscriptions WHERE id = $1
+`
+
+func (q *Queries) DeleteUserSubscription(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, deleteUserSubscription, id)
+	return err
+}
+
 const getAllUserSubscriptions = `-- name: GetAllUserSubscriptions :many
 SELECT id, user_id, subscription_id, active, created_at, updated_at, expires_at FROM user_subscriptions
 `

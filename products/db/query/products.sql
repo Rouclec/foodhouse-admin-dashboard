@@ -45,9 +45,9 @@ LEFT JOIN price_types pt ON p.unit_type = pt.id
 WHERE
   (sqlc.arg(created_by)::varchar = '' OR p.created_by = sqlc.arg(created_by)::varchar) AND
   (sqlc.arg(category_id)::varchar = '' OR p.category_id = sqlc.arg(category_id)::varchar) AND
-  (sqlc.arg(min_value)::bigint = 0 OR p.value >= sqlc.arg(min_value)::bigint) AND
+  (sqlc.arg(min_value)::float = 0 OR p.value >= sqlc.arg(min_value)::float) AND
   (
-    sqlc.arg(max_value)::bigint = 0 OR p.value <= COALESCE(sqlc.arg(max_value)::bigint, 9223372036854775807)
+    sqlc.arg(max_value)::float = 0 OR p.value <= COALESCE(sqlc.arg(max_value)::float, 9223372036854775807)
   ) AND
   (
     sqlc.arg(search)::text = '' OR

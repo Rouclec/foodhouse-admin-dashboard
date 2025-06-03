@@ -10,11 +10,13 @@ INSERT INTO orders (
     product_owner,
     payout_phone_number,
     rating, 
-    review
+    review,
+    delivery_address,
+    quantity
 )
 VALUES (
     sqlc.arg(delivery_location)::point,    -- Enforcing as POINT (casting delivery_location)
-    sqlc.arg(price_value)::bigint,         -- Enforcing as BIGINT
+    sqlc.arg(price_value)::float,         -- Enforcing as BIGINT
     sqlc.arg(price_currency)::varchar(3),  -- Enforcing as VARCHAR(3)
     sqlc.arg(status)::text,                -- Enforcing as TEXT
     sqlc.arg(product)::text,               -- Enforcing as TEXT
@@ -23,7 +25,9 @@ VALUES (
     sqlc.arg(product_owner)::varchar(36),   -- Enforcing as VARCHAR(36)
     sqlc.arg(payout_phone_number)::varchar(36), 
     1, -- Default rating
-    '' -- Default review
+    '', -- Default review
+    sqlc.arg(delivery_address)::text,
+    sqlc.arg(quantity)::bigint
 )
 RETURNING *;
 
@@ -39,16 +43,21 @@ SELECT * FROM orders WHERE secret_key = $1 AND created_by = $2;
 -- name: ListUserOrders :many
 SELECT * FROM orders 
 WHERE created_by = $1
+AND (sqlc.arg(status)::varchar = '' OR status = sqlc.arg(status)::varchar)
 AND 
   (sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at < sqlc.arg(created_before)::timestamptz)
 ORDER BY created_at DESC
 LIMIT sqlc.arg(count)::int;
 
 -- name: ListFarmerOrders :many
-SELECT * FROM orders 
+SELECT * 
+FROM orders 
 WHERE product_owner = $1
-AND 
-  (sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at < sqlc.arg(created_before)::timestamptz)
+  AND (sqlc.arg(status)::varchar = '' OR status = sqlc.arg(status)::varchar)
+  AND (
+    sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+    OR created_at < sqlc.arg(created_before)::timestamptz
+  )
 ORDER BY created_at DESC
 LIMIT sqlc.arg(count)::int;
 
@@ -72,16 +81,13 @@ VALUES ($1, $2, $3, $4, $5, $6, $7);
 SELECT * from orders_audit WHERE order_number = $1;
 
 -- name: CreatePayment :one
-INSERT INTO payments (order_number, price_value, price_currency, status, external_ref)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO payments (payment_entity, entity_id, amount_value, amount_currency, status, created_by, expires_at, method, account_number)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 RETURNING *;
 
--- name: GetPaymentByExternalReference :one
-SELECT * from payments WHERE external_ref = $1
+-- name: GetPaymentById :one
+SELECT * from payments WHERE id = $1
 LIMIT 1;
 
--- name: UpdatePaymentStatusByExternalReference :exec
-UPDATE payments SET status = $2 WHERE external_ref = $1;
-
--- name: UpdatePaymentStatusBySecretKey :exec
-UPDATE payments SET status = $2 WHERE order_secret_key = $1;
+-- name: UpdatePaymentStatus :exec
+UPDATE payments SET status = $2 WHERE id = $1;

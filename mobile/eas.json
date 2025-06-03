@@ -1,0 +1,76 @@
+{
+  "cli": {
+    "version": ">= 14.4.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "channel": "development",
+      "env": { "NODE_ENV": "development", "KOTLIN_VERSION": "1.9.25" },
+      "ios": {
+        "simulator": true
+      }
+    },
+    "dev-device": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "channel": "development",
+      "env": { "NODE_ENV": "development", "KOTLIN_VERSION": "1.9.25" }
+    },
+    "preview-device": {
+      "distribution": "internal",
+      "channel": "preview",
+      "env": { "NODE_ENV": "development", "KOTLIN_VERSION": "1.9.25" },
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "channel": "preview",
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": { "KOTLIN_VERSION": "1.9.25" },
+      "ios": {
+        "simulator": true
+      }
+    },
+    "production": {
+      "channel": "production",
+      "env": { "KOTLIN_VERSION": "1.9.25" },
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "autoIncrement": true
+    },
+    "pre-production": {
+      "channel": "production",
+      "env": { "KOTLIN_VERSION": "1.9.25" },
+      "android": {
+        "buildType": "apk"
+      },
+      "autoIncrement": true
+    },
+    "build-and-maestro-test": {
+      "channel": "preview",
+      "config": "build-and-maestro-test.yml",
+      "android": {
+        "buildType": "apk",
+        "image": "latest"
+      },
+      "ios": {
+        "simulator": true,
+        "image": "latest"
+      },
+      "env": {
+        "EXPO_PUBLIC_BASE_URL": "https://api.foodhousetesting.xyz"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

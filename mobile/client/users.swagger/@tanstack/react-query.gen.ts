@@ -2,9 +2,9 @@
 
 import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
-import type { UsersCreateSubscriptionData, UsersCreateSubscriptionError, UsersCreateSubscriptionResponse, UsersDeleteSubscriptionData, UsersDeleteSubscriptionError, UsersDeleteSubscriptionResponse, UsersGrantAdminData, UsersGrantAdminError, UsersGrantAdminResponse, UsersListUsersData, UsersUpdateSubscriptionData, UsersUpdateSubscriptionError, UsersUpdateSubscriptionResponse, UsersRevokeRefreshTokenData, UsersRevokeRefreshTokenError, UsersRevokeRefreshTokenResponse, UsersAuthenticateData, UsersAuthenticateError, UsersAuthenticateResponse, UsersChangePasswordData, UsersChangePasswordError, UsersChangePasswordResponse, UsersLastOtpForFactorData, UsersRefreshAccessTokenData, UsersRefreshAccessTokenError, UsersRefreshAccessTokenResponse, UsersSendEmailOtpData, UsersSendEmailOtpError, UsersSendEmailOtpResponse, UsersSendSignupSmsOtpData, UsersSendSignupSmsOtpError, UsersSendSignupSmsOtpResponse, UsersSendSmsOtpData, UsersSendSmsOtpError, UsersSendSmsOtpResponse, UsersSignupData, UsersSignupError, UsersSignupResponse, UsersVerifyOtpData, UsersVerifyOtpError, UsersVerifyOtpResponse, UsersCompleteRegistrationData, UsersCompleteRegistrationError, UsersCompleteRegistrationResponse, UsersDeleteUserPaymentMethodData, UsersDeleteUserPaymentMethodError, UsersDeleteUserPaymentMethodResponse, UsersGetUserByIdData, UsersSubscribeData, UsersSubscribeError, UsersSubscribeResponse, UsersGetUserActiveSubscriptionData, UsersGetUserPaymentMethodsByUserIdData, UsersGetUserSubscriptionsData, UsersGetFarmerByIdData } from '../types.gen';
+import type { UsersCreateSubscriptionData, UsersCreateSubscriptionError, UsersCreateSubscriptionResponse, UsersDeleteSubscriptionData, UsersDeleteSubscriptionError, UsersDeleteSubscriptionResponse, UsersUpdateSubscriptionData, UsersUpdateSubscriptionError, UsersUpdateSubscriptionResponse, UsersGrantAdminData, UsersGrantAdminError, UsersGrantAdminResponse, UsersListUsersData, UsersRevokeRefreshTokenData, UsersRevokeRefreshTokenError, UsersRevokeRefreshTokenResponse, UsersAuthenticateData, UsersAuthenticateError, UsersAuthenticateResponse, UsersChangePasswordData, UsersChangePasswordError, UsersChangePasswordResponse, UsersLastOtpForFactorData, UsersRefreshAccessTokenData, UsersRefreshAccessTokenError, UsersRefreshAccessTokenResponse, UsersSendEmailOtpData, UsersSendEmailOtpError, UsersSendEmailOtpResponse, UsersSendSignupSmsOtpData, UsersSendSignupSmsOtpError, UsersSendSignupSmsOtpResponse, UsersSendSmsOtpData, UsersSendSmsOtpError, UsersSendSmsOtpResponse, UsersSignupData, UsersSignupError, UsersSignupResponse, UsersVerifyOtpData, UsersVerifyOtpError, UsersVerifyOtpResponse, UsersCompleteRegistrationData, UsersCompleteRegistrationError, UsersCompleteRegistrationResponse, UsersDeleteUserPaymentMethodData, UsersDeleteUserPaymentMethodError, UsersDeleteUserPaymentMethodResponse, UsersGetUserByIdData, UsersSubscribeData, UsersSubscribeError, UsersSubscribeResponse, UsersGetUserActiveSubscriptionData, UsersGetUserSubscriptionsData, UsersGetUserSubscriptionByIdData, UsersGetUserPaymentMethodsByUserIdData, UsersGetFarmerByIdData } from '../types.gen';
 import type { AxiosError } from 'axios';
-import { client, usersCreateSubscription, usersDeleteSubscription, usersGrantAdmin, usersListUsers, usersUpdateSubscription, usersRevokeRefreshToken, usersAuthenticate, usersChangePassword, usersHealthCheck, usersLastOtpForFactor, usersRefreshAccessToken, usersSendEmailOtp, usersSendSignupSmsOtp, usersSendSmsOtp, usersSignup, usersVerifyOtp, usersCompleteRegistration, usersDeleteUserPaymentMethod, usersGetUserById, usersSubscribe, usersGetUserActiveSubscription, usersGetUserPaymentMethodsByUserId, usersGetUserSubscriptions, usersGetFarmerById } from '../sdk.gen';
+import { client, usersCreateSubscription, usersDeleteSubscription, usersUpdateSubscription, usersGrantAdmin, usersListUsers, usersRevokeRefreshToken, usersAuthenticate, usersChangePassword, usersHealthCheck, usersLastOtpForFactor, usersRefreshAccessToken, usersSendEmailOtp, usersSendSignupSmsOtp, usersSendSmsOtp, usersSignup, usersVerifyOtp, usersCompleteRegistration, usersDeleteUserPaymentMethod, usersGetUserById, usersSubscribe, usersGetUserActiveSubscription, usersGetUserSubscriptions, usersGetUserSubscriptionById, usersGetUserPaymentMethodsByUserId, usersGetFarmerById } from '../sdk.gen';
 
 type QueryKey<TOptions extends OptionsLegacyParser> = [
     Pick<TOptions, 'baseURL' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -80,6 +80,20 @@ export const usersDeleteSubscriptionMutation = (options?: Partial<OptionsLegacyP
     return mutationOptions;
 };
 
+export const usersUpdateSubscriptionMutation = (options?: Partial<OptionsLegacyParser<UsersUpdateSubscriptionData>>) => {
+    const mutationOptions: UseMutationOptions<UsersUpdateSubscriptionResponse, AxiosError<UsersUpdateSubscriptionError>, OptionsLegacyParser<UsersUpdateSubscriptionData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await usersUpdateSubscription({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
 export const usersGrantAdminQueryKey = (options: OptionsLegacyParser<UsersGrantAdminData>) => [
     createQueryKey('usersGrantAdmin', options)
 ];
@@ -130,20 +144,6 @@ export const usersListUsersOptions = (options: OptionsLegacyParser<UsersListUser
         },
         queryKey: usersListUsersQueryKey(options)
     });
-};
-
-export const usersUpdateSubscriptionMutation = (options?: Partial<OptionsLegacyParser<UsersUpdateSubscriptionData>>) => {
-    const mutationOptions: UseMutationOptions<UsersUpdateSubscriptionResponse, AxiosError<UsersUpdateSubscriptionError>, OptionsLegacyParser<UsersUpdateSubscriptionData>> = {
-        mutationFn: async (localOptions) => {
-            const { data } = await usersUpdateSubscription({
-                ...options,
-                ...localOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
 };
 
 export const usersRevokeRefreshTokenQueryKey = (options: OptionsLegacyParser<UsersRevokeRefreshTokenData>) => [
@@ -599,25 +599,6 @@ export const usersGetUserActiveSubscriptionOptions = (options: OptionsLegacyPars
     });
 };
 
-export const usersGetUserPaymentMethodsByUserIdQueryKey = (options: OptionsLegacyParser<UsersGetUserPaymentMethodsByUserIdData>) => [
-    createQueryKey('usersGetUserPaymentMethodsByUserId', options)
-];
-
-export const usersGetUserPaymentMethodsByUserIdOptions = (options: OptionsLegacyParser<UsersGetUserPaymentMethodsByUserIdData>) => {
-    return queryOptions({
-        queryFn: async ({ queryKey, signal }) => {
-            const { data } = await usersGetUserPaymentMethodsByUserId({
-                ...options,
-                ...queryKey[0],
-                signal,
-                throwOnError: true
-            });
-            return data;
-        },
-        queryKey: usersGetUserPaymentMethodsByUserIdQueryKey(options)
-    });
-};
-
 export const usersGetUserSubscriptionsQueryKey = (options: OptionsLegacyParser<UsersGetUserSubscriptionsData>) => [
     createQueryKey('usersGetUserSubscriptions', options)
 ];
@@ -634,6 +615,44 @@ export const usersGetUserSubscriptionsOptions = (options: OptionsLegacyParser<Us
             return data;
         },
         queryKey: usersGetUserSubscriptionsQueryKey(options)
+    });
+};
+
+export const usersGetUserSubscriptionByIdQueryKey = (options: OptionsLegacyParser<UsersGetUserSubscriptionByIdData>) => [
+    createQueryKey('usersGetUserSubscriptionById', options)
+];
+
+export const usersGetUserSubscriptionByIdOptions = (options: OptionsLegacyParser<UsersGetUserSubscriptionByIdData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await usersGetUserSubscriptionById({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: usersGetUserSubscriptionByIdQueryKey(options)
+    });
+};
+
+export const usersGetUserPaymentMethodsByUserIdQueryKey = (options: OptionsLegacyParser<UsersGetUserPaymentMethodsByUserIdData>) => [
+    createQueryKey('usersGetUserPaymentMethodsByUserId', options)
+];
+
+export const usersGetUserPaymentMethodsByUserIdOptions = (options: OptionsLegacyParser<UsersGetUserPaymentMethodsByUserIdData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await usersGetUserPaymentMethodsByUserId({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: usersGetUserPaymentMethodsByUserIdQueryKey(options)
     });
 };
 

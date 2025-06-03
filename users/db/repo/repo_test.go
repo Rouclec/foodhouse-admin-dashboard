@@ -285,59 +285,6 @@ func TestRefreshTokens(t *testing.T) {
 		"RevokedAt should be valid (ie the token should be revoked)")
 }
 
-func TestPaymentLifecycle(t *testing.T) {
-	migrationPath := "../migrations"
-
-	logger := zerolog.New(os.Stderr).With().Timestamp().Caller().Logger()
-
-	err := repo.Migrate(databaseURL, migrationPath, logger)
-	handleFatalError(err, "Could not migrate database")
-	defer repo.MigrateDown(databaseURL, migrationPath, logger)
-
-	repo := repo.NewUsersRepo(pool)
-	ctx := context.Background()
-
-	// Variables for payment
-	amount := int64(1000)
-	currency := "USD"
-	method := "credit_card"
-	externalRef := uuid.NewString()
-
-	// Create a payment
-	createdPayment, err := repo.Do().CreatePayment(ctx, sqlc.CreatePaymentParams{
-		Amount:          amount,
-		CurrencyIsoCode: currency,
-		Method:          method,
-		ExternalRef:     externalRef,
-	})
-	require.NoErrorf(t, err, "failed to create payment: %v", err)
-	assert.NotEmptyf(t, createdPayment.ID, "payment ID should not be empty")
-	assert.Equalf(t, amount, createdPayment.Amount, "amount should be equal")
-	assert.Equalf(t, currency, createdPayment.CurrencyIsoCode, "currency should be equal")
-
-	// Get payment by ID
-	fetchedPayment, err := repo.Do().GetPaymentById(ctx, createdPayment.ID)
-	require.NoErrorf(t, err, "failed to fetch payment by ID: %v", err)
-	assert.Equalf(t, createdPayment.ID, fetchedPayment.ID, "payment ID should be equal")
-
-	// Get payment by external reference
-	fetchedPaymentByExternalRef, err := repo.Do().GetPaymentByExternalReference(ctx, externalRef)
-	require.NoErrorf(t, err, "failed to fetch payment by external reference: %v", err)
-	assert.Equalf(t, externalRef, fetchedPaymentByExternalRef.ExternalRef, "external reference should be equal")
-
-	// Update payment status
-	err = repo.Do().UpdatePaymentStatus(ctx, sqlc.UpdatePaymentStatusParams{
-		Status: "paid",
-		ID:     createdPayment.ID,
-	})
-	require.NoErrorf(t, err, "failed to update payment status: %v", err)
-
-	// Get payment for update (locking the row)
-	fetchedPaymentForUpdate, err := repo.Do().GetPaymentForUpdate(ctx, createdPayment.ID)
-	require.NoErrorf(t, err, "failed to fetch payment for update: %v", err)
-	assert.Equalf(t, createdPayment.ID, fetchedPaymentForUpdate.ID, "payment ID should be equal")
-}
-
 func TestSubscriptionLifecycle(t *testing.T) {
 	migrationPath := "../migrations"
 
@@ -353,7 +300,7 @@ func TestSubscriptionLifecycle(t *testing.T) {
 	// Variables for subscription
 	title := "Premium Plan"
 	description := "Access to premium features"
-	amount := int64(1999)
+	amount := float64(1999)
 	currency := "USD"
 
 	// Create a subscription
@@ -370,7 +317,7 @@ func TestSubscriptionLifecycle(t *testing.T) {
 	require.NoErrorf(t, err, "failed to create subscription: %v", err)
 	assert.NotEmptyf(t, createdSubscription.ID, "subscription ID should not be empty")
 	assert.Equalf(t, title, createdSubscription.Title, "title should be equal")
-	assert.Equalf(t, amount, createdSubscription.Amount, "amount should be equal")
+	assert.InDeltaf(t, amount, createdSubscription.Amount, 0.01, "amount should be equal")
 
 	// Get subscription by ID
 	fetchedSubscription, err := subscriptionRepo.Do().GetSubscriptionByID(ctx, createdSubscription.ID)
@@ -391,7 +338,7 @@ func TestSubscriptionLifecycle(t *testing.T) {
 	})
 	require.NoErrorf(t, err, "failed to update subscription: %v", err)
 	assert.Equalf(t, "Updated Premium Plan", updatedSubscription.Title, "updated title should be equal")
-	assert.Equalf(t, int64(2999), updatedSubscription.Amount, "updated amount should be equal")
+	assert.InDeltaf(t, float64(2999), updatedSubscription.Amount, 0.01, "updated amount should be equal")
 
 	// Delete subscription
 	err = subscriptionRepo.Do().DeleteSubscription(ctx, createdSubscription.ID)

@@ -1,0 +1,58 @@
+name: IOS development build
+
+on:
+  push:
+    branches:
+      - build/ios/**
+  workflow_dispatch:
+
+jobs:
+  build-and-submit:
+    name: Build and submit
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check for EXPO_TOKEN
+        run: |
+          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
+            echo "You must provide an EXPO_TOKEN secret linked to this project's Expo account in this repo's secrets. Learn more: https://docs.expo.dev/eas-update/github-actions"
+            exit 1
+          fi
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Trying to install dependencies from cache
+      - name: Cache node modules
+        id: cache-npm
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('mobile/**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+      - if: ${{ steps.cache-npm.outputs.cache-hit == 'false' }}
+        name: List the state of node modules
+        continue-on-error: true
+        working-directory: mobile
+        run: yarn list
+
+      - name: Install dependencies
+        working-directory: mobile
+        run: yarn install
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@v7
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      # With the flag --auto-submit the build will be submitted to testflight / playstore automatically.
+      # The app will not be released without manual action
+      - name: Build and Submit
+        working-directory: mobile
+        run: make dev-build PLATFORM=ios FLAGS="--non-interactive --no-wait"

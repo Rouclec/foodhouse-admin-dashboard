@@ -21,12 +21,17 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	Orders_CreateOrder_FullMethodName         = "/ordersgrpc.Orders/CreateOrder"
 	Orders_GetOrderDetails_FullMethodName     = "/ordersgrpc.Orders/GetOrderDetails"
-	Orders_ConfirmOrderPayment_FullMethodName = "/ordersgrpc.Orders/ConfirmOrderPayment"
+	Orders_ConfirmPayment_FullMethodName      = "/ordersgrpc.Orders/ConfirmPayment"
 	Orders_DispatchOrder_FullMethodName       = "/ordersgrpc.Orders/DispatchOrder"
 	Orders_ConfirmDelivery_FullMethodName     = "/ordersgrpc.Orders/ConfirmDelivery"
+	Orders_ApproveOrder_FullMethodName        = "/ordersgrpc.Orders/ApproveOrder"
 	Orders_HealthCheck_FullMethodName         = "/ordersgrpc.Orders/HealthCheck"
 	Orders_ListUserOrders_FullMethodName      = "/ordersgrpc.Orders/ListUserOrders"
 	Orders_ListFarmerOrders_FullMethodName    = "/ordersgrpc.Orders/ListFarmerOrders"
+	Orders_InitiatePayment_FullMethodName     = "/ordersgrpc.Orders/InitiatePayment"
+	Orders_CreateDeliveryPoint_FullMethodName = "/ordersgrpc.Orders/CreateDeliveryPoint"
+	Orders_ListDeliveryPoints_FullMethodName  = "/ordersgrpc.Orders/ListDeliveryPoints"
+	Orders_ListDeliveryCities_FullMethodName  = "/ordersgrpc.Orders/ListDeliveryCities"
 )
 
 // OrdersClient is the client API for Orders service.
@@ -35,12 +40,17 @@ const (
 type OrdersClient interface {
 	CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*CreateOrderResponse, error)
 	GetOrderDetails(ctx context.Context, in *GetOrderDetailsRequest, opts ...grpc.CallOption) (*GetOrderDetailsResponse, error)
-	ConfirmOrderPayment(ctx context.Context, in *ConfirmOrderPaymentRequest, opts ...grpc.CallOption) (*ConfirmOrderPaymentResponse, error)
+	ConfirmPayment(ctx context.Context, in *ConfirmPaymentRequest, opts ...grpc.CallOption) (*ConfirmPaymentResponse, error)
 	DispatchOrder(ctx context.Context, in *DispatchOrderRequest, opts ...grpc.CallOption) (*DispatchOrderResponse, error)
 	ConfirmDelivery(ctx context.Context, in *ConfirmDeliveryRequest, opts ...grpc.CallOption) (*ConfirmDeliveryResponse, error)
+	ApproveOrder(ctx context.Context, in *ApproveOrderRequest, opts ...grpc.CallOption) (*ApproveOrderResponse, error)
 	HealthCheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
 	ListUserOrders(ctx context.Context, in *ListUserOrdersRequest, opts ...grpc.CallOption) (*ListUserOrdersResponse, error)
 	ListFarmerOrders(ctx context.Context, in *ListFarmerOrdersRequest, opts ...grpc.CallOption) (*ListFarmerOrdersResponse, error)
+	InitiatePayment(ctx context.Context, in *InitiatePaymentRequest, opts ...grpc.CallOption) (*InitiatePaymentResponse, error)
+	CreateDeliveryPoint(ctx context.Context, in *CreateDeliveryPointRequest, opts ...grpc.CallOption) (*CreateDeliveryPointResponse, error)
+	ListDeliveryPoints(ctx context.Context, in *ListDeliveryPointsRequest, opts ...grpc.CallOption) (*ListDeliveryPointsResponse, error)
+	ListDeliveryCities(ctx context.Context, in *ListDeliveryCitiesRequest, opts ...grpc.CallOption) (*ListDeliveryCitiesResponse, error)
 }
 
 type ordersClient struct {
@@ -71,10 +81,10 @@ func (c *ordersClient) GetOrderDetails(ctx context.Context, in *GetOrderDetailsR
 	return out, nil
 }
 
-func (c *ordersClient) ConfirmOrderPayment(ctx context.Context, in *ConfirmOrderPaymentRequest, opts ...grpc.CallOption) (*ConfirmOrderPaymentResponse, error) {
+func (c *ordersClient) ConfirmPayment(ctx context.Context, in *ConfirmPaymentRequest, opts ...grpc.CallOption) (*ConfirmPaymentResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ConfirmOrderPaymentResponse)
-	err := c.cc.Invoke(ctx, Orders_ConfirmOrderPayment_FullMethodName, in, out, cOpts...)
+	out := new(ConfirmPaymentResponse)
+	err := c.cc.Invoke(ctx, Orders_ConfirmPayment_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -95,6 +105,16 @@ func (c *ordersClient) ConfirmDelivery(ctx context.Context, in *ConfirmDeliveryR
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ConfirmDeliveryResponse)
 	err := c.cc.Invoke(ctx, Orders_ConfirmDelivery_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ordersClient) ApproveOrder(ctx context.Context, in *ApproveOrderRequest, opts ...grpc.CallOption) (*ApproveOrderResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ApproveOrderResponse)
+	err := c.cc.Invoke(ctx, Orders_ApproveOrder_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -131,18 +151,63 @@ func (c *ordersClient) ListFarmerOrders(ctx context.Context, in *ListFarmerOrder
 	return out, nil
 }
 
+func (c *ordersClient) InitiatePayment(ctx context.Context, in *InitiatePaymentRequest, opts ...grpc.CallOption) (*InitiatePaymentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(InitiatePaymentResponse)
+	err := c.cc.Invoke(ctx, Orders_InitiatePayment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ordersClient) CreateDeliveryPoint(ctx context.Context, in *CreateDeliveryPointRequest, opts ...grpc.CallOption) (*CreateDeliveryPointResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateDeliveryPointResponse)
+	err := c.cc.Invoke(ctx, Orders_CreateDeliveryPoint_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ordersClient) ListDeliveryPoints(ctx context.Context, in *ListDeliveryPointsRequest, opts ...grpc.CallOption) (*ListDeliveryPointsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDeliveryPointsResponse)
+	err := c.cc.Invoke(ctx, Orders_ListDeliveryPoints_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ordersClient) ListDeliveryCities(ctx context.Context, in *ListDeliveryCitiesRequest, opts ...grpc.CallOption) (*ListDeliveryCitiesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDeliveryCitiesResponse)
+	err := c.cc.Invoke(ctx, Orders_ListDeliveryCities_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrdersServer is the server API for Orders service.
 // All implementations must embed UnimplementedOrdersServer
 // for forward compatibility.
 type OrdersServer interface {
 	CreateOrder(context.Context, *CreateOrderRequest) (*CreateOrderResponse, error)
 	GetOrderDetails(context.Context, *GetOrderDetailsRequest) (*GetOrderDetailsResponse, error)
-	ConfirmOrderPayment(context.Context, *ConfirmOrderPaymentRequest) (*ConfirmOrderPaymentResponse, error)
+	ConfirmPayment(context.Context, *ConfirmPaymentRequest) (*ConfirmPaymentResponse, error)
 	DispatchOrder(context.Context, *DispatchOrderRequest) (*DispatchOrderResponse, error)
 	ConfirmDelivery(context.Context, *ConfirmDeliveryRequest) (*ConfirmDeliveryResponse, error)
+	ApproveOrder(context.Context, *ApproveOrderRequest) (*ApproveOrderResponse, error)
 	HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
 	ListUserOrders(context.Context, *ListUserOrdersRequest) (*ListUserOrdersResponse, error)
 	ListFarmerOrders(context.Context, *ListFarmerOrdersRequest) (*ListFarmerOrdersResponse, error)
+	InitiatePayment(context.Context, *InitiatePaymentRequest) (*InitiatePaymentResponse, error)
+	CreateDeliveryPoint(context.Context, *CreateDeliveryPointRequest) (*CreateDeliveryPointResponse, error)
+	ListDeliveryPoints(context.Context, *ListDeliveryPointsRequest) (*ListDeliveryPointsResponse, error)
+	ListDeliveryCities(context.Context, *ListDeliveryCitiesRequest) (*ListDeliveryCitiesResponse, error)
 	mustEmbedUnimplementedOrdersServer()
 }
 
@@ -159,14 +224,17 @@ func (UnimplementedOrdersServer) CreateOrder(context.Context, *CreateOrderReques
 func (UnimplementedOrdersServer) GetOrderDetails(context.Context, *GetOrderDetailsRequest) (*GetOrderDetailsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOrderDetails not implemented")
 }
-func (UnimplementedOrdersServer) ConfirmOrderPayment(context.Context, *ConfirmOrderPaymentRequest) (*ConfirmOrderPaymentResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ConfirmOrderPayment not implemented")
+func (UnimplementedOrdersServer) ConfirmPayment(context.Context, *ConfirmPaymentRequest) (*ConfirmPaymentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConfirmPayment not implemented")
 }
 func (UnimplementedOrdersServer) DispatchOrder(context.Context, *DispatchOrderRequest) (*DispatchOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DispatchOrder not implemented")
 }
 func (UnimplementedOrdersServer) ConfirmDelivery(context.Context, *ConfirmDeliveryRequest) (*ConfirmDeliveryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ConfirmDelivery not implemented")
+}
+func (UnimplementedOrdersServer) ApproveOrder(context.Context, *ApproveOrderRequest) (*ApproveOrderResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ApproveOrder not implemented")
 }
 func (UnimplementedOrdersServer) HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HealthCheck not implemented")
@@ -176,6 +244,18 @@ func (UnimplementedOrdersServer) ListUserOrders(context.Context, *ListUserOrders
 }
 func (UnimplementedOrdersServer) ListFarmerOrders(context.Context, *ListFarmerOrdersRequest) (*ListFarmerOrdersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListFarmerOrders not implemented")
+}
+func (UnimplementedOrdersServer) InitiatePayment(context.Context, *InitiatePaymentRequest) (*InitiatePaymentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InitiatePayment not implemented")
+}
+func (UnimplementedOrdersServer) CreateDeliveryPoint(context.Context, *CreateDeliveryPointRequest) (*CreateDeliveryPointResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateDeliveryPoint not implemented")
+}
+func (UnimplementedOrdersServer) ListDeliveryPoints(context.Context, *ListDeliveryPointsRequest) (*ListDeliveryPointsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListDeliveryPoints not implemented")
+}
+func (UnimplementedOrdersServer) ListDeliveryCities(context.Context, *ListDeliveryCitiesRequest) (*ListDeliveryCitiesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListDeliveryCities not implemented")
 }
 func (UnimplementedOrdersServer) mustEmbedUnimplementedOrdersServer() {}
 func (UnimplementedOrdersServer) testEmbeddedByValue()                {}
@@ -234,20 +314,20 @@ func _Orders_GetOrderDetails_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Orders_ConfirmOrderPayment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ConfirmOrderPaymentRequest)
+func _Orders_ConfirmPayment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConfirmPaymentRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OrdersServer).ConfirmOrderPayment(ctx, in)
+		return srv.(OrdersServer).ConfirmPayment(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Orders_ConfirmOrderPayment_FullMethodName,
+		FullMethod: Orders_ConfirmPayment_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrdersServer).ConfirmOrderPayment(ctx, req.(*ConfirmOrderPaymentRequest))
+		return srv.(OrdersServer).ConfirmPayment(ctx, req.(*ConfirmPaymentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -284,6 +364,24 @@ func _Orders_ConfirmDelivery_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OrdersServer).ConfirmDelivery(ctx, req.(*ConfirmDeliveryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orders_ApproveOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ApproveOrderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).ApproveOrder(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_ApproveOrder_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).ApproveOrder(ctx, req.(*ApproveOrderRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -342,6 +440,78 @@ func _Orders_ListFarmerOrders_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Orders_InitiatePayment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InitiatePaymentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).InitiatePayment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_InitiatePayment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).InitiatePayment(ctx, req.(*InitiatePaymentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orders_CreateDeliveryPoint_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateDeliveryPointRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).CreateDeliveryPoint(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_CreateDeliveryPoint_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).CreateDeliveryPoint(ctx, req.(*CreateDeliveryPointRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orders_ListDeliveryPoints_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDeliveryPointsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).ListDeliveryPoints(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_ListDeliveryPoints_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).ListDeliveryPoints(ctx, req.(*ListDeliveryPointsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orders_ListDeliveryCities_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDeliveryCitiesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).ListDeliveryCities(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_ListDeliveryCities_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).ListDeliveryCities(ctx, req.(*ListDeliveryCitiesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Orders_ServiceDesc is the grpc.ServiceDesc for Orders service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -358,8 +528,8 @@ var Orders_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Orders_GetOrderDetails_Handler,
 		},
 		{
-			MethodName: "ConfirmOrderPayment",
-			Handler:    _Orders_ConfirmOrderPayment_Handler,
+			MethodName: "ConfirmPayment",
+			Handler:    _Orders_ConfirmPayment_Handler,
 		},
 		{
 			MethodName: "DispatchOrder",
@@ -368,6 +538,10 @@ var Orders_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ConfirmDelivery",
 			Handler:    _Orders_ConfirmDelivery_Handler,
+		},
+		{
+			MethodName: "ApproveOrder",
+			Handler:    _Orders_ApproveOrder_Handler,
 		},
 		{
 			MethodName: "HealthCheck",
@@ -380,6 +554,22 @@ var Orders_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListFarmerOrders",
 			Handler:    _Orders_ListFarmerOrders_Handler,
+		},
+		{
+			MethodName: "InitiatePayment",
+			Handler:    _Orders_InitiatePayment_Handler,
+		},
+		{
+			MethodName: "CreateDeliveryPoint",
+			Handler:    _Orders_CreateDeliveryPoint_Handler,
+		},
+		{
+			MethodName: "ListDeliveryPoints",
+			Handler:    _Orders_ListDeliveryPoints_Handler,
+		},
+		{
+			MethodName: "ListDeliveryCities",
+			Handler:    _Orders_ListDeliveryCities_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
