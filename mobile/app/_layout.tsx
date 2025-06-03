@@ -17,6 +17,7 @@ import { Colors } from "@/constants";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { defaultStyles } from "@/styles";
+import { Region } from "react-native-maps";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -45,12 +46,30 @@ const client = new QueryClient();
 interface ContextInfo {
   user: usersgrpcUser | undefined;
   role: usersgrpcUserType | undefined;
+  productId: string | undefined;
+  deliveryLocation:
+    | {
+        description: string;
+        address: string;
+        region: Region;
+      }
+    | undefined;
 }
 
 interface ContextSetters {
   // eslint-disable-next-line no-unused-vars
   setUser: (user: usersgrpcUser | undefined) => void;
   setUserRole: (role: usersgrpcUserType | undefined) => void;
+  setProductId: (id: string | undefined) => void;
+  setDeliveryLocation: (
+    location:
+      | {
+          description: string;
+          address: string;
+          region: Region;
+        }
+      | undefined
+  ) => void;
 }
 
 export interface ContextType extends ContextInfo, ContextSetters {}
@@ -105,6 +124,8 @@ function RootLayoutNav() {
   const initialState: ContextInfo = {
     user: undefined,
     role: undefined,
+    productId: undefined,
+    deliveryLocation: undefined,
   };
 
   const [contextInfo, setContextInfo] = useState(initialState);
@@ -116,9 +137,31 @@ function RootLayoutNav() {
   function setUserRole(role: usersgrpcUserType | undefined) {
     setContextInfo((prevState) => ({ ...prevState, role }));
   }
+
+  function setProductId(id: string | undefined) {
+    setContextInfo((prevState) => ({ ...prevState, productId: id }));
+  }
+
+  function setDeliveryLocation(
+    location:
+      | {
+          description: string;
+          address: string;
+          region: Region;
+        }
+      | undefined
+  ) {
+    setContextInfo((prevState) => ({
+      ...prevState,
+      deliveryLocation: location,
+    }));
+  }
+
   const contextSetters: ContextSetters = {
     setUser,
     setUserRole,
+    setDeliveryLocation,
+    setProductId,
   };
 
   return (

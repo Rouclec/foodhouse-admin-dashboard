@@ -39,7 +39,13 @@ Parameters:
   
   DomainName:
     Type: String
-
+  
+  UsersHostPort:
+    Type: String
+  
+  ProductsHostPort:
+    Type: String
+    
   # The following are optional parameters and are treated more like constants.
   ContainerPort:
     Type: Number
@@ -108,6 +114,10 @@ Resources:
               Value: "true"
             - Name: CAMPAY_WEBHOOK
               Value: !Sub "https://api.${DomainName}/v1/public/confirm-order-payment"
+            - Name: USERS_HOST_PORT
+              Value: !Ref UsersHostPort
+            - Name: PRODUCTS_HOST_PORT
+              Value: !Ref ProductsHostPort
 
           Secrets:
             - Name: DB_NAME

@@ -666,14 +666,10 @@ func (i *Impl) SendEmailOtp(ctx context.Context,
 
 func (i *Impl) ChangePassword(ctx context.Context, req *usersgrpc.ChangePasswordRequest) (
 	*usersgrpc.ChangePasswordResponse, error) {
-	if req.GetEmailFactor().GetType() != usersgrpc.FactorType_FACTOR_TYPE_EMAIL_OTP {
-		return nil, status.Error(codes.InvalidArgument, "email factor must be an EMAIL_OTP")
-	}
-
-	// Verify the request_id and OTP here
-	userEmail, err := i.otpGenerator.VerifyOtpAuthFactor(ctx, req.GetEmailFactor())
+	// Verify the auth factor here
+	userID, err := i.validateAuthFactor(ctx, req.GetEmailFactor())
 	if err != nil {
-		return nil, status.Errorf(codes.Unauthenticated, "Failed to validate OTP: %v", err)
+		return nil, status.Errorf(codes.Unauthenticated, "Failed to validate factor: %v", err)
 	}
 
 	// Checking the password for minimum length
@@ -703,9 +699,9 @@ func (i *Impl) ChangePassword(ctx context.Context, req *usersgrpc.ChangePassword
 	}()
 
 	// Fetching the user by email
-	foundUser, err := querier.GetUserByEmail(ctx, &userEmail)
+	foundUser, err := querier.GetUser(ctx, userID)
 	if err != nil {
-		return nil, status.Errorf(codes.NotFound, "Could not fetch the user by email: %v", err)
+		return nil, status.Errorf(codes.NotFound, "Could not fetch the user by id: %v", err)
 	}
 
 	arg := sqlc.UpdateUserPasswordParams{
@@ -878,9 +874,11 @@ func (i *Impl) CreateSubscription(ctx context.Context,
 			Title:       subscription.Title,
 			Description: subscription.Description,
 			// Convert microseconds back to days
-			Duration:        subscription.Duration.Microseconds / (24 * 60 * 60 * OneMillion),
-			Amount:          subscription.Amount,
-			CurrencyIsoCode: subscription.CurrencyIsoCode,
+			Duration: subscription.Duration.Microseconds / (24 * 60 * 60 * OneMillion),
+			Amount: &types.Amount{
+				Value:           subscription.Amount,
+				CurrencyIsoCode: subscription.CurrencyIsoCode,
+			},
 		},
 	}, nil
 }
@@ -953,9 +951,11 @@ func (i *Impl) UpdateSubscription(ctx context.Context,
 			Title:       updatedSubscription.Title,
 			Description: updatedSubscription.Description,
 			// Convert microseconds back to days
-			Duration:        updatedSubscription.Duration.Microseconds / (24 * 60 * 60 * OneMillion),
-			Amount:          updatedSubscription.Amount,
-			CurrencyIsoCode: updatedSubscription.CurrencyIsoCode,
+			Duration: updatedSubscription.Duration.Microseconds / (24 * 60 * 60 * OneMillion),
+			Amount: &types.Amount{
+				Value:           updatedSubscription.Amount,
+				CurrencyIsoCode: updatedSubscription.CurrencyIsoCode,
+			},
 		},
 	}, nil
 }
@@ -1026,11 +1026,13 @@ func (i *Impl) GetUserActiveSubscription(ctx context.Context,
 			UserId: activeUserSubscription.UserID,
 			Active: activeUserSubscription.Active,
 			Subscription: &usersgrpc.Subscription{
-				Id:              subscription.ID,
-				Title:           subscription.Title,
-				Description:     subscription.Description,
-				Amount:          subscription.Amount,
-				CurrencyIsoCode: subscription.CurrencyIsoCode,
+				Id:          subscription.ID,
+				Title:       subscription.Title,
+				Description: subscription.Description,
+				Amount: &types.Amount{
+					Value:           subscription.Amount,
+					CurrencyIsoCode: subscription.CurrencyIsoCode,
+				},
 			},
 			CreatedAt: timestamppb.New(activeUserSubscription.CreatedAt.Time),
 			UpdatedAt: timestamppb.New(activeUserSubscription.UpdatedAt.Time),
@@ -1104,16 +1106,6 @@ func (i *Impl) Subscribe(ctx context.Context,
 		return nil, status.Error(codes.Internal, fmt.Sprintf("error creating user subscription %v", err))
 	}
 
-	// create a payment with the external ref as the
-	createPaymentArgs := &sqlc.CreatePaymentParams{
-		ExternalRef:     userSubscription.ID,
-		Amount:          subscription.Amount,
-		CurrencyIsoCode: req.GetCurrencyIsoCode(),
-		Method:          req.GetPaymentMethod().GetMethod(),
-	}
-
-	payment, err := querier.CreatePayment(ctx, *createPaymentArgs)
-
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("error creating payment %v", err))
 	}
@@ -1124,8 +1116,6 @@ func (i *Impl) Subscribe(ctx context.Context,
 	}
 
 	return &usersgrpc.SubscribeResponse{
-		PaymentId:  payment.ID,
-		PaymentRef: payment.ExternalRef,
 		UserSubscription: &usersgrpc.UserSubscription{
 			Id:        userSubscription.ID,
 			Active:    userSubscription.Active,
@@ -1168,4 +1158,55 @@ func (i *Impl) GetFarmerByID(
 			UpdatedAt:               timestamppb.New(foundUser.UpdatedAt.Time),
 		},
 	}, nil
+}
+
+// GetUserSubscriptionByID implements usersgrpc.UsersServer.
+func (i *Impl) GetUserSubscriptionByID(ctx context.Context,
+	req *usersgrpc.GetUserSubscriptionByIDRequest) (
+	*usersgrpc.GetUserSubscriptionByIDResponse, error) {
+	userSubscription, err := i.repo.Do().GetUserSubscriptionByID(ctx, req.GetUserSubscriptionId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Error getting user subscription by id : %v", err)
+	}
+
+	return &usersgrpc.GetUserSubscriptionByIDResponse{
+		UserSubscription: &usersgrpc.UserSubscription{
+			Id:     userSubscription.ID,
+			UserId: userSubscription.UserID,
+			Active: userSubscription.Active,
+			Subscription: &usersgrpc.Subscription{
+				Id: userSubscription.SubscriptionID,
+			},
+			CreatedAt: timestamppb.New(userSubscription.CreatedAt.Time),
+			UpdatedAt: timestamppb.New(userSubscription.UpdatedAt.Time),
+			ExpiresAt: timestamppb.New(userSubscription.ExpiresAt),
+		},
+	}, nil
+}
+
+// ActivateUserSubscription implements usersgrpc.UsersServer.
+func (i *Impl) ActivateUserSubscription(ctx context.Context,
+	req *usersgrpc.ActivateUserSubscriptionRequest) (
+	*usersgrpc.ActivateUserSubscriptionResponse, error) {
+	err := i.repo.Do().ActivateUserSubscription(ctx, req.GetUserSubscriptionId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error activating user subscription %v", err)
+	}
+
+	return &usersgrpc.ActivateUserSubscriptionResponse{}, nil
+}
+
+// DeleteUserSubscription implements usersgrpc.UsersServer.
+func (i *Impl) DeleteUserSubscription(ctx context.Context,
+	req *usersgrpc.DeleteUserSubscriptionRequest) (
+	*usersgrpc.DeleteUserSubscriptionResponse, error) {
+	err := i.repo.Do().DeleteUserSubscription(ctx, req.GetUserSubscriptionId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error deleting user subscription %v", err)
+	}
+
+	return &usersgrpc.DeleteUserSubscriptionResponse{}, nil
 }

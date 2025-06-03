@@ -14,6 +14,9 @@ export const defaultStyles = StyleSheet.create({
   bgWhite: {
     backgroundColor: Colors.light["bg"],
   },
+  bgLight10: {
+    backgroundColor: Colors.light[10],
+  },
   center: {
     alignItems: "center",
     justifyContent: "center",
@@ -99,7 +102,7 @@ export const defaultStyles = StyleSheet.create({
     height: "auto",
     width: width,
     paddingBottom: 32,
-    paddingHorizontal: 32,
+    paddingHorizontal: 24,
     rowGap: 12,
     paddingTop: 12,
   },
@@ -123,6 +126,9 @@ export const defaultStyles = StyleSheet.create({
   },
   primaryButton: {
     backgroundColor: Colors.primary[500],
+  },
+  greyButton: {
+    backgroundColor: Colors.grey["bg"],
   },
   secondaryButton: {
     borderWidth: 1,
@@ -149,7 +155,7 @@ export const defaultStyles = StyleSheet.create({
   appHeader: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.light['bg'],
+    backgroundColor: Colors.light["bg"],
     justifyContent: "space-between",
   },
   headerTextContainer: {
@@ -214,6 +220,9 @@ export const defaultStyles = StyleSheet.create({
     paddingRight: 12,
     columnGap: 16,
   },
+  px12: {
+    paddingHorizontal: 12,
+  },
   dialogSubtitleContainer: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -268,5 +277,17 @@ export const defaultStyles = StyleSheet.create({
   },
   textCenter: {
     textAlign: "center",
+  },
+  innerButtonContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center", // center contents
+    columnGap: 8,
+  },
+  text14: {
+    fontSize: 14,
+  },
+  text16: {
+    fontSize: 16,
   },
 });

@@ -138,7 +138,7 @@ export type rpcStatus = {
 };
 
 export type typesAmount = {
-    value?: string;
+    value?: number;
     currencyIsoCode?: string;
 };
 
@@ -210,9 +210,9 @@ export type ProductsListProductsData = {
         categoryId?: string;
         count?: number;
         'maxAmount.currencyIsoCode'?: string;
-        'maxAmount.value'?: string;
+        'maxAmount.value'?: number;
         'minAmount.currencyIsoCode'?: string;
-        'minAmount.value'?: string;
+        'minAmount.value'?: number;
         search?: string;
         startKey?: string;
     };
@@ -260,9 +260,9 @@ export type ProductsListFarmerProductsData = {
         categoryId?: string;
         count?: number;
         'maxAmount.currencyIsoCode'?: string;
-        'maxAmount.value'?: string;
+        'maxAmount.value'?: number;
         'minAmount.currencyIsoCode'?: string;
-        'minAmount.value'?: string;
+        'minAmount.value'?: number;
         search?: string;
         startKey?: string;
     };

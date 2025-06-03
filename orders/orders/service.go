@@ -12,6 +12,9 @@ import (
 	"time"
 
 	"github.com/foodhouse/foodhouseapp/grpc/go/ordersgrpc"
+	"github.com/foodhouse/foodhouseapp/grpc/go/productsgrpc"
+	"github.com/foodhouse/foodhouseapp/grpc/go/types"
+	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
 	"github.com/foodhouse/foodhouseapp/orders/db/converters"
 	"github.com/foodhouse/foodhouseapp/orders/db/repo"
 	"github.com/foodhouse/foodhouseapp/orders/db/sqlc"
@@ -22,6 +25,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const (
@@ -40,7 +44,13 @@ const (
 	PaymentStatusSuccessful = "SUCCESSFUL"
 
 	PaymentStatusFailed = "FAILED"
+
+	TotalPercentage = 1.08
 )
+
+var supportedCurrencies = map[string]struct{}{
+	"XAF": {},
+}
 
 // Impl is the implementation of the products service.
 type Impl struct {
@@ -48,7 +58,8 @@ type Impl struct {
 	logger             zerolog.Logger
 	devMethodsEndabled bool
 	paymentService     payment.PaymentProvider
-
+	userService        usersgrpc.UsersClient
+	productService     productsgrpc.ProductsClient
 	ordersgrpc.UnsafeOrdersServer
 }
 
@@ -60,12 +71,16 @@ func NewOrders(
 	logger zerolog.Logger,
 	enableDevMethods bool,
 	paymentService payment.PaymentProvider,
+	userService usersgrpc.UsersClient,
+	productService productsgrpc.ProductsClient,
 ) *Impl {
 	return &Impl{
 		repo:               repo,
 		logger:             logger,
 		devMethodsEndabled: enableDevMethods,
 		paymentService:     paymentService,
+		userService:        userService,
+		productService:     productService,
 	}
 }
 
@@ -107,7 +122,7 @@ func (i *Impl) ConfirmDelivery(ctx context.Context, req *ordersgrpc.ConfirmDeliv
 	i.logger.Debug().Msgf("payout phone number %v", *order.PayoutPhoneNumber)
 
 	_, err = i.paymentService.WithdrawFunds(ctx,
-		*order.PayoutPhoneNumber, int64(testAmount),
+		*order.PayoutPhoneNumber, float64(testAmount),
 		*order.PriceCurrency, fmt.Sprintf("payment for order %v", order.OrderNumber),
 		&paymentReference)
 
@@ -159,14 +174,15 @@ func (i *Impl) ConfirmDelivery(ctx context.Context, req *ordersgrpc.ConfirmDeliv
 	return &ordersgrpc.ConfirmDeliveryResponse{}, nil
 }
 
-// ConfirmOrderPayment implements ordersgrpc.OrdersServer.
-func (i *Impl) ConfirmOrderPayment(ctx context.Context, req *ordersgrpc.ConfirmOrderPaymentRequest) (*ordersgrpc.ConfirmOrderPaymentResponse, error) {
+// ConfirmPayment implements ordersgrpc.OrdersServer.
+func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymentRequest) (*ordersgrpc.ConfirmPaymentResponse, error) {
+	// TODO: add valiadation to confirm that request is coming from campay
 	querier, tx, err := i.repo.Begin(ctx)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)
 	}
 
-	i.logger.Debug().Msgf("external ref %v", req.GetExternalReference())
+	i.logger.Debug().Msgf("payment id %v", req.GetExternalReference())
 	i.logger.Debug().Msgf("payment status %v", req.GetStatus())
 
 	// Proper rollback handling
@@ -177,85 +193,162 @@ func (i *Impl) ConfirmOrderPayment(ctx context.Context, req *ordersgrpc.ConfirmO
 		}
 	}()
 
-	payment, err := querier.GetPaymentByExternalReference(ctx, req.GetExternalReference())
+	payment, err := querier.GetPaymentById(ctx, req.GetExternalReference())
 
 	if err != nil {
 		i.logger.Debug().Msgf("error getting payment %v", err)
 		return nil, status.Errorf(codes.Internal, "error getting payment %v", err)
 	}
 
-	order, err := querier.GetOrderByOrderNumber(ctx, payment.OrderNumber)
-
-	if err != nil {
-		i.logger.Debug().Msgf("error getting order for payment with ref %v, why: %v", req.GetExternalReference(), err)
-		return nil, status.Errorf(codes.Internal, "error getting order for payment with ref %v, why: %v", req.GetExternalReference(), err)
+	if payment.PaymentEntity == ordersgrpc.PaymentEntity_PaymentEntity_UNSPECIFIED.String() {
+		return nil, status.Errorf(codes.InvalidArgument, "payment entity is unspecified")
 	}
 
-	beforeBytes, err := protojson.Marshal(converters.SqlcOrderToProto(order))
+	// case for when payment is for an order
+	if payment.PaymentEntity == ordersgrpc.PaymentEntity_PaymentEntity_ORDER.String() {
+		orderId, err := strconv.ParseInt(payment.EntityID, 10, 64)
 
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error parsing order id %v", err)
+		}
+
+		order, err := querier.GetOrderByOrderNumber(ctx, orderId)
+
+		if err != nil {
+			i.logger.Debug().Msgf("error getting order for payment with ref %v, why: %v", req.GetExternalReference(), err)
+			return nil, status.Errorf(codes.Internal, "error getting order for payment with ref %v, why: %v", req.GetExternalReference(), err)
+		}
+
+		beforeBytes, err := protojson.Marshal(converters.SqlcOrderToProto(order))
+
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
+		}
+
+		var updatedPaymentStatus ordersgrpc.PaymentStatus
+		var updatedOrderStatus ordersgrpc.OrderStatus
+
+		if req.GetStatus() == PaymentStatusSuccessful {
+			updatedPaymentStatus = ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED
+			updatedOrderStatus = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL
+		} else {
+			updatedPaymentStatus = ordersgrpc.PaymentStatus_PaymentStatus_FAILED
+			updatedOrderStatus = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED
+		}
+
+		err = querier.UpdatePaymentStatus(ctx, sqlc.UpdatePaymentStatusParams{
+			ID:     req.GetExternalReference(),
+			Status: updatedPaymentStatus.String(),
+		})
+
+		if err != nil {
+			i.logger.Debug().Msgf("Error updating payment status %v", err)
+			return nil, status.Errorf(codes.Internal, "error updating payment status %v", err)
+		}
+
+		err = querier.UpdateOrderStatus(ctx, sqlc.UpdateOrderStatusParams{
+			OrderNumber: order.OrderNumber,
+			Status:      updatedOrderStatus.String(),
+		})
+
+		if err != nil {
+			i.logger.Debug().Msgf("Error updating order status %v", err)
+			return nil, status.Errorf(codes.Internal, "error updating order status %v", err)
+		}
+
+		updatedOrder, err := querier.GetOrderByOrderNumber(ctx, order.OrderNumber)
+
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error getting updated order %v", err)
+		}
+
+		afterBytes, err := protojson.Marshal(converters.SqlcOrderToProto(updatedOrder))
+
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
+		}
+
+		err = querier.CreateOrderAuditLog(ctx, sqlc.CreateOrderAuditLogParams{
+			OrderNumber:    order.OrderNumber,
+			EventTimestamp: pgtype.Timestamptz{Time: time.Now(), Valid: true},
+			Actor:          "campay",
+			Action:         "ConfirmOrderPayment",
+			Reason:         "Payment webhook has returned",
+			Before:         beforeBytes,
+			After:          afterBytes,
+		})
+
+		err = tx.Commit(ctx)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
+		}
+
+		return &ordersgrpc.ConfirmPaymentResponse{}, nil
 	}
 
-	var updatedPaymentStatus ordersgrpc.PaymentStatus
-	var updatedOrderStatus ordersgrpc.OrderStatus
+	// case for when payment is for subscription
+	if payment.PaymentEntity == ordersgrpc.PaymentEntity_PaymentEntity_SUBSCRIPTION.String() {
+		i.logger.Debug().Msgf("user subscription id ", payment.EntityID)
 
-	if req.GetStatus() == PaymentStatusSuccessful {
-		updatedPaymentStatus = ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED
-		updatedOrderStatus = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL
-	} else {
-		updatedPaymentStatus = ordersgrpc.PaymentStatus_PaymentStatus_FAILED
-		updatedOrderStatus = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error getting subscription %v", err)
+		}
+
+		if err != nil {
+			i.logger.Debug().Msgf("error getting order for payment with ref %v, why: %v", req.GetExternalReference(), err)
+			return nil, status.Errorf(codes.Internal, "error getting order for payment with ref %v, why: %v", req.GetExternalReference(), err)
+		}
+
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
+		}
+
+		var updatedPaymentStatus ordersgrpc.PaymentStatus
+
+		if req.GetStatus() != PaymentStatusSuccessful {
+			_, err := i.userService.DeleteUserSubscription(ctx, &usersgrpc.DeleteUserSubscriptionRequest{
+				UserSubscriptionId: payment.EntityID,
+			})
+
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "error confirming payment %v", err)
+			}
+
+			err = tx.Commit(ctx)
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
+			}
+			return &ordersgrpc.ConfirmPaymentResponse{}, nil
+		}
+
+		err = querier.UpdatePaymentStatus(ctx, sqlc.UpdatePaymentStatusParams{
+			ID:     req.GetExternalReference(),
+			Status: updatedPaymentStatus.String(),
+		})
+
+		if err != nil {
+			i.logger.Debug().Msgf("Error updating payment status %v", err)
+			return nil, status.Errorf(codes.Internal, "error updating payment status %v", err)
+		}
+
+		_, err = i.userService.ActivateUserSubscription(ctx, &usersgrpc.ActivateUserSubscriptionRequest{
+			UserSubscriptionId: payment.EntityID,
+		})
+
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error confirming payment %v", err)
+		}
+
+		err = tx.Commit(ctx)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
+		}
+
+		return &ordersgrpc.ConfirmPaymentResponse{}, nil
+
 	}
 
-	err = querier.UpdatePaymentStatusByExternalReference(ctx, sqlc.UpdatePaymentStatusByExternalReferenceParams{
-		ExternalRef: req.GetExternalReference(),
-		Status:      updatedPaymentStatus.String(),
-	})
-
-	if err != nil {
-		i.logger.Debug().Msgf("Error updating payment status %v", err)
-		return nil, status.Errorf(codes.Internal, "error updating payment status %v", err)
-	}
-
-	err = querier.UpdateOrderStatus(ctx, sqlc.UpdateOrderStatusParams{
-		OrderNumber: order.OrderNumber,
-		Status:      updatedOrderStatus.String(),
-	})
-
-	if err != nil {
-		i.logger.Debug().Msgf("Error updating order status %v", err)
-		return nil, status.Errorf(codes.Internal, "error updating order status %v", err)
-	}
-
-	updatedOrder, err := querier.GetOrderByOrderNumber(ctx, order.OrderNumber)
-
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error getting updated order %v", err)
-	}
-
-	afterBytes, err := protojson.Marshal(converters.SqlcOrderToProto(updatedOrder))
-
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
-	}
-
-	err = querier.CreateOrderAuditLog(ctx, sqlc.CreateOrderAuditLogParams{
-		OrderNumber:    order.OrderNumber,
-		EventTimestamp: pgtype.Timestamptz{Time: time.Now(), Valid: true},
-		Actor:          "campay",
-		Action:         "ConfirmOrderPayment",
-		Reason:         "Payment webhook has returned",
-		Before:         beforeBytes,
-		After:          afterBytes,
-	})
-
-	err = tx.Commit(ctx)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
-	}
-
-	return &ordersgrpc.ConfirmOrderPaymentResponse{}, nil
+	return &ordersgrpc.ConfirmPaymentResponse{}, nil
 }
 
 // CreateOrder implements ordersgrpc.OrdersServer.
@@ -273,27 +366,36 @@ func (i *Impl) CreateOrder(ctx context.Context, req *ordersgrpc.CreateOrderReque
 		}
 	}()
 
-	secretKey, err := generateHexSecretKey(3)
+	secretKey, err := generateHexSecretKey(6)
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error generating order secret key %v", err)
 	}
 
-	testAmount := int64(100)
+	product, err := i.productService.GetProduct(ctx, &productsgrpc.GetProductRequest{
+		ProductId: req.GetProductId(),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting product %v", err)
+	}
+
+	// Calculate totalAmount as float64 to avoid type mismatch
+	totalAmount := float64(product.GetProduct().GetAmount().GetValue()) * float64(req.GetQuantity()) * TotalPercentage
 
 	args := sqlc.CreateOrderParams{
-		DeliveryLocation: pgtype.Point{P: pgtype.Vec2{X: float64(req.GetOrder().GetDeliveryLocation().GetLon()),
-			Y: float64(req.GetOrder().GetDeliveryLocation().GetLat())},
+		DeliveryLocation: pgtype.Point{P: pgtype.Vec2{X: float64(req.GetDeliveryLocation().GetLon()),
+			Y: float64(req.GetDeliveryLocation().GetLat())},
 			Valid: true},
-		// PriceValue:    &req.GetOrder().GetPrice().Value,
-		PriceValue:        testAmount, // TODO: this is for testing, use actual amount in production
-		PriceCurrency:     req.GetOrder().GetPrice().CurrencyIsoCode,
-		Status:            ordersgrpc.OrderStatus_OrderStatus_CREATED.String(),
-		Product:           req.GetOrder().Product,
-		CreatedBy:         req.UserId,
-		SecretKey:         secretKey,
-		ProductOwner:      req.GetOrder().ProductOwner,
-		PayoutPhoneNumber: req.GetOrder().GetPayoutPhoneNumber(),
+		PriceValue:      totalAmount,
+		PriceCurrency:   product.GetProduct().GetAmount().GetCurrencyIsoCode(),
+		Status:          ordersgrpc.OrderStatus_OrderStatus_CREATED.String(),
+		Product:         req.GetProductId(),
+		CreatedBy:       req.UserId,
+		SecretKey:       secretKey,
+		ProductOwner:    product.GetProduct().GetCreatedBy(),
+		DeliveryAddress: req.GetDeliveryLocation().GetAddress(),
+		Quantity:        req.GetQuantity(),
 	}
 
 	i.logger.Debug().Msgf("argurments %v", args)
@@ -322,32 +424,6 @@ func (i *Impl) CreateOrder(ctx context.Context, req *ordersgrpc.CreateOrderReque
 	if err != nil {
 		i.logger.Debug().Msgf("Error creating order logs %v", err)
 		return nil, status.Errorf(codes.Internal, "error creating order logs %v", err)
-	}
-
-	payment, err := querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
-		OrderNumber:   order.OrderNumber,
-		PriceValue:    order.PriceValue,
-		PriceCurrency: order.PriceCurrency,
-		Status:        ordersgrpc.PaymentStatus_PaymentStatus_INITIATED.String(),
-		ExternalRef:   fmt.Sprintf("%s-%s", strconv.FormatInt(order.OrderNumber, 10), time.Now().Format("20060102150405")),
-	})
-
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error creating payment %v", err)
-	}
-
-	formattedNumber, err := formatPhoneNumber(req.GetPhoneNumber())
-	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid phone number: %v", err)
-	}
-
-	i.logger.Debug().Msgf("Formated number %v", formattedNumber)
-
-	_, err = i.paymentService.RequestPayment(ctx, formattedNumber, *payment.PriceValue, *payment.PriceCurrency, fmt.Sprintf("payment for order %s", strconv.FormatInt(order.OrderNumber, 10)), &payment.ExternalRef)
-
-	if err != nil {
-		i.logger.Debug().Msgf("payment error %v", err)
-		return nil, status.Errorf(codes.Internal, "error initiating payment %v", err)
 	}
 
 	err = tx.Commit(ctx)
@@ -426,6 +502,11 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 		return nil, status.Errorf(codes.Internal, "error dispatching order %v", err)
 	}
 
+	err = tx.Commit(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
+	}
+
 	return &ordersgrpc.DispatchOrderResponse{}, nil
 }
 
@@ -483,6 +564,7 @@ func (i *Impl) ListFarmerOrders(ctx context.Context, req *ordersgrpc.ListFarmerO
 	orders, err := i.repo.Do().ListFarmerOrders(ctx, sqlc.ListFarmerOrdersParams{
 		ProductOwner:  &req.FarmerId,
 		CreatedBefore: startKey,
+		Status:        req.GetStatus().String(),
 		Count:         int32(count), // Convert count to int32
 	})
 
@@ -524,6 +606,7 @@ func (i *Impl) ListUserOrders(ctx context.Context, req *ordersgrpc.ListUserOrder
 
 	orders, err := i.repo.Do().ListUserOrders(ctx, sqlc.ListUserOrdersParams{
 		CreatedBy:     &req.UserId,
+		Status:        req.GetStatus().String(),
 		CreatedBefore: startKey,
 		Count:         int32(count), // Convert count to int32
 	})
@@ -568,4 +651,275 @@ func formatPhoneNumber(phoneNumber string) (string, error) {
 	}
 
 	return phonenumbers.Format(parsedNumber, phonenumbers.E164), nil
+}
+
+func IsSupportedCurrency(code string) bool {
+	_, ok := supportedCurrencies[code]
+	return ok
+}
+
+// InitiatePayment implements ordersgrpc.OrdersServer.
+func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaymentRequest) (*ordersgrpc.InitiatePaymentResponse, error) {
+
+	querier, tx, err := i.repo.Begin(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)
+	}
+
+	// Proper rollback handling
+	defer func() {
+		err = tx.Rollback(ctx)
+		if err != nil && !errors.Is(err, sql.ErrTxDone) {
+			i.logger.Err(err).Msgf("Failed to rollback transaction: %v", req)
+		}
+	}()
+
+	if req.GetPaymentEntity() != ordersgrpc.PaymentEntity_PaymentEntity_ORDER && req.GetPaymentEntity() != ordersgrpc.PaymentEntity_PaymentEntity_SUBSCRIPTION {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid payment entity %s", req.GetPaymentEntity())
+	}
+
+	if req.GetAccount().PaymentMethod != ordersgrpc.PaymentMethodType_PaymentMethodType_MOBILE_MONEY && req.GetAccount().PaymentMethod != ordersgrpc.PaymentMethodType_PaymentMethodType_ORANGE_MONEY {
+		return nil, status.Errorf(codes.Internal, "payment method %s not supported", req.GetAccount().GetPaymentMethod())
+	}
+
+	if _, ok := supportedCurrencies[req.GetAmount().GetCurrencyIsoCode()]; !ok {
+		return nil, status.Errorf(codes.Internal, "currency %s is not supported", req.GetAmount().GetCurrencyIsoCode())
+	}
+
+	payment, err := querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
+		PaymentEntity:  req.GetPaymentEntity().String(),
+		EntityID:       req.GetEntityId(),
+		AmountValue:    &req.GetAmount().Value,
+		AmountCurrency: &req.GetAmount().CurrencyIsoCode,
+		AccountNumber:  req.GetAccount().GetAccountNumber(),
+		Method:         req.GetAccount().GetPaymentMethod().String(),
+		Status:         ordersgrpc.PaymentStatus_PaymentStatus_INITIATED.String(),
+		ExpiresAt:      pgtype.Timestamptz{Time: time.Now().Add(5 * time.Minute), Valid: true},
+		CreatedBy:      req.GetUserId(),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error creating payment %v", err)
+	}
+
+	formattedNumber, err := formatPhoneNumber(req.Account.GetAccountNumber())
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid phone number: %v", err)
+	}
+
+	i.logger.Debug().Msgf("Formated number log %v", formattedNumber)
+
+	supportedCurrencies := []string{"XAF"}
+	currencySupported := false
+	for _, c := range supportedCurrencies {
+		currencySupported = req.GetAmount().GetCurrencyIsoCode() == c
+		if currencySupported {
+			break
+		}
+	}
+	if !currencySupported {
+		return nil, status.Errorf(codes.Internal, "currency %s is not supported", req.GetAmount().GetCurrencyIsoCode())
+	}
+
+	// TODO: revert to actual amount when live
+	// _, err = i.paymentService.RequestPayment(ctx, formattedNumber, *payment.AmountValue, *payment.AmountCurrency, fmt.Sprintf("payment for entity: %s  with id: %s", req.GetPaymentEntity(), req.GetEntityId()), &payment.ID)
+
+	// Using test amount while in sandbox mode
+
+	testAmount := float64(10)
+	_, err = i.paymentService.RequestPayment(ctx, formattedNumber, testAmount, "XAF", fmt.Sprintf("payment for entity: %s  with id: %s", req.GetPaymentEntity(), req.GetEntityId()), &payment.ID)
+
+	if err != nil {
+		i.logger.Debug().Msgf("payment error %v", err)
+		return nil, status.Errorf(codes.Internal, "error initiating payment %v", err)
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
+	}
+
+	return &ordersgrpc.InitiatePaymentResponse{
+		Payment: &ordersgrpc.Payment{
+			Id: payment.PaymentEntity,
+			Amount: &types.Amount{
+				Value:           *payment.AmountValue,
+				CurrencyIsoCode: *payment.AmountCurrency,
+			},
+			ExpiresAt: timestamppb.New(payment.ExpiresAt.Time),
+		},
+	}, nil
+}
+
+// ApproveOrder implements ordersgrpc.OrdersServer.
+func (i *Impl) ApproveOrder(ctx context.Context, req *ordersgrpc.ApproveOrderRequest) (*ordersgrpc.ApproveOrderResponse, error) {
+
+	orderNumber, err := strconv.ParseInt(req.GetOrderId(), 10, 64)
+
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid order number %s", req.GetOrderId())
+	}
+
+	order, err := i.repo.Do().GetOrderByOrderNumber(ctx, orderNumber)
+
+	if err != nil {
+		i.logger.Debug().Msgf("error getting order with id %s why: %v", req.GetOrderId(), err)
+		return nil, status.Errorf(codes.Internal, "error getting order with id %s why: %v", req.GetOrderId(), err)
+	}
+
+	beforeBytes, err := protojson.Marshal(converters.SqlcOrderToProto(order))
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
+	}
+
+	err = i.repo.Do().UpdateOrderStatus(ctx, sqlc.UpdateOrderStatusParams{
+		OrderNumber: order.OrderNumber,
+		Status:      ordersgrpc.OrderStatus_OrderStatus_APPROVED.String(),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error updating order status %v", err)
+	}
+
+	updatedOrder, err := i.repo.Do().GetOrderByOrderNumber(ctx, order.OrderNumber)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting updated order %v", err)
+	}
+
+	afterBytes, err := protojson.Marshal(converters.SqlcOrderToProto(updatedOrder))
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
+	}
+
+	err = i.repo.Do().CreateOrderAuditLog(ctx, sqlc.CreateOrderAuditLogParams{
+		OrderNumber:    order.OrderNumber,
+		EventTimestamp: pgtype.Timestamptz{Time: time.Now(), Valid: true},
+		Actor:          req.GetUserId(),
+		Action:         "ApproveOrder",
+		Reason:         "Farmer has approved this order, and they are processing it",
+		Before:         beforeBytes,
+		After:          afterBytes,
+	})
+
+	if err != nil {
+		i.logger.Debug().Msgf("Error creating order logs %v", err)
+		return nil, status.Errorf(codes.Internal, "error creating order logs %v", err)
+	}
+
+	return &ordersgrpc.ApproveOrderResponse{}, nil
+}
+
+// CreateDeliveryPoint implements ordersgrpc.OrdersServer.
+func (i *Impl) CreateDeliveryPoint(ctx context.Context, req *ordersgrpc.CreateDeliveryPointRequest) (*ordersgrpc.CreateDeliveryPointResponse, error) {
+	deliveryPoint, err := i.repo.Do().CreateDeliveryPoint(ctx, sqlc.CreateDeliveryPointParams{
+		DeliveryLocation: pgtype.Point{P: pgtype.Vec2{X: float64(req.GetAddress().GetLon()),
+			Y: float64(req.GetAddress().GetLat())},
+			Valid: true},
+		LocationName:      req.GetAddress().GetAddress(),
+		DeliveryPointName: req.GetDeliveryPointName(),
+		City:              req.GetCity(),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error creating delivery point %v", err)
+	}
+
+	return &ordersgrpc.CreateDeliveryPointResponse{
+		DeliveryPoint: &ordersgrpc.DeliveryPoint{
+			Id: deliveryPoint.ID,
+			Address: &types.Point{
+				Address: deliveryPoint.LocationName,
+				Lon:     deliveryPoint.DeliveryLocation.P.X,
+				Lat:     deliveryPoint.DeliveryLocation.P.Y,
+			},
+			City:              deliveryPoint.City,
+			DeliveryPointName: deliveryPoint.DeliveryPointName,
+			CreatedAt:         timestamppb.New(deliveryPoint.CreatedAt.Time),
+		},
+	}, nil
+}
+
+// ListDeliveryPoints implements ordersgrpc.OrdersServer.
+func (i *Impl) ListDeliveryPoints(ctx context.Context, req *ordersgrpc.ListDeliveryPointsRequest) (*ordersgrpc.ListDeliveryPointsResponse, error) {
+	var err error
+	startKey := time.Now().Add(time.Hour)
+
+	count := int(req.GetCount())
+
+	if count == 0 {
+		count = 10
+	}
+
+	if req.GetStartKey() != "" {
+		startKey, err = time.Parse(time.RFC3339, req.GetStartKey())
+		if err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "Invalid start key")
+		}
+	}
+
+	args := sqlc.ListDeliveryPointsParams{
+		City:          req.GetCity(),
+		CreatedBefore: startKey,
+		Count:         int32(count),
+	}
+
+	deliveryPoints, err := i.repo.Do().ListDeliveryPoints(ctx, args)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "errror fetching products %v", err)
+	}
+
+	protoDeliveryPoints, err := converters.SqlcToProtoDeliveryPoints(deliveryPoints)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error converting sqlc to proto delivery points %v", err)
+	}
+
+	nextKey := ""
+
+	if len(protoDeliveryPoints) >= count {
+		nextKey = protoDeliveryPoints[len(protoDeliveryPoints)-1].GetCreatedAt().AsTime().Format(time.RFC3339)
+	}
+
+	return &ordersgrpc.ListDeliveryPointsResponse{
+		DeliveryPoints: protoDeliveryPoints,
+		NextKey:        nextKey,
+	}, nil
+}
+
+// ListDeliveryCities implements ordersgrpc.OrdersServer.
+func (i *Impl) ListDeliveryCities(ctx context.Context, req *ordersgrpc.ListDeliveryCitiesRequest) (*ordersgrpc.ListDeliveryCitiesResponse, error) {
+	var err error
+	startKey := time.Now().Add(time.Hour)
+
+	count := int(req.GetCount())
+	if count == 0 {
+		count = 20 // or whatever default you want
+	}
+
+	if req.GetStartKey() != "" {
+		startKey, err = time.Parse(time.RFC3339, req.GetStartKey())
+		if err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "Invalid start key")
+		}
+	}
+
+	i.logger.Debug().Msgf("Start key %v", startKey)
+
+	// args := sqlc.ListUniqueCitiesParams{
+	// 	CreatedBefore: startKey,
+	// 	Count:         int32(count), // Convert count to int32
+	// }
+
+	cities, err := i.repo.Do().ListUniqueCities(ctx)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error lissting cities %v", err)
+	}
+
+	return &ordersgrpc.ListDeliveryCitiesResponse{
+		Cities: cities,
+	}, nil
 }

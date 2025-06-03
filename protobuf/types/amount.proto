@@ -5,6 +5,6 @@ package types;
 option go_package = "github.com/foodhouse/foodhouseapp/grpc/go/types";
 
 message Amount {
-  int64 value = 1;
+  double value = 1;
   string currency_iso_code = 2;
 }

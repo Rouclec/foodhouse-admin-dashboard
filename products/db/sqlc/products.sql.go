@@ -75,7 +75,7 @@ type CreateProductParams struct {
 	CategoryID      string  `json:"category_id"`
 	Name            string  `json:"name"`
 	UnitType        string  `json:"unit_type"`
-	Value           int64   `json:"value"`
+	Value           float64 `json:"value"`
 	CurrencyIsoCode string  `json:"currency_iso_code"`
 	Description     string  `json:"description"`
 	Image           string  `json:"image"`
@@ -255,7 +255,7 @@ type GetProductWithCategoryRow struct {
 	ProductID         string             `json:"product_id"`
 	ProductName       string             `json:"product_name"`
 	UnitType          string             `json:"unit_type"`
-	Value             int64              `json:"value"`
+	Value             float64            `json:"value"`
 	WholeSale         bool               `json:"whole_sale"`
 	CurrencyIsoCode   string             `json:"currency_iso_code"`
 	Description       string             `json:"description"`
@@ -387,9 +387,9 @@ LEFT JOIN price_types pt ON p.unit_type = pt.id
 WHERE
   ($1::varchar = '' OR p.created_by = $1::varchar) AND
   ($2::varchar = '' OR p.category_id = $2::varchar) AND
-  ($3::bigint = 0 OR p.value >= $3::bigint) AND
+  ($3::float = 0 OR p.value >= $3::float) AND
   (
-    $4::bigint = 0 OR p.value <= COALESCE($4::bigint, 9223372036854775807)
+    $4::float = 0 OR p.value <= COALESCE($4::float, 9223372036854775807)
   ) AND
   (
     $5::text = '' OR
@@ -404,8 +404,8 @@ LIMIT $7::int
 type ListProductsParams struct {
 	CreatedBy     string    `json:"created_by"`
 	CategoryID    string    `json:"category_id"`
-	MinValue      int64     `json:"min_value"`
-	MaxValue      int64     `json:"max_value"`
+	MinValue      float64   `json:"min_value"`
+	MaxValue      float64   `json:"max_value"`
 	Search        string    `json:"search"`
 	CreatedBefore time.Time `json:"created_before"`
 	Count         int32     `json:"count"`
@@ -416,7 +416,7 @@ type ListProductsRow struct {
 	CategoryID      string             `json:"category_id"`
 	Name            string             `json:"name"`
 	UnitType        string             `json:"unit_type"`
-	Value           int64              `json:"value"`
+	Value           float64            `json:"value"`
 	CurrencyIsoCode string             `json:"currency_iso_code"`
 	Description     string             `json:"description"`
 	Image           string             `json:"image"`
@@ -489,7 +489,7 @@ type UpdateProductParams struct {
 	CategoryID      string  `json:"category_id"`
 	Name            string  `json:"name"`
 	UnitType        string  `json:"unit_type"`
-	Value           int64   `json:"value"`
+	Value           float64 `json:"value"`
 	CurrencyIsoCode string  `json:"currency_iso_code"`
 	Description     string  `json:"description"`
 	Image           string  `json:"image"`
