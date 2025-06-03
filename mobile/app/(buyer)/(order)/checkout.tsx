@@ -3,7 +3,7 @@ import { Colors } from "@/constants";
 import i18n from "@/i18n";
 import { defaultStyles } from "@/styles";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import React, { useContext, useEffect, useState } from "react";
 import {
   View,
@@ -16,36 +16,19 @@ import { Chase } from "react-native-animated-spinkit";
 import { Appbar, Button, Icon, Text } from "react-native-paper";
 import { checkoutStyles as styles } from "@/styles";
 import { formatAmount } from "@/utils/amountFormater";
-import * as Location from "expo-location";
-import { Region } from "react-native-maps";
 import { ordersCreateOrderMutation } from "@/client/orders.swagger/@tanstack/react-query.gen";
 import { Context, ContextType } from "@/app/_layout";
 
 export default function Checkout() {
   const router = useRouter();
 
-  const { user } = useContext(Context) as ContextType;
+  const { user, productId, deliveryLocation } = useContext(
+    Context
+  ) as ContextType;
 
-  const [productId, setProductId] = useState<string>();
-  const [errorLoadingProduct, setErrorLoadingProduct] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [totalPrice, setTotalPrice] = useState<number>();
   const [loading, setLoading] = useState(false);
-  const [location, setLocation] = useState<{
-    description: string;
-    region: Region;
-  }>();
-
-  const params = useLocalSearchParams();
-
-  useEffect(() => {
-    try {
-      setProductId(params?.productId as string);
-    } catch (error) {
-      setErrorLoadingProduct(true);
-      console.error("error getting product from params: ", error);
-    }
-  }, []);
 
   const { data, isError, isLoading } = useQuery({
     ...productsGetProductOptions({
@@ -59,41 +42,6 @@ export default function Checkout() {
   useEffect(() => {
     setTotalPrice((data?.product?.amount?.value ?? 0) * quantity);
   }, [data, quantity]);
-
-  useEffect(() => {
-    const handleUseCurrentLocation = async () => {
-      try {
-        setLoading(true);
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          alert(i18n.t("(buyer).(order).checkout.pleaseAcceptPermissions"));
-          return;
-        }
-
-        const currentLocation = await Location.getCurrentPositionAsync({});
-
-        const address = await Location.reverseGeocodeAsync(
-          currentLocation.coords
-        );
-
-        setLocation({
-          description: `${address[0].name}, ${address[0].city}, ${address[0].country}`,
-          region: {
-            ...currentLocation.coords,
-            latitudeDelta: 0.01,
-            longitudeDelta: 0.01,
-          },
-        });
-      } catch (error) {
-        console.error("Error getting location: ", error);
-        alert(i18n.t("(buyer).(order).checkout.errorGettingLocation"));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    handleUseCurrentLocation();
-  }, []);
 
   const { mutateAsync } = useMutation({
     ...ordersCreateOrderMutation(),
@@ -113,9 +61,9 @@ export default function Checkout() {
           productId: productId,
           quantity: quantity.toString(),
           deliveryLocation: {
-            address: location?.description,
-            lon: location?.region?.longitude,
-            lat: location?.region?.latitude,
+            address: deliveryLocation?.address,
+            lon: deliveryLocation?.region?.longitude,
+            lat: deliveryLocation?.region?.latitude,
           },
         },
         path: {
@@ -161,7 +109,7 @@ export default function Checkout() {
     );
   }
 
-  if (isError || errorLoadingProduct) {
+  if (isError) {
     return (
       <KeyboardAvoidingView
         style={defaultStyles.container}
@@ -293,15 +241,17 @@ export default function Checkout() {
                   <Chase size={24} color={Colors.primary[500]} />
                 ) : (
                   <View style={styles.rowGap8}>
-                    <Text variant="titleMedium">
-                      {i18n.t("(buyer).(order).checkout.currentLocation")}
+                    <Text variant="titleMedium" style={styles.text16}>
+                      {deliveryLocation?.description}
                     </Text>
                     <Text style={styles.textSmall}>
-                      {location?.description}
+                      {deliveryLocation?.address}
                     </Text>
                   </View>
                 )}
-                <TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => router.push("/(buyer)/(order)")}
+                >
                   <Icon source={"pencil-outline"} size={24} />
                 </TouchableOpacity>
               </View>

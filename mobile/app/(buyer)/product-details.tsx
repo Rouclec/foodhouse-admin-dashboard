@@ -20,8 +20,7 @@ import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/r
 import { usersGetFarmerByIdOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
 
 export default function ProductDetails() {
-  const { user } = useContext(Context) as ContextType;
-  const [productId, setProductId] = useState<string>();
+  const { user, productId, setProductId } = useContext(Context) as ContextType;
   const [errorLoadingProduct, setErrorLoadingProduct] = useState(false);
 
   const params = useLocalSearchParams();
@@ -216,14 +215,10 @@ export default function ProductDetails() {
                 defaultStyles.primaryButton,
                 styles.halfContainer,
               ]}
-              onPress={() =>
-                router.push({
-                  pathname: "/(buyer)/(order)",
-                  params: {
-                    productId: data?.product?.id,
-                  },
-                })
-              }
+              onPress={() => {
+                setProductId(data?.product?.id);
+                router.push("/(buyer)/(order)");
+              }}
             >
               <Text style={defaultStyles.buttonText}>
                 {i18n.t("(buyer).product-details.orderNow")}

@@ -103,4 +103,7 @@ export const checkoutStyles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: Colors.grey["border"],
   },
+  text16: {
+    fontSize: 16,
+  },
 });

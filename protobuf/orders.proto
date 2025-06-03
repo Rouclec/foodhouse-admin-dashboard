@@ -322,5 +322,4 @@ service Orders {
       get : "/v1/users/{user_id}/orders/list-delivery-cities"
     };
   }
-
 }

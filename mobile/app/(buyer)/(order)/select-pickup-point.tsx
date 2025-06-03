@@ -2,97 +2,54 @@ import { Colors } from "@/constants";
 import i18n from "@/i18n";
 import { defaultStyles } from "@/styles";
 import { useRouter } from "expo-router";
-import React, { use, useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
+  FlatList,
   KeyboardAvoidingView,
   ScrollView,
   TouchableOpacity,
   View,
 } from "react-native";
 import { Appbar, Button, Icon, Text, TextInput } from "react-native-paper";
-import * as Location from "expo-location";
 import { Region } from "react-native-maps";
 import { useQuery } from "@tanstack/react-query";
-import {
-  ordersListDeliveryCitiesOptions,
-  ordersListDeliveryPointsOptions,
-} from "@/client/orders.swagger/@tanstack/react-query.gen";
+import { ordersListDeliveryPointsOptions } from "@/client/orders.swagger/@tanstack/react-query.gen";
 import { Context, ContextType } from "@/app/_layout";
 import { Chase } from "react-native-animated-spinkit";
 import { selectPickupLocationStyles as styles } from "@/styles";
 
 export default function SelectPickupPoint() {
-  const { user } = useContext(Context) as ContextType;
+  const { user, deliveryLocation, setDeliveryLocation } = useContext(
+    Context
+  ) as ContextType;
 
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [city, setCity] = useState<string>();
+  const [debounceQuery, setDebounceQuery] = useState<string>();
 
-  const [deliveryLocation, setDeliveryLocation] = useState<{
-    description: string;
-    region: Region;
-  }>();
-  // const [userCurrentCity, setUserCurrentCity] = useState<string>();
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebounceQuery(city);
+    }, 500);
 
-  // useEffect(() => {
-  //   const handleUseCurrentLocation = async () => {
-  //     try {
-  //       setLoading(true);
-  //       const { status } = await Location.requestForegroundPermissionsAsync();
-  //       if (status !== "granted") {
-  //         alert(i18n.t("(buyer).(order).checkout.pleaseAcceptPermissions"));
-  //         return;
-  //       }
-
-  //       const currentLocation = await Location.getCurrentPositionAsync({});
-
-  //       const address = await Location.reverseGeocodeAsync(
-  //         currentLocation.coords
-  //       );
-
-  //       setUserCurrentCity(address[0]?.city + "," + address[0]?.country);
-
-  //       setCurrentLocation({
-  //         description: `${address[0].name}, ${address[0].city}, ${address[0].country}`,
-  //         region: {
-  //           ...currentLocation.coords,
-  //           latitudeDelta: 0.01,
-  //           longitudeDelta: 0.01,
-  //         },
-  //       });
-  //     } catch (error) {
-  //       console.error("Error getting location: ", error);
-  //       alert(i18n.t("(buyer).(order).checkout.errorGettingLocation"));
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   handleUseCurrentLocation();
-  // }, []);
-
-  // const { data: deliveryCities, isLoading } = useQuery({
-  //   ...ordersListDeliveryCitiesOptions({
-  //     path: {
-  //       userId: user?.userId ?? "",
-  //     },
-  //   }),
-  // });
+    return () => clearTimeout(timeoutId);
+  }, [city]);
 
   const { data, isLoading } = useQuery({
     ...ordersListDeliveryPointsOptions({
       query: {
-        city,
+        city: debounceQuery,
       },
       path: {
         userId: user?.userId ?? "",
       },
     }),
-    enabled: !!city,
+    enabled: !!debounceQuery,
   });
 
   console.log({ data });
-  
+
   if (loading) {
     return (
       <>
@@ -173,37 +130,105 @@ export default function SelectPickupPoint() {
             </Text>
             <View />
           </Appbar.Header>
-          <ScrollView
-            contentContainerStyle={defaultStyles.scrollContainer}
-            showsVerticalScrollIndicator={false}
-            nestedScrollEnabled={true}
-            keyboardShouldPersistTaps="handled"
-          >
-            <View style={defaultStyles.inputsContainer}>
-              <TextInput
-                mode="outlined"
-                label={i18n.t("(buyer).(order).select-pickup-point.enterCity")}
-                value={city}
-                onChangeText={(text) => setCity(text)}
-                style={defaultStyles.input}
-                theme={{
-                  colors: {
-                    primary: Colors.primary[500],
-                    background: Colors.grey["fa"],
-                    error: Colors.error,
-                  },
-                  roundness: 10,
-                }}
-                outlineColor={Colors.grey["bg"]}
-              />
+          <View style={styles.marginVertical24}>
+            <TextInput
+              mode="outlined"
+              label={i18n.t("(buyer).(order).select-pickup-point.enterCity")}
+              value={city}
+              onChangeText={(text) => setCity(text)}
+              style={defaultStyles.input}
+              theme={{
+                colors: {
+                  primary: Colors.primary[500],
+                  background: Colors.grey["fa"],
+                  error: Colors.error,
+                },
+                roundness: 10,
+              }}
+              outlineColor={Colors.grey["bg"]}
+            />
+          </View>
+          <Text variant="titleMedium" style={styles.title}>
+            {i18n.t("(buyer).(order).select-pickup-point.availablePickup")}
+          </Text>
+          {!debounceQuery ? null : isLoading && !data ? (
+            <View style={[defaultStyles.container, defaultStyles.center]}>
+              <Chase size={56} color={Colors.primary[500]} />
             </View>
-          </ScrollView>
+          ) : (
+            <FlatList
+              data={data?.deliveryPoints}
+              keyExtractor={(item, index) => item?.id ?? index.toString()}
+              contentContainerStyle={styles.flatListContentContainer}
+              ListEmptyComponent={
+                <View style={defaultStyles.noItemsContainer}>
+                  <Text style={defaultStyles.noItems}>
+                    {i18n.t(
+                      "(buyer).(order).select-pickup-point.noPickupPointsIn"
+                    )}{" "}
+                    {city}
+                  </Text>
+                </View>
+              }
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => {
+                return (
+                  <TouchableOpacity
+                    style={styles.card}
+                    onPress={() =>
+                      setDeliveryLocation({
+                        description: item?.deliveryPointName ?? "",
+                        address: item?.address?.address ?? "",
+                        region: {
+                          longitude: item?.address?.lon ?? 0,
+                          latitude: item?.address?.lat ?? 0,
+                          longitudeDelta: 0.01,
+                          latitudeDelta: 0.01,
+                        },
+                      })
+                    }
+                  >
+                    <View style={styles.checkOutterContainer}>
+                      <View
+                        style={[
+                          styles.checkInnercontainer,
+                          deliveryLocation?.description ===
+                            item?.deliveryPointName && styles.checked,
+                        ]}
+                      />
+                    </View>
+                    <View style={styles.iconContainer}>
+                      <Icon
+                        source={"map-marker-outline"}
+                        size={24}
+                        color={Colors.grey["61"]}
+                      />
+                    </View>
+                    <View style={styles.textsContainer}>
+                      <Text variant="titleMedium" style={styles.text16}>
+                        {item?.deliveryPointName}
+                      </Text>
+                      <Text style={styles.text14}>
+                        {item?.address?.address}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          )}
         </View>
       </KeyboardAvoidingView>
       <View style={defaultStyles.bottomButtonContainer}>
         <Button
-          style={[defaultStyles.button, defaultStyles.primaryButton]}
+          onPress={() => router.push("/(buyer)/(order)/checkout")}
+          style={[
+            defaultStyles.button,
+            defaultStyles.primaryButton,
+            !deliveryLocation && defaultStyles.greyButton,
+          ]}
           contentStyle={[defaultStyles.center]}
+          disabled={!deliveryLocation}
         >
           <View style={defaultStyles.innerButtonContainer}>
             <View>

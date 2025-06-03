@@ -76,9 +76,9 @@ export default function BuyerProducts() {
       query: {
         count: count,
         "maxAmount.currencyIsoCode": userCurrency,
-        "maxAmount.value": maxAmount,
+        "maxAmount.value": maxAmount ? parseFloat(maxAmount ?? "") : undefined,
         "minAmount.currencyIsoCode": userCurrency,
-        "minAmount.value": minAmount,
+        "minAmount.value": minAmount ? parseFloat(minAmount ?? "") : undefined,
         categoryId: selectedCategoryId,
         search: debounceQuery,
         startKey: "",
