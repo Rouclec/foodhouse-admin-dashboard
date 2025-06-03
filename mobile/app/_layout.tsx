@@ -18,7 +18,7 @@ import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { defaultStyles } from "@/styles";
 import { Region } from "react-native-maps";
-import { ordersgrpcPaymentEntity } from "@/client/orders.swagger";
+import { ordersgrpcPaymentEntity, typesAmount } from "@/client/orders.swagger";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -60,6 +60,7 @@ interface ContextInfo {
         entity: ordersgrpcPaymentEntity;
         entityId: string;
         nextScreen: string;
+        amount: typesAmount;
       }
     | undefined;
 }
@@ -84,6 +85,7 @@ interface ContextSetters {
           entity: ordersgrpcPaymentEntity;
           entityId: string;
           nextScreen: string;
+          amount: typesAmount;
         }
       | undefined
   ) => void;
@@ -181,6 +183,7 @@ function RootLayoutNav() {
           entity: ordersgrpcPaymentEntity;
           entityId: string;
           nextScreen: string;
+          amount: typesAmount;
         }
       | undefined
   ) {

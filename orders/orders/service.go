@@ -741,7 +741,8 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 
 	return &ordersgrpc.InitiatePaymentResponse{
 		Payment: &ordersgrpc.Payment{
-			Id: payment.PaymentEntity,
+			Id:            payment.ID,
+			EntityId:      payment.EntityID,
 			Amount: &types.Amount{
 				Value:           *payment.AmountValue,
 				CurrencyIsoCode: *payment.AmountCurrency,

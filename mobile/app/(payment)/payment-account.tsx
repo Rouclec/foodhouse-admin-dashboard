@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { View, ScrollView, Image } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import {
@@ -15,9 +15,13 @@ import { defaultStyles, loginstyles, signupStyles } from "@/styles";
 import i18n from "@/i18n";
 import PhoneNumberInput from "@/components/general/PhoneNumberInput";
 import { Context, ContextType } from "../_layout";
-import { useMutation } from "@tanstack/react-query";
-import { ordersInitiatePaymentMutation } from "@/client/orders.swagger/@tanstack/react-query.gen";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  ordersCheckPaymentStatusOptions,
+  ordersInitiatePaymentMutation,
+} from "@/client/orders.swagger/@tanstack/react-query.gen";
 import { delay } from "@/utils";
+import { ordersgrpcPaymentMethodType } from "@/client/orders.swagger";
 
 const PaymentAccountPage = () => {
   const router = useRouter();
@@ -25,6 +29,7 @@ const PaymentAccountPage = () => {
   const [expiryDate, setExpiryDate] = useState<Date | null>(null);
   const [loadingModalVisible, setLoadingModalVisible] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [failureModalVisisble, setFailureModalVisible] = useState(false);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [callingCode, setCallingCode] = useState("");
@@ -34,27 +39,34 @@ const PaymentAccountPage = () => {
 
   const { paymentMethod } = params;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!mobile.trim()) {
       setErrorMessage("Please enter your account number");
       setError(true);
       return;
     }
-    setLoadingModalVisible(true);
-    setTimeout(() => {
-      setLoadingModalVisible(false);
-      setSuccessModalVisible(true);
-      setTimeout(() => {
-        router.push({
-          pathname: "/(buyer)/(index)",
-          params: {
-            ...params,
-            mobile,
-            expiryDate: expiryDate?.toISOString(),
+    try {
+      //   paymentEntity?: ordersgrpcPaymentEntity;
+      // entityId?: string;
+      // amount?: typesAmount;
+      // account?: ordersgrpcAccount;
+      await mutateAsync({
+        body: {
+          paymentEntity: paymentData?.entity,
+          entityId: paymentData?.entityId,
+          amount: paymentData?.amount,
+          account: {
+            paymentMethod: paymentMethod as ordersgrpcPaymentMethodType,
+            accountNumber: `${callingCode}${mobile}`,
           },
-        });
-      }, 2000);
-    }, 2000);
+        },
+        path: {
+          userId: user?.userId ?? "",
+        },
+      });
+    } catch (error) {
+      console.error("error initiating payment ", error);
+    }
   };
 
   const { mutateAsync, data } = useMutation({
@@ -73,6 +85,26 @@ const PaymentAccountPage = () => {
       setErrorMessage("");
     },
   });
+
+  const { data: paymentStatus } = useQuery({
+    ...ordersCheckPaymentStatusOptions({
+      path: {
+        userId: user?.userId ?? "",
+        paymentId: data?.payment?.id ?? "",
+      },
+    }),
+    enabled: !!data?.payment?.id,
+    refetchInterval: 2000,
+  });
+
+  useEffect(() => {
+    if (!paymentStatus?.status) return;
+    if (paymentStatus?.status === "PaymentStatus_INITIATED") return;
+    if (paymentStatus?.status === "PaymentStatus_COMPLETED")
+      setSuccessModalVisible(true);
+    if (paymentStatus?.status === "PaymentStatus_FAILED")
+      setFailureModalVisible(true);
+  }, [paymentStatus]);
 
   return (
     <>
