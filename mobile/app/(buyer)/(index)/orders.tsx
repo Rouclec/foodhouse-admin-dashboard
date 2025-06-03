@@ -10,7 +10,7 @@ import i18n from "@/i18n";
 import { defaultStyles, ordersStyles as styles } from "@/styles";
 import { formatAmount } from "@/utils/amountFormater";
 import { Feather } from "@expo/vector-icons";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import React, { FC, useContext, useEffect, useRef, useState } from "react";
 import {
   View,
