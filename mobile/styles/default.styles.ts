@@ -123,7 +123,7 @@ export const defaultStyles = StyleSheet.create({
     borderRadius: 100,
     minHeight: 48,
     minWidth: 124,
-    backgroundColor: Colors.primary[500],
+   
   },
   primaryButton: {
     backgroundColor: Colors.primary[500],
