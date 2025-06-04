@@ -2,11 +2,11 @@ import React from "react";
 import { Tabs } from "expo-router";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SafeAreaView, View } from "react-native";
+import { Platform, View } from "react-native";
 import { Icon, Text } from "react-native-paper";
 import { tabStyles as styles } from "@/styles";
 import { Colors } from "@/constants";
-import { FontAwesome5, FontAwesome6, Ionicons } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
@@ -16,7 +16,13 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
-        tabBarStyle: [styles.tabBar, { paddingBottom: insets.bottom }],
+        tabBarStyle: [
+          styles.tabBar,
+          {
+            paddingBottom:
+              Platform.OS === "ios" ? insets.bottom + 24 : insets.bottom + 48,
+          },
+        ],
       }}
       initialRouteName="index"
     >

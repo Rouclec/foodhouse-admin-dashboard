@@ -198,7 +198,8 @@
         "searchOrder": "Search order",
         "noOrdersFound": "No orders found",
         "writeReview": "Write review",
-        "trackOrder": "Track order"
+        "trackOrder": "Track order",
+        "couldNotLoadProduct": "Could not load product details"
       }
     },
     "product-details": {
@@ -251,6 +252,10 @@
         "enterYourAddress": "Enter your address",
         "addressHere": "Address here"
       }
+    },
+    "track-order": {
+      "trackOrder": "Track Order",
+      "orderStatusDetails": "Order Status Details"
     }
   },
   "components": {

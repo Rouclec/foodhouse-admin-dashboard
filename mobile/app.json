@@ -11,14 +11,12 @@
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#6DCD47"
+      "backgroundColor": "#6DCD47",
+      "width": 186
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.foodhousecmr.foodhouse",
-      "config": {
-        "googleMapsApiKey": "AIzaSyC7YxZaDfv19RlCXKZrULvfC9XQ_vDacuU"
-      }
+      "bundleIdentifier": "com.foodhousecmr.foodhouse"
     },
     "android": {
       "adaptiveIcon": {
@@ -28,11 +26,6 @@
       "edgeToEdgeEnabled": true,
       "softwareKeyboardLayoutMode": "pan",
       "package": "com.foodhousecmr.foodhouse",
-      "config": {
-        "googleMaps": {
-          "apiKey": "AIzaSyC7YxZaDfv19RlCXKZrULvfC9XQ_vDacuU"
-        }
-      },
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
