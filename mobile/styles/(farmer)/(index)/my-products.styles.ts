@@ -26,7 +26,7 @@ export const myProductStyles = StyleSheet.create({
     top: 0,
     height: "100%",
     width: "100%",
-    backgroundColor: "#fff",
+    backgroundColor: Colors.light["bg"],
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,

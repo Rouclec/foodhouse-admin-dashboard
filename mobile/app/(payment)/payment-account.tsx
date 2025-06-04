@@ -1,10 +1,17 @@
 import React, { useContext, useEffect, useState } from "react";
-import { View, ScrollView, Image } from "react-native";
+import {
+  View,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+} from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import {
   Appbar,
   Button,
   Dialog,
+  Icon,
   Portal,
   Snackbar,
   Text,
@@ -26,7 +33,6 @@ import { ordersgrpcPaymentMethodType } from "@/client/orders.swagger";
 const PaymentAccountPage = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const [expiryDate, setExpiryDate] = useState<Date | null>(null);
   const [loadingModalVisible, setLoadingModalVisible] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [failureModalVisisble, setFailureModalVisible] = useState(false);
@@ -34,6 +40,7 @@ const PaymentAccountPage = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [callingCode, setCallingCode] = useState("");
   const [mobile, setMobile] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const { user, paymentData } = useContext(Context) as ContextType;
 
@@ -46,10 +53,7 @@ const PaymentAccountPage = () => {
       return;
     }
     try {
-      //   paymentEntity?: ordersgrpcPaymentEntity;
-      // entityId?: string;
-      // amount?: typesAmount;
-      // account?: ordersgrpcAccount;
+      setLoading(true);
       await mutateAsync({
         body: {
           paymentEntity: paymentData?.entity,
@@ -66,6 +70,8 @@ const PaymentAccountPage = () => {
       });
     } catch (error) {
       console.error("error initiating payment ", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -100,38 +106,55 @@ const PaymentAccountPage = () => {
   useEffect(() => {
     if (!paymentStatus?.status) return;
     if (paymentStatus?.status === "PaymentStatus_INITIATED") return;
-    if (paymentStatus?.status === "PaymentStatus_COMPLETED")
+    if (paymentStatus?.status === "PaymentStatus_COMPLETED") {
+      setLoadingModalVisible(false);
       setSuccessModalVisible(true);
-    if (paymentStatus?.status === "PaymentStatus_FAILED")
+    }
+    if (paymentStatus?.status === "PaymentStatus_FAILED") {
+      setLoadingModalVisible(false);
       setFailureModalVisible(true);
+    }
   }, [paymentStatus]);
 
   return (
     <>
-      <Appbar.Header dark={false} style={defaultStyles.appHeader}>
-        <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content
-          title={i18n.t("(auth).(subsciption-flow).account.heading")}
-        />
-      </Appbar.Header>
+      <KeyboardAvoidingView
+        style={defaultStyles.container}
+        behavior={"padding"}
+        keyboardVerticalOffset={0}
+      >
+        <View style={defaultStyles.flex}>
+          <Appbar.Header dark={false} style={defaultStyles.appHeader}>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={defaultStyles.backButtonContainer}
+            >
+              <Icon source={"arrow-left"} size={24} />
+            </TouchableOpacity>
+            <Text variant="titleMedium" style={defaultStyles.heading}>
+              {i18n.t("(auth).(subsciption-flow).account.heading")}
+            </Text>
+            <View />
+          </Appbar.Header>
+          <ScrollView contentContainerStyle={defaultStyles.scrollContainer}>
+            <Text>
+              {paymentMethod === "orange"
+                ? i18n.t("(auth).(subsciption-flow).account.orange")
+                : paymentMethod === "mtn"
+                ? i18n.t("(auth).(subsciption-flow).account.mtn")
+                : ""}
+            </Text>
 
-      <ScrollView contentContainerStyle={defaultStyles.container}>
-        <Text>
-          {paymentMethod === "orange"
-            ? i18n.t("(auth).(subsciption-flow).account.orange")
-            : paymentMethod === "mtn"
-            ? i18n.t("(auth).(subsciption-flow).account.mtn")
-            : ""}
-        </Text>
-
-        <PhoneNumberInput
-          setCountryCode={setCallingCode}
-          countryCode={callingCode}
-          setPhoneNumber={setMobile}
-          phoneNumber={mobile}
-          containerStyle={signupStyles.phoneNumberInputContainerStyle}
-        />
-      </ScrollView>
+            <PhoneNumberInput
+              setCountryCode={setCallingCode}
+              countryCode={callingCode}
+              setPhoneNumber={setMobile}
+              phoneNumber={mobile}
+              containerStyle={signupStyles.phoneNumberInputContainerStyle}
+            />
+          </ScrollView>
+        </View>
+      </KeyboardAvoidingView>
 
       <View style={defaultStyles.bottomButtonContainer}>
         <Button
@@ -140,7 +163,8 @@ const PaymentAccountPage = () => {
           textColor={Colors.light["10"]}
           buttonColor={Colors.primary["500"]}
           style={defaultStyles.button}
-          disabled={!mobile.trim()}
+          disabled={!mobile.trim() || loading}
+          loading={loading}
         >
           {i18n.t("(auth).(subsciption-flow).account.button")}
         </Button>
@@ -158,7 +182,10 @@ const PaymentAccountPage = () => {
           </Dialog.Content>
           <Dialog.Content>
             <Text style={defaultStyles.bodyText}>
-              {i18n.t("(auth).(subsciption-flow).account.approval")}
+              {(paymentMethod as ordersgrpcPaymentMethodType) ===
+              "PaymentMethodType_MOBILE_MONEY"
+                ? i18n.t("(auth).(subsciption-flow).account.instructionMoMo")
+                : i18n.t("(auth).(subsciption-flow).account.instructionOM")}
             </Text>
           </Dialog.Content>
         </Dialog>
@@ -168,7 +195,10 @@ const PaymentAccountPage = () => {
       <Portal>
         <Dialog
           visible={successModalVisible}
-          onDismiss={() => setSuccessModalVisible(false)}
+          onDismiss={() => {
+            setSuccessModalVisible(false);
+            router.push(paymentData?.nextScreen ?? "/(buyer)/(index)");
+          }}
           style={defaultStyles.dialogSuccessContainer}
         >
           <Dialog.Content>
@@ -179,14 +209,40 @@ const PaymentAccountPage = () => {
           </Dialog.Content>
           <Dialog.Content>
             <Text variant="titleLarge" style={defaultStyles.primaryText}>
-              {i18n.t("(auth).profile.congratulations")}
+              {i18n.t("(auth).(subsciption-flow).account.paymentSuccessful")}
             </Text>
           </Dialog.Content>
           <Dialog.Content>
             <Text style={defaultStyles.bodyText}>
               {i18n.t(
-                "(auth).(subsciption-flow).account.paymentcompleteMessage"
+                "(auth).(subsciption-flow).account.paymentCompleteMessage"
               )}
+            </Text>
+          </Dialog.Content>
+        </Dialog>
+      </Portal>
+
+      {/* error Portal */}
+      <Portal>
+        <Dialog
+          visible={failureModalVisisble}
+          onDismiss={() => setFailureModalVisible(false)}
+          style={defaultStyles.dialogSuccessContainer}
+        >
+          <Dialog.Content>
+            <Image
+              source={require("@/assets/images/error.png")}
+              style={defaultStyles.successImage}
+            />
+          </Dialog.Content>
+          <Dialog.Content>
+            <Text variant="titleLarge" style={defaultStyles.errorText}>
+              {i18n.t("(auth).(subsciption-flow).account.paymentFailed")}
+            </Text>
+          </Dialog.Content>
+          <Dialog.Content>
+            <Text style={defaultStyles.bodyText}>
+              {i18n.t("(auth).(subsciption-flow).account.paymentFailedMessage")}
             </Text>
           </Dialog.Content>
         </Dialog>

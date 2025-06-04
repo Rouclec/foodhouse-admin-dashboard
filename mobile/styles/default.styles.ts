@@ -290,4 +290,12 @@ export const defaultStyles = StyleSheet.create({
   text16: {
     fontSize: 16,
   },
+  card: {
+    backgroundColor: Colors.light[10],
+    padding: 20,
+    borderRadius: 16,
+    flexDirection: "row",
+    columnGap: 16,
+    alignItems: "center",
+  },
 });
