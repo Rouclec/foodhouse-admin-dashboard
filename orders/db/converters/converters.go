@@ -24,16 +24,18 @@ func SqlcOrderToProto(order sqlc.Order) *ordersgrpc.Order {
 	// Convert status (string → enum) — safe default
 	statusEnum := ordersgrpc.OrderStatus_OrderStatus_UNSPECIFIED
 	switch order.Status {
-	case "CREATED":
+	case "OrderStatus_CREATED":
 		statusEnum = ordersgrpc.OrderStatus_OrderStatus_CREATED
-	case "PAYMENT_SUCCESSFUL":
+	case "OrderStatus_PAYMENT_SUCCESSFUL":
 		statusEnum = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL
-	case "PAYMENT_FAILED":
+	case "OrderStatus_PAYMENT_FAILED":
 		statusEnum = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED
-	case "IN_TRANSIT":
+	case "OrderStatus_IN_TRANSIT":
 		statusEnum = ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT
-	case "DELIVERED":
+	case "OrderStatus_DELIVERED":
 		statusEnum = ordersgrpc.OrderStatus_OrderStatus_DELIVERED
+	case "OrderStatus_APPROVED":
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_APPROVED
 	}
 
 	return &ordersgrpc.Order{
@@ -119,7 +121,7 @@ func SqlcToProtoOrderAuditLogs(sqlcOrderAuditLogs []sqlc.OrdersAudit) (
 	return protoOrderAuditLogs, nil
 }
 
-func SqlcToProtoDeliveryPoints(sqlcDeliveryPoints []sqlc.DeliveryPoint) ([]*ordersgrpc.DeliveryPoint, error){
+func SqlcToProtoDeliveryPoints(sqlcDeliveryPoints []sqlc.DeliveryPoint) ([]*ordersgrpc.DeliveryPoint, error) {
 	protoDeliveryPoints := make([]*ordersgrpc.DeliveryPoint, len(sqlcDeliveryPoints))
 
 	for i, dp := range sqlcDeliveryPoints {
