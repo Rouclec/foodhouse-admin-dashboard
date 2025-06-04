@@ -1,5 +1,8 @@
 {
   "hello": "Bonjour",
+  "language": "Langue",
+  "suggested": "Suggéré",
+  "others": "Autres",
   "(auth)": {
     "index": {
       "welcomeTo": "Bienvenue à",
@@ -36,53 +39,137 @@
       "dontHaveAnAccount": "Vous n'avez pas de compte ?",
       "registerNow": "Inscrivez-vous maintenant"
     },
-  "register": {
-  "createAccount": "Créer un compte",
-  "RegisterNewAccount": "Enregistrer un nouveau compte",
-  "description": "Qu'est-ce qui vous décrit le mieux ?",
-  "buyer": "acheteur",
-  "seller": "Agriculteur ou Vendeur",
-  "button": "Suivant",
-  "havingAccount": "Vous avez déjà un compte ?",
-  "login": "Connexion"
+    "register": {
+      "createAccount": "Créer un compte",
+      "RegisterNewAccount": "Enregistrer un nouveau compte",
+      "description": "Qu'est-ce qui vous décrit le mieux ?",
+      "buyer": "acheteur",
+      "seller": "Agriculteur ou Vendeur",
+      "button": "Suivant",
+      "havingAccount": "Vous avez déjà un compte ?",
+      "login": "Connexion"
+    },
+    "createAccount": {
+      "farmerAccount": "Créer un compte agriculteur",
+      "createPassword": "Créer un mot de passe",
+      "createAccount": "Créer un compte"
+    },
+    "verifyOtp": {
+      "verifyNumber": "vérifiez votre numéro de téléphone",
+      "codeSent": "Le code a été envoyé à",
+      "verify": "vérifier",
+      "phoneNumberVerified": "Numéro de téléphone vérifié !",
+      "setupProfile": "Vous pouvez maintenant configurer le profil de l'agriculteur",
+      "continue": "continuer",
+      "resendCode": "Renvoyer le code dans"
+    },
+    "profile": {
+      "completeRegistration": "Terminer l'inscription",
+      "firstName": "Entrez le prénom",
+      "lastName": "Entrez le nom de famille",
+      "email": "Entrez l'e-mail",
+      "address": "Entrez l'adresse"
+    },
+    "(subsciption-flow)": {
+      "index": {
+        "heading": "Devenez VIP",
+        "subtitle": "Accès illimité",
+        "benefit1": "Profitez de notre application sans publicités ni restrictions",
+        "benefit2": "Appels illimités avec le système",
+        "benefit3": "Suivi de commande facile",
+        "button1": "Passer",
+        "button2": "S’abonner maintenant",
+        "duration1": "1 mois",
+        "duration2": "6 mois",
+        "duration3": "12 mois",
+        "description": "Payez une fois, annulez à tout moment"
+      }
+    }
   },
-  "createAccount": {
-  "farmerAccount": "Créer un compte agriculteur",
-  "createPassword": "Créer un mot de passe",
-  "createAccount": "Créer un compte"
-},
-"verifyOtp": {
-  "verifyNumber": "vérifiez votre numéro de téléphone",
-  "codeSent": "Le code a été envoyé à",
-  "verify": "vérifier",
-  "phoneNumberVerified": "Numéro de téléphone vérifié !",
-  "setupProfile": "Vous pouvez maintenant configurer le profil de l'agriculteur",
-  "continue": "continuer",
-  "resendCode": "Renvoyer le code dans"
-},
-"profile": {
-  "completeRegistration": "Terminer l'inscription",
-  "firstName": "Entrez le prénom",
-  "lastName": "Entrez le nom de famille",
-  "email": "Entrez l'e-mail",
-  "address": "Entrez l'adresse"
-},
-"(subsciption-flow)": {
-  "index": {
-    "heading": "Devenez VIP",
-    "subtitle": "Accès illimité",
-    "benefit1": "Profitez de notre application sans publicités ni restrictions",
-    "benefit2": "Appels illimités avec le système",
-    "benefit3": "Suivi de commande facile",
-    "button1": "Passer",
-    "button2": "S’abonner maintenant",
-    "duration1": "1 mois",
-    "duration2": "6 mois",
-    "duration3": "12 mois",
-    "description": "Payez une fois, annulez à tout moment"
-  }
-}
+  "(farmer)": {
+    "create-product": {
+      "addNewProduct": "Ajouter un nouveau produit",
+      "cancel": "Annuler",
+      "post": "Publier",
+      "productImage": "Image du produit",
+      "uploadImage": "Téléchargez une image (.jpg, .png, .jpeg).\nPas plus de 10 Mo",
+      "productCategory": "Catégorie de produit",
+      "productName": "Nom du produit",
+      "priceType": "Type de prix",
+      "price": "Prix",
+      "unknownError": "Une erreur inconnue s'est produite",
+      "pleaseSelectAnImage": "Veuillez sélectionner une image pour ce produit",
+      "pleaseEnterAProductName": "Veuillez entrer un nom de produit",
+      "pleaseEnterAPriceType": "Veuillez entrer un type de prix",
+      "pleaseSelectACategory": "Veuillez sélectionner une catégorie",
+      "pleaseEnterThePrice": "Veuillez entrer le prix du produit",
+      "pleaseEnterADescription": "Veuillez entrer la description du produit",
+      "congratulations": "Félicitations",
+      "yourProductHasBeenUploaded": "Votre produit a été téléchargé",
+      "description": "Description"
+    },
+    "(index)": {
+      "my-products": {
+        "myProducts": "Mes produits",
+        "products": "Produits",
+        "noProductsFound": "Aucun produit trouvé",
+        "searchProducts": "Rechercher des produits"
+      }
+    },
+    "(profile-flow)": {
+      "profile": {
+        "title": "Compte",
+        "heading": "Devenez VIP",
+        "description": "Devenez un VIP et profitez de l'application sans aucune restriction",
+        "button": "Devenir VIP",
+        "tab1": "Paramètres",
+        "tab2": "Partager l'application",
+        "tab3": "Se déconnecter",
+        "tab4": "Inviter des amis",
+        "confirmation": "Êtes-vous sûr de vouloir vous déconnecter ?",
+        "button1": "Annuler",
+        "button2": "Se déconnecter"
+      },
+      "(change-password)": {
+        "currentPassword": "Mot de passe actuel",
+        "enterCurrentPassword": "Entrez votre mot de passe actuel",
+        "newPassword": "Nouveau mot de passe",
+        "enterNewPassword": "Entrez un nouveau mot de passe",
+        "confirmPassword": "Confirmer le nouveau mot de passe",
+        "placeholder": "Confirmez le nouveau mot de passe",
+        "forgotPassword": "Mot de passe oublié",
+        "save": "Enregistrer les modifications"
+      },
+      "(settings)": {
+        "heading": "Paramètres",
+        "heading1": "Informations personnelles",
+        "heading2": "Changer le mot de passe",
+        "heading3": "Langue",
+        "heading4": "Nous contacter",
+        "heading6": "Termes et conditions",
+        "heading7": "Politique de confidentialité",
+        "heading8": "À propos de Foodhouse",
+        "heading9": "Supprimer le compte",
+        "english": "Anglais (US)",
+        "french": "Français",
+        "header": "Suggéré",
+        "language": "Langue",
+        "chat": "Discuter sur WhatsApp",
+        "contactUs": "Contactez-nous"
 
-
+      },
+      "(personal-info)": {
+        "heading": "Informations personnelles",
+        "fullName": "Nom complet",
+        "fullNamePlaceholder": "Entrez votre nom complet",
+        "email": "E-mail",
+        "emailPlaceholder": "Entrez votre e-mail",
+        "address": "Adresse",
+        "addressPlaceholder": "Entrez votre adresse",
+        "cancel": "Annuler",
+        "save": "Enregistrer les modifications",
+        "edit": "Modifier"
+      }
+    }
   }
 }

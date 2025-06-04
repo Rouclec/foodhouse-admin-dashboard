@@ -33,8 +33,8 @@ heading: {
     marginRight: 20
   },
   vipButton: {
-    backgroundColor: "#fff", // White background for contrast
-    width: 120, // Wider button
+    backgroundColor: "#fff", 
+    width: 120, 
   },
 
   navigation: {
@@ -73,19 +73,7 @@ heading: {
     marginHorizontal: -16,
   }, 
 
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-  },
   dialog: {
-    //backgroundColor: "transparent",
     bottom: 0,
     position: "absolute",
     left: 0,
@@ -116,38 +104,6 @@ heading: {
   cancelButton: {
     marginTop: 10,
   },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  confirmationModal: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
-    width: '80%',
-  },
-  confirmationTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  confirmationText: {
-    fontSize: 16,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  confirmationButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  modalButton: {
-    flex: 1,
-    marginHorizontal: 5,
-  },
-  //personal info
 
     infoContainer: {
       borderRadius: 12,
@@ -170,4 +126,38 @@ heading: {
       borderRadius: 8,
       paddingHorizontal: 16,
     },
+
+  innerContainer: {
+    padding: 20,
+    marginTop: 20,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 25,
+  },
+  iconContainer: {
+    backgroundColor: Colors.primary[300],
+    padding: 10,
+    borderRadius: 30,
+    marginRight: 15,
+  },
+  errorContainer: {
+    backgroundColor: "#ffebee",
+    padding: 15,
+    borderRadius: 5,
+    marginBottom: 20,
+  },
+  errorText: {
+    color: "#d32f2f",
+    textAlign: "center",
+  },
+
+ icons: {
+    backgroundColor: Colors.primary[300],
+    padding: 5,
+    borderRadius: 30,
+    margin: 15,
+  },
+
 })

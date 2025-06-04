@@ -187,6 +187,13 @@ export const selectionSubscriptionStyles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
- 
+  languageItem: {
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   
 });

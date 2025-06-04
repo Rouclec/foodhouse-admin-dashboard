@@ -1,5 +1,8 @@
 {
-  "hello": "Hello",
+   "hello": "Hello",
+  "language": "Language",
+  "suggested": "Suggested",
+  "others": "Others",
   "(auth)": {
     "index": {
       "welcomeTo": "Welcome To",
@@ -204,13 +207,29 @@
         "heading6": "Terms and conditions",
         "heading7": "Privacy Policy",
         "heading8": "About Foodhouse",
-        "heading9": "Delete Account"
+        "heading9": "Delete Account",
+        "english": "English (US)",
+        "french": "French",
+        "header": "Suggested",
+        "language": "Language",
+        "chat": "Chat on Whatsapp",
+        "contactUs": "Contact Us"
+
     },
     "(personal-info)": {
       "heading": "Personal Information",
-      "fullName": "Full Name"
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Enter YOur Full Name",
+      "email": "Email",
+      "emailPlaceholder": "Enter your Email",
+      "address": "Address",
+      "addressPlaceholder": "Enter your Address",
+      "cancel": "Cancel",
+      "save": "Save Changes",
+      "edit": "Edit"
     }
-  },
+  }
+},
   "(buyer)": {
     "(index)": {
       "products": {
