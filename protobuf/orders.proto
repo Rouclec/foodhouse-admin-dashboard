@@ -232,6 +232,13 @@ message ListFarmerOrdersResponse {
   string next_key = 2;
 }
 
+message CheckPaymentStatusRequest {
+  string payment_id = 1;
+  string user_id = 2;
+}
+
+message CheckPaymentStatusResponse { PaymentStatus status = 1; }
+
 service Orders {
 
   rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {
@@ -322,6 +329,13 @@ service Orders {
       returns (ListDeliveryCitiesResponse) {
     option (google.api.http) = {
       get : "/v1/users/{user_id}/orders/list-delivery-cities"
+    };
+  }
+
+  rpc CheckPaymentStatus(CheckPaymentStatusRequest)
+      returns (CheckPaymentStatusResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/orders/{payment_id}/check-payment-status"
     };
   }
 }

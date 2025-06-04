@@ -48,7 +48,8 @@ export default function Login() {
       const role = userData?.user?.role;
 
         if (role === "USER_ROLE_FARMER") {
-          router.replace("/(farmer)/(index)");         
+          router.replace("/(farmer)/(index)");
+          
         } else {
           router.replace("/(buyer)/(index)");
           

@@ -2,31 +2,37 @@ import React, { useState } from "react";
 import {
   View,
   TouchableOpacity,
-  StyleSheet,
   ScrollView,
   Image,
+  ImageSourcePropType,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Appbar, Button, Icon, Text } from "react-native-paper";
+import { Appbar, Button, Text } from "react-native-paper";
 import { Colors } from "@/constants";
 import { defaultStyles, selectionSubscriptionStyles } from "@/styles";
+import { ordersgrpcPaymentMethodType } from "@/client/orders.swagger";
 
 const PaymentMethodsPage = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
+  const [selectedMethod, setSelectedMethod] =
+    useState<ordersgrpcPaymentMethodType>();
 
   // // Extract the plan details from params
   // const { planDuration, planAmount, planDescription } = params;
 
-  const paymentMethods = [
+  const paymentMethods: Array<{
+    id: ordersgrpcPaymentMethodType;
+    name: string;
+    icon: ImageSourcePropType;
+  }> = [
     {
-      id: "mtn",
+      id: "PaymentMethodType_MOBILE_MONEY",
       name: "MTN Mobile Money",
       icon: require("@/assets/images/mtn-momo.png"),
     },
     {
-      id: "orange",
+      id: "PaymentMethodType_ORANGE_MONEY",
       name: "Orange Money",
       icon: require("@/assets/images/orange-money.png"),
     },
