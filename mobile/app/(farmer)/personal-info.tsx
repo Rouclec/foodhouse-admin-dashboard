@@ -89,7 +89,7 @@ export default function PersonalInfo() {
     <>
       <Appbar.Header dark={false}>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={i18n.t("personalInfo.title")} />
+        <Appbar.Content title={i18n.t("(farmer).(profile-flow).(personal-info).heading")}/>
       </Appbar.Header>
 
       <ScrollView contentContainerStyle={defaultStyles.scrollContainer}>

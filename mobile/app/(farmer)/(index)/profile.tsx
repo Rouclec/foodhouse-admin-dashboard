@@ -48,7 +48,7 @@ export default function Profile() {
   return (
     <>
       <Appbar.Header dark={false} style={defaultStyles.appHeader}>
-        <Appbar.Content title="Account" />
+        <Appbar.Content title={i18n.t("(farmer).(profile-flow).profile.title")} />
       </Appbar.Header>
 
       <ScrollView contentContainerStyle={defaultStyles.scrollContainer}>
@@ -78,7 +78,7 @@ export default function Profile() {
                 variant="titleMedium"
                 style={[defaultStyles.heading, { color: "#fff" }]}
               >
-                Become A VIP!
+                {i18n.t("(farmer).(profile-flow).profile.heading")}
               </Text>
               <Text
                 style={[
@@ -86,7 +86,7 @@ export default function Profile() {
                   { color: "#fff", marginBottom: 12 },
                 ]}
               >
-                Become A VIP and enjoy the app with no restrictions
+               {i18n.t("(farmer).(profile-flow).profile.description")}
               </Text>
               <Button
                 mode="contained"
@@ -94,7 +94,7 @@ export default function Profile() {
                 style={styles.vipButton}
                 labelStyle={{ color: Colors.primary[500] }}
               >
-                Get A VIP
+                {i18n.t("(farmer).(profile-flow).profile.button")}
               </Button>
             </View>
 
@@ -117,7 +117,7 @@ export default function Profile() {
                   source={require("@/assets/images/icons/Setting.png")}
                   style={styles.navigationIcon}
                 />
-                <Text style={styles.navigationText}>Settings</Text>
+                <Text style={styles.navigationText}>{i18n.t("(farmer).(profile-flow).profile.tab1")}</Text>
               </View>
               <List.Icon icon="chevron-right" />
             </TouchableOpacity>
@@ -128,7 +128,7 @@ export default function Profile() {
                   source={require("@/assets/images/icons/Send.png")}
                   style={styles.navigationIcon}
                 />
-                <Text style={styles.navigationText}>Share App</Text>
+                <Text style={styles.navigationText}>{i18n.t("(farmer).(profile-flow).profile.tab2")}</Text>
               </View>
               <List.Icon icon="chevron-right" />
             </TouchableOpacity>
@@ -139,7 +139,7 @@ export default function Profile() {
                   source={require("@/assets/images/icons/3 User.png")}
                   style={styles.navigationIcon}
                 />
-                <Text style={styles.navigationText}>Invite Friends</Text>
+                <Text style={styles.navigationText}>{i18n.t("(farmer).(profile-flow).profile.tab4")}</Text>
               </View>
               <List.Icon icon="chevron-right" />
             </TouchableOpacity>
@@ -153,23 +153,22 @@ export default function Profile() {
                   source={require("@/assets/images/icons/Send.png")}
                   style={styles.navigationIcon}
                 />
-                <Text style={styles.logout}>Logout</Text>
+                <Text style={styles.logout}>{i18n.t("(farmer).(profile-flow).profile.tab3")}</Text>
               </View>
             </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
 
-      {/* Logout Confirmation Dialog */}
       <Portal>
         <Dialog
           visible={visibleLogoutDialog}
           onDismiss={() => setVisibleLogoutDialog(false)}
           style={styles.dialog}
         >
-          <Dialog.Title style={styles.heading}>Logout</Dialog.Title>
+          <Dialog.Title style={styles.heading}>{i18n.t("(farmer).(profile-flow).profile.tab3")}</Dialog.Title>
           <Dialog.Content>
-            <Text>Are you sure you want to log out?</Text>
+            <Text>{i18n.t("(farmer).(profile-flow).profile.confirmation")}</Text>
           </Dialog.Content>
           <Dialog.Actions style={imagePickerStyles.bottomContainer}>
             <Button
@@ -177,10 +176,10 @@ export default function Profile() {
               style={[imagePickerStyles.button1, imagePickerStyles.skipButton]}
               labelStyle={imagePickerStyles.skipButtonText}
             >
-              Cancel
+              {i18n.t("(farmer).(profile-flow).profile.button1")}
             </Button>
             <Button onPress={handleLogout} style={imagePickerStyles.button1}>
-              Logout
+              {i18n.t("(farmer).(profile-flow).profile.button2")}
             </Button>
           </Dialog.Actions>
         </Dialog>

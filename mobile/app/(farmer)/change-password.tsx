@@ -1,12 +1,10 @@
 import React, { useContext, useState } from "react";
 import {
   View,
-  TouchableOpacity,
   StyleSheet,
   SafeAreaView,
   ScrollView,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { Appbar, Button, Text, TextInput } from "react-native-paper";
 import { Link, router } from "expo-router";
 import { defaultStyles, loginstyles, signupStyles } from "@/styles";
@@ -14,7 +12,7 @@ import { useMutation } from "@tanstack/react-query";
 import { usersChangePasswordMutation } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { delay } from "@/utils";
 import i18n from "@/i18n";
-import { Colors } from "@/constants"; // Make sure to import Colors
+import { Colors } from "@/constants"; 
 import { Context, ContextType } from "../_layout";
 
 const ChangePasswordScreen = () => {
@@ -98,13 +96,13 @@ const ChangePasswordScreen = () => {
           )}
           <View style={signupStyles.allInput}>
             <View>
-              <Text style={styles.label}>Current Password</Text>
+              <Text style={styles.label}>{i18n.t("(farmer).(profile-flow).(change-password).currentPassword")}</Text>
               <TextInput
                 mode="outlined"
                 secureTextEntry={!showCurrent}
                 value={currentPassword}
                 onChangeText={setCurrentPassword}
-                placeholder="Enter current password"
+                placeholder={i18n.t("(farmer).(profile-flow).(change-password).enterCurrentPassword")}
                 autoCapitalize="none"
                 style={loginstyles.input}
                 outlineColor={Colors.grey["bg"]}
@@ -128,13 +126,13 @@ const ChangePasswordScreen = () => {
             </View>
 
             <View>
-              <Text style={styles.label}>New Password</Text>
+              <Text style={styles.label}>{i18n.t("(farmer).(profile-flow).(change-password).newPassword")}</Text>
               <TextInput
                 mode="outlined"
                 secureTextEntry={!showNew}
                 value={newPassword}
                 onChangeText={setNewPassword}
-                placeholder="Enter new password"
+                placeholder={i18n.t("(farmer).(profile-flow).(change-password).currentPassword")}
                 autoCapitalize="none"
                 style={loginstyles.input}
                 outlineColor={Colors.grey["bg"]}
@@ -158,13 +156,13 @@ const ChangePasswordScreen = () => {
             </View>
 
             <View>
-              <Text style={styles.label}>Confirm New Password</Text>
+              <Text style={styles.label}>{i18n.t("(farmer).(profile-flow).(change-password).confirmPassword")}</Text>
               <TextInput
                 mode="outlined"
                 secureTextEntry={!showConfirm}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
-                placeholder="Confirm new password"
+                placeholder={i18n.t("(farmer).(profile-flow).(change-password).placeholder")}
                 autoCapitalize="none"
                 style={loginstyles.input}
                 outlineColor={Colors.grey["bg"]}
@@ -194,7 +192,7 @@ const ChangePasswordScreen = () => {
               href={"/(auth)/(forgot-password)"}
             >
               <Text style={loginstyles.forgotPasswordText}>
-                Forgot password?
+                {i18n.t("(farmer).(profile-flow).(change-password).forgotPassword")}
               </Text>
             </Link>
 

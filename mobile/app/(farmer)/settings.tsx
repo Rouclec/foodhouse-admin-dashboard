@@ -13,11 +13,7 @@ import {
   Text,
   List,
   Divider,
-  Button,
-  Switch,
-  Icon,
 } from "react-native-paper";
-import { Colors } from "@/constants";
 import {
   defaultStyles,
   signupStyles,
@@ -29,36 +25,30 @@ export default function SettingsPage() {
   const router = useRouter();
   const [language, setLanguage] = React.useState("English (US)");
 
-  const handleDeleteAccount = () => {
-    // Implement delete account logic
-    console.log("Account deletion requested");
-  };
-
-  const openExternalLink = (url: string) => {
-    Linking.openURL(url).catch((err) =>
-      console.error("Failed to open URL:", err)
-    );
-  };
+  // const handleDeleteAccount = () => {
+  //   // Implement delete account logic
+  //   console.log("Account deletion requested");
+  // };
 
   return (
     <>
       <Appbar.Header dark={false} style={defaultStyles.appHeader}>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title="Settings" />
+        <Appbar.Content title={i18n.t("(farmer).(profile-flow).(settings).heading")} />
       </Appbar.Header>
       <ScrollView contentContainerStyle={defaultStyles.scrollContainer}>
         <View style={signupStyles.allInput}>
           <View style={styles.navigateSection}>
             <TouchableOpacity
               style={styles.navigationItem}
-              onPress={() => router.push("/(farmer)/personalInfo")}
+              onPress={() => router.push("/(farmer)/personal-info")}
             >
               <View style={styles.navigationContent}>
                 <Image
                   source={require("@/assets/images/icons/Profile.png")}
                   style={styles.navigationIcon}
                 />
-                <Text style={styles.navigationText}>Personal Information</Text>
+                <Text style={styles.navigationText}>{i18n.t("(farmer).(profile-flow).(settings).heading1")} </Text>
               </View>
               <List.Icon icon="chevron-right" />
             </TouchableOpacity>
@@ -66,45 +56,44 @@ export default function SettingsPage() {
             {/* Share App */}
             <TouchableOpacity
               style={styles.navigationItem}
-              onPress={() => router.push("/(farmer)/changePassword")}
+              onPress={() => router.push("/(farmer)/change-password")}
             >
               <View style={styles.navigationContent}>
                 <Image
                   source={require("@/assets/images/icons/Lock.png")}
                   style={styles.navigationIcon}
                 />
-                <Text style={styles.navigationText}>Change Password</Text>
+                <Text style={styles.navigationText}>{i18n.t("(farmer).(profile-flow).(settings).heading2")} </Text>
               </View>
               <List.Icon icon="chevron-right" />
             </TouchableOpacity>
 
             {/* Invite Friends */}
-            <TouchableOpacity style={styles.navigationItem}>
+            <TouchableOpacity style={styles.navigationItem}
+            onPress={() => router.push("/(farmer)/language")}>
               <View style={styles.navigationContent}>
                 <Image
                   source={require("@/assets/images/icons/Document.png")}
                   style={styles.navigationIcon}
                 />
-                <Text style={styles.navigationText}>Language</Text>
+                <Text style={styles.navigationText}>{i18n.t("(farmer).(profile-flow).(settings).heading3")}</Text>
               </View>
               <List.Icon icon="chevron-right" />
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.navigationItem}
-              onPress={() => router.push("/(farmer)/contactUs")}
+              onPress={() => router.push("/(farmer)/contact-us")}
             >
               <View style={styles.navigationContent}>
                 <Image
                   source={require("@/assets/images/icons/Setting.png")}
                   style={styles.navigationIcon}
                 />
-                <Text style={styles.navigationText}>Contact us</Text>
+                <Text style={styles.navigationText}>{i18n.t("(farmer).(profile-flow).(settings).heading4")} </Text>
               </View>
               <List.Icon icon="chevron-right" />
             </TouchableOpacity>
-
-            {/* Share App */}
             <TouchableOpacity
               style={styles.navigationItem}
               onPress={() => console.log("Share app")}
@@ -114,7 +103,7 @@ export default function SettingsPage() {
                   source={require("@/assets/images/icons/Send.png")}
                   style={styles.navigationIcon}
                 />
-                <Text style={styles.navigationText}>Terms and conditions</Text>
+                <Text style={styles.navigationText}>{i18n.t("(farmer).(profile-flow).(settings).heading6")} </Text>
               </View>
               <List.Icon icon="chevron-right" />
             </TouchableOpacity>
@@ -126,7 +115,7 @@ export default function SettingsPage() {
                   source={require("@/assets/images/icons/Send.png")}
                   style={styles.navigationIcon}
                 />
-                <Text style={styles.navigationText}>Privacy Policy</Text>
+                <Text style={styles.navigationText}>{i18n.t("(farmer).(profile-flow).(settings).heading7")}</Text>
               </View>
               <List.Icon icon="chevron-right" />
             </TouchableOpacity>
@@ -136,7 +125,7 @@ export default function SettingsPage() {
                   source={require("@/assets/images/icons/Send.png")}
                   style={styles.navigationIcon}
                 />
-                <Text style={styles.navigationText}>About FoodHouse </Text>
+                <Text style={styles.navigationText}>{i18n.t("(farmer).(profile-flow).(settings).heading8")} </Text>
               </View>
               <List.Icon icon="chevron-right" />
             </TouchableOpacity>
@@ -148,7 +137,7 @@ export default function SettingsPage() {
                   source={require("@/assets/images/icons/Send.png")}
                   style={styles.navigationIcon}
                 />
-                <Text style={styles.logout}>Delete Account</Text>
+                <Text style={styles.logout}>{i18n.t("(farmer).(profile-flow).(settings).heading9")} </Text>
               </View>
             </TouchableOpacity>
           </View>
