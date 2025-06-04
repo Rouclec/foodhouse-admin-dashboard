@@ -51,11 +51,11 @@ export default function DeliveryMethod() {
                 style={styles.card}
                 onPress={() => setDeliveryOption("pickup")}
               >
-                <View style={styles.checkOutterContainer}>
+                <View style={defaultStyles.checkOutterContainer}>
                   <View
                     style={[
-                      styles.checkInnercontainer,
-                      deliveryOption === "pickup" && styles.blueChecked,
+                      defaultStyles.checkInnercontainer,
+                      deliveryOption === "pickup" && defaultStyles.blueChecked,
                     ]}
                   />
                 </View>
@@ -79,15 +79,15 @@ export default function DeliveryMethod() {
               >
                 <View
                   style={[
-                    styles.checkOutterContainer,
-                    styles.checkPrimaryOutterContainer,
+                    defaultStyles.checkOutterContainer,
+                    defaultStyles.checkPrimaryOutterContainer,
                   ]}
                 >
                   <View
                     style={[
-                      styles.checkInnercontainer,
+                      defaultStyles.checkInnercontainer,
                       deliveryOption === "home-delivery" &&
-                        styles.primaryChecked,
+                        defaultStyles.primaryChecked,
                     ]}
                   />
                 </View>

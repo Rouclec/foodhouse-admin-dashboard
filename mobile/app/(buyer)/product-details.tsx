@@ -77,7 +77,7 @@ export default function ProductDetails() {
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={[defaultStyles.center, styles.notFoundContainer]}>
+            <View style={[defaultStyles.center, defaultStyles.notFoundContainer]}>
               <Chase size={56} color={Colors.primary[500]} />
             </View>
           </ScrollView>
@@ -109,7 +109,7 @@ export default function ProductDetails() {
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={[defaultStyles.center, styles.notFoundContainer]}>
+            <View style={[defaultStyles.center, defaultStyles.notFoundContainer]}>
               <Text>{i18n.t("(buyer).product-details.couldNotLoad")}</Text>
             </View>
           </ScrollView>
