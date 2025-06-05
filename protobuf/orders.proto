@@ -41,6 +41,7 @@ message Order {
   string secret_key = 11;
   string product_owner = 12;
   string payout_phone_number = 13;
+  int64 quantity = 14;
 }
 
 message OrderAuditLog {

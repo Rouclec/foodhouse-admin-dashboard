@@ -30,15 +30,19 @@ const HOUR_OF_DAY = new Date().getHours();
 
 const TAB_ITEMS: Array<{
   name: string;
-  value: ordersgrpcOrderStatus;
+  value: Array<ordersgrpcOrderStatus>;
 }> = [
   {
     name: i18n.t("(farmer).(index).index.pending"),
-    value: "OrderStatus_PAYMENT_SUCCESSFUL",
+    value: [
+      "OrderStatus_PAYMENT_SUCCESSFUL",
+      "OrderStatus_APPROVED",
+      "OrderStatus_IN_TRANSIT",
+    ],
   },
   {
     name: i18n.t("(farmer).(index).index.completed"),
-    value: "OrderStatus_DELIVERED",
+    value: ["OrderStatus_DELIVERED"],
   },
 ];
 
@@ -118,7 +122,7 @@ export default function Orders() {
   const [count, setCount] = useState(10);
   const [tabItem, setTabItem] = useState<{
     name: string;
-    value: ordersgrpcOrderStatus;
+    value: Array<ordersgrpcOrderStatus>;
   }>(TAB_ITEMS[0]);
 
   useEffect(() => {
@@ -139,7 +143,7 @@ export default function Orders() {
       query: {
         count: count,
         startKey: "",
-        status: tabItem.value,
+        statuses: tabItem.value,
       },
     }),
   });
@@ -231,7 +235,7 @@ export default function Orders() {
             {TAB_ITEMS.map((item) => {
               return (
                 <TouchableOpacity
-                  key={item?.value}
+                  key={item?.value[0]}
                   onPress={() => setTabItem(item)}
                   style={[
                     styles.tabItemContainer,

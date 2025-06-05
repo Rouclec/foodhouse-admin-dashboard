@@ -17,6 +17,7 @@ import i18n from "@/i18n";
 import { Chase } from "react-native-animated-spinkit";
 import { Colors } from "@/constants";
 import { formatAmount } from "@/utils/amountFormater";
+import { usersGetPublicUserOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
 
 export default function OrderDetails() {
   const router = useRouter();
@@ -49,6 +50,15 @@ export default function OrderDetails() {
       },
     }),
     enabled: !!orderDetails?.order,
+  });
+
+  const { data: buyer } = useQuery({
+    ...usersGetPublicUserOptions({
+      path: {
+        userId: orderDetails?.order?.createdBy ?? "",
+      },
+    }),
+    enabled: !!orderDetails?.order?.createdBy,
   });
 
   if (isOrderDetailsLoading || isProductLoading) {
@@ -175,10 +185,30 @@ export default function OrderDetails() {
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={defaultStyles.card}>
-              <View>
-                {/* <Text></Text>
-                <Text></Text> */}
+            <View style={styles.card}>
+              <View style={styles.listItem}>
+                <Text variant="titleSmall" style={styles.leftText}>
+                  {i18n.t("(farmer).order-details.customersName")}
+                </Text>
+                <Text variant="titleMedium" style={styles.rightText}>
+                  {buyer?.name}
+                </Text>
+              </View>
+              <View style={styles.listItem}>
+                <Text variant="titleSmall" style={styles.leftText}>
+                  {i18n.t("(farmer).order-details.quantity")}
+                </Text>
+                <Text variant="titleMedium" style={styles.rightText}>
+                  {formatAmount(orderDetails?.order?.price?.value ?? "")}
+                </Text>
+              </View>
+              <View style={styles.listItem}>
+                <Text variant="titleSmall" style={styles.leftText}>
+                  {i18n.t("(farmer).order-details.customersName")}
+                </Text>
+                <Text variant="titleMedium" style={styles.rightText}>
+                  {buyer?.name}
+                </Text>
               </View>
             </View>
           </ScrollView>

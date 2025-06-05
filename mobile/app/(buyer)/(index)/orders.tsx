@@ -28,17 +28,23 @@ import { Appbar, Button, Icon, Text, TextInput } from "react-native-paper";
 
 const { width } = Dimensions.get("window");
 
+const PENDING_ORDER_STATUSES: Array<ordersgrpcOrderStatus> = [
+  "OrderStatus_PAYMENT_SUCCESSFUL",
+  "OrderStatus_APPROVED",
+  "OrderStatus_IN_TRANSIT",
+];
+
 const TAB_ITEMS: Array<{
   name: string;
-  value: ordersgrpcOrderStatus;
+  value: Array<ordersgrpcOrderStatus>;
 }> = [
   {
     name: i18n.t("(buyer).(index).orders.pending"),
-    value: "OrderStatus_PAYMENT_SUCCESSFUL",
+    value: PENDING_ORDER_STATUSES,
   },
   {
     name: i18n.t("(buyer).(index).orders.completed"),
-    value: "OrderStatus_DELIVERED",
+    value: ["OrderStatus_DELIVERED"],
   },
 ];
 
@@ -112,7 +118,7 @@ export default function Sales() {
   const [count, setCount] = useState(10);
   const [tabItem, setTabItem] = useState<{
     name: string;
-    value: ordersgrpcOrderStatus;
+    value: Array<ordersgrpcOrderStatus>;
   }>(TAB_ITEMS[0]);
 
   const slideAnim = useRef(new Animated.Value(width)).current;
@@ -152,7 +158,7 @@ export default function Sales() {
       query: {
         count: count,
         startKey: "",
-        status: tabItem.value,
+        statuses: tabItem.value,
       },
     }),
   });
@@ -214,7 +220,7 @@ export default function Sales() {
             {TAB_ITEMS.map((item) => {
               return (
                 <TouchableOpacity
-                  key={item?.value}
+                  key={item?.value[0]}
                   onPress={() => setTabItem(item)}
                   style={[
                     styles.tabItemContainer,
@@ -271,7 +277,9 @@ export default function Sales() {
                         ? () => {
                             console.log("delivered order");
                           }
-                        : item?.status === "OrderStatus_PAYMENT_SUCCESSFUL"
+                        : PENDING_ORDER_STATUSES.includes(
+                            item?.status as ordersgrpcOrderStatus
+                          )
                         ? () => {
                             router.push({
                               pathname: "/(buyer)/track-order",
