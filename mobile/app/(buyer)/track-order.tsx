@@ -191,7 +191,7 @@ export default function TrackOrder() {
               <Text variant="titleMedium">{productData?.product?.name}</Text>
               <View style={styles.centerRow}>
                 <Text variant="titleSmall" style={styles.primaryText}>
-                  {orderDetails?.order?.price?.currencyIsoCode}
+                  {orderDetails?.order?.price?.currencyIsoCode}{" "}
                   {formatAmount(orderDetails?.order?.price?.value ?? "", {
                     decimalPlaces: 2,
                   })}

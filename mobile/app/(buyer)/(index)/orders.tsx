@@ -90,7 +90,7 @@ const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
         <Text variant="titleMedium">{productData?.product?.name}</Text>
         <View style={styles.centerRow}>
           <Text variant="titleSmall" style={styles.primaryText}>
-            {item?.price?.currencyIsoCode}
+            {item?.price?.currencyIsoCode}{" "}
             {formatAmount(item?.price?.value ?? "", { decimalPlaces: 2 })}
           </Text>
         </View>

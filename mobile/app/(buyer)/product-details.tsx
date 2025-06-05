@@ -18,6 +18,7 @@ import { Context, ContextType } from "../_layout";
 import { useQuery } from "@tanstack/react-query";
 import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
 import { usersGetFarmerByIdOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
+import { formatAmount } from "@/utils/amountFormater";
 
 export default function ProductDetails() {
   const { user, productId, setProductId } = useContext(Context) as ContextType;
@@ -77,7 +78,9 @@ export default function ProductDetails() {
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={[defaultStyles.center, defaultStyles.notFoundContainer]}>
+            <View
+              style={[defaultStyles.center, defaultStyles.notFoundContainer]}
+            >
               <Chase size={56} color={Colors.primary[500]} />
             </View>
           </ScrollView>
@@ -109,7 +112,9 @@ export default function ProductDetails() {
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={[defaultStyles.center, defaultStyles.notFoundContainer]}>
+            <View
+              style={[defaultStyles.center, defaultStyles.notFoundContainer]}
+            >
               <Text>{i18n.t("(buyer).product-details.couldNotLoad")}</Text>
             </View>
           </ScrollView>
@@ -201,8 +206,10 @@ export default function ProductDetails() {
                 {i18n.t("(buyer).product-details.price")}
               </Text>
               <Text style={styles.price} variant="titleMedium">
-                {data?.product?.amount?.currencyIsoCode}
-                {data?.product?.amount?.value}
+                {data?.product?.amount?.currencyIsoCode}{" "}
+                {formatAmount(data?.product?.amount?.value ?? "", {
+                  decimalPlaces: 2,
+                })}
                 <Text style={styles.greyText}>
                   {" "}
                   {data?.product?.unitType?.slug?.replace("per_", "/")}
