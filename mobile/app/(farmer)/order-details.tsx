@@ -199,15 +199,15 @@ export default function OrderDetails() {
                   {i18n.t("(farmer).order-details.quantity")}
                 </Text>
                 <Text variant="titleMedium" style={styles.rightText}>
-                  {formatAmount(orderDetails?.order?.price?.value ?? "")}
+                  {formatAmount(orderDetails?.order?.quantity ?? "")}
                 </Text>
               </View>
               <View style={styles.listItem}>
                 <Text variant="titleSmall" style={styles.leftText}>
-                  {i18n.t("(farmer).order-details.customersName")}
+                  {i18n.t("(farmer).order-details.deliveryAddress")}
                 </Text>
                 <Text variant="titleMedium" style={styles.rightText}>
-                  {buyer?.name}
+                  {orderDetails?.order?.deliveryLocation?.address}
                 </Text>
               </View>
             </View>

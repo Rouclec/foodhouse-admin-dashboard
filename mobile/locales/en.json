@@ -191,7 +191,8 @@
       "couldNotLoad": "Could not load order details",
       "approveOrder": "Approve order",
       "customersName": "Customer's Name",
-      "quantity": "Quantity"
+      "quantity": "Quantity",
+      "deliveryAddress": "Delivery Address"
     }
   },
   "(buyer)": {
