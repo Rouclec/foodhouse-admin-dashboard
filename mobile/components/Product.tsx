@@ -3,6 +3,7 @@ import React, { FC } from "react";
 import { View, Image, TouchableOpacity } from "react-native";
 import { defaultStyles, productStyles as styles } from "@/styles";
 import { Text } from "react-native-paper";
+import { formatAmount } from "@/utils/amountFormater";
 
 interface Props {
   product: productsgrpcProduct;
@@ -32,7 +33,8 @@ export const Product: FC<Props> = ({ product, OnPress }) => {
           </View>
         </View> */}
         <Text style={defaultStyles.primaryText}>
-          {product.amount?.currencyIsoCode} {product.amount?.value}
+          {product.amount?.currencyIsoCode}{" "}
+          {formatAmount(product.amount?.value ?? "", { decimalPlaces: 2 })}
           {/* <Text>{product.unitType}</Text> */}
           <Text style={styles.greyText}>
             {product.unitType?.slug?.replace("per_", "/")}
