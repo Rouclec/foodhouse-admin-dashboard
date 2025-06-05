@@ -20,5 +20,29 @@ export const orderDetailsStyles = StyleSheet.create({
   primaryText: { fontSize: 16, color: Colors.primary[500] },
   mainContainer: {
     paddingVertical: 24,
-  }
+  },
+  listItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    columnGap: 24,
+    overflow: "hidden",
+  },
+  leftText: {
+    flexShrink: 1,
+    fontSize: 14,
+    color: Colors.grey["61"],
+  },
+  rightText: { flexShrink: 1, textAlign: "right", fontSize: 16 },
+  card: {
+    backgroundColor: Colors.light[10],
+    padding: 20,
+    borderRadius: 16,
+    rowGap: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
 });

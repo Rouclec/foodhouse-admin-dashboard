@@ -96,6 +96,7 @@ export type ordersgrpcOrder = {
     secretKey?: string;
     productOwner?: string;
     payoutPhoneNumber?: string;
+    quantity?: string;
 };
 
 export type ordersgrpcOrderAuditLog = {

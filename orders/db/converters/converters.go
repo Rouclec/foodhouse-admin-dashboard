@@ -55,6 +55,7 @@ func SqlcOrderToProto(order sqlc.Order) *ordersgrpc.Order {
 		SecretKey:         derefString(order.SecretKey),
 		ProductOwner:      derefString(order.ProductOwner),
 		PayoutPhoneNumber: derefString(order.PayoutPhoneNumber),
+		Quantity:          int64(*order.Quantity),
 	}
 }
 

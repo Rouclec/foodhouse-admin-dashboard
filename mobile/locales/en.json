@@ -189,7 +189,9 @@
     "order-details": {
       "orderDetails": "Order Details",
       "couldNotLoad": "Could not load order details",
-      "approveOrder": "Approve order"
+      "approveOrder": "Approve order",
+      "customersName": "Customer's Name",
+      "quantity": "Quantity"
     }
   },
   "(buyer)": {

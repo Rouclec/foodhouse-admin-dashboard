@@ -929,6 +929,10 @@
         },
         "payoutPhoneNumber": {
           "type": "string"
+        },
+        "quantity": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
