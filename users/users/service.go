@@ -1232,3 +1232,19 @@ func (i *Impl) ListSubscriptions(ctx context.Context,
 		Subscriptions: protoSubscriptions,
 	}, nil
 }
+
+// GetPublicUser implements usersgrpc.UsersServer.
+func (i *Impl) GetPublicUser(ctx context.Context,
+	req *usersgrpc.GetPublicUserRequest) (
+	*usersgrpc.GetPublicUserResponse, error) {
+	i.logger.Debug().Msgf("user id in request %v", req.GetUserId())
+
+	foundUser, err := i.repo.Do().GetUser(ctx, req.GetUserId())
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "User not found: %v", err)
+	}
+
+	return &usersgrpc.GetPublicUserResponse{
+		Name: *foundUser.FirstName + *foundUser.LastName,
+	}, nil
+}

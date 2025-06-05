@@ -564,6 +564,36 @@
         ]
       }
     },
+    "/v1/public/users/{userId}/get-public-user": {
+      "get": {
+        "operationId": "Users_GetPublicUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcGetPublicUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
     "/v1/users/{userId}/complete-registration": {
       "post": {
         "operationId": "Users_CompleteRegistration",
@@ -1204,6 +1234,14 @@
         }
       },
       "title": "Response message for GetFarmerByID"
+    },
+    "usersgrpcGetPublicUserResponse": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      }
     },
     "usersgrpcGetUserActiveSubscriptionResponse": {
       "type": "object",

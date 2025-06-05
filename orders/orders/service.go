@@ -562,10 +562,10 @@ func (i *Impl) ListFarmerOrders(ctx context.Context, req *ordersgrpc.ListFarmerO
 	}
 
 	orders, err := i.repo.Do().ListFarmerOrders(ctx, sqlc.ListFarmerOrdersParams{
-		ProductOwner:  &req.FarmerId,
-		CreatedBefore: startKey,
-		Status:        req.GetStatus().String(),
-		Count:         int32(count), // Convert count to int32
+		ProductOwner:     &req.FarmerId,
+		CreatedBefore:    startKey,
+		IncludedStatuses: convertOrderStatusesToStrings(req.GetStatuses()),
+		Count:            int32(count), // Convert count to int32
 	})
 
 	if err != nil {
@@ -605,10 +605,10 @@ func (i *Impl) ListUserOrders(ctx context.Context, req *ordersgrpc.ListUserOrder
 	}
 
 	orders, err := i.repo.Do().ListUserOrders(ctx, sqlc.ListUserOrdersParams{
-		CreatedBy:     &req.UserId,
-		Status:        req.GetStatus().String(),
-		CreatedBefore: startKey,
-		Count:         int32(count), // Convert count to int32
+		CreatedBy:        &req.UserId,
+		IncludedStatuses: convertOrderStatusesToStrings(req.GetStatuses()),
+		CreatedBefore:    startKey,
+		Count:            int32(count), // Convert count to int32
 	})
 
 	if err != nil {
@@ -628,6 +628,16 @@ func (i *Impl) ListUserOrders(ctx context.Context, req *ordersgrpc.ListUserOrder
 		Orders:  protoOrders,
 		NextKey: nextKey,
 	}, nil
+}
+
+func convertOrderStatusesToStrings(orderStatus []ordersgrpc.OrderStatus) []string {
+	stringStatuses := make([]string, len(orderStatus))
+
+	for _, os := range orderStatus {
+		stringStatuses = append(stringStatuses, os.String())
+	}
+
+	return stringStatuses
 }
 
 func generateHexSecretKey(length int) (string, error) {
@@ -782,6 +792,10 @@ func (i *Impl) ApproveOrder(ctx context.Context, req *ordersgrpc.ApproveOrderReq
 	if err != nil {
 		i.logger.Debug().Msgf("error getting order with id %s why: %v", req.GetOrderId(), err)
 		return nil, status.Errorf(codes.Internal, "error getting order with id %s why: %v", req.GetOrderId(), err)
+	}
+
+	if req.GetUserId() != *order.ProductOwner {
+		return nil, status.Error(codes.PermissionDenied, "user does not have permission to approve this order")
 	}
 
 	beforeBytes, err := protojson.Marshal(converters.SqlcOrderToProto(order))

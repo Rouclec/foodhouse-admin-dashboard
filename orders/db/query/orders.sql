@@ -42,9 +42,12 @@ SELECT * FROM orders WHERE secret_key = $1 AND created_by = $2;
 
 -- name: ListUserOrders :many
 SELECT * FROM orders 
-WHERE created_by = $1
-AND (sqlc.arg(status)::varchar = '' OR status = sqlc.arg(status)::varchar)
-AND 
+WHERE created_by = $1 AND 
+  (
+        sqlc.arg(included_statuses)::TEXT[] IS NULL OR
+        sqlc.arg(included_statuses)::TEXT[] = '{}'::TEXT[] OR
+        status::TEXT  = ANY(sqlc.arg(included_statuses))
+  ) AND 
   (sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at < sqlc.arg(created_before)::timestamptz)
 ORDER BY created_at DESC
 LIMIT sqlc.arg(count)::int;
@@ -52,9 +55,13 @@ LIMIT sqlc.arg(count)::int;
 -- name: ListFarmerOrders :many
 SELECT * 
 FROM orders 
-WHERE product_owner = $1
-  AND (sqlc.arg(status)::varchar = '' OR status = sqlc.arg(status)::varchar)
-  AND (
+WHERE product_owner = $1 AND 
+  (
+        sqlc.arg(included_statuses)::TEXT[] IS NULL OR
+        sqlc.arg(included_statuses)::TEXT[] = '{}'::TEXT[] OR
+        status::TEXT  = ANY(sqlc.arg(included_statuses))
+  ) AND 
+  (
     sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
     OR created_at < sqlc.arg(created_before)::timestamptz
   )

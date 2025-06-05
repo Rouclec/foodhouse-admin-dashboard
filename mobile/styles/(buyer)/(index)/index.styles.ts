@@ -1,7 +1,7 @@
 import { Colors } from "@/constants";
 import { Dimensions, StyleSheet } from "react-native";
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 export const buyerProductsStyles = StyleSheet.create({
   bgWhite: {
     backgroundColor: Colors.light['bg'],
