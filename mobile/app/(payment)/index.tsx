@@ -19,8 +19,6 @@ const PaymentMethodsPage = () => {
   const [selectedMethod, setSelectedMethod] =
     useState<ordersgrpcPaymentMethodType>();
 
-  // // Extract the plan details from params
-  // const { planDuration, planAmount, planDescription } = params;
 
   const paymentMethods: Array<{
     id: ordersgrpcPaymentMethodType;
@@ -42,7 +40,7 @@ const PaymentMethodsPage = () => {
   const handleNext = () => {
     if (selectedMethod) {
       router.push({
-        pathname: "/(payment)/paymentAccount",
+        pathname: "/(payment)/payment-account",
         params: {
           ...params,
           paymentMethod: selectedMethod,

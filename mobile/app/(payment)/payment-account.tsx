@@ -74,7 +74,8 @@ const PaymentAccountPage = () => {
       setLoading(false);
     }
   };
-
+console.log(paymentData);
+console.log(paymentMethod);
   const { mutateAsync, data } = useMutation({
     ...ordersInitiatePaymentMutation(),
     onSuccess: () => {
@@ -102,7 +103,7 @@ const PaymentAccountPage = () => {
     enabled: !!data?.payment?.id,
     refetchInterval: 2000,
   });
-
+console.log(paymentStatus)
   useEffect(() => {
     if (!paymentStatus?.status) return;
     if (paymentStatus?.status === "PaymentStatus_INITIATED") return;
