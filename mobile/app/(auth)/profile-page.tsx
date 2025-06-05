@@ -230,7 +230,6 @@ const ProfilePage = () => {
         </View>
       </KeyboardAvoidingView>
 
-      {/* Image Picker Component */}
       <ImagePicker
         visible={isImagePickerVisible}
         setImage={(asset) => {

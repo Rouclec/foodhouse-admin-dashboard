@@ -48,8 +48,6 @@ export default function SelectPickupPoint() {
     enabled: !!debounceQuery,
   });
 
-  console.log({ data });
-
   if (loading) {
     return (
       <>

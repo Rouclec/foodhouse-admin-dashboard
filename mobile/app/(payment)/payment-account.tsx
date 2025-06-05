@@ -42,7 +42,7 @@ const PaymentAccountPage = () => {
   const [mobile, setMobile] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { user, paymentData } = useContext(Context) as ContextType;
+  const { user, paymentData, setPaymentData } = useContext(Context) as ContextType;
 
   const { paymentMethod } = params;
 
@@ -109,6 +109,7 @@ const PaymentAccountPage = () => {
     if (paymentStatus?.status === "PaymentStatus_COMPLETED") {
       setLoadingModalVisible(false);
       setSuccessModalVisible(true);
+      setPaymentData(undefined)
     }
     if (paymentStatus?.status === "PaymentStatus_FAILED") {
       setLoadingModalVisible(false);

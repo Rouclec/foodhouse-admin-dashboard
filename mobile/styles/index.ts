@@ -36,6 +36,7 @@ import { filterBottomSheetStyles } from "./components/(buyer)/(index)/FilterBott
 import { productDetailsStyles } from "./(buyer)/product-details.styles";
 import { checkoutStyles } from "./(buyer)/(order)/checkout.styles";
 import { selectPickupLocationStyles } from "./(buyer)/(order)/select-pickup-location.styles";
+import { profileFlowStyles } from "./(farmer)/profileFlow.styles";
 import { orderDetailsStyles } from "./(farmer)/order-details.styles";
 
 export {
@@ -65,6 +66,7 @@ export {
   filterBottomSheetStyles,
   productDetailsStyles,
   checkoutStyles,
+  profileFlowStyles,
   deliveryMethodStyles,
   selectPickupLocationStyles,
   deliveryAddressStyles,

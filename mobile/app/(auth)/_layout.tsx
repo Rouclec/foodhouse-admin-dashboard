@@ -14,7 +14,6 @@ export default function AuthLayout() {
       <Stack.Screen name="variety" options={{ headerShown: false }} />
       <Stack.Screen name="subscribe" options={{ headerShown: false }} />
       <Stack.Screen name="(forgot-password)" options={{ headerShown: false }} />
-      <Stack.Screen name="(subsciption-flow)" options={{headerShown: false}} />
     </Stack>
   );
 }

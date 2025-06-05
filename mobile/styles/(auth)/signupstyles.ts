@@ -152,6 +152,7 @@ export const signupStyles = StyleSheet.create({
   imageContainer: {
     alignItems: "center",
     marginVertical: 20,
+    
   },
   imageUpload: {
     width: 100,
@@ -162,6 +163,7 @@ export const signupStyles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderColor: Colors.grey['ea'],
+    marginBottom: 8,
   },
   profileImage: {
     width: 100,

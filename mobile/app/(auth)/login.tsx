@@ -192,42 +192,42 @@ export default function Login() {
                 <Text style={loginstyles.errorText}>{errors.email}</Text>
               ) : null}
 
-              <TextInput
-                mode="outlined"
-                label={i18n.t("(auth).login.password")}
-                secureTextEntry={!showPassword}
-                value={fields.password}
-                onChangeText={(text) => handleInputChange("password", text)}
-                error={!!errors.password}
-                style={loginstyles.input}
-                theme={{
-                  colors: {
-                    primary: Colors.primary[500],
-                    background: "#FAFAFA",
-                    error: Colors.error,
-                  },
-                  roundness: 10,
-                }}
-                outlineColor={Colors.grey["bg"]}
-                left={
-                  <TextInput.Icon
-                    icon="lock-outline"
-                    color={Colors.grey["61"]}
-                    size={20}
-                  />
-                }
-                right={
-                  <TextInput.Icon
-                    icon={showPassword ? "eye-off" : "eye"}
-                    onPress={() => setShowPassword(!showPassword)}
-                    color={Colors.grey[61]}
-                    size={20}
-                  />
-                }
-              />
-              {errors.password ? (
-                <Text style={loginstyles.errorText}>{errors.password}</Text>
-              ) : null}
+            <TextInput
+              mode="outlined"
+              label={i18n.t("(auth).login.password")}
+              secureTextEntry={!showPassword}
+              value={fields.password}
+              onChangeText={(text) => handleInputChange("password", text)}
+              error={!!errors.password}
+              style={loginstyles.input}
+              theme={{
+                colors: {
+                  primary: Colors.primary[500],
+                  background: "#FAFAFA",
+                  error: Colors.error,
+                },
+                roundness: 10,
+              }}
+              outlineColor={Colors.grey["bg"]}
+              left={
+                <TextInput.Icon
+                  icon="lock-outline"
+                  color={Colors.grey["61"]}
+                  size={20}
+                />
+              }
+              right={
+                <TextInput.Icon
+                  icon={showPassword ? "eye-off" : "eye"}
+                  onPress={() => setShowPassword(!showPassword)}
+                  color={Colors.grey[61]}
+                  size={20}
+                />
+              }
+            />
+            {errors.password ? (
+              <Text style={loginstyles.errorText}>{errors.password}</Text>
+            ) : null}
 
               <Link
                 style={loginstyles.forgotPassword}

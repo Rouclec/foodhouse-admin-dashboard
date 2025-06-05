@@ -1,5 +1,8 @@
 {
-  "hello": "Hello",
+   "hello": "Hello",
+  "language": "Language",
+  "suggested": "Suggested",
+  "others": "Others",
   "(auth)": {
     "index": {
       "welcomeTo": "Welcome To",
@@ -186,6 +189,60 @@
         "searchProducts": "Search products"
       }
     },
+    "(profile-flow)": {
+      "profile":{
+        "title": "Account",
+        "heading": "Be A VIP",
+        "description": "Become a VIP and enjoy the app with no restrictions",
+        "button": "Be A VIP",
+        "tab1": "Settings",
+        "tab2": "Share App ",
+        "tab3": "Logout",
+        "tab4": "Invite friends",
+        "confirmation": "Are you sure you want to log out?",
+        "button1": "Cancel",
+        "button2": "Logout"
+      },
+      "(change-password)":{
+        "currentPassword": "Current Password",
+        "enterCurrentPassword": "Enter your Current Password",
+        "newPassword": "New Password",
+        "enterNewPassword": "Enter new password",
+        "confirmPassword": "Confirm New Password",
+        "placeholder": "COnfirm new password",
+        "forgotPassword": "Forgot Password",
+        "save": "Save changes"
+      },
+      "(settings)": {
+        "heading": "Settings",
+        "heading1": "Personal Information",
+        "heading2": "Change Password",
+        "heading3": "Language",
+        "heading4": "Contact Us",
+        "heading6": "Terms and conditions",
+        "heading7": "Privacy Policy",
+        "heading8": "About Foodhouse",
+        "heading9": "Delete Account",
+        "english": "English (US)",
+        "french": "French",
+        "header": "Suggested",
+        "language": "Language",
+        "chat": "Chat on Whatsapp",
+        "contactUs": "Contact Us"
+
+    },
+    "(personal-info)": {
+      "heading": "Personal Information",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Enter YOur Full Name",
+      "email": "Email",
+      "emailPlaceholder": "Enter your Email",
+      "address": "Address",
+      "addressPlaceholder": "Enter your Address",
+      "cancel": "Cancel",
+      "save": "Save Changes",
+      "edit": "Edit"
+    },
     "order-details": {
       "orderDetails": "Order Details",
       "couldNotLoad": "Could not load order details",
@@ -197,7 +254,8 @@
       "congratulations": "Congratulations",
       "youHaveApproved": "You have approved this order, go ahead and prepare it for delivery"
     }
-  },
+  }
+},
   "(buyer)": {
     "(index)": {
       "products": {
