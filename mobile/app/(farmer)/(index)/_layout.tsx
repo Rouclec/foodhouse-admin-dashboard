@@ -77,7 +77,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="system-chat"
         options={{
           tabBarIcon: ({ focused }) => (
@@ -97,7 +97,7 @@ export default function TabLayout() {
             </View>
           ),
         }}
-      />
+      /> */}
       <Tabs.Screen
         name="profile"
         options={{

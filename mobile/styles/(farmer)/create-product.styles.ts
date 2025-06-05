@@ -3,6 +3,7 @@ import { StyleSheet } from "react-native";
 
 export const createProductStyles = StyleSheet.create({
   flexButtonContainer: {
+    paddingHorizontal: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
