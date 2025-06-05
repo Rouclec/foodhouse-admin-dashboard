@@ -1245,6 +1245,6 @@ func (i *Impl) GetPublicUser(ctx context.Context,
 	}
 
 	return &usersgrpc.GetPublicUserResponse{
-		Name: *foundUser.FirstName + *foundUser.LastName,
+		Name: *foundUser.FirstName + " " + *foundUser.LastName,
 	}, nil
 }

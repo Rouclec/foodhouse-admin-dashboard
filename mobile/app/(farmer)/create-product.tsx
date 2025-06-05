@@ -140,7 +140,7 @@ export default function ForgotPasswordEmailOtp() {
           name: productName,
           unitType: priceType,
           amount: {
-            value: price,
+            value: parseFloat(price ?? ""),
             currencyIsoCode: currencyCountry.currency_code,
           },
           description: description,
