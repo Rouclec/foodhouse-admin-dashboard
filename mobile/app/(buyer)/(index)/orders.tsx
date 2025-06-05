@@ -11,6 +11,7 @@ import { defaultStyles, ordersStyles as styles } from "@/styles";
 import { formatAmount } from "@/utils/amountFormater";
 import { Feather } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 import React, { FC, useContext, useEffect, useRef, useState } from "react";
 import {
   View,
@@ -46,7 +47,11 @@ interface OrderItemProps {
   onPress: () => void;
 }
 const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
-  const { isLoading: isProductLoading, data: productData } = useQuery({
+  const {
+    isLoading: isProductLoading,
+    data: productData,
+    isError,
+  } = useQuery({
     ...productsGetProductOptions({
       path: {
         productId: item?.product ?? "",
@@ -61,23 +66,24 @@ const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
       </View>
     );
 
+  if (isError) {
+    return (
+      <View style={defaultStyles.center}>
+        <Text>{i18n.t("(buyer).(index).orders.couldNotLoadProduct")}</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={defaultStyles.card}>
       <Image
         source={{ uri: productData?.product?.image }}
         style={styles.productImage}
       />
-      <View
-        style={styles.orderDetailsContainer}
-      >
+      <View style={styles.orderDetailsContainer}>
         <Text variant="titleMedium">{productData?.product?.name}</Text>
-        <View
-          style={styles.centerRow}
-        >
-          <Text
-            variant="titleSmall"
-            style={styles.primaryText}
-          >
+        <View style={styles.centerRow}>
+          <Text variant="titleSmall" style={styles.primaryText}>
             {item?.price?.currencyIsoCode}
             {formatAmount(item?.price?.value ?? "", { decimalPlaces: 2 })}
           </Text>
@@ -95,6 +101,8 @@ const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
 };
 
 export default function Sales() {
+  const router = useRouter();
+
   const { user } = useContext(Context) as ContextType;
 
   const [hasReachedEnd, setHasReachedEnd] = useState(false);
@@ -265,7 +273,12 @@ export default function Sales() {
                           }
                         : item?.status === "OrderStatus_PAYMENT_SUCCESSFUL"
                         ? () => {
-                            console.log("paid order");
+                            router.push({
+                              pathname: "/(buyer)/track-order",
+                              params: {
+                                orderNumber: item?.orderNumber,
+                              },
+                            });
                           }
                         : () => {}
                     }

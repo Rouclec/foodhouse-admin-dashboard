@@ -115,6 +115,21 @@ func (mr *MockQuerierMockRecorder) GetOrderByOrderNumber(ctx, orderNumber any) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderByOrderNumber", reflect.TypeOf((*MockQuerier)(nil).GetOrderByOrderNumber), ctx, orderNumber)
 }
 
+// GetPaymentByEntity mocks base method.
+func (m *MockQuerier) GetPaymentByEntity(ctx context.Context, arg sqlc.GetPaymentByEntityParams) (sqlc.Payment, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPaymentByEntity", ctx, arg)
+	ret0, _ := ret[0].(sqlc.Payment)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPaymentByEntity indicates an expected call of GetPaymentByEntity.
+func (mr *MockQuerierMockRecorder) GetPaymentByEntity(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPaymentByEntity", reflect.TypeOf((*MockQuerier)(nil).GetPaymentByEntity), ctx, arg)
+}
+
 // GetPaymentById mocks base method.
 func (m *MockQuerier) GetPaymentById(ctx context.Context, id string) (sqlc.Payment, error) {
 	m.ctrl.T.Helper()

@@ -29,27 +29,4 @@ export const deliveryMethodStyles = StyleSheet.create({
     flexShrink: 1,
     rowGap: 8,
   },
-  checkOutterContainer: {
-    width: 18,
-    height: 18,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: Colors.blue,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  checkInnercontainer: {
-    width: 12,
-    height: 12,
-    borderRadius: 12,
-  },
-  checkPrimaryOutterContainer: {
-    borderColor: Colors.primary[500],
-  },
-  blueChecked: {
-    backgroundColor: Colors.blue,
-  },
-  primaryChecked: {
-    backgroundColor: Colors.primary[500],
-  },
 });
