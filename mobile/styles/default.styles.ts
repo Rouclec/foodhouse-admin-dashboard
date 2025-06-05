@@ -291,4 +291,44 @@ export const defaultStyles = StyleSheet.create({
   text16: {
     fontSize: 16,
   },
+  card: {
+    backgroundColor: Colors.light[10],
+    padding: 20,
+    borderRadius: 16,
+    flexDirection: "row",
+    columnGap: 16,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  notFoundContainer: {
+    flexGrow: 1,
+    marginBottom: 96,
+  },
+  checkOutterContainer: {
+    width: 18,
+    height: 18,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: Colors.blue,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkInnercontainer: {
+    width: 12,
+    height: 12,
+    borderRadius: 12,
+  },
+  checkPrimaryOutterContainer: {
+    borderColor: Colors.primary[500],
+  },
+  blueChecked: {
+    backgroundColor: Colors.blue,
+  },
+  primaryChecked: {
+    backgroundColor: Colors.primary[500],
+  },
 });

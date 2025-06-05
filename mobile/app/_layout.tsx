@@ -19,6 +19,8 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { defaultStyles } from "@/styles";
 import { Region } from "react-native-maps";
 import { ordersgrpcPaymentEntity, typesAmount } from "@/client/orders.swagger";
+import { RelativePathString } from "expo-router";
+import { ExternalPathString } from "expo-router";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -59,7 +61,7 @@ interface ContextInfo {
     | {
         entity: ordersgrpcPaymentEntity;
         entityId: string;
-        nextScreen: string;
+        nextScreen: RelativePathString | ExternalPathString;
         amount: typesAmount;
       }
     | undefined;
@@ -84,7 +86,7 @@ interface ContextSetters {
       | {
           entity: ordersgrpcPaymentEntity;
           entityId: string;
-          nextScreen: string;
+          nextScreen: RelativePathString | ExternalPathString;
           amount: typesAmount;
         }
       | undefined
@@ -182,7 +184,7 @@ function RootLayoutNav() {
       | {
           entity: ordersgrpcPaymentEntity;
           entityId: string;
-          nextScreen: string;
+          nextScreen: RelativePathString | ExternalPathString;
           amount: typesAmount;
         }
       | undefined

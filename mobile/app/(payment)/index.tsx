@@ -7,10 +7,11 @@ import {
   ImageSourcePropType,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Appbar, Button, Text } from "react-native-paper";
+import { Appbar, Button, Icon, Text } from "react-native-paper";
 import { Colors } from "@/constants";
 import { defaultStyles, selectionSubscriptionStyles } from "@/styles";
 import { ordersgrpcPaymentMethodType } from "@/client/orders.swagger";
+import { KeyboardAvoidingView } from "react-native";
 
 const PaymentMethodsPage = () => {
   const router = useRouter();
@@ -52,44 +53,65 @@ const PaymentMethodsPage = () => {
 
   return (
     <>
-      <Appbar.Header dark={false} style={defaultStyles.appHeader}>
-        <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title="Payment Methods" />
-      </Appbar.Header>
-
-      <ScrollView contentContainerStyle={defaultStyles.container}>
-        <Text style={defaultStyles.subheaderText}>
-          To proceed, please add your payment methods.
-        </Text>
-
-        <View style={selectionSubscriptionStyles.plansContainer}>
-          {paymentMethods.map((method) => (
+      <KeyboardAvoidingView
+        style={defaultStyles.container}
+        behavior={"padding"}
+        keyboardVerticalOffset={0}
+      >
+        <View style={defaultStyles.flex}>
+          <Appbar.Header dark={false} style={defaultStyles.appHeader}>
             <TouchableOpacity
-              key={method.id}
-              style={[
-                selectionSubscriptionStyles.planCard,
-                selectionSubscriptionStyles.methodCard,
-              ]}
-              onPress={() => setSelectedMethod(method.id)}
+              onPress={() => router.back()}
+              style={defaultStyles.backButtonContainer}
             >
-              <Image
-                source={method.icon}
-                style={selectionSubscriptionStyles.methodIcon}
-              />
-              <Text style={selectionSubscriptionStyles.planPrice}>
-                {method.name}
-              </Text>
-              <View style={selectionSubscriptionStyles.planSelector}>
-                <View style={[selectionSubscriptionStyles.selectionCircle]}>
-                  {selectedMethod === method.id && (
-                    <View style={selectionSubscriptionStyles.innerCircle} />
-                  )}
-                </View>
-              </View>
+              <Icon source={"arrow-left"} size={24} />
             </TouchableOpacity>
-          ))}
+            <Text variant="titleMedium" style={defaultStyles.heading}>
+              Payment Methods
+            </Text>
+            <View />
+          </Appbar.Header>
+
+          <ScrollView
+            contentContainerStyle={defaultStyles.scrollContainer}
+            showsVerticalScrollIndicator={false}
+            nestedScrollEnabled={true}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Text>
+              To proceed, please add your payment methods.
+            </Text>
+
+            <View style={selectionSubscriptionStyles.plansContainer}>
+              {paymentMethods.map((method) => (
+                <TouchableOpacity
+                  key={method.id}
+                  style={[
+                    selectionSubscriptionStyles.planCard,
+                    selectionSubscriptionStyles.methodCard,
+                  ]}
+                  onPress={() => setSelectedMethod(method.id)}
+                >
+                  <Image
+                    source={method.icon}
+                    style={selectionSubscriptionStyles.methodIcon}
+                  />
+                  <Text style={selectionSubscriptionStyles.planPrice}>
+                    {method.name}
+                  </Text>
+                  <View style={selectionSubscriptionStyles.planSelector}>
+                    <View style={[selectionSubscriptionStyles.selectionCircle]}>
+                      {selectedMethod === method.id && (
+                        <View style={selectionSubscriptionStyles.innerCircle} />
+                      )}
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
         </View>
-      </ScrollView>
+      </KeyboardAvoidingView>
 
       <View style={defaultStyles.bottomButtonContainer}>
         <Button

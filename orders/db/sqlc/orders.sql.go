@@ -209,6 +209,35 @@ func (q *Queries) GetOrderByOrderNumber(ctx context.Context, orderNumber int64) 
 	return i, err
 }
 
+const getPaymentByEntity = `-- name: GetPaymentByEntity :one
+SELECT id, status, payment_entity, entity_id, amount_value, amount_currency, created_by, expires_at, created_at, updated_at, method, account_number from payments WHERE payment_entity = $1 AND entity_id = $2
+`
+
+type GetPaymentByEntityParams struct {
+	PaymentEntity string `json:"payment_entity"`
+	EntityID      string `json:"entity_id"`
+}
+
+func (q *Queries) GetPaymentByEntity(ctx context.Context, arg GetPaymentByEntityParams) (Payment, error) {
+	row := q.db.QueryRow(ctx, getPaymentByEntity, arg.PaymentEntity, arg.EntityID)
+	var i Payment
+	err := row.Scan(
+		&i.ID,
+		&i.Status,
+		&i.PaymentEntity,
+		&i.EntityID,
+		&i.AmountValue,
+		&i.AmountCurrency,
+		&i.CreatedBy,
+		&i.ExpiresAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Method,
+		&i.AccountNumber,
+	)
+	return i, err
+}
+
 const getPaymentById = `-- name: GetPaymentById :one
 SELECT id, status, payment_entity, entity_id, amount_value, amount_currency, created_by, expires_at, created_at, updated_at, method, account_number from payments WHERE id = $1
 LIMIT 1

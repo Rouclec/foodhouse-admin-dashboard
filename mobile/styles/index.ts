@@ -20,6 +20,8 @@ import { productStyles } from "./components/Product.styles";
 import { buyerProductsStyles } from "./(buyer)/(index)/index.styles";
 import { deliveryMethodStyles } from "./(buyer)/(order)/index.styles";
 import { deliveryAddressStyles } from "./(buyer)/(order)/delivery-address.styles";
+import { ordersStyles } from "./(buyer)/(index)/orders.styles";
+import { trackOrderStyles } from "./(buyer)/track-order.styles";
 
 // import { defaultStyles } from "./defaultstyles";
 // import { phoneNumberInputStyles } from "./components/general/PhoneNumberInputStyles";
@@ -68,4 +70,6 @@ export {
   selectPickupLocationStyles,
   deliveryAddressStyles,
   buyerProductsStyles,
+  ordersStyles,
+  trackOrderStyles
 };

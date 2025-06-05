@@ -3,7 +3,7 @@ import { Colors } from "@/constants";
 import i18n from "@/i18n";
 import { defaultStyles } from "@/styles";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
+import { RelativePathString, useRouter } from "expo-router";
 import React, { useContext, useEffect, useState } from "react";
 import {
   View,
@@ -55,7 +55,7 @@ export default function Checkout() {
       setPaymentData({
         entity: "PaymentEntity_ORDER",
         entityId: data?.order?.orderNumber ?? "",
-        nextScreen: "/(buyer)/(index)",
+        nextScreen: "/(buyer)/(index)" as RelativePathString,
         amount: {
           value: totalPrice,
           currencyIsoCode: productData?.product?.amount?.currencyIsoCode,

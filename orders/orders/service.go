@@ -682,6 +682,22 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 		return nil, status.Errorf(codes.Internal, "payment method %s not supported", req.GetAccount().GetPaymentMethod())
 	}
 
+	// check if a payment has already been initiated for that entity, to avoid users intiating payments twice
+	_, err = querier.GetPaymentByEntity(ctx, sqlc.GetPaymentByEntityParams{
+		EntityID:      req.GetEntityId(),
+		PaymentEntity: req.GetPaymentEntity().String(),
+	})
+
+	if err == nil {
+		// If no error, then a payment has already been initated for that entity
+		return nil, status.Errorf(codes.AlreadyExists, "a payment has already been initated for entity %v with id %v", req.GetPaymentEntity().String(), req.GetEntityId())
+	}
+
+	// if there is an error different from no rows error, then it could be in internal server error, return
+	if !errors.Is(err, sql.ErrNoRows) {
+		return nil, fmt.Errorf("failed to check for existing payment: %w", err)
+	}
+
 	if _, ok := supportedCurrencies[req.GetAmount().GetCurrencyIsoCode()]; !ok {
 		return nil, status.Errorf(codes.Internal, "currency %s is not supported", req.GetAmount().GetCurrencyIsoCode())
 	}
@@ -741,8 +757,8 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 
 	return &ordersgrpc.InitiatePaymentResponse{
 		Payment: &ordersgrpc.Payment{
-			Id:            payment.ID,
-			EntityId:      payment.EntityID,
+			Id:       payment.ID,
+			EntityId: payment.EntityID,
 			Amount: &types.Amount{
 				Value:           *payment.AmountValue,
 				CurrencyIsoCode: *payment.AmountCurrency,

@@ -89,5 +89,8 @@ RETURNING *;
 SELECT * from payments WHERE id = $1
 LIMIT 1;
 
+-- name: GetPaymentByEntity :one
+SELECT * from payments WHERE payment_entity = $1 AND entity_id = $2;
+
 -- name: UpdatePaymentStatus :exec
 UPDATE payments SET status = $2 WHERE id = $1;
