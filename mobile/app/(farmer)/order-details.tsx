@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import {
   Image,
   KeyboardAvoidingView,
@@ -6,29 +6,46 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Appbar, Button, Icon, Text } from "react-native-paper";
+import {
+  Appbar,
+  Button,
+  Dialog,
+  Icon,
+  Portal,
+  Snackbar,
+  Text,
+} from "react-native-paper";
 import { defaultStyles, orderDetailsStyles as styles } from "@/styles";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Context, ContextType } from "../_layout";
-import { useQuery } from "@tanstack/react-query";
-import { ordersGetOrderDetailsOptions } from "@/client/orders.swagger/@tanstack/react-query.gen";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
+import {
+  ordersApproveOrderMutation,
+  ordersGetOrderDetailsOptions,
+} from "@/client/orders.swagger/@tanstack/react-query.gen";
 import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
 import i18n from "@/i18n";
 import { Chase } from "react-native-animated-spinkit";
 import { Colors } from "@/constants";
 import { formatAmount } from "@/utils/amountFormater";
 import { usersGetPublicUserOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
+import { delay } from "@/utils";
 
 export default function OrderDetails() {
   const router = useRouter();
   const { user } = useContext(Context) as ContextType;
 
   const { orderNumber } = useLocalSearchParams();
+  const [error, setError] = useState<string>();
+
+  const [loading, setLoading] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const {
     data: orderDetails,
     isLoading: isOrderDetailsLoading,
     isError: errorLoadingOrder,
+    refetch,
   } = useQuery({
     ...ordersGetOrderDetailsOptions({
       path: {
@@ -37,6 +54,7 @@ export default function OrderDetails() {
       },
     }),
     enabled: !!orderNumber,
+    placeholderData: keepPreviousData,
   });
 
   const {
@@ -59,6 +77,41 @@ export default function OrderDetails() {
       },
     }),
     enabled: !!orderDetails?.order?.createdBy,
+  });
+
+  const handleApproveOrder = async () => {
+    try {
+      setLoading(true);
+      await mutateAsync({
+        body: {},
+        path: {
+          orderId: orderDetails?.order?.orderNumber ?? "",
+          userId: user?.userId ?? "",
+        },
+      });
+    } catch (error) {
+      console.error({ error }, "approving order");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const { mutateAsync } = useMutation({
+    ...ordersApproveOrderMutation(),
+    onSuccess: async () => {
+      refetch();
+      setShowSuccessModal(true);
+      await delay(5000);
+      setShowSuccessModal(false);
+    },
+    onError: async (error) => {
+      setError(
+        error?.response?.data?.message ??
+          i18n.t("(farmer).order-details.unknownError")
+      );
+      await delay(5000);
+      setError(undefined);
+    },
   });
 
   if (isOrderDetailsLoading || isProductLoading) {
@@ -199,7 +252,13 @@ export default function OrderDetails() {
                   {i18n.t("(farmer).order-details.quantity")}
                 </Text>
                 <Text variant="titleMedium" style={styles.rightText}>
-                  {formatAmount(orderDetails?.order?.quantity ?? "")}
+                  {formatAmount(orderDetails?.order?.quantity ?? "")}{" "}
+                  {(productData?.product?.unitType?.slug ?? "").replace(
+                    "per_",
+                    ""
+                  )}
+                  {(parseInt(orderDetails?.order?.quantity ?? "") ?? 0) > 1 &&
+                    "s"}
                 </Text>
               </View>
               <View style={styles.listItem}>
@@ -216,13 +275,52 @@ export default function OrderDetails() {
       </KeyboardAvoidingView>
       {orderDetails?.order?.status === "OrderStatus_PAYMENT_SUCCESSFUL" && (
         <View style={defaultStyles.bottomButtonContainer}>
-          <Button style={[defaultStyles.primaryButton]}>
+          <Button
+            style={[
+              defaultStyles.primaryButton,
+              loading && defaultStyles.greyButton,
+            ]}
+            loading={loading}
+            onPress={handleApproveOrder}
+          >
             <Text style={defaultStyles.buttonText}>
               {i18n.t("(farmer).order-details.approveOrder")}
             </Text>
           </Button>
         </View>
       )}
+      <Portal>
+        <Dialog
+          visible={showSuccessModal}
+          onDismiss={() => setShowSuccessModal(false)}
+          style={defaultStyles.dialogSuccessContainer}
+        >
+          <Dialog.Content>
+            <Image
+              source={require("@/assets/images/success.png")}
+              style={defaultStyles.successImage}
+            />
+          </Dialog.Content>
+          <Dialog.Content>
+            <Text variant="titleLarge" style={defaultStyles.primaryText}>
+              {i18n.t("(farmer).order-details.congratulations")}
+            </Text>
+          </Dialog.Content>
+          <Dialog.Content>
+            <Text style={defaultStyles.bodyText}>
+              {i18n.t("(farmer).order-details.youHaveApproved")}
+            </Text>
+          </Dialog.Content>
+        </Dialog>
+      </Portal>
+      <Snackbar
+        visible={!!error}
+        onDismiss={() => {}}
+        duration={3000}
+        style={[defaultStyles.snackbar, defaultStyles.marginHorizontal24]}
+      >
+        <Text style={defaultStyles.errorText}>{error}</Text>
+      </Snackbar>
     </>
   );
 }
