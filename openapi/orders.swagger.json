@@ -215,20 +215,23 @@
             "type": "string"
           },
           {
-            "name": "status",
+            "name": "statuses",
             "in": "query",
             "required": false,
-            "type": "string",
-            "enum": [
-              "OrderStatus_UNSPECIFIED",
-              "OrderStatus_CREATED",
-              "OrderStatus_PAYMENT_SUCCESSFUL",
-              "OrderStatus_PAYMENT_FAILED",
-              "OrderStatus_IN_TRANSIT",
-              "OrderStatus_DELIVERED",
-              "OrderStatus_APPROVED"
-            ],
-            "default": "OrderStatus_UNSPECIFIED"
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "OrderStatus_UNSPECIFIED",
+                "OrderStatus_CREATED",
+                "OrderStatus_PAYMENT_SUCCESSFUL",
+                "OrderStatus_PAYMENT_FAILED",
+                "OrderStatus_IN_TRANSIT",
+                "OrderStatus_DELIVERED",
+                "OrderStatus_APPROVED"
+              ]
+            },
+            "collectionFormat": "multi"
           }
         ],
         "tags": [
@@ -442,20 +445,23 @@
             "type": "string"
           },
           {
-            "name": "status",
+            "name": "statuses",
             "in": "query",
             "required": false,
-            "type": "string",
-            "enum": [
-              "OrderStatus_UNSPECIFIED",
-              "OrderStatus_CREATED",
-              "OrderStatus_PAYMENT_SUCCESSFUL",
-              "OrderStatus_PAYMENT_FAILED",
-              "OrderStatus_IN_TRANSIT",
-              "OrderStatus_DELIVERED",
-              "OrderStatus_APPROVED"
-            ],
-            "default": "OrderStatus_UNSPECIFIED"
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "OrderStatus_UNSPECIFIED",
+                "OrderStatus_CREATED",
+                "OrderStatus_PAYMENT_SUCCESSFUL",
+                "OrderStatus_PAYMENT_FAILED",
+                "OrderStatus_IN_TRANSIT",
+                "OrderStatus_DELIVERED",
+                "OrderStatus_APPROVED"
+              ]
+            },
+            "collectionFormat": "multi"
           }
         ],
         "tags": [
@@ -923,6 +929,10 @@
         },
         "payoutPhoneNumber": {
           "type": "string"
+        },
+        "quantity": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },

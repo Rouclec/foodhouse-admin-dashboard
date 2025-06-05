@@ -175,8 +175,6 @@ export default function DeliveryAddress() {
                     latitude: newCoordinates.latitude,
                     longitude: newCoordinates.longitude,
                   });
-
-                  console.log({ address });
                 }}
                 title={(deliveryLocation || currentLocation)?.description}
                 description={(deliveryLocation || currentLocation)?.description}

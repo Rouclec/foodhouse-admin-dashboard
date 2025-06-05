@@ -96,6 +96,7 @@ export type ordersgrpcOrder = {
     secretKey?: string;
     productOwner?: string;
     payoutPhoneNumber?: string;
+    quantity?: string;
 };
 
 export type ordersgrpcOrderAuditLog = {
@@ -231,7 +232,7 @@ export type OrdersListFarmerOrdersData = {
     query?: {
         count?: number;
         startKey?: string;
-        status?: 'OrderStatus_UNSPECIFIED' | 'OrderStatus_CREATED' | 'OrderStatus_PAYMENT_SUCCESSFUL' | 'OrderStatus_PAYMENT_FAILED' | 'OrderStatus_IN_TRANSIT' | 'OrderStatus_DELIVERED' | 'OrderStatus_APPROVED';
+        statuses?: Array<string>;
     };
 };
 
@@ -297,7 +298,7 @@ export type OrdersListUserOrdersData = {
     query?: {
         count?: number;
         startKey?: string;
-        status?: 'OrderStatus_UNSPECIFIED' | 'OrderStatus_CREATED' | 'OrderStatus_PAYMENT_SUCCESSFUL' | 'OrderStatus_PAYMENT_FAILED' | 'OrderStatus_IN_TRANSIT' | 'OrderStatus_DELIVERED' | 'OrderStatus_APPROVED';
+        statuses?: Array<string>;
     };
 };
 

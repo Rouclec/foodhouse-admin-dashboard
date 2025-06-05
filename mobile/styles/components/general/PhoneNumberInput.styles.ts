@@ -1,4 +1,3 @@
-
 import { Colors } from "@/constants";
 import { StyleSheet } from "react-native";
 
@@ -9,7 +8,7 @@ export const phoneNumberInputStyles = StyleSheet.create({
   },
   inputContainer: {
     borderWidth: 1,
-    width: '100%',
+    width: "100%",
     borderColor: Colors.grey["bg"],
     borderRadius: 10,
     paddingHorizontal: 12,
@@ -129,15 +128,17 @@ export const phoneNumberInputStyles = StyleSheet.create({
     borderWidth: 1,
   },
   flexContainer: {
-    // flexDirection: "row",
-    // columnGap: 16,
-    // paddingHorizontal: 50,
-     flexDirection: 'row',
-    width: '100%',
-    alignItems: 'center',
+    flexDirection: "row",
+    width: "100%",
+    alignItems: "center",
     height: 64,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
     padding: 16,
     borderRadius: 4,
+  },
+  flexSmallContainer: {
+    flexDirection: "row",
+    columnGap: 16,
+    paddingHorizontal: 16,
   },
 });

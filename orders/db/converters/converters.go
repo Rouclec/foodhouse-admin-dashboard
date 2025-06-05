@@ -41,8 +41,9 @@ func SqlcOrderToProto(order sqlc.Order) *ordersgrpc.Order {
 	return &ordersgrpc.Order{
 		OrderNumber: stringFromInt64(order.OrderNumber),
 		DeliveryLocation: &types.Point{
-			Lat: order.DeliveryLocation.P.Y,
-			Lon: order.DeliveryLocation.P.X,
+			Address: order.DeliveryAddress,
+			Lat:     order.DeliveryLocation.P.Y,
+			Lon:     order.DeliveryLocation.P.X,
 		},
 		Price:             price,
 		Status:            statusEnum,
@@ -55,6 +56,7 @@ func SqlcOrderToProto(order sqlc.Order) *ordersgrpc.Order {
 		SecretKey:         derefString(order.SecretKey),
 		ProductOwner:      derefString(order.ProductOwner),
 		PayoutPhoneNumber: derefString(order.PayoutPhoneNumber),
+		Quantity:          int64(*order.Quantity),
 	}
 }
 

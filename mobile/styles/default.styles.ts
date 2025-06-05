@@ -256,6 +256,9 @@ export const defaultStyles = StyleSheet.create({
   dialogSubtitle: {
     textAlign: "center",
   },
+  marginHorizontal24: {
+    marginHorizontal: 24,
+  },
   dialogActionContainer: {
     flexDirection: "row",
     columnGap: 24,

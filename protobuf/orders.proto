@@ -41,6 +41,7 @@ message Order {
   string secret_key = 11;
   string product_owner = 12;
   string payout_phone_number = 13;
+  int64 quantity = 14;
 }
 
 message OrderAuditLog {
@@ -212,7 +213,7 @@ message ListUserOrdersRequest {
   string user_id = 1;
   int32 count = 2;
   string start_key = 3;
-  OrderStatus status = 4;
+  repeated OrderStatus statuses = 4;
 }
 
 message ListUserOrdersResponse {
@@ -224,7 +225,7 @@ message ListFarmerOrdersRequest {
   string farmer_id = 1;
   int32 count = 2;
   string start_key = 3;
-  OrderStatus status = 4;
+  repeated OrderStatus statuses = 4;
 }
 
 message ListFarmerOrdersResponse {

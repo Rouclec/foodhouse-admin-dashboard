@@ -350,6 +350,10 @@ message GetUserActiveSubscriptionResponse {
   UserSubscription user_subscription = 1;
 }
 
+message GetPublicUserRequest { string user_id = 1; }
+
+message GetPublicUserResponse { string name = 1; }
+
 service Users {
 
   rpc SendSignupSmsOtp(SendSignupSmsOtpRequest)
@@ -543,6 +547,12 @@ service Users {
       returns (ListSubscriptionsResponse) {
     option (google.api.http) = {
       get : "/v1/users/{user_id}/subscription/list-subscription"
+    };
+  }
+
+  rpc GetPublicUser(GetPublicUserRequest) returns (GetPublicUserResponse) {
+    option (google.api.http) = {
+      get : "/v1/public/users/{user_id}/get-public-user"
     };
   }
 }

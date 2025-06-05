@@ -28,6 +28,9 @@ import {
 } from "@/styles";
 import i18n from "@/i18n";
 import { Context, ContextType } from "@/app/_layout";
+
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { usersGetUserActiveSubscriptionOptions, usersGetUserByIdOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { FontAwesome } from "@expo/vector-icons";
 
 export default function Profile() {
@@ -42,6 +45,14 @@ export default function Profile() {
   const handleBecomeVIP = () => {
     router.push("/(auth)/subscribe");
   };
+  
+  const {data: userActiveSubscription} = useQuery({
+    ...usersGetUserActiveSubscriptionOptions({
+      path: {
+        userId: user?.userId ?? ""
+      }
+    })
+  })
 
   const shareApp = async () => {
     await Share.share({
@@ -64,7 +75,25 @@ export default function Profile() {
               title={i18n.t("(farmer).(profile-flow).profile.title")}
             />
           </Appbar.Header>
-
+          <View style={signupStyles.imageContainer}>
+            <TouchableOpacity style={signupStyles.imageUpload}>
+              <View style={signupStyles.addImageContainer}>
+                <Image
+                  source={{ uri: user?.profileImage }}
+                  style={signupStyles.profileImage}
+                />
+                <Avatar.Icon
+                  size={24}
+                  icon="camera"
+                  color="#fff"
+                  style={signupStyles.cameraIcon}
+                />
+              </View>
+            </TouchableOpacity>
+            <Text variant="titleLarge">
+              {`${user?.firstName || ""} ${user?.lastName || ""}`.trim()}
+            </Text>
+          </View>
           <ScrollView
             contentContainerStyle={defaultStyles.scrollContainer}
             showsVerticalScrollIndicator={false}
@@ -72,59 +101,42 @@ export default function Profile() {
             keyboardShouldPersistTaps="handled"
           >
             <View style={signupStyles.allInput}>
-              <View style={signupStyles.imageContainer}>
-                <TouchableOpacity style={signupStyles.imageUpload}>
-                  <View style={signupStyles.addImageContainer}>
+              {!userActiveSubscription?.userSubscription && (
+                <View style={styles.sectionCard}>
+                  <View style={styles.vip}>
+                    <Text
+                      variant="titleMedium"
+                      style={[defaultStyles.heading, { color: "#fff" }]}
+                    >
+                      {i18n.t("(farmer).(profile-flow).profile.heading")}
+                    </Text>
+                    <Text
+                      style={[
+                        defaultStyles.subheaderText,
+                        { color: "#fff", marginBottom: 12 },
+                      ]}
+                    >
+                      {i18n.t("(farmer).(profile-flow).profile.description")}
+                    </Text>
+                    <Button
+                      mode="contained"
+                      onPress={handleBecomeVIP}
+                      style={styles.vipButton}
+                      labelStyle={{ color: Colors.primary[500] }}
+                    >
+                      {i18n.t("(farmer).(profile-flow).profile.button")}
+                    </Button>
+                  </View>
+
+                  <View style={{ justifyContent: "center" }}>
                     <Image
-                      source={{ uri: user?.profileImage }}
-                      style={signupStyles.profileImage}
-                    />
-                    <Avatar.Icon
-                      size={24}
-                      icon="camera"
-                      color="#fff"
-                      style={signupStyles.cameraIcon}
+                      source={require("@/assets/images/icons/vip1.png")}
+                      style={{ width: 100, height: 100 }}
+                      resizeMode="contain"
                     />
                   </View>
-                </TouchableOpacity>
-                <Text variant="titleLarge">
-                  {`${user?.firstName || ""} ${user?.lastName || ""}`.trim()}
-                </Text>
-              </View>
-              <View style={styles.sectionCard}>
-                <View style={styles.vip}>
-                  <Text
-                    variant="titleMedium"
-                    style={[defaultStyles.heading, { color: "#fff" }]}
-                  >
-                    {i18n.t("(farmer).(profile-flow).profile.heading")}
-                  </Text>
-                  <Text
-                    style={[
-                      defaultStyles.subheaderText,
-                      { color: "#fff", marginBottom: 12 },
-                    ]}
-                  >
-                    {i18n.t("(farmer).(profile-flow).profile.description")}
-                  </Text>
-                  <Button
-                    mode="contained"
-                    onPress={handleBecomeVIP}
-                    style={styles.vipButton}
-                    labelStyle={{ color: Colors.primary[500] }}
-                  >
-                    {i18n.t("(farmer).(profile-flow).profile.button")}
-                  </Button>
                 </View>
-
-                <View style={{ justifyContent: "center" }}>
-                  <Image
-                    source={require("@/assets/images/icons/vip1.png")}
-                    style={{ width: 100, height: 100 }}
-                    resizeMode="contain"
-                  />
-                </View>
-              </View>
+              )}
 
               <View style={styles.navigateSection}>
                 <TouchableOpacity

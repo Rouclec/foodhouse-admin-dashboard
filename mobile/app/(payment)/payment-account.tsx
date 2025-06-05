@@ -42,7 +42,7 @@ const PaymentAccountPage = () => {
   const [mobile, setMobile] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { user, paymentData } = useContext(Context) as ContextType;
+  const { user, paymentData, setPaymentData } = useContext(Context) as ContextType;
 
   const { paymentMethod } = params;
 
@@ -74,8 +74,7 @@ const PaymentAccountPage = () => {
       setLoading(false);
     }
   };
-console.log(paymentData);
-console.log(paymentMethod);
+
   const { mutateAsync, data } = useMutation({
     ...ordersInitiatePaymentMutation(),
     onSuccess: () => {
@@ -103,13 +102,14 @@ console.log(paymentMethod);
     enabled: !!data?.payment?.id,
     refetchInterval: 2000,
   });
-console.log(paymentStatus)
+
   useEffect(() => {
     if (!paymentStatus?.status) return;
     if (paymentStatus?.status === "PaymentStatus_INITIATED") return;
     if (paymentStatus?.status === "PaymentStatus_COMPLETED") {
       setLoadingModalVisible(false);
       setSuccessModalVisible(true);
+      setPaymentData(undefined)
     }
     if (paymentStatus?.status === "PaymentStatus_FAILED") {
       setLoadingModalVisible(false);

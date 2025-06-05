@@ -14,14 +14,11 @@ import { usersListSubscriptionsOptions, usersSubscribeMutation } from "@/client/
 import { Context, ContextType } from "../_layout";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { formatAmount } from "@/utils/amountFormater";
+import { usersgrpcSubscription } from "@/client/users.swagger";
 
 export default function Index() {
  const router = useRouter();
-  const [selectedPlan, setSelectedPlan] = useState<{
-    id?: string;
-    title?: string;
-    amount?: { value?: number; currencyIsoCode?: string };
-  } | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<usersgrpcSubscription>();
   const [error, setError] = useState<string | undefined>();
   const { user, setPaymentData } = useContext(Context) as ContextType;
 
@@ -143,14 +140,14 @@ export default function Index() {
               key={plan.id}
                 style={[
                     selectionSubscriptionStyles.planCard,
-                    selectedPlan === plan.title && selectionSubscriptionStyles.selectedPlanCard,
+                    selectedPlan?.title === plan.title && selectionSubscriptionStyles.selectedPlanCard,
                   ]}
               onPress={() => setSelectedPlan(plan)}
             >
 
                   <View style={selectionSubscriptionStyles.planSelector}>
                     <View style={selectionSubscriptionStyles.selectionCircle}>
-                      {selectedPlan === plan.title && (
+                      {selectedPlan?.title === plan.title && (
                         <View style={selectionSubscriptionStyles.innerCircle} />
                       )}
                     </View>

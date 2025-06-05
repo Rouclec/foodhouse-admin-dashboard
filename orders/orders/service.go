@@ -286,7 +286,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 		return &ordersgrpc.ConfirmPaymentResponse{}, nil
 	}
 
-	// case for when payment is for subscription
+	// case for when payment is for a user subscription
 	if payment.PaymentEntity == ordersgrpc.PaymentEntity_PaymentEntity_SUBSCRIPTION.String() {
 		i.logger.Debug().Msgf("user subscription id ", payment.EntityID)
 
@@ -303,8 +303,6 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 			return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
 		}
 
-		var updatedPaymentStatus ordersgrpc.PaymentStatus
-
 		if req.GetStatus() != PaymentStatusSuccessful {
 			_, err := i.userService.DeleteUserSubscription(ctx, &usersgrpc.DeleteUserSubscriptionRequest{
 				UserSubscriptionId: payment.EntityID,
@@ -312,6 +310,16 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 
 			if err != nil {
 				return nil, status.Errorf(codes.Internal, "error confirming payment %v", err)
+			}
+
+			err = querier.UpdatePaymentStatus(ctx, sqlc.UpdatePaymentStatusParams{
+				ID:     req.GetExternalReference(),
+				Status: ordersgrpc.PaymentStatus_PaymentStatus_FAILED.String(),
+			})
+
+			if err != nil {
+				i.logger.Debug().Msgf("Error updating payment status %v", err)
+				return nil, status.Errorf(codes.Internal, "error updating payment status %v", err)
 			}
 
 			err = tx.Commit(ctx)
@@ -323,7 +331,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 
 		err = querier.UpdatePaymentStatus(ctx, sqlc.UpdatePaymentStatusParams{
 			ID:     req.GetExternalReference(),
-			Status: updatedPaymentStatus.String(),
+			Status: ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED.String(),
 		})
 
 		if err != nil {
@@ -562,10 +570,10 @@ func (i *Impl) ListFarmerOrders(ctx context.Context, req *ordersgrpc.ListFarmerO
 	}
 
 	orders, err := i.repo.Do().ListFarmerOrders(ctx, sqlc.ListFarmerOrdersParams{
-		ProductOwner:  &req.FarmerId,
-		CreatedBefore: startKey,
-		Status:        req.GetStatus().String(),
-		Count:         int32(count), // Convert count to int32
+		ProductOwner:     &req.FarmerId,
+		CreatedBefore:    startKey,
+		IncludedStatuses: convertOrderStatusesToStrings(req.GetStatuses()),
+		Count:            int32(count), // Convert count to int32
 	})
 
 	if err != nil {
@@ -605,10 +613,10 @@ func (i *Impl) ListUserOrders(ctx context.Context, req *ordersgrpc.ListUserOrder
 	}
 
 	orders, err := i.repo.Do().ListUserOrders(ctx, sqlc.ListUserOrdersParams{
-		CreatedBy:     &req.UserId,
-		Status:        req.GetStatus().String(),
-		CreatedBefore: startKey,
-		Count:         int32(count), // Convert count to int32
+		CreatedBy:        &req.UserId,
+		IncludedStatuses: convertOrderStatusesToStrings(req.GetStatuses()),
+		CreatedBefore:    startKey,
+		Count:            int32(count), // Convert count to int32
 	})
 
 	if err != nil {
@@ -628,6 +636,16 @@ func (i *Impl) ListUserOrders(ctx context.Context, req *ordersgrpc.ListUserOrder
 		Orders:  protoOrders,
 		NextKey: nextKey,
 	}, nil
+}
+
+func convertOrderStatusesToStrings(orderStatus []ordersgrpc.OrderStatus) []string {
+	stringStatuses := make([]string, len(orderStatus))
+
+	for _, os := range orderStatus {
+		stringStatuses = append(stringStatuses, os.String())
+	}
+
+	return stringStatuses
 }
 
 func generateHexSecretKey(length int) (string, error) {
@@ -782,6 +800,10 @@ func (i *Impl) ApproveOrder(ctx context.Context, req *ordersgrpc.ApproveOrderReq
 	if err != nil {
 		i.logger.Debug().Msgf("error getting order with id %s why: %v", req.GetOrderId(), err)
 		return nil, status.Errorf(codes.Internal, "error getting order with id %s why: %v", req.GetOrderId(), err)
+	}
+
+	if req.GetUserId() != *order.ProductOwner {
+		return nil, status.Error(codes.PermissionDenied, "user does not have permission to approve this order")
 	}
 
 	beforeBytes, err := protojson.Marshal(converters.SqlcOrderToProto(order))

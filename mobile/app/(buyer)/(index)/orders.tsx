@@ -28,17 +28,23 @@ import { Appbar, Button, Icon, Text, TextInput } from "react-native-paper";
 
 const { width } = Dimensions.get("window");
 
+const PENDING_ORDER_STATUSES: Array<ordersgrpcOrderStatus> = [
+  "OrderStatus_PAYMENT_SUCCESSFUL",
+  "OrderStatus_APPROVED",
+  "OrderStatus_IN_TRANSIT",
+];
+
 const TAB_ITEMS: Array<{
-  name: "Pending" | "Completed";
-  value: ordersgrpcOrderStatus;
+  name: string;
+  value: Array<ordersgrpcOrderStatus>;
 }> = [
   {
-    name: "Pending",
-    value: "OrderStatus_PAYMENT_SUCCESSFUL",
+    name: i18n.t("(buyer).(index).orders.pending"),
+    value: PENDING_ORDER_STATUSES,
   },
   {
-    name: "Completed",
-    value: "OrderStatus_DELIVERED",
+    name: i18n.t("(buyer).(index).orders.completed"),
+    value: ["OrderStatus_DELIVERED"],
   },
 ];
 
@@ -111,8 +117,8 @@ export default function Sales() {
   const [debounceQuery, setDebounceQuery] = useState("");
   const [count, setCount] = useState(10);
   const [tabItem, setTabItem] = useState<{
-    name: "Pending" | "Completed";
-    value: ordersgrpcOrderStatus;
+    name: string;
+    value: Array<ordersgrpcOrderStatus>;
   }>(TAB_ITEMS[0]);
 
   const slideAnim = useRef(new Animated.Value(width)).current;
@@ -152,7 +158,7 @@ export default function Sales() {
       query: {
         count: count,
         startKey: "",
-        status: tabItem.value,
+        statuses: tabItem.value,
       },
     }),
   });
@@ -214,11 +220,11 @@ export default function Sales() {
             {TAB_ITEMS.map((item) => {
               return (
                 <TouchableOpacity
-                  key={item?.value}
+                  key={item?.value[0]}
                   onPress={() => setTabItem(item)}
                   style={[
                     styles.tabItemContainer,
-                    tabItem.name === item?.name &&
+                    tabItem.value === item?.value &&
                       styles.tabItemActiveContainer,
                   ]}
                 >
@@ -226,7 +232,7 @@ export default function Sales() {
                     variant="titleSmall"
                     style={[
                       styles.tabItemText,
-                      tabItem.name === item?.name && styles.tabItemActiveText,
+                      tabItem.value === item?.value && styles.tabItemActiveText,
                     ]}
                   >
                     {item?.name}
@@ -271,7 +277,9 @@ export default function Sales() {
                         ? () => {
                             console.log("delivered order");
                           }
-                        : item?.status === "OrderStatus_PAYMENT_SUCCESSFUL"
+                        : PENDING_ORDER_STATUSES.includes(
+                            item?.status as ordersgrpcOrderStatus
+                          )
                         ? () => {
                             router.push({
                               pathname: "/(buyer)/track-order",
