@@ -1232,3 +1232,8 @@ func (i *Impl) ListSubscriptions(ctx context.Context,
 		Subscriptions: protoSubscriptions,
 	}, nil
 }
+
+// GetPublicUser implements usersgrpc.UsersServer.
+func (i *Impl) GetPublicUser(context.Context, *usersgrpc.GetPublicUserRequest) (*usersgrpc.GetPublicUserResponse, error) {
+	panic("unimplemented")
+}

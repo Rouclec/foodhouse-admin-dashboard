@@ -127,9 +127,6 @@ export default function BuyerProducts() {
                       <Image
                         source={require("@/assets/images/carrots.png")}
                         tintColor={Colors.primary[500]}
-                        style={{
-                          backgroundColor: Colors.primary[500],
-                        }}
                       />
                     </View>
                     <View>

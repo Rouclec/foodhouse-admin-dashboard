@@ -6,6 +6,7 @@ export default function FarmerLayout() {
     <Stack screenOptions={{ headerShown: false }} initialRouteName="(index)">
       <Stack.Screen name="(index)" options={{ headerShown: false }} />
       <Stack.Screen name="create-product" options={{ headerShown: false }} />
+      <Stack.Screen name="order-details" options={{ headerShown: false }} />
     </Stack>
   );
 }

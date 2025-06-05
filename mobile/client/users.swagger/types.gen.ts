@@ -104,6 +104,10 @@ export type usersgrpcGetFarmerByIDResponse = {
     user?: usersgrpcUser;
 };
 
+export type usersgrpcGetPublicUserResponse = {
+    name?: string;
+};
+
 export type usersgrpcGetUserActiveSubscriptionResponse = {
     userSubscription?: usersgrpcUserSubscription;
 };
@@ -440,6 +444,16 @@ export type UsersVerifyOtpData = {
 export type UsersVerifyOtpResponse = (usersgrpcVerifyOtpResponse);
 
 export type UsersVerifyOtpError = (rpcStatus);
+
+export type UsersGetPublicUserData = {
+    path: {
+        userId: string;
+    };
+};
+
+export type UsersGetPublicUserResponse = (usersgrpcGetPublicUserResponse);
+
+export type UsersGetPublicUserError = (rpcStatus);
 
 export type UsersCompleteRegistrationData = {
     body: UsersCompleteRegistrationBody;

@@ -29,15 +29,15 @@ import { Appbar, Button, Icon, Text, TextInput } from "react-native-paper";
 const { width } = Dimensions.get("window");
 
 const TAB_ITEMS: Array<{
-  name: "Pending" | "Completed";
+  name: string;
   value: ordersgrpcOrderStatus;
 }> = [
   {
-    name: "Pending",
+    name: i18n.t("(buyer).(index).orders.pending"),
     value: "OrderStatus_PAYMENT_SUCCESSFUL",
   },
   {
-    name: "Completed",
+    name: i18n.t("(buyer).(index).orders.completed"),
     value: "OrderStatus_DELIVERED",
   },
 ];
@@ -111,7 +111,7 @@ export default function Sales() {
   const [debounceQuery, setDebounceQuery] = useState("");
   const [count, setCount] = useState(10);
   const [tabItem, setTabItem] = useState<{
-    name: "Pending" | "Completed";
+    name: string;
     value: ordersgrpcOrderStatus;
   }>(TAB_ITEMS[0]);
 
@@ -218,7 +218,7 @@ export default function Sales() {
                   onPress={() => setTabItem(item)}
                   style={[
                     styles.tabItemContainer,
-                    tabItem.name === item?.name &&
+                    tabItem.value === item?.value &&
                       styles.tabItemActiveContainer,
                   ]}
                 >
@@ -226,7 +226,7 @@ export default function Sales() {
                     variant="titleSmall"
                     style={[
                       styles.tabItemText,
-                      tabItem.name === item?.name && styles.tabItemActiveText,
+                      tabItem.value === item?.value && styles.tabItemActiveText,
                     ]}
                   >
                     {item?.name}

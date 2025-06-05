@@ -168,12 +168,28 @@
       "description": "Description"
     },
     "(index)": {
+      "index": {
+        "goodMorning": "Good morning",
+        "goodAfternoon": "Good afternoon",
+        "goodEvening": "Good evening",
+        "searchOrder": "Search order",
+        "pending": "Pending",
+        "completed": "Completed",
+        "couldNotLoadProduct": "Could not load product details",
+        "details": "Details",
+        "noOrdersFound": "No orders found"
+      },
       "my-products": {
         "myProducts": "My products",
         "products": "Products",
         "noProductsFound": "No products found",
         "searchProducts": "Search products"
       }
+    },
+    "order-details": {
+      "orderDetails": "Order Details",
+      "couldNotLoad": "Could not load order details",
+      "approveOrder": "Approve order"
     }
   },
   "(buyer)": {
@@ -199,7 +215,9 @@
         "noOrdersFound": "No orders found",
         "writeReview": "Write review",
         "trackOrder": "Track order",
-        "couldNotLoadProduct": "Could not load product details"
+        "couldNotLoadProduct": "Could not load product details",
+        "pending": "Pending",
+        "completed": "Completed"
       }
     },
     "product-details": {

@@ -47,6 +47,7 @@ const (
 	Users_GetUserPaymentMethodsByUserID_FullMethodName = "/usersgrpc.Users/GetUserPaymentMethodsByUserID"
 	Users_DeleteUserPaymentMethod_FullMethodName       = "/usersgrpc.Users/DeleteUserPaymentMethod"
 	Users_ListSubscriptions_FullMethodName             = "/usersgrpc.Users/ListSubscriptions"
+	Users_GetPublicUser_FullMethodName                 = "/usersgrpc.Users/GetPublicUser"
 )
 
 // UsersClient is the client API for Users service.
@@ -81,6 +82,7 @@ type UsersClient interface {
 	GetUserPaymentMethodsByUserID(ctx context.Context, in *GetUserPaymentMethodsByUserIDRequest, opts ...grpc.CallOption) (*GetUserPaymentMethodsByUserIDResponse, error)
 	DeleteUserPaymentMethod(ctx context.Context, in *DeleteUserPaymentMethodRequest, opts ...grpc.CallOption) (*DeleteUserPaymentMethodResponse, error)
 	ListSubscriptions(ctx context.Context, in *ListSubscriptionsRequest, opts ...grpc.CallOption) (*ListSubscriptionsResponse, error)
+	GetPublicUser(ctx context.Context, in *GetPublicUserRequest, opts ...grpc.CallOption) (*GetPublicUserResponse, error)
 }
 
 type usersClient struct {
@@ -371,6 +373,16 @@ func (c *usersClient) ListSubscriptions(ctx context.Context, in *ListSubscriptio
 	return out, nil
 }
 
+func (c *usersClient) GetPublicUser(ctx context.Context, in *GetPublicUserRequest, opts ...grpc.CallOption) (*GetPublicUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetPublicUserResponse)
+	err := c.cc.Invoke(ctx, Users_GetPublicUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsersServer is the server API for Users service.
 // All implementations must embed UnimplementedUsersServer
 // for forward compatibility.
@@ -403,6 +415,7 @@ type UsersServer interface {
 	GetUserPaymentMethodsByUserID(context.Context, *GetUserPaymentMethodsByUserIDRequest) (*GetUserPaymentMethodsByUserIDResponse, error)
 	DeleteUserPaymentMethod(context.Context, *DeleteUserPaymentMethodRequest) (*DeleteUserPaymentMethodResponse, error)
 	ListSubscriptions(context.Context, *ListSubscriptionsRequest) (*ListSubscriptionsResponse, error)
+	GetPublicUser(context.Context, *GetPublicUserRequest) (*GetPublicUserResponse, error)
 	mustEmbedUnimplementedUsersServer()
 }
 
@@ -496,6 +509,9 @@ func (UnimplementedUsersServer) DeleteUserPaymentMethod(context.Context, *Delete
 }
 func (UnimplementedUsersServer) ListSubscriptions(context.Context, *ListSubscriptionsRequest) (*ListSubscriptionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListSubscriptions not implemented")
+}
+func (UnimplementedUsersServer) GetPublicUser(context.Context, *GetPublicUserRequest) (*GetPublicUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPublicUser not implemented")
 }
 func (UnimplementedUsersServer) mustEmbedUnimplementedUsersServer() {}
 func (UnimplementedUsersServer) testEmbeddedByValue()               {}
@@ -1022,6 +1038,24 @@ func _Users_ListSubscriptions_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Users_GetPublicUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPublicUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).GetPublicUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Users_GetPublicUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).GetPublicUser(ctx, req.(*GetPublicUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Users_ServiceDesc is the grpc.ServiceDesc for Users service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1140,6 +1174,10 @@ var Users_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListSubscriptions",
 			Handler:    _Users_ListSubscriptions_Handler,
+		},
+		{
+			MethodName: "GetPublicUser",
+			Handler:    _Users_GetPublicUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
