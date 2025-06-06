@@ -21,7 +21,7 @@ export default function TabOneScreen() {
             <View style={[index1.imageRows]}>
               {[
                 require("@/assets/images/rectangle11.png"),
-                require("@/assets/images/rectangle12.png"),
+                require("@/assets/images/image4.png"),
               ].map((source, index) => (
                 <View key={index} style={index1.imageWrapper}>
                   <ImageBackground source={source} style={index1.image} />
@@ -31,7 +31,7 @@ export default function TabOneScreen() {
 
             <View style={[index1.imageRows]}>
               {[
-                require("@/assets/images/rectangle13.png"),
+                require("@/assets/images/image3.png"),
                 require("@/assets/images/rectangle17.png"),
                 require("@/assets/images/rectangle14.png"),
               ].map((source, index) => (
@@ -43,7 +43,7 @@ export default function TabOneScreen() {
 
             <View style={[index1.imageRows]}>
               {[
-                require("@/assets/images/rectangle16.png"),
+                require("@/assets/images/rectangle20.jpeg"),
                 require("@/assets/images/rectangle16.png"),
               ].map((source, index) => (
                 <View key={index} style={index1.imageWrapper}>
@@ -56,7 +56,7 @@ export default function TabOneScreen() {
               {[
                 require("@/assets/images/rectangle19.png"),
                 require("@/assets/images/rectangle18.png"),
-                require("@/assets/images/rectangle15.png"),
+                require("@/assets/images/image2.png"),
               ].map((source, index) => (
                 <View key={index} style={index1.imageWrapper}>
                   <ImageBackground source={source} style={index1.image} />

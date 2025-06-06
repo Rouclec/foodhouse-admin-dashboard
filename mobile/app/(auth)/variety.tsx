@@ -12,7 +12,7 @@ const VarietyPage = () => {
   const varieties = [
     { 
       name: "Fruits", 
-      icon: require("@/assets/images/dummy_product_2.png"),
+      icon: require("@/assets/images/fruit.png"),
     },
     { 
       name: "Vegetables", 

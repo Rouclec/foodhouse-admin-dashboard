@@ -28,12 +28,12 @@ const PaymentMethodsPage = () => {
     {
       id: "PaymentMethodType_MOBILE_MONEY",
       name: "MTN Mobile Money",
-      icon: require("@/assets/images/mtn-momo.png"),
+      icon: require("@/assets/images/icons/momo.png"),
     },
     {
       id: "PaymentMethodType_ORANGE_MONEY",
       name: "Orange Money",
-      icon: require("@/assets/images/orange-money.png"),
+      icon: require("@/assets/images/icons/orangeMoney.png"),
     },
   ];
 

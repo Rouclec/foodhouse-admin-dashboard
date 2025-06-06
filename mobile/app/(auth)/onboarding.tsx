@@ -20,19 +20,19 @@ import i18n from "@/i18n";
 const onboardingSlides = [
   {
     id: 1,
-    image: require("@/assets/images/rectangle16.png"),
+    image: require("@/assets/images/onboarding1.jpg"),
     title: i18n.t("(auth).onboarding.1.title"),
     description: i18n.t("(auth).onboarding.1.description"),
   },
   {
     id: 2,
-    image: require("@/assets/images/vegetable.png"),
+    image: require("@/assets/images/onboarding2.jpg"),
     title: i18n.t("(auth).onboarding.2.title"),
     description: i18n.t("(auth).onboarding.2.description"),
   },
   {
     id: 3,
-    image: require("@/assets/images/rectangle11.png"),
+    image: require("@/assets/images/onboarding3.png"),
     title: i18n.t("(auth).onboarding.3.title"),
     description: i18n.t("(auth).onboarding.3.description"),
   },
