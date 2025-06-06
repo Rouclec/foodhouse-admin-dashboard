@@ -17,8 +17,7 @@ heading: {
   navigateSection: {
     flex: 1,
     flexDirection: "column",
-    marginLeft: 8,
-    marginRight: 8,
+    
   },
 
   sectionCard: {
@@ -55,7 +54,7 @@ heading: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: 24,
+    paddingVertical: 24,
   },
   navigationContent: {
     flexDirection: "row",
@@ -108,7 +107,6 @@ heading: {
     infoContainer: {
       borderRadius: 12,
       marginBottom: 24,
-      marginHorizontal: 24,
     },
     infoItem: {
       paddingVertical: 4,
@@ -159,5 +157,9 @@ heading: {
     borderRadius: 30,
     margin: 15,
   },
+  content: {
+    margin: 8,
+    alignItems: "center",
+  }
 
 })

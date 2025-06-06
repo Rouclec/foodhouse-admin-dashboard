@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import {
   View,
   ScrollView,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Share,
   KeyboardAvoidingView,
+  Keyboard,
 } from "react-native";
 import { useRouter } from "expo-router";
 import {
@@ -20,8 +21,9 @@ import {
 } from "react-native-paper";
 import { Colors } from "@/constants";
 import {
+  buyerProductsStyles,
   defaultStyles,
-  imagePickerStyles,
+ 
   profileFlowStyles,
   signupStyles,
   profileFlowStyles as styles,
@@ -32,10 +34,11 @@ import { Context, ContextType } from "@/app/_layout";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { usersGetUserActiveSubscriptionOptions, usersGetUserByIdOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { FontAwesome } from "@expo/vector-icons";
+import { FilterBottomSheet, FilterBottomSheetRef } from "@/components/(buyer)/(index)/FilterBottomSheet";
 
 export default function Profile() {
   const router = useRouter();
-  const [visibleLogoutDialog, setVisibleLogoutDialog] = useState(false);
+   const sheetRef = useRef<FilterBottomSheetRef>(null);
   const { user } = useContext(Context) as ContextType;
 
   const handleLogout = () => {
@@ -195,8 +198,12 @@ export default function Profile() {
                 <Divider style={styles.divider} />
                 <TouchableOpacity
                   style={styles.navigationItem}
-                  onPress={() => setVisibleLogoutDialog(true)}
-                >
+                  onPress={(e) => {
+                                    Keyboard.dismiss(); // pressing the text input opens the keyboard, so we dismiss it at once, since that is not what we want here
+                                    sheetRef.current?.open();
+                                  }}
+                                >
+                
                   <View style={profileFlowStyles.row}>
                     <FontAwesome
                       name="sign-out"
@@ -216,34 +223,45 @@ export default function Profile() {
         </View>
       </KeyboardAvoidingView>
 
-      <Portal>
-        <Dialog
-          visible={visibleLogoutDialog}
-          onDismiss={() => setVisibleLogoutDialog(false)}
-          style={styles.dialog}
-        >
-          <Dialog.Title style={styles.heading}>
-            {i18n.t("(farmer).(profile-flow).profile.tab3")}
-          </Dialog.Title>
-          <Dialog.Content>
-            <Text>
-              {i18n.t("(farmer).(profile-flow).profile.confirmation")}
-            </Text>
-          </Dialog.Content>
-          <Dialog.Actions style={imagePickerStyles.bottomContainer}>
-            <Button
-              onPress={() => setVisibleLogoutDialog(false)}
-              style={[imagePickerStyles.button1, imagePickerStyles.skipButton]}
-              labelStyle={imagePickerStyles.skipButtonText}
-            >
-              {i18n.t("(farmer).(profile-flow).profile.button1")}
-            </Button>
-            <Button onPress={handleLogout} style={imagePickerStyles.button1}>
-              {i18n.t("(farmer).(profile-flow).profile.button2")}
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
+       <FilterBottomSheet ref={sheetRef} sheetHeight={200}>
+              <View style={[buyerProductsStyles.filtersContainer]}>
+                <View style={profileFlowStyles.content}>                   
+                   <Text variant="titleMedium" style={buyerProductsStyles.title}>
+                            {i18n.t("(farmer).(profile-flow).profile.tab3")}
+                          </Text>
+                          
+                
+                <Text style={defaultStyles.dialogSubtitle}>{i18n.t("(farmer).(profile-flow).profile.confirmation")}</Text>
+                </View>
+                <View style={buyerProductsStyles.bottomButtonContainer}>
+                  <Button
+                    onPress={() => {
+                      sheetRef?.current?.close();}}
+                    style={[
+                                    defaultStyles.button,
+                                    defaultStyles.secondaryButton,
+                                    buyerProductsStyles.halfButton,
+                                  ]}
+                  >
+                    <Text style={defaultStyles.secondaryButtonText}>
+                                    {i18n.t("(farmer).(profile-flow).profile.button1")}
+                                  </Text>
+                    
+                  </Button>
+                  <Button onPress={() => {handleLogout(), sheetRef?.current?.close();} }
+                  style={[
+                                  defaultStyles.button,
+                                  defaultStyles.primaryButton,
+                                  buyerProductsStyles.halfButton,
+                                ]}>
+                    
+                    <Text style={defaultStyles.secondaryButtonText}>
+                                    {i18n.t("(farmer).(profile-flow).profile.button2")}
+                                  </Text>
+                  </Button>
+                </View>
+              </View>
+            </FilterBottomSheet>
     </>
   );
 }
