@@ -29,6 +29,7 @@ export default {
     fa: "#FAFAFA",
     f8: "#F8F8F8",
     "75": "#757575",
+    e00: "#F8FFF5",
   },
   dark: {
     "0.8": "#000000CC",
@@ -48,6 +49,7 @@ export default {
   },
   error: "#EF0000",
   errorDark: "#a10202",
+  err: "#FF5A5F14",
   primary: {
     "50": "#6DCD471F",
     "300": "#D8FFC9",

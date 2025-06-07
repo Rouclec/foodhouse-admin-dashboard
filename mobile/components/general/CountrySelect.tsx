@@ -137,7 +137,7 @@ export const CountrySelect: FC<Props> = ({
           >
             Country
           </Animated.Text> */}
-          <View style={styles.flexContainer}>
+          <View style={styles.flexSmallContainer}>
             <Text style={[styles.countryCodeText, valueTextStyle]}>
               {country?.emoji}
             </Text>

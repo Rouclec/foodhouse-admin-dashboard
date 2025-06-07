@@ -17,7 +17,7 @@ heading: {
   navigateSection: {
     flex: 1,
     flexDirection: "column",
-    
+    paddingTop: 32,
   },
 
   sectionCard: {
@@ -105,8 +105,10 @@ heading: {
   },
 
     infoContainer: {
-      borderRadius: 12,
-      marginBottom: 24,
+      flex: 1,
+    paddingTop: 32,
+    //margin: 18,
+    marginVertical: 24,
     },
     infoItem: {
       paddingVertical: 4,
@@ -127,18 +129,29 @@ heading: {
 
   innerContainer: {
     padding: 20,
-    marginTop: 20,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 25,
   },
-  iconContainer: {
-    backgroundColor: Colors.primary[300],
+ iconContainer: {
+  backgroundColor: Colors.grey["e00"],
+  borderRadius: 30,
+  marginRight: 15,
+  height: 38,
+  width: 38,
+  alignItems: "center",       
+  justifyContent: "center",   
+},
+
+   dangerContainer: {
+    backgroundColor: Colors.err,
     padding: 10,
     borderRadius: 30,
     marginRight: 15,
+    height: 38,
+    width: 38,
   },
   errorContainer: {
     backgroundColor: "#ffebee",

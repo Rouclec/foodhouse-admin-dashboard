@@ -16,7 +16,8 @@ import {
   Divider,
   Avatar,
   List,
-  
+  Portal,
+  Dialog,
 } from "react-native-paper";
 import { Colors } from "@/constants";
 import {
@@ -28,20 +29,55 @@ import {
 } from "@/styles";
 import i18n from "@/i18n";
 import { Context, ContextType } from "@/app/_layout";
+
+import {  useMutation, useQuery } from "@tanstack/react-query";
+import {
+  usersGetUserActiveSubscriptionOptions,
+  usersRevokeRefreshTokenMutation,
+  
+} from "@/client/users.swagger/@tanstack/react-query.gen";
 import { FontAwesome } from "@expo/vector-icons";
 import {
   FilterBottomSheet,
   FilterBottomSheetRef,
 } from "@/components/(buyer)/(index)/FilterBottomSheet";
+import { clearStorage, readData, updateAuthHeader } from "@/utils";
 
 export default function Profile() {
   const router = useRouter();
-  const { user } = useContext(Context) as ContextType;
   const sheetRef = useRef<FilterBottomSheetRef>(null);
-
-  const handleLogout = () => {
-    router.replace("/(auth)/login");
-  };
+   const { user, setUser } = useContext(Context) as ContextType;
+    const [loading, setLoading] = useState(false);
+    
+  
+    const handleLogout = async () => {
+        try {
+          setLoading(true);
+          const refreshToken = await readData("@refreshToken");
+    
+          await revokeRefreshToken({
+            body: {
+              refreshToken,
+            },
+          });
+    
+          await clearStorage();
+          updateAuthHeader("");
+          setUser(undefined);
+          router.replace("/onboarding");
+        } catch (error) {
+          console.error({ error }, "logging out");
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      const { mutateAsync: revokeRefreshToken } = useMutation({
+          ...usersRevokeRefreshTokenMutation(),
+          onError: async (error) => {
+            console.error("error logging out: ", error);
+          },
+        });
 
  
 
@@ -56,14 +92,12 @@ export default function Profile() {
     <>
       <KeyboardAvoidingView
         style={defaultStyles.container}
+        // behavior={Platform.OS === "ios" ? "padding" : undefined}
         behavior={"padding"}
         keyboardVerticalOffset={0}
       >
         <View style={defaultStyles.flex}>
-          <Appbar.Header
-            dark={false}
-            style={defaultStyles.appHeader}
-          >
+          <Appbar.Header dark={false} style={defaultStyles.appHeader}>
             <Appbar.Content
               title={i18n.t("(farmer).(profile-flow).profile.title")}
             />
@@ -93,124 +127,116 @@ export default function Profile() {
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled"
           >
-            {/* <View style={signupStyles.allInput}> */}
+            <View style={signupStyles.allInput}>
 
-            <View style={styles.navigateSection}>
-              <TouchableOpacity
-                style={styles.navigationItem}
-                onPress={() => router.push("/(farmer)/settings")}
-              >
-                <View style={styles.navigationContent}>
-                  <FontAwesome
-                    name="cog"
-                    size={20}
-                    color={Colors.primary[500]}
-                    style={styles.navigationIcon}
-                  />
-                  <Text style={styles.navigationText}>
-                    {i18n.t("(farmer).(profile-flow).profile.tab1")}
-                  </Text>
-                </View>
-                <List.Icon icon="chevron-right" />
-              </TouchableOpacity>
+              <View style={styles.navigateSection}>
+                <TouchableOpacity
+                  style={styles.navigationItem}
+                  onPress={() => router.push("/(farmer)/settings")}
+                >
+                  <View style={styles.navigationContent}>
+                    <View style={profileFlowStyles.iconContainer}>
+                    <FontAwesome
+                      name="cog"
+                      size={20}
+                      color={Colors.primary[500]}
+                      
+                    />
+                    </View>
+                    <Text style={styles.navigationText}>
+                      {i18n.t("(farmer).(profile-flow).profile.tab1")}
+                    </Text>
+                  </View>
+                  <List.Icon icon="chevron-right" />
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.navigationItem}
-                onPress={shareApp}
-              >
-                <View style={styles.navigationContent}>
-                  <FontAwesome
-                    name="paper-plane"
-                    size={20}
-                    color={Colors.primary[500]}
-                    style={styles.navigationIcon}
-                  />
-                  <Text style={styles.navigationText}>
-                    {i18n.t("(farmer).(profile-flow).profile.tab2")}
-                  </Text>
-                </View>
-                <List.Icon icon="chevron-right" />
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.navigationItem}
+                  onPress={shareApp}
+                >
+                  <View style={styles.navigationContent}>
+                    <View style={profileFlowStyles.iconContainer}>
+                    <FontAwesome
+                      name="paper-plane"
+                      size={20}
+                      color={Colors.primary[500]}
+                      
+                    />
+                    </View>
+                    <Text style={styles.navigationText}>
+                      {i18n.t("(farmer).(profile-flow).profile.tab2")}
+                    </Text>
+                  </View>
+                  <List.Icon icon="chevron-right" />
+                </TouchableOpacity>
+                <Divider style={styles.divider} />
+                <TouchableOpacity
+                  style={styles.navigationItem}
+                  onPress={(e) => {
+                    Keyboard.dismiss(); 
+                    sheetRef.current?.open();
+                  }}
+                >
+                  <View style={profileFlowStyles.row}>
+                    <View style={profileFlowStyles.dangerContainer}>
+                    <FontAwesome
+                      name="sign-out"
+                      size={20}
+                      color={Colors.error}
+                      
+                    />
+                    </View>
 
-              <TouchableOpacity
-                style={styles.navigationItem}
-                onPress={shareApp}
-              >
-                <View style={styles.navigationContent}>
-                  <FontAwesome
-                    name="users"
-                    size={20}
-                    color={Colors.primary[500]}
-                    style={styles.navigationIcon}
-                  />
-                  <Text style={styles.navigationText}>
-                    {i18n.t("(farmer).(profile-flow).profile.tab4")}
-                  </Text>
-                </View>
-                <List.Icon icon="chevron-right" />
-              </TouchableOpacity>
-              <Divider style={styles.divider} />
-              <TouchableOpacity
-                style={styles.navigationItem}
-                onPress={(e) => {
-                  Keyboard.dismiss(); // pressing the text input opens the keyboard, so we dismiss it at once, since that is not what we want here
-                  sheetRef.current?.open();
-                }}
-              >
-                <View style={profileFlowStyles.row}>
-                  <FontAwesome
-                    name="sign-out"
-                    size={20}
-                    color="#ff0000"
-                    style={styles.navigationIcon}
-                  />
-
-                  <Text style={styles.logout}>
-                    {i18n.t("(farmer).(profile-flow).profile.tab3")}
-                  </Text>
-                </View>
-              </TouchableOpacity>
+                    <Text style={styles.logout}>
+                      {i18n.t("(farmer).(profile-flow).profile.tab3")}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
             </View>
-            {/* </View> */}
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
 
       <FilterBottomSheet ref={sheetRef} sheetHeight={200}>
         <View style={[buyerProductsStyles.filtersContainer]}>
-          <View style={profileFlowStyles.content}>                   
-             <Text variant="titleMedium" style={buyerProductsStyles.title}>
-                      {i18n.t("(farmer).(profile-flow).profile.tab3")}
-                    </Text>
-                    
-          
-          <Text style={defaultStyles.dialogSubtitle}>{i18n.t("(farmer).(profile-flow).profile.confirmation")}</Text>
+          <View style={profileFlowStyles.content}>
+            <Text variant="titleMedium" style={buyerProductsStyles.title}>
+              {i18n.t("(farmer).(profile-flow).profile.tab3")}
+            </Text>
+
+            <Text style={defaultStyles.dialogSubtitle}>
+              {i18n.t("(farmer).(profile-flow).profile.confirmation")}
+            </Text>
           </View>
           <View style={buyerProductsStyles.bottomButtonContainer}>
             <Button
               onPress={() => {
-                sheetRef?.current?.close();}}
+                sheetRef?.current?.close();
+              }}
               style={[
-                              defaultStyles.button,
-                              defaultStyles.secondaryButton,
-                              buyerProductsStyles.halfButton,
-                            ]}
+                defaultStyles.button,
+                defaultStyles.secondaryButton,
+                buyerProductsStyles.halfButton,
+              ]}
             >
               <Text style={defaultStyles.secondaryButtonText}>
-                              {i18n.t("(farmer).(profile-flow).profile.button1")}
-                            </Text>
-              
+                {i18n.t("(farmer).(profile-flow).profile.button1")}
+              </Text>
             </Button>
-            <Button onPress={() => {handleLogout(), sheetRef?.current?.close();} }
-            style={[
-                            defaultStyles.button,
-                            defaultStyles.primaryButton,
-                            buyerProductsStyles.halfButton,
-                          ]}>
-              
-              <Text style={defaultStyles.secondaryButtonText}>
-                              {i18n.t("(farmer).(profile-flow).profile.button2")}
-                            </Text>
+            <Button
+              onPress={() => {
+                handleLogout(), sheetRef?.current?.close();
+              }}
+              style={[
+                defaultStyles.button,
+                defaultStyles.primaryButton,
+                buyerProductsStyles.halfButton,
+              ]}
+            >
+              <Text style={defaultStyles.buttonText}>
+                {i18n.t("(farmer).(profile-flow).profile.button2")}
+              </Text>
             </Button>
           </View>
         </View>

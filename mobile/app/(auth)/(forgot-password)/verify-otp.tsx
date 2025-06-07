@@ -172,19 +172,19 @@ export default function ForgotPasswordEmailOtp() {
 
   return (
     <>
-      <KeyboardAvoidingView
-        style={defaultStyles.container}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
-      >
-        <View style={defaultStyles.flex}>
-          <Appbar.Header dark={false} style={defaultStyles.appHeader}>
-            <TouchableOpacity
-              onPress={() => router.back()}
-              style={defaultStyles.backButtonContainer}
-            >
-              <Icon source={"arrow-left"} size={24} />
-            </TouchableOpacity>
+     <KeyboardAvoidingView
+             style={defaultStyles.container}
+             behavior={Platform.OS === "ios" ? "padding" : undefined}
+             keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+           >
+             <View style={defaultStyles.flex}>
+               <Appbar.Header dark={false} style={defaultStyles.appHeader}>
+                 <TouchableOpacity
+                   onPress={() => router.back()}
+                   style={defaultStyles.backButtonContainer}
+                 >
+                   <Icon source={"arrow-left"} size={24} />
+                 </TouchableOpacity>
             <Text variant="titleMedium" style={defaultStyles.heading}>
               {i18n.t("(auth).(forgot-password).verify-otp.forgotPassword")}
             </Text>

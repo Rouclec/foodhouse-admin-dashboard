@@ -94,7 +94,7 @@ export const loginstyles = StyleSheet.create({
     marginBottom: 30,
   },
   dividerLine: {
-    flex: 1,
+    flexGrow: 1,
     height: 1,
     backgroundColor: Colors.grey["border"],
   },

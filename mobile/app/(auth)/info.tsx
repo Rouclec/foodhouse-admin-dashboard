@@ -2,7 +2,6 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   ScrollView,
   TouchableOpacity,
   View,
@@ -10,7 +9,7 @@ import {
 import React, { useContext, useEffect, useState } from "react";
 import { CountrySelect } from "@/components/general/CountrySelect";
 import { CAMEROON, Colors, countries } from "@/constants";
-import { Appbar, Button, Icon, TextInput, Text } from "react-native-paper";
+import { Appbar, Button, Icon, TextInput, Text, Snackbar } from "react-native-paper";
 import PhoneNumberInput from "@/components/general/PhoneNumberInput";
 import { useRouter } from "expo-router";
 import { usersSendSignupSmsOtpMutation } from "@/client/users.swagger/@tanstack/react-query.gen";
@@ -25,7 +24,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const Info = () => {
   const [country, setCountry] = useState(CAMEROON);
-  const [callingCode, setCallingCode] = useState(country?.dial_code || "237"); 
+  const [callingCode, setCallingCode] = useState(country?.dial_code || "237");
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -87,26 +86,27 @@ const Info = () => {
   return (
     <>
       <KeyboardAvoidingView
-        style={signupStyles.container}
+        style={defaultStyles.container}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
       >
-        <Appbar.Header dark={false}>
-          <TouchableOpacity
-            style={signupStyles.closeIconContainer}
-            onPress={() => router.back()}
-          >
-            <Icon source="arrow-left" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text variant="headlineMedium" style={signupStyles.heading}>
-            {i18n.t(
-              `(auth).createAccount.${
-                role === "USER_TYPE_FARMER" ? "farmerAccount" : "buyerAccount"
-              }`
-            )}
-          </Text>
-        </Appbar.Header>
-        <SafeAreaView style={signupStyles.mainConatiner}>
+        <View style={defaultStyles.flex}>
+          <Appbar.Header dark={false} style={defaultStyles.appHeader}>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={defaultStyles.backButtonContainer}
+            >
+              <Icon source={"arrow-left"} size={24} />
+            </TouchableOpacity>
+            <Text variant="titleMedium" style={defaultStyles.heading}>
+              {i18n.t(
+                `(auth).createAccount.${
+                  role === "USER_TYPE_FARMER" ? "farmerAccount" : "buyerAccount"
+                }`
+              )}
+            </Text>
+          </Appbar.Header>
+
           <ScrollView
             contentContainerStyle={defaultStyles.scrollContainer}
             showsVerticalScrollIndicator={false}
@@ -136,9 +136,16 @@ const Info = () => {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 error={email?.length > 0 && !emailRegex.test(email)}
-                outlineStyle={signupStyles.outlineInput}
-                style={signupStyles.input}
-                theme={{ roundness: 15, colors: { onSurfaceVariant: Colors.grey["e8"] } }}
+                outlineColor={Colors.grey["bg"]}
+                style={defaultStyles.input}
+                theme={{
+                  colors: {
+                    primary: Colors.primary[500],
+                    background: Colors.grey["fa"],
+                    error: Colors.error,
+                  },
+                  roundness: 10,
+                }}
               />
 
               <TextInput
@@ -149,10 +156,16 @@ const Info = () => {
                 secureTextEntry={!showPassword}
                 mode="outlined"
                 placeholder={i18n.t("(auth).createAccount.placeholder")}
-                style={signupStyles.input}
-                outlineStyle={signupStyles.outlineInput}
-                contentStyle={signupStyles.inputContentStyle}
-                theme={{roundness: 15, colors: { onSurfaceVariant: Colors.grey["e8"] } }}
+                outlineColor={Colors.grey["bg"]}
+                style={defaultStyles.input}
+                theme={{
+                  colors: {
+                    primary: Colors.primary[500],
+                    background: Colors.grey["fa"],
+                    error: Colors.error,
+                  },
+                  roundness: 10,
+                }}
                 error={password.length > 0 && password.length < 12}
                 right={
                   <TextInput.Icon
@@ -177,9 +190,16 @@ const Info = () => {
                 autoCapitalize="none"
                 secureTextEntry={!showConfirmPassword}
                 mode="outlined"
-                outlineStyle={signupStyles.outlineInput}
-                style={signupStyles.input}
-                theme={{roundness: 15, colors: { onSurfaceVariant: Colors.grey["e8"] } }}
+                outlineColor={Colors.grey["bg"]}
+                style={defaultStyles.input}
+                theme={{
+                  colors: {
+                    primary: Colors.primary[500],
+                    background: Colors.grey["fa"],
+                    error: Colors.error,
+                  },
+                  roundness: 10,
+                }}
                 error={
                   password?.length > 0 &&
                   confirmPassword?.length > 0 &&
@@ -205,30 +225,40 @@ const Info = () => {
               )}
             </View>
           </ScrollView>
-        </SafeAreaView>
 
-        <View style={defaultStyles.bottomButtonContainer}>
-          <Button
-            mode="contained"
-            onPress={handleSignUp}
-            textColor={Colors.light["10"]}
-            buttonColor={Colors.primary["500"]}
-            style={defaultStyles.button}
-            loading={loading}
-            disabled={
-              loading ||
-              !country ||
-              !mobile ||
-              !email ||
-              !password ||
-              password.length < 12 ||
-              password !== confirmPassword
-            }
-          >
-            {i18n.t("(auth).createAccount.createAccount")}
-          </Button>
+          <View style={defaultStyles.bottomButtonContainer}>
+            <Button
+              mode="contained"
+              onPress={handleSignUp}
+              textColor={Colors.light["10"]}
+              buttonColor={Colors.primary["500"]}
+              style={defaultStyles.button}
+              loading={loading}
+              disabled={
+                loading ||
+                !country ||
+                !mobile ||
+                !email ||
+                !password ||
+                password.length < 12 ||
+                password !== confirmPassword
+              }
+            >
+              {i18n.t("(auth).createAccount.createAccount")}
+            </Button>
+          </View>
         </View>
       </KeyboardAvoidingView>
+
+       <Snackbar
+              visible={error}
+              testID="signup_error_toast"
+              onDismiss={() => {}}
+              duration={3000}
+              style={defaultStyles.snackbar}
+            >
+              <Text style={defaultStyles.errorText}>{errorMessage}</Text>
+            </Snackbar>
     </>
   );
 };
