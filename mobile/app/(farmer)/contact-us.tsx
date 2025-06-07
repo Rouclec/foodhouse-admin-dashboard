@@ -1,15 +1,14 @@
 import React from 'react';
 import {
   View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
+  
+  
   Linking,
   TouchableOpacity,
   KeyboardAvoidingView,
 } from 'react-native';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
-import { Appbar } from 'react-native-paper';
+import { Appbar, Icon, Text } from 'react-native-paper';
 import { router } from 'expo-router';
 import { defaultStyles, profileFlowStyles, signupStyles } from '@/styles';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -56,10 +55,23 @@ const ContactUsScreen = () => {
           >
             <View style={defaultStyles.flex}>
       <Appbar.Header dark={false} style={defaultStyles.appHeader}>
-        <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={i18n.t("(farmer).(profile-flow).(settings).contactUs")}/>
+        <TouchableOpacity
+              onPress={() => router.back()}
+              style={defaultStyles.backButtonContainer}
+            >
+              <Icon source={"arrow-left"} size={24} />
+            </TouchableOpacity>
+            <Text variant="titleMedium" style={defaultStyles.heading}>
+        {i18n.t("(farmer).(profile-flow).(settings).contactUs")}
+        </Text>
+        <View />
       </Appbar.Header>
-      <ScrollView style={defaultStyles.scrollContainer}>
+      <ScrollView
+                  contentContainerStyle={defaultStyles.scrollContainer}
+                  showsVerticalScrollIndicator={false}
+                  nestedScrollEnabled={true}
+                  keyboardShouldPersistTaps="handled"
+                >
         <View style={profileFlowStyles.innerContainer}>
 
           <TouchableOpacity style={profileFlowStyles.row} onPress={handleEmailPress}>

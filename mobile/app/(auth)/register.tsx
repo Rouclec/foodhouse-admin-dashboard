@@ -25,26 +25,31 @@ const Register = () => {
     <>
 
       <KeyboardAvoidingView
-        style={signupStyles.container}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
-      >
-         <Appbar.Header dark={false}>
+              style={defaultStyles.container}
+              behavior={Platform.OS === "ios" ? "padding" : undefined}
+              keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+            >
+               <View style={defaultStyles.flex}>
+         <Appbar.Header dark={false} style={defaultStyles.appHeader}>
         <TouchableOpacity
-          style={signupStyles.closeIconContainer}
-          onPress={() => router.back()}
-        >
-          <Icon source="arrow-left" size={24} color="#000" />
+                      onPress={() => router.back()}
+                      style={defaultStyles.backButtonContainer}
+                    >
+          <Icon source={"arrow-left"} size={24} />
         </TouchableOpacity>
-        <Text variant="headlineMedium" style={signupStyles.heading}>
+        <Text variant="titleMedium" style={defaultStyles.heading}>
          {i18n.t("(auth).register.createAccount")}
         </Text>
+        <View />
       </Appbar.Header>
-          <SafeAreaView style={defaultStyles.mainContainer}>
+
             <ScrollView
-              style={signupStyles.scrollContainer}
-              showsVerticalScrollIndicator={false}
-            >
+                       contentContainerStyle={defaultStyles.scrollContainer}
+                       showsVerticalScrollIndicator={false}
+                       nestedScrollEnabled={true}
+                       keyboardShouldPersistTaps="handled"
+                     >
+                       
               <View style={loginstyles.logoCircle}>
                 <Text style={loginstyles.logoText}>Food House</Text>
               </View>
@@ -116,7 +121,8 @@ const Register = () => {
                 </TouchableOpacity>
               </View>
             </View>
-          </SafeAreaView>
+          
+           </View>
       </KeyboardAvoidingView>
     </>
   );

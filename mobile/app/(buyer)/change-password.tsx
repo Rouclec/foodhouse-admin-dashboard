@@ -3,18 +3,26 @@ import {
   View,
   SafeAreaView,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableOpacity,
 } from "react-native";
-import { Appbar, Button, Text, TextInput } from "react-native-paper";
+import { Appbar, Button, Icon, Text, TextInput } from "react-native-paper";
 import { Link, router } from "expo-router";
-import { defaultStyles, loginstyles, profileFlowStyles, signupStyles } from "@/styles";
+import {
+  defaultStyles,
+  loginstyles,
+  profileFlowStyles,
+  signupStyles,
+} from "@/styles";
 import { useMutation } from "@tanstack/react-query";
 import { usersChangePasswordMutation } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { delay } from "@/utils";
 import i18n from "@/i18n";
-import { Colors } from "@/constants"; 
+import { Colors } from "@/constants";
 import { Context, ContextType } from "../_layout";
 
-export default function ChangePasswordScreen () {
+export default function ChangePasswordScreen() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -81,131 +89,151 @@ export default function ChangePasswordScreen () {
 
   return (
     <>
-      <Appbar.Header dark={false} style={defaultStyles.appHeader}>
-        <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title="Change password" />
-      </Appbar.Header>
-      <SafeAreaView style={defaultStyles.scrollContainer}>
-        <ScrollView contentContainerStyle={profileFlowStyles.innerContainer}>
-          {error && (
-            <View style={profileFlowStyles.errorContainer}>
-              <Text style={profileFlowStyles.errorText}>{errorMessage}</Text>
-            </View>
-          )}
-          <View style={signupStyles.allInput}>
-            <View>
-              <Text style={profileFlowStyles.label}>{i18n.t("(farmer).(profile-flow).(change-password).currentPassword")}</Text>
-              <TextInput
-                mode="outlined"
-                secureTextEntry={!showCurrent}
-                value={currentPassword}
-                onChangeText={setCurrentPassword}
-                placeholder={i18n.t("(farmer).(profile-flow).(change-password).enterCurrentPassword")}
-                autoCapitalize="none"
-                style={loginstyles.input}
-                outlineColor={Colors.grey["bg"]}
-                theme={{
-                  colors: {
-                    primary: Colors.primary[500],
-                    background: "#FAFAFA",
-                    error: Colors.error,
-                  },
-                  roundness: 10,
-                }}
-                right={
-                  <TextInput.Icon
-                    icon={showCurrent ? "eye-off" : "eye"}
-                    onPress={() => setShowCurrent(!showCurrent)}
-                    color={Colors.grey["61"]}
-                    size={20}
-                  />
-                }
-              />
-            </View>
-
-            <View>
-              <Text style={profileFlowStyles.label}>{i18n.t("(farmer).(profile-flow).(change-password).newPassword")}</Text>
-              <TextInput
-                mode="outlined"
-                secureTextEntry={!showNew}
-                value={newPassword}
-                onChangeText={setNewPassword}
-                placeholder={i18n.t("(farmer).(profile-flow).(change-password).currentPassword")}
-                autoCapitalize="none"
-                style={loginstyles.input}
-                outlineColor={Colors.grey["bg"]}
-                theme={{
-                  colors: {
-                    primary: Colors.primary[500],
-                    background: "#FAFAFA",
-                    error: Colors.error,
-                  },
-                  roundness: 10,
-                }}
-                right={
-                  <TextInput.Icon
-                    icon={showNew ? "eye-off" : "eye"}
-                    onPress={() => setShowNew(!showNew)}
-                    color={Colors.grey["61"]}
-                    size={20}
-                  />
-                }
-              />
-            </View>
-
-            <View>
-              <Text style={profileFlowStyles.label}>{i18n.t("(farmer).(profile-flow).(change-password).confirmPassword")}</Text>
-              <TextInput
-                mode="outlined"
-                secureTextEntry={!showConfirm}
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                placeholder={i18n.t("(farmer).(profile-flow).(change-password).placeholder")}
-                autoCapitalize="none"
-                style={loginstyles.input}
-                outlineColor={Colors.grey["bg"]}
-                theme={{
-                  colors: {
-                    primary: Colors.primary[500],
-                    background: "#FAFAFA",
-                    error: Colors.error,
-                  },
-                  roundness: 10,
-                }}
-                right={
-                  <TextInput.Icon
-                    icon={showConfirm ? "eye-off" : "eye"}
-                    onPress={() => setShowConfirm(!showConfirm)}
-                    color={Colors.grey["61"]}
-                    size={20}
-                  />
-                }
-              />
-            </View>
-            <Link
-              style={loginstyles.forgotPassword}
-              href={"/(auth)/(forgot-password)"}
+      <KeyboardAvoidingView
+        style={defaultStyles.container}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+      >
+        <View style={defaultStyles.flex}>
+          <Appbar.Header dark={false} style={defaultStyles.appHeader}>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={defaultStyles.backButtonContainer}
             >
-              <Text style={loginstyles.forgotPasswordText}>
-                {i18n.t("(farmer).(profile-flow).(change-password).forgotPassword")}
-              </Text>
-            </Link>
-          </View>
-        </ScrollView>
-         <View style={defaultStyles.bottomButtonContainer}>
+              <Icon source={"arrow-left"} size={24} />
+            </TouchableOpacity>
+            <Text variant="titleMedium" style={defaultStyles.heading}>
+              {i18n.t("(auth).(forgot-password).index.forgotPassword")}
+            </Text>
+            <View />
+          </Appbar.Header>
+
+          <ScrollView
+            contentContainerStyle={defaultStyles.scrollContainer}
+            showsVerticalScrollIndicator={false}
+            nestedScrollEnabled={true}
+            keyboardShouldPersistTaps="handled"
+          >
+            {error && (
+              <View style={profileFlowStyles.errorContainer}>
+                <Text style={profileFlowStyles.errorText}>{errorMessage}</Text>
+              </View>
+            )}
+            <View style={signupStyles.allInput}>
+              <View>
+                <TextInput
+                  mode="outlined"
+                  secureTextEntry={!showCurrent}
+                  value={currentPassword}
+                  onChangeText={setCurrentPassword}
+                  label={i18n.t(
+                    "(farmer).(profile-flow).(change-password).enterCurrentPassword"
+                  )}
+                  autoCapitalize="none"
+                  style={loginstyles.input}
+                  outlineColor={Colors.grey["bg"]}
+                  theme={{
+                    roundness: 15,
+                    colors: {
+                      onSurfaceVariant: Colors.grey["e8"],
+                      primary: Colors.primary[500],
+                    },
+                  }}
+                  right={
+                    <TextInput.Icon
+                      icon={showCurrent ? "eye-off" : "eye"}
+                      onPress={() => setShowCurrent(!showCurrent)}
+                      color={Colors.grey["61"]}
+                      size={20}
+                    />
+                  }
+                />
+              </View>
+
+              <View>
+                <TextInput
+                  mode="outlined"
+                  secureTextEntry={!showNew}
+                  value={newPassword}
+                  onChangeText={setNewPassword}
+                  label={i18n.t(
+                    "(farmer).(profile-flow).(change-password).currentPassword"
+                  )}
+                  autoCapitalize="none"
+                  style={loginstyles.input}
+                  outlineColor={Colors.grey["bg"]}
+                  theme={{
+                    roundness: 15,
+                    colors: {
+                      onSurfaceVariant: Colors.grey["e8"],
+                      primary: Colors.primary[500],
+                    },
+                  }}
+                  right={
+                    <TextInput.Icon
+                      icon={showNew ? "eye-off" : "eye"}
+                      onPress={() => setShowNew(!showNew)}
+                      color={Colors.grey["61"]}
+                      size={20}
+                    />
+                  }
+                />
+              </View>
+
+              <View>
+                <TextInput
+                  mode="outlined"
+                  secureTextEntry={!showConfirm}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  label={i18n.t(
+                    "(farmer).(profile-flow).(change-password).placeholder"
+                  )}
+                  autoCapitalize="none"
+                  style={loginstyles.input}
+                  theme={{
+                    colors: {
+                      primary: Colors.primary[500],
+                      background: "#FAFAFA",
+                      error: Colors.error,
+                    },
+                    roundness: 10,
+                  }}
+                  outlineColor={Colors.grey["bg"]}
+                  right={
+                    <TextInput.Icon
+                      icon={showConfirm ? "eye-off" : "eye"}
+                      onPress={() => setShowConfirm(!showConfirm)}
+                      color={Colors.grey["61"]}
+                      size={20}
+                    />
+                  }
+                />
+              </View>
+              <Link
+                style={loginstyles.forgotPassword}
+                href={"/(auth)/(forgot-password)"}
+              >
+                <Text style={loginstyles.forgotPasswordText}>
+                  {i18n.t(
+                    "(farmer).(profile-flow).(change-password).forgotPassword"
+                  )}
+                </Text>
+              </Link>
+            </View>
+          </ScrollView>
+          <View style={defaultStyles.bottomButtonContainer}>
             <Button
               mode="contained"
               onPress={handleSaveChanges}
               style={defaultStyles.button}
+              buttonColor={Colors.primary["500"]}
             >
               Save changes
             </Button>
           </View>
-      </SafeAreaView>
+        </View>
+      </KeyboardAvoidingView>
     </>
   );
-};
-
-
-
-
+}

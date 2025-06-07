@@ -89,7 +89,7 @@ export default function ForgotPassword() {
             <Text variant="titleMedium" style={defaultStyles.heading}>
               {i18n.t("(auth).(forgot-password).index.forgotPassword")}
             </Text>
-            <View />
+             <View /> 
           </Appbar.Header>
           <ScrollView
             contentContainerStyle={defaultStyles.scrollContainer}

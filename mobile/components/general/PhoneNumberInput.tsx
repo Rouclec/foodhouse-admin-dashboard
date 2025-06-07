@@ -4,7 +4,7 @@ import React, {
   SetStateAction,
   useEffect,
   useState,
-} from 'react';
+} from "react";
 import {
   Keyboard,
   StyleProp,
@@ -12,15 +12,15 @@ import {
   View,
   ViewStyle,
   Text,
-} from 'react-native';
+} from "react-native";
 
-import PhoneNumber, { CountryCode } from 'libphonenumber-js';
+import PhoneNumber, { CountryCode } from "libphonenumber-js";
 
-import { Colors, countries as allCountries } from '@/constants';
-import { Country } from '@/interface';
-import { phoneNumberInputStyles as styles } from '@/styles';
-import { Icon, TextInput } from 'react-native-paper';
-import { CountryList } from './CountryList';
+import { Colors, countries as allCountries } from "@/constants";
+import { Country } from "@/interface";
+import { phoneNumberInputStyles as styles } from "@/styles";
+import { Icon, TextInput } from "react-native-paper";
+import { CountryList } from "./CountryList";
 
 interface Props {
   containerStyle?: StyleProp<ViewStyle>;
@@ -34,20 +34,20 @@ interface Props {
 }
 
 export const CAMEROON = allCountries.find(
-  country => country.name === 'Cameroon',
+  (country) => country.name === "Cameroon"
 ) as Country;
 
 export const validatePhoneNumber = (
   phoneNumber: string | null,
-  countryCode: string | null,
+  countryCode: string | null
 ) => {
   try {
     const code = allCountries.find(
-      country => country.dial_code === countryCode,
+      (country) => country.dial_code === countryCode
     )?.code;
     const number = PhoneNumber(
       phoneNumber as string,
-      code as string as CountryCode,
+      code as string as CountryCode
     );
     if (number?.isValid()) {
       return true; // Phone number is valid.
@@ -55,7 +55,7 @@ export const validatePhoneNumber = (
       return false; // Phone number is not valid.
     }
   } catch (e) {
-    console.error('error validating phone number: ', e);
+    console.error("error validating phone number: ", e);
     // Handle parsing errors, such as an invalid phone number.
     return false;
   }
@@ -68,7 +68,7 @@ const PhoneNumberInput: FC<Props> = ({
   setPhoneNumber,
   containerStyle,
   countries,
-  label = 'Mobile number',
+  label = "Mobile number",
 }) => {
   const [showCountries, setShowCountries] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -89,7 +89,7 @@ const PhoneNumberInput: FC<Props> = ({
   useEffect(() => {
     if (countries?.length) {
       const defaultCountry = countries.find(
-        country => country?.name === 'Cameroon',
+        (country) => country?.name === "Cameroon"
       ) as Country;
       setCountry(defaultCountry ?? countries[0]);
     }
@@ -97,9 +97,9 @@ const PhoneNumberInput: FC<Props> = ({
 
   useEffect(() => {
     const isValid = validatePhoneNumber(
-      (countryCode ?? '') + (phoneNumber ?? ''),
-      (allCountries.find(country => country.dial_code === countryCode)?.code ??
-        'US') as CountryCode,
+      (countryCode ?? "") + (phoneNumber ?? ""),
+      (allCountries.find((country) => country.dial_code === countryCode)
+        ?.code ?? "US") as CountryCode
     );
     setIsValidPhoneNumber(isValid);
   }, [phoneNumber, countryCode]);
@@ -116,7 +116,7 @@ const PhoneNumberInput: FC<Props> = ({
             <Text style={styles.countryCodeText}>{country?.emoji}</Text>
             <Text style={styles.countryCodeText}>{country?.dial_code}</Text>
 
-            <Icon color={Colors.dark[0]} size={20} source={'chevron-down'} />
+            <Icon color={Colors.dark[0]} size={20} source={"chevron-down"} />
           </View>
         </TouchableOpacity>
 
@@ -136,11 +136,19 @@ const PhoneNumberInput: FC<Props> = ({
           label={label}
           testID="text-input-container"
           onChangeText={handlePhoneNumber}
-          value={phoneNumber ?? ''}
+          value={phoneNumber ?? ""}
           inputMode="numeric"
+          
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          theme={{roundness: 15, colors: { onSurfaceVariant: Colors.grey['e8'] } }}
+          theme={{
+            colors: {
+              primary: Colors.primary[500],
+              background: Colors.grey["fa"],
+              error: Colors.error,
+            },
+            roundness: 10,
+          }}
         />
       </View>
       <CountryList

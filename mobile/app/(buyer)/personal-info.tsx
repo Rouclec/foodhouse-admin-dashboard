@@ -7,117 +7,203 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { Appbar, Text, Button, TextInput, Avatar } from "react-native-paper";
+import { Appbar, Text, Button, TextInput, Avatar, Icon } from "react-native-paper";
 import { Colors } from "@/constants";
-import { defaultStyles, profileFlowStyles, signupStyles } from "@/styles";
+import { defaultStyles, loginstyles, profileFlowStyles, signupStyles } from "@/styles";
 import i18n from "@/i18n";
 import { Context, ContextType } from "../_layout";
 import { ImagePicker } from "@/components";
+import { usersCompleteRegistrationMutation } from "@/client/users.swagger/@tanstack/react-query.gen";
+import { delay, uploadImage } from "@/utils";
+import { useMutation } from "@tanstack/react-query";
 
 export default function PersonalInfo() {
   const router = useRouter();
   const { user, setUser } = useContext(Context) as ContextType;
-  const [isEditing, setIsEditing] = useState(false);
+
+  const [originalProfileImage, setOriginalProfileImage] = useState(
+    user?.profileImage || ""
+  );
+  const [profileImage, setProfileImage] = useState(originalProfileImage);
+
   const [formData, setFormData] = useState({
     fullName: `${user?.firstName || ""} ${user?.lastName || ""}`.trim(),
-    email: user?.email || "",
     address: user?.address || "",
-    profileImage: user?.profileImage || "",
+    email: user?.email || "",
   });
-  const [initialData, setInitialData] = useState({ ...formData });
+
   const [loading, setLoading] = useState(false);
   const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>();
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     const changesDetected =
-      initialData.fullName !== formData.fullName ||
-      initialData.email !== formData.email ||
-      initialData.address !== formData.address ||
-      initialData.profileImage !== formData.profileImage;
-    setHasChanges(changesDetected);
-  }, [formData, initialData]);
+      `${user?.firstName || ""} ${user?.lastName || ""}`.trim() !==
+        formData.fullName ||
+      user?.address !== formData.address ||
+      user?.email !== formData.email ||
+      profileImage !== originalProfileImage;
 
-  const handleEditToggle = () => {
-    if (isEditing && hasChanges) {
-      handleSave();
-    } else {
-      setIsEditing(!isEditing);
-    }
-  };
+    setHasChanges(changesDetected);
+  }, [formData, profileImage]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleImageSelect = (asset: any) => {
-    if (asset) {
-      setFormData((prev) => ({ ...prev, profileImage: asset.uri }));
+    if (asset && asset.uri !== originalProfileImage) {
+      setProfileImage(asset.uri);
+      setHasChanges(true);
     }
     setIsImagePickerVisible(false);
   };
 
-  const handleSave = async () => {
-    try {
-      setLoading(true);
-      const [firstName, ...lastNameParts] = formData.fullName.split(" ");
-      const lastName = lastNameParts.join(" ") || "";
+  const { mutateAsync: updateProfile } = useMutation({
+    ...usersCompleteRegistrationMutation(),
+    onError: async (error) => {
+      setErrorMessage(
+        error?.response?.data?.message ?? i18n.t("(auth).profile.unknownError")
+      );
+      setError(true);
+      await delay(5000);
+      setError(false);
+    },
+  });
 
-      await setUser({
-        ...user,
-        firstName,
-        lastName,
-        email: formData.email,
-        address: formData.address,
-        profileImage: formData.profileImage,
+
+//   const handleSave = async () => {
+//     try {
+//       setLoading(true);
+//       let imageUrl = originalProfileImage;
+//       if (profileImage !== originalProfileImage) {
+//         imageUrl = await uploadImage({
+//           uri: profileImage,
+//           filename: `profile_${user?.userId}_${Date.now()}.jpg`,
+//           directory: "profile_images",
+//         });
+//       }
+
+//       const firstNameSplit = formData.fullName.split(" ")[0];
+//       const lastNameSplit = formData.fullName.split(" ").slice(1).join(" ");
+
+//       const data = {
+//         firstName: firstNameSplit,
+//         lastName: lastNameSplit,
+//         email: formData.email,
+//         address: formData.address,
+
+//         profileImage: imageUrl,
+//       };
+// console.log("Sending update request with data:", data);
+
+//       await updateProfile({
+//          body: data,
+//           path: {
+//              userId: user?.userId || "" 
+//             } 
+//         });
+//       setUser({ ...data });
+//       setOriginalProfileImage(imageUrl); 
+//     } catch (error) {
+//       console.error("Error updating profile:", error);
+//       setErrorMessage("Failed to update profile");
+//       setError(true);
+//       await delay(5000);
+//       setError(false);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+const handleSave = async () => {
+  try {
+    setLoading(true);
+    let imageUrl = originalProfileImage;
+
+
+    if (profileImage !== originalProfileImage) {
+      console.log("Uploading new image...");
+      imageUrl = await uploadImage({
+        uri: profileImage,
+        filename: `profile_${user?.userId}_${Date.now()}.jpg`,
+        directory: "profile_images",
       });
-      setInitialData({ ...formData });
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Error updating profile:", error);
-    } finally {
-      setLoading(false);
+      console.log("New Firebase image URL:", imageUrl); 
+    } else {
+      console.log("No image change detected, skipping upload."); 
     }
-  };
+
+
+    const firstNameSplit = formData.fullName.split(" ")[0];
+    const lastNameSplit = formData.fullName.split(" ").slice(1).join(" ");
+
+    const data = {
+      firstName: firstNameSplit,
+      lastName: lastNameSplit,
+      email: formData.email,
+      address: formData.address,
+      profileImage: imageUrl, 
+    };
+
+    console.log("Sending update request with data:", data); 
+    await updateProfile({ body: data, path: { userId: user?.userId || "" } });
+
+    setUser({ ...data });
+    setOriginalProfileImage(imageUrl); 
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    setErrorMessage("Failed to update profile");
+    setError(true);
+    await delay(5000);
+    setError(false);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <>
       <KeyboardAvoidingView
         style={defaultStyles.container}
-        // behavior={Platform.OS === "ios" ? "padding" : undefined}
         behavior={"padding"}
         keyboardVerticalOffset={0}
       >
         <View style={defaultStyles.flex}>
           <Appbar.Header dark={false} style={defaultStyles.appHeader}>
-            <Appbar.BackAction onPress={() => router.back()} />
-            <Appbar.Content
-              title={i18n.t("(farmer).(profile-flow).(personal-info).heading")}
-            />
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={defaultStyles.backButtonContainer}
+            >
+              <Icon source={"arrow-left"} size={24} />
+            </TouchableOpacity>
+            <Text variant="titleMedium" style={defaultStyles.heading}>
+              {i18n.t("(farmer).(profile-flow).(personal-info).heading")}
+            </Text>
+            <View />
           </Appbar.Header>
 
-          <ScrollView contentContainerStyle={defaultStyles.scrollContainer}>
-            <View style={signupStyles.allInput}>
+          <ScrollView contentContainerStyle={defaultStyles.scrollContainer} >
+            <View style={profileFlowStyles.navigateSection}>
               <View style={signupStyles.imageContainer}>
                 <TouchableOpacity
-                  onPress={() => isEditing && setIsImagePickerVisible(true)}
-                  disabled={!isEditing}
+                  onPress={() => setIsImagePickerVisible(true)}
                   style={signupStyles.imageUpload}
                 >
-                  {formData.profileImage ? (
+                  {profileImage ? (
                     <>
                       <Image
-                        source={{ uri: formData.profileImage }}
+                        source={{ uri: profileImage }}
                         style={signupStyles.profileImage}
                       />
-                      {isEditing && (
-                        <Avatar.Icon
-                          size={24}
-                          icon="camera"
-                          color="#fff"
-                          style={signupStyles.cameraIcon}
-                        />
-                      )}
+                      <Avatar.Icon
+                        size={24}
+                        icon="camera"
+                        color="#fff"
+                        style={signupStyles.cameraIcon}
+                      />
                     </>
                   ) : (
                     <View style={signupStyles.addImageContainer}>
@@ -126,123 +212,67 @@ export default function PersonalInfo() {
                         icon="account"
                         style={signupStyles.account}
                       />
-                      {isEditing && (
-                        <Avatar.Icon
-                          size={24}
-                          icon="camera"
-                          color="#fff"
-                          style={signupStyles.cameraIcon}
-                        />
-                      )}
+                      <Avatar.Icon
+                        size={24}
+                        icon="camera"
+                        color="#fff"
+                        style={signupStyles.cameraIcon}
+                      />
                     </View>
                   )}
                 </TouchableOpacity>
               </View>
 
               <View style={profileFlowStyles.infoContainer}>
-                <View style={profileFlowStyles.infoItem}>
-                  <Text style={profileFlowStyles.label}>
-                    {i18n.t("(farmer).(profile-flow).(personal-info).fullName")}{" "}
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => setIsEditing(true)}
-                    activeOpacity={0.8}
-                  >
-                    <TextInput
-                      mode="outlined"
-                      value={formData.fullName}
-                      onChangeText={(text) =>
-                        handleInputChange("fullName", text)
-                      }
-                      placeholder={i18n.t(
-                        "(farmer).(profile-flow).(personal-info).fullNamePlaceholder"
-                      )}
-                      theme={{
-                        roundness: 15,
-                        colors: {
-                          onSurfaceVariant: Colors.grey["e8"],
-                          primary: isEditing
-                            ? Colors.primary[500]
-                            : Colors.grey["e8"],
-                        },
-                      }}
-                      outlineStyle={signupStyles.outlineInput}
-                      style={signupStyles.input}
-                      disabled={!isEditing}
-                      editable={isEditing}
-                    />
-                  </TouchableOpacity>
-                </View>
-
-                <View style={profileFlowStyles.infoItem}>
-                  <Text style={profileFlowStyles.label}>
-                    {i18n.t("(farmer).(profile-flow).(personal-info).email")}
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => setIsEditing(true)}
-                    activeOpacity={0.8}
-                  >
-                    <TextInput
-                      mode="outlined"
-                      value={formData.email}
-                      onChangeText={(text) => handleInputChange("email", text)}
-                      placeholder={i18n.t(
-                        "(farmer).(profile-flow).(personal-info).emailPlaceholder"
-                      )}
-                      keyboardType="email-address"
-                      autoCapitalize="none"
-                      theme={{
-                        roundness: 15,
-                        colors: {
-                          onSurfaceVariant: Colors.grey["e8"],
-                          primary: isEditing
-                            ? Colors.primary[500]
-                            : Colors.grey["e8"],
-                        },
-                      }}
-                      outlineStyle={signupStyles.outlineInput}
-                      style={signupStyles.input}
-                      disabled={!isEditing}
-                      editable={isEditing}
-                    />
-                  </TouchableOpacity>
-                </View>
-
-                <View style={profileFlowStyles.infoItem}>
-                  <Text style={profileFlowStyles.label}>
-                    {i18n.t("(farmer).(profile-flow).(personal-info).address")}
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => setIsEditing(true)}
-                    activeOpacity={0.8}
-                  >
-                    <TextInput
-                      mode="outlined"
-                      value={formData.address}
-                      onChangeText={(text) =>
-                        handleInputChange("address", text)
-                      }
-                      placeholder={i18n.t(
-                        "(farmer).(profile-flow).(personal-info).addressPlaceholder"
-                      )}
-                      multiline
-                      numberOfLines={3}
-                      theme={{
-                        roundness: 15,
-                        colors: {
-                          onSurfaceVariant: Colors.grey["e8"],
-                          primary: isEditing
-                            ? Colors.primary[500]
-                            : Colors.grey["e8"],
-                        },
-                      }}
-                      outlineStyle={signupStyles.outlineInput}
-                      style={signupStyles.input}
-                      disabled={!isEditing}
-                      editable={isEditing}
-                    />
-                  </TouchableOpacity>
-                </View>
+                 
+                  <TextInput
+                    mode="outlined"
+                    value={formData.fullName}
+                    onChangeText={(text) => handleInputChange("fullName", text)}
+                    label={i18n.t("(auth).login.email")}
+                    theme={{
+                      roundness: 15,
+                      colors: {
+                        onSurfaceVariant: Colors.grey["e8"],
+                        primary: Colors.primary[500],
+                      },
+                    }}
+                     outlineColor={Colors.grey["bg"]}
+                    style={loginstyles.input}
+                  />
+                
+                  <TextInput
+                    mode="outlined"
+                    value={formData.email}
+                    onChangeText={(text) => handleInputChange("email", text)}
+                    label={i18n.t("(auth).login.email")}
+                    theme={{
+                      roundness: 15,
+                      colors: {
+                        onSurfaceVariant: Colors.grey["e8"],
+                        primary: Colors.primary[500],
+                      },
+                    }}
+                     outlineColor={Colors.grey["bg"]}
+                    style={loginstyles.input}
+                  />
+                
+                  <TextInput
+                    mode="outlined"
+                    value={formData.address}
+                    onChangeText={(text) => handleInputChange("address", text)}
+                    label={i18n.t("(auth).login.email")}
+                    theme={{
+                      roundness: 15,
+                      colors: {
+                        onSurfaceVariant: Colors.grey["e8"],
+                        primary: Colors.primary[500],
+                      },
+                    }}
+                     outlineColor={Colors.grey["bg"]}
+                    style={loginstyles.input}
+                  />
+              
               </View>
             </View>
           </ScrollView>
@@ -252,28 +282,14 @@ export default function PersonalInfo() {
       <View style={defaultStyles.bottomButtonContainer}>
         <Button
           mode="contained"
-          onPress={handleEditToggle}
-          style={[
-            defaultStyles.button,
-            isEditing && hasChanges
-              ? defaultStyles.primaryButton
-              : defaultStyles.secondaryButton,
-          ]}
-          // textColor={
-          //   isEditing && hasChanges ? Colors.light["0"] : Colors.primary["500"]
-          // }
-          buttonColor={
-            isEditing && hasChanges
-              ? Colors.primary["500"]
-              : Colors.primary["50"]
-          }
+          onPress={hasChanges ? handleSave : () => {}}
           loading={loading}
-          disabled={loading || (isEditing && !hasChanges)}
+          disabled={!hasChanges || loading}
+          buttonColor={Colors.primary["500"]}
+          style={defaultStyles.button}
         >
-          {isEditing
-            ? hasChanges
-              ? i18n.t("(farmer).(profile-flow).(personal-info).save")
-              : i18n.t("(farmer).(profile-flow).(personal-info).edit")
+          {hasChanges
+            ? i18n.t("(farmer).(profile-flow).(personal-info).save")
             : i18n.t("(farmer).(profile-flow).(personal-info).edit")}
         </Button>
       </View>

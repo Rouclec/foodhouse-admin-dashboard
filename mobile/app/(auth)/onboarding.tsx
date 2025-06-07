@@ -2,8 +2,8 @@ import React from "react";
 import {
   View,
   Image,
-  TouchableOpacity,
   useWindowDimensions,
+  
 } from "react-native";
 import { useRouter } from "expo-router";
 import Animated, {
@@ -13,9 +13,10 @@ import Animated, {
   interpolate,
   Extrapolation,
 } from "react-native-reanimated";
-import { onboardingStyles } from "@/styles";
-import { Text } from "react-native-paper";
+import { defaultStyles, onboardingStyles } from "@/styles";
+import { Text, Button} from "react-native-paper";
 import i18n from "@/i18n";
+import { Colors } from "@/constants";
 
 const onboardingSlides = [
   {
@@ -82,49 +83,53 @@ export default function OnboardingScreen() {
         ))}
       </Animated.ScrollView>
 
-      {/* Pagination Dots */}
-      <View style={onboardingStyles.dotContainer}>
-        {onboardingSlides.map((_, i) => {
-          const animatedDotStyle = useAnimatedStyle(() => {
-            const inputRange = [(i - 1) * width, i * width, (i + 1) * width];
+      <View style={defaultStyles.bottomContainerWithContent}>
+        <View style={onboardingStyles.dotContainer}>
+          {onboardingSlides.map((_, i) => {
+            const animatedDotStyle = useAnimatedStyle(() => {
+              const inputRange = [(i - 1) * width, i * width, (i + 1) * width];
 
-            const widthAnimated = interpolate(
-              scrollX.value,
-              inputRange,
-              [10, 30, 10],
-              Extrapolation.CLAMP
+              const widthAnimated = interpolate(
+                scrollX.value,
+                inputRange,
+                [10, 30, 10],
+                Extrapolation.CLAMP
+              );
+
+              const opacity = interpolate(
+                scrollX.value,
+                inputRange,
+                [0.5, 1, 0.5],
+                Extrapolation.CLAMP
+              );
+
+              return {
+                width: widthAnimated,
+                opacity,
+              };
+            });
+
+            return (
+              <Animated.View
+                key={i}
+                style={[onboardingStyles.dot, animatedDotStyle]}
+              />
             );
+          })}
+        </View>
 
-            const opacity = interpolate(
-              scrollX.value,
-              inputRange,
-              [0.5, 1, 0.5],
-              Extrapolation.CLAMP
-            );
-
-            return {
-              width: widthAnimated,
-              opacity,
-            };
-          });
-
-          return (
-            <Animated.View
-              key={i}
-              style={[onboardingStyles.dot, animatedDotStyle]}
-            />
-          );
-        })}
-      </View>
-
-      {/* Button */}
-      <View style={onboardingStyles.buttonContainer}>
-        <TouchableOpacity
+        <Button
+          mode="contained"
+          buttonColor={Colors.primary["500"]}
           onPress={handleGetStarted}
-          style={onboardingStyles.button}
+          style={defaultStyles.button}
         >
-          <Text style={onboardingStyles.buttonText}>{i18n.t("(auth).onboarding.getStarted")}</Text>
-        </TouchableOpacity>
+          <Text style={defaultStyles.buttonText}>
+          {i18n.t("(auth).onboarding.getStarted")}
+        </Text>
+        </Button>
+
+        
       </View>
     </View>
   );

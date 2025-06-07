@@ -8,7 +8,7 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { Appbar, Text, List, Divider } from "react-native-paper";
+import { Appbar, Text, List, Divider, Icon } from "react-native-paper";
 import {
   defaultStyles,
   profileFlowStyles,
@@ -32,10 +32,16 @@ export default function SettingsPage() {
       >
         <View style={defaultStyles.flex}>
           <Appbar.Header dark={false} style={defaultStyles.appHeader}>
-            <Appbar.BackAction onPress={() => router.back()} />
-            <Appbar.Content
-              title={i18n.t("(farmer).(profile-flow).(settings).heading")}
-            />
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={defaultStyles.backButtonContainer}
+            >
+              <Icon source={"arrow-left"} size={24} />
+            </TouchableOpacity>
+            <Text variant="titleMedium" style={defaultStyles.heading}>
+              {i18n.t("(farmer).(profile-flow).(settings).heading")}
+            </Text>
+            <View />
           </Appbar.Header>
           <ScrollView
             contentContainerStyle={defaultStyles.scrollContainer}
@@ -50,12 +56,14 @@ export default function SettingsPage() {
                   onPress={() => router.push("/(farmer)/personal-info")}
                 >
                   <View style={styles.navigationContent}>
-                    <FontAwesome
-                      name="user"
-                      size={20}
-                      color={Colors.primary[500]}
-                      style={styles.navigationIcon}
-                    />
+                    <View style={profileFlowStyles.iconContainer}>
+                      <FontAwesome
+                        name="user"
+                        size={20}
+                        color={Colors.primary[500]}
+                        style={styles.navigationIcon}
+                      />
+                    </View>
                     <Text style={styles.navigationText}>
                       {i18n.t("(farmer).(profile-flow).(settings).heading1")}{" "}
                     </Text>
@@ -68,12 +76,14 @@ export default function SettingsPage() {
                   onPress={() => router.push("/(farmer)/change-password")}
                 >
                   <View style={styles.navigationContent}>
-                    <FontAwesome
-                      name="lock"
-                      size={20}
-                      color={Colors.primary[500]}
-                      style={styles.navigationIcon}
-                    />
+                    <View style={profileFlowStyles.iconContainer}>
+                      <FontAwesome
+                        name="lock"
+                        size={20}
+                        color={Colors.primary[500]}
+                        style={styles.navigationIcon}
+                      />
+                    </View>
                     <Text style={styles.navigationText}>
                       {i18n.t("(farmer).(profile-flow).(settings).heading2")}{" "}
                     </Text>
@@ -81,18 +91,19 @@ export default function SettingsPage() {
                   <List.Icon icon="chevron-right" />
                 </TouchableOpacity>
 
-                {/* Invite Friends */}
                 <TouchableOpacity
                   style={styles.navigationItem}
                   onPress={() => router.push("/(farmer)/language")}
                 >
                   <View style={styles.navigationContent}>
-                    <FontAwesome
-                      name="language"
-                      size={20}
-                      color={Colors.primary[500]}
-                      style={styles.navigationIcon}
-                    />
+                    <View style={profileFlowStyles.iconContainer}>
+                      <FontAwesome
+                        name="language"
+                        size={20}
+                        color={Colors.primary[500]}
+                        style={styles.navigationIcon}
+                      />
+                    </View>
                     <Text style={styles.navigationText}>
                       {i18n.t("(farmer).(profile-flow).(settings).heading3")}
                     </Text>
@@ -105,12 +116,14 @@ export default function SettingsPage() {
                   onPress={() => router.push("/(farmer)/contact-us")}
                 >
                   <View style={styles.navigationContent}>
-                    <FontAwesome
-                      name="envelope"
-                      size={20}
-                      color={Colors.primary[500]}
-                      style={styles.navigationIcon}
-                    />
+                    <View style={profileFlowStyles.iconContainer}>
+                      <FontAwesome
+                        name="envelope"
+                        size={20}
+                        color={Colors.primary[500]}
+                        style={styles.navigationIcon}
+                      />
+                    </View>
                     <Text style={styles.navigationText}>
                       {i18n.t("(farmer).(profile-flow).(settings).heading4")}{" "}
                     </Text>
@@ -124,12 +137,14 @@ export default function SettingsPage() {
                   }
                 >
                   <View style={styles.navigationContent}>
-                    <FontAwesome
-                      name="file-text"
-                      size={20}
-                      color={Colors.primary[500]}
-                      style={styles.navigationIcon}
-                    />
+                    <View style={profileFlowStyles.iconContainer}>
+                      <FontAwesome
+                        name="file-text"
+                        size={20}
+                        color={Colors.primary[500]}
+                        style={styles.navigationIcon}
+                      />
+                    </View>
                     <Text style={styles.navigationText}>
                       {i18n.t("(farmer).(profile-flow).(settings).heading6")}{" "}
                     </Text>
@@ -144,12 +159,14 @@ export default function SettingsPage() {
                   }
                 >
                   <View style={styles.navigationContent}>
-                    <FontAwesome
-                      name="shield"
-                      size={20}
-                      color={Colors.primary[500]}
-                      style={styles.navigationIcon}
-                    />
+                    <View style={profileFlowStyles.iconContainer}>
+                      <FontAwesome
+                        name="shield"
+                        size={20}
+                        color={Colors.primary[500]}
+                        style={styles.navigationIcon}
+                      />
+                    </View>
                     <Text style={styles.navigationText}>
                       {i18n.t("(farmer).(profile-flow).(settings).heading7")}
                     </Text>
@@ -165,12 +182,14 @@ export default function SettingsPage() {
                   }
                 >
                   <View style={styles.navigationContent}>
-                    <FontAwesome
-                      name="info-circle"
-                      size={20}
-                      color={Colors.primary[500]}
-                      style={styles.navigationIcon}
-                    />
+                    <View style={profileFlowStyles.iconContainer}>
+                      <FontAwesome
+                        name="info-circle"
+                        size={20}
+                        color={Colors.primary[500]}
+                        style={styles.navigationIcon}
+                      />
+                    </View>
                     <Text style={styles.navigationText}>
                       {i18n.t("(farmer).(profile-flow).(settings).heading8")}{" "}
                     </Text>
@@ -181,13 +200,14 @@ export default function SettingsPage() {
                 <Divider style={profileFlowStyles.divider} />
                 <TouchableOpacity style={styles.navigationItem}>
                   <View style={styles.navigationContent}>
-                    <FontAwesome
-                      name="trash"
-                      size={20}
-                      color="#ff0000"
-                      style={styles.navigationIcon}
-                    />
-
+                    <View style={profileFlowStyles.dangerContainer}>
+                      <FontAwesome
+                        name="trash"
+                        size={20}
+                        color={Colors.error}
+                        style={styles.navigationIcon}
+                      />
+                    </View>
                     <Text style={styles.logout}>
                       {i18n.t("(farmer).(profile-flow).(settings).heading9")}{" "}
                     </Text>
