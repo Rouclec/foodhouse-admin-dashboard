@@ -15,9 +15,9 @@ export default function TabOneScreen() {
     <View style={index1.container}>
       <ScrollView contentContainerStyle={index1.scrollContent}>
         <SafeAreaView style={index1.safeArea}>
-          {/* Image container */}
+          
           <View style={index1.imageContainer}>
-            {/* columns and rows of the image container */}
+            
             <View style={[index1.imageRows]}>
               {[
                 require("@/assets/images/rectangle11.png"),

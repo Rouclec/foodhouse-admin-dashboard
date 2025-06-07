@@ -73,51 +73,6 @@ export default function PersonalInfo() {
     },
   });
 
-
-//   const handleSave = async () => {
-//     try {
-//       setLoading(true);
-//       let imageUrl = originalProfileImage;
-//       if (profileImage !== originalProfileImage) {
-//         imageUrl = await uploadImage({
-//           uri: profileImage,
-//           filename: `profile_${user?.userId}_${Date.now()}.jpg`,
-//           directory: "profile_images",
-//         });
-//       }
-
-//       const firstNameSplit = formData.fullName.split(" ")[0];
-//       const lastNameSplit = formData.fullName.split(" ").slice(1).join(" ");
-
-//       const data = {
-//         firstName: firstNameSplit,
-//         lastName: lastNameSplit,
-//         email: formData.email,
-//         address: formData.address,
-
-//         profileImage: imageUrl,
-//       };
-// console.log("Sending update request with data:", data);
-
-//       await updateProfile({
-//          body: data,
-//           path: {
-//              userId: user?.userId || "" 
-//             } 
-//         });
-//       setUser({ ...data });
-//       setOriginalProfileImage(imageUrl); 
-//     } catch (error) {
-//       console.error("Error updating profile:", error);
-//       setErrorMessage("Failed to update profile");
-//       setError(true);
-//       await delay(5000);
-//       setError(false);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
 const handleSave = async () => {
   try {
     setLoading(true);
@@ -125,16 +80,14 @@ const handleSave = async () => {
 
 
     if (profileImage !== originalProfileImage) {
-      console.log("Uploading new image...");
+     
       imageUrl = await uploadImage({
         uri: profileImage,
         filename: `profile_${user?.userId}_${Date.now()}.jpg`,
         directory: "profile_images",
       });
-      console.log("New Firebase image URL:", imageUrl); 
-    } else {
-      console.log("No image change detected, skipping upload."); 
-    }
+      
+    } 
 
 
     const firstNameSplit = formData.fullName.split(" ")[0];
@@ -148,7 +101,6 @@ const handleSave = async () => {
       profileImage: imageUrl, 
     };
 
-    console.log("Sending update request with data:", data); 
     await updateProfile({ body: data, path: { userId: user?.userId || "" } });
 
     setUser({ ...data });
@@ -229,7 +181,7 @@ const handleSave = async () => {
                     mode="outlined"
                     value={formData.fullName}
                     onChangeText={(text) => handleInputChange("fullName", text)}
-                    label={i18n.t("(auth).login.email")}
+                    label= {i18n.t("(farmer).(profile-flow).(personal-info).fullName")}
                     theme={{
                       roundness: 15,
                       colors: {
@@ -245,7 +197,7 @@ const handleSave = async () => {
                     mode="outlined"
                     value={formData.email}
                     onChangeText={(text) => handleInputChange("email", text)}
-                    label={i18n.t("(auth).login.email")}
+                    label= {i18n.t("(farmer).(profile-flow).(personal-info).email")}
                     theme={{
                       roundness: 15,
                       colors: {
@@ -261,7 +213,7 @@ const handleSave = async () => {
                     mode="outlined"
                     value={formData.address}
                     onChangeText={(text) => handleInputChange("address", text)}
-                    label={i18n.t("(auth).login.email")}
+                    label= {i18n.t("(farmer).(profile-flow).(personal-info).address")}
                     theme={{
                       roundness: 15,
                       colors: {

@@ -61,7 +61,7 @@ export default function SettingsPage() {
                         name="user"
                         size={20}
                         color={Colors.primary[500]}
-                        style={styles.navigationIcon}
+                       
                       />
                     </View>
                     <Text style={styles.navigationText}>
@@ -81,7 +81,7 @@ export default function SettingsPage() {
                         name="lock"
                         size={20}
                         color={Colors.primary[500]}
-                        style={styles.navigationIcon}
+                        
                       />
                     </View>
                     <Text style={styles.navigationText}>
@@ -101,7 +101,7 @@ export default function SettingsPage() {
                         name="language"
                         size={20}
                         color={Colors.primary[500]}
-                        style={styles.navigationIcon}
+                        
                       />
                     </View>
                     <Text style={styles.navigationText}>
@@ -121,7 +121,7 @@ export default function SettingsPage() {
                         name="envelope"
                         size={20}
                         color={Colors.primary[500]}
-                        style={styles.navigationIcon}
+                        
                       />
                     </View>
                     <Text style={styles.navigationText}>
@@ -142,7 +142,7 @@ export default function SettingsPage() {
                         name="file-text"
                         size={20}
                         color={Colors.primary[500]}
-                        style={styles.navigationIcon}
+                        
                       />
                     </View>
                     <Text style={styles.navigationText}>
@@ -164,7 +164,7 @@ export default function SettingsPage() {
                         name="shield"
                         size={20}
                         color={Colors.primary[500]}
-                        style={styles.navigationIcon}
+                       
                       />
                     </View>
                     <Text style={styles.navigationText}>
@@ -187,7 +187,7 @@ export default function SettingsPage() {
                         name="info-circle"
                         size={20}
                         color={Colors.primary[500]}
-                        style={styles.navigationIcon}
+                        
                       />
                     </View>
                     <Text style={styles.navigationText}>
@@ -205,7 +205,7 @@ export default function SettingsPage() {
                         name="trash"
                         size={20}
                         color={Colors.error}
-                        style={styles.navigationIcon}
+                        
                       />
                     </View>
                     <Text style={styles.logout}>

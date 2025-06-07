@@ -30,9 +30,10 @@ import {
 import i18n from "@/i18n";
 import { Context, ContextType } from "@/app/_layout";
 
-import {  useQuery } from "@tanstack/react-query";
+import {  useMutation, useQuery } from "@tanstack/react-query";
 import {
   usersGetUserActiveSubscriptionOptions,
+  usersRevokeRefreshTokenMutation,
   
 } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { FontAwesome } from "@expo/vector-icons";
@@ -40,27 +41,45 @@ import {
   FilterBottomSheet,
   FilterBottomSheetRef,
 } from "@/components/(buyer)/(index)/FilterBottomSheet";
+import { clearStorage, readData, updateAuthHeader } from "@/utils";
 
 export default function Profile() {
   const router = useRouter();
   const sheetRef = useRef<FilterBottomSheetRef>(null);
-  const { user } = useContext(Context) as ContextType;
+   const { user, setUser } = useContext(Context) as ContextType;
+    const [loading, setLoading] = useState(false);
+    
+  
+    const handleLogout = async () => {
+        try {
+          setLoading(true);
+          const refreshToken = await readData("@refreshToken");
+    
+          await revokeRefreshToken({
+            body: {
+              refreshToken,
+            },
+          });
+    
+          await clearStorage();
+          updateAuthHeader("");
+          setUser(undefined);
+          router.replace("/onboarding");
+        } catch (error) {
+          console.error({ error }, "logging out");
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      const { mutateAsync: revokeRefreshToken } = useMutation({
+          ...usersRevokeRefreshTokenMutation(),
+          onError: async (error) => {
+            console.error("error logging out: ", error);
+          },
+        });
 
-  const handleLogout = () => {
-    router.replace("/(auth)/login");
-  };
-
-  const handleBecomeVIP = () => {
-    router.push("/(auth)/subscribe");
-  };
-
-  const { data: userActiveSubscription } = useQuery({
-    ...usersGetUserActiveSubscriptionOptions({
-      path: {
-        userId: user?.userId ?? "",
-      },
-    }),
-  });
+ 
 
   const shareApp = async () => {
     await Share.share({
@@ -121,7 +140,7 @@ export default function Profile() {
                       name="cog"
                       size={20}
                       color={Colors.primary[500]}
-                      style={styles.navigationIcon}
+                      
                     />
                     </View>
                     <Text style={styles.navigationText}>
@@ -141,7 +160,7 @@ export default function Profile() {
                       name="paper-plane"
                       size={20}
                       color={Colors.primary[500]}
-                      style={styles.navigationIcon}
+                      
                     />
                     </View>
                     <Text style={styles.navigationText}>
@@ -164,7 +183,7 @@ export default function Profile() {
                       name="sign-out"
                       size={20}
                       color={Colors.error}
-                      style={styles.navigationIcon}
+                      
                     />
                     </View>
 

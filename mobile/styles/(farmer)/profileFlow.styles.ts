@@ -135,14 +135,16 @@ heading: {
     alignItems: 'center',
     marginBottom: 25,
   },
-  iconContainer: {
-    backgroundColor: Colors.grey["e00"],
-    padding: 10,
-    borderRadius: 30,
-    marginRight: 15,
-    height: 38,
-    width: 38,
-  },
+ iconContainer: {
+  backgroundColor: Colors.grey["e00"],
+  borderRadius: 30,
+  marginRight: 15,
+  height: 38,
+  width: 38,
+  alignItems: "center",       
+  justifyContent: "center",   
+},
+
    dangerContainer: {
     backgroundColor: Colors.err,
     padding: 10,

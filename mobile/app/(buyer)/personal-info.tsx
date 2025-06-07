@@ -229,7 +229,7 @@ const handleSave = async () => {
                     mode="outlined"
                     value={formData.fullName}
                     onChangeText={(text) => handleInputChange("fullName", text)}
-                    label={i18n.t("(auth).login.email")}
+                    label= {i18n.t("(farmer).(profile-flow).(personal-info).fullName")}
                     theme={{
                       roundness: 15,
                       colors: {
@@ -245,7 +245,7 @@ const handleSave = async () => {
                     mode="outlined"
                     value={formData.email}
                     onChangeText={(text) => handleInputChange("email", text)}
-                    label={i18n.t("(auth).login.email")}
+                    label= {i18n.t("(farmer).(profile-flow).(personal-info).email")}
                     theme={{
                       roundness: 15,
                       colors: {
@@ -261,7 +261,7 @@ const handleSave = async () => {
                     mode="outlined"
                     value={formData.address}
                     onChangeText={(text) => handleInputChange("address", text)}
-                    label={i18n.t("(auth).login.email")}
+                    label= {i18n.t("(farmer).(profile-flow).(personal-info).address")}
                     theme={{
                       roundness: 15,
                       colors: {

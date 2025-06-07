@@ -2,7 +2,6 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   ScrollView,
   TouchableOpacity,
   View,
@@ -10,7 +9,7 @@ import {
 import React, { useContext, useEffect, useState } from "react";
 import { CountrySelect } from "@/components/general/CountrySelect";
 import { CAMEROON, Colors, countries } from "@/constants";
-import { Appbar, Button, Icon, TextInput, Text } from "react-native-paper";
+import { Appbar, Button, Icon, TextInput, Text, Snackbar } from "react-native-paper";
 import PhoneNumberInput from "@/components/general/PhoneNumberInput";
 import { useRouter } from "expo-router";
 import { usersSendSignupSmsOtpMutation } from "@/client/users.swagger/@tanstack/react-query.gen";
@@ -99,7 +98,7 @@ const Info = () => {
             >
               <Icon source={"arrow-left"} size={24} />
             </TouchableOpacity>
-            <Text variant="headlineMedium" style={defaultStyles.heading}>
+            <Text variant="titleMedium" style={defaultStyles.heading}>
               {i18n.t(
                 `(auth).createAccount.${
                   role === "USER_TYPE_FARMER" ? "farmerAccount" : "buyerAccount"
@@ -250,6 +249,16 @@ const Info = () => {
           </View>
         </View>
       </KeyboardAvoidingView>
+
+       <Snackbar
+              visible={error}
+              testID="signup_error_toast"
+              onDismiss={() => {}}
+              duration={3000}
+              style={defaultStyles.snackbar}
+            >
+              <Text style={defaultStyles.errorText}>{errorMessage}</Text>
+            </Snackbar>
     </>
   );
 };

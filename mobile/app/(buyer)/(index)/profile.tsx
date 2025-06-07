@@ -15,9 +15,7 @@ import {
   Text,
   Divider,
   Avatar,
-  List,
-  Portal,
-  Dialog,
+  List
 } from "react-native-paper";
 import { Colors } from "@/constants";
 import {
@@ -33,23 +31,50 @@ import { Context, ContextType } from "@/app/_layout";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   usersGetUserActiveSubscriptionOptions,
-  usersGetUserByIdOptions,
+  usersRevokeRefreshTokenMutation,
 } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { FontAwesome } from "@expo/vector-icons";
 import {
   FilterBottomSheet,
   FilterBottomSheetRef,
 } from "@/components/(buyer)/(index)/FilterBottomSheet";
+import { clearStorage, readData, updateAuthHeader } from "@/utils";
 
 export default function Profile() {
   const router = useRouter();
   const sheetRef = useRef<FilterBottomSheetRef>(null);
-  const { user } = useContext(Context) as ContextType;
+  const { user, setUser } = useContext(Context) as ContextType;
+  const [loading, setLoading] = useState(false);
+  
 
-  const handleLogout = () => {
-    router.replace("/(auth)/login");
-  };
+  const handleLogout = async () => {
+      try {
+        setLoading(true);
+        const refreshToken = await readData("@refreshToken");
+  
+        await revokeRefreshToken({
+          body: {
+            refreshToken,
+          },
+        });
+  
+        await clearStorage();
+        updateAuthHeader("");
+        setUser(undefined);
+        router.replace("/onboarding");
+      } catch (error) {
+        console.error({ error }, "logging out");
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    const { mutateAsync: revokeRefreshToken } = useMutation({
+        ...usersRevokeRefreshTokenMutation(),
+        onError: async (error) => {
+          console.error("error logging out: ", error);
+        },
+      });
   const handleBecomeVIP = () => {
     router.push("/(auth)/subscribe");
   };
@@ -157,7 +182,7 @@ export default function Profile() {
                       name="cog"
                       size={20}
                       color={Colors.primary[500]}
-                      style={styles.navigationIcon}
+                      
                     />
                     </View>
                     <Text style={styles.navigationText}>
@@ -177,7 +202,7 @@ export default function Profile() {
                       name="paper-plane"
                       size={20}
                       color={Colors.primary[500]}
-                      style={styles.navigationIcon}
+                      
                     />
                     </View>
                     <Text style={styles.navigationText}>
@@ -200,7 +225,7 @@ export default function Profile() {
                       name="sign-out"
                       size={20}
                       color={Colors.error}
-                      style={styles.navigationIcon}
+                      
                     />
                     </View>
 
@@ -251,7 +276,7 @@ export default function Profile() {
                 buyerProductsStyles.halfButton,
               ]}
             >
-              <Text style={defaultStyles.secondaryButtonText}>
+              <Text style={defaultStyles.buttonText}>
                 {i18n.t("(farmer).(profile-flow).profile.button2")}
               </Text>
             </Button>
