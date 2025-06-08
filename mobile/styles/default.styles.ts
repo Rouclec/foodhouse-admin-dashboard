@@ -48,6 +48,7 @@ export const defaultStyles = StyleSheet.create({
   heading: {
     marginLeft: -56,
     textAlign: "center",
+    flexShrink: 1,
   },
   paddingBottom: {
     paddingBottom: 64,
@@ -91,6 +92,7 @@ export const defaultStyles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
+    paddingBottom: 32,
   },
   bottomButtonContainer: {
     // position: "absolute",
@@ -123,7 +125,6 @@ export const defaultStyles = StyleSheet.create({
     borderRadius: 100,
     minHeight: 48,
     minWidth: 124,
-   
   },
   primaryButton: {
     backgroundColor: Colors.primary[500],
@@ -158,6 +159,7 @@ export const defaultStyles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: Colors.light["bg"],
     justifyContent: "space-between",
+    columnGap: 24,
   },
   headerTextContainer: {
     flexGrow: 1,
@@ -258,6 +260,9 @@ export const defaultStyles = StyleSheet.create({
   },
   marginHorizontal24: {
     marginHorizontal: 24,
+  },
+  marginVertical24: {
+    marginVertical: 24,
   },
   dialogActionContainer: {
     flexDirection: "row",

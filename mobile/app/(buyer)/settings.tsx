@@ -4,7 +4,6 @@ import {
   ScrollView,
   Linking,
   TouchableOpacity,
-  Image,
   KeyboardAvoidingView,
 } from "react-native";
 import { useRouter } from "expo-router";

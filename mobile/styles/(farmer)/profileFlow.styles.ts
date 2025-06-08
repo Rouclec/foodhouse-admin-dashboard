@@ -3,17 +3,21 @@ import { StyleSheet } from "react-native";
 import { defaultStyles } from "../default.styles";
 
 export const profileFlowStyles = StyleSheet.create({
-    container: {
+  container: {
     ...defaultStyles.container,
     padding: 16,
   },
   vip: {
     flex: 1,
+    justifyContent: "space-between",
   },
-heading: {
+  heading: {
     textAlign: "center",
     color: "#ff0000",
-},
+  },
+  shrinkHeading: {
+    flexShrink: 1,
+  },
   navigateSection: {
     flex: 1,
     flexDirection: "column",
@@ -28,12 +32,10 @@ heading: {
     padding: 16,
     paddingTop: 24,
     paddingBottom: 24,
-    marginLeft: 20,
-    marginRight: 20
   },
   vipButton: {
-    backgroundColor: "#fff", 
-    width: 120, 
+    backgroundColor: "#fff",
+    width: 120,
   },
 
   navigation: {
@@ -70,7 +72,7 @@ heading: {
   },
   divider: {
     marginHorizontal: -16,
-  }, 
+  },
 
   dialog: {
     bottom: 0,
@@ -85,67 +87,65 @@ heading: {
   },
 
   shareOptionsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-   
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
   shareOption: {
-    width: '30%',
-    alignItems: 'center',
-    
+    width: "30%",
+    alignItems: "center",
   },
   shareOptionText: {
     marginTop: 5,
     fontSize: 12,
   },
-  
+
   cancelButton: {
     marginTop: 10,
   },
 
-    infoContainer: {
-      flex: 1,
+  infoContainer: {
+    flex: 1,
     paddingTop: 32,
     //margin: 18,
     marginVertical: 24,
-    },
-    infoItem: {
-      paddingVertical: 4,
-    },
-    label: {
-      fontSize: 14,
-      marginBottom: 12,
-      paddingHorizontal: 8,
-    },
-    value: {
-      fontSize: 16,
-      marginBottom: 8,
-      paddingVertical: 18,
-      backgroundColor: Colors.grey["border"],
-      borderRadius: 8,
-      paddingHorizontal: 16,
-    },
+  },
+  infoItem: {
+    paddingVertical: 4,
+  },
+  label: {
+    fontSize: 14,
+    marginBottom: 12,
+    paddingHorizontal: 8,
+  },
+  value: {
+    fontSize: 16,
+    marginBottom: 8,
+    paddingVertical: 18,
+    backgroundColor: Colors.grey["border"],
+    borderRadius: 8,
+    paddingHorizontal: 16,
+  },
 
   innerContainer: {
     padding: 20,
   },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 25,
   },
- iconContainer: {
-  backgroundColor: Colors.grey["e00"],
-  borderRadius: 30,
-  marginRight: 15,
-  height: 38,
-  width: 38,
-  alignItems: "center",       
-  justifyContent: "center",   
-},
+  iconContainer: {
+    backgroundColor: Colors.grey["e00"],
+    borderRadius: 30,
+    marginRight: 15,
+    height: 38,
+    width: 38,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-   dangerContainer: {
+  dangerContainer: {
     backgroundColor: Colors.err,
     padding: 10,
     borderRadius: 30,
@@ -164,7 +164,7 @@ heading: {
     textAlign: "center",
   },
 
- icons: {
+  icons: {
     backgroundColor: Colors.primary[300],
     padding: 5,
     borderRadius: 30,
@@ -173,6 +173,5 @@ heading: {
   content: {
     margin: 8,
     alignItems: "center",
-  }
-
-})
+  },
+});

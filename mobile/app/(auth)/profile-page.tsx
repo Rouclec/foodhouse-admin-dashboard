@@ -1,13 +1,8 @@
 import React, { useContext, useState } from "react";
 import {
-  Keyboard,
   KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
   ScrollView,
-  StyleSheet,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
   Image,
 } from "react-native";
@@ -22,7 +17,8 @@ import {
   Avatar,
   Snackbar,
 } from "react-native-paper";
-import { imagePickerStyles, signupStyles } from "@/styles";
+import * as ExpoImagePicker from "expo-image-picker";
+import { imagePickerStyles, signupStyles, defaultStyles } from "@/styles";
 import { router } from "expo-router";
 import { usersCompleteRegistrationMutation } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { useMutation } from "@tanstack/react-query";
@@ -30,7 +26,6 @@ import { delay, uploadImage } from "@/utils";
 import { Context, ContextType } from "../_layout";
 import i18n from "@/i18n";
 import { ImagePicker } from "@/components";
-import { defaultStyles } from "@/styles";
 import { Chase } from "react-native-animated-spinkit";
 import { Colors } from "@/constants";
 
@@ -38,10 +33,11 @@ const ProfilePage = () => {
   const { user } = useContext(Context) as ContextType;
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(user?.email);
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [profileImage, setProfileImage] =
+    useState<ExpoImagePicker.ImagePickerAsset>();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [error, setError] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
@@ -77,7 +73,7 @@ const ProfilePage = () => {
 
       if (profileImage) {
         imageUrl = await uploadImage({
-          uri: profileImage,
+          uri: profileImage.uri,
           filename: `profile_${user?.userId}_${Date.now()}.jpg`,
           directory: "profile_images",
         });
@@ -110,22 +106,50 @@ const ProfilePage = () => {
   return (
     <>
       <KeyboardAvoidingView
-        style={signupStyles.container}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+        style={defaultStyles.container}
+        behavior={"padding"}
+        keyboardVerticalOffset={0}
       >
-        <Appbar.Header dark={false}>
-          <TouchableOpacity
-            style={signupStyles.closeIconContainer}
-            onPress={() => router.back()}
-          >
-            <Icon source="arrow-left" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text variant="headlineMedium" style={signupStyles.heading}>
-            {i18n.t("(auth).profile.completeRegistration")}
-          </Text>
-        </Appbar.Header>
-        <SafeAreaView style={signupStyles.mainConatiner}>
+        <View style={defaultStyles.flex}>
+          <Appbar.Header dark={false} style={defaultStyles.appHeader}>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={defaultStyles.backButtonContainer}
+            >
+              <Icon source={"arrow-left"} size={24} />
+            </TouchableOpacity>
+            <Text variant="titleMedium" style={defaultStyles.heading}>
+              {i18n.t("(auth).profile.completeRegistration")}
+            </Text>
+            <View />
+          </Appbar.Header>
+          <View style={signupStyles.imageContainer}>
+            <TouchableOpacity
+              onPress={() => setIsImagePickerVisible(true)}
+              style={signupStyles.imageUpload}
+            >
+              {profileImage ? (
+                <Image
+                  source={{ uri: profileImage.uri }}
+                  style={signupStyles.profileImage}
+                />
+              ) : (
+                <View style={signupStyles.addImageContainer}>
+                  <Avatar.Icon
+                    size={120}
+                    icon="account"
+                    style={signupStyles.account}
+                  />
+                  <Avatar.Icon
+                    size={24}
+                    icon="camera"
+                    color="#fff"
+                    style={signupStyles.cameraIcon}
+                  />
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
           <ScrollView
             contentContainerStyle={defaultStyles.scrollContainer}
             showsVerticalScrollIndicator={false}
@@ -133,110 +157,111 @@ const ProfilePage = () => {
             keyboardShouldPersistTaps="handled"
           >
             <View style={signupStyles.allInput}>
-              <View style={signupStyles.imageContainer}>
-                <TouchableOpacity
-                  onPress={() => setIsImagePickerVisible(true)}
-                  style={signupStyles.imageUpload}
-                >
-                  {profileImage ? (
-                    <Image
-                      source={{ uri: profileImage }}
-                      style={signupStyles.profileImage}
-                    />
-                  ) : (
-                    <View style={signupStyles.addImageContainer}>
-                      <Avatar.Icon
-                        size={120}
-                        icon="account"
-                        style={signupStyles.account}
-                      />
-                      <Avatar.Icon
-                        size={24}
-                        icon="camera"
-                        color="#fff"
-                        style={signupStyles.cameraIcon}
-                      />
-                    </View> 
-                  )}
-                </TouchableOpacity>
-              </View>
-
               <TextInput
-                placeholder={i18n.t("(auth).profile.firstName")}
+                label={i18n.t("(auth).profile.firstName")}
                 value={firstName}
                 onChangeText={setFirstName}
                 mode="outlined"
-                theme={{roundness: 15, colors: { onSurfaceVariant: Colors.grey["e8"] } }}
-                outlineStyle={signupStyles.outlineInput}
-                style={signupStyles.input}
+                style={defaultStyles.input}
+                theme={{
+                  colors: {
+                    primary: Colors.primary[500],
+                    background: Colors.grey["fa"],
+                    error: Colors.error,
+                  },
+                  roundness: 10,
+                }}
+                outlineColor={Colors.grey["bg"]}
               />
 
               <TextInput
-                placeholder={i18n.t("(auth).profile.lastName")}
+                label={i18n.t("(auth).profile.lastName")}
                 value={lastName}
                 onChangeText={setLastName}
                 mode="outlined"
-                theme={{roundness: 15, colors: { onSurfaceVariant: Colors.grey["e8"] } }}
-                outlineStyle={signupStyles.outlineInput}
-                style={signupStyles.input}
+                style={defaultStyles.input}
+                theme={{
+                  colors: {
+                    primary: Colors.primary[500],
+                    background: Colors.grey["fa"],
+                    error: Colors.error,
+                  },
+                  roundness: 10,
+                }}
+                outlineColor={Colors.grey["bg"]}
               />
 
               <TextInput
-                placeholder={i18n.t("(auth).profile.email")}
+                label={i18n.t("(auth).profile.email")}
                 value={email}
                 onChangeText={setEmail}
                 mode="outlined"
-                theme={{roundness: 15, colors: { onSurfaceVariant: Colors.grey["e8"] } }}
-                outlineStyle={signupStyles.outlineInput}
-                style={signupStyles.input}
+                style={defaultStyles.input}
+                theme={{
+                  colors: {
+                    primary: Colors.primary[500],
+                    background: Colors.grey["fa"],
+                    error: Colors.error,
+                  },
+                  roundness: 10,
+                }}
+                outlineColor={Colors.grey["bg"]}
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
 
               <TextInput
-                placeholder={i18n.t("(auth).profile.address")}
+                label={i18n.t("(auth).profile.address")}
                 value={address}
                 onChangeText={setAddress}
                 mode="outlined"
-                theme={{roundness: 15, colors: { onSurfaceVariant: Colors.grey["e8"] } }}
-                outlineStyle={signupStyles.outlineInput}
-                style={signupStyles.input}
-                multiline
-                numberOfLines={3}
+                style={defaultStyles.input}
+                theme={{
+                  colors: {
+                    primary: Colors.primary[500],
+                    background: Colors.grey["fa"],
+                    error: Colors.error,
+                  },
+                  roundness: 10,
+                }}
+                outlineColor={Colors.grey["bg"]}
               />
             </View>
           </ScrollView>
-        </SafeAreaView>
+        </View>
+        <View style={defaultStyles.bottomButtonContainer}>
+          <View style={signupStyles.flexButtonContainer}>
+            <Button
+              mode="contained"
+              textColor={Colors.primary["500"]}
+              buttonColor={Colors.primary["50"]}
+              onPress={() => router.replace("/(farmer)/(index)")}
+              style={[defaultStyles.button, signupStyles.button]}
+              disabled={loading}
+            >
+              <Text style={defaultStyles.secondaryButtonText}>Skip</Text>
+            </Button>
 
-        <View style={imagePickerStyles.bottomContainer}>
-          <Button
-            mode="outlined"
-            onPress={() => router.replace("/(farmer)/(index)")}
-            style={[imagePickerStyles.button1, imagePickerStyles.skipButton]}
-            labelStyle={imagePickerStyles.skipButtonText}
-          >
-            Skip
-          </Button>
-
-          <Button
-            mode="contained"
-            onPress={handleComplete}
-            style={imagePickerStyles.button1}
-            disabled={!firstName || !lastName || !email || !address || loading}
-            loading={loading}
-          >
-            Complete
-          </Button>
+            <Button
+              mode="contained"
+              textColor={Colors.light["0"]}
+              buttonColor={Colors.primary["500"]}
+              style={[defaultStyles.button, signupStyles.button]}
+              loading={loading}
+              disabled={
+                !firstName || !lastName || !email || !address || loading
+              }
+              onPress={handleComplete}
+            >
+              <Text style={defaultStyles.buttonText}>Complete</Text>
+            </Button>
+          </View>
         </View>
       </KeyboardAvoidingView>
 
       <ImagePicker
         visible={isImagePickerVisible}
-        setImage={(asset) => {
-          if (asset) {
-            setProfileImage(asset.uri);
-          }
-        }}
+        setImage={setProfileImage}
         onClose={() => setIsImagePickerVisible(false)}
         aspect={[1, 1]}
       />

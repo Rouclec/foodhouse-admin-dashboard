@@ -81,9 +81,9 @@ const PhoneNumberInput: FC<Props> = ({
 
     setPhoneNumber(input);
 
-    if (isValid && !!phoneNumber) {
-      Keyboard.dismiss();
-    }
+    // if (isValid && !!phoneNumber) {
+    //   Keyboard.dismiss();
+    // }
   };
 
   useEffect(() => {
@@ -138,9 +138,9 @@ const PhoneNumberInput: FC<Props> = ({
           onChangeText={handlePhoneNumber}
           value={phoneNumber ?? ""}
           inputMode="numeric"
-          
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
+          error={!(!phoneNumber || (isValidPhoneNumber && !!phoneNumber))}
           theme={{
             colors: {
               primary: Colors.primary[500],
