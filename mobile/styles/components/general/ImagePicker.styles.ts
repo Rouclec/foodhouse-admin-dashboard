@@ -54,7 +54,7 @@ export const imagePickerStyles = StyleSheet.create({
     },
     skipButton: {
       borderColor: "#e8e8e8",
-      backgroundColor: Colors.primary[300],
+      backgroundColor: Colors.primary[50],
     },
     skipButtonText: {
       color: Colors.primary[500],

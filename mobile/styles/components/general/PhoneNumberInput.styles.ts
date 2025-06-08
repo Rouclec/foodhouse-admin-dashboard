@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native";
 export const phoneNumberInputStyles = StyleSheet.create({
   mainContainer: {
     flexDirection: "row",
-    columnGap: 4,
+    columnGap: 12,
   },
   inputContainer: {
     borderWidth: 1,
@@ -31,12 +31,11 @@ export const phoneNumberInputStyles = StyleSheet.create({
     backgroundColor: Colors.grey["ea"],
     flexDirection: "row",
     columnGap: 8,
-    marginRight: 4,
     alignItems: "center",
-    height: 57,
+    height: 58,
     justifyContent: "center",
     padding: 16,
-    borderRadius: 14,
+    borderRadius: 10,
     borderWidth: 0.5,
     borderColor: Colors.primary["300"],
   },
@@ -63,10 +62,10 @@ export const phoneNumberInputStyles = StyleSheet.create({
     flexGrow: 1,
     height: 56,
     fontSize: 16,
-    borderRadius: 14,
+    borderRadius: 10,
     paddingHorizontal: 16,
     bottom: 6,
-    marginLeft: 20,
+    // marginLeft: 20,
   },
   outlineInput: {
     borderWidth: 0.5,

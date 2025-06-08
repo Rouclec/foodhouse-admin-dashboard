@@ -43,7 +43,7 @@
       "createAccount": "Créer un compte",
       "RegisterNewAccount": "Enregistrer un nouveau compte",
       "description": "Qu'est-ce qui vous décrit le mieux ?",
-      "buyer": "acheteur",
+      "buyer": "Acheteur",
       "seller": "Agriculteur ou Vendeur",
       "button": "Suivant",
       "havingAccount": "Vous avez déjà un compte ?",
@@ -55,7 +55,7 @@
       "createAccount": "Créer un compte"
     },
     "verifyOtp": {
-      "verifyNumber": "vérifiez votre numéro de téléphone",
+      "verifyNumber": "Vérifiez votre numéro de téléphone",
       "codeSent": "Le code a été envoyé à",
       "verify": "vérifier",
       "phoneNumberVerified": "Numéro de téléphone vérifié !",
@@ -65,10 +65,10 @@
     },
     "profile": {
       "completeRegistration": "Terminer l'inscription",
-      "firstName": "Entrez le prénom",
-      "lastName": "Entrez le nom de famille",
-      "email": "Entrez l'e-mail",
-      "address": "Entrez l'adresse"
+      "firstName": "Prénom",
+      "lastName": "Nom de famille",
+      "email": "E-mail",
+      "address": "Adresse"
     },
     "(subsciption-flow)": {
       "index": {

@@ -4,10 +4,13 @@ import { Dimensions, StyleSheet } from "react-native";
 const { height } = Dimensions.get("window");
 export const forgotPasswordVerifyOtpStyles = StyleSheet.create({
   directionContainer: {
+    alignItems: "center",
+    width: "100%",
     marginTop: 60,
   },
   direction: {
     textAlign: "center",
+    fontSize: 18,
   },
   otpContainer: {
     marginVertical: 60,

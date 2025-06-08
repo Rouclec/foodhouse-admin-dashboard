@@ -21,6 +21,7 @@ export default function Index() {
   const { setUser, user } = useContext(Context) as ContextType;
   const [appIsReady, setAppIsReady] = useState(false);
   const [delay, setDelay] = useState(5000);
+  const [hasOnboarded, setHasOnboarded] = useState(false);
   const [userId, setUserId] = useState<string>();
 
   const [loaded, error] = useFonts({
@@ -62,6 +63,9 @@ export default function Index() {
           return router.replace("/(buyer)/(index)");
         }
       }
+      if (hasOnboarded) {
+        return router.replace("/(auth)/login");
+      }
       return router.replace("/(auth)");
     }, timeLeft);
 
@@ -76,6 +80,8 @@ export default function Index() {
     const getUserIdAndRefreshTokenFromStorage = async () => {
       const refreshTokenFromStorage = await readData("@refreshToken");
       const userIdFromStorage = await readData("@userId");
+      const hasOnboardedFromStorage = await readData("@hasOnboarded");
+      setHasOnboarded(!!hasOnboardedFromStorage);
 
       // Only attempt to refresh the token if both the refreshToken and userId are found in the storage
       if (refreshTokenFromStorage && userIdFromStorage) {

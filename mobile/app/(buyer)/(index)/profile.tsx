@@ -15,7 +15,7 @@ import {
   Text,
   Divider,
   Avatar,
-  List
+  List,
 } from "react-native-paper";
 import { Colors } from "@/constants";
 import {
@@ -45,36 +45,35 @@ export default function Profile() {
   const sheetRef = useRef<FilterBottomSheetRef>(null);
   const { user, setUser } = useContext(Context) as ContextType;
   const [loading, setLoading] = useState(false);
-  
 
   const handleLogout = async () => {
-      try {
-        setLoading(true);
-        const refreshToken = await readData("@refreshToken");
-  
-        await revokeRefreshToken({
-          body: {
-            refreshToken,
-          },
-        });
-  
-        await clearStorage();
-        updateAuthHeader("");
-        setUser(undefined);
-        router.replace("/onboarding");
-      } catch (error) {
-        console.error({ error }, "logging out");
-      } finally {
-        setLoading(false);
-      }
-    };
+    try {
+      setLoading(true);
+      const refreshToken = await readData("@refreshToken");
 
-    const { mutateAsync: revokeRefreshToken } = useMutation({
-        ...usersRevokeRefreshTokenMutation(),
-        onError: async (error) => {
-          console.error("error logging out: ", error);
+      await revokeRefreshToken({
+        body: {
+          refreshToken,
         },
       });
+
+      await clearStorage();
+      updateAuthHeader("");
+      setUser(undefined);
+      router.replace("/(auth)/login");
+    } catch (error) {
+      console.error({ error }, "logging out");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const { mutateAsync: revokeRefreshToken } = useMutation({
+    ...usersRevokeRefreshTokenMutation(),
+    onError: async (error) => {
+      console.error("error logging out: ", error);
+    },
+  });
   const handleBecomeVIP = () => {
     router.push("/(auth)/subscribe");
   };
@@ -139,16 +138,11 @@ export default function Profile() {
                   <View style={styles.vip}>
                     <Text
                       variant="titleMedium"
-                      style={[defaultStyles.heading, { color: "#fff" }]}
+                      style={[styles.shrinkHeading, { color: "#fff" }]}
                     >
                       {i18n.t("(farmer).(profile-flow).profile.heading")}
                     </Text>
-                    <Text
-                      style={[
-                        defaultStyles.subheaderText,
-                        { color: "#fff", marginBottom: 12 },
-                      ]}
-                    >
+                    <Text style={[{ color: "#fff", marginBottom: 12 }]}>
                       {i18n.t("(farmer).(profile-flow).profile.description")}
                     </Text>
                     <Button
@@ -178,12 +172,11 @@ export default function Profile() {
                 >
                   <View style={styles.navigationContent}>
                     <View style={profileFlowStyles.iconContainer}>
-                    <FontAwesome
-                      name="cog"
-                      size={20}
-                      color={Colors.primary[500]}
-                      
-                    />
+                      <FontAwesome
+                        name="cog"
+                        size={20}
+                        color={Colors.primary[500]}
+                      />
                     </View>
                     <Text style={styles.navigationText}>
                       {i18n.t("(farmer).(profile-flow).profile.tab1")}
@@ -198,12 +191,11 @@ export default function Profile() {
                 >
                   <View style={styles.navigationContent}>
                     <View style={profileFlowStyles.iconContainer}>
-                    <FontAwesome
-                      name="paper-plane"
-                      size={20}
-                      color={Colors.primary[500]}
-                      
-                    />
+                      <FontAwesome
+                        name="paper-plane"
+                        size={20}
+                        color={Colors.primary[500]}
+                      />
                     </View>
                     <Text style={styles.navigationText}>
                       {i18n.t("(farmer).(profile-flow).profile.tab2")}
@@ -215,18 +207,17 @@ export default function Profile() {
                 <TouchableOpacity
                   style={styles.navigationItem}
                   onPress={(e) => {
-                    Keyboard.dismiss(); 
+                    Keyboard.dismiss();
                     sheetRef.current?.open();
                   }}
                 >
                   <View style={profileFlowStyles.row}>
                     <View style={profileFlowStyles.dangerContainer}>
-                    <FontAwesome
-                      name="sign-out"
-                      size={20}
-                      color={Colors.error}
-                      
-                    />
+                      <FontAwesome
+                        name="sign-out"
+                        size={20}
+                        color={Colors.error}
+                      />
                     </View>
 
                     <Text style={styles.logout}>

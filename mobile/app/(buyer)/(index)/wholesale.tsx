@@ -27,7 +27,7 @@ export default function TabTwoScreen() {
       await clearStorage();
       updateAuthHeader("");
       setUser(undefined);
-      router.replace("/onboarding");
+      router.replace("/(auth)/login");
     } catch (error) {
       console.error({ error }, "logging out");
     } finally {

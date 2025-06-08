@@ -16,8 +16,6 @@ import {
   Divider,
   Avatar,
   List,
-  Portal,
-  Dialog,
 } from "react-native-paper";
 import { Colors } from "@/constants";
 import {
@@ -30,9 +28,8 @@ import {
 import i18n from "@/i18n";
 import { Context, ContextType } from "@/app/_layout";
 
-import {  useMutation, useQuery } from "@tanstack/react-query";
+import {  useMutation } from "@tanstack/react-query";
 import {
-  usersGetUserActiveSubscriptionOptions,
   usersRevokeRefreshTokenMutation,
   
 } from "@/client/users.swagger/@tanstack/react-query.gen";
@@ -64,7 +61,7 @@ export default function Profile() {
           await clearStorage();
           updateAuthHeader("");
           setUser(undefined);
-          router.replace("/onboarding");
+          router.replace("/(auth)/login");
         } catch (error) {
           console.error({ error }, "logging out");
         } finally {

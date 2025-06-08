@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   Image,
   useWindowDimensions,
-  
+  ScrollView,
+  Pressable,
 } from "react-native";
 import { useRouter } from "expo-router";
 import Animated, {
@@ -12,11 +13,13 @@ import Animated, {
   useAnimatedStyle,
   interpolate,
   Extrapolation,
+  runOnJS,
 } from "react-native-reanimated";
 import { defaultStyles, onboardingStyles } from "@/styles";
-import { Text, Button} from "react-native-paper";
+import { Text, Button } from "react-native-paper";
 import i18n from "@/i18n";
 import { Colors } from "@/constants";
+import { storeData } from "@/utils";
 
 const onboardingSlides = [
   {
@@ -42,22 +45,40 @@ const onboardingSlides = [
 export default function OnboardingScreen() {
   const { width } = useWindowDimensions();
   const router = useRouter();
-
   const scrollX = useSharedValue(0);
+  const scrollViewRef =
+    useRef<React.ComponentRef<typeof Animated.ScrollView>>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       scrollX.value = event.contentOffset.x;
+      const index = Math.round(event.contentOffset.x / width);
+      runOnJS(setCurrentSlide)(index);
     },
   });
 
-  const handleGetStarted = () => {
-    router.replace("/login");
+  const handleNext = async () => {
+    if (currentSlide < onboardingSlides.length - 1) {
+      scrollViewRef.current?.scrollTo({
+        x: width * (currentSlide + 1),
+        animated: true,
+      });
+    } else {
+      await storeData("@hasOnboarded", true);
+      router.replace("/login");
+    }
+  };
+
+  const jumpToSlide = (index: number) => {
+    scrollViewRef.current?.scrollTo({ x: width * index, animated: true });
+    setCurrentSlide(index);
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={defaultStyles.flex}>
       <Animated.ScrollView
+        ref={scrollViewRef}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
@@ -88,14 +109,12 @@ export default function OnboardingScreen() {
           {onboardingSlides.map((_, i) => {
             const animatedDotStyle = useAnimatedStyle(() => {
               const inputRange = [(i - 1) * width, i * width, (i + 1) * width];
-
               const widthAnimated = interpolate(
                 scrollX.value,
                 inputRange,
                 [10, 30, 10],
                 Extrapolation.CLAMP
               );
-
               const opacity = interpolate(
                 scrollX.value,
                 inputRange,
@@ -110,10 +129,11 @@ export default function OnboardingScreen() {
             });
 
             return (
-              <Animated.View
-                key={i}
-                style={[onboardingStyles.dot, animatedDotStyle]}
-              />
+              <Pressable key={i} onPress={() => jumpToSlide(i)}>
+                <Animated.View
+                  style={[onboardingStyles.dot, animatedDotStyle]}
+                />
+              </Pressable>
             );
           })}
         </View>
@@ -121,15 +141,15 @@ export default function OnboardingScreen() {
         <Button
           mode="contained"
           buttonColor={Colors.primary["500"]}
-          onPress={handleGetStarted}
+          onPress={handleNext}
           style={defaultStyles.button}
         >
           <Text style={defaultStyles.buttonText}>
-          {i18n.t("(auth).onboarding.getStarted")}
-        </Text>
+            {currentSlide === onboardingSlides.length - 1
+              ? i18n.t("(auth).onboarding.getStarted")
+              : i18n.t("(auth).onboarding.next")}
+          </Text>
         </Button>
-
-        
       </View>
     </View>
   );

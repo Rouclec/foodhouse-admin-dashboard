@@ -9,7 +9,14 @@ import {
 import React, { useContext, useEffect, useState } from "react";
 import { CountrySelect } from "@/components/general/CountrySelect";
 import { CAMEROON, Colors, countries } from "@/constants";
-import { Appbar, Button, Icon, TextInput, Text, Snackbar } from "react-native-paper";
+import {
+  Appbar,
+  Button,
+  Icon,
+  TextInput,
+  Text,
+  Snackbar,
+} from "react-native-paper";
 import PhoneNumberInput from "@/components/general/PhoneNumberInput";
 import { useRouter } from "expo-router";
 import { usersSendSignupSmsOtpMutation } from "@/client/users.swagger/@tanstack/react-query.gen";
@@ -87,11 +94,11 @@ const Info = () => {
     <>
       <KeyboardAvoidingView
         style={defaultStyles.container}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+        behavior={"padding"}
+        keyboardVerticalOffset={0}
       >
         <View style={defaultStyles.flex}>
-          <Appbar.Header dark={false} style={defaultStyles.appHeader}>
+        <Appbar.Header dark={false} style={defaultStyles.appHeader}>
             <TouchableOpacity
               onPress={() => router.back()}
               style={defaultStyles.backButtonContainer}
@@ -105,6 +112,7 @@ const Info = () => {
                 }`
               )}
             </Text>
+            <View />
           </Appbar.Header>
 
           <ScrollView
@@ -219,7 +227,7 @@ const Info = () => {
                   style={[signupStyles.errorTextDark, signupStyles.margin20]}
                 >
                   {i18n.t(
-                    "(forgot-password).creare-new-password.passwordsDoNot"
+                    "(auth).(forgot-password).create-new-password.passwordsDoNot"
                   )}
                 </Text>
               )}
@@ -250,15 +258,15 @@ const Info = () => {
         </View>
       </KeyboardAvoidingView>
 
-       <Snackbar
-              visible={error}
-              testID="signup_error_toast"
-              onDismiss={() => {}}
-              duration={3000}
-              style={defaultStyles.snackbar}
-            >
-              <Text style={defaultStyles.errorText}>{errorMessage}</Text>
-            </Snackbar>
+      <Snackbar
+        visible={error}
+        testID="signup_error_toast"
+        onDismiss={() => {}}
+        duration={3000}
+        style={defaultStyles.snackbar}
+      >
+        <Text style={defaultStyles.errorText}>{errorMessage}</Text>
+      </Snackbar>
     </>
   );
 };
