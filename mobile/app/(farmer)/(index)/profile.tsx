@@ -14,8 +14,8 @@ import {
   Button,
   Text,
   Divider,
-  Avatar,
   List,
+  Icon,
 } from "react-native-paper";
 import { Colors } from "@/constants";
 import {
@@ -28,11 +28,8 @@ import {
 import i18n from "@/i18n";
 import { Context, ContextType } from "@/app/_layout";
 
-import {  useMutation } from "@tanstack/react-query";
-import {
-  usersRevokeRefreshTokenMutation,
-  
-} from "@/client/users.swagger/@tanstack/react-query.gen";
+import { useMutation } from "@tanstack/react-query";
+import { usersRevokeRefreshTokenMutation } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { FontAwesome } from "@expo/vector-icons";
 import {
   FilterBottomSheet,
@@ -43,40 +40,37 @@ import { clearStorage, readData, updateAuthHeader } from "@/utils";
 export default function Profile() {
   const router = useRouter();
   const sheetRef = useRef<FilterBottomSheetRef>(null);
-   const { user, setUser } = useContext(Context) as ContextType;
-    const [loading, setLoading] = useState(false);
-    
-  
-    const handleLogout = async () => {
-        try {
-          setLoading(true);
-          const refreshToken = await readData("@refreshToken");
-    
-          await revokeRefreshToken({
-            body: {
-              refreshToken,
-            },
-          });
-    
-          await clearStorage();
-          updateAuthHeader("");
-          setUser(undefined);
-          router.replace("/(auth)/login");
-        } catch (error) {
-          console.error({ error }, "logging out");
-        } finally {
-          setLoading(false);
-        }
-      };
-  
-      const { mutateAsync: revokeRefreshToken } = useMutation({
-          ...usersRevokeRefreshTokenMutation(),
-          onError: async (error) => {
-            console.error("error logging out: ", error);
-          },
-        });
+  const { user, setUser } = useContext(Context) as ContextType;
+  const [loading, setLoading] = useState(false);
 
- 
+  const handleLogout = async () => {
+    try {
+      setLoading(true);
+      const refreshToken = await readData("@refreshToken");
+
+      await revokeRefreshToken({
+        body: {
+          refreshToken,
+        },
+      });
+
+      await clearStorage();
+      updateAuthHeader("");
+      setUser(undefined);
+      router.replace("/(auth)/login");
+    } catch (error) {
+      console.error({ error }, "logging out");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const { mutateAsync: revokeRefreshToken } = useMutation({
+    ...usersRevokeRefreshTokenMutation(),
+    onError: async (error) => {
+      console.error("error logging out: ", error);
+    },
+  });
 
   const shareApp = async () => {
     await Share.share({
@@ -102,16 +96,21 @@ export default function Profile() {
           <View style={signupStyles.imageContainer}>
             <TouchableOpacity style={signupStyles.imageUpload}>
               <View style={signupStyles.addImageContainer}>
-                <Image
-                  source={{ uri: user?.profileImage }}
-                  style={signupStyles.profileImage}
-                />
-                <Avatar.Icon
-                  size={24}
-                  icon="camera"
-                  color="#fff"
-                  style={signupStyles.cameraIcon}
-                />
+                {user?.profileImage ? (
+                  <Image
+                    source={{ uri: user?.profileImage }}
+                    style={signupStyles.profileImage}
+                  />
+                ) : (
+                  <Icon
+                    source={"account"}
+                    size={64}
+                    color={Colors.grey["61"]}
+                  />
+                )}
+                <View style={signupStyles.cameraIcon}>
+                  <Icon size={16} source="camera" color={Colors.light[10]} />
+                </View>
               </View>
             </TouchableOpacity>
             <Text variant="titleLarge">
@@ -125,7 +124,6 @@ export default function Profile() {
             keyboardShouldPersistTaps="handled"
           >
             <View style={signupStyles.allInput}>
-
               <View style={styles.navigateSection}>
                 <TouchableOpacity
                   style={styles.navigationItem}
@@ -133,12 +131,11 @@ export default function Profile() {
                 >
                   <View style={styles.navigationContent}>
                     <View style={profileFlowStyles.iconContainer}>
-                    <FontAwesome
-                      name="cog"
-                      size={20}
-                      color={Colors.primary[500]}
-                      
-                    />
+                      <FontAwesome
+                        name="cog"
+                        size={20}
+                        color={Colors.primary[500]}
+                      />
                     </View>
                     <Text style={styles.navigationText}>
                       {i18n.t("(farmer).(profile-flow).profile.tab1")}
@@ -153,12 +150,11 @@ export default function Profile() {
                 >
                   <View style={styles.navigationContent}>
                     <View style={profileFlowStyles.iconContainer}>
-                    <FontAwesome
-                      name="paper-plane"
-                      size={20}
-                      color={Colors.primary[500]}
-                      
-                    />
+                      <FontAwesome
+                        name="paper-plane"
+                        size={20}
+                        color={Colors.primary[500]}
+                      />
                     </View>
                     <Text style={styles.navigationText}>
                       {i18n.t("(farmer).(profile-flow).profile.tab2")}
@@ -170,18 +166,17 @@ export default function Profile() {
                 <TouchableOpacity
                   style={styles.navigationItem}
                   onPress={(e) => {
-                    Keyboard.dismiss(); 
+                    Keyboard.dismiss();
                     sheetRef.current?.open();
                   }}
                 >
                   <View style={profileFlowStyles.row}>
                     <View style={profileFlowStyles.dangerContainer}>
-                    <FontAwesome
-                      name="sign-out"
-                      size={20}
-                      color={Colors.error}
-                      
-                    />
+                      <FontAwesome
+                        name="sign-out"
+                        size={20}
+                        color={Colors.error}
+                      />
                     </View>
 
                     <Text style={styles.logout}>
@@ -216,8 +211,9 @@ export default function Profile() {
                 defaultStyles.secondaryButton,
                 buyerProductsStyles.halfButton,
               ]}
+              disabled={loading}
             >
-              <Text style={defaultStyles.secondaryButtonText}>
+              <Text style={defaultStyles.primaryText}>
                 {i18n.t("(farmer).(profile-flow).profile.button1")}
               </Text>
             </Button>
@@ -230,6 +226,8 @@ export default function Profile() {
                 defaultStyles.primaryButton,
                 buyerProductsStyles.halfButton,
               ]}
+              loading={loading}
+              disabled={loading}
             >
               <Text style={defaultStyles.buttonText}>
                 {i18n.t("(farmer).(profile-flow).profile.button2")}

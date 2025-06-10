@@ -28,7 +28,7 @@
     "login": {
       "anUnknownError": "An unknown error occured",
       "errorParsing": "Error parsing error response: ",
-      "emailRequired": "Email is required",
+      "emailRequired": "Email or phone number is required",
       "invalidEmail": "Please enter a valid email",
       "passwordRequired": "Password is required",
       "loginTo": "Log in to your account",
