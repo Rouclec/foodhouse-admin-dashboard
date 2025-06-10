@@ -60,6 +60,7 @@ func SqlcToProtoFarmers(sqlcFarmers []sqlc.ListFarmersByRatingRow) ([]*usersgrpc
 	for i, sf := range sqlcFarmers {
 		protoFarmers[i] = &usersgrpc.FarmerWithRating{
 			User: &usersgrpc.User{
+				UserId:       sf.ID,
 				FirstName:    derefString(sf.FirstName),
 				LastName:     derefString(sf.LastName),
 				ProfileImage: derefString(&sf.ProfileImage),
