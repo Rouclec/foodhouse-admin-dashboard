@@ -545,6 +545,11 @@ func (i *Impl) validateAuthFactor(ctx context.Context, authFactor *usersgrpc.Aut
 
 	case usersgrpc.FactorType_FACTOR_TYPE_EMAIL_PASSWORD:
 		return i.validateEmailPassword(ctx, authFactor)
+	case usersgrpc.FactorType_FACTOR_TYPE_EMAIL_PHONE_PASSWORD:
+		if strings.Contains(authFactor.GetId(), "@") {
+			return i.validateEmailPassword(ctx, authFactor)
+		}
+		return i.validatePhonePassword(ctx, authFactor)
 
 	case usersgrpc.FactorType_FACTOR_TYPE_UNSPECIFIED:
 		fallthrough
@@ -555,6 +560,19 @@ func (i *Impl) validateAuthFactor(ctx context.Context, authFactor *usersgrpc.Aut
 
 func (i *Impl) validateEmailPassword(ctx context.Context, authFactor *usersgrpc.AuthFactor) (string, error) {
 	user, err := i.repo.Do().GetUserByEmail(ctx, &authFactor.Id)
+	if err != nil {
+		return "", status.Errorf(codes.NotFound, "User not found: %v", err)
+	}
+
+	if !CheckPasswordHash(authFactor.GetSecretValue(), user.Password) {
+		return "", status.Error(codes.Unauthenticated, "Invalid password")
+	}
+
+	return user.ID, nil
+}
+
+func (i *Impl) validatePhonePassword(ctx context.Context, authFactor *usersgrpc.AuthFactor) (string, error) {
+	user, err := i.repo.Do().GetUserByNationalNumber(ctx, authFactor.GetId())
 	if err != nil {
 		return "", status.Errorf(codes.NotFound, "User not found: %v", err)
 	}

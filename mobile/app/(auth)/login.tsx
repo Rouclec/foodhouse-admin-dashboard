@@ -112,7 +112,7 @@ export default function Login() {
         body: {
           factors: [
             {
-              type: "FACTOR_TYPE_EMAIL_PASSWORD",
+              type: "FACTOR_TYPE_EMAIL_PHONE_PASSWORD",
               id: fields.email,
               secretValue: fields.password,
             },

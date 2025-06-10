@@ -366,6 +366,21 @@ func (mr *MockQuerierMockRecorder) GetUserByEmail(ctx, email any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByEmail", reflect.TypeOf((*MockQuerier)(nil).GetUserByEmail), ctx, email)
 }
 
+// GetUserByNationalNumber mocks base method.
+func (m *MockQuerier) GetUserByNationalNumber(ctx context.Context, nationalNumber string) (sqlc.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByNationalNumber", ctx, nationalNumber)
+	ret0, _ := ret[0].(sqlc.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserByNationalNumber indicates an expected call of GetUserByNationalNumber.
+func (mr *MockQuerierMockRecorder) GetUserByNationalNumber(ctx, nationalNumber any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByNationalNumber", reflect.TypeOf((*MockQuerier)(nil).GetUserByNationalNumber), ctx, nationalNumber)
+}
+
 // GetUserByPhoneNumber mocks base method.
 func (m *MockQuerier) GetUserByPhoneNumber(ctx context.Context, phoneNumber string) (sqlc.User, error) {
 	m.ctrl.T.Helper()

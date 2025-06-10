@@ -98,7 +98,7 @@ export type usersgrpcDeleteUserPaymentMethodResponse = {
 
 export type usersgrpcDeleteUserSubscriptionResponse = unknown;
 
-export type usersgrpcFactorType = 'FACTOR_TYPE_UNSPECIFIED' | 'FACTOR_TYPE_EMAIL_PASSWORD' | 'FACTOR_TYPE_SMS_OTP' | 'FACTOR_TYPE_EMAIL_OTP';
+export type usersgrpcFactorType = 'FACTOR_TYPE_UNSPECIFIED' | 'FACTOR_TYPE_EMAIL_PASSWORD' | 'FACTOR_TYPE_SMS_OTP' | 'FACTOR_TYPE_EMAIL_OTP' | 'FACTOR_TYPE_EMAIL_PHONE_PASSWORD';
 
 export type usersgrpcGetFarmerByIDResponse = {
     user?: usersgrpcUser;
