@@ -281,6 +281,11 @@
         "couldNotLoadProduct": "Could not load product details",
         "pending": "Pending",
         "completed": "Completed"
+      },
+      "farmers": {
+        "farmers": "Farmers",
+        "searchFarmers": "Search farmers",
+        "noFarmerFound": "No farmer found"
       }
     },
     "product-details": {

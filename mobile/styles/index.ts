@@ -38,6 +38,7 @@ import { checkoutStyles } from "./(buyer)/(order)/checkout.styles";
 import { selectPickupLocationStyles } from "./(buyer)/(order)/select-pickup-location.styles";
 import { profileFlowStyles } from "./(farmer)/profileFlow.styles";
 import { orderDetailsStyles } from "./(farmer)/order-details.styles";
+import { farmersStyles } from "./(buyer)/(index)/farmers.styles";
 
 export {
   buyerIndexStyles,
@@ -74,4 +75,5 @@ export {
   ordersStyles,
   trackOrderStyles,
   orderDetailsStyles,
+  farmersStyles,
 };
