@@ -32,7 +32,7 @@
       "invalidEmail": "Please enter a valid email",
       "passwordRequired": "Password is required",
       "loginTo": "Log in to your account",
-      "email": "Email",
+      "email": "Email or Phone number",
       "password": "Password",
       "forgotPassword": "Forgot password?",
       "login": "Login",
