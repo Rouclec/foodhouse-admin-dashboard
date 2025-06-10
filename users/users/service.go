@@ -257,7 +257,7 @@ func (i *Impl) Signup(ctx context.Context, req *usersgrpc.SignupRequest) (*users
 	createdDBUser, err := querier.CreateUser(ctx, newUser)
 	if err != nil {
 		i.logger.Err(err).Msg("Failed to create user")
-		return nil, status.Errorf(codes.Internal, "Could not create user in the db")
+		return nil, status.Errorf(codes.Internal, "Could not create user in the db: %v", err)
 	}
 
 	// Generate an access token and refresh token

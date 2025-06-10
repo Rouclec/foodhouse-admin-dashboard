@@ -11,6 +11,13 @@ const (
 	OneMillion = 1000000
 )
 
+func derefString(s *string) string {
+	if s != nil {
+		return *s
+	}
+	return ""
+}
+
 func SqlcToProtoSubscriptions(sqlcSubscriptions []sqlc.Subscription) ([]*usersgrpc.Subscription, error) {
 	protoSubscriptions := make([]*usersgrpc.Subscription, len(sqlcSubscriptions))
 
@@ -53,9 +60,9 @@ func SqlcToProtoFarmers(sqlcFarmers []sqlc.ListFarmersByRatingRow) ([]*usersgrpc
 	for i, sf := range sqlcFarmers {
 		protoFarmers[i] = &usersgrpc.FarmerWithRating{
 			User: &usersgrpc.User{
-				FirstName:    *sf.FirstName,
-				LastName:     *sf.LastName,
-				ProfileImage: sf.ProfileImage,
+				FirstName:    derefString(sf.FirstName),
+				LastName:     derefString(sf.LastName),
+				ProfileImage: derefString(&sf.ProfileImage),
 				CreatedAt:    timestamppb.New(sf.CreatedAt.Time),
 			},
 			Rating: sf.AverageRating,

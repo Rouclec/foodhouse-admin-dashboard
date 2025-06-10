@@ -44,23 +44,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="wholesale"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <View style={styles.tabItem}>
-              <Icon
-                source={"package-variant-closed"}
-                size={24}
-                color={focused ? Colors.primary[500] : Colors.grey["9e"]}
-              />
-              <Text style={[styles.tabItemText, focused && styles.focusedText]}>
-                Wholesale
-              </Text>
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="orders"
         options={{
           tabBarIcon: ({ focused }) => (
@@ -77,6 +60,25 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      <Tabs.Screen
+        name="farmers"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <View style={styles.tabItem}>
+              <Icon
+                source={"account-hard-hat"}
+                size={24}
+                color={focused ? Colors.primary[500] : Colors.grey["9e"]}
+              />
+              <Text style={[styles.tabItemText, focused && styles.focusedText]}>
+                Farmers
+              </Text>
+            </View>
+          ),
+        }}
+      />
+
       {/* <Tabs.Screen
         name="system-chat"
         options={{
