@@ -308,7 +308,7 @@ export default function BuyerProducts() {
                     product={item}
                     OnPress={() =>
                       router.push({
-                        pathname: "/product-details",
+                        pathname: "/(buyer)/product-details",
                         params: {
                           productId: item?.id,
                         },

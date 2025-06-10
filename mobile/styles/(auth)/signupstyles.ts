@@ -203,7 +203,6 @@ export const signupStyles = StyleSheet.create({
   modalContent: {
     width: "100%",
   },
-
   content: {
     paddingHorizontal: 20,
     paddingVertical: 40,
@@ -255,5 +254,9 @@ export const signupStyles = StyleSheet.create({
   },
   button: {
     width: "50%",
+  },
+  avatar: {
+    width: 56,
+    height: 56,
   },
 });

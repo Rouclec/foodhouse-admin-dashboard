@@ -9,14 +9,7 @@ import {
   Keyboard,
 } from "react-native";
 import { useRouter } from "expo-router";
-import {
-  Appbar,
-  Button,
-  Text,
-  Divider,
-  List,
-  Icon,
-} from "react-native-paper";
+import { Appbar, Button, Text, Divider, List, Icon } from "react-native-paper";
 import { Colors } from "@/constants";
 import {
   buyerProductsStyles,
@@ -102,10 +95,9 @@ export default function Profile() {
                     style={signupStyles.profileImage}
                   />
                 ) : (
-                  <Icon
-                    source={"account"}
-                    size={64}
-                    color={Colors.grey["61"]}
+                  <Image
+                    source={require("@/assets/images/avatar.png")}
+                    style={signupStyles.avatar}
                   />
                 )}
                 <View style={signupStyles.cameraIcon}>

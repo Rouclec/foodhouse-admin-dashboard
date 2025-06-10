@@ -1,17 +1,18 @@
 import { Context, ContextType } from "@/app/_layout";
+import { ordersgrpcOrderStatus } from "@/client/orders.swagger";
+import { productsListProductsOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
 import {
-  ordersgrpcOrder,
-  ordersgrpcOrderStatus,
-} from "@/client/orders.swagger";
-import { ordersListUserOrdersOptions } from "@/client/orders.swagger/@tanstack/react-query.gen";
-import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
+  usersGetFarmerByIdOptions,
+  usersListFarmersReivewsOptions,
+  usersReviewFarmerMutation,
+} from "@/client/users.swagger/@tanstack/react-query.gen";
+import { Product } from "@/components";
 import { Colors } from "@/constants";
 import i18n from "@/i18n";
-import { defaultStyles, ordersStyles as styles } from "@/styles";
-import { formatAmount } from "@/utils/amountFormater";
-import { useQuery } from "@tanstack/react-query";
+import { defaultStyles, farmerDetailsStyle as styles } from "@/styles";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { FC, useContext, useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   KeyboardAvoidingView,
@@ -22,12 +23,6 @@ import {
 } from "react-native";
 import { Chase } from "react-native-animated-spinkit";
 import { Appbar, Button, Icon, Text } from "react-native-paper";
-
-const PENDING_ORDER_STATUSES: Array<ordersgrpcOrderStatus> = [
-  "OrderStatus_PAYMENT_SUCCESSFUL",
-  "OrderStatus_APPROVED",
-  "OrderStatus_IN_TRANSIT",
-];
 
 const TAB_ITEMS: Array<{
   name: string;
@@ -43,90 +38,78 @@ const TAB_ITEMS: Array<{
   },
 ];
 
-interface OrderItemProps {
-  item: ordersgrpcOrder;
-  onPress: () => void;
-}
-const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
-  const {
-    isLoading: isProductLoading,
-    data: productData,
-    isError,
-  } = useQuery({
-    ...productsGetProductOptions({
-      path: {
-        productId: item?.product ?? "",
-      },
-    }),
-  });
-
-  if (isProductLoading)
-    return (
-      <View style={defaultStyles.center}>
-        <Chase size={16} color={Colors.primary[500]} />
-      </View>
-    );
-
-  if (isError) {
-    return (
-      <View style={defaultStyles.center}>
-        <Text>{i18n.t("(buyer).farmer-details.couldNotLoadProduct")}</Text>
-      </View>
-    );
-  }
-
-  return (
-    <View style={defaultStyles.card}>
-      <Image
-        source={{ uri: productData?.product?.image }}
-        style={styles.productImage}
-      />
-      <View style={styles.orderDetailsContainer}>
-        <Text variant="titleMedium">{productData?.product?.name}</Text>
-        <View style={styles.centerRow}>
-          <Text variant="titleSmall" style={styles.primaryText}>
-            {item?.price?.currencyIsoCode}{" "}
-            {formatAmount(item?.price?.value ?? "", { decimalPlaces: 2 })}
-          </Text>
-        </View>
-        <Button style={defaultStyles.primaryButton} onPress={onPress}>
-          <Text style={defaultStyles.buttonText}>
-            {item?.status === "OrderStatus_DELIVERED"
-              ? i18n.t("(buyer).farmer-details.writeReview")
-              : i18n.t("(buyer).farmer-details.trackOrder")}
-          </Text>
-        </Button>
-      </View>
-    </View>
-  );
-};
-
 export default function FarmerDetails() {
   const router = useRouter();
 
   const { user } = useContext(Context) as ContextType;
 
-  const params = useLocalSearchParams();
+  const { farmerId } = useLocalSearchParams();
 
-  console.log({ params });
+  const [reviewCount, setReviewCount] = useState(10);
+  const [productsCount, setProductsCount] = useState(10);
 
-  const [hasReachedEnd, setHasReachedEnd] = useState(false);
-  const [count, setCount] = useState(10);
+  const [reviewsHaveReachedEnd, setReviewsHaveReachedEnd] = useState(false);
+  const [productsHaveReachedEnd, setProductsHaveReachedEnd] = useState(false);
+
   const [tabItem, setTabItem] = useState<{
     name: string;
     value: "PRODUCTS" | "REVIEWS";
   }>(TAB_ITEMS[0]);
 
-  const { data, isLoading } = useQuery({
-    ...ordersListUserOrdersOptions({
+  const { data: farmerDetails } = useQuery({
+    ...usersGetFarmerByIdOptions({
       path: {
+        farmerId: farmerId as string,
+        userId: user?.userId ?? "",
+      },
+    }),
+  });
+
+  const { data: farmerReviews, isLoading: isReviewsLoading } = useQuery({
+    ...usersListFarmersReivewsOptions({
+      path: {
+        farmerId: farmerId as string,
         userId: user?.userId ?? "",
       },
       query: {
-        count: count,
+        count: reviewCount,
         startKey: "",
       },
     }),
+  });
+
+  const { data: farmerProducts, isLoading: isProductsLoading } = useQuery({
+    ...productsListProductsOptions({
+      query: {
+        startKey: "",
+        count: productsCount,
+        createdBy: farmerId as string,
+      },
+    }),
+  });
+
+  const handleReview = async () => {
+    try {
+      await mutateAsync({
+        body: {
+          farmerId: farmerId as string,
+          orderId: "4",
+          productId: "1234567890",
+          rating: 5,
+          comment:
+            "Absolutely satisfied with the ripe plantains 🍌👌, they were perfectly ripe and delicious!",
+        },
+        path: {
+          userId: user?.userId ?? "",
+        },
+      });
+    } catch (error) {
+      console.error({ error }, "reviewing farmer");
+    }
+  };
+
+  const { mutateAsync } = useMutation({
+    ...usersReviewFarmerMutation(),
   });
 
   return (
@@ -150,6 +133,55 @@ export default function FarmerDetails() {
             </Text>
             <View />
           </Appbar.Header>
+          <View>
+            <View style={styles.farmerDetailsContainer}>
+              <View style={styles.addImageContainer}>
+                {farmerDetails?.user?.profileImage ? (
+                  <Image
+                    source={{ uri: farmerDetails?.user?.profileImage }}
+                    style={styles.profileImage}
+                  />
+                ) : (
+                  <Image
+                    source={require("@/assets/images/avatar.png")}
+                    style={styles.avatar}
+                  />
+                )}
+              </View>
+              <View style={styles.nameAndRatingContainer}>
+                <Text variant="titleSmall" style={styles.farmerName}>
+                  {!!farmerDetails?.user?.firstName
+                    ? farmerDetails?.user?.firstName
+                    : "Anonymous"}{" "}
+                  {farmerDetails?.user?.lastName}
+                </Text>
+                <View style={styles.ratingsContainer}>
+                  {farmerDetails?.rating ?? 0 > 0 ? (
+                    <Icon
+                      source={"star-half-full"}
+                      size={24}
+                      color={Colors.gold}
+                    />
+                  ) : (
+                    <Icon
+                      source={"star-outline"}
+                      size={24}
+                      color={Colors.grey["61"]}
+                    />
+                  )}
+                  <Text style={styles.ratingsText}>
+                    {farmerDetails?.rating}
+                  </Text>
+                </View>
+              </View>
+              {/* TODO: This text will be for the farmer's description, when the time comes  */}
+              {/* <Text style={styles.farmerDescription}>
+                {
+                  "I am Forsamp Anyah, a farmer from Bamenda, I grow foodcrops like tomatoes, banana, plantains"
+                }
+              </Text> */}
+            </View>
+          </View>
           <View style={styles.tabItemsMainContainer}>
             {TAB_ITEMS.map((item) => {
               return (
@@ -175,83 +207,140 @@ export default function FarmerDetails() {
               );
             })}
           </View>
-          {isLoading && !data ? (
-            <View style={[defaultStyles.container, defaultStyles.center]}>
-              <Chase size={56} color={Colors.primary[500]} />
-            </View>
-          ) : (
-            <FlatList
-              data={data?.orders}
-              keyExtractor={(item, index) =>
-                item.orderNumber ?? index.toString()
-              }
-              contentContainerStyle={[
-                defaultStyles.paddingVertical,
-                styles.flatListContentContainer,
-              ]}
-              ListEmptyComponent={
-                <View style={defaultStyles.noItemsContainer}>
-                  <Text style={defaultStyles.noItems}>
-                    {i18n.t("(buyer).farmer-details.noOrdersFound")}
-                  </Text>
+
+          {tabItem.value === "REVIEWS" ? (
+            <>
+              {isReviewsLoading && !farmerReviews ? (
+                <View style={[defaultStyles.container, defaultStyles.center]}>
+                  <Chase size={56} color={Colors.primary[500]} />
                 </View>
-              }
-              showsVerticalScrollIndicator={false}
-              onEndReached={() => {
-                if (!hasReachedEnd) {
-                  setHasReachedEnd(true);
-                }
-              }}
-              renderItem={({ item }) => {
-                return (
-                  <OrderItem
-                    item={item}
-                    onPress={
-                      item?.status === "OrderStatus_DELIVERED"
-                        ? () => {
-                            console.log("delivered order");
-                          }
-                        : PENDING_ORDER_STATUSES.includes(
-                            item?.status as ordersgrpcOrderStatus
-                          )
-                        ? () => {
-                            router.push({
-                              pathname: "/(buyer)/track-order",
-                              params: {
-                                orderNumber: item?.orderNumber,
-                              },
-                            });
-                          }
-                        : () => {}
+              ) : (
+                <FlatList
+                  key={"REVIEWS"}
+                  data={farmerReviews?.reviews}
+                  keyExtractor={(item, index) => item?.id ?? index.toString()}
+                  contentContainerStyle={[
+                    defaultStyles.paddingVertical,
+                    styles.flatListContentContainer,
+                  ]}
+                  ListEmptyComponent={
+                    <View style={defaultStyles.noItemsContainer}>
+                      <Text style={defaultStyles.noItems}>
+                        {i18n.t("(buyer).farmer-details.noReviewsYet")}
+                      </Text>
+                    </View>
+                  }
+                  showsVerticalScrollIndicator={false}
+                  onEndReached={() => {
+                    if (!reviewsHaveReachedEnd) {
+                      setReviewsHaveReachedEnd(true);
                     }
-                  />
-                );
-              }}
-              onScrollBeginDrag={() => {
-                // Reset flag when user starts dragging
-                setHasReachedEnd(false);
-              }}
-              onScrollEndDrag={() => {
-                if (hasReachedEnd && data?.nextKey) {
-                  setCount((prev) => prev + 10);
-                  setHasReachedEnd(false);
-                }
-              }}
-              ListFooterComponent={() =>
-                data?.nextKey ? (
-                  <View style={defaultStyles.listFooterComponent}>
-                    {hasReachedEnd && (
-                      <ActivityIndicator
-                        color={Colors.primary[500]}
-                        style={defaultStyles.listFooterIndicator}
+                  }}
+                  renderItem={({ item }) => {
+                    return (
+                      <View>
+                        <Text>very great product</Text>
+                      </View>
+                    );
+                  }}
+                  onScrollBeginDrag={() => {
+                    // Reset flag when user starts dragging
+                    setReviewsHaveReachedEnd(false);
+                  }}
+                  onScrollEndDrag={() => {
+                    if (reviewsHaveReachedEnd && farmerReviews?.nextKey) {
+                      setReviewCount((prev) => prev + 10);
+                      setReviewsHaveReachedEnd(false);
+                    }
+                  }}
+                  ListFooterComponent={() =>
+                    farmerReviews?.nextKey ? (
+                      <View style={defaultStyles.listFooterComponent}>
+                        {productsHaveReachedEnd && (
+                          <ActivityIndicator
+                            color={Colors.primary[500]}
+                            style={defaultStyles.listFooterIndicator}
+                          />
+                        )}
+                      </View>
+                    ) : null
+                  }
+                />
+              )}
+            </>
+          ) : (
+            <>
+              {isProductsLoading && !farmerProducts ? (
+                <View style={[defaultStyles.container, defaultStyles.center]}>
+                  <Chase size={56} color={Colors.primary[500]} />
+                </View>
+              ) : (
+                <FlatList
+                  key={"PRODUCTS"}
+                  data={farmerProducts?.products}
+                  keyExtractor={(item, index) => item?.id ?? index.toString()}
+                  contentContainerStyle={[
+                    defaultStyles.paddingVertical,
+                    styles.flatListContentContainer,
+                  ]}
+                  ListEmptyComponent={
+                    <View style={defaultStyles.noItemsContainer}>
+                      <Text style={defaultStyles.noItems}>
+                        {i18n.t("(buyer).farmer-details.noProductsFound")}
+                      </Text>
+                    </View>
+                  }
+                  numColumns={2}
+                  columnWrapperStyle={styles.flatListColumnWrapper}
+                  showsVerticalScrollIndicator={false}
+                  onEndReached={() => {
+                    if (!productsHaveReachedEnd) {
+                      setProductsHaveReachedEnd(true);
+                    }
+                  }}
+                  renderItem={({ item }) => {
+                    return (
+                      <Product
+                        product={item}
+                        OnPress={() =>
+                          router.push({
+                            pathname: "/(buyer)/product-details",
+                            params: {
+                              productId: item?.id,
+                            },
+                          })
+                        }
                       />
-                    )}
-                  </View>
-                ) : null
-              }
-            />
+                    );
+                  }}
+                  onScrollBeginDrag={() => {
+                    // Reset flag when user starts dragging
+                    setProductsHaveReachedEnd(false);
+                  }}
+                  onScrollEndDrag={() => {
+                    if (productsHaveReachedEnd && farmerProducts?.nextKey) {
+                      setProductsCount((prev) => prev + 10);
+                      setProductsHaveReachedEnd(false);
+                    }
+                  }}
+                  ListFooterComponent={() =>
+                    farmerProducts?.nextKey ? (
+                      <View style={defaultStyles.listFooterComponent}>
+                        {productsHaveReachedEnd && (
+                          <ActivityIndicator
+                            color={Colors.primary[500]}
+                            style={defaultStyles.listFooterIndicator}
+                          />
+                        )}
+                      </View>
+                    ) : null
+                  }
+                />
+              )}
+            </>
           )}
         </View>
+        <Button onPress={handleReview}>Review farmer</Button>
       </KeyboardAvoidingView>
     </>
   );
