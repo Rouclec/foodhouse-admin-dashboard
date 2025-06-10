@@ -14,8 +14,8 @@ import {
   Button,
   Text,
   Divider,
-  Avatar,
   List,
+  Icon,
 } from "react-native-paper";
 import { Colors } from "@/constants";
 import {
@@ -110,16 +110,21 @@ export default function Profile() {
           <View style={signupStyles.imageContainer}>
             <TouchableOpacity style={signupStyles.imageUpload}>
               <View style={signupStyles.addImageContainer}>
-                <Image
-                  source={{ uri: user?.profileImage }}
-                  style={signupStyles.profileImage}
-                />
-                <Avatar.Icon
-                  size={24}
-                  icon="camera"
-                  color="#fff"
-                  style={signupStyles.cameraIcon}
-                />
+                {user?.profileImage ? (
+                  <Image
+                    source={{ uri: user?.profileImage }}
+                    style={signupStyles.profileImage}
+                  />
+                ) : (
+                  <Icon
+                    source={"account"}
+                    size={64}
+                    color={Colors.grey["61"]}
+                  />
+                )}
+                <View style={signupStyles.cameraIcon}>
+                  <Icon size={16} source="camera" color={Colors.light[10]} />
+                </View>
               </View>
             </TouchableOpacity>
             <Text variant="titleLarge">
@@ -252,8 +257,9 @@ export default function Profile() {
                 defaultStyles.secondaryButton,
                 buyerProductsStyles.halfButton,
               ]}
+              disabled={loading}
             >
-              <Text style={defaultStyles.buttonText}>
+              <Text style={defaultStyles.primaryText}>
                 {i18n.t("(farmer).(profile-flow).profile.button1")}
               </Text>
             </Button>
@@ -266,6 +272,8 @@ export default function Profile() {
                 defaultStyles.primaryButton,
                 buyerProductsStyles.halfButton,
               ]}
+              loading={loading}
+              disabled={loading}
             >
               <Text style={defaultStyles.buttonText}>
                 {i18n.t("(farmer).(profile-flow).profile.button2")}

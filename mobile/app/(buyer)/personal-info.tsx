@@ -7,9 +7,21 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { Appbar, Text, Button, TextInput, Avatar, Icon } from "react-native-paper";
+import {
+  Appbar,
+  Text,
+  Button,
+  TextInput,
+  Avatar,
+  Icon,
+} from "react-native-paper";
 import { Colors } from "@/constants";
-import { defaultStyles, loginstyles, profileFlowStyles, signupStyles } from "@/styles";
+import {
+  defaultStyles,
+  loginstyles,
+  profileFlowStyles,
+  signupStyles,
+} from "@/styles";
 import i18n from "@/i18n";
 import { Context, ContextType } from "../_layout";
 import { ImagePicker } from "@/components";
@@ -73,96 +85,48 @@ export default function PersonalInfo() {
     },
   });
 
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+      let imageUrl = originalProfileImage;
 
-//   const handleSave = async () => {
-//     try {
-//       setLoading(true);
-//       let imageUrl = originalProfileImage;
-//       if (profileImage !== originalProfileImage) {
-//         imageUrl = await uploadImage({
-//           uri: profileImage,
-//           filename: `profile_${user?.userId}_${Date.now()}.jpg`,
-//           directory: "profile_images",
-//         });
-//       }
+      if (profileImage !== originalProfileImage) {
+        console.log("Uploading new image...");
+        imageUrl = await uploadImage({
+          uri: profileImage,
+          filename: `profile_${user?.userId}_${Date.now()}.jpg`,
+          directory: "profile_images",
+        });
+        console.log("New Firebase image URL:", imageUrl);
+      } else {
+        console.log("No image change detected, skipping upload.");
+      }
 
-//       const firstNameSplit = formData.fullName.split(" ")[0];
-//       const lastNameSplit = formData.fullName.split(" ").slice(1).join(" ");
+      const firstNameSplit = formData.fullName.split(" ")[0];
+      const lastNameSplit = formData.fullName.split(" ").slice(1).join(" ");
 
-//       const data = {
-//         firstName: firstNameSplit,
-//         lastName: lastNameSplit,
-//         email: formData.email,
-//         address: formData.address,
+      const data = {
+        firstName: firstNameSplit,
+        lastName: lastNameSplit,
+        email: formData.email,
+        address: formData.address,
+        profileImage: imageUrl,
+      };
 
-//         profileImage: imageUrl,
-//       };
-// console.log("Sending update request with data:", data);
+      await updateProfile({ body: data, path: { userId: user?.userId || "" } });
 
-//       await updateProfile({
-//          body: data,
-//           path: {
-//              userId: user?.userId || "" 
-//             } 
-//         });
-//       setUser({ ...data });
-//       setOriginalProfileImage(imageUrl); 
-//     } catch (error) {
-//       console.error("Error updating profile:", error);
-//       setErrorMessage("Failed to update profile");
-//       setError(true);
-//       await delay(5000);
-//       setError(false);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-const handleSave = async () => {
-  try {
-    setLoading(true);
-    let imageUrl = originalProfileImage;
-
-
-    if (profileImage !== originalProfileImage) {
-      console.log("Uploading new image...");
-      imageUrl = await uploadImage({
-        uri: profileImage,
-        filename: `profile_${user?.userId}_${Date.now()}.jpg`,
-        directory: "profile_images",
-      });
-      console.log("New Firebase image URL:", imageUrl); 
-    } else {
-      console.log("No image change detected, skipping upload."); 
+      setUser({ ...data });
+      setOriginalProfileImage(imageUrl);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      setErrorMessage("Failed to update profile");
+      setError(true);
+      await delay(5000);
+      setError(false);
+    } finally {
+      setLoading(false);
     }
-
-
-    const firstNameSplit = formData.fullName.split(" ")[0];
-    const lastNameSplit = formData.fullName.split(" ").slice(1).join(" ");
-
-    const data = {
-      firstName: firstNameSplit,
-      lastName: lastNameSplit,
-      email: formData.email,
-      address: formData.address,
-      profileImage: imageUrl, 
-    };
-
-    console.log("Sending update request with data:", data); 
-    await updateProfile({ body: data, path: { userId: user?.userId || "" } });
-
-    setUser({ ...data });
-    setOriginalProfileImage(imageUrl); 
-  } catch (error) {
-    console.error("Error updating profile:", error);
-    setErrorMessage("Failed to update profile");
-    setError(true);
-    await delay(5000);
-    setError(false);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <>
@@ -185,94 +149,91 @@ const handleSave = async () => {
             <View />
           </Appbar.Header>
 
-          <ScrollView contentContainerStyle={defaultStyles.scrollContainer} >
+          <ScrollView contentContainerStyle={defaultStyles.scrollContainer}>
             <View style={profileFlowStyles.navigateSection}>
               <View style={signupStyles.imageContainer}>
                 <TouchableOpacity
-                  onPress={() => setIsImagePickerVisible(true)}
                   style={signupStyles.imageUpload}
+                  onPress={() => setIsImagePickerVisible(true)}
                 >
-                  {profileImage ? (
-                    <>
+                  <View style={signupStyles.addImageContainer}>
+                    {profileImage || user?.profileImage ? (
                       <Image
-                        source={{ uri: profileImage }}
+                        source={{ uri: profileImage ?? user?.profileImage }}
                         style={signupStyles.profileImage}
                       />
-                      <Avatar.Icon
-                        size={24}
-                        icon="camera"
-                        color="#fff"
-                        style={signupStyles.cameraIcon}
+                    ) : (
+                      <Icon
+                        source={"account"}
+                        size={64}
+                        color={Colors.grey["61"]}
                       />
-                    </>
-                  ) : (
-                    <View style={signupStyles.addImageContainer}>
-                      <Avatar.Icon
-                        size={120}
-                        icon="account"
-                        style={signupStyles.account}
-                      />
-                      <Avatar.Icon
-                        size={24}
-                        icon="camera"
-                        color="#fff"
-                        style={signupStyles.cameraIcon}
+                    )}
+                    <View style={signupStyles.cameraIcon}>
+                      <Icon
+                        size={16}
+                        source="camera"
+                        color={Colors.light[10]}
                       />
                     </View>
-                  )}
+                  </View>
                 </TouchableOpacity>
               </View>
 
               <View style={profileFlowStyles.infoContainer}>
-                 
-                  <TextInput
-                    mode="outlined"
-                    value={formData.fullName}
-                    onChangeText={(text) => handleInputChange("fullName", text)}
-                    label= {i18n.t("(farmer).(profile-flow).(personal-info).fullName")}
-                    theme={{
-                      roundness: 15,
-                      colors: {
-                        onSurfaceVariant: Colors.grey["e8"],
-                        primary: Colors.primary[500],
-                      },
-                    }}
-                     outlineColor={Colors.grey["bg"]}
-                    style={loginstyles.input}
-                  />
-                
-                  <TextInput
-                    mode="outlined"
-                    value={formData.email}
-                    onChangeText={(text) => handleInputChange("email", text)}
-                    label= {i18n.t("(farmer).(profile-flow).(personal-info).email")}
-                    theme={{
-                      roundness: 15,
-                      colors: {
-                        onSurfaceVariant: Colors.grey["e8"],
-                        primary: Colors.primary[500],
-                      },
-                    }}
-                     outlineColor={Colors.grey["bg"]}
-                    style={loginstyles.input}
-                  />
-                
-                  <TextInput
-                    mode="outlined"
-                    value={formData.address}
-                    onChangeText={(text) => handleInputChange("address", text)}
-                    label= {i18n.t("(farmer).(profile-flow).(personal-info).address")}
-                    theme={{
-                      roundness: 15,
-                      colors: {
-                        onSurfaceVariant: Colors.grey["e8"],
-                        primary: Colors.primary[500],
-                      },
-                    }}
-                     outlineColor={Colors.grey["bg"]}
-                    style={loginstyles.input}
-                  />
-              
+                <TextInput
+                  mode="outlined"
+                  value={formData.fullName}
+                  onChangeText={(text) => handleInputChange("fullName", text)}
+                  label={i18n.t(
+                    "(farmer).(profile-flow).(personal-info).fullName"
+                  )}
+                  theme={{
+                    roundness: 15,
+                    colors: {
+                      onSurfaceVariant: Colors.grey["e8"],
+                      primary: Colors.primary[500],
+                    },
+                  }}
+                  outlineColor={Colors.grey["bg"]}
+                  style={loginstyles.input}
+                />
+
+                <TextInput
+                  mode="outlined"
+                  value={formData.email}
+                  onChangeText={(text) => handleInputChange("email", text)}
+                  label={i18n.t(
+                    "(farmer).(profile-flow).(personal-info).email"
+                  )}
+                  theme={{
+                    roundness: 15,
+                    colors: {
+                      onSurfaceVariant: Colors.grey["e8"],
+                      primary: Colors.primary[500],
+                    },
+                  }}
+                  outlineColor={Colors.grey["bg"]}
+                  style={loginstyles.input}
+                />
+
+                <TextInput
+                  mode="outlined"
+                  value={formData.address}
+                  onChangeText={(text) => handleInputChange("address", text)}
+                  label={i18n.t(
+                    "(farmer).(profile-flow).(personal-info).address"
+                  )}
+                  theme={{
+                    roundness: 15,
+                    colors: {
+                      onSurfaceVariant: Colors.grey["e8"],
+                      primary: Colors.primary[500],
+                    },
+                  }}
+                  outlineColor={Colors.grey["bg"]}
+                  style={loginstyles.input}
+                />
               </View>
             </View>
           </ScrollView>

@@ -8,7 +8,7 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-import { Icon, TextInput } from "react-native-paper";
+import { Icon, Snackbar, TextInput } from "react-native-paper";
 import { Link, router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -89,9 +89,6 @@ export default function Login() {
     if (!fields.email.trim()) {
       newErrors.email = i18n.t("(auth).login.emailRequired");
       isValid = false;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email)) {
-      newErrors.email = i18n.t("(auth).login.invalidEmail");
-      isValid = false;
     }
 
     if (!fields.password.trim()) {
@@ -157,10 +154,6 @@ export default function Login() {
                 {i18n.t("(auth).login.loginTo")}
               </Text>
 
-              {error && (
-                <Text style={loginstyles.errorMessage}>{errorMessage}</Text>
-              )}
-
               <TextInput
                 mode="outlined"
                 label={i18n.t("(auth).login.email")}
@@ -180,7 +173,7 @@ export default function Login() {
                 outlineColor={Colors.grey["bg"]}
                 left={
                   <TextInput.Icon
-                    icon="email-outline"
+                    icon="account-outline"
                     color={Colors.grey["61"]}
                     size={20}
                   />
@@ -237,7 +230,10 @@ export default function Login() {
               </Link>
 
               <TouchableOpacity
-                style={loginstyles.loginButton}
+                style={[
+                  loginstyles.loginButton,
+                  loading && defaultStyles.greyButton,
+                ]}
                 onPress={handleLogIn}
                 disabled={loading}
                 activeOpacity={0.8}
@@ -295,6 +291,14 @@ export default function Login() {
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
+      <Snackbar
+        visible={!!error}
+        onDismiss={() => {}}
+        duration={3000}
+        style={defaultStyles.snackbar}
+      >
+        <Text style={defaultStyles.errorText}>{errorMessage}</Text>
+      </Snackbar>
     </>
   );
 }
