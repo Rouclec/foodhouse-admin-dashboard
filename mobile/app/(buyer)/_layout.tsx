@@ -13,6 +13,7 @@ export default function BuyerLayout() {
       <Stack.Screen name="settings" options={{ headerShown: false }} />
       <Stack.Screen name="language" options={{ headerShown: false }} />
       <Stack.Screen name="track-order" options={{ headerShown: false }} />
+      <Stack.Screen name="farmer-details" options={{ headerShown: false }} />
     </Stack>
   );
 }

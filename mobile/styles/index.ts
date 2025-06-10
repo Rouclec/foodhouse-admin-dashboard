@@ -39,6 +39,7 @@ import { selectPickupLocationStyles } from "./(buyer)/(order)/select-pickup-loca
 import { profileFlowStyles } from "./(farmer)/profileFlow.styles";
 import { orderDetailsStyles } from "./(farmer)/order-details.styles";
 import { farmersStyles } from "./(buyer)/(index)/farmers.styles";
+import { farmerDetailsStyle } from "./(buyer)/farmer-details.styls";
 
 export {
   buyerIndexStyles,
@@ -76,4 +77,5 @@ export {
   trackOrderStyles,
   orderDetailsStyles,
   farmersStyles,
+  farmerDetailsStyle,
 };

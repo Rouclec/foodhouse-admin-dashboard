@@ -70,6 +70,7 @@ export default function Farmers() {
       query: {
         count: count,
         startKey: 0.0,
+        searchKey: debounceQuery,
       },
     }),
   });
@@ -199,6 +200,14 @@ export default function Farmers() {
                     </View>
                     <Button
                       style={styles.button}
+                      onPress={() =>
+                        router.push({
+                          pathname: "/(buyer)/farmer-details",
+                          params: {
+                            farmerId: item?.user?.userId,
+                          },
+                        })
+                      }
                     >
                       <Text style={defaultStyles.buttonText}>
                         {i18n.t("(buyer).(index).farmers.viewDetails")}
