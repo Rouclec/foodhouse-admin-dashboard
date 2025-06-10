@@ -1272,7 +1272,8 @@ func (i *Impl) GetPublicUser(ctx context.Context,
 	}
 
 	return &usersgrpc.GetPublicUserResponse{
-		Name: *foundUser.FirstName + " " + *foundUser.LastName,
+		Name:         *foundUser.FirstName + " " + *foundUser.LastName,
+		ProfileImage: foundUser.ProfileImage,
 	}, nil
 }
 
@@ -1350,7 +1351,7 @@ func (i *Impl) ReviewFarmer(ctx context.Context,
 func (i *Impl) ListFarmers(ctx context.Context,
 	req *usersgrpc.ListFarmersRequest) (
 	*usersgrpc.ListFarmersResponse, error) {
-	startKey := 5.00
+	startKey := 5.10
 
 	count := req.GetCount()
 	if count == 0 {

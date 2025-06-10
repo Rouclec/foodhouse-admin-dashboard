@@ -112,6 +112,7 @@ export type usersgrpcGetFarmerByIDResponse = {
 
 export type usersgrpcGetPublicUserResponse = {
     name?: string;
+    profileImage?: string;
 };
 
 export type usersgrpcGetUserActiveSubscriptionResponse = {

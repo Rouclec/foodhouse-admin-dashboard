@@ -365,7 +365,10 @@ message GetUserActiveSubscriptionResponse {
 
 message GetPublicUserRequest { string user_id = 1; }
 
-message GetPublicUserResponse { string name = 1; }
+message GetPublicUserResponse {
+  string name = 1;
+  string profile_image = 2;
+}
 
 message ReviewFarmerRequest {
   string farmer_id = 1;

@@ -3,6 +3,7 @@ import { usersListFarmersOptions } from "@/client/users.swagger/@tanstack/react-
 import { Colors } from "@/constants";
 import i18n from "@/i18n";
 import { defaultStyles, farmersStyles as styles } from "@/styles";
+import { formatAmount } from "@/utils/amountFormater";
 import { Feather } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
@@ -68,9 +69,8 @@ export default function Farmers() {
         userId: user?.userId ?? "",
       },
       query: {
-        // count: count,
-        count: 2,
-        startKey: 5.0,
+        count: count,
+        startKey: 5.1,
         searchKey: debounceQuery,
       },
     }),
@@ -181,7 +181,13 @@ export default function Farmers() {
                           {item?.user?.lastName}
                         </Text>
                         <View style={styles.ratingsContainer}>
-                          {item?.rating ?? 0 > 0 ? (
+                          {item?.rating ?? 0 >= 5.0 ? (
+                            <Icon
+                              source={"star"}
+                              size={24}
+                              color={Colors.gold}
+                            />
+                          ) : item?.rating ?? 0 > 0 ? (
                             <Icon
                               source={"star-half-full"}
                               size={24}
@@ -194,7 +200,11 @@ export default function Farmers() {
                               color={Colors.grey["61"]}
                             />
                           )}
-                          <Text style={styles.ratingsText}>{item?.rating}</Text>
+                          <Text style={styles.ratingsText}>
+                            {formatAmount((item?.rating ?? 0.0).toString(), {
+                              decimalPlaces: item?.rating ?? 0 > 0 ? 1 : 0,
+                            })}
+                          </Text>
                         </View>
                       </View>
                     </View>

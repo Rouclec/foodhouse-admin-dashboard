@@ -1415,6 +1415,9 @@
       "properties": {
         "name": {
           "type": "string"
+        },
+        "profileImage": {
+          "type": "string"
         }
       }
     },
