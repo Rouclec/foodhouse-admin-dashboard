@@ -48,6 +48,9 @@ Parameters:
 
   GoogleChatClientSecretArn:
     Type: String
+
+  NexahClientSecretArn:
+    Type: String
   
   DomainName:
     Type: String
@@ -155,6 +158,14 @@ Resources:
               ValueFrom: !Sub "${FirebaseServiceAccountSecretArn}:::"
             - Name: FIREBASE_API_KEY
               ValueFrom: !Sub "${FirebaseSdkSecretArn}:apiKey::"
+            - Name: NEXAH_BASE_URL
+              ValueFrom: !Sub "${NexahClientSecretArn}:base_url::"
+            - Name: NEXAH_USER
+              ValueFrom: !Sub "${NexahClientSecretArn}:user::"
+            - Name: NEXAH_PASSWORD
+              ValueFrom: !Sub "${NexahClientSecretArn}:password::"
+            - Name: NEXAH_SENDER_ID
+              ValueFrom: !Sub "${NexahClientSecretArn}:sender_id::"
 
   # We create a data in the RDS instance for the application.
   # We do this with a custom Cloudformation resource that will run a lambda function.
@@ -200,6 +211,7 @@ Resources:
                   - !Ref FirebaseServiceAccountSecretArn
                   - !Ref FirebaseSdkSecretArn
                   - !Ref InfoBipClientSecretArn
+                  - !Ref NexahClientSecretArn
 
   # A role for the containers
   TaskRole:

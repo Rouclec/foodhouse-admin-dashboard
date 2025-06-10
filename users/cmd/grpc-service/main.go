@@ -56,6 +56,15 @@ type Config struct {
 		GoogleChat struct {
 			WebhookURL string `conf:"env:GOOGLE_CHAT_WEBHOOK_URL"`
 		}
+		Nexah struct {
+			BaseURL string `conf:"env:NEXAH_BASE_URL,required"`
+
+			User string `conf:"env:NEXAH_USER,required"`
+
+			Password string `conf:"env:NEXAH_PASSWORD,required"`
+
+			SenderId string `conf:"env:NEXAH_SENDER_ID,required"`
+		}
 		// SnsTopicArn is an optional parameter that, if set, weill send OTP messages to an SNS topic.
 		SnsTopicArn string `conf:"env:SMS_DEBUG_SNS_TOPIC_ARN"`
 	}
@@ -143,13 +152,19 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 	// 	return fmt.Errorf("failed to create twilio sms sender: %w", err)
 	// }
 
-	infoBipSender, err := sms.NewSmsSenderInfobip(config.Sms.InfoBip.BaseURL, config.Sms.InfoBip.APIKey)
+	// infoBipSender, err := sms.NewSmsSenderInfobip(config.Sms.InfoBip.BaseURL, config.Sms.InfoBip.APIKey)
+
+	// if err != nil {
+	// 	return fmt.Errorf("failed to create info bip sms sender: %w", err)
+	// }
+
+	nexahSender, err := sms.NewSmsSenderNexah(config.Sms.Nexah.BaseURL, config.Sms.Nexah.User, config.Sms.Nexah.Password, config.Sms.Nexah.SenderId)
 
 	if err != nil {
-		return fmt.Errorf("failed to create info bip sms sender: %w", err)
+		return fmt.Errorf("failed to create nexah sms sender: %w", err)
 	}
 
-	smsSender := sms.NewSmsSenderFanout(infoBipSender)
+	smsSender := sms.NewSmsSenderFanout(nexahSender)
 	if config.Sms.GoogleChat.WebhookURL != "" {
 		googleChatWebhookSender, smsErr := sms.NewSmsSenderGoogleChat(config.Sms.GoogleChat.WebhookURL)
 		if smsErr != nil {
