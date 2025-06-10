@@ -69,4 +69,5 @@ export default {
   border: "#777585",
   blue: "#335EF7",
   "blue-10": "#335EF71A",
+  gold: "#FDBA55",
 };

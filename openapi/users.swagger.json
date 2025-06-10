@@ -706,6 +706,12 @@
             "required": false,
             "type": "integer",
             "format": "int32"
+          },
+          {
+            "name": "searchKey",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [

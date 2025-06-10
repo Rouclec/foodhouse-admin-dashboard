@@ -285,7 +285,8 @@
       "farmers": {
         "farmers": "Farmers",
         "searchFarmers": "Search farmers",
-        "noFarmerFound": "No farmer found"
+        "noFarmerFound": "No farmer found",
+        "viewDetails": "View details"
       }
     },
     "product-details": {

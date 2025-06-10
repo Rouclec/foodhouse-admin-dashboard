@@ -523,6 +523,7 @@ export type UsersListFarmersData = {
     };
     query?: {
         count?: number;
+        searchKey?: string;
         startKey?: number;
     };
 };

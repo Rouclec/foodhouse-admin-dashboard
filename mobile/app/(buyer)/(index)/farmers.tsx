@@ -1,9 +1,8 @@
 import { Context, ContextType } from "@/app/_layout";
-import { ordersgrpcOrderStatus } from "@/client/orders.swagger";
 import { usersListFarmersOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { Colors } from "@/constants";
 import i18n from "@/i18n";
-import { defaultStyles, ordersStyles as styles } from "@/styles";
+import { defaultStyles, farmersStyles as styles } from "@/styles";
 import { Feather } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
@@ -16,9 +15,10 @@ import {
   Animated,
   FlatList,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { Chase } from "react-native-animated-spinkit";
-import { Appbar, Icon, Text, TextInput } from "react-native-paper";
+import { Appbar, Button, Icon, Text, TextInput } from "react-native-paper";
 
 const { width } = Dimensions.get("window");
 
@@ -135,7 +135,7 @@ export default function Farmers() {
             <FlatList
               data={data?.farmers}
               keyExtractor={(item, index) =>
-                item.user?.userId ?? index.toString()
+                item.user?.createdAt ?? index.toString()
               }
               contentContainerStyle={[
                 defaultStyles.paddingVertical,
@@ -156,9 +156,54 @@ export default function Farmers() {
               }}
               renderItem={({ item }) => {
                 return (
-                  <View>
-                    <Text>{item?.user?.firstName}</Text>
-                    <Text>{item?.rating}</Text>
+                  <View style={styles.farmerItemContainer}>
+                    <View style={styles.profileContainer}>
+                      <View style={styles.profileImageContainer}>
+                        {item?.user?.profileImage ? (
+                          <Image
+                            source={{ uri: item?.user?.profileImage }}
+                            style={styles.profileImage}
+                          />
+                        ) : (
+                          <Icon
+                            source={"account"}
+                            size={36}
+                            color={Colors.grey["61"]}
+                          />
+                        )}
+                      </View>
+                      <View style={styles.nameContainer}>
+                        <Text variant="titleSmall" style={styles.text18}>
+                          {!!item?.user?.firstName
+                            ? item?.user?.firstName
+                            : "Anonymous"}{" "}
+                          {item?.user?.lastName}
+                        </Text>
+                        <View style={styles.ratingsContainer}>
+                          {item?.rating ?? 0 > 0 ? (
+                            <Icon
+                              source={"star-half-full"}
+                              size={24}
+                              color={Colors.gold}
+                            />
+                          ) : (
+                            <Icon
+                              source={"star-outline"}
+                              size={24}
+                              color={Colors.grey["61"]}
+                            />
+                          )}
+                          <Text style={styles.ratingsText}>{item?.rating}</Text>
+                        </View>
+                      </View>
+                    </View>
+                    <Button
+                      style={styles.button}
+                    >
+                      <Text style={defaultStyles.buttonText}>
+                        {i18n.t("(buyer).(index).farmers.viewDetails")}
+                      </Text>
+                    </Button>
                   </View>
                 );
               }}
