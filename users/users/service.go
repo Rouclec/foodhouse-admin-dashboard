@@ -1163,6 +1163,12 @@ func (i *Impl) GetFarmerByID(
 
 	i.logger.Debug().Interface("User found", foundUser).Msg("User from DB")
 
+	farmerRating, err := i.repo.Do().GetFarmerRating(ctx, req.GetFarmerId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting farmer's rating %v", err)
+	}
+
 	return &usersgrpc.GetFarmerByIDResponse{
 		User: &usersgrpc.User{
 			UserId:                  foundUser.ID,
@@ -1176,6 +1182,7 @@ func (i *Impl) GetFarmerByID(
 			CreatedAt:               timestamppb.New(foundUser.CreatedAt.Time),
 			UpdatedAt:               timestamppb.New(foundUser.UpdatedAt.Time),
 		},
+		Rating: farmerRating,
 	}, nil
 }
 
@@ -1264,5 +1271,106 @@ func (i *Impl) GetPublicUser(ctx context.Context,
 
 	return &usersgrpc.GetPublicUserResponse{
 		Name: *foundUser.FirstName + " " + *foundUser.LastName,
+	}, nil
+}
+
+// ListFarmersReivews implements usersgrpc.UsersServer.
+func (i *Impl) ListFarmersReivews(ctx context.Context, req *usersgrpc.ListFarmersReviewsRequest) (*usersgrpc.ListFarmersReivewsResponse, error) {
+	var err error
+	startKey := time.Now().Add(time.Hour)
+
+	count := int(req.GetCount())
+	if count == 0 {
+		count = 10
+	}
+
+	if req.GetStartKey() != "" {
+		startKey, err = time.Parse(time.RFC3339, req.GetStartKey())
+		if err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "Invalid start key")
+		}
+	}
+
+	i.logger.Debug().Msgf("Start key %v", startKey)
+
+	args := sqlc.ListFarmerReviewsParams{
+		FarmerID:      req.GetFarmerId(),
+		CreatedBefore: startKey,
+		Count:         int32(count),
+	}
+	sqlcReviews, err := i.repo.Do().ListFarmerReviews(ctx, args)
+
+	protoReviews, err := converters.SqlcToProtoReviews(sqlcReviews)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error converting sqlc to proto reviews %v", err)
+	}
+
+	nextKey := ""
+
+	if len(protoReviews) >= count {
+		nextKey = protoReviews[len(protoReviews)-1].GetCreatedAt().AsTime().Format(time.RFC3339)
+	}
+
+	return &usersgrpc.ListFarmersReivewsResponse{
+		Reviews: protoReviews,
+		NextKey: nextKey,
+	}, nil
+}
+
+// ReviewFarmer implements usersgrpc.UsersServer.
+func (i *Impl) ReviewFarmer(ctx context.Context, req *usersgrpc.ReviewFarmerRequest) (*usersgrpc.ReviewFarmerResponse, error) {
+	_, err := i.repo.Do().CreateReview(ctx, sqlc.CreateReviewParams{
+		FarmerID:  req.GetFarmerId(),
+		OrderID:   req.GetOrderId(),
+		ProductID: req.GetProductId(),
+		Rating:    req.GetRating(),
+		Comment:   req.GetComment(),
+		CreatedBy: &req.UserId,
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error creating review: %v", err)
+	}
+
+	return &usersgrpc.ReviewFarmerResponse{}, nil
+}
+
+// ListFarmers implements usersgrpc.UsersServer.
+func (i *Impl) ListFarmers(ctx context.Context, req *usersgrpc.ListFarmersRequest) (*usersgrpc.ListFarmersResponse, error) {
+	startKey := 5.00
+
+	count := int(req.GetCount())
+	if count == 0 {
+		count = 10
+	}
+
+	if req.GetStartKey() != 0.00 {
+		startKey = req.GetStartKey()
+	}
+
+	i.logger.Debug().Msgf("Start key %v", startKey)
+
+	args := sqlc.ListFarmersByRatingParams{
+		CursorAverageRating: startKey,
+		Count:               int32(count),
+	}
+
+	farmers, err := i.repo.Do().ListFarmersByRating(ctx, args)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error fetching farmers, %v", err)
+	}
+
+	protoFarmers, err := converters.SqlcToProtoFarmers(farmers)
+
+	nextKey := 0.00
+	if len(protoFarmers) >= count {
+		nextKey = protoFarmers[len(protoFarmers)-1].GetRating()
+	}
+
+	return &usersgrpc.ListFarmersResponse{
+		Farmers: protoFarmers,
+		NextKey: nextKey,
 	}, nil
 }

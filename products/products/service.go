@@ -172,6 +172,7 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 
 	args := sqlc.ListProductsParams{
 		CategoryID:    req.GetCategoryId(),
+		CreatedBy:     req.GetCreatedBy(),
 		MinValue:      req.GetMinAmount().GetValue(),
 		MaxValue:      req.GetMaxAmount().GetValue(),
 		Search:        req.GetSearch(),

@@ -95,6 +95,17 @@ message UserSubscription {
   google.protobuf.Timestamp expires_at = 7;
 }
 
+message Review {
+  string id = 1;
+  string farmer_id = 2;
+  string order_id = 3;
+  string product_id = 4;
+  double rating = 5;
+  string comment = 6;
+  string created_by = 7;
+  google.protobuf.Timestamp created_at = 8;
+}
+
 message RefreshAccessTokenRequest {
   // The refresh token to validate and exchange for a new access token
   string refresh_token = 1;
@@ -174,6 +185,7 @@ message GetFarmerByIDRequest {
 // Response message for GetFarmerByID
 message GetFarmerByIDResponse {
   User user = 1; // User details
+  double rating = 2;
 }
 
 // Request message for UpdateUser
@@ -354,6 +366,45 @@ message GetUserActiveSubscriptionResponse {
 message GetPublicUserRequest { string user_id = 1; }
 
 message GetPublicUserResponse { string name = 1; }
+
+message ReviewFarmerRequest {
+  string farmer_id = 1;
+  string order_id = 2;
+  string product_id = 3;
+  string user_id = 4;
+  double rating = 5;
+  string comment = 6;
+}
+
+message ReviewFarmerResponse {}
+
+message ListFarmersRequest {
+  string user_id = 1;
+  double start_key = 2;
+  int32 count = 3;
+}
+
+message FarmerWithRating {
+  User user = 1;
+  double rating = 2;
+}
+
+message ListFarmersResponse {
+  repeated FarmerWithRating farmers = 1;
+  double next_key = 2;
+}
+
+message ListFarmersReviewsRequest {
+  string farmer_id = 1;
+  string user_id = 2;
+  string startKey = 3;
+  int32 count = 4;
+}
+
+message ListFarmersReivewsResponse {
+  repeated Review reviews = 1;
+  string next_key = 2;
+}
 
 service Users {
 
@@ -554,6 +605,26 @@ service Users {
   rpc GetPublicUser(GetPublicUserRequest) returns (GetPublicUserResponse) {
     option (google.api.http) = {
       get : "/v1/public/users/{user_id}/get-public-user"
+    };
+  }
+
+  rpc ReviewFarmer(ReviewFarmerRequest) returns (ReviewFarmerResponse) {
+    option (google.api.http) = {
+      post : "/v1/users/{user_id}/review-farmer"
+      body : "*"
+    };
+  }
+
+  rpc ListFarmersReivews(ListFarmersReviewsRequest)
+      returns (ListFarmersReivewsResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/farmers/{farmer_id}/list-farmers-reviews"
+    };
+  }
+
+  rpc ListFarmers(ListFarmersRequest) returns (ListFarmersResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/farmers/list-farmers"
     };
   }
 }

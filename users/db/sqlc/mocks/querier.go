@@ -99,6 +99,21 @@ func (mr *MockQuerierMockRecorder) CreateRefreshToken(ctx, arg any) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRefreshToken", reflect.TypeOf((*MockQuerier)(nil).CreateRefreshToken), ctx, arg)
 }
 
+// CreateReview mocks base method.
+func (m *MockQuerier) CreateReview(ctx context.Context, arg sqlc.CreateReviewParams) (sqlc.FarmersReview, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateReview", ctx, arg)
+	ret0, _ := ret[0].(sqlc.FarmersReview)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateReview indicates an expected call of CreateReview.
+func (mr *MockQuerierMockRecorder) CreateReview(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateReview", reflect.TypeOf((*MockQuerier)(nil).CreateReview), ctx, arg)
+}
+
 // CreateSentOtp mocks base method.
 func (m *MockQuerier) CreateSentOtp(ctx context.Context, arg sqlc.CreateSentOtpParams) (sqlc.SentOtp, error) {
 	m.ctrl.T.Helper()
@@ -244,6 +259,21 @@ func (m *MockQuerier) GetFarmer(ctx context.Context, id string) (sqlc.User, erro
 func (mr *MockQuerierMockRecorder) GetFarmer(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFarmer", reflect.TypeOf((*MockQuerier)(nil).GetFarmer), ctx, id)
+}
+
+// GetFarmerRating mocks base method.
+func (m *MockQuerier) GetFarmerRating(ctx context.Context, farmerID string) (float64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFarmerRating", ctx, farmerID)
+	ret0, _ := ret[0].(float64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFarmerRating indicates an expected call of GetFarmerRating.
+func (mr *MockQuerierMockRecorder) GetFarmerRating(ctx, farmerID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFarmerRating", reflect.TypeOf((*MockQuerier)(nil).GetFarmerRating), ctx, farmerID)
 }
 
 // GetLatestSentOtpByFactor mocks base method.
@@ -439,6 +469,36 @@ func (m *MockQuerier) GetUserSubscriptionByID(ctx context.Context, id string) (s
 func (mr *MockQuerierMockRecorder) GetUserSubscriptionByID(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserSubscriptionByID", reflect.TypeOf((*MockQuerier)(nil).GetUserSubscriptionByID), ctx, id)
+}
+
+// ListFarmerReviews mocks base method.
+func (m *MockQuerier) ListFarmerReviews(ctx context.Context, arg sqlc.ListFarmerReviewsParams) ([]sqlc.FarmersReview, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListFarmerReviews", ctx, arg)
+	ret0, _ := ret[0].([]sqlc.FarmersReview)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListFarmerReviews indicates an expected call of ListFarmerReviews.
+func (mr *MockQuerierMockRecorder) ListFarmerReviews(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListFarmerReviews", reflect.TypeOf((*MockQuerier)(nil).ListFarmerReviews), ctx, arg)
+}
+
+// ListFarmersByRating mocks base method.
+func (m *MockQuerier) ListFarmersByRating(ctx context.Context, arg sqlc.ListFarmersByRatingParams) ([]sqlc.ListFarmersByRatingRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListFarmersByRating", ctx, arg)
+	ret0, _ := ret[0].([]sqlc.ListFarmersByRatingRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListFarmersByRating indicates an expected call of ListFarmersByRating.
+func (mr *MockQuerierMockRecorder) ListFarmersByRating(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListFarmersByRating", reflect.TypeOf((*MockQuerier)(nil).ListFarmersByRating), ctx, arg)
 }
 
 // ListSubsriptions mocks base method.

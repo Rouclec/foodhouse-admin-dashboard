@@ -13,6 +13,7 @@ type Querier interface {
 	CountSentOtpsToFactorToday(ctx context.Context, factor string) (int64, error)
 	CountUsers(ctx context.Context, arg CountUsersParams) (int64, error)
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) error
+	CreateReview(ctx context.Context, arg CreateReviewParams) (FarmersReview, error)
 	CreateSentOtp(ctx context.Context, arg CreateSentOtpParams) (SentOtp, error)
 	CreateSubscription(ctx context.Context, arg CreateSubscriptionParams) (Subscription, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
@@ -23,6 +24,7 @@ type Querier interface {
 	DeleteUserSubscription(ctx context.Context, id string) error
 	GetAllUserSubscriptions(ctx context.Context) ([]UserSubscription, error)
 	GetFarmer(ctx context.Context, id string) (User, error)
+	GetFarmerRating(ctx context.Context, farmerID string) (float64, error)
 	GetLatestSentOtpByFactor(ctx context.Context, arg GetLatestSentOtpByFactorParams) ([]SentOtp, error)
 	GetRefreshToken(ctx context.Context, token string) (RefreshToken, error)
 	GetSentOtpByRequestId(ctx context.Context, requestID string) (SentOtp, error)
@@ -36,6 +38,8 @@ type Querier interface {
 	GetUserForUpdate(ctx context.Context, id string) (User, error)
 	GetUserPaymentMethodsByUserID(ctx context.Context, userID string) ([]UserPaymentMethod, error)
 	GetUserSubscriptionByID(ctx context.Context, id string) (UserSubscription, error)
+	ListFarmerReviews(ctx context.Context, arg ListFarmerReviewsParams) ([]FarmersReview, error)
+	ListFarmersByRating(ctx context.Context, arg ListFarmersByRatingParams) ([]ListFarmersByRatingRow, error)
 	ListSubsriptions(ctx context.Context) ([]Subscription, error)
 	RevokeRefreshToken(ctx context.Context, token string) error
 	UpdateSentOtp(ctx context.Context, arg UpdateSentOtpParams) error

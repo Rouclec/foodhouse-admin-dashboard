@@ -231,6 +231,77 @@ func (q *Queries) GetUserForUpdate(ctx context.Context, id string) (User, error)
 	return i, err
 }
 
+const listFarmersByRating = `-- name: ListFarmersByRating :many
+SELECT
+    f.id,
+    f.first_name,
+    f.last_name,
+    f.profile_image,
+    f.created_at,
+    COALESCE(fr.average_rating, 0) AS average_rating
+FROM
+    users f
+LEFT JOIN (
+    SELECT
+        farmer_id,
+        AVG(rating) AS average_rating
+    FROM
+        farmers_reviews
+    GROUP BY
+        farmer_id
+) AS fr ON f.id = fr.farmer_id
+WHERE
+    ($1::float = 0.0) -- If cursor_average_rating is 0.0 (initial fetch)
+    OR
+    (COALESCE(fr.average_rating, 0) < $1::float) -- Or, get farmers with a strictly lower average rating than the cursor's rating
+AND role = 'USER_ROLE_FARMER'
+ORDER BY
+    average_rating DESC,
+    f.created_at ASC -- Oldest farmers take precedence if ratings are tied
+LIMIT $2
+`
+
+type ListFarmersByRatingParams struct {
+	CursorAverageRating float64 `json:"cursor_average_rating"`
+	Count               int32   `json:"count"`
+}
+
+type ListFarmersByRatingRow struct {
+	ID            string             `json:"id"`
+	FirstName     *string            `json:"first_name"`
+	LastName      *string            `json:"last_name"`
+	ProfileImage  string             `json:"profile_image"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	AverageRating float64            `json:"average_rating"`
+}
+
+func (q *Queries) ListFarmersByRating(ctx context.Context, arg ListFarmersByRatingParams) ([]ListFarmersByRatingRow, error) {
+	rows, err := q.db.Query(ctx, listFarmersByRating, arg.CursorAverageRating, arg.Count)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListFarmersByRatingRow{}
+	for rows.Next() {
+		var i ListFarmersByRatingRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.FirstName,
+			&i.LastName,
+			&i.ProfileImage,
+			&i.CreatedAt,
+			&i.AverageRating,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateUser = `-- name: UpdateUser :one
 UPDATE users
 SET
