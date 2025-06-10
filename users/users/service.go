@@ -1354,6 +1354,7 @@ func (i *Impl) ListFarmers(ctx context.Context, req *usersgrpc.ListFarmersReques
 	args := sqlc.ListFarmersByRatingParams{
 		CursorAverageRating: startKey,
 		Count:               int32(count),
+		SearchKey:           req.GetSearchKey(),
 	}
 
 	farmers, err := i.repo.Do().ListFarmersByRating(ctx, args)

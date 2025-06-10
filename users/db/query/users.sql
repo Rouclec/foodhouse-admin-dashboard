@@ -69,6 +69,13 @@ WHERE
     OR
     (COALESCE(fr.average_rating, 0) < sqlc.arg(cursor_average_rating)::float) -- Or, get farmers with a strictly lower average rating than the cursor's rating
 AND role = 'USER_ROLE_FARMER'
+AND (
+        sqlc.arg(search_key) = '' -- if empty, skip search
+        OR (
+            LOWER(f.first_name) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
+            OR LOWER(f.last_name) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
+        )
+    )
 ORDER BY
     average_rating DESC,
     f.created_at ASC -- Oldest farmers take precedence if ratings are tied

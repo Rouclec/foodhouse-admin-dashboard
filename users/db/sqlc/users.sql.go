@@ -255,15 +255,23 @@ WHERE
     OR
     (COALESCE(fr.average_rating, 0) < $1::float) -- Or, get farmers with a strictly lower average rating than the cursor's rating
 AND role = 'USER_ROLE_FARMER'
+AND (
+        $2 = '' -- if empty, skip search
+        OR (
+            LOWER(f.first_name) LIKE LOWER('%' || $2 || '%')
+            OR LOWER(f.last_name) LIKE LOWER('%' || $2 || '%')
+        )
+    )
 ORDER BY
     average_rating DESC,
     f.created_at ASC -- Oldest farmers take precedence if ratings are tied
-LIMIT $2
+LIMIT $3
 `
 
 type ListFarmersByRatingParams struct {
-	CursorAverageRating float64 `json:"cursor_average_rating"`
-	Count               int32   `json:"count"`
+	CursorAverageRating float64     `json:"cursor_average_rating"`
+	SearchKey           interface{} `json:"search_key"`
+	Count               int32       `json:"count"`
 }
 
 type ListFarmersByRatingRow struct {
@@ -276,7 +284,7 @@ type ListFarmersByRatingRow struct {
 }
 
 func (q *Queries) ListFarmersByRating(ctx context.Context, arg ListFarmersByRatingParams) ([]ListFarmersByRatingRow, error) {
-	rows, err := q.db.Query(ctx, listFarmersByRating, arg.CursorAverageRating, arg.Count)
+	rows, err := q.db.Query(ctx, listFarmersByRating, arg.CursorAverageRating, arg.SearchKey, arg.Count)
 	if err != nil {
 		return nil, err
 	}
