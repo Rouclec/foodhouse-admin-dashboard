@@ -31,6 +31,7 @@ type Querier interface {
 	GetUser(ctx context.Context, id string) (User, error)
 	GetUserActiveSubscription(ctx context.Context, userID string) (UserSubscription, error)
 	GetUserByEmail(ctx context.Context, email *string) (User, error)
+	GetUserByNationalNumber(ctx context.Context, nationalNumber string) (User, error)
 	GetUserByPhoneNumber(ctx context.Context, phoneNumber string) (User, error)
 	GetUserForUpdate(ctx context.Context, id string) (User, error)
 	GetUserPaymentMethodsByUserID(ctx context.Context, userID string) ([]UserPaymentMethod, error)
@@ -40,6 +41,7 @@ type Querier interface {
 	UpdateSentOtp(ctx context.Context, arg UpdateSentOtpParams) error
 	UpdateSubscription(ctx context.Context, arg UpdateSubscriptionParams) (Subscription, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
+	// ensures a valid country code
 	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error
 	UpdateUserRole(ctx context.Context, arg UpdateUserRoleParams) error
 }

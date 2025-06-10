@@ -28,6 +28,12 @@ SELECT * FROM users WHERE email = $1;
 -- name: GetUserByPhoneNumber :one
 SELECT * FROM users WHERE phone_number = $1;
 
+-- name: GetUserByNationalNumber :one
+-- name: GetUserByNationalNumber :one
+SELECT *
+FROM users
+WHERE RIGHT(phone_number, CHAR_LENGTH(sqlc.arg(national_number)::TEXT)) = sqlc.arg(national_number)::TEXT
+  AND CHAR_LENGTH(phone_number) - CHAR_LENGTH(sqlc.arg(national_number)::TEXT) BETWEEN 1 AND 5; -- ensures a valid country code
 
 -- name: UpdateUserPassword :exec
 UPDATE users SET password = $1 WHERE id = $2;

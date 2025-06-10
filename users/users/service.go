@@ -546,7 +546,7 @@ func (i *Impl) validateAuthFactor(ctx context.Context, authFactor *usersgrpc.Aut
 	case usersgrpc.FactorType_FACTOR_TYPE_EMAIL_PASSWORD:
 		return i.validateEmailPassword(ctx, authFactor)
 	case usersgrpc.FactorType_FACTOR_TYPE_EMAIL_PHONE_PASSWORD:
-		if strings.Contains(authFactor.Id, "@") {
+		if strings.Contains(authFactor.GetId(), "@") {
 			return i.validateEmailPassword(ctx, authFactor)
 		}
 		return i.validatePhonePassword(ctx, authFactor)
@@ -572,13 +572,7 @@ func (i *Impl) validateEmailPassword(ctx context.Context, authFactor *usersgrpc.
 }
 
 func (i *Impl) validatePhonePassword(ctx context.Context, authFactor *usersgrpc.AuthFactor) (string, error) {
-	formattedNumber, err := formatPhoneNumber(formatFactor(authFactor.Id))
-
-	if err != nil {
-		return "", status.Errorf(codes.InvalidArgument, "Invalid phone number: %v", err)
-	}
-
-	user, err := i.repo.Do().GetUserByPhoneNumber(ctx, formattedNumber)
+	user, err := i.repo.Do().GetUserByNationalNumber(ctx, authFactor.GetId())
 	if err != nil {
 		return "", status.Errorf(codes.NotFound, "User not found: %v", err)
 	}
