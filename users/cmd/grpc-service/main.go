@@ -63,7 +63,7 @@ type Config struct {
 
 			Password string `conf:"env:NEXAH_PASSWORD,required"`
 
-			SenderId string `conf:"env:NEXAH_SENDER_ID,required"`
+			SenderID string `conf:"env:NEXAH_SENDER_ID,required"`
 		}
 		// SnsTopicArn is an optional parameter that, if set, weill send OTP messages to an SNS topic.
 		SnsTopicArn string `conf:"env:SMS_DEBUG_SNS_TOPIC_ARN"`
@@ -158,7 +158,10 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 	// 	return fmt.Errorf("failed to create info bip sms sender: %w", err)
 	// }
 
-	nexahSender, err := sms.NewSmsSenderNexah(config.Sms.Nexah.BaseURL, config.Sms.Nexah.User, config.Sms.Nexah.Password, config.Sms.Nexah.SenderId)
+	nexahSender, err := sms.NewSmsSenderNexah(config.Sms.Nexah.BaseURL,
+		config.Sms.Nexah.User,
+		config.Sms.Nexah.Password,
+		config.Sms.Nexah.SenderID)
 
 	if err != nil {
 		return fmt.Errorf("failed to create nexah sms sender: %w", err)

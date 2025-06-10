@@ -12,14 +12,14 @@ type SmsSenderNexah struct {
 	BaseURL  string
 	User     string
 	Password string
-	SenderId string
+	SenderID string
 	Client   *http.Client
 }
 
 type NexahSmsRequest struct {
 	User     string `json:"user"`
 	Password string `json:"password"`
-	SenderId string `json:"senderid"`
+	SenderID string `json:"senderid"`
 	SMS      string `json:"sms"`
 	Mobiles  string `json:"mobiles"`
 }
@@ -43,7 +43,7 @@ func NewSmsSenderNexah(baseURL string, user string, password string, senderId st
 		BaseURL:  baseURL,
 		User:     user,
 		Password: password,
-		SenderId: senderId,
+		SenderID: senderId,
 	}, nil
 }
 
@@ -53,7 +53,7 @@ func (s *SmsSenderNexah) SendSms(ctx context.Context, to, message string) (*stri
 	reqBody := NexahSmsRequest{
 		User:     s.User,
 		Password: s.Password,
-		SenderId: s.SenderId,
+		SenderID: s.SenderID,
 		SMS:      message,
 		Mobiles:  to,
 	}
