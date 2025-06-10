@@ -36,6 +36,8 @@ const (
 	ResetPassword = "RESET_PASSWORD"
 
 	OneMillion = 1000000
+
+	DefaultRating = 0.00
 )
 
 // Impl is the implementation of the Users service.
@@ -1275,11 +1277,13 @@ func (i *Impl) GetPublicUser(ctx context.Context,
 }
 
 // ListFarmersReivews implements usersgrpc.UsersServer.
-func (i *Impl) ListFarmersReivews(ctx context.Context, req *usersgrpc.ListFarmersReviewsRequest) (*usersgrpc.ListFarmersReivewsResponse, error) {
+func (i *Impl) ListFarmersReivews(ctx context.Context,
+	req *usersgrpc.ListFarmersReviewsRequest) (
+	*usersgrpc.ListFarmersReivewsResponse, error) {
 	var err error
 	startKey := time.Now().Add(time.Hour)
 
-	count := int(req.GetCount())
+	count := req.GetCount()
 	if count == 0 {
 		count = 10
 	}
@@ -1296,9 +1300,13 @@ func (i *Impl) ListFarmersReivews(ctx context.Context, req *usersgrpc.ListFarmer
 	args := sqlc.ListFarmerReviewsParams{
 		FarmerID:      req.GetFarmerId(),
 		CreatedBefore: startKey,
-		Count:         int32(count),
+		Count:         count,
 	}
 	sqlcReviews, err := i.repo.Do().ListFarmerReviews(ctx, args)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error fetching farmer reviews: %v", err)
+	}
 
 	protoReviews, err := converters.SqlcToProtoReviews(sqlcReviews)
 
@@ -1308,7 +1316,7 @@ func (i *Impl) ListFarmersReivews(ctx context.Context, req *usersgrpc.ListFarmer
 
 	nextKey := ""
 
-	if len(protoReviews) >= count {
+	if len(protoReviews) >= int(count) {
 		nextKey = protoReviews[len(protoReviews)-1].GetCreatedAt().AsTime().Format(time.RFC3339)
 	}
 
@@ -1319,7 +1327,9 @@ func (i *Impl) ListFarmersReivews(ctx context.Context, req *usersgrpc.ListFarmer
 }
 
 // ReviewFarmer implements usersgrpc.UsersServer.
-func (i *Impl) ReviewFarmer(ctx context.Context, req *usersgrpc.ReviewFarmerRequest) (*usersgrpc.ReviewFarmerResponse, error) {
+func (i *Impl) ReviewFarmer(ctx context.Context,
+	req *usersgrpc.ReviewFarmerRequest) (
+	*usersgrpc.ReviewFarmerResponse, error) {
 	_, err := i.repo.Do().CreateReview(ctx, sqlc.CreateReviewParams{
 		FarmerID:  req.GetFarmerId(),
 		OrderID:   req.GetOrderId(),
@@ -1337,15 +1347,17 @@ func (i *Impl) ReviewFarmer(ctx context.Context, req *usersgrpc.ReviewFarmerRequ
 }
 
 // ListFarmers implements usersgrpc.UsersServer.
-func (i *Impl) ListFarmers(ctx context.Context, req *usersgrpc.ListFarmersRequest) (*usersgrpc.ListFarmersResponse, error) {
+func (i *Impl) ListFarmers(ctx context.Context,
+	req *usersgrpc.ListFarmersRequest) (
+	*usersgrpc.ListFarmersResponse, error) {
 	startKey := 5.00
 
-	count := int(req.GetCount())
+	count := req.GetCount()
 	if count == 0 {
 		count = 10
 	}
 
-	if req.GetStartKey() != 0.00 {
+	if req.GetStartKey() != DefaultRating {
 		startKey = req.GetStartKey()
 	}
 
@@ -1353,20 +1365,24 @@ func (i *Impl) ListFarmers(ctx context.Context, req *usersgrpc.ListFarmersReques
 
 	args := sqlc.ListFarmersByRatingParams{
 		CursorAverageRating: startKey,
-		Count:               int32(count),
+		Count:               count,
 		SearchKey:           req.GetSearchKey(),
 	}
 
 	farmers, err := i.repo.Do().ListFarmersByRating(ctx, args)
 
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error fetching farmers, %v", err)
+		return nil, status.Errorf(codes.Internal, "error fetching farmers: %v", err)
 	}
 
 	protoFarmers, err := converters.SqlcToProtoFarmers(farmers)
 
-	nextKey := 0.00
-	if len(protoFarmers) >= count {
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error converting sqlc to proto farmers: %v", err)
+	}
+
+	nextKey := DefaultRating
+	if len(protoFarmers) >= int(count) {
 		nextKey = protoFarmers[len(protoFarmers)-1].GetRating()
 	}
 

@@ -49,6 +49,10 @@ export const farmersStyles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: Colors.grey["9e"],
   },
+  avatar: {
+    width: 36,
+    height: 36,
+  },
   profileImage: {
     height: 60,
     width: 60,

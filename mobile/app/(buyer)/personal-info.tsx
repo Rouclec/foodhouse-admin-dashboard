@@ -163,10 +163,9 @@ export default function PersonalInfo() {
                         style={signupStyles.profileImage}
                       />
                     ) : (
-                      <Icon
-                        source={"account"}
-                        size={64}
-                        color={Colors.grey["61"]}
+                      <Image
+                        source={require("@/assets/images/avatar.png")}
+                        style={signupStyles.avatar}
                       />
                     )}
                     <View style={signupStyles.cameraIcon}>

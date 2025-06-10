@@ -251,12 +251,13 @@ LEFT JOIN (
         farmer_id
 ) AS fr ON f.id = fr.farmer_id
 WHERE
-    ($1::float = 0.0) -- If cursor_average_rating is 0.0 (initial fetch)
-    OR
-    (COALESCE(fr.average_rating, 0) < $1::float) -- Or, get farmers with a strictly lower average rating than the cursor's rating
-AND role = 'USER_ROLE_FARMER'
-AND (
-        $2 = '' -- if empty, skip search
+    (
+        $1::float = 0.0
+        OR COALESCE(fr.average_rating, 0) < $1::float
+    )
+    AND role = 'USER_ROLE_FARMER'
+    AND (
+        $2 = ''
         OR (
             LOWER(f.first_name) LIKE LOWER('%' || $2 || '%')
             OR LOWER(f.last_name) LIKE LOWER('%' || $2 || '%')

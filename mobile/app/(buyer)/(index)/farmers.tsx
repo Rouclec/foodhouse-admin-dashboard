@@ -68,8 +68,9 @@ export default function Farmers() {
         userId: user?.userId ?? "",
       },
       query: {
-        count: count,
-        startKey: 0.0,
+        // count: count,
+        count: 2,
+        startKey: 5.0,
         searchKey: debounceQuery,
       },
     }),
@@ -166,10 +167,9 @@ export default function Farmers() {
                             style={styles.profileImage}
                           />
                         ) : (
-                          <Icon
-                            source={"account"}
-                            size={36}
-                            color={Colors.grey["61"]}
+                          <Image
+                            source={require("@/assets/images/avatar.png")}
+                            style={styles.avatar}
                           />
                         )}
                       </View>

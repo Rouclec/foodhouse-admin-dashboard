@@ -358,7 +358,9 @@
     "farmer-details": {
       "farmerInformation": "Farmer Information",
       "products": "Products",
-      "reviews": "Reviews"
+      "reviews": "Reviews",
+      "noProductsFound": "No products found",
+      "noReviewsYet": "No reviews yet"
     }
   },
   "components": {
