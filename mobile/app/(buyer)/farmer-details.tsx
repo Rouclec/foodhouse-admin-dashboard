@@ -1,8 +1,10 @@
 import { Context, ContextType } from "@/app/_layout";
 import { ordersgrpcOrderStatus } from "@/client/orders.swagger";
 import { productsListProductsOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
+import { usersGetPublicUser, usersgrpcReview } from "@/client/users.swagger";
 import {
   usersGetFarmerByIdOptions,
+  usersGetPublicUserOptions,
   usersListFarmersReivewsOptions,
   usersReviewFarmerMutation,
 } from "@/client/users.swagger/@tanstack/react-query.gen";
@@ -10,9 +12,10 @@ import { Product } from "@/components";
 import { Colors } from "@/constants";
 import i18n from "@/i18n";
 import { defaultStyles, farmerDetailsStyle as styles } from "@/styles";
+import { formatAmount } from "@/utils/amountFormater";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useContext, useState } from "react";
+import React, { FC, useContext, useState } from "react";
 import {
   View,
   KeyboardAvoidingView,
@@ -37,6 +40,32 @@ const TAB_ITEMS: Array<{
     value: "REVIEWS",
   },
 ];
+
+type CommentItemProps = {
+  item: usersgrpcReview;
+};
+const CommentItem: FC<CommentItemProps> = ({ item }) => {
+  const { data, isLoading } = useQuery({
+    ...usersGetPublicUserOptions({
+      path: {
+        userId: item?.createdBy ?? "",
+      },
+    }),
+  });
+
+  console.log({ data });
+  return (
+    <View>
+      <View>
+        <View>
+          <View></View>
+          <Text>{""}</Text>
+        </View>
+      </View>
+      <Text>{item?.comment}</Text>
+    </View>
+  );
+};
 
 export default function FarmerDetails() {
   const router = useRouter();
@@ -88,29 +117,29 @@ export default function FarmerDetails() {
     }),
   });
 
-  const handleReview = async () => {
-    try {
-      await mutateAsync({
-        body: {
-          farmerId: farmerId as string,
-          orderId: "4",
-          productId: "1234567890",
-          rating: 5,
-          comment:
-            "Absolutely satisfied with the ripe plantains 🍌👌, they were perfectly ripe and delicious!",
-        },
-        path: {
-          userId: user?.userId ?? "",
-        },
-      });
-    } catch (error) {
-      console.error({ error }, "reviewing farmer");
-    }
-  };
+  //   const handleReview = async () => {
+  //     try {
+  //       await mutateAsync({
+  //         body: {
+  //           farmerId: farmerId as string,
+  //           orderId: "4",
+  //           productId: "1234567890",
+  //           rating: 4.5,
+  //           comment:
+  //             "Impressed by the quality of the ripe plantains received 🌟, will definitely be ordering again!",
+  //         },
+  //         path: {
+  //           userId: user?.userId ?? "",
+  //         },
+  //       });
+  //     } catch (error) {
+  //       console.error({ error }, "reviewing farmer");
+  //     }
+  //   };
 
-  const { mutateAsync } = useMutation({
-    ...usersReviewFarmerMutation(),
-  });
+  //   const { mutateAsync } = useMutation({
+  //     ...usersReviewFarmerMutation(),
+  //   });
 
   return (
     <>
@@ -156,7 +185,9 @@ export default function FarmerDetails() {
                   {farmerDetails?.user?.lastName}
                 </Text>
                 <View style={styles.ratingsContainer}>
-                  {farmerDetails?.rating ?? 0 > 0 ? (
+                  {farmerDetails?.rating ?? 0 >= 5.0 ? (
+                    <Icon source={"star"} size={24} color={Colors.gold} />
+                  ) : farmerDetails?.rating ?? 0 > 0 ? (
                     <Icon
                       source={"star-half-full"}
                       size={24}
@@ -170,7 +201,9 @@ export default function FarmerDetails() {
                     />
                   )}
                   <Text style={styles.ratingsText}>
-                    {farmerDetails?.rating}
+                    {formatAmount((farmerDetails?.rating ?? 0.0).toString(), {
+                      decimalPlaces: farmerDetails?.rating ?? 0 > 0 ? 1 : 0,
+                    })}
                   </Text>
                 </View>
               </View>
@@ -218,7 +251,9 @@ export default function FarmerDetails() {
                 <FlatList
                   key={"REVIEWS"}
                   data={farmerReviews?.reviews}
-                  keyExtractor={(item, index) => item?.id ?? index.toString()}
+                  keyExtractor={(item, index) =>
+                    item?.createdAt ?? index.toString()
+                  }
                   contentContainerStyle={[
                     defaultStyles.paddingVertical,
                     styles.flatListContentContainer,
@@ -237,11 +272,7 @@ export default function FarmerDetails() {
                     }
                   }}
                   renderItem={({ item }) => {
-                    return (
-                      <View>
-                        <Text>very great product</Text>
-                      </View>
-                    );
+                    return <CommentItem item={item} />;
                   }}
                   onScrollBeginDrag={() => {
                     // Reset flag when user starts dragging
@@ -340,7 +371,6 @@ export default function FarmerDetails() {
             </>
           )}
         </View>
-        <Button onPress={handleReview}>Review farmer</Button>
       </KeyboardAvoidingView>
     </>
   );
