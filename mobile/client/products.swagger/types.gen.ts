@@ -209,6 +209,7 @@ export type ProductsListProductsData = {
     query?: {
         categoryId?: string;
         count?: number;
+        createdBy?: string;
         'maxAmount.currencyIsoCode'?: string;
         'maxAmount.value'?: number;
         'minAmount.currencyIsoCode'?: string;

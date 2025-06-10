@@ -2,9 +2,9 @@
 
 import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
-import type { UsersCreateSubscriptionData, UsersCreateSubscriptionError, UsersCreateSubscriptionResponse, UsersDeleteSubscriptionData, UsersDeleteSubscriptionError, UsersDeleteSubscriptionResponse, UsersUpdateSubscriptionData, UsersUpdateSubscriptionError, UsersUpdateSubscriptionResponse, UsersGrantAdminData, UsersGrantAdminError, UsersGrantAdminResponse, UsersListUsersData, UsersRevokeRefreshTokenData, UsersRevokeRefreshTokenError, UsersRevokeRefreshTokenResponse, UsersAuthenticateData, UsersAuthenticateError, UsersAuthenticateResponse, UsersChangePasswordData, UsersChangePasswordError, UsersChangePasswordResponse, UsersLastOtpForFactorData, UsersRefreshAccessTokenData, UsersRefreshAccessTokenError, UsersRefreshAccessTokenResponse, UsersSendEmailOtpData, UsersSendEmailOtpError, UsersSendEmailOtpResponse, UsersSendSignupSmsOtpData, UsersSendSignupSmsOtpError, UsersSendSignupSmsOtpResponse, UsersSendSmsOtpData, UsersSendSmsOtpError, UsersSendSmsOtpResponse, UsersSignupData, UsersSignupError, UsersSignupResponse, UsersVerifyOtpData, UsersVerifyOtpError, UsersVerifyOtpResponse, UsersGetPublicUserData, UsersCompleteRegistrationData, UsersCompleteRegistrationError, UsersCompleteRegistrationResponse, UsersDeleteUserPaymentMethodData, UsersDeleteUserPaymentMethodError, UsersDeleteUserPaymentMethodResponse, UsersGetUserByIdData, UsersSubscribeData, UsersSubscribeError, UsersSubscribeResponse, UsersGetUserActiveSubscriptionData, UsersGetUserSubscriptionsData, UsersListSubscriptionsData, UsersGetUserSubscriptionByIdData, UsersGetUserPaymentMethodsByUserIdData, UsersGetFarmerByIdData } from '../types.gen';
+import type { UsersCreateSubscriptionData, UsersCreateSubscriptionError, UsersCreateSubscriptionResponse, UsersDeleteSubscriptionData, UsersDeleteSubscriptionError, UsersDeleteSubscriptionResponse, UsersUpdateSubscriptionData, UsersUpdateSubscriptionError, UsersUpdateSubscriptionResponse, UsersGrantAdminData, UsersGrantAdminError, UsersGrantAdminResponse, UsersListUsersData, UsersRevokeRefreshTokenData, UsersRevokeRefreshTokenError, UsersRevokeRefreshTokenResponse, UsersAuthenticateData, UsersAuthenticateError, UsersAuthenticateResponse, UsersChangePasswordData, UsersChangePasswordError, UsersChangePasswordResponse, UsersLastOtpForFactorData, UsersRefreshAccessTokenData, UsersRefreshAccessTokenError, UsersRefreshAccessTokenResponse, UsersSendEmailOtpData, UsersSendEmailOtpError, UsersSendEmailOtpResponse, UsersSendSignupSmsOtpData, UsersSendSignupSmsOtpError, UsersSendSignupSmsOtpResponse, UsersSendSmsOtpData, UsersSendSmsOtpError, UsersSendSmsOtpResponse, UsersSignupData, UsersSignupError, UsersSignupResponse, UsersVerifyOtpData, UsersVerifyOtpError, UsersVerifyOtpResponse, UsersGetPublicUserData, UsersCompleteRegistrationData, UsersCompleteRegistrationError, UsersCompleteRegistrationResponse, UsersDeleteUserPaymentMethodData, UsersDeleteUserPaymentMethodError, UsersDeleteUserPaymentMethodResponse, UsersListFarmersData, UsersListFarmersReivewsData, UsersGetUserByIdData, UsersReviewFarmerData, UsersReviewFarmerError, UsersReviewFarmerResponse, UsersSubscribeData, UsersSubscribeError, UsersSubscribeResponse, UsersGetUserActiveSubscriptionData, UsersGetUserSubscriptionsData, UsersListSubscriptionsData, UsersGetUserSubscriptionByIdData, UsersGetUserPaymentMethodsByUserIdData, UsersGetFarmerByIdData } from '../types.gen';
 import type { AxiosError } from 'axios';
-import { client, usersCreateSubscription, usersDeleteSubscription, usersUpdateSubscription, usersGrantAdmin, usersListUsers, usersRevokeRefreshToken, usersAuthenticate, usersChangePassword, usersHealthCheck, usersLastOtpForFactor, usersRefreshAccessToken, usersSendEmailOtp, usersSendSignupSmsOtp, usersSendSmsOtp, usersSignup, usersVerifyOtp, usersGetPublicUser, usersCompleteRegistration, usersDeleteUserPaymentMethod, usersGetUserById, usersSubscribe, usersGetUserActiveSubscription, usersGetUserSubscriptions, usersListSubscriptions, usersGetUserSubscriptionById, usersGetUserPaymentMethodsByUserId, usersGetFarmerById } from '../sdk.gen';
+import { client, usersCreateSubscription, usersDeleteSubscription, usersUpdateSubscription, usersGrantAdmin, usersListUsers, usersRevokeRefreshToken, usersAuthenticate, usersChangePassword, usersHealthCheck, usersLastOtpForFactor, usersRefreshAccessToken, usersSendEmailOtp, usersSendSignupSmsOtp, usersSendSmsOtp, usersSignup, usersVerifyOtp, usersGetPublicUser, usersCompleteRegistration, usersDeleteUserPaymentMethod, usersListFarmers, usersListFarmersReivews, usersGetUserById, usersReviewFarmer, usersSubscribe, usersGetUserActiveSubscription, usersGetUserSubscriptions, usersListSubscriptions, usersGetUserSubscriptionById, usersGetUserPaymentMethodsByUserId, usersGetFarmerById } from '../sdk.gen';
 
 type QueryKey<TOptions extends OptionsLegacyParser> = [
     Pick<TOptions, 'baseURL' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -547,6 +547,44 @@ export const usersDeleteUserPaymentMethodMutation = (options?: Partial<OptionsLe
     return mutationOptions;
 };
 
+export const usersListFarmersQueryKey = (options: OptionsLegacyParser<UsersListFarmersData>) => [
+    createQueryKey('usersListFarmers', options)
+];
+
+export const usersListFarmersOptions = (options: OptionsLegacyParser<UsersListFarmersData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await usersListFarmers({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: usersListFarmersQueryKey(options)
+    });
+};
+
+export const usersListFarmersReivewsQueryKey = (options: OptionsLegacyParser<UsersListFarmersReivewsData>) => [
+    createQueryKey('usersListFarmersReivews', options)
+];
+
+export const usersListFarmersReivewsOptions = (options: OptionsLegacyParser<UsersListFarmersReivewsData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await usersListFarmersReivews({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: usersListFarmersReivewsQueryKey(options)
+    });
+};
+
 export const usersGetUserByIdQueryKey = (options: OptionsLegacyParser<UsersGetUserByIdData>) => [
     createQueryKey('usersGetUserById', options)
 ];
@@ -564,6 +602,39 @@ export const usersGetUserByIdOptions = (options: OptionsLegacyParser<UsersGetUse
         },
         queryKey: usersGetUserByIdQueryKey(options)
     });
+};
+
+export const usersReviewFarmerQueryKey = (options: OptionsLegacyParser<UsersReviewFarmerData>) => [
+    createQueryKey('usersReviewFarmer', options)
+];
+
+export const usersReviewFarmerOptions = (options: OptionsLegacyParser<UsersReviewFarmerData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await usersReviewFarmer({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: usersReviewFarmerQueryKey(options)
+    });
+};
+
+export const usersReviewFarmerMutation = (options?: Partial<OptionsLegacyParser<UsersReviewFarmerData>>) => {
+    const mutationOptions: UseMutationOptions<UsersReviewFarmerResponse, AxiosError<UsersReviewFarmerError>, OptionsLegacyParser<UsersReviewFarmerData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await usersReviewFarmer({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
 };
 
 export const usersSubscribeQueryKey = (options: OptionsLegacyParser<UsersSubscribeData>) => [

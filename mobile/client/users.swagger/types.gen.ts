@@ -100,8 +100,14 @@ export type usersgrpcDeleteUserSubscriptionResponse = unknown;
 
 export type usersgrpcFactorType = 'FACTOR_TYPE_UNSPECIFIED' | 'FACTOR_TYPE_EMAIL_PASSWORD' | 'FACTOR_TYPE_SMS_OTP' | 'FACTOR_TYPE_EMAIL_OTP' | 'FACTOR_TYPE_EMAIL_PHONE_PASSWORD';
 
+export type usersgrpcFarmerWithRating = {
+    user?: usersgrpcUser;
+    rating?: number;
+};
+
 export type usersgrpcGetFarmerByIDResponse = {
     user?: usersgrpcUser;
+    rating?: number;
 };
 
 export type usersgrpcGetPublicUserResponse = {
@@ -138,6 +144,16 @@ export type usersgrpcLastOtpForFactorResponse = {
     otp?: string;
 };
 
+export type usersgrpcListFarmersReivewsResponse = {
+    reviews?: Array<usersgrpcReview>;
+    nextKey?: string;
+};
+
+export type usersgrpcListFarmersResponse = {
+    farmers?: Array<usersgrpcFarmerWithRating>;
+    nextKey?: number;
+};
+
 export type usersgrpcListSubscriptionsResponse = {
     subscriptions?: Array<usersgrpcSubscription>;
 };
@@ -161,6 +177,19 @@ export type usersgrpcRefreshAccessTokenRequest = {
 export type usersgrpcRefreshAccessTokenResponse = {
     accessToken?: string;
 };
+
+export type usersgrpcReview = {
+    id?: string;
+    farmerId?: string;
+    orderId?: string;
+    productId?: string;
+    rating?: number;
+    comment?: string;
+    createdBy?: string;
+    createdAt?: string;
+};
+
+export type usersgrpcReviewFarmerResponse = unknown;
 
 export type usersgrpcRevokeRefreshTokenRequest = {
     refreshToken?: string;
@@ -273,6 +302,14 @@ export type usersgrpcVerifyOtpRequest = {
 
 export type usersgrpcVerifyOtpResponse = {
     valid?: boolean;
+};
+
+export type UsersReviewFarmerBody = {
+    farmerId?: string;
+    orderId?: string;
+    productId?: string;
+    rating?: number;
+    comment?: string;
 };
 
 export type UsersSubscribeBody = {
@@ -480,6 +517,35 @@ export type UsersDeleteUserPaymentMethodResponse = (usersgrpcDeleteUserPaymentMe
 
 export type UsersDeleteUserPaymentMethodError = (rpcStatus);
 
+export type UsersListFarmersData = {
+    path: {
+        userId: string;
+    };
+    query?: {
+        count?: number;
+        startKey?: number;
+    };
+};
+
+export type UsersListFarmersResponse = (usersgrpcListFarmersResponse);
+
+export type UsersListFarmersError = (rpcStatus);
+
+export type UsersListFarmersReivewsData = {
+    path: {
+        farmerId: string;
+        userId: string;
+    };
+    query?: {
+        count?: number;
+        startKey?: string;
+    };
+};
+
+export type UsersListFarmersReivewsResponse = (usersgrpcListFarmersReivewsResponse);
+
+export type UsersListFarmersReivewsError = (rpcStatus);
+
 export type UsersGetUserByIdData = {
     path: {
         /**
@@ -492,6 +558,17 @@ export type UsersGetUserByIdData = {
 export type UsersGetUserByIdResponse = (usersgrpcGetUserByIDResponse);
 
 export type UsersGetUserByIdError = (rpcStatus);
+
+export type UsersReviewFarmerData = {
+    body: UsersReviewFarmerBody;
+    path: {
+        userId: string;
+    };
+};
+
+export type UsersReviewFarmerResponse = (usersgrpcReviewFarmerResponse);
+
+export type UsersReviewFarmerError = (rpcStatus);
 
 export type UsersSubscribeData = {
     body: UsersSubscribeBody;

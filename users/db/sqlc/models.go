@@ -10,6 +10,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type FarmersReview struct {
+	ID        string             `json:"id"`
+	FarmerID  string             `json:"farmer_id"`
+	OrderID   string             `json:"order_id"`
+	ProductID string             `json:"product_id"`
+	Rating    float64            `json:"rating"`
+	Comment   string             `json:"comment"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	CreatedBy *string            `json:"created_by"`
+}
+
 type RefreshToken struct {
 	Token     string             `json:"token"`
 	UserID    string             `json:"user_id"`

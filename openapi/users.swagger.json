@@ -669,6 +669,99 @@
         ]
       }
     },
+    "/v1/users/{userId}/farmers/list-farmers": {
+      "get": {
+        "operationId": "Users_ListFarmers",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcListFarmersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "startKey",
+            "in": "query",
+            "required": false,
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/users/{userId}/farmers/{farmerId}/list-farmers-reviews": {
+      "get": {
+        "operationId": "Users_ListFarmersReivews",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcListFarmersReivewsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "farmerId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "startKey",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
     "/v1/users/{userId}/get-user-by-id": {
       "get": {
         "operationId": "Users_GetUserByID",
@@ -693,6 +786,44 @@
             "in": "path",
             "required": true,
             "type": "string"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/users/{userId}/review-farmer": {
+      "post": {
+        "operationId": "Users_ReviewFarmer",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcReviewFarmerResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UsersReviewFarmerBody"
+            }
           }
         ],
         "tags": [
@@ -993,6 +1124,27 @@
         }
       }
     },
+    "UsersReviewFarmerBody": {
+      "type": "object",
+      "properties": {
+        "farmerId": {
+          "type": "string"
+        },
+        "orderId": {
+          "type": "string"
+        },
+        "productId": {
+          "type": "string"
+        },
+        "rating": {
+          "type": "number",
+          "format": "double"
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    },
     "UsersSubscribeBody": {
       "type": "object",
       "properties": {
@@ -1226,12 +1378,28 @@
       ],
       "default": "FACTOR_TYPE_UNSPECIFIED"
     },
+    "usersgrpcFarmerWithRating": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "$ref": "#/definitions/usersgrpcUser"
+        },
+        "rating": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
     "usersgrpcGetFarmerByIDResponse": {
       "type": "object",
       "properties": {
         "user": {
           "$ref": "#/definitions/usersgrpcUser",
           "title": "User details"
+        },
+        "rating": {
+          "type": "number",
+          "format": "double"
         }
       },
       "title": "Response message for GetFarmerByID"
@@ -1313,6 +1481,37 @@
         }
       }
     },
+    "usersgrpcListFarmersReivewsResponse": {
+      "type": "object",
+      "properties": {
+        "reviews": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/usersgrpcReview"
+          }
+        },
+        "nextKey": {
+          "type": "string"
+        }
+      }
+    },
+    "usersgrpcListFarmersResponse": {
+      "type": "object",
+      "properties": {
+        "farmers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/usersgrpcFarmerWithRating"
+          }
+        },
+        "nextKey": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
     "usersgrpcListSubscriptionsResponse": {
       "type": "object",
       "properties": {
@@ -1382,6 +1581,40 @@
           "title": "The newly generated access token"
         }
       }
+    },
+    "usersgrpcReview": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "farmerId": {
+          "type": "string"
+        },
+        "orderId": {
+          "type": "string"
+        },
+        "productId": {
+          "type": "string"
+        },
+        "rating": {
+          "type": "number",
+          "format": "double"
+        },
+        "comment": {
+          "type": "string"
+        },
+        "createdBy": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "usersgrpcReviewFarmerResponse": {
+      "type": "object"
     },
     "usersgrpcRevokeRefreshTokenRequest": {
       "type": "object",

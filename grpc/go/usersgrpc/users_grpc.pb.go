@@ -48,6 +48,9 @@ const (
 	Users_DeleteUserPaymentMethod_FullMethodName       = "/usersgrpc.Users/DeleteUserPaymentMethod"
 	Users_ListSubscriptions_FullMethodName             = "/usersgrpc.Users/ListSubscriptions"
 	Users_GetPublicUser_FullMethodName                 = "/usersgrpc.Users/GetPublicUser"
+	Users_ReviewFarmer_FullMethodName                  = "/usersgrpc.Users/ReviewFarmer"
+	Users_ListFarmersReivews_FullMethodName            = "/usersgrpc.Users/ListFarmersReivews"
+	Users_ListFarmers_FullMethodName                   = "/usersgrpc.Users/ListFarmers"
 )
 
 // UsersClient is the client API for Users service.
@@ -83,6 +86,9 @@ type UsersClient interface {
 	DeleteUserPaymentMethod(ctx context.Context, in *DeleteUserPaymentMethodRequest, opts ...grpc.CallOption) (*DeleteUserPaymentMethodResponse, error)
 	ListSubscriptions(ctx context.Context, in *ListSubscriptionsRequest, opts ...grpc.CallOption) (*ListSubscriptionsResponse, error)
 	GetPublicUser(ctx context.Context, in *GetPublicUserRequest, opts ...grpc.CallOption) (*GetPublicUserResponse, error)
+	ReviewFarmer(ctx context.Context, in *ReviewFarmerRequest, opts ...grpc.CallOption) (*ReviewFarmerResponse, error)
+	ListFarmersReivews(ctx context.Context, in *ListFarmersReviewsRequest, opts ...grpc.CallOption) (*ListFarmersReivewsResponse, error)
+	ListFarmers(ctx context.Context, in *ListFarmersRequest, opts ...grpc.CallOption) (*ListFarmersResponse, error)
 }
 
 type usersClient struct {
@@ -383,6 +389,36 @@ func (c *usersClient) GetPublicUser(ctx context.Context, in *GetPublicUserReques
 	return out, nil
 }
 
+func (c *usersClient) ReviewFarmer(ctx context.Context, in *ReviewFarmerRequest, opts ...grpc.CallOption) (*ReviewFarmerResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReviewFarmerResponse)
+	err := c.cc.Invoke(ctx, Users_ReviewFarmer_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersClient) ListFarmersReivews(ctx context.Context, in *ListFarmersReviewsRequest, opts ...grpc.CallOption) (*ListFarmersReivewsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListFarmersReivewsResponse)
+	err := c.cc.Invoke(ctx, Users_ListFarmersReivews_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersClient) ListFarmers(ctx context.Context, in *ListFarmersRequest, opts ...grpc.CallOption) (*ListFarmersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListFarmersResponse)
+	err := c.cc.Invoke(ctx, Users_ListFarmers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsersServer is the server API for Users service.
 // All implementations must embed UnimplementedUsersServer
 // for forward compatibility.
@@ -416,6 +452,9 @@ type UsersServer interface {
 	DeleteUserPaymentMethod(context.Context, *DeleteUserPaymentMethodRequest) (*DeleteUserPaymentMethodResponse, error)
 	ListSubscriptions(context.Context, *ListSubscriptionsRequest) (*ListSubscriptionsResponse, error)
 	GetPublicUser(context.Context, *GetPublicUserRequest) (*GetPublicUserResponse, error)
+	ReviewFarmer(context.Context, *ReviewFarmerRequest) (*ReviewFarmerResponse, error)
+	ListFarmersReivews(context.Context, *ListFarmersReviewsRequest) (*ListFarmersReivewsResponse, error)
+	ListFarmers(context.Context, *ListFarmersRequest) (*ListFarmersResponse, error)
 	mustEmbedUnimplementedUsersServer()
 }
 
@@ -512,6 +551,15 @@ func (UnimplementedUsersServer) ListSubscriptions(context.Context, *ListSubscrip
 }
 func (UnimplementedUsersServer) GetPublicUser(context.Context, *GetPublicUserRequest) (*GetPublicUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPublicUser not implemented")
+}
+func (UnimplementedUsersServer) ReviewFarmer(context.Context, *ReviewFarmerRequest) (*ReviewFarmerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReviewFarmer not implemented")
+}
+func (UnimplementedUsersServer) ListFarmersReivews(context.Context, *ListFarmersReviewsRequest) (*ListFarmersReivewsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListFarmersReivews not implemented")
+}
+func (UnimplementedUsersServer) ListFarmers(context.Context, *ListFarmersRequest) (*ListFarmersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListFarmers not implemented")
 }
 func (UnimplementedUsersServer) mustEmbedUnimplementedUsersServer() {}
 func (UnimplementedUsersServer) testEmbeddedByValue()               {}
@@ -1056,6 +1104,60 @@ func _Users_GetPublicUser_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Users_ReviewFarmer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReviewFarmerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).ReviewFarmer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Users_ReviewFarmer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).ReviewFarmer(ctx, req.(*ReviewFarmerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Users_ListFarmersReivews_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListFarmersReviewsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).ListFarmersReivews(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Users_ListFarmersReivews_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).ListFarmersReivews(ctx, req.(*ListFarmersReviewsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Users_ListFarmers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListFarmersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).ListFarmers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Users_ListFarmers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).ListFarmers(ctx, req.(*ListFarmersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Users_ServiceDesc is the grpc.ServiceDesc for Users service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1178,6 +1280,18 @@ var Users_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPublicUser",
 			Handler:    _Users_GetPublicUser_Handler,
+		},
+		{
+			MethodName: "ReviewFarmer",
+			Handler:    _Users_ReviewFarmer_Handler,
+		},
+		{
+			MethodName: "ListFarmersReivews",
+			Handler:    _Users_ListFarmersReivews_Handler,
+		},
+		{
+			MethodName: "ListFarmers",
+			Handler:    _Users_ListFarmers_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
