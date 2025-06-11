@@ -103,7 +103,8 @@ func (i *Impl) SendSignupSmsOtp(ctx context.Context, req *usersgrpc.SendSignupSm
 		return nil, status.Errorf(codes.InvalidArgument, "Invalid phone number: %v", err)
 	}
 
-	i.logger.Debug().Interface("formarted phone number from helper function", formattedNumber).Msg("Formatted phone number")
+	i.logger.Debug().Interface("formarted phone number from helper function",
+		formattedNumber).Msg("Formatted phone number")
 	// Format the number in E.164 format
 
 	_, err = querier.GetUserByPhoneNumber(ctx, formattedNumber)
