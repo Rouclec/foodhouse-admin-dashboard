@@ -36,6 +36,11 @@ export const farmerDetailsStyle = StyleSheet.create({
     height: 100,
     borderRadius: 50,
   },
+  smallProfileImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 48,
+  },
   addImageContainer: {
     position: "relative",
     width: 100,
@@ -45,9 +50,21 @@ export const farmerDetailsStyle = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  smallImageContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 48,
+    backgroundColor: Colors.grey["9e"],
+    alignItems: "center",
+    justifyContent: "center",
+  },
   avatar: {
     width: 56,
     height: 56,
+  },
+  smallAvatar: {
+    width: 24,
+    height: 24,
   },
   farmerName: {
     fontSize: 24,
@@ -78,5 +95,41 @@ export const farmerDetailsStyle = StyleSheet.create({
     textAlign: "justify",
     color: Colors.grey["3c"],
     lineHeight: 24,
+  },
+  reviewContainer: {
+    rowGap: 12,
+  },
+  reviewProfileContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    columnGap: 16,
+    flexShrink: 1,
+  },
+  reviewTopContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    columnGap: 24,
+  },
+  starContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.primary["50"],
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    columnGap: 8,
+    borderRadius: 100,
+  },
+  commentText: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: Colors.dark["10"],
+    textAlign: "justify",
+  },
+  timeText: {
+    fontSize: 12,
+    color: Colors.grey["61"],
+    lineHeight: 12,
   },
 });
