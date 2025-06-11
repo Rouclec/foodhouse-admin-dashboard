@@ -241,18 +241,18 @@
         "cancel": "Cancel",
         "save": "Save Changes",
         "edit": "Edit"
-      },
-      "order-details": {
-        "orderDetails": "Order Details",
-        "couldNotLoad": "Could not load order details",
-        "approveOrder": "Approve order",
-        "customersName": "Customer's Name",
-        "quantity": "Quantity",
-        "deliveryAddress": "Delivery Address",
-        "unknownError": "An unknown error occured",
-        "congratulations": "Congratulations",
-        "youHaveApproved": "You have approved this order, go ahead and prepare it for delivery"
       }
+    },
+    "order-details": {
+      "orderDetails": "Order Details",
+      "couldNotLoad": "Could not load order details",
+      "approveOrder": "Approve order",
+      "customersName": "Customer's Name",
+      "quantity": "Quantity",
+      "deliveryAddress": "Delivery Address",
+      "unknownError": "An unknown error occured",
+      "congratulations": "Congratulations",
+      "youHaveApproved": "You have approved this order, go ahead and prepare it for delivery"
     }
   },
   "(buyer)": {
