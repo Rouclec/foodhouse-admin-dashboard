@@ -35,6 +35,7 @@ const (
 	Products_DeletePriceType_FullMethodName            = "/productsgrpc.Products/DeletePriceType"
 	Products_ListProductNamesByCategory_FullMethodName = "/productsgrpc.Products/ListProductNamesByCategory"
 	Products_ListPriceTypesByCategory_FullMethodName   = "/productsgrpc.Products/ListPriceTypesByCategory"
+	Products_SumProductAmounts_FullMethodName          = "/productsgrpc.Products/SumProductAmounts"
 )
 
 // ProductsClient is the client API for Products service.
@@ -57,6 +58,7 @@ type ProductsClient interface {
 	DeletePriceType(ctx context.Context, in *DeletePriceTypeRequest, opts ...grpc.CallOption) (*DeletePriceTypeResponse, error)
 	ListProductNamesByCategory(ctx context.Context, in *ListProductNamesByCategoryRequest, opts ...grpc.CallOption) (*ListProductNamesByCategoryResponse, error)
 	ListPriceTypesByCategory(ctx context.Context, in *ListPriceTypesByCategoryRequest, opts ...grpc.CallOption) (*ListPriceTypesByCategoryResponse, error)
+	SumProductAmounts(ctx context.Context, in *SumProductAmountsRequest, opts ...grpc.CallOption) (*SumProductAmountsResponse, error)
 }
 
 type productsClient struct {
@@ -227,6 +229,16 @@ func (c *productsClient) ListPriceTypesByCategory(ctx context.Context, in *ListP
 	return out, nil
 }
 
+func (c *productsClient) SumProductAmounts(ctx context.Context, in *SumProductAmountsRequest, opts ...grpc.CallOption) (*SumProductAmountsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SumProductAmountsResponse)
+	err := c.cc.Invoke(ctx, Products_SumProductAmounts_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProductsServer is the server API for Products service.
 // All implementations must embed UnimplementedProductsServer
 // for forward compatibility.
@@ -247,6 +259,7 @@ type ProductsServer interface {
 	DeletePriceType(context.Context, *DeletePriceTypeRequest) (*DeletePriceTypeResponse, error)
 	ListProductNamesByCategory(context.Context, *ListProductNamesByCategoryRequest) (*ListProductNamesByCategoryResponse, error)
 	ListPriceTypesByCategory(context.Context, *ListPriceTypesByCategoryRequest) (*ListPriceTypesByCategoryResponse, error)
+	SumProductAmounts(context.Context, *SumProductAmountsRequest) (*SumProductAmountsResponse, error)
 	mustEmbedUnimplementedProductsServer()
 }
 
@@ -304,6 +317,9 @@ func (UnimplementedProductsServer) ListProductNamesByCategory(context.Context, *
 }
 func (UnimplementedProductsServer) ListPriceTypesByCategory(context.Context, *ListPriceTypesByCategoryRequest) (*ListPriceTypesByCategoryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListPriceTypesByCategory not implemented")
+}
+func (UnimplementedProductsServer) SumProductAmounts(context.Context, *SumProductAmountsRequest) (*SumProductAmountsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SumProductAmounts not implemented")
 }
 func (UnimplementedProductsServer) mustEmbedUnimplementedProductsServer() {}
 func (UnimplementedProductsServer) testEmbeddedByValue()                  {}
@@ -614,6 +630,24 @@ func _Products_ListPriceTypesByCategory_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Products_SumProductAmounts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SumProductAmountsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProductsServer).SumProductAmounts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Products_SumProductAmounts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProductsServer).SumProductAmounts(ctx, req.(*SumProductAmountsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Products_ServiceDesc is the grpc.ServiceDesc for Products service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -684,6 +718,10 @@ var Products_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListPriceTypesByCategory",
 			Handler:    _Products_ListPriceTypesByCategory_Handler,
+		},
+		{
+			MethodName: "SumProductAmounts",
+			Handler:    _Products_SumProductAmounts_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

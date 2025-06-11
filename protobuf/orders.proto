@@ -240,6 +240,26 @@ message CheckPaymentStatusRequest {
 
 message CheckPaymentStatusResponse { PaymentStatus status = 1; }
 
+enum FilterType {
+  FilterType_UNSPECIFIED = 0;
+  FilterType_THIS_WEEK = 1;
+  FilterType_THIS_MONTH = 2;
+  FilterType_THIS_YEAR = 3;
+  FilterType_ALL_TIME = 4;
+}
+
+message GetFarmerEarningsRequest {
+  string farmer_id = 1;
+  FilterType filter = 2; // "this_week", "this_month", etc.
+}
+
+message FarmerEarningsData {
+  string date = 1;
+  double value = 2;
+}
+
+message GetFarmerEarningsResponse { repeated FarmerEarningsData data = 1; }
+
 service Orders {
 
   rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {
@@ -337,6 +357,13 @@ service Orders {
       returns (CheckPaymentStatusResponse) {
     option (google.api.http) = {
       get : "/v1/users/{user_id}/orders/{payment_id}/check-payment-status"
+    };
+  }
+
+  rpc GetFarmerEarnings(GetFarmerEarningsRequest)
+      returns (GetFarmerEarningsResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{farmer_id}/orders/get-farmer-earnings"
     };
   }
 }

@@ -113,6 +113,10 @@ export type productsgrpcProductName = {
     categoryId?: string;
 };
 
+export type productsgrpcSumProductAmountsResponse = {
+    total?: number;
+};
+
 export type productsgrpcUpdateProductResponse = {
     message?: string;
 };

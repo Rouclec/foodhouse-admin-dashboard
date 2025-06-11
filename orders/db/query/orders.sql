@@ -32,7 +32,7 @@ VALUES (
 RETURNING *;
 
 -- name: UpdateOrderStatus :exec
-UPDATE orders SET status = $2 WHERE order_number = $1;
+UPDATE orders SET status = $2, updated_at = now() WHERE order_number = $1;
 
 -- name: GetOrderByOrderNumber :one
 SELECT * FROM orders WHERE order_number = $1;
@@ -69,7 +69,7 @@ ORDER BY created_at DESC
 LIMIT sqlc.arg(count)::int;
 
 -- name: ReviewOrder :exec
-UPDATE orders SET review = $1, rating = $2 WHERE order_number = $3;
+UPDATE orders SET review = $1, rating = $2, updated_at = now() WHERE order_number = $3;
 
 -- name: CreateOrderAuditLog :exec
 INSERT INTO orders_audit
@@ -100,4 +100,37 @@ LIMIT 1;
 SELECT * from payments WHERE payment_entity = $1 AND entity_id = $2;
 
 -- name: UpdatePaymentStatus :exec
-UPDATE payments SET status = $2 WHERE id = $1;
+UPDATE payments SET status = $2, updated_at = now() WHERE id = $1;
+
+-- name: GetOrdersGroupedByDay :many
+SELECT 
+  DATE_TRUNC('day', updated_at)::timestamptz AS group_date,
+  ARRAY_AGG(product_id)::text[] AS product_ids
+FROM orders
+WHERE product_owner = $1
+  AND status = $2
+  AND updated_at BETWEEN $3 AND $4
+GROUP BY group_date
+ORDER BY group_date;
+
+-- name: GetOrdersGroupedByMonth :many
+SELECT 
+  DATE_TRUNC('month', updated_at)::timestamptz AS group_date,
+  ARRAY_AGG(product_id)::text[] AS product_ids
+FROM orders
+WHERE product_owner = $1
+  AND status = $2
+  AND updated_at BETWEEN $3 AND $4
+GROUP BY group_date
+ORDER BY group_date;
+
+-- name: GetOrdersGroupedByYear :many
+SELECT 
+  DATE_TRUNC('year', updated_at)::timestamptz AS group_date,
+  ARRAY_AGG(product_id)::text[] AS product_ids
+FROM orders
+WHERE product_owner = $1
+  AND status = $2
+  AND updated_at BETWEEN $3 AND $4
+GROUP BY group_date
+ORDER BY group_date;

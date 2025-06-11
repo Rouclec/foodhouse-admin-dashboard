@@ -2144,6 +2144,96 @@ func (x *ListPriceTypesByCategoryResponse) GetPriceTypes() []*PriceType {
 	return nil
 }
 
+type SumProductAmountsRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	ProductIds []string `protobuf:"bytes,1,rep,name=product_ids,json=productIds,proto3" json:"product_ids,omitempty"`
+}
+
+func (x *SumProductAmountsRequest) Reset() {
+	*x = SumProductAmountsRequest{}
+	mi := &file_products_proto_msgTypes[38]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SumProductAmountsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SumProductAmountsRequest) ProtoMessage() {}
+
+func (x *SumProductAmountsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_products_proto_msgTypes[38]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SumProductAmountsRequest.ProtoReflect.Descriptor instead.
+func (*SumProductAmountsRequest) Descriptor() ([]byte, []int) {
+	return file_products_proto_rawDescGZIP(), []int{38}
+}
+
+func (x *SumProductAmountsRequest) GetProductIds() []string {
+	if x != nil {
+		return x.ProductIds
+	}
+	return nil
+}
+
+type SumProductAmountsResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Total float64 `protobuf:"fixed64,1,opt,name=total,proto3" json:"total,omitempty"`
+}
+
+func (x *SumProductAmountsResponse) Reset() {
+	*x = SumProductAmountsResponse{}
+	mi := &file_products_proto_msgTypes[39]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SumProductAmountsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SumProductAmountsResponse) ProtoMessage() {}
+
+func (x *SumProductAmountsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_products_proto_msgTypes[39]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SumProductAmountsResponse.ProtoReflect.Descriptor instead.
+func (*SumProductAmountsResponse) Descriptor() ([]byte, []int) {
+	return file_products_proto_rawDescGZIP(), []int{39}
+}
+
+func (x *SumProductAmountsResponse) GetTotal() float64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
 var File_products_proto protoreflect.FileDescriptor
 
 var file_products_proto_rawDesc = []byte{
@@ -2398,7 +2488,14 @@ var file_products_proto_rawDesc = []byte{
 	0x74, 0x79, 0x70, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x17, 0x2e, 0x70, 0x72,
 	0x6f, 0x64, 0x75, 0x63, 0x74, 0x73, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x50, 0x72, 0x69, 0x63, 0x65,
 	0x54, 0x79, 0x70, 0x65, 0x52, 0x0a, 0x70, 0x72, 0x69, 0x63, 0x65, 0x54, 0x79, 0x70, 0x65, 0x73,
-	0x32, 0xf3, 0x13, 0x0a, 0x08, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x73, 0x12, 0x94, 0x01,
+	0x22, 0x3b, 0x0a, 0x18, 0x53, 0x75, 0x6d, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x41, 0x6d,
+	0x6f, 0x75, 0x6e, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1f, 0x0a, 0x0b,
+	0x70, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x5f, 0x69, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28,
+	0x09, 0x52, 0x0a, 0x70, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x49, 0x64, 0x73, 0x22, 0x31, 0x0a,
+	0x19, 0x53, 0x75, 0x6d, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x41, 0x6d, 0x6f, 0x75, 0x6e,
+	0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f,
+	0x74, 0x61, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x01, 0x52, 0x05, 0x74, 0x6f, 0x74, 0x61, 0x6c,
+	0x32, 0xd9, 0x14, 0x0a, 0x08, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x73, 0x12, 0x94, 0x01,
 	0x0a, 0x0e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x43, 0x61, 0x74, 0x65, 0x67, 0x6f, 0x72, 0x79,
 	0x12, 0x23, 0x2e, 0x70, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x73, 0x67, 0x72, 0x70, 0x63, 0x2e,
 	0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x43, 0x61, 0x74, 0x65, 0x67, 0x6f, 0x72, 0x79, 0x52, 0x65,
@@ -2557,11 +2654,17 @@ var file_products_proto_rawDesc = []byte{
 	0x69, 0x63, 0x2f, 0x70, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x73, 0x2f, 0x7b, 0x63, 0x61, 0x74,
 	0x65, 0x67, 0x6f, 0x72, 0x79, 0x5f, 0x69, 0x64, 0x7d, 0x2f, 0x6c, 0x69, 0x73, 0x74, 0x2d, 0x70,
 	0x72, 0x69, 0x63, 0x65, 0x2d, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2d, 0x62, 0x79, 0x2d, 0x63, 0x61,
-	0x74, 0x65, 0x67, 0x6f, 0x72, 0x79, 0x42, 0x38, 0x5a, 0x36, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62,
-	0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x66, 0x6f, 0x6f, 0x64, 0x68, 0x6f, 0x75, 0x73, 0x65, 0x2f, 0x66,
-	0x6f, 0x6f, 0x64, 0x68, 0x6f, 0x75, 0x73, 0x65, 0x61, 0x70, 0x70, 0x2f, 0x67, 0x72, 0x70, 0x63,
-	0x2f, 0x67, 0x6f, 0x2f, 0x70, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x73, 0x67, 0x72, 0x70, 0x63,
-	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x74, 0x65, 0x67, 0x6f, 0x72, 0x79, 0x12, 0x64, 0x0a, 0x11, 0x53, 0x75, 0x6d, 0x50, 0x72, 0x6f,
+	0x64, 0x75, 0x63, 0x74, 0x41, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x73, 0x12, 0x26, 0x2e, 0x70, 0x72,
+	0x6f, 0x64, 0x75, 0x63, 0x74, 0x73, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x53, 0x75, 0x6d, 0x50, 0x72,
+	0x6f, 0x64, 0x75, 0x63, 0x74, 0x41, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x27, 0x2e, 0x70, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x73, 0x67, 0x72,
+	0x70, 0x63, 0x2e, 0x53, 0x75, 0x6d, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x41, 0x6d, 0x6f,
+	0x75, 0x6e, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x38, 0x5a, 0x36,
+	0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x66, 0x6f, 0x6f, 0x64, 0x68,
+	0x6f, 0x75, 0x73, 0x65, 0x2f, 0x66, 0x6f, 0x6f, 0x64, 0x68, 0x6f, 0x75, 0x73, 0x65, 0x61, 0x70,
+	0x70, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2f, 0x67, 0x6f, 0x2f, 0x70, 0x72, 0x6f, 0x64, 0x75, 0x63,
+	0x74, 0x73, 0x67, 0x72, 0x70, 0x63, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -2576,7 +2679,7 @@ func file_products_proto_rawDescGZIP() []byte {
 	return file_products_proto_rawDescData
 }
 
-var file_products_proto_msgTypes = make([]protoimpl.MessageInfo, 38)
+var file_products_proto_msgTypes = make([]protoimpl.MessageInfo, 40)
 var file_products_proto_goTypes = []any{
 	(*Category)(nil),                           // 0: productsgrpc.Category
 	(*Product)(nil),                            // 1: productsgrpc.Product
@@ -2616,25 +2719,27 @@ var file_products_proto_goTypes = []any{
 	(*ListProductNamesByCategoryResponse)(nil), // 35: productsgrpc.ListProductNamesByCategoryResponse
 	(*ListPriceTypesByCategoryRequest)(nil),    // 36: productsgrpc.ListPriceTypesByCategoryRequest
 	(*ListPriceTypesByCategoryResponse)(nil),   // 37: productsgrpc.ListPriceTypesByCategoryResponse
-	(*types.Amount)(nil),                       // 38: types.Amount
-	(*timestamppb.Timestamp)(nil),              // 39: google.protobuf.Timestamp
+	(*SumProductAmountsRequest)(nil),           // 38: productsgrpc.SumProductAmountsRequest
+	(*SumProductAmountsResponse)(nil),          // 39: productsgrpc.SumProductAmountsResponse
+	(*types.Amount)(nil),                       // 40: types.Amount
+	(*timestamppb.Timestamp)(nil),              // 41: google.protobuf.Timestamp
 }
 var file_products_proto_depIdxs = []int32{
 	0,  // 0: productsgrpc.Product.category:type_name -> productsgrpc.Category
 	3,  // 1: productsgrpc.Product.unit_type:type_name -> productsgrpc.PriceType
-	38, // 2: productsgrpc.Product.amount:type_name -> types.Amount
-	39, // 3: productsgrpc.Product.created_at:type_name -> google.protobuf.Timestamp
-	39, // 4: productsgrpc.Product.updated_at:type_name -> google.protobuf.Timestamp
+	40, // 2: productsgrpc.Product.amount:type_name -> types.Amount
+	41, // 3: productsgrpc.Product.created_at:type_name -> google.protobuf.Timestamp
+	41, // 4: productsgrpc.Product.updated_at:type_name -> google.protobuf.Timestamp
 	0,  // 5: productsgrpc.CreateCategoryResponse.category:type_name -> productsgrpc.Category
-	38, // 6: productsgrpc.CreateProductRequest.amount:type_name -> types.Amount
+	40, // 6: productsgrpc.CreateProductRequest.amount:type_name -> types.Amount
 	1,  // 7: productsgrpc.CreateProductResponse.product:type_name -> productsgrpc.Product
 	1,  // 8: productsgrpc.ListUserProductsRespnse.products:type_name -> productsgrpc.Product
-	38, // 9: productsgrpc.UpdateProductRequest.amount:type_name -> types.Amount
-	38, // 10: productsgrpc.ListProductsRequest.min_amount:type_name -> types.Amount
-	38, // 11: productsgrpc.ListProductsRequest.max_amount:type_name -> types.Amount
+	40, // 9: productsgrpc.UpdateProductRequest.amount:type_name -> types.Amount
+	40, // 10: productsgrpc.ListProductsRequest.min_amount:type_name -> types.Amount
+	40, // 11: productsgrpc.ListProductsRequest.max_amount:type_name -> types.Amount
 	1,  // 12: productsgrpc.ListProductsResponse.products:type_name -> productsgrpc.Product
-	38, // 13: productsgrpc.ListFarmerProductsRequest.min_amount:type_name -> types.Amount
-	38, // 14: productsgrpc.ListFarmerProductsRequest.max_amount:type_name -> types.Amount
+	40, // 13: productsgrpc.ListFarmerProductsRequest.min_amount:type_name -> types.Amount
+	40, // 14: productsgrpc.ListFarmerProductsRequest.max_amount:type_name -> types.Amount
 	1,  // 15: productsgrpc.ListFarmerProductsResponse.products:type_name -> productsgrpc.Product
 	1,  // 16: productsgrpc.GetProductResponse.product:type_name -> productsgrpc.Product
 	0,  // 17: productsgrpc.ListCategoriesResponse.categories:type_name -> productsgrpc.Category
@@ -2659,24 +2764,26 @@ var file_products_proto_depIdxs = []int32{
 	32, // 36: productsgrpc.Products.DeletePriceType:input_type -> productsgrpc.DeletePriceTypeRequest
 	34, // 37: productsgrpc.Products.ListProductNamesByCategory:input_type -> productsgrpc.ListProductNamesByCategoryRequest
 	36, // 38: productsgrpc.Products.ListPriceTypesByCategory:input_type -> productsgrpc.ListPriceTypesByCategoryRequest
-	5,  // 39: productsgrpc.Products.CreateCategory:output_type -> productsgrpc.CreateCategoryResponse
-	7,  // 40: productsgrpc.Products.CreateProduct:output_type -> productsgrpc.CreateProductResponse
-	11, // 41: productsgrpc.Products.UpdateProduct:output_type -> productsgrpc.UpdateProductResponse
-	13, // 42: productsgrpc.Products.DeleteProduct:output_type -> productsgrpc.DeleteProductResponse
-	15, // 43: productsgrpc.Products.ListProducts:output_type -> productsgrpc.ListProductsResponse
-	17, // 44: productsgrpc.Products.ListFarmerProducts:output_type -> productsgrpc.ListFarmerProductsResponse
-	19, // 45: productsgrpc.Products.GetProduct:output_type -> productsgrpc.GetProductResponse
-	23, // 46: productsgrpc.Products.GetFarmerProduct:output_type -> productsgrpc.GetFarmerProductResponse
-	21, // 47: productsgrpc.Products.ListCategories:output_type -> productsgrpc.ListCategoriesResponse
-	25, // 48: productsgrpc.Products.HealthCheck:output_type -> productsgrpc.HealthCheckResponse
-	27, // 49: productsgrpc.Products.CreateProductName:output_type -> productsgrpc.CreateProductNameResponse
-	29, // 50: productsgrpc.Products.DeleteProductName:output_type -> productsgrpc.DeleteProductNameResponse
-	31, // 51: productsgrpc.Products.CreatePriceType:output_type -> productsgrpc.CreatePriceTypeResponse
-	33, // 52: productsgrpc.Products.DeletePriceType:output_type -> productsgrpc.DeletePriceTypeResponse
-	35, // 53: productsgrpc.Products.ListProductNamesByCategory:output_type -> productsgrpc.ListProductNamesByCategoryResponse
-	37, // 54: productsgrpc.Products.ListPriceTypesByCategory:output_type -> productsgrpc.ListPriceTypesByCategoryResponse
-	39, // [39:55] is the sub-list for method output_type
-	23, // [23:39] is the sub-list for method input_type
+	38, // 39: productsgrpc.Products.SumProductAmounts:input_type -> productsgrpc.SumProductAmountsRequest
+	5,  // 40: productsgrpc.Products.CreateCategory:output_type -> productsgrpc.CreateCategoryResponse
+	7,  // 41: productsgrpc.Products.CreateProduct:output_type -> productsgrpc.CreateProductResponse
+	11, // 42: productsgrpc.Products.UpdateProduct:output_type -> productsgrpc.UpdateProductResponse
+	13, // 43: productsgrpc.Products.DeleteProduct:output_type -> productsgrpc.DeleteProductResponse
+	15, // 44: productsgrpc.Products.ListProducts:output_type -> productsgrpc.ListProductsResponse
+	17, // 45: productsgrpc.Products.ListFarmerProducts:output_type -> productsgrpc.ListFarmerProductsResponse
+	19, // 46: productsgrpc.Products.GetProduct:output_type -> productsgrpc.GetProductResponse
+	23, // 47: productsgrpc.Products.GetFarmerProduct:output_type -> productsgrpc.GetFarmerProductResponse
+	21, // 48: productsgrpc.Products.ListCategories:output_type -> productsgrpc.ListCategoriesResponse
+	25, // 49: productsgrpc.Products.HealthCheck:output_type -> productsgrpc.HealthCheckResponse
+	27, // 50: productsgrpc.Products.CreateProductName:output_type -> productsgrpc.CreateProductNameResponse
+	29, // 51: productsgrpc.Products.DeleteProductName:output_type -> productsgrpc.DeleteProductNameResponse
+	31, // 52: productsgrpc.Products.CreatePriceType:output_type -> productsgrpc.CreatePriceTypeResponse
+	33, // 53: productsgrpc.Products.DeletePriceType:output_type -> productsgrpc.DeletePriceTypeResponse
+	35, // 54: productsgrpc.Products.ListProductNamesByCategory:output_type -> productsgrpc.ListProductNamesByCategoryResponse
+	37, // 55: productsgrpc.Products.ListPriceTypesByCategory:output_type -> productsgrpc.ListPriceTypesByCategoryResponse
+	39, // 56: productsgrpc.Products.SumProductAmounts:output_type -> productsgrpc.SumProductAmountsResponse
+	40, // [40:57] is the sub-list for method output_type
+	23, // [23:40] is the sub-list for method input_type
 	23, // [23:23] is the sub-list for extension type_name
 	23, // [23:23] is the sub-list for extension extendee
 	0,  // [0:23] is the sub-list for field type_name
@@ -2693,7 +2800,7 @@ func file_products_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_products_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   38,
+			NumMessages:   40,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

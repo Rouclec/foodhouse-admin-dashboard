@@ -263,6 +263,21 @@ func (mr *MockQuerierMockRecorder) ListProducts(ctx, arg any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListProducts", reflect.TypeOf((*MockQuerier)(nil).ListProducts), ctx, arg)
 }
 
+// SumProductAmounts mocks base method.
+func (m *MockQuerier) SumProductAmounts(ctx context.Context, productIds []string) (float64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SumProductAmounts", ctx, productIds)
+	ret0, _ := ret[0].(float64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SumProductAmounts indicates an expected call of SumProductAmounts.
+func (mr *MockQuerierMockRecorder) SumProductAmounts(ctx, productIds any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SumProductAmounts", reflect.TypeOf((*MockQuerier)(nil).SumProductAmounts), ctx, productIds)
+}
+
 // UpdateProduct mocks base method.
 func (m *MockQuerier) UpdateProduct(ctx context.Context, arg sqlc.UpdateProductParams) error {
 	m.ctrl.T.Helper()

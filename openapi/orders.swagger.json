@@ -177,6 +177,51 @@
         ]
       }
     },
+    "/v1/users/{farmerId}/orders/get-farmer-earnings": {
+      "get": {
+        "operationId": "Orders_GetFarmerEarnings",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcGetFarmerEarningsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "farmerId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "filter",
+            "description": "\"this_week\", \"this_month\", etc.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "FilterType_UNSPECIFIED",
+              "FilterType_THIS_WEEK",
+              "FilterType_THIS_MONTH",
+              "FilterType_THIS_YEAR",
+              "FilterType_ALL_TIME"
+            ],
+            "default": "FilterType_UNSPECIFIED"
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/users/{farmerId}/orders/list-farmer-orders": {
       "get": {
         "operationId": "Orders_ListFarmerOrders",
@@ -799,6 +844,41 @@
     },
     "ordersgrpcDispatchOrderResponse": {
       "type": "object"
+    },
+    "ordersgrpcFarmerEarningsData": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "ordersgrpcFilterType": {
+      "type": "string",
+      "enum": [
+        "FilterType_UNSPECIFIED",
+        "FilterType_THIS_WEEK",
+        "FilterType_THIS_MONTH",
+        "FilterType_THIS_YEAR",
+        "FilterType_ALL_TIME"
+      ],
+      "default": "FilterType_UNSPECIFIED"
+    },
+    "ordersgrpcGetFarmerEarningsResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ordersgrpcFarmerEarningsData"
+          }
+        }
+      }
     },
     "ordersgrpcGetOrderDetailsResponse": {
       "type": "object",

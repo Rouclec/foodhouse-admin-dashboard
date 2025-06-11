@@ -469,6 +469,20 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]L
 	return items, nil
 }
 
+const sumProductAmounts = `-- name: SumProductAmounts :one
+SELECT 
+  COALESCE(SUM(value), 0)::double precision AS total
+FROM product
+WHERE id = ANY($1::text[])
+`
+
+func (q *Queries) SumProductAmounts(ctx context.Context, productIds []string) (float64, error) {
+	row := q.db.QueryRow(ctx, sumProductAmounts, productIds)
+	var total float64
+	err := row.Scan(&total)
+	return total, err
+}
+
 const updateProduct = `-- name: UpdateProduct :exec
 UPDATE product
 SET category_id = $3,

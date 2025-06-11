@@ -51,6 +51,17 @@ export type ordersgrpcDeliveryPoint = {
 
 export type ordersgrpcDispatchOrderResponse = unknown;
 
+export type ordersgrpcFarmerEarningsData = {
+    date?: string;
+    value?: number;
+};
+
+export type ordersgrpcFilterType = 'FilterType_UNSPECIFIED' | 'FilterType_THIS_WEEK' | 'FilterType_THIS_MONTH' | 'FilterType_THIS_YEAR' | 'FilterType_ALL_TIME';
+
+export type ordersgrpcGetFarmerEarningsResponse = {
+    data?: Array<ordersgrpcFarmerEarningsData>;
+};
+
 export type ordersgrpcGetOrderDetailsResponse = {
     order?: ordersgrpcOrder;
     auditLog?: Array<ordersgrpcOrderAuditLog>;
@@ -224,6 +235,22 @@ export type OrdersConfirmPaymentError = (rpcStatus);
 export type OrdersHealthCheckResponse = (ordersgrpcHealthCheckResponse);
 
 export type OrdersHealthCheckError = (rpcStatus);
+
+export type OrdersGetFarmerEarningsData = {
+    path: {
+        farmerId: string;
+    };
+    query?: {
+        /**
+         * "this_week", "this_month", etc.
+         */
+        filter?: 'FilterType_UNSPECIFIED' | 'FilterType_THIS_WEEK' | 'FilterType_THIS_MONTH' | 'FilterType_THIS_YEAR' | 'FilterType_ALL_TIME';
+    };
+};
+
+export type OrdersGetFarmerEarningsResponse = (ordersgrpcGetFarmerEarningsResponse);
+
+export type OrdersGetFarmerEarningsError = (rpcStatus);
 
 export type OrdersListFarmerOrdersData = {
     path: {

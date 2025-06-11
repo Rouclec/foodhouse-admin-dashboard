@@ -473,3 +473,18 @@ func (i *Impl) ListProductNamesByCategory(ctx context.Context, req *productsgrpc
 
 	return &productsgrpc.ListProductNamesByCategoryResponse{ProductNames: protoProductNames}, nil
 }
+
+// SumProductAmounts implements productsgrpc.ProductsServer.
+func (i *Impl) SumProductAmounts(ctx context.Context,
+	req *productsgrpc.SumProductAmountsRequest) (
+	*productsgrpc.SumProductAmountsResponse, error) {
+	total, err := i.repo.Do().SumProductAmounts(ctx, req.GetProductIds())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting products total, %v", err)
+	}
+
+	return &productsgrpc.SumProductAmountsResponse{
+		Total: total,
+	}, nil
+}

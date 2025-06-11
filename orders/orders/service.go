@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -993,4 +994,189 @@ func (i *Impl) CheckPaymentStatus(ctx context.Context, req *ordersgrpc.CheckPaym
 	return &ordersgrpc.CheckPaymentStatusResponse{
 		Status: paymentStatus,
 	}, nil
+}
+
+type GroupBy string
+
+const (
+	GroupByDay   GroupBy = "day"
+	GroupByMonth GroupBy = "month"
+	GroupByYear  GroupBy = "year"
+)
+
+type FilterContext struct {
+	StartDate time.Time
+	EndDate   time.Time
+	GroupBy   GroupBy
+	Format    string
+}
+
+func GetFilterContext(filter ordersgrpc.FilterType) (FilterContext, error) {
+	now := time.Now()
+	loc := now.Location()
+	switch filter {
+	case ordersgrpc.FilterType_FilterType_THIS_WEEK:
+		offset := int(now.Weekday())
+		start := now.AddDate(0, 0, -offset)
+		end := start.AddDate(0, 0, 7)
+		return FilterContext{start, end, GroupByDay, "Mon"}, nil
+
+	case ordersgrpc.FilterType_FilterType_THIS_MONTH:
+		start := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, loc)
+		end := start.AddDate(0, 1, 0)
+		return FilterContext{start, end, GroupByDay, "02/01"}, nil
+
+	case ordersgrpc.FilterType_FilterType_THIS_YEAR:
+		start := time.Date(now.Year(), 1, 1, 0, 0, 0, 0, loc)
+		end := start.AddDate(1, 0, 0)
+		return FilterContext{start, end, GroupByMonth, "01/06"}, nil
+
+	case ordersgrpc.FilterType_FilterType_ALL_TIME:
+		start := time.Time{}
+		return FilterContext{start, now, GroupByYear, "2006"}, nil
+
+	default:
+		return FilterContext{}, fmt.Errorf("invalid filter type")
+	}
+}
+
+// GetFarmerEarnings implements ordersgrpc.OrdersServer.
+func (i *Impl) GetFarmerEarnings(ctx context.Context,
+	req *ordersgrpc.GetFarmerEarningsRequest) (
+	*ordersgrpc.GetFarmerEarningsResponse, error) {
+
+	filterCtx, err := GetFilterContext(req.GetFilter())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting context %v", err)
+	}
+
+	var rawResults []struct {
+		GroupDate  pgtype.Timestamptz `json:"group_date"`
+		ProductIds []string           `json:"product_ids"`
+	}
+
+	switch filterCtx.GroupBy {
+	case GroupByDay:
+		results, err := i.repo.Do().GetOrdersGroupedByDay(ctx, sqlc.GetOrdersGroupedByDayParams{
+			ProductOwner: &req.FarmerId,
+			Status:       ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String(),
+			UpdatedAt: pgtype.Timestamptz{
+				Valid: true,
+				Time:  filterCtx.StartDate,
+			},
+			UpdatedAt_2: pgtype.Timestamptz{
+				Valid: true,
+				Time:  filterCtx.EndDate,
+			},
+		})
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error getting earnings by day: %v", err)
+		}
+		rawResults = make([]struct {
+			GroupDate  pgtype.Timestamptz `json:"group_date"`
+			ProductIds []string           `json:"product_ids"`
+		}, len(results))
+		for i, r := range results {
+			rawResults[i] = struct {
+				GroupDate  pgtype.Timestamptz `json:"group_date"`
+				ProductIds []string           `json:"product_ids"`
+			}{
+				GroupDate:  pgtype.Timestamptz{Valid: true, Time: r.GroupDate},
+				ProductIds: r.ProductIds,
+			}
+		}
+
+	case GroupByMonth:
+		results, err := i.repo.Do().GetOrdersGroupedByMonth(ctx, sqlc.GetOrdersGroupedByMonthParams{
+			ProductOwner: &req.FarmerId,
+			Status:       ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String(),
+			UpdatedAt: pgtype.Timestamptz{
+				Valid: true,
+				Time:  filterCtx.StartDate,
+			},
+			UpdatedAt_2: pgtype.Timestamptz{
+				Valid: true,
+				Time:  filterCtx.EndDate,
+			},
+		})
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error getting earnings by day: %v", err)
+		}
+		rawResults = make([]struct {
+			GroupDate  pgtype.Timestamptz `json:"group_date"`
+			ProductIds []string           `json:"product_ids"`
+		}, len(results))
+		for i, r := range results {
+			rawResults[i] = struct {
+				GroupDate  pgtype.Timestamptz `json:"group_date"`
+				ProductIds []string           `json:"product_ids"`
+			}{
+				GroupDate:  pgtype.Timestamptz{Valid: true, Time: r.GroupDate},
+				ProductIds: r.ProductIds,
+			}
+		}
+	case GroupByYear:
+		results, err := i.repo.Do().GetOrdersGroupedByYear(ctx, sqlc.GetOrdersGroupedByYearParams{
+			ProductOwner: &req.FarmerId,
+			Status:       ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String(),
+			UpdatedAt: pgtype.Timestamptz{
+				Valid: true,
+				Time:  filterCtx.StartDate,
+			},
+			UpdatedAt_2: pgtype.Timestamptz{
+				Valid: true,
+				Time:  filterCtx.EndDate,
+			},
+		})
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error getting earnings by day: %v", err)
+		}
+		rawResults = make([]struct {
+			GroupDate  pgtype.Timestamptz `json:"group_date"`
+			ProductIds []string           `json:"product_ids"`
+		}, len(results))
+		for i, r := range results {
+			rawResults[i] = struct {
+				GroupDate  pgtype.Timestamptz `json:"group_date"`
+				ProductIds []string           `json:"product_ids"`
+			}{
+				GroupDate:  pgtype.Timestamptz{Valid: true, Time: r.GroupDate},
+				ProductIds: r.ProductIds,
+			}
+		}
+	}
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting earnings by group: %v", err)
+	}
+
+	// Group by date string
+	grouped := make(map[string][]string)
+	for _, row := range rawResults {
+		key := row.GroupDate.Time.Format(filterCtx.Format)
+		grouped[key] = append(grouped[key], row.ProductIds...)
+	}
+
+	// Call ProductService for each group
+	results := make([]*ordersgrpc.FarmerEarningsData, 0, len(grouped))
+	for dateStr, productIDs := range grouped {
+		res, err := i.productService.SumProductAmounts(ctx, &productsgrpc.SumProductAmountsRequest{
+			ProductIds: productIDs,
+		})
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error getting total earning from products %v", err)
+		}
+
+		results = append(results, &ordersgrpc.FarmerEarningsData{
+			Date:  dateStr,
+			Value: res.Total,
+		})
+	}
+
+	// Sort by date string if needed
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].Date < results[j].Date
+	})
+
+	return &ordersgrpc.GetFarmerEarningsResponse{Data: results}, nil
 }

@@ -115,6 +115,51 @@ func (mr *MockQuerierMockRecorder) GetOrderByOrderNumber(ctx, orderNumber any) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderByOrderNumber", reflect.TypeOf((*MockQuerier)(nil).GetOrderByOrderNumber), ctx, orderNumber)
 }
 
+// GetOrdersGroupedByDay mocks base method.
+func (m *MockQuerier) GetOrdersGroupedByDay(ctx context.Context, arg sqlc.GetOrdersGroupedByDayParams) ([]sqlc.GetOrdersGroupedByDayRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrdersGroupedByDay", ctx, arg)
+	ret0, _ := ret[0].([]sqlc.GetOrdersGroupedByDayRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrdersGroupedByDay indicates an expected call of GetOrdersGroupedByDay.
+func (mr *MockQuerierMockRecorder) GetOrdersGroupedByDay(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrdersGroupedByDay", reflect.TypeOf((*MockQuerier)(nil).GetOrdersGroupedByDay), ctx, arg)
+}
+
+// GetOrdersGroupedByMonth mocks base method.
+func (m *MockQuerier) GetOrdersGroupedByMonth(ctx context.Context, arg sqlc.GetOrdersGroupedByMonthParams) ([]sqlc.GetOrdersGroupedByMonthRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrdersGroupedByMonth", ctx, arg)
+	ret0, _ := ret[0].([]sqlc.GetOrdersGroupedByMonthRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrdersGroupedByMonth indicates an expected call of GetOrdersGroupedByMonth.
+func (mr *MockQuerierMockRecorder) GetOrdersGroupedByMonth(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrdersGroupedByMonth", reflect.TypeOf((*MockQuerier)(nil).GetOrdersGroupedByMonth), ctx, arg)
+}
+
+// GetOrdersGroupedByYear mocks base method.
+func (m *MockQuerier) GetOrdersGroupedByYear(ctx context.Context, arg sqlc.GetOrdersGroupedByYearParams) ([]sqlc.GetOrdersGroupedByYearRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrdersGroupedByYear", ctx, arg)
+	ret0, _ := ret[0].([]sqlc.GetOrdersGroupedByYearRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrdersGroupedByYear indicates an expected call of GetOrdersGroupedByYear.
+func (mr *MockQuerierMockRecorder) GetOrdersGroupedByYear(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrdersGroupedByYear", reflect.TypeOf((*MockQuerier)(nil).GetOrdersGroupedByYear), ctx, arg)
+}
+
 // GetPaymentByEntity mocks base method.
 func (m *MockQuerier) GetPaymentByEntity(ctx context.Context, arg sqlc.GetPaymentByEntityParams) (sqlc.Payment, error) {
 	m.ctrl.T.Helper()
