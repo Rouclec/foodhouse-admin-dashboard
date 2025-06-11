@@ -174,6 +174,10 @@ message ListProductNamesByCategoryResponse {
 message ListPriceTypesByCategoryRequest { string category_id = 1; }
 message ListPriceTypesByCategoryResponse { repeated PriceType price_types = 1; }
 
+message SumProductAmountsRequest { repeated string product_ids = 1; }
+
+message SumProductAmountsResponse { double total = 1; }
+
 service Products {
 
   rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryResponse) {
@@ -284,4 +288,7 @@ service Products {
       get : "/v1/public/products/{category_id}/list-price-types-by-category"
     };
   }
+
+  rpc SumProductAmounts(SumProductAmountsRequest)
+      returns (SumProductAmountsResponse);
 }

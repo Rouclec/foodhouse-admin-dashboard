@@ -114,3 +114,9 @@ ORDER BY slug ASC;
 -- name: ListPriceTypesByCategory :many
 SELECT * FROM price_types WHERE category_id = $1
 ORDER BY slug ASC;
+
+-- name: SumProductAmounts :one
+SELECT 
+  COALESCE(SUM(value), 0)::double precision AS total
+FROM product
+WHERE id = ANY(sqlc.arg(product_ids)::text[]);

@@ -14,6 +14,9 @@ type Querier interface {
 	CreateOrderAuditLog(ctx context.Context, arg CreateOrderAuditLogParams) error
 	CreatePayment(ctx context.Context, arg CreatePaymentParams) (Payment, error)
 	GetOrderByOrderNumber(ctx context.Context, orderNumber int64) (Order, error)
+	GetOrdersGroupedByDay(ctx context.Context, arg GetOrdersGroupedByDayParams) ([]GetOrdersGroupedByDayRow, error)
+	GetOrdersGroupedByMonth(ctx context.Context, arg GetOrdersGroupedByMonthParams) ([]GetOrdersGroupedByMonthRow, error)
+	GetOrdersGroupedByYear(ctx context.Context, arg GetOrdersGroupedByYearParams) ([]GetOrdersGroupedByYearRow, error)
 	GetPaymentByEntity(ctx context.Context, arg GetPaymentByEntityParams) (Payment, error)
 	GetPaymentById(ctx context.Context, id string) (Payment, error)
 	GetUserOrderBySecretKey(ctx context.Context, arg GetUserOrderBySecretKeyParams) (Order, error)

@@ -33,6 +33,7 @@ const (
 	Orders_ListDeliveryPoints_FullMethodName  = "/ordersgrpc.Orders/ListDeliveryPoints"
 	Orders_ListDeliveryCities_FullMethodName  = "/ordersgrpc.Orders/ListDeliveryCities"
 	Orders_CheckPaymentStatus_FullMethodName  = "/ordersgrpc.Orders/CheckPaymentStatus"
+	Orders_GetFarmerEarnings_FullMethodName   = "/ordersgrpc.Orders/GetFarmerEarnings"
 )
 
 // OrdersClient is the client API for Orders service.
@@ -53,6 +54,7 @@ type OrdersClient interface {
 	ListDeliveryPoints(ctx context.Context, in *ListDeliveryPointsRequest, opts ...grpc.CallOption) (*ListDeliveryPointsResponse, error)
 	ListDeliveryCities(ctx context.Context, in *ListDeliveryCitiesRequest, opts ...grpc.CallOption) (*ListDeliveryCitiesResponse, error)
 	CheckPaymentStatus(ctx context.Context, in *CheckPaymentStatusRequest, opts ...grpc.CallOption) (*CheckPaymentStatusResponse, error)
+	GetFarmerEarnings(ctx context.Context, in *GetFarmerEarningsRequest, opts ...grpc.CallOption) (*GetFarmerEarningsResponse, error)
 }
 
 type ordersClient struct {
@@ -203,6 +205,16 @@ func (c *ordersClient) CheckPaymentStatus(ctx context.Context, in *CheckPaymentS
 	return out, nil
 }
 
+func (c *ordersClient) GetFarmerEarnings(ctx context.Context, in *GetFarmerEarningsRequest, opts ...grpc.CallOption) (*GetFarmerEarningsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetFarmerEarningsResponse)
+	err := c.cc.Invoke(ctx, Orders_GetFarmerEarnings_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrdersServer is the server API for Orders service.
 // All implementations must embed UnimplementedOrdersServer
 // for forward compatibility.
@@ -221,6 +233,7 @@ type OrdersServer interface {
 	ListDeliveryPoints(context.Context, *ListDeliveryPointsRequest) (*ListDeliveryPointsResponse, error)
 	ListDeliveryCities(context.Context, *ListDeliveryCitiesRequest) (*ListDeliveryCitiesResponse, error)
 	CheckPaymentStatus(context.Context, *CheckPaymentStatusRequest) (*CheckPaymentStatusResponse, error)
+	GetFarmerEarnings(context.Context, *GetFarmerEarningsRequest) (*GetFarmerEarningsResponse, error)
 	mustEmbedUnimplementedOrdersServer()
 }
 
@@ -272,6 +285,9 @@ func (UnimplementedOrdersServer) ListDeliveryCities(context.Context, *ListDelive
 }
 func (UnimplementedOrdersServer) CheckPaymentStatus(context.Context, *CheckPaymentStatusRequest) (*CheckPaymentStatusResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CheckPaymentStatus not implemented")
+}
+func (UnimplementedOrdersServer) GetFarmerEarnings(context.Context, *GetFarmerEarningsRequest) (*GetFarmerEarningsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFarmerEarnings not implemented")
 }
 func (UnimplementedOrdersServer) mustEmbedUnimplementedOrdersServer() {}
 func (UnimplementedOrdersServer) testEmbeddedByValue()                {}
@@ -546,6 +562,24 @@ func _Orders_CheckPaymentStatus_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Orders_GetFarmerEarnings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetFarmerEarningsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).GetFarmerEarnings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_GetFarmerEarnings_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).GetFarmerEarnings(ctx, req.(*GetFarmerEarningsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Orders_ServiceDesc is the grpc.ServiceDesc for Orders service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -608,6 +642,10 @@ var Orders_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CheckPaymentStatus",
 			Handler:    _Orders_CheckPaymentStatus_Handler,
+		},
+		{
+			MethodName: "GetFarmerEarnings",
+			Handler:    _Orders_GetFarmerEarnings_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

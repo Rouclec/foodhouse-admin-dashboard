@@ -209,6 +209,153 @@ func (q *Queries) GetOrderByOrderNumber(ctx context.Context, orderNumber int64) 
 	return i, err
 }
 
+const getOrdersGroupedByDay = `-- name: GetOrdersGroupedByDay :many
+SELECT 
+  DATE_TRUNC('day', updated_at)::timestamptz AS group_date,
+  ARRAY_AGG(product_id)::text[] AS product_ids
+FROM orders
+WHERE product_owner = $1
+  AND status = $2
+  AND updated_at BETWEEN $3 AND $4
+GROUP BY group_date
+ORDER BY group_date
+`
+
+type GetOrdersGroupedByDayParams struct {
+	ProductOwner *string            `json:"product_owner"`
+	Status       string             `json:"status"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	UpdatedAt_2  pgtype.Timestamptz `json:"updated_at_2"`
+}
+
+type GetOrdersGroupedByDayRow struct {
+	GroupDate  time.Time `json:"group_date"`
+	ProductIds []string  `json:"product_ids"`
+}
+
+func (q *Queries) GetOrdersGroupedByDay(ctx context.Context, arg GetOrdersGroupedByDayParams) ([]GetOrdersGroupedByDayRow, error) {
+	rows, err := q.db.Query(ctx, getOrdersGroupedByDay,
+		arg.ProductOwner,
+		arg.Status,
+		arg.UpdatedAt,
+		arg.UpdatedAt_2,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetOrdersGroupedByDayRow{}
+	for rows.Next() {
+		var i GetOrdersGroupedByDayRow
+		if err := rows.Scan(&i.GroupDate, &i.ProductIds); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getOrdersGroupedByMonth = `-- name: GetOrdersGroupedByMonth :many
+SELECT 
+  DATE_TRUNC('month', updated_at)::timestamptz AS group_date,
+  ARRAY_AGG(product_id)::text[] AS product_ids
+FROM orders
+WHERE product_owner = $1
+  AND status = $2
+  AND updated_at BETWEEN $3 AND $4
+GROUP BY group_date
+ORDER BY group_date
+`
+
+type GetOrdersGroupedByMonthParams struct {
+	ProductOwner *string            `json:"product_owner"`
+	Status       string             `json:"status"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	UpdatedAt_2  pgtype.Timestamptz `json:"updated_at_2"`
+}
+
+type GetOrdersGroupedByMonthRow struct {
+	GroupDate  time.Time `json:"group_date"`
+	ProductIds []string  `json:"product_ids"`
+}
+
+func (q *Queries) GetOrdersGroupedByMonth(ctx context.Context, arg GetOrdersGroupedByMonthParams) ([]GetOrdersGroupedByMonthRow, error) {
+	rows, err := q.db.Query(ctx, getOrdersGroupedByMonth,
+		arg.ProductOwner,
+		arg.Status,
+		arg.UpdatedAt,
+		arg.UpdatedAt_2,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetOrdersGroupedByMonthRow{}
+	for rows.Next() {
+		var i GetOrdersGroupedByMonthRow
+		if err := rows.Scan(&i.GroupDate, &i.ProductIds); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getOrdersGroupedByYear = `-- name: GetOrdersGroupedByYear :many
+SELECT 
+  DATE_TRUNC('year', updated_at)::timestamptz AS group_date,
+  ARRAY_AGG(product_id)::text[] AS product_ids
+FROM orders
+WHERE product_owner = $1
+  AND status = $2
+  AND updated_at BETWEEN $3 AND $4
+GROUP BY group_date
+ORDER BY group_date
+`
+
+type GetOrdersGroupedByYearParams struct {
+	ProductOwner *string            `json:"product_owner"`
+	Status       string             `json:"status"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	UpdatedAt_2  pgtype.Timestamptz `json:"updated_at_2"`
+}
+
+type GetOrdersGroupedByYearRow struct {
+	GroupDate  time.Time `json:"group_date"`
+	ProductIds []string  `json:"product_ids"`
+}
+
+func (q *Queries) GetOrdersGroupedByYear(ctx context.Context, arg GetOrdersGroupedByYearParams) ([]GetOrdersGroupedByYearRow, error) {
+	rows, err := q.db.Query(ctx, getOrdersGroupedByYear,
+		arg.ProductOwner,
+		arg.Status,
+		arg.UpdatedAt,
+		arg.UpdatedAt_2,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetOrdersGroupedByYearRow{}
+	for rows.Next() {
+		var i GetOrdersGroupedByYearRow
+		if err := rows.Scan(&i.GroupDate, &i.ProductIds); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getPaymentByEntity = `-- name: GetPaymentByEntity :one
 SELECT id, status, payment_entity, entity_id, amount_value, amount_currency, created_by, expires_at, created_at, updated_at, method, account_number from payments WHERE payment_entity = $1 AND entity_id = $2
 `
@@ -458,7 +605,7 @@ func (q *Queries) ListUserOrders(ctx context.Context, arg ListUserOrdersParams) 
 }
 
 const reviewOrder = `-- name: ReviewOrder :exec
-UPDATE orders SET review = $1, rating = $2 WHERE order_number = $3
+UPDATE orders SET review = $1, rating = $2, updated_at = now() WHERE order_number = $3
 `
 
 type ReviewOrderParams struct {
@@ -473,7 +620,7 @@ func (q *Queries) ReviewOrder(ctx context.Context, arg ReviewOrderParams) error 
 }
 
 const updateOrderStatus = `-- name: UpdateOrderStatus :exec
-UPDATE orders SET status = $2 WHERE order_number = $1
+UPDATE orders SET status = $2, updated_at = now() WHERE order_number = $1
 `
 
 type UpdateOrderStatusParams struct {
@@ -487,7 +634,7 @@ func (q *Queries) UpdateOrderStatus(ctx context.Context, arg UpdateOrderStatusPa
 }
 
 const updatePaymentStatus = `-- name: UpdatePaymentStatus :exec
-UPDATE payments SET status = $2 WHERE id = $1
+UPDATE payments SET status = $2, updated_at = now() WHERE id = $1
 `
 
 type UpdatePaymentStatusParams struct {
