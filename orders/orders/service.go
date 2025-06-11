@@ -117,19 +117,6 @@ func (i *Impl) ConfirmDelivery(ctx context.Context, req *ordersgrpc.ConfirmDeliv
 		return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
 	}
 
-	paymentReference := fmt.Sprintf("payount-%s-%s", strconv.FormatInt(order.OrderNumber, 10), time.Now().Format("20060102150405"))
-	testAmount := 10
-
-	i.logger.Debug().Msgf("payout phone number %v", *order.PayoutPhoneNumber)
-
-	_, err = i.paymentService.WithdrawFunds(ctx,
-		*order.PayoutPhoneNumber, float64(testAmount),
-		*order.PriceCurrency, fmt.Sprintf("payment for order %v", order.OrderNumber),
-		&paymentReference)
-
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error making payout %v", err)
-	}
 
 	err = querier.UpdateOrderStatus(ctx, sqlc.UpdateOrderStatusParams{
 		OrderNumber: order.OrderNumber,
@@ -493,6 +480,7 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 
 	afterBytes, err := protojson.Marshal(converters.SqlcOrderToProto(updatedOrder))
 
+
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
 	}
@@ -509,6 +497,20 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error dispatching order %v", err)
+	}
+
+	paymentReference := fmt.Sprintf("payount-%s-%s", strconv.FormatInt(order.OrderNumber, 10), time.Now().Format("20060102150405"))
+	testAmount := 10
+
+	i.logger.Debug().Msgf("payout phone number %v", req.GetPayoutPhoneNumber())
+
+	_, err = i.paymentService.WithdrawFunds(ctx,
+		req.GetPayoutPhoneNumber(), float64(testAmount),
+		*order.PriceCurrency, fmt.Sprintf("payment for order %v", order.OrderNumber),
+		&paymentReference)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error making payout %v", err)
 	}
 
 	err = tx.Commit(ctx)
