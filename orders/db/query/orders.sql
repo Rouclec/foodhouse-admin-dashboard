@@ -105,7 +105,7 @@ UPDATE payments SET status = $2, updated_at = now() WHERE id = $1;
 -- name: GetOrdersGroupedByDay :many
 SELECT 
   DATE_TRUNC('day', updated_at)::timestamptz AS group_date,
-  ARRAY_AGG(product_id)::text[] AS product_ids
+  ARRAY_AGG(product)::text[] AS product_ids
 FROM orders
 WHERE product_owner = $1
   AND status = $2
@@ -116,7 +116,7 @@ ORDER BY group_date;
 -- name: GetOrdersGroupedByMonth :many
 SELECT 
   DATE_TRUNC('month', updated_at)::timestamptz AS group_date,
-  ARRAY_AGG(product_id)::text[] AS product_ids
+  ARRAY_AGG(product)::text[] AS product_ids
 FROM orders
 WHERE product_owner = $1
   AND status = $2
@@ -127,7 +127,7 @@ ORDER BY group_date;
 -- name: GetOrdersGroupedByYear :many
 SELECT 
   DATE_TRUNC('year', updated_at)::timestamptz AS group_date,
-  ARRAY_AGG(product_id)::text[] AS product_ids
+  ARRAY_AGG(product)::text[] AS product_ids
 FROM orders
 WHERE product_owner = $1
   AND status = $2
