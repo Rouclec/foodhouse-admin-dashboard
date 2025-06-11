@@ -1050,6 +1050,7 @@ func (i *Impl) GetFarmerEarnings(ctx context.Context,
 		return nil, status.Errorf(codes.Internal, "error getting context %v", err)
 	}
 
+	i.logger.Debug().Msgf("filter conext %v", filterCtx)
 	var rawResults []struct {
 		GroupDate  pgtype.Timestamptz `json:"group_date"`
 		ProductIds []string           `json:"product_ids"`
@@ -1150,12 +1151,16 @@ func (i *Impl) GetFarmerEarnings(ctx context.Context,
 		return nil, status.Errorf(codes.Internal, "error getting earnings by group: %v", err)
 	}
 
+	i.logger.Debug().Msgf("Raw results :%v", rawResults)
+
 	// Group by date string
 	grouped := make(map[string][]string)
 	for _, row := range rawResults {
 		key := row.GroupDate.Time.Format(filterCtx.Format)
 		grouped[key] = append(grouped[key], row.ProductIds...)
 	}
+
+	i.logger.Debug().Msgf("Groupped results: %v", grouped)
 
 	// Call ProductService for each group
 	results := make([]*ordersgrpc.FarmerEarningsData, 0, len(grouped))
@@ -1177,6 +1182,8 @@ func (i *Impl) GetFarmerEarnings(ctx context.Context,
 	sort.Slice(results, func(i, j int) bool {
 		return results[i].Date < results[j].Date
 	})
+
+	i.logger.Debug().Msgf("Final results: %v", results)
 
 	return &ordersgrpc.GetFarmerEarningsResponse{Data: results}, nil
 }
