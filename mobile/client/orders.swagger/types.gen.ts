@@ -119,7 +119,7 @@ export type ordersgrpcOrderAuditLog = {
     after?: ordersgrpcOrder;
 };
 
-export type ordersgrpcOrderStatus = 'OrderStatus_UNSPECIFIED' | 'OrderStatus_CREATED' | 'OrderStatus_PAYMENT_SUCCESSFUL' | 'OrderStatus_PAYMENT_FAILED' | 'OrderStatus_IN_TRANSIT' | 'OrderStatus_DELIVERED' | 'OrderStatus_APPROVED';
+export type ordersgrpcOrderStatus = 'OrderStatus_UNSPECIFIED' | 'OrderStatus_CREATED' | 'OrderStatus_PAYMENT_SUCCESSFUL' | 'OrderStatus_PAYMENT_FAILED' | 'OrderStatus_IN_TRANSIT' | 'OrderStatus_DELIVERED' | 'OrderStatus_APPROVED' | 'OrderStatus_REJECTED';
 
 export type ordersgrpcPayment = {
     id?: string;
@@ -140,11 +140,17 @@ export type ordersgrpcPaymentMethodType = 'PaymentMethodType_UNSPECIFIED' | 'Pay
 
 export type ordersgrpcPaymentStatus = 'PaymentStatus_UNSPECIFIED' | 'PaymentStatus_INITIATED' | 'PaymentStatus_COMPLETED' | 'PaymentStatus_FAILED' | 'PaymentStatus_CANCELED';
 
+export type ordersgrpcRejectOrderResponse = unknown;
+
 export type OrdersInitiatePaymentBody = {
     paymentEntity?: ordersgrpcPaymentEntity;
     entityId?: string;
     amount?: typesAmount;
     account?: ordersgrpcAccount;
+};
+
+export type OrdersRejectOrderBody = {
+    reason?: string;
 };
 
 export type protobufAny = {
@@ -344,6 +350,18 @@ export type OrdersApproveOrderData = {
 export type OrdersApproveOrderResponse = (ordersgrpcApproveOrderResponse);
 
 export type OrdersApproveOrderError = (rpcStatus);
+
+export type OrdersRejectOrderData = {
+    body: OrdersRejectOrderBody;
+    path: {
+        orderId: string;
+        userId: string;
+    };
+};
+
+export type OrdersRejectOrderResponse = (ordersgrpcRejectOrderResponse);
+
+export type OrdersRejectOrderError = (rpcStatus);
 
 export type OrdersDispatchOrderData = {
     body: OrdersDispatchOrderBody;

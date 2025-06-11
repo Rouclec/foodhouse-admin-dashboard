@@ -17,6 +17,7 @@ enum OrderStatus {
   OrderStatus_IN_TRANSIT = 4;
   OrderStatus_DELIVERED = 5;
   OrderStatus_APPROVED = 6;
+  OrderStatus_REJECTED = 7;
 }
 
 enum PaymentStatus {
@@ -166,6 +167,14 @@ message ApproveOrderRequest {
 
 message ApproveOrderResponse {}
 
+message RejectOrderRequest {
+  string order_id = 1;
+  string user_id = 2;
+  string reason = 3;
+}
+
+message RejectOrderResponse {}
+
 message DeliveryPoint {
   string id = 1;
   types.Point address = 2;
@@ -300,6 +309,13 @@ service Orders {
   rpc ApproveOrder(ApproveOrderRequest) returns (ApproveOrderResponse) {
     option (google.api.http) = {
       put : "/v1/users/{user_id}/orders/{order_id}/approve-order"
+      body : "*"
+    };
+  }
+
+  rpc RejectOrder(RejectOrderRequest) returns (RejectOrderResponse) {
+    option (google.api.http) = {
+      put : "/v1/users/{user_id}/orders/{order_id}/reject-order"
       body : "*"
     };
   }

@@ -2,9 +2,9 @@
 
 import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
-import type { OrdersCreateDeliveryPointData, OrdersCreateDeliveryPointError, OrdersCreateDeliveryPointResponse, OrdersConfirmPaymentData, OrdersGetFarmerEarningsData, OrdersListFarmerOrdersData, OrdersCreateOrderData, OrdersCreateOrderError, OrdersCreateOrderResponse, OrdersInitiatePaymentData, OrdersInitiatePaymentError, OrdersInitiatePaymentResponse, OrdersListDeliveryCitiesData, OrdersListDeliveryPointsData, OrdersListUserOrdersData, OrdersApproveOrderData, OrdersApproveOrderError, OrdersApproveOrderResponse, OrdersDispatchOrderData, OrdersDispatchOrderError, OrdersDispatchOrderResponse, OrdersGetOrderDetailsData, OrdersCheckPaymentStatusData, OrdersConfirmDeliveryData, OrdersConfirmDeliveryError, OrdersConfirmDeliveryResponse } from '../types.gen';
+import type { OrdersCreateDeliveryPointData, OrdersCreateDeliveryPointError, OrdersCreateDeliveryPointResponse, OrdersConfirmPaymentData, OrdersGetFarmerEarningsData, OrdersListFarmerOrdersData, OrdersCreateOrderData, OrdersCreateOrderError, OrdersCreateOrderResponse, OrdersInitiatePaymentData, OrdersInitiatePaymentError, OrdersInitiatePaymentResponse, OrdersListDeliveryCitiesData, OrdersListDeliveryPointsData, OrdersListUserOrdersData, OrdersApproveOrderData, OrdersApproveOrderError, OrdersApproveOrderResponse, OrdersRejectOrderData, OrdersRejectOrderError, OrdersRejectOrderResponse, OrdersDispatchOrderData, OrdersDispatchOrderError, OrdersDispatchOrderResponse, OrdersGetOrderDetailsData, OrdersCheckPaymentStatusData, OrdersConfirmDeliveryData, OrdersConfirmDeliveryError, OrdersConfirmDeliveryResponse } from '../types.gen';
 import type { AxiosError } from 'axios';
-import { client, ordersCreateDeliveryPoint, ordersConfirmPayment, ordersHealthCheck, ordersGetFarmerEarnings, ordersListFarmerOrders, ordersCreateOrder, ordersInitiatePayment, ordersListDeliveryCities, ordersListDeliveryPoints, ordersListUserOrders, ordersApproveOrder, ordersDispatchOrder, ordersGetOrderDetails, ordersCheckPaymentStatus, ordersConfirmDelivery } from '../sdk.gen';
+import { client, ordersCreateDeliveryPoint, ordersConfirmPayment, ordersHealthCheck, ordersGetFarmerEarnings, ordersListFarmerOrders, ordersCreateOrder, ordersInitiatePayment, ordersListDeliveryCities, ordersListDeliveryPoints, ordersListUserOrders, ordersApproveOrder, ordersRejectOrder, ordersDispatchOrder, ordersGetOrderDetails, ordersCheckPaymentStatus, ordersConfirmDelivery } from '../sdk.gen';
 
 type QueryKey<TOptions extends OptionsLegacyParser> = [
     Pick<TOptions, 'baseURL' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -269,6 +269,20 @@ export const ordersApproveOrderMutation = (options?: Partial<OptionsLegacyParser
     const mutationOptions: UseMutationOptions<OrdersApproveOrderResponse, AxiosError<OrdersApproveOrderError>, OptionsLegacyParser<OrdersApproveOrderData>> = {
         mutationFn: async (localOptions) => {
             const { data } = await ordersApproveOrder({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const ordersRejectOrderMutation = (options?: Partial<OptionsLegacyParser<OrdersRejectOrderData>>) => {
+    const mutationOptions: UseMutationOptions<OrdersRejectOrderResponse, AxiosError<OrdersRejectOrderError>, OptionsLegacyParser<OrdersRejectOrderData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await ordersRejectOrder({
                 ...options,
                 ...localOptions,
                 throwOnError: true

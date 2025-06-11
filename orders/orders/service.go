@@ -1180,3 +1180,68 @@ func (i *Impl) GetFarmerEarnings(ctx context.Context,
 
 	return &ordersgrpc.GetFarmerEarningsResponse{Data: results}, nil
 }
+
+// RejectOrder implements ordersgrpc.OrdersServer.
+func (i *Impl) RejectOrder(ctx context.Context,
+	req *ordersgrpc.RejectOrderRequest) (
+	*ordersgrpc.RejectOrderResponse, error) {
+	orderNumber, err := strconv.ParseInt(req.GetOrderId(), 10, 64)
+
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid order number %s", req.GetOrderId())
+	}
+
+	order, err := i.repo.Do().GetOrderByOrderNumber(ctx, orderNumber)
+
+	if err != nil {
+		i.logger.Debug().Msgf("error getting order with id %s why: %v", req.GetOrderId(), err)
+		return nil, status.Errorf(codes.Internal, "error getting order with id %s why: %v", req.GetOrderId(), err)
+	}
+
+	if req.GetUserId() != *order.ProductOwner {
+		return nil, status.Error(codes.PermissionDenied, "user does not have permission to approve this order")
+	}
+
+	beforeBytes, err := protojson.Marshal(converters.SqlcOrderToProto(order))
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
+	}
+
+	err = i.repo.Do().UpdateOrderStatus(ctx, sqlc.UpdateOrderStatusParams{
+		OrderNumber: order.OrderNumber,
+		Status:      ordersgrpc.OrderStatus_OrderStatus_REJECTED.String(),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error updating order status %v", err)
+	}
+
+	updatedOrder, err := i.repo.Do().GetOrderByOrderNumber(ctx, order.OrderNumber)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting updated order %v", err)
+	}
+
+	afterBytes, err := protojson.Marshal(converters.SqlcOrderToProto(updatedOrder))
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
+	}
+
+	err = i.repo.Do().CreateOrderAuditLog(ctx, sqlc.CreateOrderAuditLogParams{
+		OrderNumber:    order.OrderNumber,
+		EventTimestamp: pgtype.Timestamptz{Time: time.Now(), Valid: true},
+		Actor:          req.GetUserId(),
+		Action:         "RejectOrder",
+		Reason:         req.GetReason(),
+		Before:         beforeBytes,
+		After:          afterBytes,
+	})
+
+	if err != nil {
+		i.logger.Debug().Msgf("Error creating order logs %v", err)
+		return nil, status.Errorf(codes.Internal, "error creating order logs %v", err)
+	}
+
+	return &ordersgrpc.RejectOrderResponse{}, nil
+}
