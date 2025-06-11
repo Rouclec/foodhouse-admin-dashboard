@@ -273,7 +273,8 @@
                 "OrderStatus_PAYMENT_FAILED",
                 "OrderStatus_IN_TRANSIT",
                 "OrderStatus_DELIVERED",
-                "OrderStatus_APPROVED"
+                "OrderStatus_APPROVED",
+                "OrderStatus_REJECTED"
               ]
             },
             "collectionFormat": "multi"
@@ -503,7 +504,8 @@
                 "OrderStatus_PAYMENT_FAILED",
                 "OrderStatus_IN_TRANSIT",
                 "OrderStatus_DELIVERED",
-                "OrderStatus_APPROVED"
+                "OrderStatus_APPROVED",
+                "OrderStatus_REJECTED"
               ]
             },
             "collectionFormat": "multi"
@@ -550,6 +552,50 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/OrdersApproveOrderBody"
+            }
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/v1/users/{userId}/orders/{orderId}/reject-order": {
+      "put": {
+        "operationId": "Orders_RejectOrder",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcRejectOrderResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/OrdersRejectOrderBody"
             }
           }
         ],
@@ -774,6 +820,14 @@
         },
         "account": {
           "$ref": "#/definitions/ordersgrpcAccount"
+        }
+      }
+    },
+    "OrdersRejectOrderBody": {
+      "type": "object",
+      "properties": {
+        "reason": {
+          "type": "string"
         }
       }
     },
@@ -1049,7 +1103,8 @@
         "OrderStatus_PAYMENT_FAILED",
         "OrderStatus_IN_TRANSIT",
         "OrderStatus_DELIVERED",
-        "OrderStatus_APPROVED"
+        "OrderStatus_APPROVED",
+        "OrderStatus_REJECTED"
       ],
       "default": "OrderStatus_UNSPECIFIED"
     },
@@ -1120,6 +1175,9 @@
         "PaymentStatus_CANCELED"
       ],
       "default": "PaymentStatus_UNSPECIFIED"
+    },
+    "ordersgrpcRejectOrderResponse": {
+      "type": "object"
     },
     "protobufAny": {
       "type": "object",

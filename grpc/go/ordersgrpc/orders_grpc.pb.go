@@ -25,6 +25,7 @@ const (
 	Orders_DispatchOrder_FullMethodName       = "/ordersgrpc.Orders/DispatchOrder"
 	Orders_ConfirmDelivery_FullMethodName     = "/ordersgrpc.Orders/ConfirmDelivery"
 	Orders_ApproveOrder_FullMethodName        = "/ordersgrpc.Orders/ApproveOrder"
+	Orders_RejectOrder_FullMethodName         = "/ordersgrpc.Orders/RejectOrder"
 	Orders_HealthCheck_FullMethodName         = "/ordersgrpc.Orders/HealthCheck"
 	Orders_ListUserOrders_FullMethodName      = "/ordersgrpc.Orders/ListUserOrders"
 	Orders_ListFarmerOrders_FullMethodName    = "/ordersgrpc.Orders/ListFarmerOrders"
@@ -46,6 +47,7 @@ type OrdersClient interface {
 	DispatchOrder(ctx context.Context, in *DispatchOrderRequest, opts ...grpc.CallOption) (*DispatchOrderResponse, error)
 	ConfirmDelivery(ctx context.Context, in *ConfirmDeliveryRequest, opts ...grpc.CallOption) (*ConfirmDeliveryResponse, error)
 	ApproveOrder(ctx context.Context, in *ApproveOrderRequest, opts ...grpc.CallOption) (*ApproveOrderResponse, error)
+	RejectOrder(ctx context.Context, in *RejectOrderRequest, opts ...grpc.CallOption) (*RejectOrderResponse, error)
 	HealthCheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
 	ListUserOrders(ctx context.Context, in *ListUserOrdersRequest, opts ...grpc.CallOption) (*ListUserOrdersResponse, error)
 	ListFarmerOrders(ctx context.Context, in *ListFarmerOrdersRequest, opts ...grpc.CallOption) (*ListFarmerOrdersResponse, error)
@@ -119,6 +121,16 @@ func (c *ordersClient) ApproveOrder(ctx context.Context, in *ApproveOrderRequest
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ApproveOrderResponse)
 	err := c.cc.Invoke(ctx, Orders_ApproveOrder_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ordersClient) RejectOrder(ctx context.Context, in *RejectOrderRequest, opts ...grpc.CallOption) (*RejectOrderResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RejectOrderResponse)
+	err := c.cc.Invoke(ctx, Orders_RejectOrder_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -225,6 +237,7 @@ type OrdersServer interface {
 	DispatchOrder(context.Context, *DispatchOrderRequest) (*DispatchOrderResponse, error)
 	ConfirmDelivery(context.Context, *ConfirmDeliveryRequest) (*ConfirmDeliveryResponse, error)
 	ApproveOrder(context.Context, *ApproveOrderRequest) (*ApproveOrderResponse, error)
+	RejectOrder(context.Context, *RejectOrderRequest) (*RejectOrderResponse, error)
 	HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
 	ListUserOrders(context.Context, *ListUserOrdersRequest) (*ListUserOrdersResponse, error)
 	ListFarmerOrders(context.Context, *ListFarmerOrdersRequest) (*ListFarmerOrdersResponse, error)
@@ -261,6 +274,9 @@ func (UnimplementedOrdersServer) ConfirmDelivery(context.Context, *ConfirmDelive
 }
 func (UnimplementedOrdersServer) ApproveOrder(context.Context, *ApproveOrderRequest) (*ApproveOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ApproveOrder not implemented")
+}
+func (UnimplementedOrdersServer) RejectOrder(context.Context, *RejectOrderRequest) (*RejectOrderResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RejectOrder not implemented")
 }
 func (UnimplementedOrdersServer) HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HealthCheck not implemented")
@@ -414,6 +430,24 @@ func _Orders_ApproveOrder_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OrdersServer).ApproveOrder(ctx, req.(*ApproveOrderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orders_RejectOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RejectOrderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).RejectOrder(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_RejectOrder_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).RejectOrder(ctx, req.(*RejectOrderRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -610,6 +644,10 @@ var Orders_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ApproveOrder",
 			Handler:    _Orders_ApproveOrder_Handler,
+		},
+		{
+			MethodName: "RejectOrder",
+			Handler:    _Orders_RejectOrder_Handler,
 		},
 		{
 			MethodName: "HealthCheck",
