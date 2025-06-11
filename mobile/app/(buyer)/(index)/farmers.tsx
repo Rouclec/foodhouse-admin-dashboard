@@ -181,7 +181,7 @@ export default function Farmers() {
                           {item?.user?.lastName}
                         </Text>
                         <View style={styles.ratingsContainer}>
-                          {item?.rating ?? 0 >= 5.0 ? (
+                          {Math.floor(item?.rating ?? 0) >= 5.0 ? (
                             <Icon
                               source={"star"}
                               size={24}

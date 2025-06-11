@@ -15,6 +15,7 @@ import { defaultStyles, farmerDetailsStyle as styles } from "@/styles";
 import { formatAmount } from "@/utils/amountFormater";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import moment, { defaultFormat } from "moment";
 import React, { FC, useContext, useState } from "react";
 import {
   View,
@@ -25,7 +26,7 @@ import {
   Image,
 } from "react-native";
 import { Chase } from "react-native-animated-spinkit";
-import { Appbar, Button, Icon, Text } from "react-native-paper";
+import { Appbar, Icon, Text } from "react-native-paper";
 
 const TAB_ITEMS: Array<{
   name: string;
@@ -45,7 +46,7 @@ type CommentItemProps = {
   item: usersgrpcReview;
 };
 const CommentItem: FC<CommentItemProps> = ({ item }) => {
-  const { data, isLoading } = useQuery({
+  const { data } = useQuery({
     ...usersGetPublicUserOptions({
       path: {
         userId: item?.createdBy ?? "",
@@ -53,16 +54,52 @@ const CommentItem: FC<CommentItemProps> = ({ item }) => {
     }),
   });
 
-  console.log({ data });
   return (
-    <View>
-      <View>
-        <View>
-          <View></View>
-          <Text>{""}</Text>
+    <View style={styles.reviewContainer}>
+      <View style={styles.reviewTopContainer}>
+        <View style={styles.reviewProfileContainer}>
+          <View style={styles.smallImageContainer}>
+            {!!data?.profileImage ? (
+              <Image
+                source={{ uri: data?.profileImage }}
+                style={styles.smallProfileImage}
+              />
+            ) : (
+              <Image
+                source={require("@/assets/images/avatar.png")}
+                style={styles.smallAvatar}
+              />
+            )}
+          </View>
+          <Text variant="titleSmall" style={defaultStyles.text16}>
+            {data?.name}
+          </Text>
+        </View>
+        <View style={styles.starContainer}>
+          {
+            <Icon
+              source={
+                Math.floor(item?.rating ?? 0) >= 5
+                  ? "star"
+                  : item?.rating ?? 0 > 0
+                  ? "star-half-full"
+                  : "star-outline"
+              }
+              size={12}
+              color={Colors.primary[500]}
+            />
+          }
+          <Text style={[defaultStyles.primaryText, defaultStyles.text14]}>
+            {formatAmount(item?.rating ?? 0, {
+              decimalPlaces: item?.rating ?? 0 > 0 ? 1 : 0,
+            })}
+          </Text>
         </View>
       </View>
-      <Text>{item?.comment}</Text>
+      <Text style={styles.commentText}>{item?.comment}</Text>
+      <Text variant="bodyLarge" style={styles.timeText}>
+        {moment(item?.createdAt).fromNow()}
+      </Text>
     </View>
   );
 };
@@ -185,7 +222,7 @@ export default function FarmerDetails() {
                   {farmerDetails?.user?.lastName}
                 </Text>
                 <View style={styles.ratingsContainer}>
-                  {farmerDetails?.rating ?? 0 >= 5.0 ? (
+                  {Math.floor(farmerDetails?.rating ?? 0) >= 5.0 ? (
                     <Icon source={"star"} size={24} color={Colors.gold} />
                   ) : farmerDetails?.rating ?? 0 > 0 ? (
                     <Icon
