@@ -212,7 +212,7 @@ func (q *Queries) GetOrderByOrderNumber(ctx context.Context, orderNumber int64) 
 const getOrdersGroupedByDay = `-- name: GetOrdersGroupedByDay :many
 SELECT 
   DATE_TRUNC('day', updated_at)::timestamptz AS group_date,
-  ARRAY_AGG(product_id)::text[] AS product_ids
+  ARRAY_AGG(product)::text[] AS product_ids
 FROM orders
 WHERE product_owner = $1
   AND status = $2
@@ -261,7 +261,7 @@ func (q *Queries) GetOrdersGroupedByDay(ctx context.Context, arg GetOrdersGroupe
 const getOrdersGroupedByMonth = `-- name: GetOrdersGroupedByMonth :many
 SELECT 
   DATE_TRUNC('month', updated_at)::timestamptz AS group_date,
-  ARRAY_AGG(product_id)::text[] AS product_ids
+  ARRAY_AGG(product)::text[] AS product_ids
 FROM orders
 WHERE product_owner = $1
   AND status = $2
@@ -310,7 +310,7 @@ func (q *Queries) GetOrdersGroupedByMonth(ctx context.Context, arg GetOrdersGrou
 const getOrdersGroupedByYear = `-- name: GetOrdersGroupedByYear :many
 SELECT 
   DATE_TRUNC('year', updated_at)::timestamptz AS group_date,
-  ARRAY_AGG(product_id)::text[] AS product_ids
+  ARRAY_AGG(product)::text[] AS product_ids
 FROM orders
 WHERE product_owner = $1
   AND status = $2
