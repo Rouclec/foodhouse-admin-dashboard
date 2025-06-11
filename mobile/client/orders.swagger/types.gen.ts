@@ -16,7 +16,9 @@ export type OrdersCreateOrderBody = {
     deliveryLocation?: typesPoint;
 };
 
-export type OrdersDispatchOrderBody = unknown;
+export type OrdersDispatchOrderBody = {
+    payoutPhoneNumber?: string;
+};
 
 export type ordersgrpcAccount = {
     paymentMethod?: ordersgrpcPaymentMethodType;
