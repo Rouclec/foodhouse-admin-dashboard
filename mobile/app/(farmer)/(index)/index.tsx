@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Button, Icon, Text, TextInput } from "react-native-paper";
+import { Icon, Text, TextInput } from "react-native-paper";
 import { Context, ContextType } from "../../_layout";
 import { defaultStyles, farmerIndexStyles as styles } from "@/styles";
 import { Colors } from "@/constants";
@@ -19,12 +19,10 @@ import i18n from "@/i18n";
 import { Feather } from "@expo/vector-icons";
 import { ordersListFarmerOrdersOptions } from "@/client/orders.swagger/@tanstack/react-query.gen";
 import {
-  ordersgrpcOrder,
   ordersgrpcOrderStatus,
 } from "@/client/orders.swagger";
 import { Chase } from "react-native-animated-spinkit";
-import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
-import { formatAmount } from "@/utils/amountFormater";
+import { OrderItem } from "@/components";
 
 const HOUR_OF_DAY = new Date().getHours();
 
@@ -46,72 +44,7 @@ const TAB_ITEMS: Array<{
   },
 ];
 
-interface OrderItemProps {
-  item: ordersgrpcOrder;
-}
-const OrderItem: FC<OrderItemProps> = ({ item }) => {
-  const router = useRouter();
 
-  const {
-    isLoading: isProductLoading,
-    data: productData,
-    isError,
-  } = useQuery({
-    ...productsGetProductOptions({
-      path: {
-        productId: item?.product ?? "",
-      },
-    }),
-  });
-
-  if (isProductLoading)
-    return (
-      <View style={defaultStyles.center}>
-        <Chase size={16} color={Colors.primary[500]} />
-      </View>
-    );
-
-  if (isError) {
-    return (
-      <View style={defaultStyles.center}>
-        <Text>{i18n.t("(farmer).(index).index.couldNotLoadProduct")}</Text>
-      </View>
-    );
-  }
-
-  return (
-    <View style={defaultStyles.card}>
-      <Image
-        source={{ uri: productData?.product?.image }}
-        style={styles.productImage}
-      />
-      <View style={styles.orderDetailsContainer}>
-        <Text variant="titleMedium">{productData?.product?.name}</Text>
-        <View style={styles.centerRow}>
-          <Text variant="titleSmall" style={styles.primaryText}>
-            {item?.price?.currencyIsoCode}{" "}
-            {formatAmount(item?.price?.value ?? "", { decimalPlaces: 2 })}
-          </Text>
-        </View>
-        <Button
-          style={defaultStyles.primaryButton}
-          onPress={() =>
-            router.push({
-              pathname: "/(farmer)/order-details",
-              params: {
-                orderNumber: item?.orderNumber,
-              },
-            })
-          }
-        >
-          <Text style={defaultStyles.buttonText}>
-            {i18n.t("(farmer).(index).index.details")}
-          </Text>
-        </Button>
-      </View>
-    </View>
-  );
-};
 
 export default function Orders() {
   const { user } = useContext(Context) as ContextType;

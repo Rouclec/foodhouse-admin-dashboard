@@ -247,6 +247,7 @@
       "orderDetails": "Order Details",
       "couldNotLoad": "Could not load order details",
       "approveOrder": "Approve order",
+      "orderNumber": "Order number",
       "customersName": "Customer's Name",
       "quantity": "Quantity",
       "deliveryAddress": "Delivery Address",
@@ -256,7 +257,9 @@
     },
     "sales": {
       "sales": "Sales",
-      "earnings": "Earnings"
+      "earnings": "Earnings",
+      "completedOrders": "Completed Orders",
+      "noOrdersFound": "No orders found"
     }
   },
   "(buyer)": {
@@ -284,7 +287,13 @@
         "trackOrder": "Track order",
         "couldNotLoadProduct": "Could not load product details",
         "pending": "Pending",
-        "completed": "Completed"
+        "completed": "Completed",
+        "leaveAReview": "Leave a review",
+        "howWasYourProduct": "How was your product?",
+        "pleaseGiveYourRating": "Please give your rating and also your review",
+        "review": "Review",
+        "cancel": "Cancel",
+        "submit": "Submit"
       },
       "farmers": {
         "farmers": "Farmers",
@@ -357,7 +366,8 @@
       "farmerReceived": "The farmer has received your order",
       "orderInTransit": "Your order is now in transit",
       "orderCompleted": "Order has been deliverd to the delivery location",
-      "unknownState": "The state of this order is unknonw, contact admin for more info"
+      "unknownState": "The state of this order is unknonw, contact admin for more info",
+      "orderNumber": "Order number"
     },
     "farmer-details": {
       "farmerInformation": "Farmer Information",

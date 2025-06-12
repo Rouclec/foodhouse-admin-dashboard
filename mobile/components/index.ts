@@ -6,6 +6,7 @@ import { ImagePicker } from "./general/ImagePicker";
 import { CurrencySelect } from "./general/CurrencySelect";
 import { Product } from "./Product";
 import { FilterBottomSheet } from "./(buyer)/(index)/FilterBottomSheet";
+import { OrderItem } from "./(farmer)/OrderItem";
 
 export {
   CountryList,
@@ -16,4 +17,5 @@ export {
   ImagePicker,
   Product,
   FilterBottomSheet,
+  OrderItem,
 };

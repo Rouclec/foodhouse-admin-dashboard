@@ -218,13 +218,23 @@ export default function OrderDetails() {
               style={styles.productImage}
             />
             <View style={styles.orderDetailsContainer}>
+              <Text style={styles.leftText}>
+                {i18n.t("(farmer).order-details.orderNumber")}:{" "}
+                <Text variant="titleMedium" style={styles.rightText}>
+                  {orderDetails?.order?.orderNumber}
+                </Text>
+              </Text>
               <Text variant="titleMedium">{productData?.product?.name}</Text>
               <View style={styles.centerRow}>
                 <Text variant="titleSmall" style={styles.primaryText}>
                   {orderDetails?.order?.price?.currencyIsoCode}{" "}
-                  {formatAmount(orderDetails?.order?.price?.value ?? "", {
-                    decimalPlaces: 2,
-                  })}
+                  {formatAmount(
+                    (
+                      (productData?.product?.amount?.value ?? 0) *
+                      parseInt(orderDetails?.order?.quantity ?? "")
+                    ).toString() ?? "",
+                    { decimalPlaces: 2 }
+                  )}
                 </Text>
               </View>
             </View>

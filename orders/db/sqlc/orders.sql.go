@@ -212,7 +212,10 @@ func (q *Queries) GetOrderByOrderNumber(ctx context.Context, orderNumber int64) 
 const getOrdersGroupedByDay = `-- name: GetOrdersGroupedByDay :many
 SELECT 
   DATE_TRUNC('day', updated_at)::timestamptz AS group_date,
-  ARRAY_AGG(product)::text[] AS product_ids
+  JSON_AGG(JSON_BUILD_OBJECT(
+    'product_id', product,
+    'quantity', quantity
+  )) AS products
 FROM orders
 WHERE product_owner = $1
   AND status = $2
@@ -229,8 +232,8 @@ type GetOrdersGroupedByDayParams struct {
 }
 
 type GetOrdersGroupedByDayRow struct {
-	GroupDate  time.Time `json:"group_date"`
-	ProductIds []string  `json:"product_ids"`
+	GroupDate time.Time `json:"group_date"`
+	Products  []byte    `json:"products"`
 }
 
 func (q *Queries) GetOrdersGroupedByDay(ctx context.Context, arg GetOrdersGroupedByDayParams) ([]GetOrdersGroupedByDayRow, error) {
@@ -247,7 +250,7 @@ func (q *Queries) GetOrdersGroupedByDay(ctx context.Context, arg GetOrdersGroupe
 	items := []GetOrdersGroupedByDayRow{}
 	for rows.Next() {
 		var i GetOrdersGroupedByDayRow
-		if err := rows.Scan(&i.GroupDate, &i.ProductIds); err != nil {
+		if err := rows.Scan(&i.GroupDate, &i.Products); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -261,7 +264,10 @@ func (q *Queries) GetOrdersGroupedByDay(ctx context.Context, arg GetOrdersGroupe
 const getOrdersGroupedByMonth = `-- name: GetOrdersGroupedByMonth :many
 SELECT 
   DATE_TRUNC('month', updated_at)::timestamptz AS group_date,
-  ARRAY_AGG(product)::text[] AS product_ids
+  JSON_AGG(JSON_BUILD_OBJECT(
+    'product_id', product,
+    'quantity', quantity
+  )) AS products
 FROM orders
 WHERE product_owner = $1
   AND status = $2
@@ -278,8 +284,8 @@ type GetOrdersGroupedByMonthParams struct {
 }
 
 type GetOrdersGroupedByMonthRow struct {
-	GroupDate  time.Time `json:"group_date"`
-	ProductIds []string  `json:"product_ids"`
+	GroupDate time.Time `json:"group_date"`
+	Products  []byte    `json:"products"`
 }
 
 func (q *Queries) GetOrdersGroupedByMonth(ctx context.Context, arg GetOrdersGroupedByMonthParams) ([]GetOrdersGroupedByMonthRow, error) {
@@ -296,7 +302,7 @@ func (q *Queries) GetOrdersGroupedByMonth(ctx context.Context, arg GetOrdersGrou
 	items := []GetOrdersGroupedByMonthRow{}
 	for rows.Next() {
 		var i GetOrdersGroupedByMonthRow
-		if err := rows.Scan(&i.GroupDate, &i.ProductIds); err != nil {
+		if err := rows.Scan(&i.GroupDate, &i.Products); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -310,7 +316,10 @@ func (q *Queries) GetOrdersGroupedByMonth(ctx context.Context, arg GetOrdersGrou
 const getOrdersGroupedByYear = `-- name: GetOrdersGroupedByYear :many
 SELECT 
   DATE_TRUNC('year', updated_at)::timestamptz AS group_date,
-  ARRAY_AGG(product)::text[] AS product_ids
+  JSON_AGG(JSON_BUILD_OBJECT(
+    'product_id', product,
+    'quantity', quantity
+  )) AS products
 FROM orders
 WHERE product_owner = $1
   AND status = $2
@@ -327,8 +336,8 @@ type GetOrdersGroupedByYearParams struct {
 }
 
 type GetOrdersGroupedByYearRow struct {
-	GroupDate  time.Time `json:"group_date"`
-	ProductIds []string  `json:"product_ids"`
+	GroupDate time.Time `json:"group_date"`
+	Products  []byte    `json:"products"`
 }
 
 func (q *Queries) GetOrdersGroupedByYear(ctx context.Context, arg GetOrdersGroupedByYearParams) ([]GetOrdersGroupedByYearRow, error) {
@@ -345,7 +354,7 @@ func (q *Queries) GetOrdersGroupedByYear(ctx context.Context, arg GetOrdersGroup
 	items := []GetOrdersGroupedByYearRow{}
 	for rows.Next() {
 		var i GetOrdersGroupedByYearRow
-		if err := rows.Scan(&i.GroupDate, &i.ProductIds); err != nil {
+		if err := rows.Scan(&i.GroupDate, &i.Products); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
