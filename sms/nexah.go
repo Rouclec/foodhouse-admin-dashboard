@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/rs/zerolog"
 )
 
 type SmsSenderNexah struct {
@@ -13,6 +15,7 @@ type SmsSenderNexah struct {
 	User     string
 	Password string
 	SenderID string
+	logger   zerolog.Logger
 	Client   *http.Client
 }
 
@@ -40,13 +43,14 @@ type NexahSmsResponse struct {
 	} `json:"sms"`
 }
 
-func NewSmsSenderNexah(baseURL string, user string, password string, senderId string) (*SmsSenderNexah, error) {
+func NewSmsSenderNexah(baseURL string, user string, password string, senderId string, logger zerolog.Logger) (*SmsSenderNexah, error) {
 	return &SmsSenderNexah{
 		BaseURL:  baseURL,
 		User:     user,
 		Password: password,
 		SenderID: senderId,
-		Client:  http.DefaultClient,
+		Client:   http.DefaultClient,
+		logger:   logger,
 	}, nil
 }
 
@@ -61,6 +65,8 @@ func (s *SmsSenderNexah) SendSms(ctx context.Context, to, message string) (*stri
 		Mobiles:  to,
 	}
 
+	s.logger.Debug().Msgf("nexah request body: %v", reqBody)
+
 	jsonBody, err := json.Marshal(reqBody)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal SMS request: %w", err)
@@ -71,19 +77,18 @@ func (s *SmsSenderNexah) SendSms(ctx context.Context, to, message string) (*stri
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
-
 	resp, err := s.Client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request to Infobip: %w", err)
 	}
 	defer resp.Body.Close()
 
-
 	var smsResponse NexahSmsResponse
 	if err := json.NewDecoder(resp.Body).Decode(&smsResponse); err != nil {
 		return nil, fmt.Errorf("failed to decode Infobip response: %w", err)
 	}
 
+	s.logger.Debug().Msgf("Nexah response body %v", smsResponse)
 
 	return &smsResponse.Sms[0].MessageId, nil
 }

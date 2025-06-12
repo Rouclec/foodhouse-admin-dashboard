@@ -161,7 +161,7 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 	nexahSender, err := sms.NewSmsSenderNexah(config.Sms.Nexah.BaseURL,
 		config.Sms.Nexah.User,
 		config.Sms.Nexah.Password,
-		config.Sms.Nexah.SenderID)
+		config.Sms.Nexah.SenderID, logger)
 
 	if err != nil {
 		return fmt.Errorf("failed to create nexah sms sender: %w", err)
