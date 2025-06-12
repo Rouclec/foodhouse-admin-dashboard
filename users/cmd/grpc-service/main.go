@@ -65,6 +65,7 @@ type Config struct {
 
 			SenderID string `conf:"env:NEXAH_SENDER_ID,required"`
 		}
+
 		// SnsTopicArn is an optional parameter that, if set, weill send OTP messages to an SNS topic.
 		SnsTopicArn string `conf:"env:SMS_DEBUG_SNS_TOPIC_ARN"`
 	}
