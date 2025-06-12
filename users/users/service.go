@@ -122,9 +122,6 @@ func (i *Impl) SendSignupSmsOtp(ctx context.Context, req *usersgrpc.SendSignupSm
 	// Success: User does not exist, proceed with action.
 	totalSmsRequestsToPhoneNumberToday, err := querier.CountSentOtpsToFactorToday(ctx, formattedNumber)
 
-	i.logger.Debug().Interface("Number of requests today: ", totalSmsRequestsToPhoneNumberToday).
-		Msg("Number of requests for phone number today")
-
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Error checking sms requests for today %v", err)
 	}
@@ -152,8 +149,6 @@ func (i *Impl) SendSignupSmsOtp(ctx context.Context, req *usersgrpc.SendSignupSm
 	if err != nil {
 		return nil, fmt.Errorf("error sending SMS: %w", err)
 	}
-
-	i.logger.Debug().Interface("standard number: ", formattedNumber).Msg("Standadized phone number")
 
 	err = tx.Commit(ctx)
 	if err != nil {
