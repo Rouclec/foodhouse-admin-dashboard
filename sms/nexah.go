@@ -72,10 +72,14 @@ func (s *SmsSenderNexah) SendSms(ctx context.Context, to, message string) (*stri
 		return nil, fmt.Errorf("failed to marshal SMS request: %w", err)
 	}
 
+	s.logger.Debug().Msgf("JSON body %v", jsonBody)
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
+
+	s.logger.Debug().Msgf("Nexah request: %v", req)
 
 	resp, err := s.Client.Do(req)
 	if err != nil {
