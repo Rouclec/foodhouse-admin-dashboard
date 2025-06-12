@@ -253,6 +253,10 @@
       "unknownError": "An unknown error occured",
       "congratulations": "Congratulations",
       "youHaveApproved": "You have approved this order, go ahead and prepare it for delivery"
+    },
+    "sales": {
+      "sales": "Sales",
+      "earnings": "Earnings"
     }
   },
   "(buyer)": {

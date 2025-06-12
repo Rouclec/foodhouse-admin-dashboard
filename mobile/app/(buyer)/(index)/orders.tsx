@@ -53,6 +53,8 @@ interface OrderItemProps {
   onPress: () => void;
 }
 const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
+  const { user } = useContext(Context) as ContextType;
+
   const {
     isLoading: isProductLoading,
     data: productData,

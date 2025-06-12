@@ -7,7 +7,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -117,6 +116,9 @@ func (i *Impl) ConfirmDelivery(ctx context.Context, req *ordersgrpc.ConfirmDeliv
 		return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
 	}
 
+	if order.Status != ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String() {
+		return nil, status.Errorf(codes.Internal, "order must be in status %v for delivery to be confirmed", ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String())
+	}
 
 	err = querier.UpdateOrderStatus(ctx, sqlc.UpdateOrderStatusParams{
 		OrderNumber: order.OrderNumber,
@@ -463,8 +465,8 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 		}
 	}()
 
-	if order.Status != ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL.String() {
-		return nil, status.Errorf(codes.Internal, "order must be in status %v to be dispatched", ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL)
+	if order.Status != ordersgrpc.OrderStatus_OrderStatus_APPROVED.String() {
+		return nil, status.Errorf(codes.Internal, "order must be in status %v to be dispatched", ordersgrpc.OrderStatus_OrderStatus_APPROVED.String())
 	}
 
 	err = querier.UpdateOrderStatus(ctx, sqlc.UpdateOrderStatusParams{
@@ -479,7 +481,6 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 	}
 
 	afterBytes, err := protojson.Marshal(converters.SqlcOrderToProto(updatedOrder))
-
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
@@ -1006,6 +1007,79 @@ const (
 	GroupByYear  GroupBy = "year"
 )
 
+func fillMissingDates(results []*ordersgrpc.FarmerEarningsData, filterCtx FilterContext) []*ordersgrpc.FarmerEarningsData {
+	switch filterCtx.GroupBy {
+	case GroupByDay:
+		return fillMissingDays(results, filterCtx.StartDate, filterCtx.EndDate, filterCtx.Format)
+	case GroupByMonth:
+		return fillMissingMonths(results, filterCtx.StartDate, filterCtx.EndDate, filterCtx.Format)
+	case GroupByYear:
+		if len(results) < 5 {
+			return fillMissingYears(results, filterCtx.Format)
+		}
+	}
+	return results
+}
+
+func fillMissingDays(results []*ordersgrpc.FarmerEarningsData, start, end time.Time, format string) []*ordersgrpc.FarmerEarningsData {
+	existing := make(map[string]float64)
+	for _, r := range results {
+		existing[r.Date] = r.Value
+	}
+
+	var filled []*ordersgrpc.FarmerEarningsData
+	for d := start; d.Before(end); d = d.AddDate(0, 0, 1) {
+		dateStr := d.Format(format)
+		val := existing[dateStr]
+		filled = append(filled, &ordersgrpc.FarmerEarningsData{
+			Date:  dateStr,
+			Value: val, // will be 0 if not in map
+		})
+	}
+	return filled
+}
+
+func fillMissingMonths(results []*ordersgrpc.FarmerEarningsData, start, end time.Time, format string) []*ordersgrpc.FarmerEarningsData {
+	existing := make(map[string]float64)
+	for _, r := range results {
+		existing[r.Date] = r.Value
+	}
+
+	var filled []*ordersgrpc.FarmerEarningsData
+	for d := start; d.Before(end); d = d.AddDate(0, 1, 0) {
+		dateStr := d.Format(format)
+		val := existing[dateStr]
+		filled = append(filled, &ordersgrpc.FarmerEarningsData{
+			Date:  dateStr,
+			Value: val,
+		})
+	}
+	return filled
+}
+
+func fillMissingYears(results []*ordersgrpc.FarmerEarningsData, format string) []*ordersgrpc.FarmerEarningsData {
+	existing := make(map[string]float64)
+	minYear := time.Now().Year() - 4
+	maxYear := time.Now().Year()
+
+	for _, r := range results {
+		existing[r.Date] = r.Value
+	}
+
+	var filled []*ordersgrpc.FarmerEarningsData
+	for y := minYear; y <= maxYear; y++ {
+		t := time.Date(y, 1, 1, 0, 0, 0, 0, time.UTC)
+		dateStr := t.Format(format)
+		val := existing[dateStr]
+		filled = append(filled, &ordersgrpc.FarmerEarningsData{
+			Date:  dateStr,
+			Value: val,
+		})
+	}
+
+	return filled
+}
+
 type FilterContext struct {
 	StartDate time.Time
 	EndDate   time.Time
@@ -1180,10 +1254,7 @@ func (i *Impl) GetFarmerEarnings(ctx context.Context,
 		})
 	}
 
-	// Sort by date string if needed
-	sort.Slice(results, func(i, j int) bool {
-		return results[i].Date < results[j].Date
-	})
+	results = fillMissingDates(results, filterCtx)
 
 	i.logger.Debug().Msgf("Final results: %v", results)
 

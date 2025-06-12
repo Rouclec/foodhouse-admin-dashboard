@@ -64,7 +64,8 @@ export default function Index() {
         }
       }
       if (hasOnboarded) {
-        return router.replace("/(auth)/login");
+        // return router.replace("/(auth)/login");
+        return router.replace("/(farmer)/(index)");
       }
       return router.replace("/(auth)");
     }, timeLeft);

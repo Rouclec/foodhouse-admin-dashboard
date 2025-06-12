@@ -133,8 +133,6 @@ export default function Orders() {
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
 
-  const router = useRouter();
-
   const { data: ordersData, isLoading: isOrdersLoading } = useQuery({
     ...ordersListFarmerOrdersOptions({
       path: {
