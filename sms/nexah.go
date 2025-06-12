@@ -77,6 +77,8 @@ func (s *SmsSenderNexah) SendSms(ctx context.Context, to, message string) (*stri
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
+	s.logger.Debug().Msgf("Nexah request: %v", req)
+
 	resp, err := s.Client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request to Infobip: %w", err)
