@@ -145,7 +145,7 @@ func (i *Impl) SendSignupSmsOtp(ctx context.Context, req *usersgrpc.SendSignupSm
 	response, err := i.smsSender.SendSms(
 		ctx,
 		formattedNumber,
-		fmt.Sprintf(`Your verification code for Foodhouse is %v`, otp),
+		fmt.Sprintf(`Your verification code for FOOD HOUSE is %v`, otp),
 	)
 
 	i.logger.Debug().Interface("SMS response: ", response).Msg("Response from sms client")
