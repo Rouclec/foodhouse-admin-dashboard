@@ -43,6 +43,7 @@ type Config struct {
 	UsersHostPort    string `conf:"env:USERS_HOST_PORT,required"`
 	ProductsHostPort string `conf:"env:PRODUCTS_HOST_PORT,required"`
 	OrdersHostPort   string `conf:"env:ORDERS_HOST_PORT,required"`
+
 	// FirebaseServiceAccountJSON holds the JSON credentials for the Firebase service account.
 	FirebaseServiceAccountJSON string `conf:"env:FIREBASE_SERVICE_ACCOUNT_JSON,required"`
 	AllowedOrigins             string `conf:"env:ALLOWED_ORIGINS,required"`
