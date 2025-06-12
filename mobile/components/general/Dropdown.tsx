@@ -22,12 +22,12 @@ interface DropdownItem {
 }
 
 interface DropdownProps {
-  label: string;
   data: DropdownItem[];
   value: string | undefined;
   onSelect: (item: string) => void;
   dropdownStyle?: ViewStyle;
   inputContainerStyle?: ViewStyle;
+  label?: string;
   iconColor?: string;
   activeColor?: string;
   labelColor?: string;
@@ -37,6 +37,7 @@ interface DropdownProps {
   onFocus?: () => void;
   onBlur?: () => void;
   error?: string;
+  defaultSelected?: DropdownItem;
 }
 
 export const Dropdown: React.FC<DropdownProps> = ({
@@ -55,6 +56,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
   onFocus = () => {},
   onBlur = () => {},
   error,
+  defaultSelected,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const animation = useRef(new Animated.Value(0)).current;
@@ -129,28 +131,30 @@ export const Dropdown: React.FC<DropdownProps> = ({
           !!error && { borderColor: Colors.error },
         ]}
       >
-        <Animated.Text
-          style={[
-            styles.label,
-            {
-              transform: [
-                { translateY: labelTranslateY },
-                { scale: labelScale },
-                { translateX: labelTranslateX },
-              ],
-              color: !!error
-                ? Colors.error
-                : isFocused
-                ? activeColor
-                : labelColor,
-            },
-            labelTextStyle,
-          ]}
-        >
-          {label}
-        </Animated.Text>
+        {!!label && (
+          <Animated.Text
+            style={[
+              styles.label,
+              {
+                transform: [
+                  { translateY: labelTranslateY },
+                  { scale: labelScale },
+                  { translateX: labelTranslateX },
+                ],
+                color: !!error
+                  ? Colors.error
+                  : isFocused
+                  ? activeColor
+                  : labelColor,
+              },
+              labelTextStyle,
+            ]}
+          >
+            {label}
+          </Animated.Text>
+        )}
         <Text style={[styles.valueText, valueTextStyle]}>
-          {selectedValue?.label ?? ""}
+          {selectedValue?.label ?? defaultSelected?.label ?? ""}
         </Text>
         <Animated.View style={{ transform: [{ rotate }] }}>
           <Icon

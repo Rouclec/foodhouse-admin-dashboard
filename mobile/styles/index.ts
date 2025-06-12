@@ -40,6 +40,7 @@ import { profileFlowStyles } from "./(farmer)/profileFlow.styles";
 import { orderDetailsStyles } from "./(farmer)/order-details.styles";
 import { farmersStyles } from "./(buyer)/(index)/farmers.styles";
 import { farmerDetailsStyle } from "./(buyer)/farmer-details.styls";
+import { salesStyles } from "./(farmer)/(index)/sales.styles";
 
 export {
   buyerIndexStyles,
@@ -78,4 +79,5 @@ export {
   orderDetailsStyles,
   farmersStyles,
   farmerDetailsStyle,
+  salesStyles,
 };

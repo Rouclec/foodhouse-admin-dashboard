@@ -274,7 +274,7 @@ export default function OrderDetails() {
         </View>
       </KeyboardAvoidingView>
       {orderDetails?.order?.status === "OrderStatus_PAYMENT_SUCCESSFUL" && (
-        <View style={defaultStyles.bottomButtonContainer}>
+        <View style={defaultStyles.bottomContainerWithContent}>
           <Button
             style={[
               defaultStyles.primaryButton,
