@@ -87,6 +87,8 @@ func (s *SmsSenderNexah) SendSms(ctx context.Context, to, message string) (*stri
 	}
 	defer resp.Body.Close()
 
+	s.logger.Debug().Msgf("Raw response %v", resp)
+
 	var smsResponse NexahSmsResponse
 	if err := json.NewDecoder(resp.Body).Decode(&smsResponse); err != nil {
 		return nil, fmt.Errorf("failed to decode Infobip response: %w", err)
