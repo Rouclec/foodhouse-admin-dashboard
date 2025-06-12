@@ -77,9 +77,9 @@ export const trackOrderStyles = StyleSheet.create({
   },
   rowGap6: {
     rowGap: 6,
-     maxWidth: width * 0.6,
-     flexShrink: 1,
-     flex: 1,
+    maxWidth: width * 0.6,
+    flexShrink: 1,
+    flex: 1,
   },
   bodyText: {
     fontSize: 14,
@@ -91,6 +91,15 @@ export const trackOrderStyles = StyleSheet.create({
     textAlign: "right",
     fontSize: 12,
     color: Colors.grey["61"],
-    flexShrink: 0,   
+    flexShrink: 0,
+  },
+  leftText: {
+    flexShrink: 1,
+    fontSize: 14,
+    color: Colors.grey["61"],
+  },
+  rightText: { flexShrink: 1, textAlign: "right", fontSize: 16 },
+  text20: {
+    fontSize: 20,
   },
 });

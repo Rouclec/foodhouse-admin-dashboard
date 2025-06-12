@@ -174,7 +174,11 @@ message ListProductNamesByCategoryResponse {
 message ListPriceTypesByCategoryRequest { string category_id = 1; }
 message ListPriceTypesByCategoryResponse { repeated PriceType price_types = 1; }
 
-message SumProductAmountsRequest { repeated string product_ids = 1; }
+
+message SumProductAmountsRequest { 
+  repeated string product_ids = 1; 
+  repeated int64 quantities = 2;
+}
 
 message SumProductAmountsResponse { double total = 1; }
 

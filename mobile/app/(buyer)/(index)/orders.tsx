@@ -5,12 +5,18 @@ import {
 } from "@/client/orders.swagger";
 import { ordersListUserOrdersOptions } from "@/client/orders.swagger/@tanstack/react-query.gen";
 import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
+import { usersReviewFarmerMutation } from "@/client/users.swagger/@tanstack/react-query.gen";
+import {
+  FilterBottomSheet,
+  FilterBottomSheetRef,
+} from "@/components/(buyer)/(index)/FilterBottomSheet";
 import { Colors } from "@/constants";
 import i18n from "@/i18n";
 import { defaultStyles, ordersStyles as styles } from "@/styles";
+import { delay } from "@/utils";
 import { formatAmount } from "@/utils/amountFormater";
 import { Feather } from "@expo/vector-icons";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import React, { FC, useContext, useEffect, useRef, useState } from "react";
 import {
@@ -24,7 +30,14 @@ import {
   Image,
 } from "react-native";
 import { Chase } from "react-native-animated-spinkit";
-import { Appbar, Button, Icon, Text, TextInput } from "react-native-paper";
+import {
+  Appbar,
+  Button,
+  Icon,
+  Snackbar,
+  Text,
+  TextInput,
+} from "react-native-paper";
 
 const { width } = Dimensions.get("window");
 
@@ -48,13 +61,12 @@ const TAB_ITEMS: Array<{
   },
 ];
 
+const { height } = Dimensions.get("window");
 interface OrderItemProps {
-  item: ordersgrpcOrder;
-  onPress: () => void;
+  item: ordersgrpcOrder | undefined;
+  onPress?: () => void;
 }
 const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
-  const { user } = useContext(Context) as ContextType;
-
   const {
     isLoading: isProductLoading,
     data: productData,
@@ -96,13 +108,15 @@ const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
             {formatAmount(item?.price?.value ?? "", { decimalPlaces: 2 })}
           </Text>
         </View>
-        <Button style={defaultStyles.primaryButton} onPress={onPress}>
-          <Text style={defaultStyles.buttonText}>
-            {item?.status === "OrderStatus_DELIVERED"
-              ? i18n.t("(buyer).(index).orders.writeReview")
-              : i18n.t("(buyer).(index).orders.trackOrder")}
-          </Text>
-        </Button>
+        {!!onPress && (
+          <Button style={defaultStyles.primaryButton} onPress={onPress}>
+            <Text style={defaultStyles.buttonText}>
+              {item?.status === "OrderStatus_DELIVERED"
+                ? i18n.t("(buyer).(index).orders.writeReview")
+                : i18n.t("(buyer).(index).orders.trackOrder")}
+            </Text>
+          </Button>
+        )}
       </View>
     </View>
   );
@@ -115,6 +129,8 @@ export default function Orders() {
 
   const [hasReachedEnd, setHasReachedEnd] = useState(false);
   const [searchVisible, setSearchVisible] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<ordersgrpcOrder>();
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [debounceQuery, setDebounceQuery] = useState("");
   const [count, setCount] = useState(10);
@@ -124,6 +140,11 @@ export default function Orders() {
   }>(TAB_ITEMS[0]);
 
   const slideAnim = useRef(new Animated.Value(width)).current;
+
+  const sheetRef = useRef<FilterBottomSheetRef>(null);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [error, setError] = useState<string>();
 
   const toggleSearch = () => {
     if (searchVisible) {
@@ -164,6 +185,43 @@ export default function Orders() {
       },
     }),
   });
+
+  const { mutateAsync } = useMutation({
+    ...usersReviewFarmerMutation(),
+    onSuccess: () => {
+      setRating(0);
+      setComment("");
+      sheetRef?.current?.close();
+    },
+    onError: async (error) => {
+      setError(
+        error?.response?.data?.message ?? i18n.t("(auth).login.anUnknownError")
+      );
+      await delay(5000);
+      setError(undefined);
+    },
+  });
+
+  const handleReview = async () => {
+    try {
+      setLoading(true);
+      await mutateAsync({
+        body: {
+          farmerId: selectedOrder?.productOwner ?? "",
+          orderId: selectedOrder?.orderNumber ?? "",
+          productId: selectedOrder?.product ?? "",
+          rating: rating,
+          comment: comment,
+        },
+        path: {
+          userId: user?.userId ?? "",
+        },
+      });
+    } catch (error) {
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -277,7 +335,8 @@ export default function Orders() {
                     onPress={
                       item?.status === "OrderStatus_DELIVERED"
                         ? () => {
-                            console.log("delivered order");
+                            setSelectedOrder(item);
+                            sheetRef?.current?.open();
                           }
                         : PENDING_ORDER_STATUSES.includes(
                             item?.status as ordersgrpcOrderStatus
@@ -321,6 +380,140 @@ export default function Orders() {
           )}
         </View>
       </KeyboardAvoidingView>
+      <FilterBottomSheet
+        ref={sheetRef}
+        sheetHeight={height * 0.9 > 643 ? 643 : height * 0.9}
+      >
+        <View style={styles.ratingTitleContainer}>
+          <Text
+            variant="titleMedium"
+            style={[styles.ratingTitle, defaultStyles.textCenter]}
+          >
+            {i18n.t("(buyer).(index).orders.leaveAReview")}
+          </Text>
+        </View>
+        <View style={styles.ratingTitleContainer}>
+          <OrderItem item={selectedOrder} />
+        </View>
+        <View
+          style={{
+            rowGap: 24,
+            paddingVertical: 24,
+            borderBottomWidth: 1,
+            borderColor: Colors.grey["border"],
+          }}
+        >
+          <View
+            style={{
+              alignItems: "center",
+              justifyContent: "center",
+              rowGap: 12,
+            }}
+          >
+            <Text variant="titleMedium" style={defaultStyles.textCenter}>
+              {i18n.t("(buyer).(index).orders.howWasYourProduct")}
+            </Text>
+            <Text
+              style={[
+                defaultStyles.textCenter,
+                { fontSize: 16, color: Colors.grey["61"] },
+              ]}
+              variant="bodyLarge"
+            >
+              {i18n.t("(buyer).(index).orders.pleaseGiveYourRating")}
+            </Text>
+          </View>
+          <View
+            style={[
+              defaultStyles.center,
+              {
+                flexDirection: "row",
+                columnGap: 24,
+              },
+            ]}
+          >
+            {Array(5)
+              .fill("a")
+              .map((_item, index) => {
+                return (
+                  <TouchableOpacity
+                    onPress={() => setRating(index + 1)}
+                    key={index}
+                  >
+                    <Icon
+                      size={32}
+                      source={rating >= index + 1 ? "star" : "star-outline"}
+                      color={
+                        rating >= index + 1
+                          ? Colors.primary[500]
+                          : Colors.dark[10]
+                      }
+                    />
+                  </TouchableOpacity>
+                );
+              })}
+          </View>
+          <View>
+            <TextInput
+              // style={defaultStyles.input}
+              mode="outlined"
+              label={i18n.t("(buyer).(index).orders.review")}
+              value={comment}
+              onChangeText={setComment}
+              theme={{
+                colors: {
+                  primary: Colors.primary[500],
+                  background: Colors.grey["fa"],
+                  error: Colors.error,
+                },
+                roundness: 10,
+              }}
+              outlineColor={Colors.grey["bg"]}
+            />
+          </View>
+        </View>
+        <View style={styles.ratingsButtonsContainer}>
+          <Button
+            style={[
+              defaultStyles.button,
+              defaultStyles.secondaryButton,
+              styles.halfButton,
+            ]}
+            onPress={() => {
+              setRating(0);
+              setComment("");
+              sheetRef?.current?.close();
+            }}
+          >
+            <Text style={defaultStyles.secondaryButtonText}>
+              {i18n.t("(buyer).(index).orders.cancel")}
+            </Text>
+          </Button>
+          <Button
+            style={[
+              defaultStyles.button,
+              defaultStyles.primaryButton,
+              styles.halfButton,
+              (!rating || !comment || loading) && defaultStyles.greyButton,
+            ]}
+            disabled={!rating || !comment || loading}
+            loading={loading}
+            onPress={handleReview}
+          >
+            <Text style={defaultStyles.buttonText}>
+              {i18n.t("(buyer).(index).orders.submit")}
+            </Text>
+          </Button>
+        </View>
+        <Snackbar
+          visible={!!error}
+          onDismiss={() => {}}
+          duration={3000}
+          style={defaultStyles.snackbar}
+        >
+          <Text style={defaultStyles.errorText}>{error}</Text>
+        </Snackbar>
+      </FilterBottomSheet>
     </>
   );
 }

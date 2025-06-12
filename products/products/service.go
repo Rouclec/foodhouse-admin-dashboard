@@ -478,7 +478,10 @@ func (i *Impl) ListProductNamesByCategory(ctx context.Context, req *productsgrpc
 func (i *Impl) SumProductAmounts(ctx context.Context,
 	req *productsgrpc.SumProductAmountsRequest) (
 	*productsgrpc.SumProductAmountsResponse, error) {
-	total, err := i.repo.Do().SumProductAmounts(ctx, req.GetProductIds())
+	total, err := i.repo.Do().SumProductAmounts(ctx, sqlc.SumProductAmountsParams{
+		ProductIds: req.GetProductIds(),
+		Quantities: req.GetQuantities(),
+	})
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error getting products total, %v", err)

@@ -24,7 +24,7 @@ type Querier interface {
 	ListPriceTypesByCategory(ctx context.Context, categoryID string) ([]PriceType, error)
 	ListProductNamesByCategory(ctx context.Context, categoryID string) ([]ProductName, error)
 	ListProducts(ctx context.Context, arg ListProductsParams) ([]ListProductsRow, error)
-	SumProductAmounts(ctx context.Context, productIds []string) (float64, error)
+	SumProductAmounts(ctx context.Context, arg SumProductAmountsParams) (float64, error)
 	UpdateProduct(ctx context.Context, arg UpdateProductParams) error
 }
 

@@ -65,4 +65,20 @@ export const ordersStyles = StyleSheet.create({
     alignItems: "center",
   },
   primaryText: { fontSize: 16, color: Colors.primary[500] },
+  ratingTitleContainer: {
+    paddingVertical: 24,
+    borderBottomWidth: 1,
+    borderColor: Colors.grey["border"],
+  },
+  ratingTitle: { fontSize: 24, lineHeight: 32 },
+  ratingsButtonsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    columnGap: 24,
+    paddingVertical: 24,
+  },
+  halfButton: {
+    width: "45%",
+  },
 });

@@ -117,6 +117,10 @@ ORDER BY slug ASC;
 
 -- name: SumProductAmounts :one
 SELECT 
-  COALESCE(SUM(value), 0)::double precision AS total
-FROM product
-WHERE id = ANY(sqlc.arg(product_ids)::text[]);
+  COALESCE(SUM(p.value * t.quantity), 0)::double precision AS total
+FROM (
+  SELECT 
+    UNNEST(sqlc.arg(product_ids)::text[]) AS id,
+    UNNEST(sqlc.arg(quantities)::bigint[]) AS quantity
+) AS t
+JOIN product p ON p.id = t.id;

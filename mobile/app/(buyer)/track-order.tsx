@@ -188,7 +188,17 @@ export default function TrackOrder() {
               style={styles.productImage}
             />
             <View style={styles.orderDetailsContainer}>
-              <Text variant="titleMedium">{productData?.product?.name}</Text>
+              <Text style={styles.leftText}>
+                {i18n.t("(buyer).track-order.orderNumber")}:{" "}
+                <Text variant="titleMedium" style={styles.rightText}>
+                  {orderDetails?.order?.orderNumber}
+                </Text>
+              </Text>
+              <Text variant="titleSmall" style={styles.text20}>
+                {productData?.product?.name} - {orderDetails?.order?.quantity}{" "}
+                {productData?.product?.unitType?.slug?.replace("per_", "")}
+                {parseInt(orderDetails?.order?.quantity ?? "") > 1 && "s"}
+              </Text>
               <View style={styles.centerRow}>
                 <Text variant="titleSmall" style={styles.primaryText}>
                   {orderDetails?.order?.price?.currencyIsoCode}{" "}

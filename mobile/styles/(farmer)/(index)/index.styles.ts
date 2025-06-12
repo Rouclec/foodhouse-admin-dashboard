@@ -93,22 +93,6 @@ export const farmerIndexStyles = StyleSheet.create({
   },
   tabItemText: { fontSize: 18, color: Colors.grey["9e"] },
   tabItemActiveText: { color: Colors.primary[500] },
-  productImage: {
-    width: 102,
-    height: 102,
-    borderRadius: 12,
-  },
-  orderDetailsContainer: {
-    flexShrink: 1,
-    flexGrow: 1,
-    overflow: "hidden",
-    rowGap: 16,
-  },
-  centerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  primaryText: { fontSize: 16, color: Colors.primary[500] },
   flatListContentContainer: {
     rowGap: 24,
     paddingHorizontal: 24,

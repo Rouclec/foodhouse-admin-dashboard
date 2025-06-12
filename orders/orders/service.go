@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -1087,6 +1088,16 @@ type FilterContext struct {
 	Format    string
 }
 
+type ProductQuantity struct {
+	ProductID string `json:"product_id"`
+	Quantity  int64  `json:"quantity"`
+}
+
+type Group struct {
+	GroupDate pgtype.Timestamptz `json:"group_date"`
+	Products  []ProductQuantity  `json:"products"`
+}
+
 func GetFilterContext(filter ordersgrpc.FilterType) (FilterContext, error) {
 	now := time.Now()
 	loc := now.Location()
@@ -1127,10 +1138,7 @@ func (i *Impl) GetFarmerEarnings(ctx context.Context,
 	}
 
 	i.logger.Debug().Msgf("filter conext %v", filterCtx)
-	var rawResults []struct {
-		GroupDate  pgtype.Timestamptz `json:"group_date"`
-		ProductIds []string           `json:"product_ids"`
-	}
+	var rawResults []Group
 
 	switch filterCtx.GroupBy {
 	case GroupByDay:
@@ -1149,17 +1157,16 @@ func (i *Impl) GetFarmerEarnings(ctx context.Context,
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "error getting earnings by day: %v", err)
 		}
-		rawResults = make([]struct {
-			GroupDate  pgtype.Timestamptz `json:"group_date"`
-			ProductIds []string           `json:"product_ids"`
-		}, len(results))
+		rawResults = make([]Group, len(results))
 		for i, r := range results {
-			rawResults[i] = struct {
-				GroupDate  pgtype.Timestamptz `json:"group_date"`
-				ProductIds []string           `json:"product_ids"`
-			}{
-				GroupDate:  pgtype.Timestamptz{Valid: true, Time: r.GroupDate},
-				ProductIds: r.ProductIds,
+			var products []ProductQuantity
+			err := json.Unmarshal(r.Products, &products)
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to parse product group: %w", err)
+			}
+			rawResults[i] = Group{
+				GroupDate: pgtype.Timestamptz{Valid: true, Time: r.GroupDate},
+				Products:  products,
 			}
 		}
 
@@ -1179,19 +1186,19 @@ func (i *Impl) GetFarmerEarnings(ctx context.Context,
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "error getting earnings by day: %v", err)
 		}
-		rawResults = make([]struct {
-			GroupDate  pgtype.Timestamptz `json:"group_date"`
-			ProductIds []string           `json:"product_ids"`
-		}, len(results))
+		rawResults = make([]Group, len(results))
 		for i, r := range results {
-			rawResults[i] = struct {
-				GroupDate  pgtype.Timestamptz `json:"group_date"`
-				ProductIds []string           `json:"product_ids"`
-			}{
-				GroupDate:  pgtype.Timestamptz{Valid: true, Time: r.GroupDate},
-				ProductIds: r.ProductIds,
+			var products []ProductQuantity
+			err := json.Unmarshal(r.Products, &products)
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to parse product group: %w", err)
+			}
+			rawResults[i] = Group{
+				GroupDate: pgtype.Timestamptz{Valid: true, Time: r.GroupDate},
+				Products:  products,
 			}
 		}
+
 	case GroupByYear:
 		results, err := i.repo.Do().GetOrdersGroupedByYear(ctx, sqlc.GetOrdersGroupedByYearParams{
 			ProductOwner: &req.FarmerId,
@@ -1208,17 +1215,16 @@ func (i *Impl) GetFarmerEarnings(ctx context.Context,
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "error getting earnings by day: %v", err)
 		}
-		rawResults = make([]struct {
-			GroupDate  pgtype.Timestamptz `json:"group_date"`
-			ProductIds []string           `json:"product_ids"`
-		}, len(results))
+		rawResults = make([]Group, len(results))
 		for i, r := range results {
-			rawResults[i] = struct {
-				GroupDate  pgtype.Timestamptz `json:"group_date"`
-				ProductIds []string           `json:"product_ids"`
-			}{
-				GroupDate:  pgtype.Timestamptz{Valid: true, Time: r.GroupDate},
-				ProductIds: r.ProductIds,
+			var products []ProductQuantity
+			err := json.Unmarshal(r.Products, &products)
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to parse product group: %w", err)
+			}
+			rawResults[i] = Group{
+				GroupDate: pgtype.Timestamptz{Valid: true, Time: r.GroupDate},
+				Products:  products,
 			}
 		}
 	}
@@ -1230,22 +1236,31 @@ func (i *Impl) GetFarmerEarnings(ctx context.Context,
 	i.logger.Debug().Msgf("Raw results :%v", rawResults)
 
 	// Group by date string
-	grouped := make(map[string][]string)
+	grouped := make(map[string][]ProductQuantity)
 	for _, row := range rawResults {
 		key := row.GroupDate.Time.Format(filterCtx.Format)
-		grouped[key] = append(grouped[key], row.ProductIds...)
+		grouped[key] = append(grouped[key], row.Products...)
 	}
 
 	i.logger.Debug().Msgf("Groupped results: %v", grouped)
 
 	// Call ProductService for each group
 	results := make([]*ordersgrpc.FarmerEarningsData, 0, len(grouped))
-	for dateStr, productIDs := range grouped {
+	for dateStr, productQuantities := range grouped {
+		var productIDs []string
+		var quantities []int64
+
+		for _, pq := range productQuantities {
+			productIDs = append(productIDs, pq.ProductID)
+			quantities = append(quantities, pq.Quantity)
+		}
+
 		res, err := i.productService.SumProductAmounts(ctx, &productsgrpc.SumProductAmountsRequest{
 			ProductIds: productIDs,
+			Quantities: quantities,
 		})
 		if err != nil {
-			return nil, status.Errorf(codes.Internal, "error getting total earning from products %v", err)
+			return nil, status.Errorf(codes.Internal, "error getting total earning from products: %v", err)
 		}
 
 		results = append(results, &ordersgrpc.FarmerEarningsData{

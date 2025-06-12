@@ -471,13 +471,22 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]L
 
 const sumProductAmounts = `-- name: SumProductAmounts :one
 SELECT 
-  COALESCE(SUM(value), 0)::double precision AS total
-FROM product
-WHERE id = ANY($1::text[])
+  COALESCE(SUM(p.value * t.quantity), 0)::double precision AS total
+FROM (
+  SELECT 
+    UNNEST($1::text[]) AS id,
+    UNNEST($2::bigint[]) AS quantity
+) AS t
+JOIN product p ON p.id = t.id
 `
 
-func (q *Queries) SumProductAmounts(ctx context.Context, productIds []string) (float64, error) {
-	row := q.db.QueryRow(ctx, sumProductAmounts, productIds)
+type SumProductAmountsParams struct {
+	ProductIds []string `json:"product_ids"`
+	Quantities []int64  `json:"quantities"`
+}
+
+func (q *Queries) SumProductAmounts(ctx context.Context, arg SumProductAmountsParams) (float64, error) {
+	row := q.db.QueryRow(ctx, sumProductAmounts, arg.ProductIds, arg.Quantities)
 	var total float64
 	err := row.Scan(&total)
 	return total, err
