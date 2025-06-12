@@ -79,6 +79,9 @@ func (s *SmsSenderNexah) SendSms(ctx context.Context, to, message string) (*stri
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
+	// req.Header.Set("Authorization", "App "+s.apiKey)
+	req.Header.Set("Content-Type", "application/json")
+
 	s.logger.Debug().Msgf("Nexah request: %v", req)
 
 	resp, err := s.Client.Do(req)
