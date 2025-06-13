@@ -15,6 +15,7 @@ import {
   Snackbar,
   Text,
 } from "react-native-paper";
+
 import { PaperOtpInput } from "react-native-paper-otp-input";
 
 import {
@@ -27,6 +28,7 @@ import { delay, storeData, updateAuthHeader } from "@/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Context, ContextType } from "../_layout";
 import i18n from "@/i18n";
+import { store } from "expo-router/build/global-state/router-store";
 
 const VerifyOtpScreen: FC = () => {
   const { requestId, email, password, phoneNumber, residenceCountryIsoCode } = useLocalSearchParams();
@@ -136,6 +138,7 @@ const VerifyOtpScreen: FC = () => {
       setTimeLeft(0);
       updateAuthHeader(data.tokens?.accessToken!);
       await storeData("@userId", data?.userId);
+      await storeData("@refreshToken", data?.tokens?.refreshToken);
       setUserId(data?.userId);
       router.push("/profile-page");
     },
