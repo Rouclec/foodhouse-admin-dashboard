@@ -7,14 +7,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { index1 } from "@/styles";
+import { defaultStyles, index1 } from "@/styles";
 import i18n from "@/i18n";
+import React from "react";
 
 export default function TabOneScreen() {
   return (
-    <View style={index1.container}>
-      <ScrollView contentContainerStyle={index1.scrollContent}>
-        <SafeAreaView style={index1.safeArea}>
+    <>
+      <ScrollView contentContainerStyle={defaultStyles.scrollContainer}>
+        <View style={index1.safeArea}>
           
           <View style={index1.imageContainer}>
             
@@ -76,7 +77,7 @@ export default function TabOneScreen() {
               {i18n.t("(auth).index.discoverFresh")}
             </Text>
           </View>
-        </SafeAreaView>
+        </View>
       </ScrollView>
 
       <View style={index1.buttonContainer}>
@@ -90,6 +91,7 @@ export default function TabOneScreen() {
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    
+    </>
   );
 }

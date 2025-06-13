@@ -30,10 +30,10 @@ import { Chase } from "react-native-animated-spinkit";
 import { Colors } from "@/constants";
 
 const ProfilePage = () => {
-  const { user } = useContext(Context) as ContextType;
+  const { user, setUser } = useContext(Context) as ContextType;
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState(user?.email);
+  //const [email, setEmail] = useState(user?.email);
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [profileImage, setProfileImage] =
@@ -56,6 +56,7 @@ const ProfilePage = () => {
     },
     onSuccess: async () => {
       setSuccessModalVisible(true);
+     
       setTimeout(() => {
         if (role === "USER_TYPE_FARMER") {
           router.replace("/(farmer)/(index)");
@@ -82,7 +83,7 @@ const ProfilePage = () => {
       const data = {
         firstName,
         lastName,
-        email,
+        email: user?.email,
         address,
         profileImage: imageUrl || undefined,
       };
@@ -93,6 +94,7 @@ const ProfilePage = () => {
           userId: user?.userId ?? "",
         },
       });
+       setUser({ ...data });
     } catch (error) {
       console.error("Error completing registration:", error);
       setErrorMessage(i18n.t("(auth).profile.uploadError"));
@@ -192,25 +194,6 @@ const ProfilePage = () => {
               />
 
               <TextInput
-                label={i18n.t("(auth).profile.email")}
-                value={email}
-                onChangeText={setEmail}
-                mode="outlined"
-                style={defaultStyles.input}
-                theme={{
-                  colors: {
-                    primary: Colors.primary[500],
-                    background: Colors.grey["fa"],
-                    error: Colors.error,
-                  },
-                  roundness: 10,
-                }}
-                outlineColor={Colors.grey["bg"]}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-
-              <TextInput
                 label={i18n.t("(auth).profile.address")}
                 value={address}
                 onChangeText={setAddress}
@@ -249,7 +232,7 @@ const ProfilePage = () => {
               style={[defaultStyles.button, signupStyles.button]}
               loading={loading}
               disabled={
-                !firstName || !lastName || !email || !address || loading
+                !firstName || !lastName  || !address || loading
               }
               onPress={handleComplete}
             >

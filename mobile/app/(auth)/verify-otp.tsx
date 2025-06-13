@@ -4,18 +4,14 @@ import React, { FC, useContext, useEffect, useState } from "react";
 import {
   Keyboard,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import {
   Appbar,
   Button,
-  Dialog,
   Icon,
-  Portal,
   Snackbar,
   Text,
 } from "react-native-paper";
@@ -33,7 +29,7 @@ import { Context, ContextType } from "../_layout";
 import i18n from "@/i18n";
 
 const VerifyOtpScreen: FC = () => {
-  const { requestId, email, password, phoneNumber } = useLocalSearchParams();
+  const { requestId, email, password, phoneNumber, residenceCountryIsoCode } = useLocalSearchParams();
   const [requestIdState, setRequestIdState] = useState<string>(
     (requestId as string) ?? ""
   );
@@ -43,12 +39,11 @@ const VerifyOtpScreen: FC = () => {
   const [, setRetries] = useState(0);
   const [timeLeft, setTimeLeft] = useState(currentTimeLeft);
   const [otp, setOtp] = useState("");
-  const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
   const [error, setError] = useState(false);
   const [userId, setUserId] = useState<string>();
-  const { role, setUserRole } = useContext(Context) as ContextType;
+  const { role } = useContext(Context) as ContextType;
 
   const { setUser } = useContext(Context) as ContextType;
 
@@ -64,6 +59,7 @@ const VerifyOtpScreen: FC = () => {
           },
           email: email as string,
           password: password as string,
+          residenceCountryIsoCode: residenceCountryIsoCode as string,
           userType: role,
         },
       });

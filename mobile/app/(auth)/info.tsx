@@ -31,7 +31,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const Info = () => {
   const [country, setCountry] = useState(CAMEROON);
-  const [callingCode, setCallingCode] = useState(country?.dial_code || "237");
+  const [residenceCountryIsoCode, setCallingCode] = useState(country?.dial_code || "237");
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -56,7 +56,7 @@ const Info = () => {
       setLoading(true);
       await mutateAsync({
         body: {
-          phoneNumber: `${callingCode}${mobile}`,
+          phoneNumber: `${residenceCountryIsoCode}${mobile}`,
         },
       });
     } catch (error) {
@@ -81,9 +81,10 @@ const Info = () => {
         pathname: "/verify-otp",
         params: {
           requestId: data.requestId,
-          phoneNumber: `${callingCode}${mobile}`,
+          phoneNumber: `${residenceCountryIsoCode}${mobile}`,
           email,
           password,
+          residenceCountryIsoCode,
           role: role || "USER_ROLE_UNSPECIFIED",
         },
       });
@@ -130,7 +131,7 @@ const Info = () => {
               />
               <PhoneNumberInput
                 setCountryCode={setCallingCode}
-                countryCode={callingCode}
+                countryCode={residenceCountryIsoCode}
                 setPhoneNumber={setMobile}
                 phoneNumber={mobile}
                 containerStyle={signupStyles.phoneNumberInputContainerStyle}

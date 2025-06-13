@@ -16,6 +16,8 @@ export const index1 = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
+    flexDirection: "column",
+    paddingTop: 32,
   },
   headingH1: {
     fontFamily: "Urbanist-Regular",
@@ -31,7 +33,7 @@ export const index1 = StyleSheet.create({
     lineHeight: 24,
   },
   textContainer: {
-    marginTop: screenHeight * 0.6,
+    marginTop: screenHeight * 0.9,
     paddingHorizontal: 24,
   },
   imageContainer: {

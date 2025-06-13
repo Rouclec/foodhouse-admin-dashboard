@@ -137,19 +137,21 @@ export default function OnboardingScreen() {
             );
           })}
         </View>
-
-        <Button
-          mode="contained"
-          buttonColor={Colors.primary["500"]}
-          onPress={handleNext}
-          style={defaultStyles.button}
-        >
-          <Text style={defaultStyles.buttonText}>
-            {currentSlide === onboardingSlides.length - 1
-              ? i18n.t("(auth).onboarding.getStarted")
-              : i18n.t("(auth).onboarding.next")}
-          </Text>
-        </Button>
+        <View style={defaultStyles.bottomButtonContainer}>
+          {currentSlide === onboardingSlides.length - 1 && (
+          <Button
+            mode="contained"
+            buttonColor={Colors.primary["500"]}
+            onPress={handleNext}
+            style={defaultStyles.button}
+          >
+            <Text style={defaultStyles.buttonText}>
+              {i18n.t("(auth).onboarding.getStarted")}
+            </Text>
+          </Button>
+        )}
+        </View>
+        
       </View>
     </View>
   );
