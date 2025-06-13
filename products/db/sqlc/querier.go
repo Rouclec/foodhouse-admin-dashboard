@@ -19,6 +19,7 @@ type Querier interface {
 	GetCategory(ctx context.Context, id string) (Category, error)
 	GetProduct(ctx context.Context, id string) (Product, error)
 	GetProductForUpdate(ctx context.Context, id string) (Product, error)
+	GetProductStatsBetweenDates(ctx context.Context, arg GetProductStatsBetweenDatesParams) (int64, error)
 	GetProductWithCategory(ctx context.Context, id string) (GetProductWithCategoryRow, error)
 	ListCategories(ctx context.Context) ([]Category, error)
 	ListPriceTypesByCategory(ctx context.Context, categoryID string) ([]PriceType, error)

@@ -81,3 +81,11 @@ ORDER BY
     average_rating DESC,
     f.created_at ASC -- Oldest farmers take precedence if ratings are tied
 LIMIT sqlc.arg(count);
+
+-- name: GetUserStatsBetweenDates :one
+SELECT
+  COUNT(*) FILTER (WHERE role = 'USER_ROLE_USER') AS total_users,
+  COUNT(*) FILTER (WHERE role = 'USER_ROLE_FARMER') AS total_farmers
+FROM users
+WHERE created_at >= sqlc.arg(start_date)::timestamptz
+  AND created_at <= sqlc.arg(end_date)::timestamptz;

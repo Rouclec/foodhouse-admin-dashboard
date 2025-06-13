@@ -124,3 +124,11 @@ FROM (
     UNNEST(sqlc.arg(quantities)::bigint[]) AS quantity
 ) AS t
 JOIN product p ON p.id = t.id;
+
+
+-- name: GetProductStatsBetweenDates :one
+SELECT
+  COUNT(*) AS total_products
+FROM product
+WHERE created_at >= sqlc.arg(start_date)::timestamptz
+  AND created_at <= sqlc.arg(end_date)::timestamptz;

@@ -209,6 +209,33 @@ func (q *Queries) GetOrderByOrderNumber(ctx context.Context, orderNumber int64) 
 	return i, err
 }
 
+const getOrderStatsBetweenDates = `-- name: GetOrderStatsBetweenDates :one
+SELECT 
+  COUNT(*) AS total_orders,
+  COALESCE(SUM(amount_value), 0)::float AS total_value
+FROM orders
+WHERE status = 'OrderStatus_PAYMENT_SUCCESSFUL'
+  AND created_at >= $1::timestamptz
+  AND created_at <= $2::timestamptz
+`
+
+type GetOrderStatsBetweenDatesParams struct {
+	StartDate time.Time `json:"start_date"`
+	EndDate   time.Time `json:"end_date"`
+}
+
+type GetOrderStatsBetweenDatesRow struct {
+	TotalOrders int64   `json:"total_orders"`
+	TotalValue  float64 `json:"total_value"`
+}
+
+func (q *Queries) GetOrderStatsBetweenDates(ctx context.Context, arg GetOrderStatsBetweenDatesParams) (GetOrderStatsBetweenDatesRow, error) {
+	row := q.db.QueryRow(ctx, getOrderStatsBetweenDates, arg.StartDate, arg.EndDate)
+	var i GetOrderStatsBetweenDatesRow
+	err := row.Scan(&i.TotalOrders, &i.TotalValue)
+	return i, err
+}
+
 const getOrdersGroupedByDay = `-- name: GetOrdersGroupedByDay :many
 SELECT 
   DATE_TRUNC('day', updated_at)::timestamptz AS group_date,
@@ -465,14 +492,19 @@ WHERE product_owner = $1 AND
     $3::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
     OR created_at < $3::timestamptz
   )
+  AND
+  (
+    $4::TEXT IS NULL OR order_number ILIKE '%' || $4 || '%'
+  )
 ORDER BY created_at DESC
-LIMIT $4::int
+LIMIT $5::int
 `
 
 type ListFarmerOrdersParams struct {
 	ProductOwner     *string   `json:"product_owner"`
 	IncludedStatuses []string  `json:"included_statuses"`
 	CreatedBefore    time.Time `json:"created_before"`
+	SearchKey        string    `json:"search_key"`
 	Count            int32     `json:"count"`
 }
 
@@ -481,6 +513,7 @@ func (q *Queries) ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersPara
 		arg.ProductOwner,
 		arg.IncludedStatuses,
 		arg.CreatedBefore,
+		arg.SearchKey,
 		arg.Count,
 	)
 	if err != nil {
@@ -551,23 +584,98 @@ func (q *Queries) ListOrderAuditLogs(ctx context.Context, orderNumber int64) ([]
 	return items, nil
 }
 
+const listOrders = `-- name: ListOrders :many
+SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity FROM orders 
+WHERE 
+  (
+    $1::TEXT[] IS NULL OR
+    $1::TEXT[] = '{}'::TEXT[] OR
+    status::TEXT = ANY($1)
+  ) AND 
+  (
+    $2::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+    OR created_at < $2::timestamptz
+  ) AND
+  (
+    $3::TEXT IS NULL OR order_number ILIKE '%' || $3 || '%'
+  )
+ORDER BY created_at DESC
+LIMIT $4::int
+`
+
+type ListOrdersParams struct {
+	IncludedStatuses []string  `json:"included_statuses"`
+	CreatedBefore    time.Time `json:"created_before"`
+	SearchKey        string    `json:"search_key"`
+	Count            int32     `json:"count"`
+}
+
+func (q *Queries) ListOrders(ctx context.Context, arg ListOrdersParams) ([]Order, error) {
+	rows, err := q.db.Query(ctx, listOrders,
+		arg.IncludedStatuses,
+		arg.CreatedBefore,
+		arg.SearchKey,
+		arg.Count,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Order{}
+	for rows.Next() {
+		var i Order
+		if err := rows.Scan(
+			&i.OrderNumber,
+			&i.DeliveryLocation,
+			&i.PriceValue,
+			&i.PriceCurrency,
+			&i.Status,
+			&i.Rating,
+			&i.Review,
+			&i.Product,
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.SecretKey,
+			&i.ProductOwner,
+			&i.PayoutPhoneNumber,
+			&i.DeliveryAddress,
+			&i.Quantity,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listUserOrders = `-- name: ListUserOrders :many
 SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity FROM orders 
 WHERE created_by = $1 AND 
   (
-        $2::TEXT[] IS NULL OR
-        $2::TEXT[] = '{}'::TEXT[] OR
-        status::TEXT  = ANY($2)
+    $2::TEXT[] IS NULL OR
+    $2::TEXT[] = '{}'::TEXT[] OR
+    status::TEXT = ANY($2)
   ) AND 
-  ($3::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at < $3::timestamptz)
+  (
+    $3::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+    OR created_at < $3::timestamptz
+  ) AND
+  (
+    $4::TEXT IS NULL OR order_number ILIKE '%' || $4 || '%'
+  )
 ORDER BY created_at DESC
-LIMIT $4::int
+LIMIT $5::int
 `
 
 type ListUserOrdersParams struct {
 	CreatedBy        *string   `json:"created_by"`
 	IncludedStatuses []string  `json:"included_statuses"`
 	CreatedBefore    time.Time `json:"created_before"`
+	SearchKey        string    `json:"search_key"`
 	Count            int32     `json:"count"`
 }
 
@@ -576,6 +684,7 @@ func (q *Queries) ListUserOrders(ctx context.Context, arg ListUserOrdersParams) 
 		arg.CreatedBy,
 		arg.IncludedStatuses,
 		arg.CreatedBefore,
+		arg.SearchKey,
 		arg.Count,
 	)
 	if err != nil {

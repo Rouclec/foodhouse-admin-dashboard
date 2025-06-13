@@ -60,6 +60,10 @@ export type ordersgrpcFarmerEarningsData = {
 
 export type ordersgrpcFilterType = 'FilterType_UNSPECIFIED' | 'FilterType_THIS_WEEK' | 'FilterType_THIS_MONTH' | 'FilterType_THIS_YEAR' | 'FilterType_ALL_TIME';
 
+export type ordersgrpcGetAdminStatsResponse = {
+    data?: Array<ordersgrpcStatItem>;
+};
+
 export type ordersgrpcGetFarmerEarningsResponse = {
     data?: Array<ordersgrpcFarmerEarningsData>;
 };
@@ -86,6 +90,11 @@ export type ordersgrpcListDeliveryPointsResponse = {
 };
 
 export type ordersgrpcListFarmerOrdersResponse = {
+    orders?: Array<ordersgrpcOrder>;
+    nextKey?: string;
+};
+
+export type ordersgrpcListOrdersResponse = {
     orders?: Array<ordersgrpcOrder>;
     nextKey?: string;
 };
@@ -144,6 +153,14 @@ export type ordersgrpcPaymentStatus = 'PaymentStatus_UNSPECIFIED' | 'PaymentStat
 
 export type ordersgrpcRejectOrderResponse = unknown;
 
+export type ordersgrpcStatItem = {
+    title?: string;
+    value?: number;
+    change?: number;
+    description?: string;
+    currency?: string;
+};
+
 export type OrdersInitiatePaymentBody = {
     paymentEntity?: ordersgrpcPaymentEntity;
     entityId?: string;
@@ -186,6 +203,32 @@ export type OrdersCreateDeliveryPointData = {
 export type OrdersCreateDeliveryPointResponse = (ordersgrpcCreateDeliveryPointResponse);
 
 export type OrdersCreateDeliveryPointError = (rpcStatus);
+
+export type OrdersGetAdminStatsData = {
+    path: {
+        userId: string;
+    };
+};
+
+export type OrdersGetAdminStatsResponse = (ordersgrpcGetAdminStatsResponse);
+
+export type OrdersGetAdminStatsError = (rpcStatus);
+
+export type OrdersListOrdersData = {
+    path: {
+        userId: string;
+    };
+    query?: {
+        count?: number;
+        searchKey?: string;
+        startKey?: string;
+        statuses?: Array<string>;
+    };
+};
+
+export type OrdersListOrdersResponse = (ordersgrpcListOrdersResponse);
+
+export type OrdersListOrdersError = (rpcStatus);
 
 export type OrdersConfirmPaymentData = {
     query?: {
@@ -266,6 +309,7 @@ export type OrdersListFarmerOrdersData = {
     };
     query?: {
         count?: number;
+        searchKey?: string;
         startKey?: string;
         statuses?: Array<string>;
     };
@@ -332,6 +376,7 @@ export type OrdersListUserOrdersData = {
     };
     query?: {
         count?: number;
+        searchKey?: string;
         startKey?: string;
         statuses?: Array<string>;
     };

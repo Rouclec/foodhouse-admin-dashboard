@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/foodhouse/foodhouseapp/grpc/go/productsgrpc"
@@ -31,6 +32,8 @@ const (
 	ResetPassword = "RESET_PASSWORD"
 
 	OneMillion = 1000000
+
+	CENT = 100
 )
 
 // Impl is the implementation of the products service.
@@ -489,5 +492,65 @@ func (i *Impl) SumProductAmounts(ctx context.Context,
 
 	return &productsgrpc.SumProductAmountsResponse{
 		Total: total,
+	}, nil
+}
+
+func getMonthRanges() (startOfThisMonth, endOfThisMonth, startOfLastMonth, endOfLastMonth time.Time) {
+	now := time.Now()
+
+	// Truncate to the start of this month
+	startOfThisMonth = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+
+	// Start of next month, minus 1 second gives end of this month
+	endOfThisMonth = startOfThisMonth.AddDate(0, 1, 0).Add(-time.Second)
+
+	// Start of last month
+	startOfLastMonth = startOfThisMonth.AddDate(0, -1, 0)
+
+	// End of last month = start of this month - 1 second
+	endOfLastMonth = startOfThisMonth.Add(-time.Second)
+
+	return
+}
+
+func percentageChange(old, new float64) *float64 {
+	if old == 0 {
+		change := 100.0
+		return &change
+	}
+	change := ((new - old) / math.Abs(old)) * CENT
+	return &change
+}
+
+// GetProductStats implements productsgrpc.ProductsServer.
+func (i *Impl) GetProductStats(ctx context.Context, _req *productsgrpc.GetProductStatsRequest) (*productsgrpc.GetProductStatsResponse, error) {
+	startThis, endThis, startLast, endLast := getMonthRanges()
+
+	productsThisMonth, err := i.repo.Do().GetProductStatsBetweenDates(ctx, sqlc.GetProductStatsBetweenDatesParams{
+		StartDate: startThis,
+		EndDate:   endThis,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	productsLastMonth, err := i.repo.Do().GetProductStatsBetweenDates(ctx, sqlc.GetProductStatsBetweenDatesParams{
+		StartDate: startLast,
+		EndDate:   endLast,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	stats := make([]*productsgrpc.StatItem, 0, 1)
+	stats[0] = &productsgrpc.StatItem{
+		Title:       "Total Products",
+		Value:       float64(productsThisMonth),
+		Change:      *percentageChange(float64(productsLastMonth), float64(productsThisMonth)),
+		Description: "Products created this month",
+	}
+	return &productsgrpc.GetProductStatsResponse{
+		Data: stats,
 	}, nil
 }

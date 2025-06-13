@@ -188,6 +188,21 @@ func (mr *MockQuerierMockRecorder) GetProductForUpdate(ctx, id any) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProductForUpdate", reflect.TypeOf((*MockQuerier)(nil).GetProductForUpdate), ctx, id)
 }
 
+// GetProductStatsBetweenDates mocks base method.
+func (m *MockQuerier) GetProductStatsBetweenDates(ctx context.Context, arg sqlc.GetProductStatsBetweenDatesParams) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetProductStatsBetweenDates", ctx, arg)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetProductStatsBetweenDates indicates an expected call of GetProductStatsBetweenDates.
+func (mr *MockQuerierMockRecorder) GetProductStatsBetweenDates(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProductStatsBetweenDates", reflect.TypeOf((*MockQuerier)(nil).GetProductStatsBetweenDates), ctx, arg)
+}
+
 // GetProductWithCategory mocks base method.
 func (m *MockQuerier) GetProductWithCategory(ctx context.Context, id string) (sqlc.GetProductWithCategoryRow, error) {
 	m.ctrl.T.Helper()

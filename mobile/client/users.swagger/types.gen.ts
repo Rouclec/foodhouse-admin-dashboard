@@ -127,6 +127,10 @@ export type usersgrpcGetUserPaymentMethodsByUserIDResponse = {
     userPaymentMethods?: Array<usersgrpcUserPaymentMethod>;
 };
 
+export type usersgrpcGetUserStatsResponse = {
+    data?: Array<usersgrpcStatItem>;
+};
+
 export type usersgrpcGetUserSubscriptionByIDResponse = {
     userSubscription?: usersgrpcUserSubscription;
 };
@@ -238,6 +242,13 @@ export type usersgrpcSignupRequest = {
 export type usersgrpcSignupResponse = {
     userId?: string;
     tokens?: usersgrpcTokens;
+};
+
+export type usersgrpcStatItem = {
+    title?: string;
+    value?: number;
+    change?: number;
+    description?: string;
 };
 
 export type usersgrpcSubscribeResponse = {

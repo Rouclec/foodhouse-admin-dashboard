@@ -181,6 +181,16 @@ message SumProductAmountsRequest {
 
 message SumProductAmountsResponse { double total = 1; }
 
+message StatItem {
+  string title = 1;
+  double value = 2;
+  double change = 3;
+  string description = 4;
+}
+
+message GetProductStatsRequest {}
+message GetProductStatsResponse { repeated StatItem data = 1; }
+
 service Products {
 
   rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryResponse) {
@@ -294,4 +304,6 @@ service Products {
 
   rpc SumProductAmounts(SumProductAmountsRequest)
       returns (SumProductAmountsResponse);
+
+  rpc GetProductStats(GetProductStatsRequest) returns (GetProductStatsResponse);
 }

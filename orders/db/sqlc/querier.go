@@ -14,6 +14,7 @@ type Querier interface {
 	CreateOrderAuditLog(ctx context.Context, arg CreateOrderAuditLogParams) error
 	CreatePayment(ctx context.Context, arg CreatePaymentParams) (Payment, error)
 	GetOrderByOrderNumber(ctx context.Context, orderNumber int64) (Order, error)
+	GetOrderStatsBetweenDates(ctx context.Context, arg GetOrderStatsBetweenDatesParams) (GetOrderStatsBetweenDatesRow, error)
 	GetOrdersGroupedByDay(ctx context.Context, arg GetOrdersGroupedByDayParams) ([]GetOrdersGroupedByDayRow, error)
 	GetOrdersGroupedByMonth(ctx context.Context, arg GetOrdersGroupedByMonthParams) ([]GetOrdersGroupedByMonthRow, error)
 	GetOrdersGroupedByYear(ctx context.Context, arg GetOrdersGroupedByYearParams) ([]GetOrdersGroupedByYearRow, error)
@@ -23,6 +24,7 @@ type Querier interface {
 	ListDeliveryPoints(ctx context.Context, arg ListDeliveryPointsParams) ([]DeliveryPoint, error)
 	ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersParams) ([]Order, error)
 	ListOrderAuditLogs(ctx context.Context, orderNumber int64) ([]OrdersAudit, error)
+	ListOrders(ctx context.Context, arg ListOrdersParams) ([]Order, error)
 	ListUniqueCities(ctx context.Context) ([]string, error)
 	ListUserOrders(ctx context.Context, arg ListUserOrdersParams) ([]Order, error)
 	ReviewOrder(ctx context.Context, arg ReviewOrderParams) error
