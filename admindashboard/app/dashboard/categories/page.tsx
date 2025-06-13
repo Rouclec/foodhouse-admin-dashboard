@@ -1,0 +1,216 @@
+"use client"
+
+import type React from "react"
+
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Badge } from "@/components/ui/badge"
+import { Plus, Edit, Trash2, Package } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+
+interface Category {
+  id: string
+  name: string
+  slug: string
+  createdBy: string
+  createdAt: string
+  productCount: number
+}
+
+export default function CategoriesPage() {
+  const [categories, setCategories] = useState<Category[]>([
+    { id: "1", name: "Vegetables", slug: "vegetables", createdBy: "Admin", createdAt: "2024-01-15", productCount: 25 },
+    { id: "2", name: "Fruits", slug: "fruits", createdBy: "Admin", createdAt: "2024-01-16", productCount: 18 },
+    { id: "3", name: "Grains", slug: "grains", createdBy: "Admin", createdAt: "2024-01-17", productCount: 12 },
+    { id: "4", name: "Dairy", slug: "dairy", createdBy: "Admin", createdAt: "2024-01-18", productCount: 8 },
+  ])
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null)
+  const [categoryName, setCategoryName] = useState("")
+  const { toast } = useToast()
+
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "")
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (editingCategory) {
+      // Update existing category
+      setCategories(
+        categories.map((cat) =>
+          cat.id === editingCategory.id ? { ...cat, name: categoryName, slug: generateSlug(categoryName) } : cat,
+        ),
+      )
+      toast({
+        title: "Category updated",
+        description: "The category has been successfully updated.",
+      })
+    } else {
+      // Create new category
+      const newCategory: Category = {
+        id: Date.now().toString(),
+        name: categoryName,
+        slug: generateSlug(categoryName),
+        createdBy: "Admin",
+        createdAt: new Date().toISOString().split("T")[0],
+        productCount: 0,
+      }
+      setCategories([...categories, newCategory])
+      toast({
+        title: "Category created",
+        description: "The new category has been successfully created.",
+      })
+    }
+
+    setCategoryName("")
+    setEditingCategory(null)
+    setIsDialogOpen(false)
+  }
+
+  const handleEdit = (category: Category) => {
+    setEditingCategory(category)
+    setCategoryName(category.name)
+    setIsDialogOpen(true)
+  }
+
+  const handleDelete = (id: string) => {
+    setCategories(categories.filter((cat) => cat.id !== id))
+    toast({
+      title: "Category deleted",
+      description: "The category has been successfully deleted.",
+    })
+  }
+
+  const openCreateDialog = () => {
+    setEditingCategory(null)
+    setCategoryName("")
+    setIsDialogOpen(true)
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Product Categories</h1>
+          <p className="text-gray-600">Manage product categories for your marketplace</p>
+        </div>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={openCreateDialog}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Category
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{editingCategory ? "Edit Category" : "Create New Category"}</DialogTitle>
+              <DialogDescription>
+                {editingCategory
+                  ? "Update the category information below."
+                  : "Add a new product category to organize your marketplace."}
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit}>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="categoryName">Category Name</Label>
+                  <Input
+                    id="categoryName"
+                    placeholder="e.g., Vegetables, Fruits, Grains"
+                    value={categoryName}
+                    onChange={(e) => setCategoryName(e.target.value)}
+                    required
+                  />
+                </div>
+                {categoryName && (
+                  <div className="space-y-2">
+                    <Label>Generated Slug</Label>
+                    <div className="p-2 bg-gray-100 rounded text-sm text-gray-600">{generateSlug(categoryName)}</div>
+                  </div>
+                )}
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">{editingCategory ? "Update Category" : "Create Category"}</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Package className="h-5 w-5 mr-2" />
+            Categories Overview
+          </CardTitle>
+          <CardDescription>Total categories: {categories.length}</CardDescription>
+        </CardHeader>
+        <CardContent className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead className="hidden sm:table-cell">Slug</TableHead>
+                <TableHead className="hidden md:table-cell">Products</TableHead>
+                <TableHead className="hidden lg:table-cell">Created By</TableHead>
+                <TableHead className="hidden lg:table-cell">Created Date</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {categories.map((category) => (
+                <TableRow key={category.id}>
+                  <TableCell className="font-medium">
+                    {category.name}
+                    <div className="sm:hidden mt-1">
+                      <Badge variant="secondary">{category.slug}</Badge>
+                    </div>
+                    <div className="md:hidden mt-1 text-xs text-gray-500">{category.productCount} products</div>
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    <Badge variant="secondary">{category.slug}</Badge>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">{category.productCount} products</TableCell>
+                  <TableCell className="hidden lg:table-cell">{category.createdBy}</TableCell>
+                  <TableCell className="hidden lg:table-cell">{category.createdAt}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end space-x-2">
+                      <Button variant="outline" size="sm" onClick={() => handleEdit(category)}>
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => handleDelete(category.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
