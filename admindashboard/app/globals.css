@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    /* Updated primary color to match #6dcd47 */
+    --primary: 100 60% 54%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Card colors */
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    /* Popover colors */
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    /* Updated secondary to be a light gray */
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+
+    /* Updated muted to match light.bg #F3F3F3 */
+    --muted: 0 0% 95%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    /* Updated accent to be a subtle version of primary */
+    --accent: 100 60% 97%;
+    --accent-foreground: 100 60% 30%;
+
+    /* Updated destructive to match error #EF0000 */
+    --destructive: 0 100% 47%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Updated border to match light.0 #F6F6F6 */
+    --border: 0 0% 96%;
+    --input: 0 0% 96%;
+    --ring: 100 60% 54%;
+    --radius: 0.5rem;
+
+    /* Chart colors */
+    --chart-1: 100 60% 54%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+
+    /* Sidebar colors */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222.2 84% 4.9%;
+    --sidebar-primary: 100 60% 54%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 96%;
+    --sidebar-accent-foreground: 222.2 84% 4.9%;
+    --sidebar-border: 0 0% 96%;
+    --sidebar-ring: 100 60% 54%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 0 0% 98%;
+
+    /* Dark mode primary */
+    --primary: 100 60% 54%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Dark mode card */
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 98%;
+
+    /* Dark mode popover */
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 0 0% 98%;
+
+    /* Dark mode secondary */
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 0 0% 98%;
+
+    /* Dark mode muted */
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    /* Dark mode accent */
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 0 0% 98%;
+
+    /* Dark mode destructive */
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Dark mode border */
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 100 60% 54%;
+
+    /* Dark mode chart colors */
+    --chart-1: 100 60% 54%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+
+    /* Dark mode sidebar */
+    --sidebar-background: 222.2 84% 4.9%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 100 60% 54%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 217.2 32.6% 17.5%;
+    --sidebar-ring: 100 60% 54%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
