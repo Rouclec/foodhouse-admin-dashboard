@@ -224,6 +224,26 @@ func (q *Queries) GetProductForUpdate(ctx context.Context, id string) (Product, 
 	return i, err
 }
 
+const getProductStatsBetweenDates = `-- name: GetProductStatsBetweenDates :one
+SELECT
+  COUNT(*) AS total_products
+FROM product
+WHERE created_at >= $1::timestamptz
+  AND created_at <= $2::timestamptz
+`
+
+type GetProductStatsBetweenDatesParams struct {
+	StartDate time.Time `json:"start_date"`
+	EndDate   time.Time `json:"end_date"`
+}
+
+func (q *Queries) GetProductStatsBetweenDates(ctx context.Context, arg GetProductStatsBetweenDatesParams) (int64, error) {
+	row := q.db.QueryRow(ctx, getProductStatsBetweenDates, arg.StartDate, arg.EndDate)
+	var total_products int64
+	err := row.Scan(&total_products)
+	return total_products, err
+}
+
 const getProductWithCategory = `-- name: GetProductWithCategory :one
 SELECT 
   p.id AS product_id,

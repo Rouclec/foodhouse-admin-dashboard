@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math"
 	"regexp"
 	"strings"
 	"time"
@@ -38,6 +39,8 @@ const (
 	OneMillion = 1000000
 
 	DefaultRating = 0.00
+
+	CENT = 100
 )
 
 // Impl is the implementation of the Users service.
@@ -1387,4 +1390,75 @@ func (i *Impl) ListFarmers(ctx context.Context,
 		Farmers: protoFarmers,
 		NextKey: nextKey,
 	}, nil
+}
+
+func getMonthRanges() (startOfThisMonth, endOfThisMonth, startOfLastMonth, endOfLastMonth time.Time) {
+	now := time.Now()
+
+	// Truncate to the start of this month
+	startOfThisMonth = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+
+	// Start of next month, minus 1 second gives end of this month
+	endOfThisMonth = startOfThisMonth.AddDate(0, 1, 0).Add(-time.Second)
+
+	// Start of last month
+	startOfLastMonth = startOfThisMonth.AddDate(0, -1, 0)
+
+	// End of last month = start of this month - 1 second
+	endOfLastMonth = startOfThisMonth.Add(-time.Second)
+
+	return
+}
+
+func percentageChange(old, new float64) *float64 {
+	if old == 0 {
+		change := 100.0
+		return &change
+	}
+	change := ((new - old) / math.Abs(old)) * CENT
+	return &change
+}
+
+// GetUserStats implements usersgrpc.UsersServer.
+func (i *Impl) GetUserStats(ctx context.Context, _req *usersgrpc.GetUserStatsRequest) (*usersgrpc.GetUserStatsResponse, error) {
+	startThis, endThis, startLast, endLast := getMonthRanges()
+
+	statsThisMonth, err := i.repo.Do().GetUserStatsBetweenDates(ctx, sqlc.GetUserStatsBetweenDatesParams{
+		StartDate: startThis,
+		EndDate:   endThis,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	statsLastMonth, err := i.repo.Do().GetUserStatsBetweenDates(ctx, sqlc.GetUserStatsBetweenDatesParams{
+		StartDate: startLast,
+		EndDate:   endLast,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	stats := make([]*usersgrpc.StatItem, 0, 2)
+
+	stats[0] = &usersgrpc.StatItem{
+		Title:       "Total Users",
+		Value:       float64(statsThisMonth.TotalUsers),
+		Change:      *percentageChange(float64(statsLastMonth.TotalUsers), float64(statsThisMonth.TotalUsers)),
+		Description: "New users this month",
+	}
+
+	stats[1] = &usersgrpc.StatItem{
+		Title:       "Total Farmers",
+		Value:       float64(statsThisMonth.TotalFarmers),
+		Change:      *percentageChange(float64(statsLastMonth.TotalFarmers), float64(statsThisMonth.TotalFarmers)),
+		Description: "Total active farmers",
+	}
+
+	return &usersgrpc.GetUserStatsResponse{
+		Data: stats,
+	}, nil
+	// panic("unimplemented")
 }

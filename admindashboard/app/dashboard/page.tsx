@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   Users,
   ShoppingCart,
-  Leaf,
   CreditCard,
   TrendingUp,
   TrendingDown,
@@ -117,7 +116,6 @@ const OrderItem: FC<OrderItemProps> = ({ order }) => {
 };
 
 export default function DashboardPage() {
-  /* Update the dashboard stats to use the primary color */
   const stats = [
     {
       title: "Total Farmers",

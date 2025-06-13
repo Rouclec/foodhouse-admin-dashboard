@@ -63,6 +63,10 @@ export type productsgrpcGetProductResponse = {
     product?: productsgrpcProduct;
 };
 
+export type productsgrpcGetProductStatsResponse = {
+    data?: Array<productsgrpcStatItem>;
+};
+
 export type productsgrpcHealthCheckResponse = unknown;
 
 export type productsgrpcListCategoriesResponse = {
@@ -111,6 +115,13 @@ export type productsgrpcProductName = {
     name?: string;
     slug?: string;
     categoryId?: string;
+};
+
+export type productsgrpcStatItem = {
+    title?: string;
+    value?: number;
+    change?: number;
+    description?: string;
 };
 
 export type productsgrpcSumProductAmountsResponse = {

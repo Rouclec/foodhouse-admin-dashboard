@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -47,6 +48,8 @@ const (
 	PaymentStatusFailed = "FAILED"
 
 	TotalPercentage = 1.08
+
+	CENT = 100
 )
 
 var supportedCurrencies = map[string]struct{}{
@@ -579,6 +582,7 @@ func (i *Impl) ListFarmerOrders(ctx context.Context, req *ordersgrpc.ListFarmerO
 		CreatedBefore:    startKey,
 		IncludedStatuses: convertOrderStatusesToStrings(req.GetStatuses()),
 		Count:            int32(count), // Convert count to int32
+		SearchKey:        req.GetSearchKey(),
 	})
 
 	if err != nil {
@@ -622,6 +626,7 @@ func (i *Impl) ListUserOrders(ctx context.Context, req *ordersgrpc.ListUserOrder
 		IncludedStatuses: convertOrderStatusesToStrings(req.GetStatuses()),
 		CreatedBefore:    startKey,
 		Count:            int32(count), // Convert count to int32
+		SearchKey:        req.GetSearchKey(),
 	})
 
 	if err != nil {
@@ -1339,4 +1344,153 @@ func (i *Impl) RejectOrder(ctx context.Context,
 	}
 
 	return &ordersgrpc.RejectOrderResponse{}, nil
+}
+
+func getMonthRanges() (startOfThisMonth, endOfThisMonth, startOfLastMonth, endOfLastMonth time.Time) {
+	now := time.Now()
+
+	// Truncate to the start of this month
+	startOfThisMonth = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+
+	// Start of next month, minus 1 second gives end of this month
+	endOfThisMonth = startOfThisMonth.AddDate(0, 1, 0).Add(-time.Second)
+
+	// Start of last month
+	startOfLastMonth = startOfThisMonth.AddDate(0, -1, 0)
+
+	// End of last month = start of this month - 1 second
+	endOfLastMonth = startOfThisMonth.Add(-time.Second)
+
+	return
+}
+
+func percentageChange(old, new float64) *float64 {
+	if old == 0 {
+		change := 100.0
+		return &change
+	}
+	change := ((new - old) / math.Abs(old)) * CENT
+	return &change
+}
+
+// GetAdminStats implements ordersgrpc.OrdersServer.
+func (i *Impl) GetAdminStats(ctx context.Context, req *ordersgrpc.GetAdminStatsRequest) (*ordersgrpc.GetAdminStatsResponse, error) {
+	startThis, endThis, startLast, endLast := getMonthRanges()
+
+	thisMonthOrderStats, err := i.repo.Do().GetOrderStatsBetweenDates(ctx, sqlc.GetOrderStatsBetweenDatesParams{
+		StartDate: startThis,
+		EndDate:   endThis,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting stats %v", err)
+	}
+
+	lastMonthOrderStats, err := i.repo.Do().GetOrderStatsBetweenDates(ctx, sqlc.GetOrderStatsBetweenDatesParams{
+		StartDate: startLast,
+		EndDate:   endLast,
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting stats %v", err)
+	}
+
+	usersStats, err := i.userService.GetUserStats(ctx, &usersgrpc.GetUserStatsRequest{})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting stats %v", err)
+	}
+
+	productsStats, err := i.productService.GetProductStats(ctx, &productsgrpc.GetProductStatsRequest{})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting stats %v", err)
+	}
+
+	stats := make([]*ordersgrpc.StatItem, 0, 5)
+
+	stats[0] = &ordersgrpc.StatItem{
+		Title:       usersStats.GetData()[0].Title,
+		Value:       usersStats.GetData()[0].Value,
+		Change:      usersStats.GetData()[0].Change,
+		Description: usersStats.GetData()[0].Description,
+	}
+
+	stats[1] = &ordersgrpc.StatItem{
+		Title:       usersStats.GetData()[1].Title,
+		Value:       usersStats.GetData()[1].Value,
+		Change:      usersStats.GetData()[1].Change,
+		Description: usersStats.GetData()[1].Description,
+	}
+
+	stats[2] = &ordersgrpc.StatItem{
+		Title:       productsStats.GetData()[0].Title,
+		Value:       productsStats.GetData()[0].Value,
+		Change:      productsStats.GetData()[0].Change,
+		Description: productsStats.GetData()[0].Description,
+	}
+
+	stats[3] = &ordersgrpc.StatItem{
+		Title:       "Total Orders",
+		Value:       float64(thisMonthOrderStats.TotalOrders),
+		Change:      *percentageChange(float64(lastMonthOrderStats.TotalOrders), float64(thisMonthOrderStats.TotalOrders)),
+		Description: "Total orders this month",
+	}
+
+	currency := "XAF"
+
+	stats[4] = &ordersgrpc.StatItem{
+		Title:       "Total Revenue",
+		Value:       float64(thisMonthOrderStats.TotalValue),
+		Currency:    &currency,
+		Change:      *percentageChange(float64(lastMonthOrderStats.TotalValue), float64(thisMonthOrderStats.TotalValue)),
+		Description: "Total revenue this month",
+	}
+
+	return &ordersgrpc.GetAdminStatsResponse{
+		Data: stats,
+	}, nil
+	// panic("unimplemented")
+}
+
+// ListOrders implements ordersgrpc.OrdersServer.
+func (i *Impl) ListOrders(ctx context.Context, req *ordersgrpc.ListOrdersRequest) (*ordersgrpc.ListOrdersResponse, error) {
+	var err error
+	startKey := time.Now().Add(time.Hour)
+
+	if req.GetStartKey() != "" {
+		startKey, err = time.Parse(time.RFC3339, req.GetStartKey())
+		if err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "Invalid start key")
+		}
+	}
+
+	count := int(req.GetCount())
+	if count == 0 {
+		count = 20 // or whatever default you want
+	}
+
+	orders, err := i.repo.Do().ListOrders(ctx, sqlc.ListOrdersParams{
+		CreatedBefore:    startKey,
+		IncludedStatuses: convertOrderStatusesToStrings(req.GetStatuses()),
+		Count:            int32(count), // Convert count to int32
+		SearchKey:        req.GetSearchKey(),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting orders %v", err)
+	}
+
+	protoOrders := converters.SqlcOrdersToProto(orders)
+
+	nextKey := ""
+
+	i.logger.Debug().Msgf("Count %v, orders length %v", count, len(protoOrders))
+
+	if len(protoOrders) >= count {
+		nextKey = protoOrders[len(protoOrders)-1].GetCreatedAt().AsTime().Format(time.RFC3339)
+	}
+	return &ordersgrpc.ListOrdersResponse{
+		Orders:  protoOrders,
+		NextKey: nextKey,
+	}, nil
 }

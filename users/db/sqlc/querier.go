@@ -37,6 +37,7 @@ type Querier interface {
 	GetUserByPhoneNumber(ctx context.Context, phoneNumber string) (User, error)
 	GetUserForUpdate(ctx context.Context, id string) (User, error)
 	GetUserPaymentMethodsByUserID(ctx context.Context, userID string) ([]UserPaymentMethod, error)
+	GetUserStatsBetweenDates(ctx context.Context, arg GetUserStatsBetweenDatesParams) (GetUserStatsBetweenDatesRow, error)
 	GetUserSubscriptionByID(ctx context.Context, id string) (UserSubscription, error)
 	ListFarmerReviews(ctx context.Context, arg ListFarmerReviewsParams) ([]FarmersReview, error)
 	ListFarmersByRating(ctx context.Context, arg ListFarmersByRatingParams) ([]ListFarmersByRatingRow, error)

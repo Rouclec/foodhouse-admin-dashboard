@@ -410,6 +410,16 @@ message ListFarmersReivewsResponse {
   string next_key = 2;
 }
 
+message StatItem {
+  string title = 1;
+  double value = 2;
+  double change = 3;
+  string description = 4;
+}
+
+message GetUserStatsRequest {}
+message GetUserStatsResponse { repeated StatItem data = 1; }
+
 service Users {
 
   rpc SendSignupSmsOtp(SendSignupSmsOtpRequest)
@@ -631,4 +641,6 @@ service Users {
       get : "/v1/users/{user_id}/farmers/list-farmers"
     };
   }
+
+  rpc GetUserStats(GetUserStatsRequest) returns (GetUserStatsResponse);
 }

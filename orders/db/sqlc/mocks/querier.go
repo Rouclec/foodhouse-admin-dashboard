@@ -115,6 +115,21 @@ func (mr *MockQuerierMockRecorder) GetOrderByOrderNumber(ctx, orderNumber any) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderByOrderNumber", reflect.TypeOf((*MockQuerier)(nil).GetOrderByOrderNumber), ctx, orderNumber)
 }
 
+// GetOrderStatsBetweenDates mocks base method.
+func (m *MockQuerier) GetOrderStatsBetweenDates(ctx context.Context, arg sqlc.GetOrderStatsBetweenDatesParams) (sqlc.GetOrderStatsBetweenDatesRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrderStatsBetweenDates", ctx, arg)
+	ret0, _ := ret[0].(sqlc.GetOrderStatsBetweenDatesRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrderStatsBetweenDates indicates an expected call of GetOrderStatsBetweenDates.
+func (mr *MockQuerierMockRecorder) GetOrderStatsBetweenDates(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderStatsBetweenDates", reflect.TypeOf((*MockQuerier)(nil).GetOrderStatsBetweenDates), ctx, arg)
+}
+
 // GetOrdersGroupedByDay mocks base method.
 func (m *MockQuerier) GetOrdersGroupedByDay(ctx context.Context, arg sqlc.GetOrdersGroupedByDayParams) ([]sqlc.GetOrdersGroupedByDayRow, error) {
 	m.ctrl.T.Helper()
@@ -248,6 +263,21 @@ func (m *MockQuerier) ListOrderAuditLogs(ctx context.Context, orderNumber int64)
 func (mr *MockQuerierMockRecorder) ListOrderAuditLogs(ctx, orderNumber any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListOrderAuditLogs", reflect.TypeOf((*MockQuerier)(nil).ListOrderAuditLogs), ctx, orderNumber)
+}
+
+// ListOrders mocks base method.
+func (m *MockQuerier) ListOrders(ctx context.Context, arg sqlc.ListOrdersParams) ([]sqlc.Order, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListOrders", ctx, arg)
+	ret0, _ := ret[0].([]sqlc.Order)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListOrders indicates an expected call of ListOrders.
+func (mr *MockQuerierMockRecorder) ListOrders(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListOrders", reflect.TypeOf((*MockQuerier)(nil).ListOrders), ctx, arg)
 }
 
 // ListUniqueCities mocks base method.

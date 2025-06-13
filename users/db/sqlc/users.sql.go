@@ -7,6 +7,7 @@ package sqlc
 
 import (
 	"context"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -228,6 +229,32 @@ func (q *Queries) GetUserForUpdate(ctx context.Context, id string) (User, error)
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
+	return i, err
+}
+
+const getUserStatsBetweenDates = `-- name: GetUserStatsBetweenDates :one
+SELECT
+  COUNT(*) FILTER (WHERE role = 'USER_ROLE_USER') AS total_users,
+  COUNT(*) FILTER (WHERE role = 'USER_ROLE_FARMER') AS total_farmers
+FROM users
+WHERE created_at >= $1::timestamptz
+  AND created_at <= $2::timestamptz
+`
+
+type GetUserStatsBetweenDatesParams struct {
+	StartDate time.Time `json:"start_date"`
+	EndDate   time.Time `json:"end_date"`
+}
+
+type GetUserStatsBetweenDatesRow struct {
+	TotalUsers   int64 `json:"total_users"`
+	TotalFarmers int64 `json:"total_farmers"`
+}
+
+func (q *Queries) GetUserStatsBetweenDates(ctx context.Context, arg GetUserStatsBetweenDatesParams) (GetUserStatsBetweenDatesRow, error) {
+	row := q.db.QueryRow(ctx, getUserStatsBetweenDates, arg.StartDate, arg.EndDate)
+	var i GetUserStatsBetweenDatesRow
+	err := row.Scan(&i.TotalUsers, &i.TotalFarmers)
 	return i, err
 }
 

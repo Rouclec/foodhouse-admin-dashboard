@@ -224,6 +224,7 @@ message ListUserOrdersRequest {
   int32 count = 2;
   string start_key = 3;
   repeated OrderStatus statuses = 4;
+  string search_key = 5;
 }
 
 message ListUserOrdersResponse {
@@ -236,9 +237,23 @@ message ListFarmerOrdersRequest {
   int32 count = 2;
   string start_key = 3;
   repeated OrderStatus statuses = 4;
+  string search_key = 5;
 }
 
 message ListFarmerOrdersResponse {
+  repeated Order orders = 1;
+  string next_key = 2;
+}
+
+message ListOrdersRequest {
+  string user_id = 1;
+  int32 count = 2;
+  string start_key = 3;
+  repeated OrderStatus statuses = 4;
+  string search_key = 5;
+}
+
+message ListOrdersResponse {
   repeated Order orders = 1;
   string next_key = 2;
 }
@@ -269,6 +284,17 @@ message FarmerEarningsData {
 }
 
 message GetFarmerEarningsResponse { repeated FarmerEarningsData data = 1; }
+
+message StatItem {
+  string title = 1;
+  double value = 2;
+  double change = 3;
+  string description = 4;
+  optional string currency = 5;
+}
+
+message GetAdminStatsRequest { string user_id = 1; }
+message GetAdminStatsResponse { repeated StatItem data = 1; }
 
 service Orders {
 
@@ -340,6 +366,12 @@ service Orders {
     };
   }
 
+  rpc ListOrders(ListOrdersRequest) returns (ListOrdersResponse) {
+    option (google.api.http) = {
+      get : "/v1/admin/{user_id}/orders/list-farmer-orders"
+    };
+  }
+
   rpc InitiatePayment(InitiatePaymentRequest)
       returns (InitiatePaymentResponse) {
     option (google.api.http) = {
@@ -360,6 +392,12 @@ service Orders {
       returns (ListDeliveryPointsResponse) {
     option (google.api.http) = {
       get : "/v1/users/{user_id}/orders/list-delivery-points"
+    };
+  }
+
+  rpc GetAdminStats(GetAdminStatsRequest) returns (GetAdminStatsResponse) {
+    option (google.api.http) = {
+      get : "/v1/admin/{user_id}/orders/get-admin-stats"
     };
   }
 

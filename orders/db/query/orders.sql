@@ -44,11 +44,17 @@ SELECT * FROM orders WHERE secret_key = $1 AND created_by = $2;
 SELECT * FROM orders 
 WHERE created_by = $1 AND 
   (
-        sqlc.arg(included_statuses)::TEXT[] IS NULL OR
-        sqlc.arg(included_statuses)::TEXT[] = '{}'::TEXT[] OR
-        status::TEXT  = ANY(sqlc.arg(included_statuses))
+    sqlc.arg(included_statuses)::TEXT[] IS NULL OR
+    sqlc.arg(included_statuses)::TEXT[] = '{}'::TEXT[] OR
+    status::TEXT = ANY(sqlc.arg(included_statuses))
   ) AND 
-  (sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at < sqlc.arg(created_before)::timestamptz)
+  (
+    sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+    OR created_at < sqlc.arg(created_before)::timestamptz
+  ) AND
+  (
+    sqlc.arg(search_key)::TEXT IS NULL OR order_number ILIKE '%' || sqlc.arg(search_key) || '%'
+  )
 ORDER BY created_at DESC
 LIMIT sqlc.arg(count)::int;
 
@@ -64,6 +70,28 @@ WHERE product_owner = $1 AND
   (
     sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
     OR created_at < sqlc.arg(created_before)::timestamptz
+  )
+  AND
+  (
+    sqlc.arg(search_key)::TEXT IS NULL OR order_number ILIKE '%' || sqlc.arg(search_key) || '%'
+  )
+ORDER BY created_at DESC
+LIMIT sqlc.arg(count)::int;
+
+-- name: ListOrders :many
+SELECT * FROM orders 
+WHERE 
+  (
+    sqlc.arg(included_statuses)::TEXT[] IS NULL OR
+    sqlc.arg(included_statuses)::TEXT[] = '{}'::TEXT[] OR
+    status::TEXT = ANY(sqlc.arg(included_statuses))
+  ) AND 
+  (
+    sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+    OR created_at < sqlc.arg(created_before)::timestamptz
+  ) AND
+  (
+    sqlc.arg(search_key)::TEXT IS NULL OR order_number ILIKE '%' || sqlc.arg(search_key) || '%'
   )
 ORDER BY created_at DESC
 LIMIT sqlc.arg(count)::int;
@@ -143,3 +171,12 @@ WHERE product_owner = $1
   AND updated_at BETWEEN $3 AND $4
 GROUP BY group_date
 ORDER BY group_date;
+
+-- name: GetOrderStatsBetweenDates :one
+SELECT 
+  COUNT(*) AS total_orders,
+  COALESCE(SUM(amount_value), 0)::float AS total_value
+FROM orders
+WHERE status = 'OrderStatus_PAYMENT_SUCCESSFUL'
+  AND created_at >= sqlc.arg(start_date)::timestamptz
+  AND created_at <= sqlc.arg(end_date)::timestamptz;

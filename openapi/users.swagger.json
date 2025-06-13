@@ -1451,6 +1451,18 @@
         }
       }
     },
+    "usersgrpcGetUserStatsResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/usersgrpcStatItem"
+          }
+        }
+      }
+    },
     "usersgrpcGetUserSubscriptionByIDResponse": {
       "type": "object",
       "properties": {
@@ -1728,6 +1740,25 @@
         },
         "tokens": {
           "$ref": "#/definitions/usersgrpcTokens"
+        }
+      }
+    },
+    "usersgrpcStatItem": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number",
+          "format": "double"
+        },
+        "change": {
+          "type": "number",
+          "format": "double"
+        },
+        "description": {
+          "type": "string"
         }
       }
     },
