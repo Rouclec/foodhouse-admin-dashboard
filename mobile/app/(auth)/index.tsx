@@ -14,7 +14,7 @@ import React from "react";
 export default function TabOneScreen() {
   return (
     <>
-      <ScrollView contentContainerStyle={defaultStyles.scrollContainer}>
+      <ScrollView contentContainerStyle={[defaultStyles.scrollContainer, index1.nopadding]}>
         <View style={index1.safeArea}>
           
           <View style={index1.imageContainer}>
