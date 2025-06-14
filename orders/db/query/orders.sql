@@ -174,10 +174,17 @@ ORDER BY group_date;
 
 -- name: GetOrderStatsBetweenDates :one
 SELECT 
-  COUNT(*) AS total_orders,
-  COALESCE(SUM(price_value), 0)::float AS total_value
+  COUNT(*) AS total_orders
 FROM orders
-WHERE status = 'OrderStatus_PAYMENT_SUCCESSFUL'
+WHERE status = ANY(sqlc.arg(included_statuses)::TEXT[])
+  AND created_at >= sqlc.arg(start_date)::timestamptz
+  AND created_at <= sqlc.arg(end_date)::timestamptz;
+
+-- name: GetPaymentStatsBetweenDates :one
+SELECT 
+  COALESCE(SUM(amount_value), 0)::float AS total_value
+FROM payments
+WHERE status = 'PaymentStatus_COMPLETED'
   AND created_at >= sqlc.arg(start_date)::timestamptz
   AND created_at <= sqlc.arg(end_date)::timestamptz;
 
