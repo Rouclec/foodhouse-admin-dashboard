@@ -510,7 +510,7 @@ WHERE product_owner = $1 AND
   )
   AND
   (
-    $4::TEXT IS NULL OR order_number ILIKE '%' || $4 || '%'
+    $4::TEXT IS NULL OR order_number::TEXT ILIKE '%' || $4 || '%'
   )
 ORDER BY created_at DESC
 LIMIT $5::int
@@ -613,7 +613,8 @@ WHERE
     OR created_at < $2::timestamptz
   ) AND
   (
-    $3::TEXT IS NULL OR order_number ILIKE '%' || $3 || '%'
+    $3::TEXT IS NULL 
+    OR order_number::TEXT ILIKE '%' || $3 || '%'
   )
 ORDER BY created_at DESC
 LIMIT $4::int
@@ -734,7 +735,7 @@ WHERE created_by = $1 AND
     OR created_at < $3::timestamptz
   ) AND
   (
-    $4::TEXT IS NULL OR order_number ILIKE '%' || $4 || '%'
+    $4::TEXT IS NULL OR order_number::TEXT ILIKE '%' || $4 || '%'
   )
 ORDER BY created_at DESC
 LIMIT $5::int

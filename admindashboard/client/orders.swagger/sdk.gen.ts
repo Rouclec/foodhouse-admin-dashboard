@@ -22,7 +22,7 @@ export const ordersGetAdminStats = <ThrowOnError extends boolean = false>(option
 export const ordersListOrders = <ThrowOnError extends boolean = false>(options: OptionsLegacyParser<OrdersListOrdersData, ThrowOnError>) => {
     return (options?.client ?? client).get<OrdersListOrdersResponse, OrdersListOrdersError, ThrowOnError>({
         ...options,
-        url: '/v1/admin/{userId}/orders/list-farmer-orders'
+        url: '/v1/admin/{userId}/orders/list-orders'
     });
 };
 

@@ -84,7 +84,7 @@
         ]
       }
     },
-    "/v1/admin/{userId}/orders/list-farmer-orders": {
+    "/v1/admin/{userId}/orders/list-orders": {
       "get": {
         "operationId": "Orders_ListOrders",
         "responses": {
