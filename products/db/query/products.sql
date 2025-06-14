@@ -3,6 +3,16 @@ INSERT INTO categories (name, slug, created_by)
 VALUES ($1, $2, $3)
 RETURNING *;
 
+-- name: UpdateCategory :exec
+UPDATE categories
+SET name = $2,
+    slug = $3
+WHERE id = $1;
+
+-- name: DeleteCategory :exec
+DELETE FROM categories
+WHERE id = $1;
+
 -- name: ListCategories :many
 SELECT * FROM categories;
 
@@ -107,12 +117,14 @@ DELETE FROM product_names WHERE name = $1;
 -- name: DeletePriceType :exec
 DELETE FROM price_types WHERE id = $1;
 
--- name: ListProductNamesByCategory :many
-SELECT * FROM product_names WHERE category_id = $1
+-- name: ListProductNames :many
+SELECT * FROM product_names 
+WHERE (sqlc.arg(category_id)::text = '' OR category_id = sqlc.arg(category_id))
 ORDER BY slug ASC;
 
--- name: ListPriceTypesByCategory :many
-SELECT * FROM price_types WHERE category_id = $1
+-- name: ListPriceTypes :many
+SELECT * FROM price_types
+WHERE (sqlc.arg(category_id)::text = '' OR category_id = sqlc.arg(category_id))
 ORDER BY slug ASC;
 
 -- name: SumProductAmounts :one

@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, Flag, UserX, Leaf, MessageCircle, Tractor } from "lucide-react"
+import { Search, Flag, UserX, Leaf, MessageCircle, Users } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 interface Farmer {
@@ -96,6 +96,24 @@ export default function FarmersPage() {
     }
   }
 
+  const handleFlagFarmer = (farmerId: string) => {
+    setFarmers(
+      farmers.map((farmer) =>
+        farmer.id === farmerId
+          ? { ...farmer, status: farmer.status === "flagged" ? "active" : ("flagged" as const) }
+          : farmer,
+      ),
+    )
+
+    const farmer = farmers.find((f) => f.id === farmerId)
+    const newStatus = farmer?.status === "flagged" ? "active" : "flagged"
+
+    toast({
+      title: `Farmer ${newStatus === "flagged" ? "flagged" : "unflagged"}`,
+      description: `${farmer?.name} has been ${newStatus === "flagged" ? "flagged for review" : "restored to active status"}.`,
+    })
+  }
+
   const handleDisableFarmer = (farmerId: string) => {
     setFarmers(
       farmers.map((farmer) =>
@@ -126,8 +144,8 @@ export default function FarmersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Farmer Management</h1>
-          <p className="text-gray-600">Manage farmers and their account status</p>
+          <h1 className="text-3xl font-bold text-gray-900">Buyer Management</h1>
+          <p className="text-gray-600">Manage buyers and their account status</p>
         </div>
       </div>
 
@@ -135,8 +153,8 @@ export default function FarmersPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Tractor className="h-5 w-5 mr-2 text-gray-500" />
-            Farmer Filters
+            <Users className="h-5 w-5 mr-2" />
+            Buyer Filters
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -169,16 +187,16 @@ export default function FarmersPage() {
       {/* Farmers Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Farmers</CardTitle>
+          <CardTitle>Buyers</CardTitle>
           <CardDescription>
-            Showing {filteredFarmers.length} of {farmers.length} farmers
+            Showing {filteredFarmers.length} of {farmers.length} users
           </CardDescription>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Farmer</TableHead>
+                <TableHead>User</TableHead>
                 <TableHead className="hidden lg:table-cell">Location</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="hidden md:table-cell">Join Date</TableHead>
