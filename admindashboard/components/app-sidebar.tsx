@@ -34,6 +34,8 @@ import {
   MapPin,
   Truck,
   LucideProps,
+  Tractor,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -68,7 +70,8 @@ const menuItems: Array<{
     title: "Operations",
     items: [
       { title: "Orders", url: "/dashboard/orders", icon: ShoppingCart },
-      { title: "Farmers", url: "/dashboard/farmers", icon: Leaf },
+      { title: "Farmers", url: "/dashboard/farmers", icon: Tractor },
+      { title: "Buyers", url: "/dashboard/buyers", icon: Users },
       {
         title: "Delivery Points",
         url: "/dashboard/delivery-points",
@@ -112,8 +115,8 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="border-b border-gray-200">
-        <div className="flex items-center space-x-2 px-4 py-2">
+      <SidebarHeader className="border-b border-gray-200 h-20">
+        <div className="flex items-center space-x-2 px-4">
           <div className="bg-primary p-2 rounded-lg">
             <Leaf className="h-6 w-6 text-white" />
           </div>
@@ -136,7 +139,7 @@ export function AppSidebar() {
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild isActive={pathname === item.url}>
                       <Link href={item.url}>
-                        <item.icon className="h-4 w-4" />
+                        <item.icon className="h-4 w-4 text-gray-500" />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>

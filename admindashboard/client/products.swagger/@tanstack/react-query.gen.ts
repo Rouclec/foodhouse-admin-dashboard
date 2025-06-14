@@ -2,9 +2,9 @@
 
 import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
-import type { ProductsCreateCategoryData, ProductsCreateCategoryError, ProductsCreateCategoryResponse, ProductsCreatePriceTypeData, ProductsCreatePriceTypeError, ProductsCreatePriceTypeResponse, ProductsCreateProductNameData, ProductsCreateProductNameError, ProductsCreateProductNameResponse, ProductsDeleteProductNameData, ProductsDeleteProductNameError, ProductsDeleteProductNameResponse, ProductsDeletePriceTypeData, ProductsDeletePriceTypeError, ProductsDeletePriceTypeResponse, ProductsListProductsData, ProductsListPriceTypesByCategoryData, ProductsListProductNamesByCategoryData, ProductsGetProductData, ProductsListFarmerProductsData, ProductsCreateProductData, ProductsCreateProductError, ProductsCreateProductResponse, ProductsDeleteProductData, ProductsDeleteProductError, ProductsDeleteProductResponse, ProductsGetFarmerProductData, ProductsUpdateProductData, ProductsUpdateProductError, ProductsUpdateProductResponse } from '../types.gen';
+import type { ProductsCreateCategoryData, ProductsCreateCategoryError, ProductsCreateCategoryResponse, ProductsCreatePriceTypeData, ProductsCreatePriceTypeError, ProductsCreatePriceTypeResponse, ProductsCreateProductNameData, ProductsCreateProductNameError, ProductsCreateProductNameResponse, ProductsDeleteCategoryData, ProductsDeleteCategoryError, ProductsDeleteCategoryResponse, ProductsUpdateCategoryData, ProductsUpdateCategoryError, ProductsUpdateCategoryResponse, ProductsDeleteProductNameData, ProductsDeleteProductNameError, ProductsDeleteProductNameResponse, ProductsDeletePriceTypeData, ProductsDeletePriceTypeError, ProductsDeletePriceTypeResponse, ProductsListPriceTypesData, ProductsListProductNamesData, ProductsListProductsData, ProductsGetProductData, ProductsListFarmerProductsData, ProductsCreateProductData, ProductsCreateProductError, ProductsCreateProductResponse, ProductsDeleteProductData, ProductsDeleteProductError, ProductsDeleteProductResponse, ProductsGetFarmerProductData, ProductsUpdateProductData, ProductsUpdateProductError, ProductsUpdateProductResponse } from '../types.gen';
 import type { AxiosError } from 'axios';
-import { client, productsCreateCategory, productsCreatePriceType, productsCreateProductName, productsDeleteProductName, productsDeletePriceType, productsListCategories, productsHealthCheck, productsListProducts, productsListPriceTypesByCategory, productsListProductNamesByCategory, productsGetProduct, productsListFarmerProducts, productsCreateProduct, productsDeleteProduct, productsGetFarmerProduct, productsUpdateProduct } from '../sdk.gen';
+import { client, productsCreateCategory, productsCreatePriceType, productsCreateProductName, productsDeleteCategory, productsUpdateCategory, productsDeleteProductName, productsDeletePriceType, productsListCategories, productsHealthCheck, productsListPriceTypes, productsListProductNames, productsListProducts, productsGetProduct, productsListFarmerProducts, productsCreateProduct, productsDeleteProduct, productsGetFarmerProduct, productsUpdateProduct } from '../sdk.gen';
 
 type QueryKey<TOptions extends OptionsLegacyParser> = [
     Pick<TOptions, 'baseURL' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -132,6 +132,34 @@ export const productsCreateProductNameMutation = (options?: Partial<OptionsLegac
     return mutationOptions;
 };
 
+export const productsDeleteCategoryMutation = (options?: Partial<OptionsLegacyParser<ProductsDeleteCategoryData>>) => {
+    const mutationOptions: UseMutationOptions<ProductsDeleteCategoryResponse, AxiosError<ProductsDeleteCategoryError>, OptionsLegacyParser<ProductsDeleteCategoryData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await productsDeleteCategory({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const productsUpdateCategoryMutation = (options?: Partial<OptionsLegacyParser<ProductsUpdateCategoryData>>) => {
+    const mutationOptions: UseMutationOptions<ProductsUpdateCategoryResponse, AxiosError<ProductsUpdateCategoryError>, OptionsLegacyParser<ProductsUpdateCategoryData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await productsUpdateCategory({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
 export const productsDeleteProductNameMutation = (options?: Partial<OptionsLegacyParser<ProductsDeleteProductNameData>>) => {
     const mutationOptions: UseMutationOptions<ProductsDeleteProductNameResponse, AxiosError<ProductsDeleteProductNameError>, OptionsLegacyParser<ProductsDeleteProductNameData>> = {
         mutationFn: async (localOptions) => {
@@ -198,6 +226,44 @@ export const productsHealthCheckOptions = (options?: OptionsLegacyParser) => {
     });
 };
 
+export const productsListPriceTypesQueryKey = (options?: OptionsLegacyParser<ProductsListPriceTypesData>) => [
+    createQueryKey('productsListPriceTypes', options)
+];
+
+export const productsListPriceTypesOptions = (options?: OptionsLegacyParser<ProductsListPriceTypesData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await productsListPriceTypes({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: productsListPriceTypesQueryKey(options)
+    });
+};
+
+export const productsListProductNamesQueryKey = (options?: OptionsLegacyParser<ProductsListProductNamesData>) => [
+    createQueryKey('productsListProductNames', options)
+];
+
+export const productsListProductNamesOptions = (options?: OptionsLegacyParser<ProductsListProductNamesData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await productsListProductNames({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: productsListProductNamesQueryKey(options)
+    });
+};
+
 export const productsListProductsQueryKey = (options?: OptionsLegacyParser<ProductsListProductsData>) => [
     createQueryKey('productsListProducts', options)
 ];
@@ -214,44 +280,6 @@ export const productsListProductsOptions = (options?: OptionsLegacyParser<Produc
             return data;
         },
         queryKey: productsListProductsQueryKey(options)
-    });
-};
-
-export const productsListPriceTypesByCategoryQueryKey = (options: OptionsLegacyParser<ProductsListPriceTypesByCategoryData>) => [
-    createQueryKey('productsListPriceTypesByCategory', options)
-];
-
-export const productsListPriceTypesByCategoryOptions = (options: OptionsLegacyParser<ProductsListPriceTypesByCategoryData>) => {
-    return queryOptions({
-        queryFn: async ({ queryKey, signal }) => {
-            const { data } = await productsListPriceTypesByCategory({
-                ...options,
-                ...queryKey[0],
-                signal,
-                throwOnError: true
-            });
-            return data;
-        },
-        queryKey: productsListPriceTypesByCategoryQueryKey(options)
-    });
-};
-
-export const productsListProductNamesByCategoryQueryKey = (options: OptionsLegacyParser<ProductsListProductNamesByCategoryData>) => [
-    createQueryKey('productsListProductNamesByCategory', options)
-];
-
-export const productsListProductNamesByCategoryOptions = (options: OptionsLegacyParser<ProductsListProductNamesByCategoryData>) => {
-    return queryOptions({
-        queryFn: async ({ queryKey, signal }) => {
-            const { data } = await productsListProductNamesByCategory({
-                ...options,
-                ...queryKey[0],
-                signal,
-                throwOnError: true
-            });
-            return data;
-        },
-        queryKey: productsListProductNamesByCategoryQueryKey(options)
     });
 };
 

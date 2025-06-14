@@ -84,6 +84,33 @@ func (i *Impl) CreateCategory(ctx context.Context, req *productsgrpc.CreateCateg
 	}, nil
 }
 
+// DeleteCategory implements productsgrpc.ProductsServer.
+func (i *Impl) DeleteCategory(ctx context.Context, req *productsgrpc.DeleteCategoryRequest) (*productsgrpc.DeleteCategoryResponse, error) {
+	err := i.repo.Do().DeleteCategory(ctx, req.GetCategoryId())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error deleting category %v", err)
+	}
+
+	return &productsgrpc.DeleteCategoryResponse{}, nil
+}
+
+// UpdateCategory implements productsgrpc.ProductsServer.
+func (i *Impl) UpdateCategory(ctx context.Context, req *productsgrpc.UpdateCategoryRequest) (*productsgrpc.UpdateCategoryResponse, error) {
+	i.logger.Debug().Msgf("name %v and slug %v", req.GetName(), slug.Make(req.GetName()))
+
+	err := i.repo.Do().UpdateCategory(ctx, sqlc.UpdateCategoryParams{
+		ID:   req.GetCategoryId(),
+		Name: req.GetName(),
+		Slug: slug.Make(req.GetName()),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error updating category %v", err)
+	}
+
+	return &productsgrpc.UpdateCategoryResponse{}, nil
+}
+
 // CreateProduct implements productsgrpc.ProductsServer.
 func (i *Impl) CreateProduct(ctx context.Context, req *productsgrpc.CreateProductRequest) (*productsgrpc.CreateProductResponse, error) {
 	i.logger.Debug().Msgf("name %v and slug %v", req.GetName(), slug.Make(req.GetName()))
@@ -443,9 +470,9 @@ func (i *Impl) DeleteProductName(ctx context.Context, req *productsgrpc.DeletePr
 	return &productsgrpc.DeleteProductNameResponse{}, nil
 }
 
-// ListPriceTypesByCategory implements productsgrpc.ProductsServer.
-func (i *Impl) ListPriceTypesByCategory(ctx context.Context, req *productsgrpc.ListPriceTypesByCategoryRequest) (*productsgrpc.ListPriceTypesByCategoryResponse, error) {
-	sqlcPriceTypes, err := i.repo.Do().ListPriceTypesByCategory(ctx, req.GetCategoryId())
+// ListPriceTypes implements productsgrpc.ProductsServer.
+func (i *Impl) ListPriceTypes(ctx context.Context, req *productsgrpc.ListPriceTypesRequest) (*productsgrpc.ListPriceTypesResponse, error) {
+	sqlcPriceTypes, err := i.repo.Do().ListPriceTypes(ctx, req.GetCategoryId())
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error getting price types %v", err)
@@ -457,12 +484,12 @@ func (i *Impl) ListPriceTypesByCategory(ctx context.Context, req *productsgrpc.L
 		return nil, status.Errorf(codes.Internal, "error converting sqlc to proto price types, %v", err)
 	}
 
-	return &productsgrpc.ListPriceTypesByCategoryResponse{PriceTypes: protoPriceTypes}, nil
+	return &productsgrpc.ListPriceTypesResponse{PriceTypes: protoPriceTypes}, nil
 }
 
-// ListProductNamesByCategory implements productsgrpc.ProductsServer.
-func (i *Impl) ListProductNamesByCategory(ctx context.Context, req *productsgrpc.ListProductNamesByCategoryRequest) (*productsgrpc.ListProductNamesByCategoryResponse, error) {
-	sqlcProductNames, err := i.repo.Do().ListProductNamesByCategory(ctx, req.GetCategoryId())
+// ListProductNames implements productsgrpc.ProductsServer.
+func (i *Impl) ListProductNames(ctx context.Context, req *productsgrpc.ListProductNamesRequest) (*productsgrpc.ListProductNamesResponse, error) {
+	sqlcProductNames, err := i.repo.Do().ListProductNames(ctx, req.GetCategoryId())
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error getting product names %v", err)
@@ -474,7 +501,7 @@ func (i *Impl) ListProductNamesByCategory(ctx context.Context, req *productsgrpc
 		return nil, status.Errorf(codes.Internal, "error converting sqlc to proto product names, %v", err)
 	}
 
-	return &productsgrpc.ListProductNamesByCategoryResponse{ProductNames: protoProductNames}, nil
+	return &productsgrpc.ListProductNamesResponse{ProductNames: protoProductNames}, nil
 }
 
 // SumProductAmounts implements productsgrpc.ProductsServer.

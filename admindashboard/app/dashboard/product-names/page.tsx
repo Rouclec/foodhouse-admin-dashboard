@@ -21,6 +21,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Plus, Edit, Trash2, Tag } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useQuery } from "@tanstack/react-query"
+import { productsListCategoriesOptions } from "@/client/products.swagger/@tanstack/react-query.gen"
+import { useQueryLoading } from "@/hooks/use-query-loading"
 
 interface ProductName {
   id: string
@@ -134,6 +137,23 @@ export default function ProductNamesPage() {
     setSelectedCategoryId("")
     setIsDialogOpen(true)
   }
+
+  const {
+    data: categoriesData,
+    isLoading: isCategoriesLoading,
+  } = useQuery({
+    ...productsListCategoriesOptions({}),
+  });
+
+  // const {
+  //   data: productNames,
+  //   isLoading: isProductNamesLoading,
+  //   refetch,
+  // } = useQuery({
+  //   ...productslistproductnames({}),
+  // });
+
+  useQueryLoading(isCategoriesLoading);
 
   return (
     <div className="space-y-6">

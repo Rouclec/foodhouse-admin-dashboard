@@ -132,6 +132,16 @@ func (q *Queries) CreateProductName(ctx context.Context, arg CreateProductNamePa
 	return i, err
 }
 
+const deleteCategory = `-- name: DeleteCategory :exec
+DELETE FROM categories
+WHERE id = $1
+`
+
+func (q *Queries) DeleteCategory(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, deleteCategory, id)
+	return err
+}
+
 const deletePriceType = `-- name: DeletePriceType :exec
 DELETE FROM price_types WHERE id = $1
 `
@@ -343,13 +353,14 @@ func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
 	return items, nil
 }
 
-const listPriceTypesByCategory = `-- name: ListPriceTypesByCategory :many
-SELECT id, name, slug, category_id FROM price_types WHERE category_id = $1
+const listPriceTypes = `-- name: ListPriceTypes :many
+SELECT id, name, slug, category_id FROM price_types
+WHERE ($1::text = '' OR category_id = $1)
 ORDER BY slug ASC
 `
 
-func (q *Queries) ListPriceTypesByCategory(ctx context.Context, categoryID string) ([]PriceType, error) {
-	rows, err := q.db.Query(ctx, listPriceTypesByCategory, categoryID)
+func (q *Queries) ListPriceTypes(ctx context.Context, categoryID string) ([]PriceType, error) {
+	rows, err := q.db.Query(ctx, listPriceTypes, categoryID)
 	if err != nil {
 		return nil, err
 	}
@@ -373,13 +384,14 @@ func (q *Queries) ListPriceTypesByCategory(ctx context.Context, categoryID strin
 	return items, nil
 }
 
-const listProductNamesByCategory = `-- name: ListProductNamesByCategory :many
-SELECT name, slug, category_id FROM product_names WHERE category_id = $1
+const listProductNames = `-- name: ListProductNames :many
+SELECT name, slug, category_id FROM product_names 
+WHERE ($1::text = '' OR category_id = $1)
 ORDER BY slug ASC
 `
 
-func (q *Queries) ListProductNamesByCategory(ctx context.Context, categoryID string) ([]ProductName, error) {
-	rows, err := q.db.Query(ctx, listProductNamesByCategory, categoryID)
+func (q *Queries) ListProductNames(ctx context.Context, categoryID string) ([]ProductName, error) {
+	rows, err := q.db.Query(ctx, listProductNames, categoryID)
 	if err != nil {
 		return nil, err
 	}
@@ -510,6 +522,24 @@ func (q *Queries) SumProductAmounts(ctx context.Context, arg SumProductAmountsPa
 	var total float64
 	err := row.Scan(&total)
 	return total, err
+}
+
+const updateCategory = `-- name: UpdateCategory :exec
+UPDATE categories
+SET name = $2,
+    slug = $3
+WHERE id = $1
+`
+
+type UpdateCategoryParams struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Slug string `json:"slug"`
+}
+
+func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) error {
+	_, err := q.db.Exec(ctx, updateCategory, arg.ID, arg.Name, arg.Slug)
+	return err
 }
 
 const updateProduct = `-- name: UpdateProduct :exec

@@ -47,6 +47,8 @@ export type productsgrpcCreateProductResponse = {
     product?: productsgrpcProduct;
 };
 
+export type productsgrpcDeleteCategoryResponse = unknown;
+
 export type productsgrpcDeletePriceTypeResponse = unknown;
 
 export type productsgrpcDeleteProductNameResponse = unknown;
@@ -78,11 +80,11 @@ export type productsgrpcListFarmerProductsResponse = {
     nextKey?: string;
 };
 
-export type productsgrpcListPriceTypesByCategoryResponse = {
+export type productsgrpcListPriceTypesResponse = {
     priceTypes?: Array<productsgrpcPriceType>;
 };
 
-export type productsgrpcListProductNamesByCategoryResponse = {
+export type productsgrpcListProductNamesResponse = {
     productNames?: Array<productsgrpcProductName>;
 };
 
@@ -128,8 +130,14 @@ export type productsgrpcSumProductAmountsResponse = {
     total?: number;
 };
 
+export type productsgrpcUpdateCategoryResponse = unknown;
+
 export type productsgrpcUpdateProductResponse = {
     message?: string;
+};
+
+export type ProductsUpdateCategoryBody = {
+    name?: string;
 };
 
 export type ProductsUpdateProductBody = {
@@ -190,6 +198,29 @@ export type ProductsCreateProductNameResponse = (productsgrpcCreateProductNameRe
 
 export type ProductsCreateProductNameError = (rpcStatus);
 
+export type ProductsDeleteCategoryData = {
+    path: {
+        categoryId: string;
+        userId: string;
+    };
+};
+
+export type ProductsDeleteCategoryResponse = (productsgrpcDeleteCategoryResponse);
+
+export type ProductsDeleteCategoryError = (rpcStatus);
+
+export type ProductsUpdateCategoryData = {
+    body: ProductsUpdateCategoryBody;
+    path: {
+        categoryId: string;
+        userId: string;
+    };
+};
+
+export type ProductsUpdateCategoryResponse = (productsgrpcUpdateCategoryResponse);
+
+export type ProductsUpdateCategoryError = (rpcStatus);
+
 export type ProductsDeleteProductNameData = {
     path: {
         name: string;
@@ -220,6 +251,26 @@ export type ProductsHealthCheckResponse = (productsgrpcHealthCheckResponse);
 
 export type ProductsHealthCheckError = (rpcStatus);
 
+export type ProductsListPriceTypesData = {
+    query?: {
+        categoryId?: string;
+    };
+};
+
+export type ProductsListPriceTypesResponse = (productsgrpcListPriceTypesResponse);
+
+export type ProductsListPriceTypesError = (rpcStatus);
+
+export type ProductsListProductNamesData = {
+    query?: {
+        categoryId?: string;
+    };
+};
+
+export type ProductsListProductNamesResponse = (productsgrpcListProductNamesResponse);
+
+export type ProductsListProductNamesError = (rpcStatus);
+
 export type ProductsListProductsData = {
     query?: {
         categoryId?: string;
@@ -237,26 +288,6 @@ export type ProductsListProductsData = {
 export type ProductsListProductsResponse = (productsgrpcListProductsResponse);
 
 export type ProductsListProductsError = (rpcStatus);
-
-export type ProductsListPriceTypesByCategoryData = {
-    path: {
-        categoryId: string;
-    };
-};
-
-export type ProductsListPriceTypesByCategoryResponse = (productsgrpcListPriceTypesByCategoryResponse);
-
-export type ProductsListPriceTypesByCategoryError = (rpcStatus);
-
-export type ProductsListProductNamesByCategoryData = {
-    path: {
-        categoryId: string;
-    };
-};
-
-export type ProductsListProductNamesByCategoryResponse = (productsgrpcListProductNamesByCategoryResponse);
-
-export type ProductsListProductNamesByCategoryError = (rpcStatus);
 
 export type ProductsGetProductData = {
     path: {
