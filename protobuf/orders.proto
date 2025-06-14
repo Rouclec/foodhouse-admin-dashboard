@@ -115,6 +115,18 @@ message InitiatePaymentRequest {
 
 message InitiatePaymentResponse { Payment payment = 1; }
 
+message ListPaymentsRequest {
+  string user_id = 1;
+  string search_key = 2;
+  int32 count = 3;
+  string start_key = 4;
+}
+
+message ListPaymentsResponse {
+  repeated Payment payments = 1;
+  string next_key = 2;
+}
+
 message ConfirmPaymentRequest {
   string status = 1; // "SUCCESSFUL" or "FAILED",
 
@@ -419,6 +431,12 @@ service Orders {
       returns (GetFarmerEarningsResponse) {
     option (google.api.http) = {
       get : "/v1/users/{farmer_id}/orders/get-farmer-earnings"
+    };
+  }
+
+  rpc ListPayments(ListPaymentsRequest) returns (ListPaymentsResponse) {
+    option (google.api.http) = {
+      get : "/v1/admin/{user_id}/orders/list-payments"
     };
   }
 }

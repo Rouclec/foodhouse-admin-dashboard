@@ -280,6 +280,21 @@ func (mr *MockQuerierMockRecorder) ListOrders(ctx, arg any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListOrders", reflect.TypeOf((*MockQuerier)(nil).ListOrders), ctx, arg)
 }
 
+// ListPayments mocks base method.
+func (m *MockQuerier) ListPayments(ctx context.Context, arg sqlc.ListPaymentsParams) ([]sqlc.Payment, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListPayments", ctx, arg)
+	ret0, _ := ret[0].([]sqlc.Payment)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListPayments indicates an expected call of ListPayments.
+func (mr *MockQuerierMockRecorder) ListPayments(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListPayments", reflect.TypeOf((*MockQuerier)(nil).ListPayments), ctx, arg)
+}
+
 // ListUniqueCities mocks base method.
 func (m *MockQuerier) ListUniqueCities(ctx context.Context) ([]string, error) {
 	m.ctrl.T.Helper()

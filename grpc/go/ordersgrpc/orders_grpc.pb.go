@@ -37,6 +37,7 @@ const (
 	Orders_ListDeliveryCities_FullMethodName  = "/ordersgrpc.Orders/ListDeliveryCities"
 	Orders_CheckPaymentStatus_FullMethodName  = "/ordersgrpc.Orders/CheckPaymentStatus"
 	Orders_GetFarmerEarnings_FullMethodName   = "/ordersgrpc.Orders/GetFarmerEarnings"
+	Orders_ListPayments_FullMethodName        = "/ordersgrpc.Orders/ListPayments"
 )
 
 // OrdersClient is the client API for Orders service.
@@ -61,6 +62,7 @@ type OrdersClient interface {
 	ListDeliveryCities(ctx context.Context, in *ListDeliveryCitiesRequest, opts ...grpc.CallOption) (*ListDeliveryCitiesResponse, error)
 	CheckPaymentStatus(ctx context.Context, in *CheckPaymentStatusRequest, opts ...grpc.CallOption) (*CheckPaymentStatusResponse, error)
 	GetFarmerEarnings(ctx context.Context, in *GetFarmerEarningsRequest, opts ...grpc.CallOption) (*GetFarmerEarningsResponse, error)
+	ListPayments(ctx context.Context, in *ListPaymentsRequest, opts ...grpc.CallOption) (*ListPaymentsResponse, error)
 }
 
 type ordersClient struct {
@@ -251,6 +253,16 @@ func (c *ordersClient) GetFarmerEarnings(ctx context.Context, in *GetFarmerEarni
 	return out, nil
 }
 
+func (c *ordersClient) ListPayments(ctx context.Context, in *ListPaymentsRequest, opts ...grpc.CallOption) (*ListPaymentsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListPaymentsResponse)
+	err := c.cc.Invoke(ctx, Orders_ListPayments_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrdersServer is the server API for Orders service.
 // All implementations must embed UnimplementedOrdersServer
 // for forward compatibility.
@@ -273,6 +285,7 @@ type OrdersServer interface {
 	ListDeliveryCities(context.Context, *ListDeliveryCitiesRequest) (*ListDeliveryCitiesResponse, error)
 	CheckPaymentStatus(context.Context, *CheckPaymentStatusRequest) (*CheckPaymentStatusResponse, error)
 	GetFarmerEarnings(context.Context, *GetFarmerEarningsRequest) (*GetFarmerEarningsResponse, error)
+	ListPayments(context.Context, *ListPaymentsRequest) (*ListPaymentsResponse, error)
 	mustEmbedUnimplementedOrdersServer()
 }
 
@@ -336,6 +349,9 @@ func (UnimplementedOrdersServer) CheckPaymentStatus(context.Context, *CheckPayme
 }
 func (UnimplementedOrdersServer) GetFarmerEarnings(context.Context, *GetFarmerEarningsRequest) (*GetFarmerEarningsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFarmerEarnings not implemented")
+}
+func (UnimplementedOrdersServer) ListPayments(context.Context, *ListPaymentsRequest) (*ListPaymentsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListPayments not implemented")
 }
 func (UnimplementedOrdersServer) mustEmbedUnimplementedOrdersServer() {}
 func (UnimplementedOrdersServer) testEmbeddedByValue()                {}
@@ -682,6 +698,24 @@ func _Orders_GetFarmerEarnings_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Orders_ListPayments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPaymentsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).ListPayments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_ListPayments_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).ListPayments(ctx, req.(*ListPaymentsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Orders_ServiceDesc is the grpc.ServiceDesc for Orders service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -760,6 +794,10 @@ var Orders_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetFarmerEarnings",
 			Handler:    _Orders_GetFarmerEarnings_Handler,
+		},
+		{
+			MethodName: "ListPayments",
+			Handler:    _Orders_ListPayments_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
