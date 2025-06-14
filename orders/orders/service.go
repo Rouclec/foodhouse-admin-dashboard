@@ -1346,35 +1346,37 @@ func (i *Impl) RejectOrder(ctx context.Context,
 	return &ordersgrpc.RejectOrderResponse{}, nil
 }
 
-func getMonthRanges() (startOfThisMonth, endOfThisMonth, startOfLastMonth, endOfLastMonth time.Time) {
+func getMonthRanges() (time.Time, time.Time, time.Time, time.Time) {
 	now := time.Now()
 
 	// Truncate to the start of this month
-	startOfThisMonth = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	startOfThisMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
 
 	// Start of next month, minus 1 second gives end of this month
-	endOfThisMonth = startOfThisMonth.AddDate(0, 1, 0).Add(-time.Second)
+	endOfThisMonth := startOfThisMonth.AddDate(0, 1, 0).Add(-time.Second)
 
 	// Start of last month
-	startOfLastMonth = startOfThisMonth.AddDate(0, -1, 0)
+	startOfLastMonth := startOfThisMonth.AddDate(0, -1, 0)
 
 	// End of last month = start of this month - 1 second
-	endOfLastMonth = startOfThisMonth.Add(-time.Second)
+	endOfLastMonth := startOfThisMonth.Add(-time.Second)
 
-	return
+	return startOfThisMonth, endOfThisMonth, startOfLastMonth, endOfLastMonth
 }
 
-func percentageChange(old, new float64) *float64 {
-	if old == 0 {
+func percentageChange(oldValue, newValue float64) *float64 {
+	if oldValue == 0 {
 		change := 100.0
 		return &change
 	}
-	change := ((new - old) / math.Abs(old)) * CENT
+	change := ((newValue - oldValue) / math.Abs(oldValue)) * CENT
 	return &change
 }
 
 // GetAdminStats implements ordersgrpc.OrdersServer.
-func (i *Impl) GetAdminStats(ctx context.Context, req *ordersgrpc.GetAdminStatsRequest) (*ordersgrpc.GetAdminStatsResponse, error) {
+func (i *Impl) GetAdminStats(ctx context.Context,
+	req *ordersgrpc.GetAdminStatsRequest) (
+	*ordersgrpc.GetAdminStatsResponse, error) {
 	startThis, endThis, startLast, endLast := getMonthRanges()
 
 	thisMonthOrderStats, err := i.repo.Do().GetOrderStatsBetweenDates(ctx, sqlc.GetOrderStatsBetweenDatesParams{
@@ -1453,7 +1455,9 @@ func (i *Impl) GetAdminStats(ctx context.Context, req *ordersgrpc.GetAdminStatsR
 }
 
 // ListOrders implements ordersgrpc.OrdersServer.
-func (i *Impl) ListOrders(ctx context.Context, req *ordersgrpc.ListOrdersRequest) (*ordersgrpc.ListOrdersResponse, error) {
+func (i *Impl) ListOrders(ctx context.Context,
+	req *ordersgrpc.ListOrdersRequest) (
+	*ordersgrpc.ListOrdersResponse, error) {
 	var err error
 	startKey := time.Now().Add(time.Hour)
 
@@ -1496,7 +1500,9 @@ func (i *Impl) ListOrders(ctx context.Context, req *ordersgrpc.ListOrdersRequest
 }
 
 // ListPayments implements ordersgrpc.OrdersServer.
-func (i *Impl) ListPayments(ctx context.Context, req *ordersgrpc.ListPaymentsRequest) (*ordersgrpc.ListPaymentsResponse, error) {
+func (i *Impl) ListPayments(ctx context.Context,
+	req *ordersgrpc.ListPaymentsRequest) (
+	*ordersgrpc.ListPaymentsResponse, error) {
 	var err error
 	startKey := time.Now().Add(time.Hour)
 

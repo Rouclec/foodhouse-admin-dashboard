@@ -20,9 +20,12 @@ import {
   ordersgrpcOrderStatus,
 } from "@/client/orders.swagger";
 import { delay, formatAmount, formatCurrency } from "@/utils";
-import { FC, useEffect, useState } from "react";
+import { FC, useContext, useEffect, useState } from "react";
 import { useLoadingState } from "@/hooks/use-with-loading";
 import { productsgrpcProduct } from "@/client/products.swagger";
+import { useQuery } from "@tanstack/react-query";
+import { ordersGetAdminStatsOptions } from "@/client/orders.swagger/@tanstack/react-query.gen";
+import { Context, ContextType } from "../contexts/QueryProvider";
 
 type OrderItemProps = {
   order: ordersgrpcOrder | undefined;
@@ -116,6 +119,8 @@ const OrderItem: FC<OrderItemProps> = ({ order }) => {
 };
 
 export default function DashboardPage() {
+  const { user } = useContext(Context) as ContextType;
+
   const stats = [
     {
       title: "Total Farmers",
@@ -217,6 +222,13 @@ export default function DashboardPage() {
   const recentOrders: Array<ordersgrpcOrder> = [];
 
   // const {data: order}
+  const { data } = useQuery({
+    ...ordersGetAdminStatsOptions({
+      path: {
+        userId: user?.userId ?? "",
+      },
+    }),
+  });
 
   const { withLoading } = useLoadingState();
 

@@ -41,6 +41,8 @@ const (
 	DefaultRating = 0.00
 
 	CENT = 100
+
+	ClaimKeyRole = "role"
 )
 
 // Impl is the implementation of the Users service.
@@ -262,7 +264,9 @@ func (i *Impl) Signup(ctx context.Context, req *usersgrpc.SignupRequest) (*users
 	}
 
 	// Generate an access token and refresh token
-	claims := map[string]any{}
+	claims := map[string]any{
+		ClaimKeyRole: createdDBUser.Role,
+	}
 	accessTokens, err := i.tokenManagerBuilder.WithQuerier(querier).GenerateAccessToken(ctx, createdDBUser.ID, claims)
 	if err != nil {
 		i.logger.Debug().Msgf("firebase error %v", err)
@@ -317,7 +321,11 @@ func (i *Impl) RefreshAccessToken(ctx context.Context, req *usersgrpc.RefreshAcc
 		return nil, status.Errorf(codes.Unauthenticated, "Refresh token is invalid")
 	}
 
-	claims := map[string]any{}
+	claims, err := i.getUserClaims(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user claims: %w", err)
+	}
+
 	accessToken, err := i.tokenManagerBuilder.WithQuerier(i.repo.Do()).GenerateAccessToken(ctx, userID, claims)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Failed to generate access token: %v", err)
@@ -509,7 +517,7 @@ func (i *Impl) getUserClaims(ctx context.Context, userID string) (map[string]any
 		return nil, status.Errorf(codes.Internal, "Failed to get user: %v", err)
 	}
 
-	claims["role"] = user.Role
+	claims[ClaimKeyRole] = user.Role
 
 	return claims, nil
 }
@@ -1392,35 +1400,37 @@ func (i *Impl) ListFarmers(ctx context.Context,
 	}, nil
 }
 
-func getMonthRanges() (startOfThisMonth, endOfThisMonth, startOfLastMonth, endOfLastMonth time.Time) {
+func getMonthRanges() (time.Time, time.Time, time.Time, time.Time) {
 	now := time.Now()
 
 	// Truncate to the start of this month
-	startOfThisMonth = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	startOfThisMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
 
 	// Start of next month, minus 1 second gives end of this month
-	endOfThisMonth = startOfThisMonth.AddDate(0, 1, 0).Add(-time.Second)
+	endOfThisMonth := startOfThisMonth.AddDate(0, 1, 0).Add(-time.Second)
 
 	// Start of last month
-	startOfLastMonth = startOfThisMonth.AddDate(0, -1, 0)
+	startOfLastMonth := startOfThisMonth.AddDate(0, -1, 0)
 
 	// End of last month = start of this month - 1 second
-	endOfLastMonth = startOfThisMonth.Add(-time.Second)
+	endOfLastMonth := startOfThisMonth.Add(-time.Second)
 
-	return
+	return startOfThisMonth, endOfThisMonth, startOfLastMonth, endOfLastMonth
 }
 
-func percentageChange(old, new float64) *float64 {
-	if old == 0 {
+func percentageChange(oldValue, newValue float64) *float64 {
+	if oldValue == 0 {
 		change := 100.0
 		return &change
 	}
-	change := ((new - old) / math.Abs(old)) * CENT
+	change := ((newValue - oldValue) / math.Abs(oldValue)) * CENT
 	return &change
 }
 
 // GetUserStats implements usersgrpc.UsersServer.
-func (i *Impl) GetUserStats(ctx context.Context, _req *usersgrpc.GetUserStatsRequest) (*usersgrpc.GetUserStatsResponse, error) {
+func (i *Impl) GetUserStats(ctx context.Context,
+	_ *usersgrpc.GetUserStatsRequest) (
+	*usersgrpc.GetUserStatsResponse, error) {
 	startThis, endThis, startLast, endLast := getMonthRanges()
 
 	statsThisMonth, err := i.repo.Do().GetUserStatsBetweenDates(ctx, sqlc.GetUserStatsBetweenDatesParams{
@@ -1441,7 +1451,8 @@ func (i *Impl) GetUserStats(ctx context.Context, _req *usersgrpc.GetUserStatsReq
 		return nil, err
 	}
 
-	stats := make([]*usersgrpc.StatItem, 0, 2)
+	const statItemCapacity = 2
+	stats := make([]*usersgrpc.StatItem, 0, statItemCapacity)
 
 	stats[0] = &usersgrpc.StatItem{
 		Title:       "Total Users",
