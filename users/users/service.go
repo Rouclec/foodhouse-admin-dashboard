@@ -1454,19 +1454,19 @@ func (i *Impl) GetUserStats(ctx context.Context,
 	const statItemCapacity = 2
 	stats := make([]*usersgrpc.StatItem, 0, statItemCapacity)
 
-	stats[0] = &usersgrpc.StatItem{
+	stats = append(stats, &usersgrpc.StatItem{
 		Title:       "Total Users",
 		Value:       float64(statsThisMonth.TotalUsers),
 		Change:      *percentageChange(float64(statsLastMonth.TotalUsers), float64(statsThisMonth.TotalUsers)),
 		Description: "New users this month",
-	}
+	})
 
-	stats[1] = &usersgrpc.StatItem{
+	stats = append(stats, &usersgrpc.StatItem{
 		Title:       "Total Farmers",
 		Value:       float64(statsThisMonth.TotalFarmers),
 		Change:      *percentageChange(float64(statsLastMonth.TotalFarmers), float64(statsThisMonth.TotalFarmers)),
 		Description: "Total active farmers",
-	}
+	})
 
 	return &usersgrpc.GetUserStatsResponse{
 		Data: stats,

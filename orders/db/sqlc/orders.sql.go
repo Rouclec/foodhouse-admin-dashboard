@@ -211,29 +211,24 @@ func (q *Queries) GetOrderByOrderNumber(ctx context.Context, orderNumber int64) 
 
 const getOrderStatsBetweenDates = `-- name: GetOrderStatsBetweenDates :one
 SELECT 
-  COUNT(*) AS total_orders,
-  COALESCE(SUM(price_value), 0)::float AS total_value
+  COUNT(*) AS total_orders
 FROM orders
-WHERE status = 'OrderStatus_PAYMENT_SUCCESSFUL'
-  AND created_at >= $1::timestamptz
-  AND created_at <= $2::timestamptz
+WHERE status = ANY($1::TEXT[])
+  AND created_at >= $2::timestamptz
+  AND created_at <= $3::timestamptz
 `
 
 type GetOrderStatsBetweenDatesParams struct {
-	StartDate time.Time `json:"start_date"`
-	EndDate   time.Time `json:"end_date"`
+	IncludedStatuses []string  `json:"included_statuses"`
+	StartDate        time.Time `json:"start_date"`
+	EndDate          time.Time `json:"end_date"`
 }
 
-type GetOrderStatsBetweenDatesRow struct {
-	TotalOrders int64   `json:"total_orders"`
-	TotalValue  float64 `json:"total_value"`
-}
-
-func (q *Queries) GetOrderStatsBetweenDates(ctx context.Context, arg GetOrderStatsBetweenDatesParams) (GetOrderStatsBetweenDatesRow, error) {
-	row := q.db.QueryRow(ctx, getOrderStatsBetweenDates, arg.StartDate, arg.EndDate)
-	var i GetOrderStatsBetweenDatesRow
-	err := row.Scan(&i.TotalOrders, &i.TotalValue)
-	return i, err
+func (q *Queries) GetOrderStatsBetweenDates(ctx context.Context, arg GetOrderStatsBetweenDatesParams) (int64, error) {
+	row := q.db.QueryRow(ctx, getOrderStatsBetweenDates, arg.IncludedStatuses, arg.StartDate, arg.EndDate)
+	var total_orders int64
+	err := row.Scan(&total_orders)
+	return total_orders, err
 }
 
 const getOrdersGroupedByDay = `-- name: GetOrdersGroupedByDay :many
@@ -444,6 +439,27 @@ func (q *Queries) GetPaymentById(ctx context.Context, id string) (Payment, error
 		&i.AccountNumber,
 	)
 	return i, err
+}
+
+const getPaymentStatsBetweenDates = `-- name: GetPaymentStatsBetweenDates :one
+SELECT 
+  COALESCE(SUM(amount_value), 0)::float AS total_value
+FROM payments
+WHERE status = 'PaymentStatus_COMPLETED'
+  AND created_at >= $1::timestamptz
+  AND created_at <= $2::timestamptz
+`
+
+type GetPaymentStatsBetweenDatesParams struct {
+	StartDate time.Time `json:"start_date"`
+	EndDate   time.Time `json:"end_date"`
+}
+
+func (q *Queries) GetPaymentStatsBetweenDates(ctx context.Context, arg GetPaymentStatsBetweenDatesParams) (float64, error) {
+	row := q.db.QueryRow(ctx, getPaymentStatsBetweenDates, arg.StartDate, arg.EndDate)
+	var total_value float64
+	err := row.Scan(&total_value)
+	return total_value, err
 }
 
 const getUserOrderBySecretKey = `-- name: GetUserOrderBySecretKey :one

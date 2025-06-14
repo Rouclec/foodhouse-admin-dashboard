@@ -1379,17 +1379,46 @@ func (i *Impl) GetAdminStats(ctx context.Context,
 	*ordersgrpc.GetAdminStatsResponse, error) {
 	startThis, endThis, startLast, endLast := getMonthRanges()
 
-	thisMonthOrderStats, err := i.repo.Do().GetOrderStatsBetweenDates(ctx, sqlc.GetOrderStatsBetweenDatesParams{
+	lastMonthOrderStats, err := i.repo.Do().GetOrderStatsBetweenDates(ctx, sqlc.GetOrderStatsBetweenDatesParams{
 		StartDate: startThis,
 		EndDate:   endThis,
+		IncludedStatuses: []string{
+			ordersgrpc.OrderStatus_OrderStatus_APPROVED.String(),
+			ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String(),
+			ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String(),
+			ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL.String(),
+		},
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error getting stats %v", err)
 	}
 
-	lastMonthOrderStats, err := i.repo.Do().GetOrderStatsBetweenDates(ctx, sqlc.GetOrderStatsBetweenDatesParams{
+	thisMonthOrderStats, err := i.repo.Do().GetOrderStatsBetweenDates(ctx, sqlc.GetOrderStatsBetweenDatesParams{
+		StartDate: startThis,
+		EndDate:   endThis,
+		IncludedStatuses: []string{
+			ordersgrpc.OrderStatus_OrderStatus_APPROVED.String(),
+			ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String(),
+			ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String(),
+			ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL.String(),
+		},
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting stats %v", err)
+	}
+
+	lastMonthPaymentStats, err := i.repo.Do().GetPaymentStatsBetweenDates(ctx, sqlc.GetPaymentStatsBetweenDatesParams{
 		StartDate: startLast,
 		EndDate:   endLast,
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting stats %v", err)
+	}
+
+	thisMonthPaymentStats, err := i.repo.Do().GetPaymentStatsBetweenDates(ctx, sqlc.GetPaymentStatsBetweenDatesParams{
+		StartDate: startThis,
+		EndDate:   endThis,
 	})
 
 	if err != nil {
@@ -1410,48 +1439,47 @@ func (i *Impl) GetAdminStats(ctx context.Context,
 
 	stats := make([]*ordersgrpc.StatItem, 0, 5)
 
-	stats[0] = &ordersgrpc.StatItem{
+	stats = append(stats, &ordersgrpc.StatItem{
 		Title:       usersStats.GetData()[0].Title,
 		Value:       usersStats.GetData()[0].Value,
 		Change:      usersStats.GetData()[0].Change,
 		Description: usersStats.GetData()[0].Description,
-	}
+	})
 
-	stats[1] = &ordersgrpc.StatItem{
+	stats = append(stats, &ordersgrpc.StatItem{
 		Title:       usersStats.GetData()[1].Title,
 		Value:       usersStats.GetData()[1].Value,
 		Change:      usersStats.GetData()[1].Change,
 		Description: usersStats.GetData()[1].Description,
-	}
+	})
 
-	stats[2] = &ordersgrpc.StatItem{
+	stats = append(stats, &ordersgrpc.StatItem{
 		Title:       productsStats.GetData()[0].Title,
 		Value:       productsStats.GetData()[0].Value,
 		Change:      productsStats.GetData()[0].Change,
 		Description: productsStats.GetData()[0].Description,
-	}
+	})
 
-	stats[3] = &ordersgrpc.StatItem{
+	stats = append(stats, &ordersgrpc.StatItem{
 		Title:       "Total Orders",
-		Value:       float64(thisMonthOrderStats.TotalOrders),
-		Change:      *percentageChange(float64(lastMonthOrderStats.TotalOrders), float64(thisMonthOrderStats.TotalOrders)),
+		Value:       float64(thisMonthOrderStats),
+		Change:      *percentageChange(float64(lastMonthOrderStats), float64(thisMonthOrderStats)),
 		Description: "Total orders this month",
-	}
+	})
 
 	currency := "XAF"
 
-	stats[4] = &ordersgrpc.StatItem{
+	stats = append(stats, &ordersgrpc.StatItem{
 		Title:       "Total Revenue",
-		Value:       float64(thisMonthOrderStats.TotalValue),
+		Value:       float64(thisMonthPaymentStats),
 		Currency:    &currency,
-		Change:      *percentageChange(float64(lastMonthOrderStats.TotalValue), float64(thisMonthOrderStats.TotalValue)),
+		Change:      *percentageChange(float64(lastMonthPaymentStats), float64(thisMonthPaymentStats)),
 		Description: "Total revenue this month",
-	}
+	})
 
 	return &ordersgrpc.GetAdminStatsResponse{
 		Data: stats,
 	}, nil
-	// panic("unimplemented")
 }
 
 // ListOrders implements ordersgrpc.OrdersServer.

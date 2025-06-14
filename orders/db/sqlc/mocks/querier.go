@@ -116,10 +116,10 @@ func (mr *MockQuerierMockRecorder) GetOrderByOrderNumber(ctx, orderNumber any) *
 }
 
 // GetOrderStatsBetweenDates mocks base method.
-func (m *MockQuerier) GetOrderStatsBetweenDates(ctx context.Context, arg sqlc.GetOrderStatsBetweenDatesParams) (sqlc.GetOrderStatsBetweenDatesRow, error) {
+func (m *MockQuerier) GetOrderStatsBetweenDates(ctx context.Context, arg sqlc.GetOrderStatsBetweenDatesParams) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetOrderStatsBetweenDates", ctx, arg)
-	ret0, _ := ret[0].(sqlc.GetOrderStatsBetweenDatesRow)
+	ret0, _ := ret[0].(int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -203,6 +203,21 @@ func (m *MockQuerier) GetPaymentById(ctx context.Context, id string) (sqlc.Payme
 func (mr *MockQuerierMockRecorder) GetPaymentById(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPaymentById", reflect.TypeOf((*MockQuerier)(nil).GetPaymentById), ctx, id)
+}
+
+// GetPaymentStatsBetweenDates mocks base method.
+func (m *MockQuerier) GetPaymentStatsBetweenDates(ctx context.Context, arg sqlc.GetPaymentStatsBetweenDatesParams) (float64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPaymentStatsBetweenDates", ctx, arg)
+	ret0, _ := ret[0].(float64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPaymentStatsBetweenDates indicates an expected call of GetPaymentStatsBetweenDates.
+func (mr *MockQuerierMockRecorder) GetPaymentStatsBetweenDates(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPaymentStatsBetweenDates", reflect.TypeOf((*MockQuerier)(nil).GetPaymentStatsBetweenDates), ctx, arg)
 }
 
 // GetUserOrderBySecretKey mocks base method.

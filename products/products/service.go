@@ -546,12 +546,13 @@ func (i *Impl) GetProductStats(ctx context.Context,
 	}
 
 	stats := make([]*productsgrpc.StatItem, 0, 1)
-	stats[0] = &productsgrpc.StatItem{
+	stats = append(stats, &productsgrpc.StatItem{
 		Title:       "Total Products",
 		Value:       float64(productsThisMonth),
 		Change:      *percentageChange(float64(productsLastMonth), float64(productsThisMonth)),
 		Description: "Products created this month",
-	}
+	})
+
 	return &productsgrpc.GetProductStatsResponse{
 		Data: stats,
 	}, nil
