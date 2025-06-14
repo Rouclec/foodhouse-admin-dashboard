@@ -83,7 +83,7 @@ export default function TabOneScreen() {
       <View style={index1.buttonContainer}>
         <TouchableOpacity
           style={index1.button}
-          onPress={() => router.replace("/onboarding")}
+          onPress={() => router.replace("/login")}
           activeOpacity={0.8}
         >
           <Text style={index1.buttonText}>

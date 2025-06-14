@@ -47,10 +47,10 @@ export default function Login() {
       setUser(userData.user);
       const role = userData?.user?.role;
 
-      if (role === "USER_ROLE_FARMER") {
-        router.replace("/(farmer)/(index)");
+      if (role === "USER_ROLE_AGENT") {
+        router.replace("/(tabs)/(index)");
       } else {
-        router.replace("/(buyer)/(index)");
+        // router.replace("/(buyer)/(index)");
       }
     }
   }, [userData]);
@@ -134,7 +134,7 @@ export default function Login() {
           <View style={loginstyles.header}>
             <TouchableOpacity
               style={loginstyles.backButton}
-              onPress={() => router.replace("/onboarding")}
+              // onPress={() => router.replace("/onboarding")}
             >
               <Icon source="arrow-left" size={24} color={Colors.dark[0]} />
             </TouchableOpacity>
@@ -280,7 +280,7 @@ export default function Login() {
                   {i18n.t("(auth).login.dontHaveAnAccount")}{" "}
                 </Text>
                 <TouchableOpacity
-                  onPress={() => router.push("/(auth)/register")}
+                  onPress={() => router.push("/(tabs)/(index)")}
                 >
                   <Text style={loginstyles.registerLink}>
                     {i18n.t("(auth).login.registerNow")}

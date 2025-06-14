@@ -64,7 +64,7 @@ export const farmerIndexStyles = StyleSheet.create({
   searchInput: {
     width: "100%",
     marginHorizontal: 24,
-    height: 56,
+    height: 6,
     paddingHorizontal: 0,
     borderRadius: 16,
   },

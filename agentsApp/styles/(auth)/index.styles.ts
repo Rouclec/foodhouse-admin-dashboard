@@ -9,14 +9,13 @@ export const index1 = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#6dcd47",
-    
   },
-  
+
   safeArea: {
     flex: 1,
     flexDirection: "column",
     paddingTop: 32,
-    backgroundColor: Colors.primary[500]
+    backgroundColor: Colors.primary[500],
   },
   headingH1: {
     fontFamily: "Urbanist-Regular",
@@ -41,7 +40,6 @@ export const index1 = StyleSheet.create({
     flexDirection: "row",
     left: -imageWidth / 5,
     top: screenHeight * 0.05,
-   
   },
   imageRows: {},
   imageRow2: {
@@ -66,7 +64,7 @@ export const index1 = StyleSheet.create({
   nopadding: {
     paddingBottom: 0,
   },
-  
+
   buttonContainer: {
     position: "absolute",
     bottom: 40,
@@ -83,6 +81,9 @@ export const index1 = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  buttonbg: {
+    backgroundColor: Colors.primary[500],
+  },
   buttonText: {
     color: "#1C1C1C",
     fontSize: 18,
@@ -90,6 +91,3 @@ export const index1 = StyleSheet.create({
     letterSpacing: 0.5,
   },
 });
-
-
-

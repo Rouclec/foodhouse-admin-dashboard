@@ -5,16 +5,17 @@ export const tabStyles = StyleSheet.create({
   tabBar: {
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 12,
+    paddingHorizontal: 4,
     paddingTop: 16,
     borderTopRightRadius: 18,
     borderTopLeftRadius: 18,
+    
   },
   tabItem: {
     width: 64,
     alignItems: "center",
     justifyContent: "center",
-    columnGap: 2,
+    columnGap: 1,
   },
   tabItemText: {
     color: Colors.grey["9e"],
