@@ -361,6 +361,7 @@ func TestRefreshAccessToken(t *testing.T) {
 				mockTokenManager.EXPECT().
 					RefreshTokenIsValid(gomock.Any(), testRefreshToken).
 					Return(true, testUserID, nil)
+				mockQuerier.EXPECT().GetUser(gomock.Any(), testUserID).Times(1)
 				mockTokenManager.EXPECT().
 					GenerateAccessToken(gomock.Any(), testUserID, gomock.Any()).
 					Return("", fmt.Errorf("Token generation failed"))
@@ -377,6 +378,7 @@ func TestRefreshAccessToken(t *testing.T) {
 				mockTokenManager *usersMocks.MockTokenManager) {
 				mockRepo.EXPECT().Do().Return(mockQuerier).AnyTimes()
 				mockTokenManager.EXPECT().RefreshTokenIsValid(gomock.Any(), testRefreshToken).Return(true, testUserID, nil)
+				mockQuerier.EXPECT().GetUser(gomock.Any(), testUserID).Times(1)
 				mockTokenManager.EXPECT().GenerateAccessToken(gomock.Any(), testUserID, gomock.Any()).Return("newAccessToken", nil)
 			},
 			request: &usersgrpc.RefreshAccessTokenRequest{
