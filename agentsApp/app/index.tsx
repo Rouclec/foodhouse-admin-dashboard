@@ -57,8 +57,8 @@ export default function Index() {
     const timeLeft = Math.max(delay, 0);
     const timeout = setTimeout(() => {
       if (user) {
-        if (user?.role === "USER_ROLE_FARMER") {
-          return router.replace("/(farmer)/(index)");
+        if (user?.role === "USER_ROLE_AGENT") {
+          return router.replace("/(tabs)/(index)");
         } else {
           return router.replace("/(buyer)/(index)");
         }
