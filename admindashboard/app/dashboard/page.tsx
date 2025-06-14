@@ -21,11 +21,22 @@ import {
 } from "@/client/orders.swagger";
 import { delay, formatAmount, formatCurrency } from "@/utils";
 import { FC, useContext, useEffect, useState } from "react";
-import { useLoadingState } from "@/hooks/use-with-loading";
 import { productsgrpcProduct } from "@/client/products.swagger";
 import { useQuery } from "@tanstack/react-query";
-import { ordersGetAdminStatsOptions } from "@/client/orders.swagger/@tanstack/react-query.gen";
+import {
+  ordersGetAdminStatsOptions,
+  ordersListOrdersOptions,
+} from "@/client/orders.swagger/@tanstack/react-query.gen";
 import { Context, ContextType } from "../contexts/QueryProvider";
+import { useQueryLoading } from "@/hooks/use-query-loading";
+
+const acceptedOrderStatuses: Array<ordersgrpcOrderStatus> = [
+  "OrderStatus_APPROVED",
+  "OrderStatus_DELIVERED",
+  "OrderStatus_IN_TRANSIT",
+  "OrderStatus_PAYMENT_SUCCESSFUL",
+  "OrderStatus_REJECTED",
+];
 
 type OrderItemProps = {
   order: ordersgrpcOrder | undefined;
@@ -120,6 +131,7 @@ const OrderItem: FC<OrderItemProps> = ({ order }) => {
 
 export default function DashboardPage() {
   const { user } = useContext(Context) as ContextType;
+  const [loading, setLoading] = useState(true);
 
   const stats = [
     {
@@ -219,10 +231,9 @@ export default function DashboardPage() {
   //   },
   // ];
 
-  const recentOrders: Array<ordersgrpcOrder> = [];
+  // const recentOrders: Array<ordersgrpcOrder> = [];
 
-  // const {data: order}
-  const { data } = useQuery({
+  const { data: adminStats, isLoading: isStatsLoading } = useQuery({
     ...ordersGetAdminStatsOptions({
       path: {
         userId: user?.userId ?? "",
@@ -230,27 +241,21 @@ export default function DashboardPage() {
     }),
   });
 
-  const { withLoading } = useLoadingState();
-
-  const handleSubmit = async () => {
-    await withLoading(
-      async () => {
-        // Your async operation here
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        // return { success: true };
-        return { error: true };
+  const { data: recentOrders, isLoading: isOrdersLoading } = useQuery({
+    ...ordersListOrdersOptions({
+      path: {
+        userId: user?.userId ?? "",
       },
-      {
-        loadingMessage: "Please wait...",
-        successMessage: "Successfull",
-        errorMessage: "Oh no!!...",
-      }
-    );
-  };
+      query: {
+        count: 5,
+        statuses: acceptedOrderStatuses,
+      },
+    }),
+  });
 
-  useEffect(() => {
-    handleSubmit();
-  }, []);
+  useQueryLoading(isStatsLoading || isOrdersLoading, {
+    loadingMessage: "Loading...",
+  });
 
   return (
     <div className="space-y-6">
@@ -304,12 +309,12 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {recentOrders?.length == 0 ? (
+            {recentOrders?.orders?.length == 0 ? (
               <div>
                 <p>No recent orders</p>
               </div>
             ) : (
-              recentOrders.map((order) => <OrderItem order={order} />)
+              recentOrders?.orders?.map((order) => <OrderItem order={order} />)
             )}
           </div>
         </CardContent>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useLoading } from "@/app/contexts/loading-context"
+import { useLoadingContext } from "@/app/contexts/loading-context"
 import { useToast } from "./use-toast"
 
 // Define the type for the function parameter
@@ -23,7 +23,7 @@ interface LoadingOptions<T = any> {
 
 export function useLoadingState() {
   // Use the centralized loading context instead of local state
-  const { showLoading, hideLoading } = useLoading()
+  const { showLoading, hideLoading } = useLoadingContext()
   const { toast } = useToast()
 
   // Generic function that preserves the return type of the async function

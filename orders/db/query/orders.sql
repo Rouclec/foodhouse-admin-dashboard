@@ -53,7 +53,7 @@ WHERE created_by = $1 AND
     OR created_at < sqlc.arg(created_before)::timestamptz
   ) AND
   (
-    sqlc.arg(search_key)::TEXT IS NULL OR order_number ILIKE '%' || sqlc.arg(search_key) || '%'
+    sqlc.arg(search_key)::TEXT IS NULL OR order_number::TEXT ILIKE '%' || sqlc.arg(search_key) || '%'
   )
 ORDER BY created_at DESC
 LIMIT sqlc.arg(count)::int;
@@ -73,7 +73,7 @@ WHERE product_owner = $1 AND
   )
   AND
   (
-    sqlc.arg(search_key)::TEXT IS NULL OR order_number ILIKE '%' || sqlc.arg(search_key) || '%'
+    sqlc.arg(search_key)::TEXT IS NULL OR order_number::TEXT ILIKE '%' || sqlc.arg(search_key) || '%'
   )
 ORDER BY created_at DESC
 LIMIT sqlc.arg(count)::int;
@@ -91,7 +91,8 @@ WHERE
     OR created_at < sqlc.arg(created_before)::timestamptz
   ) AND
   (
-    sqlc.arg(search_key)::TEXT IS NULL OR order_number ILIKE '%' || sqlc.arg(search_key) || '%'
+    sqlc.arg(search_key)::TEXT IS NULL 
+    OR order_number::TEXT ILIKE '%' || sqlc.arg(search_key) || '%'
   )
 ORDER BY created_at DESC
 LIMIT sqlc.arg(count)::int;

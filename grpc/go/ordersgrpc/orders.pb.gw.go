@@ -1536,7 +1536,7 @@ func RegisterOrdersHandlerServer(ctx context.Context, mux *runtime.ServeMux, ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/ordersgrpc.Orders/ListOrders", runtime.WithHTTPPathPattern("/v1/admin/{user_id}/orders/list-farmer-orders"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/ordersgrpc.Orders/ListOrders", runtime.WithHTTPPathPattern("/v1/admin/{user_id}/orders/list-orders"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2020,7 +2020,7 @@ func RegisterOrdersHandlerClient(ctx context.Context, mux *runtime.ServeMux, cli
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/ordersgrpc.Orders/ListOrders", runtime.WithHTTPPathPattern("/v1/admin/{user_id}/orders/list-farmer-orders"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/ordersgrpc.Orders/ListOrders", runtime.WithHTTPPathPattern("/v1/admin/{user_id}/orders/list-orders"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2236,7 +2236,7 @@ var (
 
 	pattern_Orders_ListFarmerOrders_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4}, []string{"v1", "users", "farmer_id", "orders", "list-farmer-orders"}, ""))
 
-	pattern_Orders_ListOrders_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4}, []string{"v1", "admin", "user_id", "orders", "list-farmer-orders"}, ""))
+	pattern_Orders_ListOrders_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4}, []string{"v1", "admin", "user_id", "orders", "list-orders"}, ""))
 
 	pattern_Orders_InitiatePayment_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4}, []string{"v1", "users", "user_id", "orders", "initiate-payment"}, ""))
 
