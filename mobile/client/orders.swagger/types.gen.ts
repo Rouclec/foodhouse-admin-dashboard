@@ -99,6 +99,11 @@ export type ordersgrpcListOrdersResponse = {
     nextKey?: string;
 };
 
+export type ordersgrpcListPaymentsResponse = {
+    payments?: Array<ordersgrpcPayment>;
+    nextKey?: string;
+};
+
 export type ordersgrpcListUserOrdersResponse = {
     orders?: Array<ordersgrpcOrder>;
     nextKey?: string;
@@ -229,6 +234,21 @@ export type OrdersListOrdersData = {
 export type OrdersListOrdersResponse = (ordersgrpcListOrdersResponse);
 
 export type OrdersListOrdersError = (rpcStatus);
+
+export type OrdersListPaymentsData = {
+    path: {
+        userId: string;
+    };
+    query?: {
+        count?: number;
+        searchKey?: string;
+        startKey?: string;
+    };
+};
+
+export type OrdersListPaymentsResponse = (ordersgrpcListPaymentsResponse);
+
+export type OrdersListPaymentsError = (rpcStatus);
 
 export type OrdersConfirmPaymentData = {
     query?: {

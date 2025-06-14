@@ -652,6 +652,59 @@ func (q *Queries) ListOrders(ctx context.Context, arg ListOrdersParams) ([]Order
 	return items, nil
 }
 
+const listPayments = `-- name: ListPayments :many
+SELECT id, status, payment_entity, entity_id, amount_value, amount_currency, created_by, expires_at, created_at, updated_at, method, account_number FROM payments 
+WHERE 
+  (
+    $1::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+    OR created_at < $1::timestamptz
+  ) AND
+  (
+    $2::TEXT IS NULL OR external_ref ILIKE '%' || $2 || '%'
+  )
+ORDER BY created_at DESC
+LIMIT $3::int
+`
+
+type ListPaymentsParams struct {
+	CreatedBefore time.Time `json:"created_before"`
+	SearchKey     string    `json:"search_key"`
+	Count         int32     `json:"count"`
+}
+
+func (q *Queries) ListPayments(ctx context.Context, arg ListPaymentsParams) ([]Payment, error) {
+	rows, err := q.db.Query(ctx, listPayments, arg.CreatedBefore, arg.SearchKey, arg.Count)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Payment{}
+	for rows.Next() {
+		var i Payment
+		if err := rows.Scan(
+			&i.ID,
+			&i.Status,
+			&i.PaymentEntity,
+			&i.EntityID,
+			&i.AmountValue,
+			&i.AmountCurrency,
+			&i.CreatedBy,
+			&i.ExpiresAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Method,
+			&i.AccountNumber,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listUserOrders = `-- name: ListUserOrders :many
 SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity FROM orders 
 WHERE created_by = $1 AND 

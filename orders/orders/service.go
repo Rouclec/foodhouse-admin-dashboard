@@ -1494,3 +1494,45 @@ func (i *Impl) ListOrders(ctx context.Context, req *ordersgrpc.ListOrdersRequest
 		NextKey: nextKey,
 	}, nil
 }
+
+// ListPayments implements ordersgrpc.OrdersServer.
+func (i *Impl) ListPayments(ctx context.Context, req *ordersgrpc.ListPaymentsRequest) (*ordersgrpc.ListPaymentsResponse, error) {
+	var err error
+	startKey := time.Now().Add(time.Hour)
+
+	if req.GetStartKey() != "" {
+		startKey, err = time.Parse(time.RFC3339, req.GetStartKey())
+		if err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "Invalid start key")
+		}
+	}
+
+	count := int(req.GetCount())
+	if count == 0 {
+		count = 20 // or whatever default you want
+	}
+
+	sqlcPayments, err := i.repo.Do().ListPayments(ctx, sqlc.ListPaymentsParams{
+		CreatedBefore: startKey,
+		Count:         int32(count),
+		SearchKey:     req.GetSearchKey(),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting payments %v", err)
+	}
+
+	protoPayments := converters.SqlcPaymentsToProto(sqlcPayments)
+
+	nextKey := ""
+
+	i.logger.Debug().Msgf("Count %v, orders length %v", count, len(protoPayments))
+
+	if len(protoPayments) >= count {
+		nextKey = protoPayments[len(protoPayments)-1].GetCreatedAt().AsTime().Format(time.RFC3339)
+	}
+	return &ordersgrpc.ListPaymentsResponse{
+		Payments: protoPayments,
+		NextKey:  nextKey,
+	}, nil
+}

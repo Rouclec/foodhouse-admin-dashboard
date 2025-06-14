@@ -153,6 +153,55 @@
         ]
       }
     },
+    "/v1/admin/{userId}/orders/list-payments": {
+      "get": {
+        "operationId": "Orders_ListPayments",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcListPaymentsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "searchKey",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "startKey",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/public/confirm-payment": {
       "get": {
         "operationId": "Orders_ConfirmPayment",
@@ -1140,6 +1189,21 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/ordersgrpcOrder"
+          }
+        },
+        "nextKey": {
+          "type": "string"
+        }
+      }
+    },
+    "ordersgrpcListPaymentsResponse": {
+      "type": "object",
+      "properties": {
+        "payments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ordersgrpcPayment"
           }
         },
         "nextKey": {
