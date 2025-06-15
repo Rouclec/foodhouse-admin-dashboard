@@ -347,6 +347,11 @@ export default function PriceTypesPage() {
                 ))}
               </TableBody>
             </Table>
+            {(priceTypesData?.priceTypes ?? []).length === 0 && (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No price types found</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
