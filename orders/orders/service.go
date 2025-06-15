@@ -474,8 +474,9 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 	}
 
 	err = querier.UpdateOrderStatus(ctx, sqlc.UpdateOrderStatusParams{
-		OrderNumber: req.GetOrderNumber(),
-		Status:      ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String(),
+		OrderNumber:  req.GetOrderNumber(),
+		Status:       ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String(),
+		DispatchedBy: &req.UserId,
 	})
 
 	updatedOrder, err := querier.GetOrderByOrderNumber(ctx, order.OrderNumber)

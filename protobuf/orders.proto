@@ -43,6 +43,7 @@ message Order {
   string product_owner = 12;
   string payout_phone_number = 13;
   int64 quantity = 14;
+  string dispatched_by = 15;
 }
 
 message OrderAuditLog {

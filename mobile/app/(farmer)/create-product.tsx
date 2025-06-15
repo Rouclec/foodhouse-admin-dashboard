@@ -290,8 +290,8 @@ export default function ForgotPasswordEmailOtp() {
                 onSelect={(value) => setPriceType(value)}
                 data={(priceTypes?.priceTypes ?? [])?.map((priceType) => {
                   return {
-                    label: priceType.name ?? "",
-                    value: priceType.id ?? "",
+                    label: `Per ${priceType.slug?.replace("per_", "") ?? ""}`,
+                    value: priceType.slug ?? "",
                   };
                 })}
                 loading={isPriceTypesLoading}

@@ -104,7 +104,7 @@ export type productsgrpcProduct = {
     id?: string;
     category?: productsgrpcCategory;
     name?: string;
-    unitType?: productsgrpcPriceType;
+    unitType?: string;
     amount?: typesAmount;
     description?: string;
     image?: string;

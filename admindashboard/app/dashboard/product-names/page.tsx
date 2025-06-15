@@ -1,13 +1,26 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { FC, useContext, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -16,256 +29,324 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Plus, Edit, Trash2, Tag } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { useQuery } from "@tanstack/react-query"
-import { productsListCategoriesOptions } from "@/client/products.swagger/@tanstack/react-query.gen"
-import { useQueryLoading } from "@/hooks/use-query-loading"
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Loader2, Plus, Tag, Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  productsCreateProductNameMutation,
+  productsDeleteProductNameMutation,
+  productsListCategoriesOptions,
+  productsListProductNamesOptions,
+} from "@/client/products.swagger/@tanstack/react-query.gen";
+import { useQueryLoading } from "@/hooks/use-query-loading";
+import { productsgrpcProductName } from "@/client/products.swagger";
+import { useConfirmDelete } from "@/hooks/use-confirm-delete";
+import { Context, ContextType } from "@/app/contexts/QueryProvider";
+import { Badge } from "@/components/ui/badge";
+import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 
-interface ProductName {
-  id: string
-  name: string
-  categoryId: string
-  categoryName: string
-  createdBy: string
-  createdAt: string
-}
+type ProductNameItemProps = {
+  productName: productsgrpcProductName;
+  handleDeleteClick: (productName: productsgrpcProductName) => void;
+  categoryName: string | undefined;
+};
 
-interface Category {
-  id: string
-  name: string
-}
+const ProductNameItem: FC<ProductNameItemProps> = ({
+  productName,
+  handleDeleteClick,
+  categoryName,
+}) => {
+  return (
+    <TableRow key={productName?.name ?? ""}>
+      <TableCell className="font-medium">
+        {productName.name}
+        <div className="sm:hidden mt-1">
+          <Badge variant="secondary">{categoryName}</Badge>
+        </div>
+      </TableCell>
+      <TableCell className="hidden sm:table-cell">
+        <Badge variant="secondary">{categoryName}</Badge>
+      </TableCell>
+      <TableCell className="hidden sm:table-cell">
+        <p>Admin</p>
+      </TableCell>
+      <TableCell className="text-right">
+        <div className="flex justify-end space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleDeleteClick(productName)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+};
 
 export default function ProductNamesPage() {
-  const [categories] = useState<Category[]>([
-    { id: "1", name: "Vegetables" },
-    { id: "2", name: "Fruits" },
-    { id: "3", name: "Grains" },
-    { id: "4", name: "Dairy" },
-  ])
+  const { user } = useContext(Context) as ContextType;
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [deletingProductName, setDeletingProductName] = useState<string>();
 
-  const [productNames, setProductNames] = useState<ProductName[]>([
-    {
-      id: "1",
-      name: "Tomatoes",
-      categoryId: "1",
-      categoryName: "Vegetables",
-      createdBy: "Admin",
-      createdAt: "2024-01-15",
-    },
-    {
-      id: "2",
-      name: "Lettuce",
-      categoryId: "1",
-      categoryName: "Vegetables",
-      createdBy: "Admin",
-      createdAt: "2024-01-16",
-    },
-    { id: "3", name: "Apples", categoryId: "2", categoryName: "Fruits", createdBy: "Admin", createdAt: "2024-01-17" },
-    { id: "4", name: "Wheat", categoryId: "3", categoryName: "Grains", createdBy: "Admin", createdAt: "2024-01-18" },
-  ])
+  const [productName, setProductName] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState("");
+  const { toast } = useToast();
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [editingProductName, setEditingProductName] = useState<ProductName | null>(null)
-  const [productName, setProductName] = useState("")
-  const [selectedCategoryId, setSelectedCategoryId] = useState("")
-  const { toast } = useToast()
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    try {
+      setLoading(true);
+      const selectedCategory = categoriesData?.categories?.find(
+        (cat) => cat.id === selectedCategoryId
+      );
+      if (!selectedCategory) return;
 
-    const selectedCategory = categories.find((cat) => cat.id === selectedCategoryId)
-    if (!selectedCategory) return
+      await createProductName({
+        body: {
+          name: productName,
+          categoryId: selectedCategoryId,
+        },
+        path: {
+          userId: user?.userId ?? "",
+        },
+      });
 
-    if (editingProductName) {
-      // Update existing product name
-      setProductNames(
-        productNames.map((pn) =>
-          pn.id === editingProductName.id
-            ? { ...pn, name: productName, categoryId: selectedCategoryId, categoryName: selectedCategory.name }
-            : pn,
-        ),
-      )
-      toast({
-        title: "Product name updated",
-        description: "The product name has been successfully updated.",
-      })
-    } else {
-      // Create new product name
-      const newProductName: ProductName = {
-        id: Date.now().toString(),
-        name: productName,
-        categoryId: selectedCategoryId,
-        categoryName: selectedCategory.name,
-        createdBy: "Admin",
-        createdAt: new Date().toISOString().split("T")[0],
-      }
-      setProductNames([...productNames, newProductName])
-      toast({
-        title: "Product name created",
-        description: "The new product name has been successfully created.",
-      })
+      setProductName("");
+      setSelectedCategoryId("");
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error({ error }, "creating product name");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    setProductName("")
-    setSelectedCategoryId("")
-    setEditingProductName(null)
-    setIsDialogOpen(false)
-  }
+  const handleDeleteClick = (
+    productName: productsgrpcProductName | undefined
+  ) => {
+    setDeletingProductName(productName?.name ?? "");
+    confirmDelete.openDialog();
+  };
 
-  const handleEdit = (productName: ProductName) => {
-    setEditingProductName(productName)
-    setProductName(productName.name)
-    setSelectedCategoryId(productName.categoryId)
-    setIsDialogOpen(true)
-  }
-
-  const handleDelete = (id: string) => {
-    setProductNames(productNames.filter((pn) => pn.id !== id))
-    toast({
-      title: "Product name deleted",
-      description: "The product name has been successfully deleted.",
-    })
-  }
+  // Confirm delete hook
+  const confirmDelete = useConfirmDelete({
+    onDelete: async () => {
+      setLoading(true);
+      if (deletingProductName) {
+        await deleteProductName({
+          path: { userId: user?.userId ?? "", name: deletingProductName },
+        });
+      }
+      setLoading(false);
+    },
+    itemType: deletingProductName,
+    description:
+      "Deleting this product name will delete all the products associated with it",
+  });
 
   const openCreateDialog = () => {
-    setEditingProductName(null)
-    setProductName("")
-    setSelectedCategoryId("")
-    setIsDialogOpen(true)
-  }
+    setProductName("");
+    setSelectedCategoryId("");
+    setIsDialogOpen(true);
+  };
 
-  const {
-    data: categoriesData,
-    isLoading: isCategoriesLoading,
-  } = useQuery({
+  const { data: categoriesData, isLoading: isCategoriesLoading } = useQuery({
     ...productsListCategoriesOptions({}),
   });
 
-  // const {
-  //   data: productNames,
-  //   isLoading: isProductNamesLoading,
-  //   refetch,
-  // } = useQuery({
-  //   ...productslistproductnames({}),
-  // });
+  const {
+    data: productNames,
+    isLoading: isProductNamesLoading,
+    refetch,
+  } = useQuery({
+    ...productsListProductNamesOptions({}),
+  });
 
-  useQueryLoading(isCategoriesLoading);
+  useQueryLoading(isCategoriesLoading || isProductNamesLoading);
+
+  const { mutateAsync: createProductName } = useMutation({
+    ...productsCreateProductNameMutation(),
+    onSuccess: () => {
+      toast({
+        title: "Product name created",
+        description: "The product name has been successfully created.",
+      });
+      refetch();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error creating product name",
+        description:
+          error?.response?.data?.message ?? "An unkonwn error occured",
+      });
+    },
+  });
+
+  const { mutateAsync: deleteProductName } = useMutation({
+    ...productsDeleteProductNameMutation(),
+    onSuccess: () => {
+      setDeletingProductName(undefined);
+      toast({
+        title: "Product name deleted",
+        description: "The product name has been successfully deleted.",
+      });
+      refetch();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error deleting product name",
+        description:
+          error?.response?.data?.message ?? "An unkonwn error occured",
+      });
+    },
+  });
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Product Names</h1>
-          <p className="text-gray-600">Manage standardized product names for farmers to select</p>
+    <>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Product Names</h1>
+            <p className="text-gray-600">
+              Manage standardized product names for farmers to select
+            </p>
+          </div>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={openCreateDialog}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Product Name
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{"Create New Product Name"}</DialogTitle>
+                <DialogDescription>
+                  {"Add a new standardized product name for farmers to select."}
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmit}>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Category</Label>
+                    <Select
+                      value={selectedCategoryId}
+                      onValueChange={setSelectedCategoryId}
+                      required
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categoriesData?.categories?.map((category) => (
+                          <SelectItem
+                            key={category.id}
+                            value={category.id ?? ""}
+                          >
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="productName">Product Name</Label>
+                    <Input
+                      id="productName"
+                      placeholder="e.g., Tomatoes, Apples, Wheat"
+                      value={productName}
+                      onChange={(e) => setProductName(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className={`${
+                      loading &&
+                      "bg-gray-500 hover:bg-grey-500 hover:cursor-not-allowed bg-opacity-80"
+                    }`}
+                  >
+                    {"Create Product Name"}
+                    {loading && (
+                      <Loader2 className={"animate-spin text-white"} />
+                    )}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={openCreateDialog}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Product Name
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{editingProductName ? "Edit Product Name" : "Create New Product Name"}</DialogTitle>
-              <DialogDescription>
-                {editingProductName
-                  ? "Update the product name information below."
-                  : "Add a new standardized product name for farmers to select."}
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit}>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
-                  <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId} required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="productName">Product Name</Label>
-                  <Input
-                    id="productName"
-                    placeholder="e.g., Tomatoes, Apples, Wheat"
-                    value={productName}
-                    onChange={(e) => setProductName(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">{editingProductName ? "Update Product Name" : "Create Product Name"}</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Tag className="h-5 w-5 mr-2" />
-            Product Names Overview
-          </CardTitle>
-          <CardDescription>Total product names: {productNames.length}</CardDescription>
-        </CardHeader>
-        <CardContent className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Product Name</TableHead>
-                <TableHead className="hidden sm:table-cell">Category</TableHead>
-                <TableHead className="hidden lg:table-cell">Created By</TableHead>
-                <TableHead className="hidden lg:table-cell">Created Date</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {productNames.map((productName) => (
-                <TableRow key={productName.id}>
-                  <TableCell className="font-medium">
-                    {productName.name}
-                    <div className="sm:hidden mt-1">
-                      <Badge variant="secondary">{productName.categoryName}</Badge>
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell">
-                    <Badge variant="secondary">{productName.categoryName}</Badge>
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell">{productName.createdBy}</TableCell>
-                  <TableCell className="hidden lg:table-cell">{productName.createdAt}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end space-x-2">
-                      <Button variant="outline" size="sm" onClick={() => handleEdit(productName)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleDelete(productName.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Tag className="h-5 w-5 mr-2" />
+              Product Names Overview
+            </CardTitle>
+            <CardDescription>
+              Total product names: {productNames?.productNames?.length}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Product Name</TableHead>
+                  <TableHead className="hidden sm:table-cell">
+                    Category
+                  </TableHead>
+                  <TableHead className="hidden lg:table-cell">
+                    Created By
+                  </TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
-  )
+              </TableHeader>
+              <TableBody>
+                {productNames?.productNames?.map((productName) => (
+                  <ProductNameItem
+                    productName={productName}
+                    handleDeleteClick={(productName) =>
+                      handleDeleteClick(productName)
+                    }
+                    categoryName={
+                      categoriesData?.categories?.find(
+                        (item) => item?.id === productName?.categoryId
+                      )?.name
+                    }
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
+      <ConfirmDeleteDialog
+        {...confirmDelete.dialogProps}
+        itemName={deleteProductName?.name}
+        isLoading={loading}
+      />
+    </>
+  );
 }

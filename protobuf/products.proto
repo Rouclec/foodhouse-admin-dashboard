@@ -19,7 +19,7 @@ message Product {
   string id = 1;
   Category category = 2;
   string name = 3;
-  PriceType unit_type = 4;
+  string unit_type = 4;
   types.Amount amount = 5;
   string description = 6;
   string image = 7;
@@ -54,14 +54,14 @@ message UpdateCategoryRequest {
   string name = 3;
 }
 
-message UpdateCategoryResponse { }
+message UpdateCategoryResponse {}
 
 message DeleteCategoryRequest {
   string user_id = 1;
   string category_id = 2;
 }
 
-message DeleteCategoryResponse { }
+message DeleteCategoryResponse {}
 
 message CreateProductRequest {
   string user_id = 1;
@@ -182,9 +182,7 @@ message DeletePriceTypeRequest {
 message DeletePriceTypeResponse {}
 
 message ListProductNamesRequest { string category_id = 1; }
-message ListProductNamesResponse {
-  repeated ProductName product_names = 1;
-}
+message ListProductNamesResponse { repeated ProductName product_names = 1; }
 
 message ListPriceTypesRequest { string category_id = 1; }
 message ListPriceTypesResponse { repeated PriceType price_types = 1; }
@@ -222,7 +220,7 @@ service Products {
     };
   }
 
-   rpc DeleteCategory(DeleteCategoryRequest) returns (DeleteCategoryResponse) {
+  rpc DeleteCategory(DeleteCategoryRequest) returns (DeleteCategoryResponse) {
     option (google.api.http) = {
       delete : "/v1/admin/{user_id}/products/{category_id}/delete-category"
     };
@@ -323,8 +321,7 @@ service Products {
     };
   }
 
-  rpc ListPriceTypes(ListPriceTypesRequest)
-      returns (ListPriceTypesResponse) {
+  rpc ListPriceTypes(ListPriceTypesRequest) returns (ListPriceTypesResponse) {
     option (google.api.http) = {
       get : "/v1/public/products/list-price-types"
     };

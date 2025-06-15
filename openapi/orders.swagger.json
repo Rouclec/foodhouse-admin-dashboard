@@ -1274,6 +1274,9 @@
         "quantity": {
           "type": "string",
           "format": "int64"
+        },
+        "dispatchedBy": {
+          "type": "string"
         }
       }
     },

@@ -43,7 +43,7 @@ VALUES (
     $10::text,
     $11::bigint
 )
-RETURNING order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity
+RETURNING order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity, dispatched_by
 `
 
 type CreateOrderParams struct {
@@ -92,6 +92,7 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 		&i.PayoutPhoneNumber,
 		&i.DeliveryAddress,
 		&i.Quantity,
+		&i.DispatchedBy,
 	)
 	return i, err
 }
@@ -182,7 +183,7 @@ func (q *Queries) CreatePayment(ctx context.Context, arg CreatePaymentParams) (P
 }
 
 const getOrderByOrderNumber = `-- name: GetOrderByOrderNumber :one
-SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity FROM orders WHERE order_number = $1
+SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity, dispatched_by FROM orders WHERE order_number = $1
 `
 
 func (q *Queries) GetOrderByOrderNumber(ctx context.Context, orderNumber int64) (Order, error) {
@@ -205,6 +206,7 @@ func (q *Queries) GetOrderByOrderNumber(ctx context.Context, orderNumber int64) 
 		&i.PayoutPhoneNumber,
 		&i.DeliveryAddress,
 		&i.Quantity,
+		&i.DispatchedBy,
 	)
 	return i, err
 }
@@ -463,7 +465,7 @@ func (q *Queries) GetPaymentStatsBetweenDates(ctx context.Context, arg GetPaymen
 }
 
 const getUserOrderBySecretKey = `-- name: GetUserOrderBySecretKey :one
-SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity FROM orders WHERE secret_key = $1 AND created_by = $2
+SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity, dispatched_by FROM orders WHERE secret_key = $1 AND created_by = $2
 `
 
 type GetUserOrderBySecretKeyParams struct {
@@ -491,12 +493,13 @@ func (q *Queries) GetUserOrderBySecretKey(ctx context.Context, arg GetUserOrderB
 		&i.PayoutPhoneNumber,
 		&i.DeliveryAddress,
 		&i.Quantity,
+		&i.DispatchedBy,
 	)
 	return i, err
 }
 
 const listFarmerOrders = `-- name: ListFarmerOrders :many
-SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity 
+SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity, dispatched_by 
 FROM orders 
 WHERE product_owner = $1 AND 
   (
@@ -556,6 +559,7 @@ func (q *Queries) ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersPara
 			&i.PayoutPhoneNumber,
 			&i.DeliveryAddress,
 			&i.Quantity,
+			&i.DispatchedBy,
 		); err != nil {
 			return nil, err
 		}
@@ -601,7 +605,7 @@ func (q *Queries) ListOrderAuditLogs(ctx context.Context, orderNumber int64) ([]
 }
 
 const listOrders = `-- name: ListOrders :many
-SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity FROM orders 
+SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity, dispatched_by FROM orders 
 WHERE 
   (
     $1::TEXT[] IS NULL OR
@@ -658,6 +662,7 @@ func (q *Queries) ListOrders(ctx context.Context, arg ListOrdersParams) ([]Order
 			&i.PayoutPhoneNumber,
 			&i.DeliveryAddress,
 			&i.Quantity,
+			&i.DispatchedBy,
 		); err != nil {
 			return nil, err
 		}
@@ -723,7 +728,7 @@ func (q *Queries) ListPayments(ctx context.Context, arg ListPaymentsParams) ([]P
 }
 
 const listUserOrders = `-- name: ListUserOrders :many
-SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity FROM orders 
+SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity, dispatched_by FROM orders 
 WHERE created_by = $1 AND 
   (
     $2::TEXT[] IS NULL OR
@@ -781,6 +786,7 @@ func (q *Queries) ListUserOrders(ctx context.Context, arg ListUserOrdersParams) 
 			&i.PayoutPhoneNumber,
 			&i.DeliveryAddress,
 			&i.Quantity,
+			&i.DispatchedBy,
 		); err != nil {
 			return nil, err
 		}
@@ -808,16 +814,22 @@ func (q *Queries) ReviewOrder(ctx context.Context, arg ReviewOrderParams) error 
 }
 
 const updateOrderStatus = `-- name: UpdateOrderStatus :exec
-UPDATE orders SET status = $2, updated_at = now() WHERE order_number = $1
+UPDATE orders
+SET
+  status = $2,
+  updated_at = now(),
+  dispatched_by = COALESCE($3, approved_by)
+WHERE order_number = $1
 `
 
 type UpdateOrderStatusParams struct {
-	OrderNumber int64  `json:"order_number"`
-	Status      string `json:"status"`
+	OrderNumber  int64   `json:"order_number"`
+	Status       string  `json:"status"`
+	DispatchedBy *string `json:"dispatched_by"`
 }
 
 func (q *Queries) UpdateOrderStatus(ctx context.Context, arg UpdateOrderStatusParams) error {
-	_, err := q.db.Exec(ctx, updateOrderStatus, arg.OrderNumber, arg.Status)
+	_, err := q.db.Exec(ctx, updateOrderStatus, arg.OrderNumber, arg.Status, arg.DispatchedBy)
 	return err
 }
 
