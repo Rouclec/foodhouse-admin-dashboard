@@ -1427,6 +1427,8 @@ func (i *Impl) ListFarmers(ctx context.Context,
 		UserStatus:          req.GetUserStatus().String(),
 	}
 
+	i.logger.Debug().Msgf("list farmers query %v", args)
+
 	farmers, err := i.repo.Do().ListFarmersByRating(ctx, args)
 
 	if err != nil {

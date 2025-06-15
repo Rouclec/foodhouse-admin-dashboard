@@ -54,7 +54,7 @@ interface Farmer {
 
 export default function FarmersPage() {
   const { user } = useContext(Context) as ContextType;
-  
+
   const [farmers, setFarmers] = useState<Farmer[]>([
     {
       id: "1",
@@ -120,6 +120,11 @@ export default function FarmersPage() {
     ...usersListFarmersOptions({
       path: {
         userId: user?.userId ?? "",
+      },
+      query: {
+        searchKey: searchTerm,
+        startKey: 5.1,
+        userStatus: "UserStatus_ACTIVE",
       },
     }),
   });
