@@ -52,6 +52,8 @@ const (
 	Users_ListFarmersReivews_FullMethodName            = "/usersgrpc.Users/ListFarmersReivews"
 	Users_ListFarmers_FullMethodName                   = "/usersgrpc.Users/ListFarmers"
 	Users_GetUserStats_FullMethodName                  = "/usersgrpc.Users/GetUserStats"
+	Users_SuspendUser_FullMethodName                   = "/usersgrpc.Users/SuspendUser"
+	Users_ReactivateUser_FullMethodName                = "/usersgrpc.Users/ReactivateUser"
 )
 
 // UsersClient is the client API for Users service.
@@ -91,6 +93,8 @@ type UsersClient interface {
 	ListFarmersReivews(ctx context.Context, in *ListFarmersReviewsRequest, opts ...grpc.CallOption) (*ListFarmersReivewsResponse, error)
 	ListFarmers(ctx context.Context, in *ListFarmersRequest, opts ...grpc.CallOption) (*ListFarmersResponse, error)
 	GetUserStats(ctx context.Context, in *GetUserStatsRequest, opts ...grpc.CallOption) (*GetUserStatsResponse, error)
+	SuspendUser(ctx context.Context, in *SuspendUserRequest, opts ...grpc.CallOption) (*SuspendUserResponse, error)
+	ReactivateUser(ctx context.Context, in *ReactivateUserRequest, opts ...grpc.CallOption) (*ReactivateUserResponse, error)
 }
 
 type usersClient struct {
@@ -431,6 +435,26 @@ func (c *usersClient) GetUserStats(ctx context.Context, in *GetUserStatsRequest,
 	return out, nil
 }
 
+func (c *usersClient) SuspendUser(ctx context.Context, in *SuspendUserRequest, opts ...grpc.CallOption) (*SuspendUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SuspendUserResponse)
+	err := c.cc.Invoke(ctx, Users_SuspendUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersClient) ReactivateUser(ctx context.Context, in *ReactivateUserRequest, opts ...grpc.CallOption) (*ReactivateUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReactivateUserResponse)
+	err := c.cc.Invoke(ctx, Users_ReactivateUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsersServer is the server API for Users service.
 // All implementations must embed UnimplementedUsersServer
 // for forward compatibility.
@@ -468,6 +492,8 @@ type UsersServer interface {
 	ListFarmersReivews(context.Context, *ListFarmersReviewsRequest) (*ListFarmersReivewsResponse, error)
 	ListFarmers(context.Context, *ListFarmersRequest) (*ListFarmersResponse, error)
 	GetUserStats(context.Context, *GetUserStatsRequest) (*GetUserStatsResponse, error)
+	SuspendUser(context.Context, *SuspendUserRequest) (*SuspendUserResponse, error)
+	ReactivateUser(context.Context, *ReactivateUserRequest) (*ReactivateUserResponse, error)
 	mustEmbedUnimplementedUsersServer()
 }
 
@@ -576,6 +602,12 @@ func (UnimplementedUsersServer) ListFarmers(context.Context, *ListFarmersRequest
 }
 func (UnimplementedUsersServer) GetUserStats(context.Context, *GetUserStatsRequest) (*GetUserStatsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserStats not implemented")
+}
+func (UnimplementedUsersServer) SuspendUser(context.Context, *SuspendUserRequest) (*SuspendUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SuspendUser not implemented")
+}
+func (UnimplementedUsersServer) ReactivateUser(context.Context, *ReactivateUserRequest) (*ReactivateUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReactivateUser not implemented")
 }
 func (UnimplementedUsersServer) mustEmbedUnimplementedUsersServer() {}
 func (UnimplementedUsersServer) testEmbeddedByValue()               {}
@@ -1192,6 +1224,42 @@ func _Users_GetUserStats_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Users_SuspendUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SuspendUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).SuspendUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Users_SuspendUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).SuspendUser(ctx, req.(*SuspendUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Users_ReactivateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReactivateUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).ReactivateUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Users_ReactivateUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).ReactivateUser(ctx, req.(*ReactivateUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Users_ServiceDesc is the grpc.ServiceDesc for Users service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1330,6 +1398,14 @@ var Users_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserStats",
 			Handler:    _Users_GetUserStats_Handler,
+		},
+		{
+			MethodName: "SuspendUser",
+			Handler:    _Users_SuspendUser_Handler,
+		},
+		{
+			MethodName: "ReactivateUser",
+			Handler:    _Users_ReactivateUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

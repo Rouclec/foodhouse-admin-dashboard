@@ -43,6 +43,8 @@ const (
 	CENT = 100
 
 	ClaimKeyRole = "role"
+
+	ClaimKeyStatus = "status"
 )
 
 // Impl is the implementation of the Users service.
@@ -265,7 +267,8 @@ func (i *Impl) Signup(ctx context.Context, req *usersgrpc.SignupRequest) (*users
 
 	// Generate an access token and refresh token
 	claims := map[string]any{
-		ClaimKeyRole: createdDBUser.Role,
+		ClaimKeyRole:   createdDBUser.Role,
+		ClaimKeyStatus: createdDBUser.UserStatus,
 	}
 	accessTokens, err := i.tokenManagerBuilder.WithQuerier(querier).GenerateAccessToken(ctx, createdDBUser.ID, claims)
 	if err != nil {
@@ -518,6 +521,7 @@ func (i *Impl) getUserClaims(ctx context.Context, userID string) (map[string]any
 	}
 
 	claims[ClaimKeyRole] = user.Role
+	claims[ClaimKeyStatus] = user.UserStatus
 
 	return claims, nil
 }
@@ -1077,10 +1081,55 @@ func (i *Impl) GetUserSubscriptions(context.Context,
 }
 
 // ListUsers implements usersgrpc.UsersServer.
-func (i *Impl) ListUsers(context.Context,
-	*usersgrpc.ListUsersRequest) (
+func (i *Impl) ListUsers(ctx context.Context,
+	req *usersgrpc.ListUsersRequest) (
 	*usersgrpc.ListUsersResponse, error) {
-	panic("unimplemented")
+	var err error
+	startKey := time.Now().Add(time.Hour)
+
+	count := req.GetCount()
+	if count == 0 {
+		count = 10
+	}
+
+	if req.GetStartKey() != "" {
+		startKey, err = time.Parse(time.RFC3339, req.GetStartKey())
+		if err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "Invalid start key")
+		}
+	}
+
+	i.logger.Debug().Msgf("Start key %v", startKey)
+
+	args := sqlc.ListUsersParams{
+		UserStatus: req.GetUserStatus().String(),
+		SearchKey:  req.GetSearch(),
+		Limit:      count,
+		Before:     startKey,
+	}
+	sqlcUsers, err := i.repo.Do().ListUsers(ctx, args)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error fetching users: %v", err)
+	}
+
+	protoUsers, err := converters.SqlcToProtoUsers(sqlcUsers)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error converting sqlc to proto reviews %v", err)
+	}
+
+	nextKey := ""
+
+	if len(protoUsers) >= int(count) {
+		nextKey = protoUsers[len(protoUsers)-1].GetCreatedAt().AsTime().Format(time.RFC3339)
+	}
+
+	return &usersgrpc.ListUsersResponse{
+		Users:   protoUsers,
+		NextKey: nextKey,
+	}, nil
+	// panic("unimplemented")
 }
 
 // Subscribe implements usersgrpc.UsersServer.
@@ -1375,6 +1424,7 @@ func (i *Impl) ListFarmers(ctx context.Context,
 		CursorAverageRating: startKey,
 		Count:               count,
 		SearchKey:           req.GetSearchKey(),
+		UserStatus:          req.GetUserStatus().String(),
 	}
 
 	farmers, err := i.repo.Do().ListFarmersByRating(ctx, args)
@@ -1471,5 +1521,28 @@ func (i *Impl) GetUserStats(ctx context.Context,
 	return &usersgrpc.GetUserStatsResponse{
 		Data: stats,
 	}, nil
-	// panic("unimplemented")
+}
+
+// SuspendUser implements usersgrpc.UsersServer.
+func (i *Impl) SuspendUser(ctx context.Context,
+	req *usersgrpc.SuspendUserRequest) (
+	*usersgrpc.SuspendUserResponse, error) {
+	err := i.repo.Do().SuspendUser(ctx, req.GetUserId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error suspending user %v", err)
+	}
+	return &usersgrpc.SuspendUserResponse{}, nil
+}
+
+// ReactivateUser implements usersgrpc.UsersServer.
+func (i *Impl) ReactivateUser(ctx context.Context,
+	req *usersgrpc.ReactivateUserRequest) (
+	*usersgrpc.ReactivateUserResponse, error) {
+	err := i.repo.Do().ReactivateUser(ctx, req.GetUserId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error re-activating user %v", err)
+	}
+	return &usersgrpc.ReactivateUserResponse{}, nil
 }

@@ -531,6 +531,35 @@ func (mr *MockQuerierMockRecorder) ListSubsriptions(ctx any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSubsriptions", reflect.TypeOf((*MockQuerier)(nil).ListSubsriptions), ctx)
 }
 
+// ListUsers mocks base method.
+func (m *MockQuerier) ListUsers(ctx context.Context, arg sqlc.ListUsersParams) ([]sqlc.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListUsers", ctx, arg)
+	ret0, _ := ret[0].([]sqlc.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListUsers indicates an expected call of ListUsers.
+func (mr *MockQuerierMockRecorder) ListUsers(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListUsers", reflect.TypeOf((*MockQuerier)(nil).ListUsers), ctx, arg)
+}
+
+// ReactivateUser mocks base method.
+func (m *MockQuerier) ReactivateUser(ctx context.Context, id string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ReactivateUser", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ReactivateUser indicates an expected call of ReactivateUser.
+func (mr *MockQuerierMockRecorder) ReactivateUser(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReactivateUser", reflect.TypeOf((*MockQuerier)(nil).ReactivateUser), ctx, id)
+}
+
 // RevokeRefreshToken mocks base method.
 func (m *MockQuerier) RevokeRefreshToken(ctx context.Context, token string) error {
 	m.ctrl.T.Helper()
@@ -543,6 +572,20 @@ func (m *MockQuerier) RevokeRefreshToken(ctx context.Context, token string) erro
 func (mr *MockQuerierMockRecorder) RevokeRefreshToken(ctx, token any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RevokeRefreshToken", reflect.TypeOf((*MockQuerier)(nil).RevokeRefreshToken), ctx, token)
+}
+
+// SuspendUser mocks base method.
+func (m *MockQuerier) SuspendUser(ctx context.Context, id string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SuspendUser", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SuspendUser indicates an expected call of SuspendUser.
+func (mr *MockQuerierMockRecorder) SuspendUser(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SuspendUser", reflect.TypeOf((*MockQuerier)(nil).SuspendUser), ctx, id)
 }
 
 // UpdateSentOtp mocks base method.

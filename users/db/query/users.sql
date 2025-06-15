@@ -1,6 +1,6 @@
 -- name: CreateUser :one
-INSERT INTO users (phone_number, email, "password", first_name, last_name, residence_country_iso_code, "address", location_coordinates, profile_image, "role")
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+INSERT INTO users (phone_number, email, "password", first_name, last_name, residence_country_iso_code, "address", location_coordinates, profile_image, "role", user_status)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'UserStatus_ACTIVE')
 RETURNING *;
 
 -- name: UpdateUser :one
@@ -52,6 +52,8 @@ SELECT
     f.last_name,
     f.profile_image,
     f.created_at,
+    f.user_status,
+    f.address,
     COALESCE(fr.average_rating, 0) AS average_rating
 FROM
     users f
@@ -65,6 +67,8 @@ LEFT JOIN (
         farmer_id
 ) AS fr ON f.id = fr.farmer_id
 WHERE
+    ( sqlc.arg(user_status)::TEXT = '' OR (status = sqlc.arg(user_status)::user_status) )
+    AND
     (
         sqlc.arg(cursor_average_rating)::float = 0.0
         OR COALESCE(fr.average_rating, 0) < sqlc.arg(cursor_average_rating)::float
@@ -75,12 +79,30 @@ WHERE
         OR (
             LOWER(f.first_name) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
             OR LOWER(f.last_name) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
+            OR LOWER(f.email) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
         )
     )
 ORDER BY
     average_rating DESC,
     f.created_at ASC -- Oldest farmers take precedence if ratings are tied
 LIMIT sqlc.arg(count);
+
+-- name: ListUsers :many
+SELECT *
+FROM users 
+WHERE
+    ( sqlc.arg(user_status)::TEXT = '' OR (status = sqlc.arg(user_status)::user_status) )
+   AND (
+        sqlc.arg(search_key) = ''
+        OR (
+            LOWER(f.first_name) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
+            OR LOWER(f.last_name) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
+            OR LOWER(f.email) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
+        )
+    )
+    AND created_at < sqlc.arg(before)::timestamptz
+ORDER BY created_at DESC
+LIMIT $1;
 
 -- name: GetUserStatsBetweenDates :one
 SELECT
@@ -89,3 +111,15 @@ SELECT
 FROM users
 WHERE created_at >= sqlc.arg(start_date)::timestamptz
   AND created_at <= sqlc.arg(end_date)::timestamptz;
+
+
+-- name: SuspendUser :exec
+UPDATE users
+SET user_status = 'UserStatus_SUSPENDED'
+WHERE id = $1; 
+
+-- name: ReactivateUser :exec
+UPDATE users
+SET user_status = 'UserStatus_ACTIVE'
+WHERE id = $1; 
+
