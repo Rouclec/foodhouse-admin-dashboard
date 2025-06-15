@@ -54,6 +54,8 @@ SELECT
     f.created_at,
     f.user_status,
     f.address,
+    f.phone_number,
+    f.email,
     COALESCE(fr.average_rating, 0) AS average_rating
 FROM
     users f
@@ -67,7 +69,7 @@ LEFT JOIN (
         farmer_id
 ) AS fr ON f.id = fr.farmer_id
 WHERE
-    ( sqlc.arg(user_status)::TEXT = '' OR (f.user_status = sqlc.arg(user_status)::TEXT) )
+    ( sqlc.arg(user_status)::TEXT = 'UserStatus_UNSPECIFIED' OR (f.user_status = sqlc.arg(user_status)::TEXT) )
     AND
     (
         sqlc.arg(cursor_average_rating)::float = 0.0
@@ -91,7 +93,7 @@ LIMIT sqlc.arg(count);
 SELECT *
 FROM users 
 WHERE
-    ( sqlc.arg(user_status)::TEXT = '' OR (user_status = sqlc.arg(user_status)::TEXT) )
+    ( sqlc.arg(user_status)::TEXT = 'UserStatus_UNSPECIFIED' OR (user_status = sqlc.arg(user_status)::TEXT) )
    AND (
         sqlc.arg(search_key) = ''
         OR (
