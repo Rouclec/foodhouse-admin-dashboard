@@ -297,54 +297,61 @@ export default function CategoriesPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead className="hidden sm:table-cell">Slug</TableHead>
-                  <TableHead className="hidden lg:table-cell">
-                    Created By
-                  </TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {categoriesData?.categories?.map((category) => (
-                  <TableRow key={category?.id}>
-                    <TableCell className="font-medium">
-                      {category?.name}
-                      <div className="sm:hidden mt-1">
-                        <Badge variant="secondary">{category?.slug}</Badge>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      <Badge variant="secondary">{category?.slug}</Badge>
-                    </TableCell>
-                    <TableCell className="hidden lg:table-cell">
-                      Admin
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(category)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteClick(category)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead className="hidden sm:table-cell">Slug</TableHead>
+                    <TableHead className="hidden lg:table-cell">
+                      Created By
+                    </TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {categoriesData?.categories?.map((category) => (
+                    <TableRow key={category?.id}>
+                      <TableCell className="font-medium">
+                        {category?.name}
+                        <div className="sm:hidden mt-1">
+                          <Badge variant="secondary">{category?.slug}</Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        <Badge variant="secondary">{category?.slug}</Badge>
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        Admin
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(category)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteClick(category)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              {(categoriesData?.categories ?? []).length === 0 && (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No categories found</p>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>

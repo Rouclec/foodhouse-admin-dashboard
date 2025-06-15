@@ -55,12 +55,12 @@ func SqlcToProtoProductRow(sqlcProduct sqlc.ListProductsRow, sqlcCategory *sqlc.
 	}, nil
 }
 
-func SqlcToProtoProduct(sqlcProduct sqlc.GetProductWithCategoryRow) (*productsgrpc.Product, error) {
+func SqlcToProtoProduct(sqlcProduct sqlc.Product) (*productsgrpc.Product, error) {
 
 	return &productsgrpc.Product{
-		Id:       sqlcProduct.ProductID,
-		Category: &productsgrpc.Category{Id: sqlcProduct.CategoryID, Name: sqlcProduct.CategoryName, Slug: sqlcProduct.CategorySlug}, // Category will be nil if sqlcCategory is nil
-		Name:     sqlcProduct.ProductName,
+		Id:       sqlcProduct.ID,
+		Category: &productsgrpc.Category{Id: *sqlcProduct.CategoryID}, // Category will be nil if sqlcCategory is nil
+		Name:     sqlcProduct.Name,
 		UnitType: sqlcProduct.UnitType,
 		Amount: &types.Amount{
 			Value:           sqlcProduct.Value,
@@ -68,7 +68,7 @@ func SqlcToProtoProduct(sqlcProduct sqlc.GetProductWithCategoryRow) (*productsgr
 		},
 		Description: sqlcProduct.Description,
 		Image:       sqlcProduct.Image,
-		CreatedBy:   derefString(sqlcProduct.ProductCreatedBy),
+		CreatedBy:   derefString(sqlcProduct.CreatedBy),
 		CreatedAt:   timestamppb.New(sqlcProduct.CreatedAt.Time),
 		UpdatedAt:   timestamppb.New(sqlcProduct.UpdatedAt.Time),
 	}, nil

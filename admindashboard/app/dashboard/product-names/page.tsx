@@ -339,6 +339,11 @@ export default function ProductNamesPage() {
                 ))}
               </TableBody>
             </Table>
+            {(productNames?.productNames ?? []).length === 0 && (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No product names found</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

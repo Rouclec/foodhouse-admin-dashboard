@@ -336,7 +336,7 @@ func (i *Impl) UpdateProduct(ctx context.Context, req *productsgrpc.UpdateProduc
 
 // GetFarmerProduct implements productsgrpc.ProductsServer.
 func (i *Impl) GetFarmerProduct(ctx context.Context, req *productsgrpc.GetFarmerProductRequest) (*productsgrpc.GetFarmerProductResponse, error) {
-	product, err := i.repo.Do().GetProductWithCategory(ctx, req.GetProductId())
+	product, err := i.repo.Do().GetProduct(ctx, req.GetProductId())
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error getting product %v", err)
@@ -354,7 +354,7 @@ func (i *Impl) GetFarmerProduct(ctx context.Context, req *productsgrpc.GetFarmer
 
 // GetProduct implements productsgrpc.ProductsServer.
 func (i *Impl) GetProduct(ctx context.Context, req *productsgrpc.GetProductRequest) (*productsgrpc.GetProductResponse, error) {
-	product, err := i.repo.Do().GetProductWithCategory(ctx, req.GetProductId())
+	product, err := i.repo.Do().GetProduct(ctx, req.GetProductId())
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error getting product %v", err)

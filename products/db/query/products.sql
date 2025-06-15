@@ -74,30 +74,6 @@ SELECT * FROM product where id = $1 FOR UPDATE;
 -- name: GetProduct :one
 SELECT * FROM product where id = $1; 
 
--- name: GetProductWithCategory :one
-SELECT 
-  p.id AS product_id,
-  p.name AS product_name,
-  p.unit_type,
-  p.value,
-  p.whole_sale,
-  p.currency_iso_code,
-  p.description,
-  p.image,
-  p.created_by AS product_created_by,
-  p.created_at,
-  p.updated_at,
-  
-  c.id AS category_id,
-  c.name AS category_name,
-  c.slug AS category_slug,
-  c.created_by AS category_created_by,
-
-
-FROM product p
-LEFT JOIN categories c ON p.category_id = c.id
-WHERE p.id = $1;
-
 -- name: CreateProductName :one
 INSERT INTO product_names (name, slug, category_id)
 VALUES ($1, $2, $3)
