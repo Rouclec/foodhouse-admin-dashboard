@@ -2,9 +2,9 @@
 
 import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
-import type { UsersCreateSubscriptionData, UsersCreateSubscriptionError, UsersCreateSubscriptionResponse, UsersDeleteSubscriptionData, UsersDeleteSubscriptionError, UsersDeleteSubscriptionResponse, UsersUpdateSubscriptionData, UsersUpdateSubscriptionError, UsersUpdateSubscriptionResponse, UsersGrantAdminData, UsersGrantAdminError, UsersGrantAdminResponse, UsersListUsersData, UsersRevokeRefreshTokenData, UsersRevokeRefreshTokenError, UsersRevokeRefreshTokenResponse, UsersAuthenticateData, UsersAuthenticateError, UsersAuthenticateResponse, UsersChangePasswordData, UsersChangePasswordError, UsersChangePasswordResponse, UsersLastOtpForFactorData, UsersRefreshAccessTokenData, UsersRefreshAccessTokenError, UsersRefreshAccessTokenResponse, UsersSendEmailOtpData, UsersSendEmailOtpError, UsersSendEmailOtpResponse, UsersSendSignupSmsOtpData, UsersSendSignupSmsOtpError, UsersSendSignupSmsOtpResponse, UsersSendSmsOtpData, UsersSendSmsOtpError, UsersSendSmsOtpResponse, UsersSignupData, UsersSignupError, UsersSignupResponse, UsersVerifyOtpData, UsersVerifyOtpError, UsersVerifyOtpResponse, UsersGetPublicUserData, UsersCompleteRegistrationData, UsersCompleteRegistrationError, UsersCompleteRegistrationResponse, UsersDeleteUserPaymentMethodData, UsersDeleteUserPaymentMethodError, UsersDeleteUserPaymentMethodResponse, UsersListFarmersData, UsersListFarmersReivewsData, UsersGetUserByIdData, UsersReviewFarmerData, UsersReviewFarmerError, UsersReviewFarmerResponse, UsersSubscribeData, UsersSubscribeError, UsersSubscribeResponse, UsersGetUserActiveSubscriptionData, UsersGetUserSubscriptionsData, UsersListSubscriptionsData, UsersGetUserSubscriptionByIdData, UsersGetUserPaymentMethodsByUserIdData, UsersGetFarmerByIdData } from '../types.gen';
+import type { UsersCreateSubscriptionData, UsersCreateSubscriptionError, UsersCreateSubscriptionResponse, UsersDeleteSubscriptionData, UsersDeleteSubscriptionError, UsersDeleteSubscriptionResponse, UsersUpdateSubscriptionData, UsersUpdateSubscriptionError, UsersUpdateSubscriptionResponse, UsersGrantAdminData, UsersGrantAdminError, UsersGrantAdminResponse, UsersListUsersData, UsersReactivateUserData, UsersReactivateUserError, UsersReactivateUserResponse, UsersSuspendUserData, UsersSuspendUserError, UsersSuspendUserResponse, UsersRevokeRefreshTokenData, UsersRevokeRefreshTokenError, UsersRevokeRefreshTokenResponse, UsersAuthenticateData, UsersAuthenticateError, UsersAuthenticateResponse, UsersChangePasswordData, UsersChangePasswordError, UsersChangePasswordResponse, UsersLastOtpForFactorData, UsersRefreshAccessTokenData, UsersRefreshAccessTokenError, UsersRefreshAccessTokenResponse, UsersSendEmailOtpData, UsersSendEmailOtpError, UsersSendEmailOtpResponse, UsersSendSignupSmsOtpData, UsersSendSignupSmsOtpError, UsersSendSignupSmsOtpResponse, UsersSendSmsOtpData, UsersSendSmsOtpError, UsersSendSmsOtpResponse, UsersSignupData, UsersSignupError, UsersSignupResponse, UsersVerifyOtpData, UsersVerifyOtpError, UsersVerifyOtpResponse, UsersGetPublicUserData, UsersCompleteRegistrationData, UsersCompleteRegistrationError, UsersCompleteRegistrationResponse, UsersDeleteUserPaymentMethodData, UsersDeleteUserPaymentMethodError, UsersDeleteUserPaymentMethodResponse, UsersListFarmersData, UsersListFarmersReivewsData, UsersGetUserByIdData, UsersReviewFarmerData, UsersReviewFarmerError, UsersReviewFarmerResponse, UsersSubscribeData, UsersSubscribeError, UsersSubscribeResponse, UsersGetUserActiveSubscriptionData, UsersGetUserSubscriptionsData, UsersListSubscriptionsData, UsersGetUserSubscriptionByIdData, UsersGetUserPaymentMethodsByUserIdData, UsersGetFarmerByIdData } from '../types.gen';
 import type { AxiosError } from 'axios';
-import { client, usersCreateSubscription, usersDeleteSubscription, usersUpdateSubscription, usersGrantAdmin, usersListUsers, usersRevokeRefreshToken, usersAuthenticate, usersChangePassword, usersHealthCheck, usersLastOtpForFactor, usersRefreshAccessToken, usersSendEmailOtp, usersSendSignupSmsOtp, usersSendSmsOtp, usersSignup, usersVerifyOtp, usersGetPublicUser, usersCompleteRegistration, usersDeleteUserPaymentMethod, usersListFarmers, usersListFarmersReivews, usersGetUserById, usersReviewFarmer, usersSubscribe, usersGetUserActiveSubscription, usersGetUserSubscriptions, usersListSubscriptions, usersGetUserSubscriptionById, usersGetUserPaymentMethodsByUserId, usersGetFarmerById } from '../sdk.gen';
+import { client, usersCreateSubscription, usersDeleteSubscription, usersUpdateSubscription, usersGrantAdmin, usersListUsers, usersReactivateUser, usersSuspendUser, usersRevokeRefreshToken, usersAuthenticate, usersChangePassword, usersHealthCheck, usersLastOtpForFactor, usersRefreshAccessToken, usersSendEmailOtp, usersSendSignupSmsOtp, usersSendSmsOtp, usersSignup, usersVerifyOtp, usersGetPublicUser, usersCompleteRegistration, usersDeleteUserPaymentMethod, usersListFarmers, usersListFarmersReivews, usersGetUserById, usersReviewFarmer, usersSubscribe, usersGetUserActiveSubscription, usersGetUserSubscriptions, usersListSubscriptions, usersGetUserSubscriptionById, usersGetUserPaymentMethodsByUserId, usersGetFarmerById } from '../sdk.gen';
 
 type QueryKey<TOptions extends OptionsLegacyParser> = [
     Pick<TOptions, 'baseURL' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -144,6 +144,34 @@ export const usersListUsersOptions = (options: OptionsLegacyParser<UsersListUser
         },
         queryKey: usersListUsersQueryKey(options)
     });
+};
+
+export const usersReactivateUserMutation = (options?: Partial<OptionsLegacyParser<UsersReactivateUserData>>) => {
+    const mutationOptions: UseMutationOptions<UsersReactivateUserResponse, AxiosError<UsersReactivateUserError>, OptionsLegacyParser<UsersReactivateUserData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await usersReactivateUser({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const usersSuspendUserMutation = (options?: Partial<OptionsLegacyParser<UsersSuspendUserData>>) => {
+    const mutationOptions: UseMutationOptions<UsersSuspendUserResponse, AxiosError<UsersSuspendUserError>, OptionsLegacyParser<UsersSuspendUserData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await usersSuspendUser({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
 };
 
 export const usersRevokeRefreshTokenQueryKey = (options: OptionsLegacyParser<UsersRevokeRefreshTokenData>) => [

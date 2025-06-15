@@ -42,7 +42,10 @@ type Querier interface {
 	ListFarmerReviews(ctx context.Context, arg ListFarmerReviewsParams) ([]FarmersReview, error)
 	ListFarmersByRating(ctx context.Context, arg ListFarmersByRatingParams) ([]ListFarmersByRatingRow, error)
 	ListSubsriptions(ctx context.Context) ([]Subscription, error)
+	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
+	ReactivateUser(ctx context.Context, id string) error
 	RevokeRefreshToken(ctx context.Context, token string) error
+	SuspendUser(ctx context.Context, id string) error
 	UpdateSentOtp(ctx context.Context, arg UpdateSentOtpParams) error
 	UpdateSubscription(ctx context.Context, arg UpdateSubscriptionParams) (Subscription, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)

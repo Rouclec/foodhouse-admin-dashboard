@@ -175,6 +175,8 @@ export type usersgrpcPaymentMethod = {
     methodId?: string;
 };
 
+export type usersgrpcReactivateUserResponse = unknown;
+
 export type usersgrpcRefreshAccessTokenRequest = {
     refreshToken?: string;
 };
@@ -263,6 +265,8 @@ export type usersgrpcSubscription = {
     amount?: typesAmount;
 };
 
+export type usersgrpcSuspendUserResponse = unknown;
+
 export type usersgrpcTokens = {
     accessToken?: string;
     refreshToken?: string;
@@ -285,6 +289,7 @@ export type usersgrpcUser = {
     address?: string;
     createdAt?: string;
     updatedAt?: string;
+    status?: usersgrpcUserStatus;
 };
 
 export type usersgrpcUserPaymentMethod = {
@@ -294,7 +299,9 @@ export type usersgrpcUserPaymentMethod = {
     createdAt?: string;
 };
 
-export type usersgrpcUserRole = 'USER_ROLE_UNSPECIFIED' | 'USER_ROLE_FARMER' | 'USER_ROLE_BUYER' | 'USER_ROLE_ADMIN';
+export type usersgrpcUserRole = 'USER_ROLE_UNSPECIFIED' | 'USER_ROLE_FARMER' | 'USER_ROLE_BUYER' | 'USER_ROLE_ADMIN' | 'USER_ROLE_AGENT';
+
+export type usersgrpcUserStatus = 'UserStatus_UNSPECIFIED' | 'UserStatus_SUSPENDED' | 'UserStatus_ACTIVE';
 
 export type usersgrpcUserSubscription = {
     id?: string;
@@ -306,7 +313,7 @@ export type usersgrpcUserSubscription = {
     expiresAt?: string;
 };
 
-export type usersgrpcUserType = 'USER_TYPE_UNSPECIFIED' | 'USER_TYPE_FARMER' | 'USER_TYPE_BUYER';
+export type usersgrpcUserType = 'USER_TYPE_UNSPECIFIED' | 'USER_TYPE_FARMER' | 'USER_TYPE_BUYER' | 'USER_TYPE_AGENT';
 
 export type usersgrpcVerifyOtpRequest = {
     authFactor?: usersgrpcAuthFactor;
@@ -315,6 +322,8 @@ export type usersgrpcVerifyOtpRequest = {
 export type usersgrpcVerifyOtpResponse = {
     valid?: boolean;
 };
+
+export type UsersReactivateUserBody = unknown;
 
 export type UsersReviewFarmerBody = {
     farmerId?: string;
@@ -330,6 +339,8 @@ export type UsersSubscribeBody = {
     currencyIsoCode?: string;
     paymentMethod?: usersgrpcPaymentMethod;
 };
+
+export type UsersSuspendUserBody = unknown;
 
 export type UsersUpdateSubscriptionBody = {
     title?: string;
@@ -401,12 +412,37 @@ export type UsersListUsersData = {
          * Key for pagination, indicating where to start the list
          */
         startKey?: string;
+        userStatus?: 'UserStatus_UNSPECIFIED' | 'UserStatus_SUSPENDED' | 'UserStatus_ACTIVE';
     };
 };
 
 export type UsersListUsersResponse = (usersgrpcListUsersResponse);
 
 export type UsersListUsersError = (rpcStatus);
+
+export type UsersReactivateUserData = {
+    body: UsersReactivateUserBody;
+    path: {
+        adminUserId: string;
+        userId: string;
+    };
+};
+
+export type UsersReactivateUserResponse = (usersgrpcReactivateUserResponse);
+
+export type UsersReactivateUserError = (rpcStatus);
+
+export type UsersSuspendUserData = {
+    body: UsersSuspendUserBody;
+    path: {
+        adminUserId: string;
+        userId: string;
+    };
+};
+
+export type UsersSuspendUserResponse = (usersgrpcSuspendUserResponse);
+
+export type UsersSuspendUserError = (rpcStatus);
 
 export type UsersRevokeRefreshTokenData = {
     body: usersgrpcRevokeRefreshTokenRequest;
@@ -537,6 +573,7 @@ export type UsersListFarmersData = {
         count?: number;
         searchKey?: string;
         startKey?: number;
+        userStatus?: 'UserStatus_UNSPECIFIED' | 'UserStatus_SUSPENDED' | 'UserStatus_ACTIVE';
     };
 };
 

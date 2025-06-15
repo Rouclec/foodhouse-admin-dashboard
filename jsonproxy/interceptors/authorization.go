@@ -36,6 +36,12 @@ func NewAuthorizationInterceptor() HTTPInterceptor {
 			ctx := r.Context()
 			userID, _ := ctx.Value(ContextKeyUserID).(string)
 			role, _ := ctx.Value(ContextKeyRole).(string)
+			status, _ := ctx.Value(ContextKeyStatus).(string)
+
+			if status != UserActiveStatus {
+				http.Error(w, "User is inactive", http.StatusUnauthorized)
+				return
+			}
 
 			// Admins can access all endpoints
 			if role == RoleAdmin {

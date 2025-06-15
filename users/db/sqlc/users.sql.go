@@ -29,9 +29,9 @@ func (q *Queries) CountUsers(ctx context.Context, arg CountUsersParams) (int64, 
 }
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (phone_number, email, "password", first_name, last_name, residence_country_iso_code, "address", location_coordinates, profile_image, "role")
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-RETURNING id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at
+INSERT INTO users (phone_number, email, "password", first_name, last_name, residence_country_iso_code, "address", location_coordinates, profile_image, "role", user_status)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'UserStatus_ACTIVE')
+RETURNING id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status
 `
 
 type CreateUserParams struct {
@@ -75,12 +75,13 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Password,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.UserStatus,
 	)
 	return i, err
 }
 
 const getFarmer = `-- name: GetFarmer :one
-SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at FROM users WHERE id = $1 AND role = 'USER_ROLE_FARMER'
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status FROM users WHERE id = $1 AND role = 'USER_ROLE_FARMER'
 `
 
 func (q *Queries) GetFarmer(ctx context.Context, id string) (User, error) {
@@ -100,12 +101,13 @@ func (q *Queries) GetFarmer(ctx context.Context, id string) (User, error) {
 		&i.Password,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.UserStatus,
 	)
 	return i, err
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at FROM users WHERE id = $1
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
@@ -125,12 +127,13 @@ func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
 		&i.Password,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.UserStatus,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at FROM users WHERE email = $1
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status FROM users WHERE email = $1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email *string) (User, error) {
@@ -150,12 +153,13 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email *string) (User, erro
 		&i.Password,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.UserStatus,
 	)
 	return i, err
 }
 
 const getUserByNationalNumber = `-- name: GetUserByNationalNumber :one
-SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status
 FROM users
 WHERE RIGHT(phone_number, CHAR_LENGTH($1::TEXT)) = $1::TEXT
   AND CHAR_LENGTH(phone_number) - CHAR_LENGTH($1::TEXT) BETWEEN 1 AND 5
@@ -178,12 +182,13 @@ func (q *Queries) GetUserByNationalNumber(ctx context.Context, nationalNumber st
 		&i.Password,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.UserStatus,
 	)
 	return i, err
 }
 
 const getUserByPhoneNumber = `-- name: GetUserByPhoneNumber :one
-SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at FROM users WHERE phone_number = $1
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status FROM users WHERE phone_number = $1
 `
 
 func (q *Queries) GetUserByPhoneNumber(ctx context.Context, phoneNumber string) (User, error) {
@@ -203,12 +208,13 @@ func (q *Queries) GetUserByPhoneNumber(ctx context.Context, phoneNumber string) 
 		&i.Password,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.UserStatus,
 	)
 	return i, err
 }
 
 const getUserForUpdate = `-- name: GetUserForUpdate :one
-SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at FROM users WHERE id = $1 FOR UPDATE
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status FROM users WHERE id = $1 FOR UPDATE
 `
 
 func (q *Queries) GetUserForUpdate(ctx context.Context, id string) (User, error) {
@@ -228,6 +234,7 @@ func (q *Queries) GetUserForUpdate(ctx context.Context, id string) (User, error)
 		&i.Password,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.UserStatus,
 	)
 	return i, err
 }
@@ -265,6 +272,8 @@ SELECT
     f.last_name,
     f.profile_image,
     f.created_at,
+    f.user_status,
+    f.address,
     COALESCE(fr.average_rating, 0) AS average_rating
 FROM
     users f
@@ -278,25 +287,29 @@ LEFT JOIN (
         farmer_id
 ) AS fr ON f.id = fr.farmer_id
 WHERE
+    ( $1::TEXT = '' OR (status = $1::user_status) )
+    AND
     (
-        $1::float = 0.0
-        OR COALESCE(fr.average_rating, 0) < $1::float
+        $2::float = 0.0
+        OR COALESCE(fr.average_rating, 0) < $2::float
     )
     AND role = 'USER_ROLE_FARMER'
     AND (
-        $2 = ''
+        $3 = ''
         OR (
-            LOWER(f.first_name) LIKE LOWER('%' || $2 || '%')
-            OR LOWER(f.last_name) LIKE LOWER('%' || $2 || '%')
+            LOWER(f.first_name) LIKE LOWER('%' || $3 || '%')
+            OR LOWER(f.last_name) LIKE LOWER('%' || $3 || '%')
+            OR LOWER(f.email) LIKE LOWER('%' || $3 || '%')
         )
     )
 ORDER BY
     average_rating DESC,
     f.created_at ASC -- Oldest farmers take precedence if ratings are tied
-LIMIT $3
+LIMIT $4
 `
 
 type ListFarmersByRatingParams struct {
+	UserStatus          string      `json:"user_status"`
 	CursorAverageRating float64     `json:"cursor_average_rating"`
 	SearchKey           interface{} `json:"search_key"`
 	Count               int32       `json:"count"`
@@ -308,11 +321,18 @@ type ListFarmersByRatingRow struct {
 	LastName      *string            `json:"last_name"`
 	ProfileImage  string             `json:"profile_image"`
 	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	UserStatus    string             `json:"user_status"`
+	Address       *string            `json:"address"`
 	AverageRating float64            `json:"average_rating"`
 }
 
 func (q *Queries) ListFarmersByRating(ctx context.Context, arg ListFarmersByRatingParams) ([]ListFarmersByRatingRow, error) {
-	rows, err := q.db.Query(ctx, listFarmersByRating, arg.CursorAverageRating, arg.SearchKey, arg.Count)
+	rows, err := q.db.Query(ctx, listFarmersByRating,
+		arg.UserStatus,
+		arg.CursorAverageRating,
+		arg.SearchKey,
+		arg.Count,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -326,6 +346,8 @@ func (q *Queries) ListFarmersByRating(ctx context.Context, arg ListFarmersByRati
 			&i.LastName,
 			&i.ProfileImage,
 			&i.CreatedAt,
+			&i.UserStatus,
+			&i.Address,
 			&i.AverageRating,
 		); err != nil {
 			return nil, err
@@ -338,6 +360,93 @@ func (q *Queries) ListFarmersByRating(ctx context.Context, arg ListFarmersByRati
 	return items, nil
 }
 
+const listUsers = `-- name: ListUsers :many
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status
+FROM users 
+WHERE
+    ( $2::TEXT = '' OR (status = $2::user_status) )
+   AND (
+        $3 = ''
+        OR (
+            LOWER(f.first_name) LIKE LOWER('%' || $3 || '%')
+            OR LOWER(f.last_name) LIKE LOWER('%' || $3 || '%')
+            OR LOWER(f.email) LIKE LOWER('%' || $3 || '%')
+        )
+    )
+    AND created_at < $4::timestamptz
+ORDER BY created_at DESC
+LIMIT $1
+`
+
+type ListUsersParams struct {
+	Limit      int32       `json:"limit"`
+	UserStatus string      `json:"user_status"`
+	SearchKey  interface{} `json:"search_key"`
+	Before     time.Time   `json:"before"`
+}
+
+func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error) {
+	rows, err := q.db.Query(ctx, listUsers,
+		arg.Limit,
+		arg.UserStatus,
+		arg.SearchKey,
+		arg.Before,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []User{}
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Role,
+			&i.PhoneNumber,
+			&i.Email,
+			&i.FirstName,
+			&i.LastName,
+			&i.ResidenceCountryIsoCode,
+			&i.Address,
+			&i.LocationCoordinates,
+			&i.ProfileImage,
+			&i.Password,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.UserStatus,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const reactivateUser = `-- name: ReactivateUser :exec
+UPDATE users
+SET user_status = 'UserStatus_ACTIVE'
+WHERE id = $1
+`
+
+func (q *Queries) ReactivateUser(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, reactivateUser, id)
+	return err
+}
+
+const suspendUser = `-- name: SuspendUser :exec
+UPDATE users
+SET user_status = 'UserStatus_SUSPENDED'
+WHERE id = $1
+`
+
+func (q *Queries) SuspendUser(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, suspendUser, id)
+	return err
+}
+
 const updateUser = `-- name: UpdateUser :one
 UPDATE users
 SET
@@ -346,7 +455,7 @@ SET
 WHERE
     id = $7
 RETURNING
-    id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at
+    id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status
 `
 
 type UpdateUserParams struct {
@@ -384,6 +493,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.Password,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.UserStatus,
 	)
 	return i, err
 }

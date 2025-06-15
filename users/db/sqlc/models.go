@@ -62,6 +62,7 @@ type User struct {
 	Password                string             `json:"password"`
 	CreatedAt               pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt               pgtype.Timestamptz `json:"updated_at"`
+	UserStatus              string             `json:"user_status"`
 }
 
 type UserPaymentMethod struct {

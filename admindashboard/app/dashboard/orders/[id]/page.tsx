@@ -288,10 +288,7 @@ export default function OrderDetailsPage() {
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 text-right">
                           {orderDetailsData?.order.quantity}{" "}
-                          {productData?.product?.unitType?.replace(
-                            "per_",
-                            ""
-                          )}
+                          {productData?.product?.unitType?.replace("per_", "")}
                           {parseInt(orderDetailsData?.order.quantity ?? "") >
                             1 && "s"}
                         </td>
@@ -320,8 +317,9 @@ export default function OrderDetailsPage() {
                         </td>
                         <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right">
                           {formatCurrency(
-                            orderDetailsData?.order?.price?.value ?? 0,
-                            orderDetailsData?.order.price?.currencyIsoCode ?? ""
+                            (productData?.product?.amount?.value ?? 0) *
+                              parseInt(orderDetailsData?.order?.quantity ?? ""),
+                            productData?.product?.amount?.currencyIsoCode ?? ""
                           )}
                         </td>
                       </tr>
@@ -330,11 +328,15 @@ export default function OrderDetailsPage() {
                           colSpan={3}
                           className="px-4 py-3 text-sm font-medium text-gray-900 text-right"
                         >
-                          Delivery Fee
+                          Fees
                         </td>
                         <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right">
                           {formatCurrency(
-                            0,
+                            (orderDetailsData?.order.price?.value ?? 0) -
+                              (productData?.product?.amount?.value ?? 0) *
+                                parseInt(
+                                  orderDetailsData?.order?.quantity ?? ""
+                                ),
                             orderDetailsData?.order.price?.currencyIsoCode ?? ""
                           )}
                         </td>
