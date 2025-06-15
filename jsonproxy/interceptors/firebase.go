@@ -44,10 +44,14 @@ func NewFirebaseAuthenticationInterceptor(client TokenVerifier) HTTPInterceptor 
 
 			userRole, _ := token.Claims["role"].(string)
 
+			userStatus, _ := token.Claims["status"].(string)
+
 			// Set the user role in the request context
 			ctx := context.WithValue(r.Context(), ContextKeyRole, userRole)
 			// Set the user ID in the request context
 			ctx = context.WithValue(ctx, ContextKeyUserID, token.UID)
+			// Set the status in the request context
+			ctx = context.WithValue(ctx, ContextKeyStatus, userStatus)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
