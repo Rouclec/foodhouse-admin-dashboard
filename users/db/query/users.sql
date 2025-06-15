@@ -55,7 +55,7 @@ SELECT
     f.user_status,
     f.address,
     f.phone_number,
-    f.email
+    f.email,
     COALESCE(fr.average_rating, 0) AS average_rating
 FROM
     users f

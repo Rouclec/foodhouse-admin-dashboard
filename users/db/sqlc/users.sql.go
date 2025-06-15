@@ -274,6 +274,8 @@ SELECT
     f.created_at,
     f.user_status,
     f.address,
+    f.phone_number,
+    f.email,
     COALESCE(fr.average_rating, 0) AS average_rating
 FROM
     users f
@@ -287,7 +289,7 @@ LEFT JOIN (
         farmer_id
 ) AS fr ON f.id = fr.farmer_id
 WHERE
-    ( $1::TEXT = '' OR (f.user_status = $1::TEXT) )
+    ( $1::TEXT = 'UserStatus_UNSPECIFIED' OR (f.user_status = $1::TEXT) )
     AND
     (
         $2::float = 0.0
@@ -323,6 +325,8 @@ type ListFarmersByRatingRow struct {
 	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 	UserStatus    string             `json:"user_status"`
 	Address       *string            `json:"address"`
+	PhoneNumber   string             `json:"phone_number"`
+	Email         *string            `json:"email"`
 	AverageRating float64            `json:"average_rating"`
 }
 
@@ -348,6 +352,8 @@ func (q *Queries) ListFarmersByRating(ctx context.Context, arg ListFarmersByRati
 			&i.CreatedAt,
 			&i.UserStatus,
 			&i.Address,
+			&i.PhoneNumber,
+			&i.Email,
 			&i.AverageRating,
 		); err != nil {
 			return nil, err
@@ -364,7 +370,7 @@ const listUsers = `-- name: ListUsers :many
 SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status
 FROM users 
 WHERE
-    ( $2::TEXT = '' OR (user_status = $2::TEXT) )
+    ( $2::TEXT = 'UserStatus_UNSPECIFIED' OR (user_status = $2::TEXT) )
    AND (
         $3 = ''
         OR (
