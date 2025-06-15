@@ -145,7 +145,7 @@ const OrderItem: FC<OrderItemProps> = ({ order }) => {
           <div>
             <p className="text-sm text-gray-600">
               {formatAmount(order?.quantity ?? "", { decimalPlaces: 0 })}{" "}
-              {productData?.product?.unitType?.slug?.replace("per_", "")}
+              {productData?.product?.unitType?.replace("per_", "")}
               {parseInt(order?.quantity ?? "") > 1 && "s"}
             </p>
             <p className="text-sm font-medium">{productData?.product?.name}</p>

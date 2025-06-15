@@ -32,7 +32,13 @@ VALUES (
 RETURNING *;
 
 -- name: UpdateOrderStatus :exec
-UPDATE orders SET status = $2, updated_at = now() WHERE order_number = $1;
+UPDATE orders
+SET
+  status = $2,
+  updated_at = now(),
+  dispatched_by = COALESCE($3, approved_by)
+WHERE order_number = $1;
+
 
 -- name: GetOrderByOrderNumber :one
 SELECT * FROM orders WHERE order_number = $1;

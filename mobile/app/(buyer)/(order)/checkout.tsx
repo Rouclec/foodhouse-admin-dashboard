@@ -208,7 +208,7 @@ export default function Checkout() {
                     {productData?.product?.amount?.value}
                     <Text style={styles.greyText}>
                       {" "}
-                      {productData?.product?.unitType?.slug?.replace(
+                      {productData?.product?.unitType?.replace(
                         "per_",
                         "/"
                       )}

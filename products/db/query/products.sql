@@ -93,11 +93,9 @@ SELECT
   c.slug AS category_slug,
   c.created_by AS category_created_by,
 
-  pt.slug as unit_type_slug
 
 FROM product p
-JOIN categories c ON p.category_id = c.id
-JOIN price_types pt ON p.unit_type = pt.id
+LEFT JOIN categories c ON p.category_id = c.id
 WHERE p.id = $1;
 
 -- name: CreateProductName :one

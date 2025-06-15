@@ -37,7 +37,7 @@ export const Product: FC<Props> = ({ product, OnPress }) => {
           {formatAmount(product.amount?.value ?? "", { decimalPlaces: 2 })}
           {/* <Text>{product.unitType}</Text> */}
           <Text style={styles.greyText}>
-            {product.unitType?.slug?.replace("per_", "/")}
+            {product.unitType?.replace("per_", "/")}
           </Text>{" "}
           {/* Use actual unit type*/}
         </Text>

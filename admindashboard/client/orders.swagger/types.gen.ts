@@ -124,6 +124,7 @@ export type ordersgrpcOrder = {
     productOwner?: string;
     payoutPhoneNumber?: string;
     quantity?: string;
+    dispatchedBy?: string;
 };
 
 export type ordersgrpcOrderAuditLog = {

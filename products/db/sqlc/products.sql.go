@@ -43,9 +43,9 @@ RETURNING id, name, slug, category_id
 `
 
 type CreatePriceTypeParams struct {
-	Name       string `json:"name"`
-	Slug       string `json:"slug"`
-	CategoryID string `json:"category_id"`
+	Name       string  `json:"name"`
+	Slug       string  `json:"slug"`
+	CategoryID *string `json:"category_id"`
 }
 
 func (q *Queries) CreatePriceType(ctx context.Context, arg CreatePriceTypeParams) (PriceType, error) {
@@ -72,7 +72,7 @@ RETURNING id, category_id, name, unit_type, value, currency_iso_code, descriptio
 `
 
 type CreateProductParams struct {
-	CategoryID      string  `json:"category_id"`
+	CategoryID      *string `json:"category_id"`
 	Name            string  `json:"name"`
 	UnitType        string  `json:"unit_type"`
 	Value           float64 `json:"value"`
@@ -120,9 +120,9 @@ RETURNING name, slug, category_id
 `
 
 type CreateProductNameParams struct {
-	Name       string `json:"name"`
-	Slug       string `json:"slug"`
-	CategoryID string `json:"category_id"`
+	Name       string  `json:"name"`
+	Slug       string  `json:"slug"`
+	CategoryID *string `json:"category_id"`
 }
 
 func (q *Queries) CreateProductName(ctx context.Context, arg CreateProductNameParams) (ProductName, error) {
@@ -445,7 +445,7 @@ type ListProductsParams struct {
 
 type ListProductsRow struct {
 	ID              string             `json:"id"`
-	CategoryID      string             `json:"category_id"`
+	CategoryID      *string            `json:"category_id"`
 	Name            string             `json:"name"`
 	UnitType        string             `json:"unit_type"`
 	Value           float64            `json:"value"`
@@ -559,7 +559,7 @@ WHERE id = $2 AND created_by = $1
 type UpdateProductParams struct {
 	CreatedBy       *string `json:"created_by"`
 	ID              string  `json:"id"`
-	CategoryID      string  `json:"category_id"`
+	CategoryID      *string `json:"category_id"`
 	Name            string  `json:"name"`
 	UnitType        string  `json:"unit_type"`
 	Value           float64 `json:"value"`

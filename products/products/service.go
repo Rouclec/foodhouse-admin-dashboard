@@ -122,7 +122,7 @@ func (i *Impl) CreateProduct(ctx context.Context, req *productsgrpc.CreateProduc
 	}
 
 	product, err := i.repo.Do().CreateProduct(ctx, sqlc.CreateProductParams{
-		CategoryID:      req.GetCategoryId(),
+		CategoryID:      &req.CategoryId,
 		Name:            req.GetName(),
 		UnitType:        req.GetUnitType(),
 		Value:           req.GetAmount().GetValue(),
@@ -144,10 +144,8 @@ func (i *Impl) CreateProduct(ctx context.Context, req *productsgrpc.CreateProduc
 				Name: category.Name,
 				Slug: category.Slug,
 			},
-			Name: product.Name,
-			UnitType: &productsgrpc.PriceType{
-				Id: product.UnitType,
-			},
+			Name:     product.Name,
+			UnitType: product.UnitType,
 			Amount: &types.Amount{
 				Value:           product.Value,
 				CurrencyIsoCode: product.CurrencyIsoCode,
@@ -311,7 +309,7 @@ func (i *Impl) UpdateProduct(ctx context.Context, req *productsgrpc.UpdateProduc
 	i.logger.Debug().Interface("product found: ", product).Msg("Product for update")
 
 	arg := sqlc.UpdateProductParams{
-		CategoryID:      req.GetCategoryId(),
+		CategoryID:      &req.CategoryId,
 		Name:            req.GetName(),
 		UnitType:        req.GetUnitType(),
 		Value:           req.Amount.GetValue(),
@@ -402,7 +400,7 @@ func (i *Impl) CreatePriceType(ctx context.Context, req *productsgrpc.CreatePric
 	args := sqlc.CreatePriceTypeParams{
 		Name:       req.GetName(),
 		Slug:       slug.Make(req.GetName()),
-		CategoryID: req.GetCategoryId(),
+		CategoryID: &req.CategoryId,
 	}
 
 	priceType, err := i.repo.Do().CreatePriceType(ctx, args)
@@ -415,7 +413,7 @@ func (i *Impl) CreatePriceType(ctx context.Context, req *productsgrpc.CreatePric
 			Id:         priceType.ID,
 			Name:       priceType.Name,
 			Slug:       priceType.Slug,
-			CategoryId: priceType.CategoryID,
+			CategoryId: *priceType.CategoryID,
 		},
 	}, nil
 }
@@ -431,7 +429,7 @@ func (i *Impl) CreateProductName(ctx context.Context, req *productsgrpc.CreatePr
 	args := sqlc.CreateProductNameParams{
 		Name:       req.GetName(),
 		Slug:       slug.Make(req.GetName()),
-		CategoryID: req.GetCategoryId(),
+		CategoryID: &req.CategoryId,
 	}
 
 	productName, err := i.repo.Do().CreateProductName(ctx, args)
@@ -443,7 +441,7 @@ func (i *Impl) CreateProductName(ctx context.Context, req *productsgrpc.CreatePr
 		ProductName: &productsgrpc.ProductName{
 			Name:       productName.Name,
 			Slug:       productName.Slug,
-			CategoryId: productName.CategoryID,
+			CategoryId: *productName.CategoryID,
 		},
 	}, nil
 }
