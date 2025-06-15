@@ -63,10 +63,8 @@ func SqlcToProtoFarmers(sqlcFarmers []sqlc.ListFarmersByRatingRow) ([]*usersgrpc
 		switch sf.UserStatus {
 		case usersgrpc.UserStatus_UserStatus_ACTIVE.String():
 			status = usersgrpc.UserStatus_UserStatus_ACTIVE
-			break
 		case usersgrpc.UserStatus_UserStatus_SUSPENDED.String():
 			status = usersgrpc.UserStatus_UserStatus_SUSPENDED
-			break
 		default:
 			status = usersgrpc.UserStatus_UserStatus_UNSPECIFIED
 		}
@@ -89,7 +87,7 @@ func SqlcToProtoFarmers(sqlcFarmers []sqlc.ListFarmersByRatingRow) ([]*usersgrpc
 }
 
 func SqlcToProtoUsers(sqlcUsers []sqlc.User) ([]*usersgrpc.User, error) {
-	protoUsers := make([]*usersgrpc.User, len(sqlcUsers))
+	protoUsers := make([]*usersgrpc.User, 0, len(sqlcUsers))
 
 	for _, su := range sqlcUsers {
 		var status usersgrpc.UserStatus
@@ -97,10 +95,8 @@ func SqlcToProtoUsers(sqlcUsers []sqlc.User) ([]*usersgrpc.User, error) {
 		switch su.UserStatus {
 		case usersgrpc.UserStatus_UserStatus_ACTIVE.String():
 			status = usersgrpc.UserStatus_UserStatus_ACTIVE
-			break
 		case usersgrpc.UserStatus_UserStatus_SUSPENDED.String():
 			status = usersgrpc.UserStatus_UserStatus_SUSPENDED
-			break
 		default:
 			status = usersgrpc.UserStatus_UserStatus_UNSPECIFIED
 		}

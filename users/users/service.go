@@ -1524,7 +1524,9 @@ func (i *Impl) GetUserStats(ctx context.Context,
 }
 
 // SuspendUser implements usersgrpc.UsersServer.
-func (i *Impl) SuspendUser(ctx context.Context, req *usersgrpc.SuspendUserRequest) (*usersgrpc.SuspendUserResponse, error) {
+func (i *Impl) SuspendUser(ctx context.Context,
+	req *usersgrpc.SuspendUserRequest) (
+	*usersgrpc.SuspendUserResponse, error) {
 	err := i.repo.Do().SuspendUser(ctx, req.GetUserId())
 
 	if err != nil {
@@ -1534,7 +1536,9 @@ func (i *Impl) SuspendUser(ctx context.Context, req *usersgrpc.SuspendUserReques
 }
 
 // ReactivateUser implements usersgrpc.UsersServer.
-func (i *Impl) ReactivateUser(ctx context.Context, req *usersgrpc.ReactivateUserRequest) (*usersgrpc.ReactivateUserResponse, error) {
+func (i *Impl) ReactivateUser(ctx context.Context,
+	req *usersgrpc.ReactivateUserRequest) (
+	*usersgrpc.ReactivateUserResponse, error) {
 	err := i.repo.Do().ReactivateUser(ctx, req.GetUserId())
 
 	if err != nil {
