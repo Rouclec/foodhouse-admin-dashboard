@@ -1,28 +1,60 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, Flag, UserX, Leaf, MessageCircle, Tractor } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { useContext, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Search,
+  Flag,
+  UserX,
+  Leaf,
+  MessageCircle,
+  Tractor,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useQueryLoading } from "@/hooks/use-query-loading";
+import { useQuery } from "@tanstack/react-query";
+import { usersListFarmersOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
+import { Context, ContextType } from "@/app/contexts/QueryProvider";
 
 interface Farmer {
-  id: string
-  name: string
-  email: string
-  phone: string
-  farmName: string
-  location: string
-  status: "active" | "flagged" | "disabled"
-  joinDate: string
-  totalProducts: number
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  farmName: string;
+  location: string;
+  status: "active" | "flagged" | "disabled";
+  joinDate: string;
+  totalProducts: number;
 }
 
 export default function FarmersPage() {
+  const { user } = useContext(Context) as ContextType;
+  
   const [farmers, setFarmers] = useState<Farmer[]>([
     {
       id: "1",
@@ -68,66 +100,92 @@ export default function FarmersPage() {
       joinDate: "2024-01-05",
       totalProducts: 12,
     },
-  ])
+  ]);
 
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-  const { toast } = useToast()
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const { toast } = useToast();
 
   const filteredFarmers = farmers.filter((farmer) => {
     const matchesSearch =
       farmer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       farmer.farmName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      farmer.email.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === "all" || farmer.status === statusFilter
-    return matchesSearch && matchesStatus
-  })
+      farmer.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === "all" || farmer.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const { data: farmersData, isLoading: isFarmersLoading } = useQuery({
+    ...usersListFarmersOptions({
+      path: {
+        userId: user?.userId ?? "",
+      },
+    }),
+  });
+
+  useQueryLoading(isFarmersLoading);
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
-        return "bg-green-100 text-green-800"
+        return "bg-green-100 text-green-800";
       case "flagged":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-100 text-yellow-800";
       case "disabled":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800";
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
   const handleDisableFarmer = (farmerId: string) => {
     setFarmers(
       farmers.map((farmer) =>
         farmer.id === farmerId
-          ? { ...farmer, status: farmer.status === "disabled" ? "active" : ("disabled" as const) }
-          : farmer,
-      ),
-    )
+          ? {
+              ...farmer,
+              status:
+                farmer.status === "disabled" ? "active" : ("disabled" as const),
+            }
+          : farmer
+      )
+    );
 
-    const farmer = farmers.find((f) => f.id === farmerId)
-    const newStatus = farmer?.status === "disabled" ? "active" : "disabled"
+    const farmer = farmers.find((f) => f.id === farmerId);
+    const newStatus = farmer?.status === "disabled" ? "active" : "disabled";
 
     toast({
-      title: `Farmer account ${newStatus === "disabled" ? "disabled" : "enabled"}`,
-      description: `${farmer?.name}'s account has been ${newStatus === "disabled" ? "disabled" : "reactivated"}.`,
-    })
-  }
+      title: `Farmer account ${
+        newStatus === "disabled" ? "disabled" : "enabled"
+      }`,
+      description: `${farmer?.name}'s account has been ${
+        newStatus === "disabled" ? "disabled" : "reactivated"
+      }.`,
+    });
+  };
 
   const handleContactFarmer = (phone: string, farmerName: string) => {
     const message = encodeURIComponent(
-      `Hello ${farmerName}! I'm contacting you from FoodHouse admin team. How can I assist you?`,
-    )
-    const whatsappUrl = `https://wa.me/${phone.replace(/[^0-9]/g, "")}?text=${message}`
-    window.open(whatsappUrl, "_blank")
-  }
+      `Hello ${farmerName}! I'm contacting you from FoodHouse admin team. How can I assist you?`
+    );
+    const whatsappUrl = `https://wa.me/${phone.replace(
+      /[^0-9]/g,
+      ""
+    )}?text=${message}`;
+    window.open(whatsappUrl, "_blank");
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Farmer Management</h1>
-          <p className="text-gray-600">Manage farmers and their account status</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Farmer Management
+          </h1>
+          <p className="text-gray-600">
+            Manage farmers and their account status
+          </p>
         </div>
       </div>
 
@@ -181,7 +239,9 @@ export default function FarmersPage() {
                 <TableHead>Farmer</TableHead>
                 <TableHead className="hidden lg:table-cell">Location</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="hidden md:table-cell">Join Date</TableHead>
+                <TableHead className="hidden md:table-cell">
+                  Join Date
+                </TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -194,18 +254,28 @@ export default function FarmersPage() {
                       <p className="text-sm text-gray-600">{farmer.email}</p>
                     </div>
                   </TableCell>
-                  <TableCell className="hidden lg:table-cell">{farmer.location}</TableCell>
-                  <TableCell>
-                    <Badge className={getStatusColor(farmer.status)}>{farmer.status}</Badge>
-                    <div className="md:hidden mt-1 text-xs text-gray-500">Joined: {farmer.joinDate}</div>
+                  <TableCell className="hidden lg:table-cell">
+                    {farmer.location}
                   </TableCell>
-                  <TableCell className="hidden md:table-cell">{farmer.joinDate}</TableCell>
+                  <TableCell>
+                    <Badge className={getStatusColor(farmer.status)}>
+                      {farmer.status}
+                    </Badge>
+                    <div className="md:hidden mt-1 text-xs text-gray-500">
+                      Joined: {farmer.joinDate}
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    {farmer.joinDate}
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleContactFarmer(farmer.phone, farmer.name)}
+                        onClick={() =>
+                          handleContactFarmer(farmer.phone, farmer.name)
+                        }
                         title="Contact via WhatsApp"
                       >
                         <MessageCircle className="h-4 w-4" />
@@ -214,7 +284,11 @@ export default function FarmersPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => handleDisableFarmer(farmer.id)}
-                        title={farmer.status === "disabled" ? "Enable account" : "Disable account"}
+                        title={
+                          farmer.status === "disabled"
+                            ? "Enable account"
+                            : "Disable account"
+                        }
                       >
                         <UserX className="h-4 w-4" />
                       </Button>
@@ -227,5 +301,5 @@ export default function FarmersPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

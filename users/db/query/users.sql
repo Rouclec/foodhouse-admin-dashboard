@@ -67,7 +67,7 @@ LEFT JOIN (
         farmer_id
 ) AS fr ON f.id = fr.farmer_id
 WHERE
-    ( sqlc.arg(user_status)::TEXT = '' OR (status = sqlc.arg(user_status)::user_status) )
+    ( sqlc.arg(user_status)::TEXT = '' OR (f.user_status = sqlc.arg(user_status)::TEXT) )
     AND
     (
         sqlc.arg(cursor_average_rating)::float = 0.0
@@ -91,13 +91,13 @@ LIMIT sqlc.arg(count);
 SELECT *
 FROM users 
 WHERE
-    ( sqlc.arg(user_status)::TEXT = '' OR (status = sqlc.arg(user_status)::user_status) )
+    ( sqlc.arg(user_status)::TEXT = '' OR (user_status = sqlc.arg(user_status)::TEXT) )
    AND (
         sqlc.arg(search_key) = ''
         OR (
-            LOWER(f.first_name) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
-            OR LOWER(f.last_name) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
-            OR LOWER(f.email) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
+            LOWER(first_name) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
+            OR LOWER(last_name) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
+            OR LOWER(email) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
         )
     )
     AND created_at < sqlc.arg(before)::timestamptz
