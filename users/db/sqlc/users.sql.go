@@ -287,7 +287,7 @@ LEFT JOIN (
         farmer_id
 ) AS fr ON f.id = fr.farmer_id
 WHERE
-    ( $1::TEXT = '' OR (status = $1::user_status) )
+    ( $1::TEXT = '' OR (f.user_status = $1::TEXT) )
     AND
     (
         $2::float = 0.0
@@ -364,13 +364,13 @@ const listUsers = `-- name: ListUsers :many
 SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status
 FROM users 
 WHERE
-    ( $2::TEXT = '' OR (status = $2::user_status) )
+    ( $2::TEXT = '' OR (user_status = $2::TEXT) )
    AND (
         $3 = ''
         OR (
-            LOWER(f.first_name) LIKE LOWER('%' || $3 || '%')
-            OR LOWER(f.last_name) LIKE LOWER('%' || $3 || '%')
-            OR LOWER(f.email) LIKE LOWER('%' || $3 || '%')
+            LOWER(first_name) LIKE LOWER('%' || $3 || '%')
+            OR LOWER(last_name) LIKE LOWER('%' || $3 || '%')
+            OR LOWER(email) LIKE LOWER('%' || $3 || '%')
         )
     )
     AND created_at < $4::timestamptz

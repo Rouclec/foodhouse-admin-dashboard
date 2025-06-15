@@ -116,7 +116,8 @@ func TestNewFirebaseAuthenticationInterceptor(t *testing.T) {
 			handler := interceptors.WireDefaultInterceptors(tokenVerifier, okHandler)
 
 			handler.ServeHTTP(responseWriter, req)
-			assert.Equalf(t, tc.expectedStatusCode, responseWriter.Code, "expected status code %d, got %d", tc.expectedStatusCode, responseWriter.Code)
+			assert.Equalf(t, tc.expectedStatusCode, responseWriter.Code,
+				"expected status code %d, got %d", tc.expectedStatusCode, responseWriter.Code)
 		})
 	}
 }
