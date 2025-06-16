@@ -206,6 +206,23 @@ message CreateDeliveryPointRequest {
 
 message CreateDeliveryPointResponse { DeliveryPoint delivery_point = 1; }
 
+message UpdateDeliveryPointRequest {
+  string id = 1;
+  types.Point address = 2;
+  string city = 3;
+  string delivery_point_name = 4;
+  string user_id = 5;
+}
+
+message UpdateDeliveryPointResponse {}
+
+message DeleteDeliveryPointRequest {
+  string id = 1;
+  string user_id = 2;
+}
+
+message DeleteDeliveryPointResponse {}
+
 message ListDeliveryPointsRequest {
   string city = 1;
   string user_id = 2;
@@ -398,6 +415,21 @@ service Orders {
     option (google.api.http) = {
       post : "/v1/admin/{user_id}/orders/create-delivery-point"
       body : "*"
+    };
+  }
+
+  rpc UpdateDeliveryPoint(UpdateDeliveryPointRequest)
+      returns (UpdateDeliveryPointResponse) {
+    option (google.api.http) = {
+      put : "/v1/admin/{user_id}/orders/{id}/update-delivery-point"
+      body : "*"
+    };
+  }
+
+  rpc DeleteDeliveryPoint(DeleteDeliveryPointRequest)
+      returns (DeleteDeliveryPointResponse) {
+    option (google.api.http) = {
+      delete : "/v1/admin/{user_id}/orders/{id}/delete-delivery-point"
     };
   }
 

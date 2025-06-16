@@ -2,6 +2,14 @@
 INSERT INTO delivery_points (delivery_location, location_name, delivery_point_name, city) VALUES ($1, $2, $3, $4)
 RETURNING *;
 
+-- name: UpdateDeliveryPoint :exec
+UPDATE delivery_points
+SET (delivery_location, location_name, delivery_point_name, city) = ($2, $3, $4, $5)
+WHERE id = $1;
+
+-- name: DeleteDeliveryPoint :exec
+DELETE FROM delivery_points WHERE id = $1;
+
 -- name: ListDeliveryPoints :many
 SELECT * 
 FROM delivery_points

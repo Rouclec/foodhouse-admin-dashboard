@@ -32,6 +32,8 @@ const (
 	Orders_ListOrders_FullMethodName          = "/ordersgrpc.Orders/ListOrders"
 	Orders_InitiatePayment_FullMethodName     = "/ordersgrpc.Orders/InitiatePayment"
 	Orders_CreateDeliveryPoint_FullMethodName = "/ordersgrpc.Orders/CreateDeliveryPoint"
+	Orders_UpdateDeliveryPoint_FullMethodName = "/ordersgrpc.Orders/UpdateDeliveryPoint"
+	Orders_DeleteDeliveryPoint_FullMethodName = "/ordersgrpc.Orders/DeleteDeliveryPoint"
 	Orders_ListDeliveryPoints_FullMethodName  = "/ordersgrpc.Orders/ListDeliveryPoints"
 	Orders_GetAdminStats_FullMethodName       = "/ordersgrpc.Orders/GetAdminStats"
 	Orders_ListDeliveryCities_FullMethodName  = "/ordersgrpc.Orders/ListDeliveryCities"
@@ -57,6 +59,8 @@ type OrdersClient interface {
 	ListOrders(ctx context.Context, in *ListOrdersRequest, opts ...grpc.CallOption) (*ListOrdersResponse, error)
 	InitiatePayment(ctx context.Context, in *InitiatePaymentRequest, opts ...grpc.CallOption) (*InitiatePaymentResponse, error)
 	CreateDeliveryPoint(ctx context.Context, in *CreateDeliveryPointRequest, opts ...grpc.CallOption) (*CreateDeliveryPointResponse, error)
+	UpdateDeliveryPoint(ctx context.Context, in *UpdateDeliveryPointRequest, opts ...grpc.CallOption) (*UpdateDeliveryPointResponse, error)
+	DeleteDeliveryPoint(ctx context.Context, in *DeleteDeliveryPointRequest, opts ...grpc.CallOption) (*DeleteDeliveryPointResponse, error)
 	ListDeliveryPoints(ctx context.Context, in *ListDeliveryPointsRequest, opts ...grpc.CallOption) (*ListDeliveryPointsResponse, error)
 	GetAdminStats(ctx context.Context, in *GetAdminStatsRequest, opts ...grpc.CallOption) (*GetAdminStatsResponse, error)
 	ListDeliveryCities(ctx context.Context, in *ListDeliveryCitiesRequest, opts ...grpc.CallOption) (*ListDeliveryCitiesResponse, error)
@@ -203,6 +207,26 @@ func (c *ordersClient) CreateDeliveryPoint(ctx context.Context, in *CreateDelive
 	return out, nil
 }
 
+func (c *ordersClient) UpdateDeliveryPoint(ctx context.Context, in *UpdateDeliveryPointRequest, opts ...grpc.CallOption) (*UpdateDeliveryPointResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateDeliveryPointResponse)
+	err := c.cc.Invoke(ctx, Orders_UpdateDeliveryPoint_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ordersClient) DeleteDeliveryPoint(ctx context.Context, in *DeleteDeliveryPointRequest, opts ...grpc.CallOption) (*DeleteDeliveryPointResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteDeliveryPointResponse)
+	err := c.cc.Invoke(ctx, Orders_DeleteDeliveryPoint_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *ordersClient) ListDeliveryPoints(ctx context.Context, in *ListDeliveryPointsRequest, opts ...grpc.CallOption) (*ListDeliveryPointsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListDeliveryPointsResponse)
@@ -280,6 +304,8 @@ type OrdersServer interface {
 	ListOrders(context.Context, *ListOrdersRequest) (*ListOrdersResponse, error)
 	InitiatePayment(context.Context, *InitiatePaymentRequest) (*InitiatePaymentResponse, error)
 	CreateDeliveryPoint(context.Context, *CreateDeliveryPointRequest) (*CreateDeliveryPointResponse, error)
+	UpdateDeliveryPoint(context.Context, *UpdateDeliveryPointRequest) (*UpdateDeliveryPointResponse, error)
+	DeleteDeliveryPoint(context.Context, *DeleteDeliveryPointRequest) (*DeleteDeliveryPointResponse, error)
 	ListDeliveryPoints(context.Context, *ListDeliveryPointsRequest) (*ListDeliveryPointsResponse, error)
 	GetAdminStats(context.Context, *GetAdminStatsRequest) (*GetAdminStatsResponse, error)
 	ListDeliveryCities(context.Context, *ListDeliveryCitiesRequest) (*ListDeliveryCitiesResponse, error)
@@ -334,6 +360,12 @@ func (UnimplementedOrdersServer) InitiatePayment(context.Context, *InitiatePayme
 }
 func (UnimplementedOrdersServer) CreateDeliveryPoint(context.Context, *CreateDeliveryPointRequest) (*CreateDeliveryPointResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateDeliveryPoint not implemented")
+}
+func (UnimplementedOrdersServer) UpdateDeliveryPoint(context.Context, *UpdateDeliveryPointRequest) (*UpdateDeliveryPointResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateDeliveryPoint not implemented")
+}
+func (UnimplementedOrdersServer) DeleteDeliveryPoint(context.Context, *DeleteDeliveryPointRequest) (*DeleteDeliveryPointResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteDeliveryPoint not implemented")
 }
 func (UnimplementedOrdersServer) ListDeliveryPoints(context.Context, *ListDeliveryPointsRequest) (*ListDeliveryPointsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListDeliveryPoints not implemented")
@@ -608,6 +640,42 @@ func _Orders_CreateDeliveryPoint_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Orders_UpdateDeliveryPoint_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateDeliveryPointRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).UpdateDeliveryPoint(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_UpdateDeliveryPoint_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).UpdateDeliveryPoint(ctx, req.(*UpdateDeliveryPointRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orders_DeleteDeliveryPoint_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteDeliveryPointRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).DeleteDeliveryPoint(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_DeleteDeliveryPoint_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).DeleteDeliveryPoint(ctx, req.(*DeleteDeliveryPointRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Orders_ListDeliveryPoints_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListDeliveryPointsRequest)
 	if err := dec(in); err != nil {
@@ -774,6 +842,14 @@ var Orders_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateDeliveryPoint",
 			Handler:    _Orders_CreateDeliveryPoint_Handler,
+		},
+		{
+			MethodName: "UpdateDeliveryPoint",
+			Handler:    _Orders_UpdateDeliveryPoint_Handler,
+		},
+		{
+			MethodName: "DeleteDeliveryPoint",
+			Handler:    _Orders_DeleteDeliveryPoint_Handler,
 		},
 		{
 			MethodName: "ListDeliveryPoints",
