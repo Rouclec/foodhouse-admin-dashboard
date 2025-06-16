@@ -900,7 +900,9 @@ func (i *Impl) CreateSubscription(ctx context.Context,
 		return nil, status.Errorf(codes.Internal, "Erro creating subscription: %v", err)
 	}
 
-	totalDays := int64(subscription.Duration.Months)*30 + int64(subscription.Duration.Days) + subscription.Duration.Microseconds/(24*60*60*OneMillion)
+	totalDays := int64(subscription.Duration.Months)*30 +
+		int64(subscription.Duration.Days) +
+		subscription.Duration.Microseconds/(24*60*60*OneMillion)
 
 	return &usersgrpc.CreateSubscriptionResponse{
 		Subscription: &usersgrpc.Subscription{
@@ -979,15 +981,16 @@ func (i *Impl) UpdateSubscription(ctx context.Context,
 		return nil, status.Errorf(codes.Internal, "Failed to commit the transaction: %v", err)
 	}
 
-
-	totalDays := int64(updatedSubscription.Duration.Months)*30 + int64(updatedSubscription.Duration.Days) + updatedSubscription.Duration.Microseconds/(24*60*60*OneMillion)
+	totalDays := int64(updatedSubscription.Duration.Months)*30 +
+		int64(updatedSubscription.Duration.Days) +
+		updatedSubscription.Duration.Microseconds/(24*60*60*OneMillion)
 
 	return &usersgrpc.UpdateSubscriptionResponse{
 		Subscription: &usersgrpc.Subscription{
 			Id:          updatedSubscription.ID,
 			Title:       updatedSubscription.Title,
 			Description: updatedSubscription.Description,
-			Duration: totalDays,
+			Duration:    totalDays,
 			Amount: &types.Amount{
 				Value:           updatedSubscription.Amount,
 				CurrencyIsoCode: updatedSubscription.CurrencyIsoCode,
