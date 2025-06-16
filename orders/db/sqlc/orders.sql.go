@@ -679,7 +679,7 @@ SELECT id, status, payment_entity, entity_id, amount_value, amount_currency, cre
 WHERE
   ( $1::TEXT = 'PaymentStatus_UNSPECIFIED' OR (status = $1::TEXT) ) 
   AND  
-  ( $2::TEXT = 'PaymentEntity_UNSPECIFIED' OR (payment_entity = $1::TEXT) ) 
+  ( $2::TEXT = 'PaymentEntity_UNSPECIFIED' OR (payment_entity = $2::TEXT) ) 
   AND  
   (
     $3::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
