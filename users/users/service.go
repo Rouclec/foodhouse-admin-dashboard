@@ -1598,19 +1598,10 @@ func (i *Impl) GrantAgent(ctx context.Context,
 		if !ok {
 			return nil, status.Errorf(codes.Internal, "Invalid user role in database: %v", foundUser.Role)
 		}
-		if userRole == int32(usersgrpc.UserRole_USER_ROLE_ADMIN) {
+		if userRole != int32(usersgrpc.UserRole_USER_ROLE_BUYER) {
 			return nil, status.
-				Errorf(codes.AlreadyExists, "This phone number is already assigned to an admin: %v", newAgentPhoneNumber)
-		}
-
-		if userRole == int32(usersgrpc.UserRole_USER_ROLE_FARMER) {
-			return nil, status.
-				Errorf(codes.AlreadyExists, "This phone number is already assigned to a farmer: %v", newAgentPhoneNumber)
-		}
-
-		if userRole == int32(usersgrpc.UserRole_USER_ROLE_AGENT) {
-			return nil, status.
-				Errorf(codes.AlreadyExists, "This phone number is already assigned to an agent: %v", newAgentPhoneNumber)
+				Errorf(codes.AlreadyExists, "Phone number belongs to a user who is not a buyer: %v",
+					newAgentPhoneNumber)
 		}
 
 		arg := sqlc.UpdateUserRoleParams{
