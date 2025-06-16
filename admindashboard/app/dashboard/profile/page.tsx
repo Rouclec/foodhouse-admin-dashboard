@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,14 +14,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, Mail, Lock, Upload } from "lucide-react";
+import { User, Mail, Lock, Upload, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Context, ContextType } from "@/app/contexts/QueryProvider";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  usersChangePasswordMutation,
+  usersCompleteRegistrationMutation,
+  usersGetUserByIdOptions,
+} from "@/client/users.swagger/@tanstack/react-query.gen";
 
 export default function ProfilePage() {
-  const { user } = useContext(Context) as ContextType;
-  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const { user, setUser } = useContext(Context) as ContextType;
+  const [loading, setLoading] = useState(false);
 
   const [profile, setProfile] = useState({
     firstName: user?.firstName,
@@ -32,38 +37,125 @@ export default function ProfilePage() {
     confirmPassword: "",
   });
 
-  const { toast } = useToast();
-
-  const handleProfileUpdate = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast({
-      title: "Profile updated",
-      description: "Your profile information has been successfully updated.",
-    });
-  };
-
-  const handlePasswordChange = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (profile.newPassword !== profile.confirmPassword) {
+  const { mutateAsync: updatePassword } = useMutation({
+    ...usersChangePasswordMutation(),
+    onError: async (error) => {
       toast({
-        title: "Error",
-        description: "New passwords do not match.",
+        title: "Error chainging password",
+        description:
+          error?.response?.data?.message ?? "An unknown error occured",
         variant: "destructive",
       });
-      return;
+    },
+  });
+
+  const { mutateAsync: updateProfile } = useMutation({
+    ...usersCompleteRegistrationMutation(),
+    onError: async (error) => {
+      toast({
+        title: "Error updating profile",
+        description:
+          error?.response?.data?.message ?? "An unknown error occured",
+        variant: "destructive",
+      });
+    },
+    onSuccess: () => {
+      refetch();
+    },
+  });
+
+  const { data: userData, refetch } = useQuery({
+    ...usersGetUserByIdOptions({
+      path: {
+        userId: user?.userId ?? "",
+      },
+    }),
+  });
+
+  useEffect(() => {
+    if (userData?.user) {
+      setUser(userData?.user);
     }
+  }, [userData]);
 
-    toast({
-      title: "Password changed",
-      description: "Your password has been successfully updated.",
-    });
+  const { toast } = useToast();
 
-    setProfile({
-      ...profile,
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
+  const handleProfileUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      setLoading(true);
+
+      const data = {
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        email: profile.email,
+        address: user?.address,
+        profileImage: user?.profileImage ?? "",
+      };
+
+      await updateProfile({ body: data, path: { userId: user?.userId || "" } });
+
+      toast({
+        title: "Profile updated",
+        description: "Your profile information has been successfully updated.",
+      });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      if (profile?.newPassword.length < 12) {
+        toast({
+          title: "Error",
+          description: "Password must be at least 12 characters",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (profile.newPassword !== profile.confirmPassword) {
+        toast({
+          title: "Error",
+          description: "New passwords do not match.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      await updatePassword({
+        body: {
+          newPassword: profile?.newPassword,
+          emailFactor: {
+            id: user?.email,
+            type: "FACTOR_TYPE_EMAIL_PASSWORD",
+            secretValue: profile?.currentPassword,
+          },
+        },
+      });
+
+      toast({
+        title: "Password changed",
+        description: "Your password has been successfully updated.",
+      });
+
+      setProfile({
+        ...profile,
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (error) {
+      console.error({ error }, "updating password");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleImageUpload = () => {
@@ -136,7 +228,6 @@ export default function ProfilePage() {
                     onChange={(e) =>
                       setProfile({ ...profile, firstName: e.target.value })
                     }
-                    required
                   />
                 </div>
                 <div className="space-y-2">
@@ -147,7 +238,6 @@ export default function ProfilePage() {
                     onChange={(e) =>
                       setProfile({ ...profile, lastName: e.target.value })
                     }
-                    required
                   />
                 </div>
               </div>
@@ -162,10 +252,24 @@ export default function ProfilePage() {
                     setProfile({ ...profile, email: e.target.value })
                   }
                   required
+                  readOnly
                 />
               </div>
 
-              <Button type="submit">Update Profile</Button>
+              <Button
+                type="submit"
+                onSubmit={() => {
+                  console.log("updating profile");
+                }}
+                disabled={loading}
+                className={`${
+                  loading &&
+                  "bg-gray-500 hover:bg-grey-500 hover:cursor-not-allowed bg-opacity-80"
+                }`}
+              >
+                Update Profile
+                {loading && <Loader2 className={"animate-spin text-white"} />}
+              </Button>
             </form>
           </CardContent>
         </Card>
@@ -225,7 +329,17 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <Button type="submit">Change Password</Button>
+            <Button
+              type="submit"
+              disabled={loading}
+              className={`${
+                loading &&
+                "bg-gray-500 hover:bg-grey-500 hover:cursor-not-allowed bg-opacity-80"
+              }`}
+            >
+              Change Password
+              {loading && <Loader2 className={"animate-spin text-white"} />}
+            </Button>
           </form>
         </CardContent>
       </Card>

@@ -64,8 +64,8 @@ const handleResponseError = async (error: any) => {
   if (
     error?.response?.status === 401 &&
     !originalRequest?._retry &&
-    typeof error?.response?.data === "string" &&
-    (error?.response?.data ?? "")?.includes("ID token has expired")
+    !!error?.response?.data?.message &&
+    (error?.response?.data?.message ?? "").includes("ID token has expired")
   ) {
     originalRequest._retry = true; // Mark the request as retried to avoid infinite loops.
     try {

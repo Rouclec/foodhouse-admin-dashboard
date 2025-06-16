@@ -39,10 +39,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, CreditCard } from "lucide-react";
+import { Plus, Edit, Trash2, CreditCard, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Context, ContextType } from "@/app/contexts/QueryProvider";
-import { useCursorPagination } from "@/hooks/use-cursor-pagination";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   usersCreateSubscriptionMutation,
@@ -54,7 +53,6 @@ import { usersgrpcSubscription } from "@/client/users.swagger";
 import { useConfirmDelete } from "@/hooks/use-confirm-delete";
 import { useQueryLoading } from "@/hooks/use-query-loading";
 import { formatCurrency } from "@/utils";
-import moment from "moment";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 
 const currencies = ["XAF", "TZS", "USD"];
@@ -97,35 +95,44 @@ export default function SubscriptionsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (editingSubscription) {
-      // Update existing subscription
-      await updateSubscription({
-        body: {
-          title: formData?.name,
-          description: formData?.description,
-          duration: (parseInt(formData?.duration ?? "0") * 30).toString(),
-          amount: parseFloat(formData?.amount ?? ""),
-          currencyIsoCode: formData?.currency,
-        },
-        path: {
-          adminUserId: user?.userId ?? "",
-          subscriptionId: editingSubscription?.id ?? "",
-        },
-      });
-    } else {
-      // Create new subscription
-      await createSubscription({
-        body: {
-          title: formData?.name,
-          description: formData?.description,
-          duration: (parseInt(formData?.duration ?? "0") * 30).toString(),
-          amount: parseFloat(formData?.amount ?? ""),
-          currencyIsoCode: formData?.currency,
-        },
-        path: {
-          adminUserId: user?.userId ?? "",
-        },
-      });
+    try {
+      setLoading(true);
+      if (editingSubscription) {
+        // Update existing subscription
+        await updateSubscription({
+          body: {
+            title: formData?.name,
+            description: formData?.description,
+            duration: (parseInt(formData?.duration ?? "0") * 7).toString(),
+            amount: parseFloat(formData?.amount ?? ""),
+            currencyIsoCode: formData?.currency,
+          },
+          path: {
+            adminUserId: user?.userId ?? "",
+            subscriptionId: editingSubscription?.id ?? "",
+          },
+        });
+      } else {
+        // Create new subscription
+        await createSubscription({
+          body: {
+            title: formData?.name,
+            description: formData?.description,
+            duration: (parseInt(formData?.duration ?? "0") * 7).toString(),
+            amount: parseFloat(formData?.amount ?? ""),
+            currencyIsoCode: formData?.currency,
+          },
+          path: {
+            adminUserId: user?.userId ?? "",
+          },
+        });
+      }
+
+      refetch();
+    } catch (error) {
+      console.error({ error }, "creating or updating subscription");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -136,7 +143,7 @@ export default function SubscriptionsPage() {
       description: subscription?.description ?? "",
       amount: (subscription?.amount?.value ?? 0)?.toString(),
       currency: subscription?.amount?.currencyIsoCode ?? "",
-      duration: Math.ceil(
+      duration: Math.round(
         parseInt(subscription?.duration ?? "0") / 7
       ).toString(),
     });
@@ -302,6 +309,19 @@ export default function SubscriptionsPage() {
                     />
                   </div>
 
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Description</Label>
+                    <Input
+                      id="name"
+                      placeholder="e.g. Access to basic features"
+                      value={formData.description}
+                      onChange={(e) =>
+                        setFormData({ ...formData, description: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="amount">Amount</Label>
@@ -309,7 +329,7 @@ export default function SubscriptionsPage() {
                         id="amount"
                         type="number"
                         step="0.01"
-                        placeholder="9.99"
+                        placeholder="1000.00"
                         value={formData.amount}
                         onChange={(e) =>
                           setFormData({ ...formData, amount: e.target.value })
@@ -370,13 +390,24 @@ export default function SubscriptionsPage() {
                     type="button"
                     variant="outline"
                     onClick={() => setIsDialogOpen(false)}
+                    disabled={loading}
                   >
                     Cancel
                   </Button>
-                  <Button type="submit">
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className={`${
+                      loading &&
+                      "bg-gray-500 hover:bg-grey-500 hover:cursor-not-allowed bg-opacity-80"
+                    }`}
+                  >
                     {editingSubscription
                       ? "Update Subscription"
                       : "Create Subscription"}
+                    {loading && (
+                      <Loader2 className={"animate-spin text-white"} />
+                    )}
                   </Button>
                 </DialogFooter>
               </form>
@@ -416,7 +447,7 @@ export default function SubscriptionsPage() {
                     <TableCell className="font-medium">
                       {subscription?.title}
                       <div className="md:hidden mt-1 text-xs text-gray-500">
-                        {Math.ceil(parseInt(subscription.duration ?? "0") / 7)}{" "}
+                        {Math.round(parseInt(subscription.duration ?? "0") / 7)}{" "}
                         weeks
                       </div>
                     </TableCell>
@@ -429,7 +460,7 @@ export default function SubscriptionsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      {Math.ceil(parseInt(subscription.duration ?? "0") / 7)}{" "}
+                      {Math.round(parseInt(subscription.duration ?? "0") / 7)}{" "}
                       weeks
                     </TableCell>
                     <TableCell className="hidden lg:table-cell">

@@ -1603,6 +1603,11 @@ func (i *Impl) GrantAgent(ctx context.Context,
 				Errorf(codes.AlreadyExists, "This phone number is already assigned to an admin: %v", newAgentPhoneNumber)
 		}
 
+		if userRole == int32(usersgrpc.UserRole_USER_ROLE_FARMER) {
+			return nil, status.
+				Errorf(codes.AlreadyExists, "This phone number is already assigned to a farmer: %v", newAgentPhoneNumber)
+		}
+
 		if userRole == int32(usersgrpc.UserRole_USER_ROLE_AGENT) {
 			return nil, status.
 				Errorf(codes.AlreadyExists, "This phone number is already assigned to an agent: %v", newAgentPhoneNumber)

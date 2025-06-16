@@ -24,7 +24,7 @@ import {
   Package,
   ShoppingCart,
   CreditCard,
-  Settings,
+  // Settings,
   Leaf,
   Tag,
   DollarSign,
@@ -88,9 +88,9 @@ const menuItems: Array<{
   {
     title: "Account",
     items: [
-      { title: "Profile", url: "/dashboard/profile", icon: User },
       { title: "Field Agents", url: "/dashboard/agents", icon: Truck },
-      { title: "Settings", url: "/dashboard/settings", icon: Settings },
+      { title: "Profile", url: "/dashboard/profile", icon: User },
+      // { title: "Settings", url: "/dashboard/settings", icon: Settings },
     ],
   },
 ];

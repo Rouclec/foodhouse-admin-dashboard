@@ -109,19 +109,19 @@ export default function Buysers() {
     }
   };
 
-  const handleDisableUser = async (user: usersgrpcUser | undefined) => {
+  const handleDisableUser = async (buyer: usersgrpcUser | undefined) => {
     try {
-      setSuspendingBuyer(user?.userId);
+      setSuspendingBuyer(buyer?.userId);
       setLoading(true);
       // const user = users.find((f) => f.id === userId);
       const newStatus =
-        user?.status === "UserStatus_SUSPENDED" ? "active" : "suspended";
+        buyer?.status === "UserStatus_SUSPENDED" ? "active" : "suspended";
 
       if (newStatus === "active") {
         await reactivateAccount({
           body: {},
           path: {
-            userId: user?.userId ?? "",
+            userId: buyer?.userId ?? "",
             adminUserId: user?.userId ?? "",
           },
         });
@@ -129,7 +129,7 @@ export default function Buysers() {
         await suspendAccount({
           body: {},
           path: {
-            userId: user?.userId ?? "",
+            userId: buyer?.userId ?? "",
             adminUserId: user?.userId ?? "",
           },
         });
@@ -139,7 +139,7 @@ export default function Buysers() {
         title: `User account ${
           newStatus === "suspended" ? "disabled" : "enabled"
         }`,
-        description: `${user?.firstName}'s account has been ${
+        description: `${buyer?.firstName ?? buyer?.lastName}'s account has been ${
           newStatus === "suspended" ? "suspended" : "reactivated"
         }.`,
       });
@@ -171,6 +171,7 @@ export default function Buysers() {
         title: `Error suspending account`,
         description:
           error?.response?.data?.message ?? "An unknown error occured",
+        variant: "destructive",
       });
     },
   });
@@ -182,6 +183,7 @@ export default function Buysers() {
         title: `Error reactivating account`,
         description:
           error?.response?.data?.message ?? "An unknown error occured",
+        variant: "destructive",
       });
     },
   });
