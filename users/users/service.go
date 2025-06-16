@@ -38,7 +38,7 @@ const (
 
 	OneMillion = 1000000
 
-	DefaultRating = 0.00
+	DefaultRating = -1.00
 
 	CENT = 100
 

@@ -26,33 +26,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Search,
-  Flag,
-  UserX,
-  Leaf,
-  MessageCircle,
-  Tractor,
-} from "lucide-react";
+import { Search, UserX, MessageCircle, Tractor, UserCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryLoading } from "@/hooks/use-query-loading";
-import { useQuery } from "@tanstack/react-query";
-import { usersListFarmersOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
+import {
+  usersListFarmersOptions,
+  usersReactivateUserMutation,
+  usersSuspendUserMutation,
+} from "@/client/users.swagger/@tanstack/react-query.gen";
 import { Context, ContextType } from "@/app/contexts/QueryProvider";
 import { usersgrpcUser, usersgrpcUserStatus } from "@/client/users.swagger";
 import moment from "moment";
-
-interface Farmer {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  farmName: string;
-  location: string;
-  status: "active" | "flagged" | "disabled";
-  joinDate: string;
-  totalProducts: number;
-}
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useCursorPagination } from "@/hooks/use-cursor-pagination";
+import { CursorPagination } from "@/components/ui/cursor-pagination";
 
 const STATUS_FILTERS: Array<{
   label: string;
@@ -74,6 +62,13 @@ const STATUS_FILTERS: Array<{
 
 export default function FarmersPage() {
   const { user } = useContext(Context) as ContextType;
+  const [suspendingFarmer, setSuspendingFarmer] = useState<string>();
+
+  const pagination = useCursorPagination({
+    pageSize: 10,
+  });
+
+  const [loading, setLoading] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<usersgrpcUserStatus>(
@@ -81,7 +76,11 @@ export default function FarmersPage() {
   );
   const { toast } = useToast();
 
-  const { data: farmersData, isLoading: isFarmersLoading } = useQuery({
+  const {
+    data: farmersData,
+    isLoading: isFarmersLoading,
+    refetch,
+  } = useQuery({
     ...usersListFarmersOptions({
       path: {
         userId: user?.userId ?? "",
@@ -90,8 +89,10 @@ export default function FarmersPage() {
         searchKey: searchTerm,
         startKey: 5.1,
         userStatus: statusFilter,
+        count: pagination.pageSize,
       },
     }),
+    placeholderData: keepPreviousData,
   });
 
   useQueryLoading(isFarmersLoading);
@@ -107,43 +108,88 @@ export default function FarmersPage() {
     }
   };
 
-  const handleDisableFarmer = (farmer: usersgrpcUser | undefined) => {
-    // disable or enable the farmer based on their status
-    // setFarmers(
-    //   farmers.map((farmer) =>
-    //     farmer.id === farmerId
-    //       ? {
-    //           ...farmer,
-    //           status:
-    //             farmer.status === "disabled" ? "active" : ("disabled" as const),
-    //         }
-    //       : farmer
-    //   )
-    // );
+  const handleDisableFarmer = async (farmer: usersgrpcUser | undefined) => {
+    try {
+      setSuspendingFarmer(farmer?.userId);
+      setLoading(true);
+      // const farmer = farmers.find((f) => f.id === farmerId);
+      const newStatus =
+        farmer?.status === "UserStatus_SUSPENDED" ? "active" : "suspended";
 
-    // const farmer = farmers.find((f) => f.id === farmerId);
-    const newStatus =
-      farmer?.status === "UserStatus_SUSPENDED" ? "active" : "suspended";
+      if (newStatus === "active") {
+        await reactivateAccount({
+          body: {},
+          path: {
+            userId: farmer?.userId ?? "",
+            adminUserId: user?.userId ?? "",
+          },
+        });
+      } else {
+        await suspendAccount({
+          body: {},
+          path: {
+            userId: farmer?.userId ?? "",
+            adminUserId: user?.userId ?? "",
+          },
+        });
+      }
 
-    toast({
-      title: `Farmer account ${
-        newStatus === "suspended" ? "disabled" : "enabled"
-      }`,
-      description: `${farmer?.firstName}'s account has been ${
-        newStatus === "suspended" ? "suspended" : "reactivated"
-      }.`,
-    });
+      toast({
+        title: `Farmer account ${
+          newStatus === "suspended" ? "disabled" : "enabled"
+        }`,
+        description: `${farmer?.firstName}'s account has been ${
+          newStatus === "suspended" ? "suspended" : "reactivated"
+        }.`,
+      });
+
+      refetch();
+    } catch (error) {
+      console.error({ error }, "changing account status");
+    } finally {
+      setSuspendingFarmer(undefined);
+      setLoading(false);
+    }
   };
 
   const handleContactFarmer = (phone: string, farmerName: string) => {
     const message = encodeURIComponent(
-      `Hello ${farmerName}! I'm contacting you from FoodHouse admin team. How can I assist you?`
+      `Hello ${farmerName}! I'm contacting you from FoodHouse admin team.\n`
     );
     const whatsappUrl = `https://wa.me/${phone.replace(
       /[^0-9]/g,
       ""
     )}?text=${message}`;
     window.open(whatsappUrl, "_blank");
+  };
+
+  const { mutateAsync: suspendAccount } = useMutation({
+    ...usersSuspendUserMutation(),
+    onError: (error) => {
+      toast({
+        title: `Error suspending account`,
+        description:
+          error?.response?.data?.message ?? "An unknown error occured",
+      });
+    },
+  });
+
+  const { mutateAsync: reactivateAccount } = useMutation({
+    ...usersReactivateUserMutation(),
+    onError: (error) => {
+      toast({
+        title: `Error reactivating account`,
+        description:
+          error?.response?.data?.message ?? "An unknown error occured",
+      });
+    },
+  });
+
+  const handleNextPage = () => {
+    // Only proceed if nextKey exists and is not empty
+    if (farmersData?.nextKey && farmersData.nextKey !== -1) {
+      pagination.goToNextPage(farmersData.nextKey.toString());
+    }
   };
 
   return (
@@ -211,81 +257,113 @@ export default function FarmersPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Farmer</TableHead>
-                <TableHead className="hidden lg:table-cell">Location</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="hidden md:table-cell">
-                  Join Date
-                </TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {farmersData?.farmers?.map((farmer) => (
-                <TableRow key={farmer?.user?.userId}>
-                  <TableCell>
-                    <div>
-                      <p className="font-medium">
-                        {farmer?.user?.firstName} {farmer?.user?.lastName}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        {farmer?.user?.email}
-                      </p>
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell">
-                    {farmer?.user?.address}
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={getStatusColor(farmer?.user?.status)}>
-                      {farmer?.user?.status?.replace("UserStatus_", "")}
-                    </Badge>
-                    <div className="md:hidden mt-1 text-xs text-gray-500">
-                      Joined:{" "}
-                      {moment(farmer?.user?.createdAt).format("DD-MM-YYYY")}
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    {moment(farmer?.user?.createdAt).format("DD-MM-YYYY")}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          handleContactFarmer(
-                            farmer?.user?.phoneNumber ?? "",
-                            farmer?.user?.firstName ??
-                              farmer?.user?.lastName ??
-                              ""
-                          )
-                        }
-                        title="Contact via WhatsApp"
-                      >
-                        <MessageCircle className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDisableFarmer(farmer?.user)}
-                        title={
-                          farmer?.user?.status === "UserStatus_SUSPENDED"
-                            ? "Reactivate account"
-                            : "Suspend account"
-                        }
-                      >
-                        <UserX className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          <div className="space-y-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Farmer</TableHead>
+                  <TableHead className="hidden lg:table-cell">
+                    Location
+                  </TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="hidden md:table-cell">
+                    Join Date
+                  </TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {farmersData?.farmers?.map((farmer) => (
+                  <TableRow key={farmer?.user?.userId}>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">
+                          {farmer?.user?.firstName} {farmer?.user?.lastName}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {farmer?.user?.email}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      {farmer?.user?.address}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getStatusColor(farmer?.user?.status)}>
+                        {farmer?.user?.status?.replace("UserStatus_", "")}
+                      </Badge>
+                      <div className="md:hidden mt-1 text-xs text-gray-500">
+                        Joined:{" "}
+                        {moment(farmer?.user?.createdAt).format("DD-MM-YYYY")}
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {moment(farmer?.user?.createdAt).format("DD-MM-YYYY")}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            handleContactFarmer(
+                              farmer?.user?.phoneNumber ?? "",
+                              farmer?.user?.firstName ??
+                                farmer?.user?.lastName ??
+                                ""
+                            )
+                          }
+                          title="Contact via WhatsApp"
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            handleDisableFarmer(farmer?.user);
+                          }}
+                          disabled={loading}
+                          className={`${loading && "cursor-not-allowed"}`}
+                          title={
+                            farmer?.user?.status === "UserStatus_SUSPENDED"
+                              ? "Reactivate account"
+                              : "Suspend account"
+                          }
+                        >
+                          {loading &&
+                          suspendingFarmer === farmer?.user?.userId ? (
+                            <LoadingSpinner size="sm" />
+                          ) : farmer?.user?.status ===
+                            "UserStatus_SUSPENDED" ? (
+                            <UserCheck className="h-4 w-4" />
+                          ) : (
+                            <UserX className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            {farmersData?.farmers?.length === 0 && (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No farmers found</p>
+              </div>
+            )}
+            <CursorPagination
+              currentPage={pagination.currentPage}
+              nextKey={farmersData?.nextKey?.toString()} // Pass the nextKey directly
+              canGoToPrevious={pagination.canGoToPrevious}
+              onPreviousPage={pagination.goToPreviousPage}
+              onNextPage={handleNextPage}
+              onFirstPage={pagination.goToFirstPage}
+              isLoading={isFarmersLoading}
+              itemsPerPage={pagination.pageSize}
+              totalItemsOnPage={farmersData?.farmers?.length ?? 0}
+            />
+          </div>
         </CardContent>
       </Card>
     </div>
