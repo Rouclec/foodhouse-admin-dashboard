@@ -43,6 +43,8 @@ export type ordersgrpcCreateOrderResponse = {
     order?: ordersgrpcOrder;
 };
 
+export type ordersgrpcDeleteDeliveryPointResponse = unknown;
+
 export type ordersgrpcDeliveryPoint = {
     id?: string;
     address?: typesPoint;
@@ -167,6 +169,8 @@ export type ordersgrpcStatItem = {
     currency?: string;
 };
 
+export type ordersgrpcUpdateDeliveryPointResponse = unknown;
+
 export type OrdersInitiatePaymentBody = {
     paymentEntity?: ordersgrpcPaymentEntity;
     entityId?: string;
@@ -176,6 +180,12 @@ export type OrdersInitiatePaymentBody = {
 
 export type OrdersRejectOrderBody = {
     reason?: string;
+};
+
+export type OrdersUpdateDeliveryPointBody = {
+    address?: typesPoint;
+    city?: string;
+    deliveryPointName?: string;
 };
 
 export type protobufAny = {
@@ -250,6 +260,29 @@ export type OrdersListPaymentsData = {
 export type OrdersListPaymentsResponse = (ordersgrpcListPaymentsResponse);
 
 export type OrdersListPaymentsError = (rpcStatus);
+
+export type OrdersDeleteDeliveryPointData = {
+    path: {
+        id: string;
+        userId: string;
+    };
+};
+
+export type OrdersDeleteDeliveryPointResponse = (ordersgrpcDeleteDeliveryPointResponse);
+
+export type OrdersDeleteDeliveryPointError = (rpcStatus);
+
+export type OrdersUpdateDeliveryPointData = {
+    body: OrdersUpdateDeliveryPointBody;
+    path: {
+        id: string;
+        userId: string;
+    };
+};
+
+export type OrdersUpdateDeliveryPointResponse = (ordersgrpcUpdateDeliveryPointResponse);
+
+export type OrdersUpdateDeliveryPointError = (rpcStatus);
 
 export type OrdersConfirmPaymentData = {
     query?: {

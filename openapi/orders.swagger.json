@@ -202,6 +202,86 @@
         ]
       }
     },
+    "/v1/admin/{userId}/orders/{id}/delete-delivery-point": {
+      "delete": {
+        "operationId": "Orders_DeleteDeliveryPoint",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcDeleteDeliveryPointResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/v1/admin/{userId}/orders/{id}/update-delivery-point": {
+      "put": {
+        "operationId": "Orders_UpdateDeliveryPoint",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcUpdateDeliveryPointResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/OrdersUpdateDeliveryPointBody"
+            }
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/public/confirm-payment": {
       "get": {
         "operationId": "Orders_ConfirmPayment",
@@ -996,6 +1076,20 @@
         }
       }
     },
+    "OrdersUpdateDeliveryPointBody": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "$ref": "#/definitions/typesPoint"
+        },
+        "city": {
+          "type": "string"
+        },
+        "deliveryPointName": {
+          "type": "string"
+        }
+      }
+    },
     "ordersgrpcAccount": {
       "type": "object",
       "properties": {
@@ -1039,6 +1133,9 @@
           "$ref": "#/definitions/ordersgrpcOrder"
         }
       }
+    },
+    "ordersgrpcDeleteDeliveryPointResponse": {
+      "type": "object"
     },
     "ordersgrpcDeliveryPoint": {
       "type": "object",
@@ -1410,6 +1507,9 @@
           "type": "string"
         }
       }
+    },
+    "ordersgrpcUpdateDeliveryPointResponse": {
+      "type": "object"
     },
     "protobufAny": {
       "type": "object",

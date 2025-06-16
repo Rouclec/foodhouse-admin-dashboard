@@ -100,6 +100,20 @@ func (mr *MockQuerierMockRecorder) CreatePayment(ctx, arg any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePayment", reflect.TypeOf((*MockQuerier)(nil).CreatePayment), ctx, arg)
 }
 
+// DeleteDeliveryPoint mocks base method.
+func (m *MockQuerier) DeleteDeliveryPoint(ctx context.Context, id string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteDeliveryPoint", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteDeliveryPoint indicates an expected call of DeleteDeliveryPoint.
+func (mr *MockQuerierMockRecorder) DeleteDeliveryPoint(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteDeliveryPoint", reflect.TypeOf((*MockQuerier)(nil).DeleteDeliveryPoint), ctx, id)
+}
+
 // GetOrderByOrderNumber mocks base method.
 func (m *MockQuerier) GetOrderByOrderNumber(ctx context.Context, orderNumber int64) (sqlc.Order, error) {
 	m.ctrl.T.Helper()
@@ -352,6 +366,20 @@ func (m *MockQuerier) ReviewOrder(ctx context.Context, arg sqlc.ReviewOrderParam
 func (mr *MockQuerierMockRecorder) ReviewOrder(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReviewOrder", reflect.TypeOf((*MockQuerier)(nil).ReviewOrder), ctx, arg)
+}
+
+// UpdateDeliveryPoint mocks base method.
+func (m *MockQuerier) UpdateDeliveryPoint(ctx context.Context, arg sqlc.UpdateDeliveryPointParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateDeliveryPoint", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateDeliveryPoint indicates an expected call of UpdateDeliveryPoint.
+func (mr *MockQuerierMockRecorder) UpdateDeliveryPoint(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateDeliveryPoint", reflect.TypeOf((*MockQuerier)(nil).UpdateDeliveryPoint), ctx, arg)
 }
 
 // UpdateOrderStatus mocks base method.

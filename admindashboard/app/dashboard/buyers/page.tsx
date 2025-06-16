@@ -135,7 +135,7 @@ export default function Buysers() {
       }
 
       toast({
-        title: `user account ${
+        title: `User account ${
           newStatus === "suspended" ? "disabled" : "enabled"
         }`,
         description: `${user?.firstName}'s account has been ${

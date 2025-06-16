@@ -974,6 +974,36 @@ func (i *Impl) ListDeliveryCities(ctx context.Context, req *ordersgrpc.ListDeliv
 	}, nil
 }
 
+// DeleteDeliveryPoint implements ordersgrpc.OrdersServer.
+func (i *Impl) DeleteDeliveryPoint(ctx context.Context, req *ordersgrpc.DeleteDeliveryPointRequest) (*ordersgrpc.DeleteDeliveryPointResponse, error) {
+	err := i.repo.Do().DeleteDeliveryPoint(ctx, req.GetId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error deleting delivery point %v", err)
+	}
+
+	return &ordersgrpc.DeleteDeliveryPointResponse{}, nil
+}
+
+// UpdateDeliveryPoint implements ordersgrpc.OrdersServer.
+func (i *Impl) UpdateDeliveryPoint(ctx context.Context, req *ordersgrpc.UpdateDeliveryPointRequest) (*ordersgrpc.UpdateDeliveryPointResponse, error) {
+	err := i.repo.Do().UpdateDeliveryPoint(ctx, sqlc.UpdateDeliveryPointParams{
+		DeliveryLocation: pgtype.Point{P: pgtype.Vec2{X: float64(req.GetAddress().GetLon()),
+			Y: float64(req.GetAddress().GetLat())},
+			Valid: true},
+		LocationName:      req.GetAddress().GetAddress(),
+		DeliveryPointName: req.GetDeliveryPointName(),
+		City:              req.GetCity(),
+		ID:                req.GetId(),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error updating delivery point %v", err)
+	}
+
+	return &ordersgrpc.UpdateDeliveryPointResponse{}, nil
+}
+
 func ParsePaymentStatus(status string) (ordersgrpc.PaymentStatus, error) {
 	if val, ok := ordersgrpc.PaymentStatus_value[status]; ok {
 		return ordersgrpc.PaymentStatus(val), nil
