@@ -1582,6 +1582,7 @@ func (i *Impl) ListPayments(ctx context.Context,
 		Count:         int32(count),
 		SearchKey:     req.GetSearchKey(),
 		PaymentStatus: req.GetPaymentStatus().String(),
+		PaymentEntity: req.GetPaymentEntity().String(),
 	})
 
 	if err != nil {

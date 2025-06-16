@@ -13,7 +13,6 @@ import React, { useContext, useState } from "react";
 import {
   View,
   KeyboardAvoidingView,
-  ScrollView,
   Dimensions,
   FlatList,
   ActivityIndicator,
@@ -27,7 +26,7 @@ const FILTER_DATA: Array<{
   value: ordersgrpcFilterType;
 }> = [
   {
-    label: "All",
+    label: "All Time",
     value: "FilterType_ALL_TIME",
   },
   {

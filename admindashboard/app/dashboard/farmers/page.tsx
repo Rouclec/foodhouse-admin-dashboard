@@ -47,7 +47,7 @@ const STATUS_FILTERS: Array<{
   value: usersgrpcUserStatus;
 }> = [
   {
-    label: "All",
+    label: "All Statuses",
     value: "UserStatus_UNSPECIFIED",
   },
   {

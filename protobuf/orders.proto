@@ -122,6 +122,7 @@ message ListPaymentsRequest {
   int32 count = 3;
   string start_key = 4;
   PaymentStatus payment_status = 5;
+  PaymentEntity payment_entity = 6;
 }
 
 message ListPaymentsResponse {
