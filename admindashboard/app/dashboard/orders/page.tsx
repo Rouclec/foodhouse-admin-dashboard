@@ -48,7 +48,7 @@ const STATUS_FILTERS: Array<{
   value: ordersgrpcOrderStatus | string;
 }> = [
   {
-    label: "All",
+    label: "All Statuses",
     value: "all",
   },
   {

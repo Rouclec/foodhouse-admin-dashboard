@@ -47,7 +47,7 @@ const STATUS_FILTERS: Array<{
   value: ordersgrpcPaymentStatus;
 }> = [
   {
-    label: "All",
+    label: "All Statuses",
     value: "PaymentStatus_UNSPECIFIED",
   },
   {
@@ -73,7 +73,7 @@ const TYPE_FILTERS: Array<{
   value: ordersgrpcPaymentEntity;
 }> = [
   {
-    label: "All",
+    label: "All Types",
     value: "PaymentEntity_UNSPECIFIED",
   },
   {
