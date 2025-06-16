@@ -1,4 +1,3 @@
-
 function getCurrencySymbol(isoCode: string): [string | null, boolean] {
   // Define a map for ISO codes to symbols (all symbols are before the amount)
   const currencyData: { [key: string]: string } = {
@@ -77,7 +76,6 @@ export const formatAmount = (
   // Return formatted number, including decimal part if applicable
   return decimalPlaces > 0 ? `${integerPart}.${decimalPart}` : integerPart;
 };
-
 
 export * from "./utils";
 export * from "./auth";
