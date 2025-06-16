@@ -256,6 +256,16 @@ message GrantAdminRequest {
 
 message GrantAdminResponse { string message = 1; }
 
+message GrantAgentRequest {
+  string admin_user_id = 1;
+  string phone_number = 2;
+  string residence_country_iso_code = 3;
+  string address = 4;
+  string email = 5;
+}
+
+message GrantAgentResponse { string message = 1; }
+
 // Request message for ListUsers
 message ListUsersRequest {
   string admin_user_id = 1;
@@ -266,6 +276,7 @@ message ListUsersRequest {
   // keyword search for the users (could be name, or email)
   string search = 4;
   UserStatus user_status = 5;
+  UserRole user_role = 6;
 }
 
 // Response message for ListAllUsers
@@ -446,6 +457,13 @@ message ReactivateUserRequest {
 
 message ReactivateUserResponse {}
 
+message DeleteAgentRequest {
+  string user_id = 1;
+  string admin_user_id = 2;
+}
+
+message DeleteAgentResponse {}
+
 service Users {
 
   rpc SendSignupSmsOtp(SendSignupSmsOtpRequest)
@@ -550,6 +568,13 @@ service Users {
   rpc GrantAdmin(GrantAdminRequest) returns (GrantAdminResponse) {
     option (google.api.http) = {
       post : "/v1/admin/{admin_user_id}/users/grant-admin"
+      body : "*"
+    };
+  }
+
+  rpc GrantAgent(GrantAgentRequest) returns (GrantAgentResponse) {
+    option (google.api.http) = {
+      post : "/v1/admin/{admin_user_id}/users/grant-agent"
       body : "*"
     };
   }
@@ -681,6 +706,12 @@ service Users {
     option (google.api.http) = {
       put : "/v1/admin/{admin_user_id}/users/{user_id}/reactivate-user"
       body : "*"
+    };
+  }
+
+  rpc DeleteAgent(DeleteAgentRequest) returns (DeleteAgentResponse) {
+    option (google.api.http) = {
+      delete : "/v1/admin/{admin_user_id}/users/{user_id}/delete-agent"
     };
   }
 }

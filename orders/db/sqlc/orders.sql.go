@@ -676,26 +676,34 @@ func (q *Queries) ListOrders(ctx context.Context, arg ListOrdersParams) ([]Order
 
 const listPayments = `-- name: ListPayments :many
 SELECT id, status, payment_entity, entity_id, amount_value, amount_currency, created_by, expires_at, created_at, updated_at, method, account_number FROM payments 
-WHERE 
+WHERE
+  ( $1::TEXT = 'PaymentStatus_UNSPECIFIED' OR (status = $1::TEXT) ) 
+  AND  
   (
-    $1::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
-    OR created_at < $1::timestamptz
+    $2::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+    OR created_at < $2::timestamptz
   ) AND
   (
-    $2::TEXT IS NULL OR external_ref ILIKE '%' || $2 || '%'
+    $3::TEXT IS NULL OR account_number ILIKE '%' || $3 || '%'
   )
 ORDER BY created_at DESC
-LIMIT $3::int
+LIMIT $4::int
 `
 
 type ListPaymentsParams struct {
+	PaymentStatus string    `json:"payment_status"`
 	CreatedBefore time.Time `json:"created_before"`
 	SearchKey     string    `json:"search_key"`
 	Count         int32     `json:"count"`
 }
 
 func (q *Queries) ListPayments(ctx context.Context, arg ListPaymentsParams) ([]Payment, error) {
-	rows, err := q.db.Query(ctx, listPayments, arg.CreatedBefore, arg.SearchKey, arg.Count)
+	rows, err := q.db.Query(ctx, listPayments,
+		arg.PaymentStatus,
+		arg.CreatedBefore,
+		arg.SearchKey,
+		arg.Count,
+	)
 	if err != nil {
 		return nil, err
 	}

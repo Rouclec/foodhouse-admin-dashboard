@@ -121,6 +121,7 @@ message ListPaymentsRequest {
   string search_key = 2;
   int32 count = 3;
   string start_key = 4;
+  PaymentStatus payment_status = 5;
 }
 
 message ListPaymentsResponse {

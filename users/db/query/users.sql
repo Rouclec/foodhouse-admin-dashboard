@@ -94,7 +94,7 @@ SELECT *
 FROM users 
 WHERE
     ( sqlc.arg(user_status)::TEXT = 'UserStatus_UNSPECIFIED' OR (user_status = sqlc.arg(user_status)::TEXT) )
-    AND role = 'USER_ROLE_BUYER'
+    AND role = sqlc.arg(user_role)::TEXT
    AND (
         sqlc.arg(search_key) = ''
         OR (
@@ -126,3 +126,5 @@ UPDATE users
 SET user_status = 'UserStatus_ACTIVE'
 WHERE id = $1; 
 
+-- name: DeleteUser :exec
+DELETE FROM users where id = $1;

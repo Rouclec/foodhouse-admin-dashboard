@@ -1574,13 +1574,14 @@ func (i *Impl) ListPayments(ctx context.Context,
 
 	count := int(req.GetCount())
 	if count == 0 {
-		count = 20 // or whatever default you want
+		count = 10 // or whatever default you want
 	}
 
 	sqlcPayments, err := i.repo.Do().ListPayments(ctx, sqlc.ListPaymentsParams{
 		CreatedBefore: startKey,
 		Count:         int32(count),
 		SearchKey:     req.GetSearchKey(),
+		PaymentStatus: req.GetPaymentStatus().String(),
 	})
 
 	if err != nil {
@@ -1591,7 +1592,7 @@ func (i *Impl) ListPayments(ctx context.Context,
 
 	nextKey := ""
 
-	i.logger.Debug().Msgf("Count %v, orders length %v", count, len(protoPayments))
+	i.logger.Debug().Msgf("Count %v, payments length %v", count, len(protoPayments))
 
 	if len(protoPayments) >= count {
 		nextKey = protoPayments[len(protoPayments)-1].GetCreatedAt().AsTime().Format(time.RFC3339)

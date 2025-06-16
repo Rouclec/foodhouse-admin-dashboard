@@ -203,6 +203,20 @@ func (mr *MockQuerierMockRecorder) DeleteSubscription(ctx, id any) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSubscription", reflect.TypeOf((*MockQuerier)(nil).DeleteSubscription), ctx, id)
 }
 
+// DeleteUser mocks base method.
+func (m *MockQuerier) DeleteUser(ctx context.Context, id string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteUser", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteUser indicates an expected call of DeleteUser.
+func (mr *MockQuerierMockRecorder) DeleteUser(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUser", reflect.TypeOf((*MockQuerier)(nil).DeleteUser), ctx, id)
+}
+
 // DeleteUserPaymentMethod mocks base method.
 func (m *MockQuerier) DeleteUserPaymentMethod(ctx context.Context, id string) error {
 	m.ctrl.T.Helper()

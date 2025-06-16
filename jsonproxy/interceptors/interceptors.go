@@ -21,7 +21,9 @@ const (
 	BearerPrefix = "Bearer "
 	// RoleAdmin is the role for an admin user.
 	RoleAdmin = "USER_ROLE_ADMIN"
-
+	//RoleAgent is the role for agent users
+	RoleAgent = "USER_ROLE_AGENT"
+	//UserActiveStatus is the status for active users
 	UserActiveStatus = "UserStatus_ACTIVE"
 )
 

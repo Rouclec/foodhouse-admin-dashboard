@@ -823,12 +823,12 @@ func (i *Impl) GrantAdmin(
 	req *usersgrpc.GrantAdminRequest) (
 	*usersgrpc.GrantAdminResponse,
 	error) {
-	newadminPhoneNumber := req.GetPhoneNumber()
+	newAgentPhoneNumber := req.GetPhoneNumber()
 
 	// fetch the user via email from the db.
 	// If there is no user then we want to create one.
 	// We shall generate a random password and hash it too.
-	foundUser, err := i.repo.Do().GetUserByPhoneNumber(ctx, newadminPhoneNumber)
+	foundUser, err := i.repo.Do().GetUserByPhoneNumber(ctx, newAgentPhoneNumber)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, status.Errorf(codes.Internal, "Failed to check for existing users: %v", err)
 	}
@@ -839,7 +839,7 @@ func (i *Impl) GrantAdmin(
 		}
 		if userRole == int32(usersgrpc.UserRole_USER_ROLE_ADMIN) {
 			return nil, status.
-				Errorf(codes.AlreadyExists, "This phone number is already assigned to an admin: %v", newadminPhoneNumber)
+				Errorf(codes.AlreadyExists, "This phone number is already assigned to an admin: %v", newAgentPhoneNumber)
 		}
 
 		arg := sqlc.UpdateUserRoleParams{
@@ -874,7 +874,7 @@ func (i *Impl) GrantAdmin(
 	_, newErr = i.repo.Do().CreateUser(ctx, arg)
 	if newErr != nil {
 		return nil, status.
-			Errorf(codes.Internal, "Could not create a new admin user with phone number: %v: %v", newadminPhoneNumber, newErr)
+			Errorf(codes.Internal, "Could not create a new admin user with phone number: %v: %v", newAgentPhoneNumber, newErr)
 	}
 
 	return &usersgrpc.GrantAdminResponse{
@@ -1106,6 +1106,7 @@ func (i *Impl) ListUsers(ctx context.Context,
 		SearchKey:  req.GetSearch(),
 		Limit:      count,
 		Before:     startKey,
+		UserRole:   req.GetUserRole().String(),
 	}
 	sqlcUsers, err := i.repo.Do().ListUsers(ctx, args)
 
@@ -1547,4 +1548,92 @@ func (i *Impl) ReactivateUser(ctx context.Context,
 		return nil, status.Errorf(codes.Internal, "error re-activating user %v", err)
 	}
 	return &usersgrpc.ReactivateUserResponse{}, nil
+}
+
+// DeleteAgent implements usersgrpc.UsersServer.
+func (i *Impl) DeleteAgent(ctx context.Context, req *usersgrpc.DeleteAgentRequest) (*usersgrpc.DeleteAgentResponse, error) {
+	user, err := i.repo.Do().GetUser(ctx, req.GetUserId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error fetching user %v", err)
+	}
+
+	if user.Role != usersgrpc.UserRole_USER_ROLE_AGENT.String() {
+		return nil, status.Errorf(codes.Internal, "cannot delete user with role %v", user.Role)
+	}
+
+	err = i.repo.Do().DeleteUser(ctx, req.GetUserId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error deleting agent %v", err)
+	}
+
+	return &usersgrpc.DeleteAgentResponse{}, nil
+}
+
+// GrantAgent implements usersgrpc.UsersServer.
+func (i *Impl) GrantAgent(ctx context.Context, req *usersgrpc.GrantAgentRequest) (*usersgrpc.GrantAgentResponse, error) {
+	newAgentPhoneNumber := req.GetPhoneNumber()
+
+	// fetch the user via email from the db.
+	// If there is no user then we want to create one.
+	// We shall generate a random password and hash it too.
+	foundUser, err := i.repo.Do().GetUserByPhoneNumber(ctx, newAgentPhoneNumber)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return nil, status.Errorf(codes.Internal, "Failed to check for existing users: %v", err)
+	}
+	if err == nil {
+		userRole, ok := usersgrpc.UserRole_value[foundUser.Role]
+		if !ok {
+			return nil, status.Errorf(codes.Internal, "Invalid user role in database: %v", foundUser.Role)
+		}
+		if userRole == int32(usersgrpc.UserRole_USER_ROLE_ADMIN) {
+			return nil, status.
+				Errorf(codes.AlreadyExists, "This phone number is already assigned to an admin: %v", newAgentPhoneNumber)
+		}
+
+		if userRole == int32(usersgrpc.UserRole_USER_ROLE_AGENT) {
+			return nil, status.
+				Errorf(codes.AlreadyExists, "This phone number is already assigned to an agent: %v", newAgentPhoneNumber)
+		}
+
+		arg := sqlc.UpdateUserRoleParams{
+			ID:   foundUser.ID,
+			Role: usersgrpc.UserRole_USER_ROLE_AGENT.String(),
+		}
+
+		err = i.repo.Do().UpdateUserRole(ctx, arg)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "Could not make user an agent: %v", err)
+		}
+
+		return &usersgrpc.GrantAgentResponse{
+			Message: "New agent successfully created.",
+		}, nil
+	}
+
+	// Generate random user password.
+	newHashedPassword, newErr := GeneratePassword(ctx)
+	if newErr != nil {
+		return nil, status.Errorf(codes.Internal, "Could not generate password for new user: %v", newErr)
+	}
+
+	// Create new user with hashed password in the db.
+	arg := sqlc.CreateUserParams{
+		PhoneNumber:             req.GetPhoneNumber(),
+		Password:                newHashedPassword,
+		ResidenceCountryIsoCode: req.GetResidenceCountryIsoCode(),
+		Email:                   &req.Email,
+		Role:                    usersgrpc.UserRole_USER_ROLE_AGENT.String(),
+	}
+
+	_, newErr = i.repo.Do().CreateUser(ctx, arg)
+	if newErr != nil {
+		return nil, status.
+			Errorf(codes.Internal, "Could not create a new admin user with phone number: %v: %v", newAgentPhoneNumber, newErr)
+	}
+
+	return &usersgrpc.GrantAgentResponse{
+		Message: "New agent successfully created.",
+	}, nil
 }
