@@ -202,7 +202,7 @@ SELECT * FROM payments
 WHERE
   ( sqlc.arg(payment_status)::TEXT = 'PaymentStatus_UNSPECIFIED' OR (status = sqlc.arg(payment_status)::TEXT) ) 
   AND  
-  ( sqlc.arg(payment_entity)::TEXT = 'PaymentEntity_UNSPECIFIED' OR (payment_entity = sqlc.arg(payment_status)::TEXT) ) 
+  ( sqlc.arg(payment_entity)::TEXT = 'PaymentEntity_UNSPECIFIED' OR (payment_entity = sqlc.arg(payment_entity)::TEXT) ) 
   AND  
   (
     sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
