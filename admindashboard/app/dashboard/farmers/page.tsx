@@ -171,6 +171,7 @@ export default function FarmersPage() {
         title: `Error suspending account`,
         description:
           error?.response?.data?.message ?? "An unknown error occured",
+        variant: "destructive",
       });
     },
   });
@@ -182,6 +183,7 @@ export default function FarmersPage() {
         title: `Error reactivating account`,
         description:
           error?.response?.data?.message ?? "An unknown error occured",
+        variant: "destructive",
       });
     },
   });

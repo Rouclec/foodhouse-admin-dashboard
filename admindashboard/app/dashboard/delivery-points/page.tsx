@@ -350,6 +350,7 @@ export default function DeliveryPointsPage() {
         title: "Error creating delivery point",
         description:
           error?.response?.data?.message ?? "An unknown error occured",
+        variant: "destructive",
       });
     },
   });
@@ -361,6 +362,7 @@ export default function DeliveryPointsPage() {
         title: "Error updating delivery point",
         description:
           error?.response?.data?.message ?? "An unknown error occured",
+        variant: "destructive",
       });
     },
   });
@@ -378,6 +380,7 @@ export default function DeliveryPointsPage() {
         title: "Error deleting delivery point",
         description:
           error?.response?.data?.message ?? "An unknown error occured",
+        variant: "destructive",
       });
     },
   });
