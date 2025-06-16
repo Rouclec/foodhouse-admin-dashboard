@@ -76,6 +76,8 @@ func SqlcToProtoFarmers(sqlcFarmers []sqlc.ListFarmersByRatingRow) ([]*usersgrpc
 				LastName:     derefString(sf.LastName),
 				ProfileImage: derefString(&sf.ProfileImage),
 				Address:      derefString(sf.Address),
+				Email:        derefString(sf.Email),
+				PhoneNumber:  derefString(&sf.PhoneNumber),
 				CreatedAt:    timestamppb.New(sf.CreatedAt.Time),
 				Status:       status,
 			},
@@ -109,6 +111,8 @@ func SqlcToProtoUsers(sqlcUsers []sqlc.User) ([]*usersgrpc.User, error) {
 				ProfileImage: derefString(&su.ProfileImage),
 				Address:      derefString(su.Address),
 				CreatedAt:    timestamppb.New(su.CreatedAt.Time),
+				Email:        derefString(su.Email),
+				PhoneNumber:  derefString(&su.PhoneNumber),
 				Status:       status,
 			})
 	}
