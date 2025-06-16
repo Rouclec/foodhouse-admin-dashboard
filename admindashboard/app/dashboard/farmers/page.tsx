@@ -65,6 +65,7 @@ export default function FarmersPage() {
   const [suspendingFarmer, setSuspendingFarmer] = useState<string>();
 
   const pagination = useCursorPagination({
+    initialStartKey: "5.1",
     pageSize: 10,
   });
 
@@ -87,7 +88,7 @@ export default function FarmersPage() {
       },
       query: {
         searchKey: searchTerm,
-        startKey: 5.1,
+        startKey: parseFloat(pagination.startKey ?? "5.1"),
         userStatus: statusFilter,
         count: pagination.pageSize,
       },

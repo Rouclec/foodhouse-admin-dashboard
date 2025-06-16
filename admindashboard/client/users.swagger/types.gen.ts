@@ -43,6 +43,13 @@ export type UsersGrantAdminBody = {
     residenceCountryIsoCode?: string;
 };
 
+export type UsersGrantAgentBody = {
+    phoneNumber?: string;
+    residenceCountryIsoCode?: string;
+    address?: string;
+    email?: string;
+};
+
 export type usersgrpcActivateUserSubscriptionResponse = unknown;
 
 /**
@@ -87,6 +94,8 @@ export type usersgrpcCompleteRegistrationResponse = {
 export type usersgrpcCreateSubscriptionResponse = {
     subscription?: usersgrpcSubscription;
 };
+
+export type usersgrpcDeleteAgentResponse = unknown;
 
 export type usersgrpcDeleteSubscriptionResponse = {
     message?: string;
@@ -140,6 +149,10 @@ export type usersgrpcGetUserSubscriptionsResponse = {
 };
 
 export type usersgrpcGrantAdminResponse = {
+    message?: string;
+};
+
+export type usersgrpcGrantAgentResponse = {
     message?: string;
 };
 
@@ -395,6 +408,17 @@ export type UsersGrantAdminResponse = (usersgrpcGrantAdminResponse);
 
 export type UsersGrantAdminError = (rpcStatus);
 
+export type UsersGrantAgentData = {
+    body: UsersGrantAgentBody;
+    path: {
+        adminUserId: string;
+    };
+};
+
+export type UsersGrantAgentResponse = (usersgrpcGrantAgentResponse);
+
+export type UsersGrantAgentError = (rpcStatus);
+
 export type UsersListUsersData = {
     path: {
         adminUserId: string;
@@ -412,6 +436,7 @@ export type UsersListUsersData = {
          * Key for pagination, indicating where to start the list
          */
         startKey?: string;
+        userRole?: 'USER_ROLE_UNSPECIFIED' | 'USER_ROLE_FARMER' | 'USER_ROLE_BUYER' | 'USER_ROLE_ADMIN' | 'USER_ROLE_AGENT';
         userStatus?: 'UserStatus_UNSPECIFIED' | 'UserStatus_SUSPENDED' | 'UserStatus_ACTIVE';
     };
 };
@@ -419,6 +444,17 @@ export type UsersListUsersData = {
 export type UsersListUsersResponse = (usersgrpcListUsersResponse);
 
 export type UsersListUsersError = (rpcStatus);
+
+export type UsersDeleteAgentData = {
+    path: {
+        adminUserId: string;
+        userId: string;
+    };
+};
+
+export type UsersDeleteAgentResponse = (usersgrpcDeleteAgentResponse);
+
+export type UsersDeleteAgentError = (rpcStatus);
 
 export type UsersReactivateUserData = {
     body: UsersReactivateUserBody;

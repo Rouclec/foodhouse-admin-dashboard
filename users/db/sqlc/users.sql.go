@@ -80,6 +80,15 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
+const deleteUser = `-- name: DeleteUser :exec
+DELETE FROM users where id = $1
+`
+
+func (q *Queries) DeleteUser(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, deleteUser, id)
+	return err
+}
+
 const getFarmer = `-- name: GetFarmer :one
 SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status FROM users WHERE id = $1 AND role = 'USER_ROLE_FARMER'
 `
@@ -371,16 +380,16 @@ SELECT id, role, phone_number, email, first_name, last_name, residence_country_i
 FROM users 
 WHERE
     ( $2::TEXT = 'UserStatus_UNSPECIFIED' OR (user_status = $2::TEXT) )
-    AND role = 'USER_ROLE_BUYER'
+    AND role = $3::TEXT
    AND (
-        $3 = ''
+        $4 = ''
         OR (
-            LOWER(first_name) LIKE LOWER('%' || $3 || '%')
-            OR LOWER(last_name) LIKE LOWER('%' || $3 || '%')
-            OR LOWER(email) LIKE LOWER('%' || $3 || '%')
+            LOWER(first_name) LIKE LOWER('%' || $4 || '%')
+            OR LOWER(last_name) LIKE LOWER('%' || $4 || '%')
+            OR LOWER(email) LIKE LOWER('%' || $4 || '%')
         )
     )
-    AND created_at < $4::timestamptz
+    AND created_at < $5::timestamptz
 ORDER BY created_at DESC
 LIMIT $1
 `
@@ -388,6 +397,7 @@ LIMIT $1
 type ListUsersParams struct {
 	Limit      int32       `json:"limit"`
 	UserStatus string      `json:"user_status"`
+	UserRole   string      `json:"user_role"`
 	SearchKey  interface{} `json:"search_key"`
 	Before     time.Time   `json:"before"`
 }
@@ -396,6 +406,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 	rows, err := q.db.Query(ctx, listUsers,
 		arg.Limit,
 		arg.UserStatus,
+		arg.UserRole,
 		arg.SearchKey,
 		arg.Before,
 	)

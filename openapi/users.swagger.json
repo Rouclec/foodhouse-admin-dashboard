@@ -172,6 +172,44 @@
         ]
       }
     },
+    "/v1/admin/{adminUserId}/users/grant-agent": {
+      "post": {
+        "operationId": "Users_GrantAgent",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcGrantAgentResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UsersGrantAgentBody"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
     "/v1/admin/{adminUserId}/users/list-users": {
       "get": {
         "operationId": "Users_ListUsers",
@@ -229,6 +267,56 @@
               "UserStatus_ACTIVE"
             ],
             "default": "UserStatus_UNSPECIFIED"
+          },
+          {
+            "name": "userRole",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "USER_ROLE_UNSPECIFIED",
+              "USER_ROLE_FARMER",
+              "USER_ROLE_BUYER",
+              "USER_ROLE_ADMIN",
+              "USER_ROLE_AGENT"
+            ],
+            "default": "USER_ROLE_UNSPECIFIED"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/admin/{adminUserId}/users/{userId}/delete-agent": {
+      "delete": {
+        "operationId": "Users_DeleteAgent",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcDeleteAgentResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
           }
         ],
         "tags": [
@@ -1242,6 +1330,23 @@
         }
       }
     },
+    "UsersGrantAgentBody": {
+      "type": "object",
+      "properties": {
+        "phoneNumber": {
+          "type": "string"
+        },
+        "residenceCountryIsoCode": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      }
+    },
     "UsersReactivateUserBody": {
       "type": "object"
     },
@@ -1471,6 +1576,9 @@
         }
       }
     },
+    "usersgrpcDeleteAgentResponse": {
+      "type": "object"
+    },
     "usersgrpcDeleteSubscriptionResponse": {
       "type": "object",
       "properties": {
@@ -1602,6 +1710,14 @@
       }
     },
     "usersgrpcGrantAdminResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "usersgrpcGrantAgentResponse": {
       "type": "object",
       "properties": {
         "message": {

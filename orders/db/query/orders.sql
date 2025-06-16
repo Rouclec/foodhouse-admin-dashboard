@@ -196,15 +196,18 @@ WHERE status = 'PaymentStatus_COMPLETED'
   AND created_at <= sqlc.arg(end_date)::timestamptz;
 
 
+
 -- name: ListPayments :many
 SELECT * FROM payments 
-WHERE 
+WHERE
+  ( sqlc.arg(payment_status)::TEXT = 'PaymentStatus_UNSPECIFIED' OR (status = sqlc.arg(payment_status)::TEXT) ) 
+  AND  
   (
     sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
     OR created_at < sqlc.arg(created_before)::timestamptz
   ) AND
   (
-    sqlc.arg(search_key)::TEXT IS NULL OR external_ref ILIKE '%' || sqlc.arg(search_key) || '%'
+    sqlc.arg(search_key)::TEXT IS NULL OR account_number ILIKE '%' || sqlc.arg(search_key) || '%'
   )
 ORDER BY created_at DESC
 LIMIT sqlc.arg(count)::int;

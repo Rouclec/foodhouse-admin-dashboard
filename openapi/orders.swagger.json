@@ -195,6 +195,20 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "paymentStatus",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "PaymentStatus_UNSPECIFIED",
+              "PaymentStatus_INITIATED",
+              "PaymentStatus_COMPLETED",
+              "PaymentStatus_FAILED",
+              "PaymentStatus_CANCELED"
+            ],
+            "default": "PaymentStatus_UNSPECIFIED"
           }
         ],
         "tags": [

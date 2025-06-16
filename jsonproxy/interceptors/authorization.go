@@ -55,6 +55,12 @@ func NewAuthorizationInterceptor() HTTPInterceptor {
 				return
 			}
 
+			// if the user is an agent and the enpoint is not an admin endpoint, grant them access
+			if role == RoleAgent {
+				next.ServeHTTP(w, r)
+				return
+			}
+
 			pathParts := strings.Split(path, "/")
 			minPathParts := 4
 			if len(pathParts) < minPathParts {
