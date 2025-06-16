@@ -91,7 +91,7 @@ Resources:
             - Name: ORDERS_HOST_PORT
               Value: orders:80
             - Name: ALLOWED_ORIGINS
-              Value: !Sub "https://foodhouse-admin-dashboard-yfcu.vercel.app/"
+              Value: "https://foodhouse-admin-dashboard-yfcu.vercel.app/"
           Secrets:
             - Name: FIREBASE_SERVICE_ACCOUNT_JSON
               ValueFrom: !Sub "${FirebaseServiceAccountSecretArn}:::"
