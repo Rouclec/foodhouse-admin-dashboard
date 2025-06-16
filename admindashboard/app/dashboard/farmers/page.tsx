@@ -39,6 +39,8 @@ import { useQueryLoading } from "@/hooks/use-query-loading";
 import { useQuery } from "@tanstack/react-query";
 import { usersListFarmersOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { Context, ContextType } from "@/app/contexts/QueryProvider";
+import { usersgrpcUser, usersgrpcUserStatus } from "@/client/users.swagger";
+import moment from "moment";
 
 interface Farmer {
   id: string;
@@ -52,69 +54,32 @@ interface Farmer {
   totalProducts: number;
 }
 
+const STATUS_FILTERS: Array<{
+  label: string;
+  value: usersgrpcUserStatus;
+}> = [
+  {
+    label: "All",
+    value: "UserStatus_UNSPECIFIED",
+  },
+  {
+    label: "Active",
+    value: "UserStatus_ACTIVE",
+  },
+  {
+    label: "Suspended",
+    value: "UserStatus_SUSPENDED",
+  },
+];
+
 export default function FarmersPage() {
   const { user } = useContext(Context) as ContextType;
 
-  const [farmers, setFarmers] = useState<Farmer[]>([
-    {
-      id: "1",
-      name: "John Smith",
-      email: "john@greenvalley.com",
-      phone: "+1234567890",
-      farmName: "Green Valley Farm",
-      location: "California, USA",
-      status: "active",
-      joinDate: "2024-01-15",
-      totalProducts: 25,
-    },
-    {
-      id: "2",
-      name: "Maria Garcia",
-      email: "maria@sunnyacres.com",
-      phone: "+1234567891",
-      farmName: "Sunny Acres",
-      location: "Texas, USA",
-      status: "flagged",
-      joinDate: "2024-01-10",
-      totalProducts: 18,
-    },
-    {
-      id: "3",
-      name: "David Johnson",
-      email: "david@freshfields.com",
-      phone: "+1234567892",
-      farmName: "Fresh Fields",
-      location: "Florida, USA",
-      status: "active",
-      joinDate: "2024-01-20",
-      totalProducts: 32,
-    },
-    {
-      id: "4",
-      name: "Sarah Wilson",
-      email: "sarah@organicharvest.com",
-      phone: "+1234567893",
-      farmName: "Organic Harvest",
-      location: "Oregon, USA",
-      status: "disabled",
-      joinDate: "2024-01-05",
-      totalProducts: 12,
-    },
-  ]);
-
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<usersgrpcUserStatus>(
+    "UserStatus_UNSPECIFIED"
+  );
   const { toast } = useToast();
-
-  const filteredFarmers = farmers.filter((farmer) => {
-    const matchesSearch =
-      farmer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      farmer.farmName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      farmer.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || farmer.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
 
   const { data: farmersData, isLoading: isFarmersLoading } = useQuery({
     ...usersListFarmersOptions({
@@ -124,48 +89,48 @@ export default function FarmersPage() {
       query: {
         searchKey: searchTerm,
         startKey: 5.1,
-        userStatus: "UserStatus_ACTIVE",
+        userStatus: statusFilter,
       },
     }),
   });
 
   useQueryLoading(isFarmersLoading);
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: usersgrpcUserStatus | undefined) => {
     switch (status) {
-      case "active":
+      case "UserStatus_ACTIVE":
         return "bg-green-100 text-green-800";
-      case "flagged":
-        return "bg-yellow-100 text-yellow-800";
-      case "disabled":
+      case "UserStatus_SUSPENDED":
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
   };
 
-  const handleDisableFarmer = (farmerId: string) => {
-    setFarmers(
-      farmers.map((farmer) =>
-        farmer.id === farmerId
-          ? {
-              ...farmer,
-              status:
-                farmer.status === "disabled" ? "active" : ("disabled" as const),
-            }
-          : farmer
-      )
-    );
+  const handleDisableFarmer = (farmer: usersgrpcUser | undefined) => {
+    // disable or enable the farmer based on their status
+    // setFarmers(
+    //   farmers.map((farmer) =>
+    //     farmer.id === farmerId
+    //       ? {
+    //           ...farmer,
+    //           status:
+    //             farmer.status === "disabled" ? "active" : ("disabled" as const),
+    //         }
+    //       : farmer
+    //   )
+    // );
 
-    const farmer = farmers.find((f) => f.id === farmerId);
-    const newStatus = farmer?.status === "disabled" ? "active" : "disabled";
+    // const farmer = farmers.find((f) => f.id === farmerId);
+    const newStatus =
+      farmer?.status === "UserStatus_SUSPENDED" ? "active" : "suspended";
 
     toast({
       title: `Farmer account ${
-        newStatus === "disabled" ? "disabled" : "enabled"
+        newStatus === "suspended" ? "disabled" : "enabled"
       }`,
-      description: `${farmer?.name}'s account has been ${
-        newStatus === "disabled" ? "disabled" : "reactivated"
+      description: `${farmer?.firstName}'s account has been ${
+        newStatus === "suspended" ? "suspended" : "reactivated"
       }.`,
     });
   };
@@ -215,14 +180,21 @@ export default function FarmersPage() {
                 />
               </div>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select
+              value={statusFilter}
+              onValueChange={(value) =>
+                setStatusFilter(value as usersgrpcUserStatus)
+              }
+            >
               <SelectTrigger className="w-48">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="disabled">Disabled</SelectItem>
+                {STATUS_FILTERS.map((filter, index) => (
+                  <SelectItem value={filter.value as string} key={index}>
+                    {filter.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -234,7 +206,8 @@ export default function FarmersPage() {
         <CardHeader>
           <CardTitle>Farmers</CardTitle>
           <CardDescription>
-            Showing {filteredFarmers.length} of {farmers.length} farmers
+            Showing {farmersData?.farmers?.length ?? 0} of{" "}
+            {farmersData?.farmers?.length ?? 0} farmers
           </CardDescription>
         </CardHeader>
         <CardContent className="overflow-x-auto">
@@ -251,27 +224,32 @@ export default function FarmersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredFarmers.map((farmer) => (
-                <TableRow key={farmer.id}>
+              {farmersData?.farmers?.map((farmer) => (
+                <TableRow key={farmer?.user?.userId}>
                   <TableCell>
                     <div>
-                      <p className="font-medium">{farmer.name}</p>
-                      <p className="text-sm text-gray-600">{farmer.email}</p>
+                      <p className="font-medium">
+                        {farmer?.user?.firstName} {farmer?.user?.lastName}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {farmer?.user?.email}
+                      </p>
                     </div>
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
-                    {farmer.location}
+                    {farmer?.user?.address}
                   </TableCell>
                   <TableCell>
-                    <Badge className={getStatusColor(farmer.status)}>
-                      {farmer.status}
+                    <Badge className={getStatusColor(farmer?.user?.status)}>
+                      {farmer?.user?.status?.replace("UserStatus_", "")}
                     </Badge>
                     <div className="md:hidden mt-1 text-xs text-gray-500">
-                      Joined: {farmer.joinDate}
+                      Joined:{" "}
+                      {moment(farmer?.user?.createdAt).format("DD-MM-YYYY")}
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                    {farmer.joinDate}
+                    {moment(farmer?.user?.createdAt).format("DD-MM-YYYY")}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
@@ -279,7 +257,12 @@ export default function FarmersPage() {
                         variant="outline"
                         size="sm"
                         onClick={() =>
-                          handleContactFarmer(farmer.phone, farmer.name)
+                          handleContactFarmer(
+                            farmer?.user?.phoneNumber ?? "",
+                            farmer?.user?.firstName ??
+                              farmer?.user?.lastName ??
+                              ""
+                          )
                         }
                         title="Contact via WhatsApp"
                       >
@@ -288,11 +271,11 @@ export default function FarmersPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleDisableFarmer(farmer.id)}
+                        onClick={() => handleDisableFarmer(farmer?.user)}
                         title={
-                          farmer.status === "disabled"
-                            ? "Enable account"
-                            : "Disable account"
+                          farmer?.user?.status === "UserStatus_SUSPENDED"
+                            ? "Reactivate account"
+                            : "Suspend account"
                         }
                       >
                         <UserX className="h-4 w-4" />
