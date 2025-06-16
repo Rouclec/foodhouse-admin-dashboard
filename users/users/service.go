@@ -1551,7 +1551,9 @@ func (i *Impl) ReactivateUser(ctx context.Context,
 }
 
 // DeleteAgent implements usersgrpc.UsersServer.
-func (i *Impl) DeleteAgent(ctx context.Context, req *usersgrpc.DeleteAgentRequest) (*usersgrpc.DeleteAgentResponse, error) {
+func (i *Impl) DeleteAgent(ctx context.Context,
+	req *usersgrpc.DeleteAgentRequest) (
+	*usersgrpc.DeleteAgentResponse, error) {
 	user, err := i.repo.Do().GetUser(ctx, req.GetUserId())
 
 	if err != nil {
@@ -1572,7 +1574,9 @@ func (i *Impl) DeleteAgent(ctx context.Context, req *usersgrpc.DeleteAgentReques
 }
 
 // GrantAgent implements usersgrpc.UsersServer.
-func (i *Impl) GrantAgent(ctx context.Context, req *usersgrpc.GrantAgentRequest) (*usersgrpc.GrantAgentResponse, error) {
+func (i *Impl) GrantAgent(ctx context.Context,
+	req *usersgrpc.GrantAgentRequest) (
+	*usersgrpc.GrantAgentResponse, error) {
 	newAgentPhoneNumber := req.GetPhoneNumber()
 
 	// fetch the user via email from the db.
