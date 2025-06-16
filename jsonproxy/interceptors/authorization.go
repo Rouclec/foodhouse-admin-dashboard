@@ -25,10 +25,7 @@ var (
 func NewAuthorizationInterceptor() HTTPInterceptor {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			path := r.URL.Path
-
-			// Public endpoints don't need any authorization
-			if PublicEndpointPrefixRegex.MatchString(path) {
+			if isPublicEndpoint(r.URL.Path) {
 				next.ServeHTTP(w, r)
 				return
 			}
@@ -38,39 +35,27 @@ func NewAuthorizationInterceptor() HTTPInterceptor {
 			role, _ := ctx.Value(ContextKeyRole).(string)
 			status, _ := ctx.Value(ContextKeyStatus).(string)
 
-			if status != UserActiveStatus {
+			if !isUserActive(status) {
 				http.Error(w, "User is inactive", http.StatusUnauthorized)
 				return
 			}
 
-			// Admins can access all endpoints
-			if role == RoleAdmin {
+			if isAdmin(role) {
 				next.ServeHTTP(w, r)
 				return
 			}
 
-			// Non-admins can't access admin endpoints
-			if AdminEndpointPrefixRegex.MatchString(path) {
+			if isAdminEndpoint(r.URL.Path) {
 				http.Error(w, "Unauthorized", http.StatusForbidden)
 				return
 			}
 
-			// if the user is an agent and the enpoint is not an admin endpoint, grant them access
-			if role == RoleAgent {
+			if isAgent(role) {
 				next.ServeHTTP(w, r)
 				return
 			}
 
-			pathParts := strings.Split(path, "/")
-			minPathParts := 4
-			if len(pathParts) < minPathParts {
-				http.Error(w, "Bad Request", http.StatusBadRequest)
-				return
-			}
-
-			// Check if the user ID in the path matches the user ID in the token
-			userIDFromPath := pathParts[3]
-			if userID != userIDFromPath {
+			if !isPathValidAndAuthorized(r.URL.Path, userID) {
 				http.Error(w, "Unauthorized", http.StatusForbidden)
 				return
 			}
@@ -78,4 +63,35 @@ func NewAuthorizationInterceptor() HTTPInterceptor {
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+func isPublicEndpoint(path string) bool {
+	return PublicEndpointPrefixRegex.MatchString(path)
+}
+
+func isUserActive(status string) bool {
+	return status == UserActiveStatus
+}
+
+func isAdmin(role string) bool {
+	return role == RoleAdmin
+}
+
+func isAgent(role string) bool {
+	return role == RoleAgent
+}
+
+func isAdminEndpoint(path string) bool {
+	return AdminEndpointPrefixRegex.MatchString(path)
+}
+
+func isPathValidAndAuthorized(path, userID string) bool {
+	parts := strings.Split(path, "/")
+
+	minimumPartsLength := 4
+
+	if len(parts) < minimumPartsLength {
+		return false
+	}
+	return parts[3] == userID
 }
