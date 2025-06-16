@@ -22,7 +22,9 @@ func SqlcToProtoSubscriptions(sqlcSubscriptions []sqlc.Subscription) ([]*usersgr
 	protoSubscriptions := make([]*usersgrpc.Subscription, len(sqlcSubscriptions))
 
 	for i, sc := range sqlcSubscriptions {
-		totalDays := int64(sc.Duration.Months)*30 + int64(sc.Duration.Days) + sc.Duration.Microseconds/(24*60*60*OneMillion)
+		totalDays := int64(sc.Duration.Months)*30 +
+			int64(sc.Duration.Days) +
+			sc.Duration.Microseconds/(24*60*60*OneMillion)
 
 		protoSubscriptions[i] = &usersgrpc.Subscription{
 			Id:          sc.ID,
