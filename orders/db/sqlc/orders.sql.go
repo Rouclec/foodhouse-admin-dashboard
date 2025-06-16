@@ -679,19 +679,22 @@ SELECT id, status, payment_entity, entity_id, amount_value, amount_currency, cre
 WHERE
   ( $1::TEXT = 'PaymentStatus_UNSPECIFIED' OR (status = $1::TEXT) ) 
   AND  
+  ( $2::TEXT = 'PaymentEntity_UNSPECIFIED' OR (payment_entity = $1::TEXT) ) 
+  AND  
   (
-    $2::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
-    OR created_at < $2::timestamptz
+    $3::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+    OR created_at < $3::timestamptz
   ) AND
   (
-    $3::TEXT IS NULL OR account_number ILIKE '%' || $3 || '%'
+    $4::TEXT IS NULL OR account_number ILIKE '%' || $4 || '%'
   )
 ORDER BY created_at DESC
-LIMIT $4::int
+LIMIT $5::int
 `
 
 type ListPaymentsParams struct {
 	PaymentStatus string    `json:"payment_status"`
+	PaymentEntity string    `json:"payment_entity"`
 	CreatedBefore time.Time `json:"created_before"`
 	SearchKey     string    `json:"search_key"`
 	Count         int32     `json:"count"`
@@ -700,6 +703,7 @@ type ListPaymentsParams struct {
 func (q *Queries) ListPayments(ctx context.Context, arg ListPaymentsParams) ([]Payment, error) {
 	rows, err := q.db.Query(ctx, listPayments,
 		arg.PaymentStatus,
+		arg.PaymentEntity,
 		arg.CreatedBefore,
 		arg.SearchKey,
 		arg.Count,

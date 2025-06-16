@@ -209,6 +209,18 @@
               "PaymentStatus_CANCELED"
             ],
             "default": "PaymentStatus_UNSPECIFIED"
+          },
+          {
+            "name": "paymentEntity",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "PaymentEntity_UNSPECIFIED",
+              "PaymentEntity_ORDER",
+              "PaymentEntity_SUBSCRIPTION"
+            ],
+            "default": "PaymentEntity_UNSPECIFIED"
           }
         ],
         "tags": [

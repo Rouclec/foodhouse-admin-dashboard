@@ -87,7 +87,7 @@ export default function Buysers() {
       },
       query: {
         searchKey: searchTerm,
-        startKey: "",
+        startKey: pagination.startKey,
         userStatus: statusFilter,
         count: pagination.pageSize,
         userRole: "USER_ROLE_BUYER",

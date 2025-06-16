@@ -252,6 +252,7 @@ export type OrdersListPaymentsData = {
     };
     query?: {
         count?: number;
+        paymentEntity?: 'PaymentEntity_UNSPECIFIED' | 'PaymentEntity_ORDER' | 'PaymentEntity_SUBSCRIPTION';
         paymentStatus?: 'PaymentStatus_UNSPECIFIED' | 'PaymentStatus_INITIATED' | 'PaymentStatus_COMPLETED' | 'PaymentStatus_FAILED' | 'PaymentStatus_CANCELED';
         searchKey?: string;
         startKey?: string;
