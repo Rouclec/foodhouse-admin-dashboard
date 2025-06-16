@@ -290,12 +290,12 @@ LEFT JOIN (
 ) AS fr ON f.id = fr.farmer_id
 WHERE
     ( $1::TEXT = 'UserStatus_UNSPECIFIED' OR (f.user_status = $1::TEXT) )
+    AND role = 'USER_ROLE_FARMER'
     AND
     (
         $2::float = 0.0
         OR COALESCE(fr.average_rating, 0) < $2::float
     )
-    AND role = 'USER_ROLE_FARMER'
     AND (
         $3 = ''
         OR (
@@ -371,6 +371,7 @@ SELECT id, role, phone_number, email, first_name, last_name, residence_country_i
 FROM users 
 WHERE
     ( $2::TEXT = 'UserStatus_UNSPECIFIED' OR (user_status = $2::TEXT) )
+    AND role = 'USER_ROLE_BUYER'
    AND (
         $3 = ''
         OR (

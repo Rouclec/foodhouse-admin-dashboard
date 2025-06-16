@@ -70,12 +70,12 @@ LEFT JOIN (
 ) AS fr ON f.id = fr.farmer_id
 WHERE
     ( sqlc.arg(user_status)::TEXT = 'UserStatus_UNSPECIFIED' OR (f.user_status = sqlc.arg(user_status)::TEXT) )
+    AND role = 'USER_ROLE_FARMER'
     AND
     (
         sqlc.arg(cursor_average_rating)::float = 0.0
         OR COALESCE(fr.average_rating, 0) < sqlc.arg(cursor_average_rating)::float
     )
-    AND role = 'USER_ROLE_FARMER'
     AND (
         sqlc.arg(search_key) = ''
         OR (
@@ -94,6 +94,7 @@ SELECT *
 FROM users 
 WHERE
     ( sqlc.arg(user_status)::TEXT = 'UserStatus_UNSPECIFIED' OR (user_status = sqlc.arg(user_status)::TEXT) )
+    AND role = 'USER_ROLE_BUYER'
    AND (
         sqlc.arg(search_key) = ''
         OR (
