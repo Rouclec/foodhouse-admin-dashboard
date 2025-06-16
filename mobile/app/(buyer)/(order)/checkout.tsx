@@ -57,7 +57,7 @@ export default function Checkout() {
         entityId: data?.order?.orderNumber ?? "",
         nextScreen: "/(buyer)/(index)" as RelativePathString,
         amount: {
-          value: totalPrice,
+          value: (totalPrice ?? 0) * 1.08,
           currencyIsoCode: productData?.product?.amount?.currencyIsoCode,
         },
       });
@@ -208,7 +208,7 @@ export default function Checkout() {
                     {productData?.product?.amount?.value}
                     <Text style={styles.greyText}>
                       {" "}
-                      {productData?.product?.unitType?.slug?.replace(
+                      {productData?.product?.unitType?.replace(
                         "per_",
                         "/"
                       )}

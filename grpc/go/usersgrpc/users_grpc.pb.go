@@ -34,6 +34,7 @@ const (
 	Users_VerifyOtp_FullMethodName                     = "/usersgrpc.Users/VerifyOtp"
 	Users_LastOtpForFactor_FullMethodName              = "/usersgrpc.Users/LastOtpForFactor"
 	Users_GrantAdmin_FullMethodName                    = "/usersgrpc.Users/GrantAdmin"
+	Users_GrantAgent_FullMethodName                    = "/usersgrpc.Users/GrantAgent"
 	Users_ListUsers_FullMethodName                     = "/usersgrpc.Users/ListUsers"
 	Users_CreateSubscription_FullMethodName            = "/usersgrpc.Users/CreateSubscription"
 	Users_UpdateSubscription_FullMethodName            = "/usersgrpc.Users/UpdateSubscription"
@@ -51,6 +52,10 @@ const (
 	Users_ReviewFarmer_FullMethodName                  = "/usersgrpc.Users/ReviewFarmer"
 	Users_ListFarmersReivews_FullMethodName            = "/usersgrpc.Users/ListFarmersReivews"
 	Users_ListFarmers_FullMethodName                   = "/usersgrpc.Users/ListFarmers"
+	Users_GetUserStats_FullMethodName                  = "/usersgrpc.Users/GetUserStats"
+	Users_SuspendUser_FullMethodName                   = "/usersgrpc.Users/SuspendUser"
+	Users_ReactivateUser_FullMethodName                = "/usersgrpc.Users/ReactivateUser"
+	Users_DeleteAgent_FullMethodName                   = "/usersgrpc.Users/DeleteAgent"
 )
 
 // UsersClient is the client API for Users service.
@@ -72,6 +77,7 @@ type UsersClient interface {
 	VerifyOtp(ctx context.Context, in *VerifyOtpRequest, opts ...grpc.CallOption) (*VerifyOtpResponse, error)
 	LastOtpForFactor(ctx context.Context, in *LastOtpForFactorRequest, opts ...grpc.CallOption) (*LastOtpForFactorResponse, error)
 	GrantAdmin(ctx context.Context, in *GrantAdminRequest, opts ...grpc.CallOption) (*GrantAdminResponse, error)
+	GrantAgent(ctx context.Context, in *GrantAgentRequest, opts ...grpc.CallOption) (*GrantAgentResponse, error)
 	ListUsers(ctx context.Context, in *ListUsersRequest, opts ...grpc.CallOption) (*ListUsersResponse, error)
 	CreateSubscription(ctx context.Context, in *CreateSubscriptionRequest, opts ...grpc.CallOption) (*CreateSubscriptionResponse, error)
 	UpdateSubscription(ctx context.Context, in *UpdateSubscriptionRequest, opts ...grpc.CallOption) (*UpdateSubscriptionResponse, error)
@@ -89,6 +95,10 @@ type UsersClient interface {
 	ReviewFarmer(ctx context.Context, in *ReviewFarmerRequest, opts ...grpc.CallOption) (*ReviewFarmerResponse, error)
 	ListFarmersReivews(ctx context.Context, in *ListFarmersReviewsRequest, opts ...grpc.CallOption) (*ListFarmersReivewsResponse, error)
 	ListFarmers(ctx context.Context, in *ListFarmersRequest, opts ...grpc.CallOption) (*ListFarmersResponse, error)
+	GetUserStats(ctx context.Context, in *GetUserStatsRequest, opts ...grpc.CallOption) (*GetUserStatsResponse, error)
+	SuspendUser(ctx context.Context, in *SuspendUserRequest, opts ...grpc.CallOption) (*SuspendUserResponse, error)
+	ReactivateUser(ctx context.Context, in *ReactivateUserRequest, opts ...grpc.CallOption) (*ReactivateUserResponse, error)
+	DeleteAgent(ctx context.Context, in *DeleteAgentRequest, opts ...grpc.CallOption) (*DeleteAgentResponse, error)
 }
 
 type usersClient struct {
@@ -243,6 +253,16 @@ func (c *usersClient) GrantAdmin(ctx context.Context, in *GrantAdminRequest, opt
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GrantAdminResponse)
 	err := c.cc.Invoke(ctx, Users_GrantAdmin_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersClient) GrantAgent(ctx context.Context, in *GrantAgentRequest, opts ...grpc.CallOption) (*GrantAgentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GrantAgentResponse)
+	err := c.cc.Invoke(ctx, Users_GrantAgent_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -419,6 +439,46 @@ func (c *usersClient) ListFarmers(ctx context.Context, in *ListFarmersRequest, o
 	return out, nil
 }
 
+func (c *usersClient) GetUserStats(ctx context.Context, in *GetUserStatsRequest, opts ...grpc.CallOption) (*GetUserStatsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetUserStatsResponse)
+	err := c.cc.Invoke(ctx, Users_GetUserStats_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersClient) SuspendUser(ctx context.Context, in *SuspendUserRequest, opts ...grpc.CallOption) (*SuspendUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SuspendUserResponse)
+	err := c.cc.Invoke(ctx, Users_SuspendUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersClient) ReactivateUser(ctx context.Context, in *ReactivateUserRequest, opts ...grpc.CallOption) (*ReactivateUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReactivateUserResponse)
+	err := c.cc.Invoke(ctx, Users_ReactivateUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersClient) DeleteAgent(ctx context.Context, in *DeleteAgentRequest, opts ...grpc.CallOption) (*DeleteAgentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteAgentResponse)
+	err := c.cc.Invoke(ctx, Users_DeleteAgent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsersServer is the server API for Users service.
 // All implementations must embed UnimplementedUsersServer
 // for forward compatibility.
@@ -438,6 +498,7 @@ type UsersServer interface {
 	VerifyOtp(context.Context, *VerifyOtpRequest) (*VerifyOtpResponse, error)
 	LastOtpForFactor(context.Context, *LastOtpForFactorRequest) (*LastOtpForFactorResponse, error)
 	GrantAdmin(context.Context, *GrantAdminRequest) (*GrantAdminResponse, error)
+	GrantAgent(context.Context, *GrantAgentRequest) (*GrantAgentResponse, error)
 	ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error)
 	CreateSubscription(context.Context, *CreateSubscriptionRequest) (*CreateSubscriptionResponse, error)
 	UpdateSubscription(context.Context, *UpdateSubscriptionRequest) (*UpdateSubscriptionResponse, error)
@@ -455,6 +516,10 @@ type UsersServer interface {
 	ReviewFarmer(context.Context, *ReviewFarmerRequest) (*ReviewFarmerResponse, error)
 	ListFarmersReivews(context.Context, *ListFarmersReviewsRequest) (*ListFarmersReivewsResponse, error)
 	ListFarmers(context.Context, *ListFarmersRequest) (*ListFarmersResponse, error)
+	GetUserStats(context.Context, *GetUserStatsRequest) (*GetUserStatsResponse, error)
+	SuspendUser(context.Context, *SuspendUserRequest) (*SuspendUserResponse, error)
+	ReactivateUser(context.Context, *ReactivateUserRequest) (*ReactivateUserResponse, error)
+	DeleteAgent(context.Context, *DeleteAgentRequest) (*DeleteAgentResponse, error)
 	mustEmbedUnimplementedUsersServer()
 }
 
@@ -510,6 +575,9 @@ func (UnimplementedUsersServer) LastOtpForFactor(context.Context, *LastOtpForFac
 func (UnimplementedUsersServer) GrantAdmin(context.Context, *GrantAdminRequest) (*GrantAdminResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GrantAdmin not implemented")
 }
+func (UnimplementedUsersServer) GrantAgent(context.Context, *GrantAgentRequest) (*GrantAgentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GrantAgent not implemented")
+}
 func (UnimplementedUsersServer) ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListUsers not implemented")
 }
@@ -560,6 +628,18 @@ func (UnimplementedUsersServer) ListFarmersReivews(context.Context, *ListFarmers
 }
 func (UnimplementedUsersServer) ListFarmers(context.Context, *ListFarmersRequest) (*ListFarmersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListFarmers not implemented")
+}
+func (UnimplementedUsersServer) GetUserStats(context.Context, *GetUserStatsRequest) (*GetUserStatsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserStats not implemented")
+}
+func (UnimplementedUsersServer) SuspendUser(context.Context, *SuspendUserRequest) (*SuspendUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SuspendUser not implemented")
+}
+func (UnimplementedUsersServer) ReactivateUser(context.Context, *ReactivateUserRequest) (*ReactivateUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReactivateUser not implemented")
+}
+func (UnimplementedUsersServer) DeleteAgent(context.Context, *DeleteAgentRequest) (*DeleteAgentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteAgent not implemented")
 }
 func (UnimplementedUsersServer) mustEmbedUnimplementedUsersServer() {}
 func (UnimplementedUsersServer) testEmbeddedByValue()               {}
@@ -848,6 +928,24 @@ func _Users_GrantAdmin_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UsersServer).GrantAdmin(ctx, req.(*GrantAdminRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Users_GrantAgent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GrantAgentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).GrantAgent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Users_GrantAgent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).GrantAgent(ctx, req.(*GrantAgentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1158,6 +1256,78 @@ func _Users_ListFarmers_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Users_GetUserStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserStatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).GetUserStats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Users_GetUserStats_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).GetUserStats(ctx, req.(*GetUserStatsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Users_SuspendUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SuspendUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).SuspendUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Users_SuspendUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).SuspendUser(ctx, req.(*SuspendUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Users_ReactivateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReactivateUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).ReactivateUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Users_ReactivateUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).ReactivateUser(ctx, req.(*ReactivateUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Users_DeleteAgent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteAgentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).DeleteAgent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Users_DeleteAgent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).DeleteAgent(ctx, req.(*DeleteAgentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Users_ServiceDesc is the grpc.ServiceDesc for Users service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1226,6 +1396,10 @@ var Users_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Users_GrantAdmin_Handler,
 		},
 		{
+			MethodName: "GrantAgent",
+			Handler:    _Users_GrantAgent_Handler,
+		},
+		{
 			MethodName: "ListUsers",
 			Handler:    _Users_ListUsers_Handler,
 		},
@@ -1292,6 +1466,22 @@ var Users_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListFarmers",
 			Handler:    _Users_ListFarmers_Handler,
+		},
+		{
+			MethodName: "GetUserStats",
+			Handler:    _Users_GetUserStats_Handler,
+		},
+		{
+			MethodName: "SuspendUser",
+			Handler:    _Users_SuspendUser_Handler,
+		},
+		{
+			MethodName: "ReactivateUser",
+			Handler:    _Users_ReactivateUser_Handler,
+		},
+		{
+			MethodName: "DeleteAgent",
+			Handler:    _Users_DeleteAgent_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

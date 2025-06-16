@@ -16,15 +16,15 @@ type Category struct {
 }
 
 type PriceType struct {
-	ID         string `json:"id"`
-	Name       string `json:"name"`
-	Slug       string `json:"slug"`
-	CategoryID string `json:"category_id"`
+	ID         string  `json:"id"`
+	Name       string  `json:"name"`
+	Slug       string  `json:"slug"`
+	CategoryID *string `json:"category_id"`
 }
 
 type Product struct {
 	ID              string             `json:"id"`
-	CategoryID      string             `json:"category_id"`
+	CategoryID      *string            `json:"category_id"`
 	Name            string             `json:"name"`
 	UnitType        string             `json:"unit_type"`
 	Value           float64            `json:"value"`
@@ -38,7 +38,7 @@ type Product struct {
 }
 
 type ProductName struct {
-	Name       string `json:"name"`
-	Slug       string `json:"slug"`
-	CategoryID string `json:"category_id"`
+	Name       string  `json:"name"`
+	Slug       string  `json:"slug"`
+	CategoryID *string `json:"category_id"`
 }

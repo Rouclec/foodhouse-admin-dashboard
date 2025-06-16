@@ -14,6 +14,13 @@ enum UserRole {
   USER_ROLE_FARMER = 1;
   USER_ROLE_BUYER = 2;
   USER_ROLE_ADMIN = 3;
+  USER_ROLE_AGENT = 4;
+}
+
+enum UserStatus {
+  UserStatus_UNSPECIFIED = 0;
+  UserStatus_SUSPENDED = 1;
+  UserStatus_ACTIVE = 2;
 }
 
 message User {
@@ -29,6 +36,7 @@ message User {
   string address = 11;
   google.protobuf.Timestamp created_at = 12; // Using a timestamp for date
   google.protobuf.Timestamp updated_at = 13;
+  UserStatus status = 14;
 }
 
 message AuthFactor {
@@ -152,7 +160,9 @@ enum UserType {
   USER_TYPE_UNSPECIFIED = 0;
   USER_TYPE_FARMER = 1;
   USER_TYPE_BUYER = 2;
+  USER_TYPE_AGENT = 3;
 }
+
 message SignupRequest {
   AuthFactor phone_factor = 1;
   string residence_country_iso_code = 2;
@@ -246,6 +256,16 @@ message GrantAdminRequest {
 
 message GrantAdminResponse { string message = 1; }
 
+message GrantAgentRequest {
+  string admin_user_id = 1;
+  string phone_number = 2;
+  string residence_country_iso_code = 3;
+  string address = 4;
+  string email = 5;
+}
+
+message GrantAgentResponse { string message = 1; }
+
 // Request message for ListUsers
 message ListUsersRequest {
   string admin_user_id = 1;
@@ -255,6 +275,8 @@ message ListUsersRequest {
   int32 count = 3;
   // keyword search for the users (could be name, or email)
   string search = 4;
+  UserStatus user_status = 5;
+  UserRole user_role = 6;
 }
 
 // Response message for ListAllUsers
@@ -386,6 +408,7 @@ message ListFarmersRequest {
   double start_key = 2;
   int32 count = 3;
   string search_key = 4;
+  UserStatus user_status = 5;
 }
 
 message FarmerWithRating {
@@ -409,6 +432,37 @@ message ListFarmersReivewsResponse {
   repeated Review reviews = 1;
   string next_key = 2;
 }
+
+message StatItem {
+  string title = 1;
+  double value = 2;
+  double change = 3;
+  string description = 4;
+}
+
+message GetUserStatsRequest {}
+message GetUserStatsResponse { repeated StatItem data = 1; }
+
+message SuspendUserRequest {
+  string user_id = 1;
+  string admin_user_id = 2;
+}
+
+message SuspendUserResponse {}
+
+message ReactivateUserRequest {
+  string user_id = 1;
+  string admin_user_id = 2;
+}
+
+message ReactivateUserResponse {}
+
+message DeleteAgentRequest {
+  string user_id = 1;
+  string admin_user_id = 2;
+}
+
+message DeleteAgentResponse {}
 
 service Users {
 
@@ -514,6 +568,13 @@ service Users {
   rpc GrantAdmin(GrantAdminRequest) returns (GrantAdminResponse) {
     option (google.api.http) = {
       post : "/v1/admin/{admin_user_id}/users/grant-admin"
+      body : "*"
+    };
+  }
+
+  rpc GrantAgent(GrantAgentRequest) returns (GrantAgentResponse) {
+    option (google.api.http) = {
+      post : "/v1/admin/{admin_user_id}/users/grant-agent"
       body : "*"
     };
   }
@@ -629,6 +690,28 @@ service Users {
   rpc ListFarmers(ListFarmersRequest) returns (ListFarmersResponse) {
     option (google.api.http) = {
       get : "/v1/users/{user_id}/farmers/list-farmers"
+    };
+  }
+
+  rpc GetUserStats(GetUserStatsRequest) returns (GetUserStatsResponse);
+
+  rpc SuspendUser(SuspendUserRequest) returns (SuspendUserResponse) {
+    option (google.api.http) = {
+      put : "/v1/admin/{admin_user_id}/users/{user_id}/suspend-user"
+      body : "*"
+    };
+  }
+
+  rpc ReactivateUser(ReactivateUserRequest) returns (ReactivateUserResponse) {
+    option (google.api.http) = {
+      put : "/v1/admin/{admin_user_id}/users/{user_id}/reactivate-user"
+      body : "*"
+    };
+  }
+
+  rpc DeleteAgent(DeleteAgentRequest) returns (DeleteAgentResponse) {
+    option (google.api.http) = {
+      delete : "/v1/admin/{admin_user_id}/users/{user_id}/delete-agent"
     };
   }
 }

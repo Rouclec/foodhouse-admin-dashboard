@@ -19,23 +19,26 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Products_CreateCategory_FullMethodName             = "/productsgrpc.Products/CreateCategory"
-	Products_CreateProduct_FullMethodName              = "/productsgrpc.Products/CreateProduct"
-	Products_UpdateProduct_FullMethodName              = "/productsgrpc.Products/UpdateProduct"
-	Products_DeleteProduct_FullMethodName              = "/productsgrpc.Products/DeleteProduct"
-	Products_ListProducts_FullMethodName               = "/productsgrpc.Products/ListProducts"
-	Products_ListFarmerProducts_FullMethodName         = "/productsgrpc.Products/ListFarmerProducts"
-	Products_GetProduct_FullMethodName                 = "/productsgrpc.Products/GetProduct"
-	Products_GetFarmerProduct_FullMethodName           = "/productsgrpc.Products/GetFarmerProduct"
-	Products_ListCategories_FullMethodName             = "/productsgrpc.Products/ListCategories"
-	Products_HealthCheck_FullMethodName                = "/productsgrpc.Products/HealthCheck"
-	Products_CreateProductName_FullMethodName          = "/productsgrpc.Products/CreateProductName"
-	Products_DeleteProductName_FullMethodName          = "/productsgrpc.Products/DeleteProductName"
-	Products_CreatePriceType_FullMethodName            = "/productsgrpc.Products/CreatePriceType"
-	Products_DeletePriceType_FullMethodName            = "/productsgrpc.Products/DeletePriceType"
-	Products_ListProductNamesByCategory_FullMethodName = "/productsgrpc.Products/ListProductNamesByCategory"
-	Products_ListPriceTypesByCategory_FullMethodName   = "/productsgrpc.Products/ListPriceTypesByCategory"
-	Products_SumProductAmounts_FullMethodName          = "/productsgrpc.Products/SumProductAmounts"
+	Products_CreateCategory_FullMethodName     = "/productsgrpc.Products/CreateCategory"
+	Products_UpdateCategory_FullMethodName     = "/productsgrpc.Products/UpdateCategory"
+	Products_DeleteCategory_FullMethodName     = "/productsgrpc.Products/DeleteCategory"
+	Products_CreateProduct_FullMethodName      = "/productsgrpc.Products/CreateProduct"
+	Products_UpdateProduct_FullMethodName      = "/productsgrpc.Products/UpdateProduct"
+	Products_DeleteProduct_FullMethodName      = "/productsgrpc.Products/DeleteProduct"
+	Products_ListProducts_FullMethodName       = "/productsgrpc.Products/ListProducts"
+	Products_ListFarmerProducts_FullMethodName = "/productsgrpc.Products/ListFarmerProducts"
+	Products_GetProduct_FullMethodName         = "/productsgrpc.Products/GetProduct"
+	Products_GetFarmerProduct_FullMethodName   = "/productsgrpc.Products/GetFarmerProduct"
+	Products_ListCategories_FullMethodName     = "/productsgrpc.Products/ListCategories"
+	Products_HealthCheck_FullMethodName        = "/productsgrpc.Products/HealthCheck"
+	Products_CreateProductName_FullMethodName  = "/productsgrpc.Products/CreateProductName"
+	Products_DeleteProductName_FullMethodName  = "/productsgrpc.Products/DeleteProductName"
+	Products_CreatePriceType_FullMethodName    = "/productsgrpc.Products/CreatePriceType"
+	Products_DeletePriceType_FullMethodName    = "/productsgrpc.Products/DeletePriceType"
+	Products_ListProductNames_FullMethodName   = "/productsgrpc.Products/ListProductNames"
+	Products_ListPriceTypes_FullMethodName     = "/productsgrpc.Products/ListPriceTypes"
+	Products_SumProductAmounts_FullMethodName  = "/productsgrpc.Products/SumProductAmounts"
+	Products_GetProductStats_FullMethodName    = "/productsgrpc.Products/GetProductStats"
 )
 
 // ProductsClient is the client API for Products service.
@@ -43,6 +46,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ProductsClient interface {
 	CreateCategory(ctx context.Context, in *CreateCategoryRequest, opts ...grpc.CallOption) (*CreateCategoryResponse, error)
+	UpdateCategory(ctx context.Context, in *UpdateCategoryRequest, opts ...grpc.CallOption) (*UpdateCategoryResponse, error)
+	DeleteCategory(ctx context.Context, in *DeleteCategoryRequest, opts ...grpc.CallOption) (*DeleteCategoryResponse, error)
 	CreateProduct(ctx context.Context, in *CreateProductRequest, opts ...grpc.CallOption) (*CreateProductResponse, error)
 	UpdateProduct(ctx context.Context, in *UpdateProductRequest, opts ...grpc.CallOption) (*UpdateProductResponse, error)
 	DeleteProduct(ctx context.Context, in *DeleteProductRequest, opts ...grpc.CallOption) (*DeleteProductResponse, error)
@@ -56,9 +61,10 @@ type ProductsClient interface {
 	DeleteProductName(ctx context.Context, in *DeleteProductNameRequest, opts ...grpc.CallOption) (*DeleteProductNameResponse, error)
 	CreatePriceType(ctx context.Context, in *CreatePriceTypeRequest, opts ...grpc.CallOption) (*CreatePriceTypeResponse, error)
 	DeletePriceType(ctx context.Context, in *DeletePriceTypeRequest, opts ...grpc.CallOption) (*DeletePriceTypeResponse, error)
-	ListProductNamesByCategory(ctx context.Context, in *ListProductNamesByCategoryRequest, opts ...grpc.CallOption) (*ListProductNamesByCategoryResponse, error)
-	ListPriceTypesByCategory(ctx context.Context, in *ListPriceTypesByCategoryRequest, opts ...grpc.CallOption) (*ListPriceTypesByCategoryResponse, error)
+	ListProductNames(ctx context.Context, in *ListProductNamesRequest, opts ...grpc.CallOption) (*ListProductNamesResponse, error)
+	ListPriceTypes(ctx context.Context, in *ListPriceTypesRequest, opts ...grpc.CallOption) (*ListPriceTypesResponse, error)
 	SumProductAmounts(ctx context.Context, in *SumProductAmountsRequest, opts ...grpc.CallOption) (*SumProductAmountsResponse, error)
+	GetProductStats(ctx context.Context, in *GetProductStatsRequest, opts ...grpc.CallOption) (*GetProductStatsResponse, error)
 }
 
 type productsClient struct {
@@ -73,6 +79,26 @@ func (c *productsClient) CreateCategory(ctx context.Context, in *CreateCategoryR
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CreateCategoryResponse)
 	err := c.cc.Invoke(ctx, Products_CreateCategory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *productsClient) UpdateCategory(ctx context.Context, in *UpdateCategoryRequest, opts ...grpc.CallOption) (*UpdateCategoryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateCategoryResponse)
+	err := c.cc.Invoke(ctx, Products_UpdateCategory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *productsClient) DeleteCategory(ctx context.Context, in *DeleteCategoryRequest, opts ...grpc.CallOption) (*DeleteCategoryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteCategoryResponse)
+	err := c.cc.Invoke(ctx, Products_DeleteCategory_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -209,20 +235,20 @@ func (c *productsClient) DeletePriceType(ctx context.Context, in *DeletePriceTyp
 	return out, nil
 }
 
-func (c *productsClient) ListProductNamesByCategory(ctx context.Context, in *ListProductNamesByCategoryRequest, opts ...grpc.CallOption) (*ListProductNamesByCategoryResponse, error) {
+func (c *productsClient) ListProductNames(ctx context.Context, in *ListProductNamesRequest, opts ...grpc.CallOption) (*ListProductNamesResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListProductNamesByCategoryResponse)
-	err := c.cc.Invoke(ctx, Products_ListProductNamesByCategory_FullMethodName, in, out, cOpts...)
+	out := new(ListProductNamesResponse)
+	err := c.cc.Invoke(ctx, Products_ListProductNames_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *productsClient) ListPriceTypesByCategory(ctx context.Context, in *ListPriceTypesByCategoryRequest, opts ...grpc.CallOption) (*ListPriceTypesByCategoryResponse, error) {
+func (c *productsClient) ListPriceTypes(ctx context.Context, in *ListPriceTypesRequest, opts ...grpc.CallOption) (*ListPriceTypesResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListPriceTypesByCategoryResponse)
-	err := c.cc.Invoke(ctx, Products_ListPriceTypesByCategory_FullMethodName, in, out, cOpts...)
+	out := new(ListPriceTypesResponse)
+	err := c.cc.Invoke(ctx, Products_ListPriceTypes_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -239,11 +265,23 @@ func (c *productsClient) SumProductAmounts(ctx context.Context, in *SumProductAm
 	return out, nil
 }
 
+func (c *productsClient) GetProductStats(ctx context.Context, in *GetProductStatsRequest, opts ...grpc.CallOption) (*GetProductStatsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetProductStatsResponse)
+	err := c.cc.Invoke(ctx, Products_GetProductStats_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProductsServer is the server API for Products service.
 // All implementations must embed UnimplementedProductsServer
 // for forward compatibility.
 type ProductsServer interface {
 	CreateCategory(context.Context, *CreateCategoryRequest) (*CreateCategoryResponse, error)
+	UpdateCategory(context.Context, *UpdateCategoryRequest) (*UpdateCategoryResponse, error)
+	DeleteCategory(context.Context, *DeleteCategoryRequest) (*DeleteCategoryResponse, error)
 	CreateProduct(context.Context, *CreateProductRequest) (*CreateProductResponse, error)
 	UpdateProduct(context.Context, *UpdateProductRequest) (*UpdateProductResponse, error)
 	DeleteProduct(context.Context, *DeleteProductRequest) (*DeleteProductResponse, error)
@@ -257,9 +295,10 @@ type ProductsServer interface {
 	DeleteProductName(context.Context, *DeleteProductNameRequest) (*DeleteProductNameResponse, error)
 	CreatePriceType(context.Context, *CreatePriceTypeRequest) (*CreatePriceTypeResponse, error)
 	DeletePriceType(context.Context, *DeletePriceTypeRequest) (*DeletePriceTypeResponse, error)
-	ListProductNamesByCategory(context.Context, *ListProductNamesByCategoryRequest) (*ListProductNamesByCategoryResponse, error)
-	ListPriceTypesByCategory(context.Context, *ListPriceTypesByCategoryRequest) (*ListPriceTypesByCategoryResponse, error)
+	ListProductNames(context.Context, *ListProductNamesRequest) (*ListProductNamesResponse, error)
+	ListPriceTypes(context.Context, *ListPriceTypesRequest) (*ListPriceTypesResponse, error)
 	SumProductAmounts(context.Context, *SumProductAmountsRequest) (*SumProductAmountsResponse, error)
+	GetProductStats(context.Context, *GetProductStatsRequest) (*GetProductStatsResponse, error)
 	mustEmbedUnimplementedProductsServer()
 }
 
@@ -272,6 +311,12 @@ type UnimplementedProductsServer struct{}
 
 func (UnimplementedProductsServer) CreateCategory(context.Context, *CreateCategoryRequest) (*CreateCategoryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateCategory not implemented")
+}
+func (UnimplementedProductsServer) UpdateCategory(context.Context, *UpdateCategoryRequest) (*UpdateCategoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateCategory not implemented")
+}
+func (UnimplementedProductsServer) DeleteCategory(context.Context, *DeleteCategoryRequest) (*DeleteCategoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteCategory not implemented")
 }
 func (UnimplementedProductsServer) CreateProduct(context.Context, *CreateProductRequest) (*CreateProductResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateProduct not implemented")
@@ -312,14 +357,17 @@ func (UnimplementedProductsServer) CreatePriceType(context.Context, *CreatePrice
 func (UnimplementedProductsServer) DeletePriceType(context.Context, *DeletePriceTypeRequest) (*DeletePriceTypeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePriceType not implemented")
 }
-func (UnimplementedProductsServer) ListProductNamesByCategory(context.Context, *ListProductNamesByCategoryRequest) (*ListProductNamesByCategoryResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListProductNamesByCategory not implemented")
+func (UnimplementedProductsServer) ListProductNames(context.Context, *ListProductNamesRequest) (*ListProductNamesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListProductNames not implemented")
 }
-func (UnimplementedProductsServer) ListPriceTypesByCategory(context.Context, *ListPriceTypesByCategoryRequest) (*ListPriceTypesByCategoryResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListPriceTypesByCategory not implemented")
+func (UnimplementedProductsServer) ListPriceTypes(context.Context, *ListPriceTypesRequest) (*ListPriceTypesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListPriceTypes not implemented")
 }
 func (UnimplementedProductsServer) SumProductAmounts(context.Context, *SumProductAmountsRequest) (*SumProductAmountsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SumProductAmounts not implemented")
+}
+func (UnimplementedProductsServer) GetProductStats(context.Context, *GetProductStatsRequest) (*GetProductStatsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProductStats not implemented")
 }
 func (UnimplementedProductsServer) mustEmbedUnimplementedProductsServer() {}
 func (UnimplementedProductsServer) testEmbeddedByValue()                  {}
@@ -356,6 +404,42 @@ func _Products_CreateCategory_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ProductsServer).CreateCategory(ctx, req.(*CreateCategoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Products_UpdateCategory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateCategoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProductsServer).UpdateCategory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Products_UpdateCategory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProductsServer).UpdateCategory(ctx, req.(*UpdateCategoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Products_DeleteCategory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteCategoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProductsServer).DeleteCategory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Products_DeleteCategory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProductsServer).DeleteCategory(ctx, req.(*DeleteCategoryRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -594,38 +678,38 @@ func _Products_DeletePriceType_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Products_ListProductNamesByCategory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListProductNamesByCategoryRequest)
+func _Products_ListProductNames_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListProductNamesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProductsServer).ListProductNamesByCategory(ctx, in)
+		return srv.(ProductsServer).ListProductNames(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Products_ListProductNamesByCategory_FullMethodName,
+		FullMethod: Products_ListProductNames_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProductsServer).ListProductNamesByCategory(ctx, req.(*ListProductNamesByCategoryRequest))
+		return srv.(ProductsServer).ListProductNames(ctx, req.(*ListProductNamesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Products_ListPriceTypesByCategory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListPriceTypesByCategoryRequest)
+func _Products_ListPriceTypes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPriceTypesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProductsServer).ListPriceTypesByCategory(ctx, in)
+		return srv.(ProductsServer).ListPriceTypes(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Products_ListPriceTypesByCategory_FullMethodName,
+		FullMethod: Products_ListPriceTypes_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProductsServer).ListPriceTypesByCategory(ctx, req.(*ListPriceTypesByCategoryRequest))
+		return srv.(ProductsServer).ListPriceTypes(ctx, req.(*ListPriceTypesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -648,6 +732,24 @@ func _Products_SumProductAmounts_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Products_GetProductStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProductStatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProductsServer).GetProductStats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Products_GetProductStats_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProductsServer).GetProductStats(ctx, req.(*GetProductStatsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Products_ServiceDesc is the grpc.ServiceDesc for Products service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -658,6 +760,14 @@ var Products_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateCategory",
 			Handler:    _Products_CreateCategory_Handler,
+		},
+		{
+			MethodName: "UpdateCategory",
+			Handler:    _Products_UpdateCategory_Handler,
+		},
+		{
+			MethodName: "DeleteCategory",
+			Handler:    _Products_DeleteCategory_Handler,
 		},
 		{
 			MethodName: "CreateProduct",
@@ -712,16 +822,20 @@ var Products_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Products_DeletePriceType_Handler,
 		},
 		{
-			MethodName: "ListProductNamesByCategory",
-			Handler:    _Products_ListProductNamesByCategory_Handler,
+			MethodName: "ListProductNames",
+			Handler:    _Products_ListProductNames_Handler,
 		},
 		{
-			MethodName: "ListPriceTypesByCategory",
-			Handler:    _Products_ListPriceTypesByCategory_Handler,
+			MethodName: "ListPriceTypes",
+			Handler:    _Products_ListPriceTypes_Handler,
 		},
 		{
 			MethodName: "SumProductAmounts",
 			Handler:    _Products_SumProductAmounts_Handler,
+		},
+		{
+			MethodName: "GetProductStats",
+			Handler:    _Products_GetProductStats_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

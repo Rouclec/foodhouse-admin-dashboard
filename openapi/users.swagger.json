@@ -172,6 +172,44 @@
         ]
       }
     },
+    "/v1/admin/{adminUserId}/users/grant-agent": {
+      "post": {
+        "operationId": "Users_GrantAgent",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcGrantAgentResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UsersGrantAgentBody"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
     "/v1/admin/{adminUserId}/users/list-users": {
       "get": {
         "operationId": "Users_ListUsers",
@@ -217,6 +255,156 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "userStatus",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UserStatus_UNSPECIFIED",
+              "UserStatus_SUSPENDED",
+              "UserStatus_ACTIVE"
+            ],
+            "default": "UserStatus_UNSPECIFIED"
+          },
+          {
+            "name": "userRole",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "USER_ROLE_UNSPECIFIED",
+              "USER_ROLE_FARMER",
+              "USER_ROLE_BUYER",
+              "USER_ROLE_ADMIN",
+              "USER_ROLE_AGENT"
+            ],
+            "default": "USER_ROLE_UNSPECIFIED"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/admin/{adminUserId}/users/{userId}/delete-agent": {
+      "delete": {
+        "operationId": "Users_DeleteAgent",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcDeleteAgentResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/admin/{adminUserId}/users/{userId}/reactivate-user": {
+      "put": {
+        "operationId": "Users_ReactivateUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcReactivateUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UsersReactivateUserBody"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/admin/{adminUserId}/users/{userId}/suspend-user": {
+      "put": {
+        "operationId": "Users_SuspendUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcSuspendUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UsersSuspendUserBody"
+            }
           }
         ],
         "tags": [
@@ -712,6 +900,18 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "userStatus",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UserStatus_UNSPECIFIED",
+              "UserStatus_SUSPENDED",
+              "UserStatus_ACTIVE"
+            ],
+            "default": "UserStatus_UNSPECIFIED"
           }
         ],
         "tags": [
@@ -1130,6 +1330,26 @@
         }
       }
     },
+    "UsersGrantAgentBody": {
+      "type": "object",
+      "properties": {
+        "phoneNumber": {
+          "type": "string"
+        },
+        "residenceCountryIsoCode": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      }
+    },
+    "UsersReactivateUserBody": {
+      "type": "object"
+    },
     "UsersReviewFarmerBody": {
       "type": "object",
       "properties": {
@@ -1168,6 +1388,9 @@
           "$ref": "#/definitions/usersgrpcPaymentMethod"
         }
       }
+    },
+    "UsersSuspendUserBody": {
+      "type": "object"
     },
     "UsersUpdateSubscriptionBody": {
       "type": "object",
@@ -1353,6 +1576,9 @@
         }
       }
     },
+    "usersgrpcDeleteAgentResponse": {
+      "type": "object"
+    },
     "usersgrpcDeleteSubscriptionResponse": {
       "type": "object",
       "properties": {
@@ -1451,6 +1677,18 @@
         }
       }
     },
+    "usersgrpcGetUserStatsResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/usersgrpcStatItem"
+          }
+        }
+      }
+    },
     "usersgrpcGetUserSubscriptionByIDResponse": {
       "type": "object",
       "properties": {
@@ -1472,6 +1710,14 @@
       }
     },
     "usersgrpcGrantAdminResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "usersgrpcGrantAgentResponse": {
       "type": "object",
       "properties": {
         "message": {
@@ -1572,6 +1818,9 @@
           "type": "string"
         }
       }
+    },
+    "usersgrpcReactivateUserResponse": {
+      "type": "object"
     },
     "usersgrpcRefreshAccessTokenRequest": {
       "type": "object",
@@ -1731,6 +1980,25 @@
         }
       }
     },
+    "usersgrpcStatItem": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number",
+          "format": "double"
+        },
+        "change": {
+          "type": "number",
+          "format": "double"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
     "usersgrpcSubscribeResponse": {
       "type": "object",
       "properties": {
@@ -1760,6 +2028,9 @@
           "$ref": "#/definitions/typesAmount"
         }
       }
+    },
+    "usersgrpcSuspendUserResponse": {
+      "type": "object"
     },
     "usersgrpcTokens": {
       "type": "object",
@@ -1823,6 +2094,9 @@
         "updatedAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "status": {
+          "$ref": "#/definitions/usersgrpcUserStatus"
         }
       }
     },
@@ -1853,9 +2127,19 @@
         "USER_ROLE_UNSPECIFIED",
         "USER_ROLE_FARMER",
         "USER_ROLE_BUYER",
-        "USER_ROLE_ADMIN"
+        "USER_ROLE_ADMIN",
+        "USER_ROLE_AGENT"
       ],
       "default": "USER_ROLE_UNSPECIFIED"
+    },
+    "usersgrpcUserStatus": {
+      "type": "string",
+      "enum": [
+        "UserStatus_UNSPECIFIED",
+        "UserStatus_SUSPENDED",
+        "UserStatus_ACTIVE"
+      ],
+      "default": "UserStatus_UNSPECIFIED"
     },
     "usersgrpcUserSubscription": {
       "type": "object",
@@ -1891,7 +2175,8 @@
       "enum": [
         "USER_TYPE_UNSPECIFIED",
         "USER_TYPE_FARMER",
-        "USER_TYPE_BUYER"
+        "USER_TYPE_BUYER",
+        "USER_TYPE_AGENT"
       ],
       "default": "USER_TYPE_UNSPECIFIED"
     },

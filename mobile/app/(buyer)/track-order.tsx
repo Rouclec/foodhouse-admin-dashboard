@@ -196,7 +196,7 @@ export default function TrackOrder() {
               </Text>
               <Text variant="titleSmall" style={styles.text20}>
                 {productData?.product?.name} - {orderDetails?.order?.quantity}{" "}
-                {productData?.product?.unitType?.slug?.replace("per_", "")}
+                {productData?.product?.unitType?.replace("per_", "")}
                 {parseInt(orderDetails?.order?.quantity ?? "") > 1 && "s"}
               </Text>
               <View style={styles.centerRow}>

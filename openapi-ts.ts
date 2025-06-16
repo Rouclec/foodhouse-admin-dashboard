@@ -5,7 +5,7 @@ import path from "path";
 // Directory containing your OpenAPI spec files
 const specsDir: string = "openapi";
 // Output directories for generated clients
-const outputDirs: string[] = ["mobile/client"]; // Add more paths if needed
+const outputDirs: string[] = ["mobile/client", "admindashboard/client"]; // Add more paths if needed
 
 /**
  * Ensure the output directories are deleted and recreated.

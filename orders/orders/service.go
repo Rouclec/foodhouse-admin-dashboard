@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -47,6 +48,8 @@ const (
 	PaymentStatusFailed = "FAILED"
 
 	TotalPercentage = 1.08
+
+	CENT = 100
 )
 
 var supportedCurrencies = map[string]struct{}{
@@ -471,8 +474,9 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 	}
 
 	err = querier.UpdateOrderStatus(ctx, sqlc.UpdateOrderStatusParams{
-		OrderNumber: req.GetOrderNumber(),
-		Status:      ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String(),
+		OrderNumber:  req.GetOrderNumber(),
+		Status:       ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String(),
+		DispatchedBy: &req.UserId,
 	})
 
 	updatedOrder, err := querier.GetOrderByOrderNumber(ctx, order.OrderNumber)
@@ -579,6 +583,7 @@ func (i *Impl) ListFarmerOrders(ctx context.Context, req *ordersgrpc.ListFarmerO
 		CreatedBefore:    startKey,
 		IncludedStatuses: convertOrderStatusesToStrings(req.GetStatuses()),
 		Count:            int32(count), // Convert count to int32
+		SearchKey:        req.GetSearchKey(),
 	})
 
 	if err != nil {
@@ -622,6 +627,7 @@ func (i *Impl) ListUserOrders(ctx context.Context, req *ordersgrpc.ListUserOrder
 		IncludedStatuses: convertOrderStatusesToStrings(req.GetStatuses()),
 		CreatedBefore:    startKey,
 		Count:            int32(count), // Convert count to int32
+		SearchKey:        req.GetSearchKey(),
 	})
 
 	if err != nil {
@@ -966,6 +972,36 @@ func (i *Impl) ListDeliveryCities(ctx context.Context, req *ordersgrpc.ListDeliv
 	return &ordersgrpc.ListDeliveryCitiesResponse{
 		Cities: cities,
 	}, nil
+}
+
+// DeleteDeliveryPoint implements ordersgrpc.OrdersServer.
+func (i *Impl) DeleteDeliveryPoint(ctx context.Context, req *ordersgrpc.DeleteDeliveryPointRequest) (*ordersgrpc.DeleteDeliveryPointResponse, error) {
+	err := i.repo.Do().DeleteDeliveryPoint(ctx, req.GetId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error deleting delivery point %v", err)
+	}
+
+	return &ordersgrpc.DeleteDeliveryPointResponse{}, nil
+}
+
+// UpdateDeliveryPoint implements ordersgrpc.OrdersServer.
+func (i *Impl) UpdateDeliveryPoint(ctx context.Context, req *ordersgrpc.UpdateDeliveryPointRequest) (*ordersgrpc.UpdateDeliveryPointResponse, error) {
+	err := i.repo.Do().UpdateDeliveryPoint(ctx, sqlc.UpdateDeliveryPointParams{
+		DeliveryLocation: pgtype.Point{P: pgtype.Vec2{X: float64(req.GetAddress().GetLon()),
+			Y: float64(req.GetAddress().GetLat())},
+			Valid: true},
+		LocationName:      req.GetAddress().GetAddress(),
+		DeliveryPointName: req.GetDeliveryPointName(),
+		City:              req.GetCity(),
+		ID:                req.GetId(),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error updating delivery point %v", err)
+	}
+
+	return &ordersgrpc.UpdateDeliveryPointResponse{}, nil
 }
 
 func ParsePaymentStatus(status string) (ordersgrpc.PaymentStatus, error) {
@@ -1339,4 +1375,231 @@ func (i *Impl) RejectOrder(ctx context.Context,
 	}
 
 	return &ordersgrpc.RejectOrderResponse{}, nil
+}
+
+func getMonthRanges() (time.Time, time.Time, time.Time, time.Time) {
+	now := time.Now()
+
+	// Truncate to the start of this month
+	startOfThisMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+
+	// Start of next month, minus 1 second gives end of this month
+	endOfThisMonth := startOfThisMonth.AddDate(0, 1, 0).Add(-time.Second)
+
+	// Start of last month
+	startOfLastMonth := startOfThisMonth.AddDate(0, -1, 0)
+
+	// End of last month = start of this month - 1 second
+	endOfLastMonth := startOfThisMonth.Add(-time.Second)
+
+	return startOfThisMonth, endOfThisMonth, startOfLastMonth, endOfLastMonth
+}
+
+func percentageChange(oldValue, newValue float64) *float64 {
+	if oldValue == 0 {
+		change := 100.0
+		return &change
+	}
+	change := ((newValue - oldValue) / math.Abs(oldValue)) * CENT
+	return &change
+}
+
+// GetAdminStats implements ordersgrpc.OrdersServer.
+func (i *Impl) GetAdminStats(ctx context.Context,
+	req *ordersgrpc.GetAdminStatsRequest) (
+	*ordersgrpc.GetAdminStatsResponse, error) {
+	startThis, endThis, startLast, endLast := getMonthRanges()
+
+	lastMonthOrderStats, err := i.repo.Do().GetOrderStatsBetweenDates(ctx, sqlc.GetOrderStatsBetweenDatesParams{
+		StartDate: startThis,
+		EndDate:   endThis,
+		IncludedStatuses: []string{
+			ordersgrpc.OrderStatus_OrderStatus_APPROVED.String(),
+			ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String(),
+			ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String(),
+			ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL.String(),
+		},
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting stats %v", err)
+	}
+
+	thisMonthOrderStats, err := i.repo.Do().GetOrderStatsBetweenDates(ctx, sqlc.GetOrderStatsBetweenDatesParams{
+		StartDate: startThis,
+		EndDate:   endThis,
+		IncludedStatuses: []string{
+			ordersgrpc.OrderStatus_OrderStatus_APPROVED.String(),
+			ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String(),
+			ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String(),
+			ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL.String(),
+		},
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting stats %v", err)
+	}
+
+	lastMonthPaymentStats, err := i.repo.Do().GetPaymentStatsBetweenDates(ctx, sqlc.GetPaymentStatsBetweenDatesParams{
+		StartDate: startLast,
+		EndDate:   endLast,
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting stats %v", err)
+	}
+
+	thisMonthPaymentStats, err := i.repo.Do().GetPaymentStatsBetweenDates(ctx, sqlc.GetPaymentStatsBetweenDatesParams{
+		StartDate: startThis,
+		EndDate:   endThis,
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting stats %v", err)
+	}
+
+	usersStats, err := i.userService.GetUserStats(ctx, &usersgrpc.GetUserStatsRequest{})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting stats %v", err)
+	}
+
+	productsStats, err := i.productService.GetProductStats(ctx, &productsgrpc.GetProductStatsRequest{})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting stats %v", err)
+	}
+
+	stats := make([]*ordersgrpc.StatItem, 0, 5)
+
+	stats = append(stats, &ordersgrpc.StatItem{
+		Title:       usersStats.GetData()[0].Title,
+		Value:       usersStats.GetData()[0].Value,
+		Change:      usersStats.GetData()[0].Change,
+		Description: usersStats.GetData()[0].Description,
+	})
+
+	stats = append(stats, &ordersgrpc.StatItem{
+		Title:       usersStats.GetData()[1].Title,
+		Value:       usersStats.GetData()[1].Value,
+		Change:      usersStats.GetData()[1].Change,
+		Description: usersStats.GetData()[1].Description,
+	})
+
+	stats = append(stats, &ordersgrpc.StatItem{
+		Title:       productsStats.GetData()[0].Title,
+		Value:       productsStats.GetData()[0].Value,
+		Change:      productsStats.GetData()[0].Change,
+		Description: productsStats.GetData()[0].Description,
+	})
+
+	stats = append(stats, &ordersgrpc.StatItem{
+		Title:       "Total Orders",
+		Value:       float64(thisMonthOrderStats),
+		Change:      *percentageChange(float64(lastMonthOrderStats), float64(thisMonthOrderStats)),
+		Description: "Total orders this month",
+	})
+
+	currency := "XAF"
+
+	stats = append(stats, &ordersgrpc.StatItem{
+		Title:       "Total Revenue",
+		Value:       float64(thisMonthPaymentStats),
+		Currency:    &currency,
+		Change:      *percentageChange(float64(lastMonthPaymentStats), float64(thisMonthPaymentStats)),
+		Description: "Total revenue this month",
+	})
+
+	return &ordersgrpc.GetAdminStatsResponse{
+		Data: stats,
+	}, nil
+}
+
+// ListOrders implements ordersgrpc.OrdersServer.
+func (i *Impl) ListOrders(ctx context.Context,
+	req *ordersgrpc.ListOrdersRequest) (
+	*ordersgrpc.ListOrdersResponse, error) {
+	var err error
+	startKey := time.Now().Add(time.Hour)
+
+	if req.GetStartKey() != "" {
+		startKey, err = time.Parse(time.RFC3339, req.GetStartKey())
+		if err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "Invalid start key")
+		}
+	}
+
+	count := int(req.GetCount())
+	if count == 0 {
+		count = 20 // or whatever default you want
+	}
+
+	orders, err := i.repo.Do().ListOrders(ctx, sqlc.ListOrdersParams{
+		CreatedBefore:    startKey,
+		IncludedStatuses: convertOrderStatusesToStrings(req.GetStatuses()),
+		Count:            int32(count), // Convert count to int32
+		SearchKey:        req.GetSearchKey(),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting orders %v", err)
+	}
+
+	protoOrders := converters.SqlcOrdersToProto(orders)
+
+	nextKey := ""
+
+	i.logger.Debug().Msgf("Count %v, orders length %v", count, len(protoOrders))
+
+	if len(protoOrders) >= count {
+		nextKey = protoOrders[len(protoOrders)-1].GetCreatedAt().AsTime().Format(time.RFC3339)
+	}
+	return &ordersgrpc.ListOrdersResponse{
+		Orders:  protoOrders,
+		NextKey: nextKey,
+	}, nil
+}
+
+// ListPayments implements ordersgrpc.OrdersServer.
+func (i *Impl) ListPayments(ctx context.Context,
+	req *ordersgrpc.ListPaymentsRequest) (
+	*ordersgrpc.ListPaymentsResponse, error) {
+	var err error
+	startKey := time.Now().Add(time.Hour)
+
+	if req.GetStartKey() != "" {
+		startKey, err = time.Parse(time.RFC3339, req.GetStartKey())
+		if err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "Invalid start key")
+		}
+	}
+
+	count := int(req.GetCount())
+	if count == 0 {
+		count = 10 // or whatever default you want
+	}
+
+	sqlcPayments, err := i.repo.Do().ListPayments(ctx, sqlc.ListPaymentsParams{
+		CreatedBefore: startKey,
+		Count:         int32(count),
+		SearchKey:     req.GetSearchKey(),
+		PaymentStatus: req.GetPaymentStatus().String(),
+		PaymentEntity: req.GetPaymentEntity().String(),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting payments %v", err)
+	}
+
+	protoPayments := converters.SqlcPaymentsToProto(sqlcPayments)
+
+	nextKey := ""
+
+	i.logger.Debug().Msgf("Count %v, payments length %v", count, len(protoPayments))
+
+	if len(protoPayments) >= count {
+		nextKey = protoPayments[len(protoPayments)-1].GetCreatedAt().AsTime().Format(time.RFC3339)
+	}
+	return &ordersgrpc.ListPaymentsResponse{
+		Payments: protoPayments,
+		NextKey:  nextKey,
+	}, nil
 }

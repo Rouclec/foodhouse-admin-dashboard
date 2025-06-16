@@ -7,6 +7,13 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+func derefString(s *string) string {
+	if s != nil {
+		return *s
+	}
+	return ""
+}
+
 func SqlcToProtoProducts(sqlcProducts []sqlc.ListProductsRow) ([]*productsgrpc.Product, error) {
 	protoProducts := make([]*productsgrpc.Product, 0, len(sqlcProducts))
 
@@ -25,7 +32,7 @@ func SqlcToProtoProducts(sqlcProducts []sqlc.ListProductsRow) ([]*productsgrpc.P
 func SqlcToProtoProductRow(sqlcProduct sqlc.ListProductsRow, sqlcCategory *sqlc.Category) (*productsgrpc.Product, error) {
 
 	// Build a minimal category with just the ID if category is nil
-	category := &productsgrpc.Category{Id: sqlcProduct.CategoryID}
+	category := &productsgrpc.Category{Id: *sqlcProduct.CategoryID}
 	if sqlcCategory != nil {
 		category.Name = sqlcCategory.Name
 		category.Slug = sqlcCategory.Slug
@@ -35,39 +42,33 @@ func SqlcToProtoProductRow(sqlcProduct sqlc.ListProductsRow, sqlcCategory *sqlc.
 		Id:       sqlcProduct.ID,
 		Category: category, // Category will be nil if sqlcCategory is nil
 		Name:     sqlcProduct.Name,
-		UnitType: &productsgrpc.PriceType{
-			Id:   sqlcProduct.UnitType,
-			Slug: sqlcProduct.UnitTypeSlug,
-		},
+		UnitType: sqlcProduct.UnitType,
 		Amount: &types.Amount{
 			Value:           sqlcProduct.Value,
 			CurrencyIsoCode: sqlcProduct.CurrencyIsoCode,
 		},
 		Description: sqlcProduct.Description,
 		Image:       sqlcProduct.Image,
-		CreatedBy:   *sqlcProduct.CreatedBy,
+		CreatedBy:   derefString(sqlcProduct.CreatedBy),
 		CreatedAt:   timestamppb.New(sqlcProduct.CreatedAt.Time),
 		UpdatedAt:   timestamppb.New(sqlcProduct.UpdatedAt.Time),
 	}, nil
 }
 
-func SqlcToProtoProduct(sqlcProduct sqlc.GetProductWithCategoryRow) (*productsgrpc.Product, error) {
+func SqlcToProtoProduct(sqlcProduct sqlc.Product) (*productsgrpc.Product, error) {
 
 	return &productsgrpc.Product{
-		Id:       sqlcProduct.ProductID,
-		Category: &productsgrpc.Category{Id: sqlcProduct.CategoryID, Name: sqlcProduct.CategoryName, Slug: sqlcProduct.CategorySlug}, // Category will be nil if sqlcCategory is nil
-		Name:     sqlcProduct.ProductName,
-		UnitType: &productsgrpc.PriceType{
-			Id:   sqlcProduct.UnitType,
-			Slug: sqlcProduct.UnitTypeSlug,
-		},
+		Id:       sqlcProduct.ID,
+		Category: &productsgrpc.Category{Id: *sqlcProduct.CategoryID}, // Category will be nil if sqlcCategory is nil
+		Name:     sqlcProduct.Name,
+		UnitType: sqlcProduct.UnitType,
 		Amount: &types.Amount{
 			Value:           sqlcProduct.Value,
 			CurrencyIsoCode: sqlcProduct.CurrencyIsoCode,
 		},
 		Description: sqlcProduct.Description,
 		Image:       sqlcProduct.Image,
-		CreatedBy:   *sqlcProduct.ProductCreatedBy,
+		CreatedBy:   derefString(sqlcProduct.CreatedBy),
 		CreatedAt:   timestamppb.New(sqlcProduct.CreatedAt.Time),
 		UpdatedAt:   timestamppb.New(sqlcProduct.UpdatedAt.Time),
 	}, nil
@@ -81,7 +82,7 @@ func SqlcToProtoCategories(sqlcCategories []sqlc.Category) ([]*productsgrpc.Cate
 			Id:        c.ID,
 			Name:      c.Name,
 			Slug:      c.Slug,
-			CreatedBy: *c.CreatedBy,
+			CreatedBy: derefString(c.CreatedBy),
 		}
 		protoCategories = append(protoCategories, protoCategory)
 	}
@@ -97,7 +98,7 @@ func SqlcToProtoPriceTypes(sqlcPriceTypes []sqlc.PriceType) ([]*productsgrpc.Pri
 			Id:         pt.ID,
 			Name:       pt.Name,
 			Slug:       pt.Slug,
-			CategoryId: pt.CategoryID,
+			CategoryId: derefString(pt.CategoryID),
 		}
 		protoPriceTypes = append(protoPriceTypes, protoPriceType)
 	}
@@ -112,7 +113,7 @@ func SqlcToProtoProductNames(sqlcProductNames []sqlc.ProductName) ([]*productsgr
 		protoProductName := &productsgrpc.ProductName{
 			Name:       pn.Name,
 			Slug:       pn.Slug,
-			CategoryId: pn.CategoryID,
+			CategoryId: *pn.CategoryID,
 		}
 		protoProductNames = append(protoProductNames, protoProductName)
 	}

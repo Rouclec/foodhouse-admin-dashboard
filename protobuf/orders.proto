@@ -43,6 +43,7 @@ message Order {
   string product_owner = 12;
   string payout_phone_number = 13;
   int64 quantity = 14;
+  string dispatched_by = 15;
 }
 
 message OrderAuditLog {
@@ -114,6 +115,20 @@ message InitiatePaymentRequest {
 }
 
 message InitiatePaymentResponse { Payment payment = 1; }
+
+message ListPaymentsRequest {
+  string user_id = 1;
+  string search_key = 2;
+  int32 count = 3;
+  string start_key = 4;
+  PaymentStatus payment_status = 5;
+  PaymentEntity payment_entity = 6;
+}
+
+message ListPaymentsResponse {
+  repeated Payment payments = 1;
+  string next_key = 2;
+}
 
 message ConfirmPaymentRequest {
   string status = 1; // "SUCCESSFUL" or "FAILED",
@@ -193,6 +208,23 @@ message CreateDeliveryPointRequest {
 
 message CreateDeliveryPointResponse { DeliveryPoint delivery_point = 1; }
 
+message UpdateDeliveryPointRequest {
+  string id = 1;
+  types.Point address = 2;
+  string city = 3;
+  string delivery_point_name = 4;
+  string user_id = 5;
+}
+
+message UpdateDeliveryPointResponse {}
+
+message DeleteDeliveryPointRequest {
+  string id = 1;
+  string user_id = 2;
+}
+
+message DeleteDeliveryPointResponse {}
+
 message ListDeliveryPointsRequest {
   string city = 1;
   string user_id = 2;
@@ -224,6 +256,7 @@ message ListUserOrdersRequest {
   int32 count = 2;
   string start_key = 3;
   repeated OrderStatus statuses = 4;
+  string search_key = 5;
 }
 
 message ListUserOrdersResponse {
@@ -236,9 +269,23 @@ message ListFarmerOrdersRequest {
   int32 count = 2;
   string start_key = 3;
   repeated OrderStatus statuses = 4;
+  string search_key = 5;
 }
 
 message ListFarmerOrdersResponse {
+  repeated Order orders = 1;
+  string next_key = 2;
+}
+
+message ListOrdersRequest {
+  string user_id = 1;
+  int32 count = 2;
+  string start_key = 3;
+  repeated OrderStatus statuses = 4;
+  string search_key = 5;
+}
+
+message ListOrdersResponse {
   repeated Order orders = 1;
   string next_key = 2;
 }
@@ -269,6 +316,17 @@ message FarmerEarningsData {
 }
 
 message GetFarmerEarningsResponse { repeated FarmerEarningsData data = 1; }
+
+message StatItem {
+  string title = 1;
+  double value = 2;
+  double change = 3;
+  string description = 4;
+  optional string currency = 5;
+}
+
+message GetAdminStatsRequest { string user_id = 1; }
+message GetAdminStatsResponse { repeated StatItem data = 1; }
 
 service Orders {
 
@@ -340,6 +398,12 @@ service Orders {
     };
   }
 
+  rpc ListOrders(ListOrdersRequest) returns (ListOrdersResponse) {
+    option (google.api.http) = {
+      get : "/v1/admin/{user_id}/orders/list-orders"
+    };
+  }
+
   rpc InitiatePayment(InitiatePaymentRequest)
       returns (InitiatePaymentResponse) {
     option (google.api.http) = {
@@ -356,10 +420,31 @@ service Orders {
     };
   }
 
+  rpc UpdateDeliveryPoint(UpdateDeliveryPointRequest)
+      returns (UpdateDeliveryPointResponse) {
+    option (google.api.http) = {
+      put : "/v1/admin/{user_id}/orders/{id}/update-delivery-point"
+      body : "*"
+    };
+  }
+
+  rpc DeleteDeliveryPoint(DeleteDeliveryPointRequest)
+      returns (DeleteDeliveryPointResponse) {
+    option (google.api.http) = {
+      delete : "/v1/admin/{user_id}/orders/{id}/delete-delivery-point"
+    };
+  }
+
   rpc ListDeliveryPoints(ListDeliveryPointsRequest)
       returns (ListDeliveryPointsResponse) {
     option (google.api.http) = {
       get : "/v1/users/{user_id}/orders/list-delivery-points"
+    };
+  }
+
+  rpc GetAdminStats(GetAdminStatsRequest) returns (GetAdminStatsResponse) {
+    option (google.api.http) = {
+      get : "/v1/admin/{user_id}/orders/get-admin-stats"
     };
   }
 
@@ -381,6 +466,12 @@ service Orders {
       returns (GetFarmerEarningsResponse) {
     option (google.api.http) = {
       get : "/v1/users/{farmer_id}/orders/get-farmer-earnings"
+    };
+  }
+
+  rpc ListPayments(ListPaymentsRequest) returns (ListPaymentsResponse) {
+    option (google.api.http) = {
+      get : "/v1/admin/{user_id}/orders/list-payments"
     };
   }
 }

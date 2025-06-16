@@ -13,18 +13,20 @@ type Querier interface {
 	CreatePriceType(ctx context.Context, arg CreatePriceTypeParams) (PriceType, error)
 	CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error)
 	CreateProductName(ctx context.Context, arg CreateProductNameParams) (ProductName, error)
+	DeleteCategory(ctx context.Context, id string) error
 	DeletePriceType(ctx context.Context, id string) error
 	DeleteProduct(ctx context.Context, id string) error
 	DeleteProductName(ctx context.Context, name string) error
 	GetCategory(ctx context.Context, id string) (Category, error)
 	GetProduct(ctx context.Context, id string) (Product, error)
 	GetProductForUpdate(ctx context.Context, id string) (Product, error)
-	GetProductWithCategory(ctx context.Context, id string) (GetProductWithCategoryRow, error)
+	GetProductStatsBetweenDates(ctx context.Context, arg GetProductStatsBetweenDatesParams) (int64, error)
 	ListCategories(ctx context.Context) ([]Category, error)
-	ListPriceTypesByCategory(ctx context.Context, categoryID string) ([]PriceType, error)
-	ListProductNamesByCategory(ctx context.Context, categoryID string) ([]ProductName, error)
+	ListPriceTypes(ctx context.Context, categoryID string) ([]PriceType, error)
+	ListProductNames(ctx context.Context, categoryID string) ([]ProductName, error)
 	ListProducts(ctx context.Context, arg ListProductsParams) ([]ListProductsRow, error)
 	SumProductAmounts(ctx context.Context, arg SumProductAmountsParams) (float64, error)
+	UpdateCategory(ctx context.Context, arg UpdateCategoryParams) error
 	UpdateProduct(ctx context.Context, arg UpdateProductParams) error
 }
 

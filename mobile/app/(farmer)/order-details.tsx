@@ -263,7 +263,7 @@ export default function OrderDetails() {
                 </Text>
                 <Text variant="titleMedium" style={styles.rightText}>
                   {formatAmount(orderDetails?.order?.quantity ?? "")}{" "}
-                  {(productData?.product?.unitType?.slug ?? "").replace(
+                  {(productData?.product?.unitType ?? "").replace(
                     "per_",
                     ""
                   )}

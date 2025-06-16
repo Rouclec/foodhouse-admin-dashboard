@@ -32,7 +32,13 @@ VALUES (
 RETURNING *;
 
 -- name: UpdateOrderStatus :exec
-UPDATE orders SET status = $2, updated_at = now() WHERE order_number = $1;
+UPDATE orders
+SET
+  status = $2,
+  updated_at = now(),
+  dispatched_by = COALESCE($3, approved_by)
+WHERE order_number = $1;
+
 
 -- name: GetOrderByOrderNumber :one
 SELECT * FROM orders WHERE order_number = $1;
@@ -44,11 +50,17 @@ SELECT * FROM orders WHERE secret_key = $1 AND created_by = $2;
 SELECT * FROM orders 
 WHERE created_by = $1 AND 
   (
-        sqlc.arg(included_statuses)::TEXT[] IS NULL OR
-        sqlc.arg(included_statuses)::TEXT[] = '{}'::TEXT[] OR
-        status::TEXT  = ANY(sqlc.arg(included_statuses))
+    sqlc.arg(included_statuses)::TEXT[] IS NULL OR
+    sqlc.arg(included_statuses)::TEXT[] = '{}'::TEXT[] OR
+    status::TEXT = ANY(sqlc.arg(included_statuses))
   ) AND 
-  (sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at < sqlc.arg(created_before)::timestamptz)
+  (
+    sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+    OR created_at < sqlc.arg(created_before)::timestamptz
+  ) AND
+  (
+    sqlc.arg(search_key)::TEXT IS NULL OR order_number::TEXT ILIKE '%' || sqlc.arg(search_key) || '%'
+  )
 ORDER BY created_at DESC
 LIMIT sqlc.arg(count)::int;
 
@@ -64,6 +76,29 @@ WHERE product_owner = $1 AND
   (
     sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
     OR created_at < sqlc.arg(created_before)::timestamptz
+  )
+  AND
+  (
+    sqlc.arg(search_key)::TEXT IS NULL OR order_number::TEXT ILIKE '%' || sqlc.arg(search_key) || '%'
+  )
+ORDER BY created_at DESC
+LIMIT sqlc.arg(count)::int;
+
+-- name: ListOrders :many
+SELECT * FROM orders 
+WHERE 
+  (
+    sqlc.arg(included_statuses)::TEXT[] IS NULL OR
+    sqlc.arg(included_statuses)::TEXT[] = '{}'::TEXT[] OR
+    status::TEXT = ANY(sqlc.arg(included_statuses))
+  ) AND 
+  (
+    sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+    OR created_at < sqlc.arg(created_before)::timestamptz
+  ) AND
+  (
+    sqlc.arg(search_key)::TEXT IS NULL 
+    OR order_number::TEXT ILIKE '%' || sqlc.arg(search_key) || '%'
   )
 ORDER BY created_at DESC
 LIMIT sqlc.arg(count)::int;
@@ -143,3 +178,38 @@ WHERE product_owner = $1
   AND updated_at BETWEEN $3 AND $4
 GROUP BY group_date
 ORDER BY group_date;
+
+-- name: GetOrderStatsBetweenDates :one
+SELECT 
+  COUNT(*) AS total_orders
+FROM orders
+WHERE status = ANY(sqlc.arg(included_statuses)::TEXT[])
+  AND created_at >= sqlc.arg(start_date)::timestamptz
+  AND created_at <= sqlc.arg(end_date)::timestamptz;
+
+-- name: GetPaymentStatsBetweenDates :one
+SELECT 
+  COALESCE(SUM(amount_value), 0)::float AS total_value
+FROM payments
+WHERE status = 'PaymentStatus_COMPLETED'
+  AND created_at >= sqlc.arg(start_date)::timestamptz
+  AND created_at <= sqlc.arg(end_date)::timestamptz;
+
+
+
+-- name: ListPayments :many
+SELECT * FROM payments 
+WHERE
+  ( sqlc.arg(payment_status)::TEXT = 'PaymentStatus_UNSPECIFIED' OR (status = sqlc.arg(payment_status)::TEXT) ) 
+  AND  
+  ( sqlc.arg(payment_entity)::TEXT = 'PaymentEntity_UNSPECIFIED' OR (payment_entity = sqlc.arg(payment_entity)::TEXT) ) 
+  AND  
+  (
+    sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+    OR created_at < sqlc.arg(created_before)::timestamptz
+  ) AND
+  (
+    sqlc.arg(search_key)::TEXT IS NULL OR account_number ILIKE '%' || sqlc.arg(search_key) || '%'
+  )
+ORDER BY created_at DESC
+LIMIT sqlc.arg(count)::int;

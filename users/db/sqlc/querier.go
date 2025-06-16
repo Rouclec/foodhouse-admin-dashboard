@@ -20,6 +20,7 @@ type Querier interface {
 	CreateUserPaymentMethod(ctx context.Context, arg CreateUserPaymentMethodParams) (UserPaymentMethod, error)
 	CreateUserSubscription(ctx context.Context, arg CreateUserSubscriptionParams) (UserSubscription, error)
 	DeleteSubscription(ctx context.Context, id string) error
+	DeleteUser(ctx context.Context, id string) error
 	DeleteUserPaymentMethod(ctx context.Context, id string) error
 	DeleteUserSubscription(ctx context.Context, id string) error
 	GetAllUserSubscriptions(ctx context.Context) ([]UserSubscription, error)
@@ -37,11 +38,15 @@ type Querier interface {
 	GetUserByPhoneNumber(ctx context.Context, phoneNumber string) (User, error)
 	GetUserForUpdate(ctx context.Context, id string) (User, error)
 	GetUserPaymentMethodsByUserID(ctx context.Context, userID string) ([]UserPaymentMethod, error)
+	GetUserStatsBetweenDates(ctx context.Context, arg GetUserStatsBetweenDatesParams) (GetUserStatsBetweenDatesRow, error)
 	GetUserSubscriptionByID(ctx context.Context, id string) (UserSubscription, error)
 	ListFarmerReviews(ctx context.Context, arg ListFarmerReviewsParams) ([]FarmersReview, error)
 	ListFarmersByRating(ctx context.Context, arg ListFarmersByRatingParams) ([]ListFarmersByRatingRow, error)
 	ListSubsriptions(ctx context.Context) ([]Subscription, error)
+	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
+	ReactivateUser(ctx context.Context, id string) error
 	RevokeRefreshToken(ctx context.Context, token string) error
+	SuspendUser(ctx context.Context, id string) error
 	UpdateSentOtp(ctx context.Context, arg UpdateSentOtpParams) error
 	UpdateSubscription(ctx context.Context, arg UpdateSubscriptionParams) (Subscription, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)

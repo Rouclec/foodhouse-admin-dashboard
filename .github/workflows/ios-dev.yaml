@@ -55,4 +55,4 @@ jobs:
       # The app will not be released without manual action
       - name: Build and Submit
         working-directory: mobile
-        run: make dev-build PLATFORM=ios FLAGS="--non-interactive --no-wait"
+        run: make dev-build PLATFORM=ios FLAGS="--non-interactive --no-wait --no-wait"
