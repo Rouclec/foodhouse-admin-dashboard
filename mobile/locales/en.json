@@ -253,7 +253,13 @@
       "deliveryAddress": "Delivery Address",
       "unknownError": "An unknown error occured",
       "congratulations": "Congratulations",
-      "youHaveApproved": "You have approved this order, go ahead and prepare it for delivery"
+      "youHaveApproved": "You have approved this order, go ahead and prepare it for delivery",
+      "rejectOrder": "Reject order",
+      "enterAReason": "Enter a reason for rejecting this order",
+      "reason": "Reason",
+      "reject": "Reject",
+      "orderRejected": "Order Rejected",
+      "youHaveRejected": "You have rejected this order. The customer will be notified about this action"
     },
     "sales": {
       "sales": "Sales",

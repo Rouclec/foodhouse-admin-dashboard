@@ -24,18 +24,20 @@ func SqlcOrderToProto(order sqlc.Order) *ordersgrpc.Order {
 	// Convert status (string → enum) — safe default
 	statusEnum := ordersgrpc.OrderStatus_OrderStatus_UNSPECIFIED
 	switch order.Status {
-	case "OrderStatus_CREATED":
+	case ordersgrpc.OrderStatus_OrderStatus_CREATED.String():
 		statusEnum = ordersgrpc.OrderStatus_OrderStatus_CREATED
-	case "OrderStatus_PAYMENT_SUCCESSFUL":
+	case ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL.String():
 		statusEnum = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL
-	case "OrderStatus_PAYMENT_FAILED":
+	case ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED.String():
 		statusEnum = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED
-	case "OrderStatus_IN_TRANSIT":
+	case ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String():
 		statusEnum = ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT
-	case "OrderStatus_DELIVERED":
+	case ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String():
 		statusEnum = ordersgrpc.OrderStatus_OrderStatus_DELIVERED
-	case "OrderStatus_APPROVED":
+	case ordersgrpc.OrderStatus_OrderStatus_APPROVED.String():
 		statusEnum = ordersgrpc.OrderStatus_OrderStatus_APPROVED
+	case ordersgrpc.OrderStatus_OrderStatus_REJECTED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_REJECTED
 	}
 
 	return &ordersgrpc.Order{
