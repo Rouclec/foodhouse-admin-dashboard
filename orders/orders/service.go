@@ -1405,6 +1405,7 @@ func (i *Impl) GetAdminStats(ctx context.Context,
 			ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String(),
 			ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String(),
 			ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL.String(),
+			ordersgrpc.OrderStatus_OrderStatus_REJECTED.String(),
 		},
 	})
 	if err != nil {
@@ -1419,6 +1420,7 @@ func (i *Impl) GetAdminStats(ctx context.Context,
 			ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String(),
 			ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String(),
 			ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL.String(),
+			ordersgrpc.OrderStatus_OrderStatus_REJECTED.String(),
 		},
 	})
 	if err != nil {

@@ -18,7 +18,6 @@ import MapView, {
   Callout,
   Marker,
   PROVIDER_DEFAULT,
-  PROVIDER_GOOGLE,
   Region,
 } from "react-native-maps";
 import * as Location from "expo-location";

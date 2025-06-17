@@ -81,7 +81,7 @@ export default function Checkout() {
           productId: productId,
           quantity: quantity.toString(),
           deliveryLocation: {
-            address: deliveryLocation?.address,
+            address: deliveryLocation?.description,
             lon: deliveryLocation?.region?.longitude,
             lat: deliveryLocation?.region?.latitude,
           },
@@ -208,10 +208,7 @@ export default function Checkout() {
                     {productData?.product?.amount?.value}
                     <Text style={styles.greyText}>
                       {" "}
-                      {productData?.product?.unitType?.replace(
-                        "per_",
-                        "/"
-                      )}
+                      {productData?.product?.unitType?.replace("per_", "/")}
                     </Text>
                   </Text>
                   <View style={styles.buttonsContainer}>
