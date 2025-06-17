@@ -45,4 +45,16 @@ export const orderDetailsStyles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
+  errorButton: {
+    backgroundColor: Colors.error,
+  },
+  dialogContainer: {
+    borderRadius: 12,
+    padding: 16,
+    alignItems: "flex-start",
+  },
+  widthFull: { width: "100%" },
+  inputContainer: { height: 96 },
+  selfCenter: { alignSelf: "center" },
+  actionContainer: { width: "100%", paddingBottom: 12 },
 });
