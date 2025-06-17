@@ -8,8 +8,6 @@ package sqlc
 import (
 	"context"
 	"time"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createCategory = `-- name: CreateCategory :one
@@ -341,25 +339,21 @@ func (q *Queries) ListProductNames(ctx context.Context, categoryID string) ([]Pr
 }
 
 const listProducts = `-- name: ListProducts :many
-SELECT
-  p.id, p.category_id, p.name, p.unit_type, p.value, p.currency_iso_code, p.description, p.image, p.created_by, p.created_at, p.updated_at, p.whole_sale,
-  pt.slug AS unit_type_slug
-FROM product p
-LEFT JOIN price_types pt ON p.unit_type = pt.id
+SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale FROM product
 WHERE
-  ($1::varchar = '' OR p.created_by = $1::varchar) AND
-  ($2::varchar = '' OR p.category_id = $2::varchar) AND
-  ($3::float = 0 OR p.value >= $3::float) AND
+  ($1::varchar = '' OR created_by = $1::varchar) AND
+  ($2::varchar = '' OR category_id = $2::varchar) AND
+  ($3::float = 0 OR value >= $3::float) AND
   (
-    $4::float = 0 OR p.value <= COALESCE($4::float, 9223372036854775807)
+    $4::float = 0 OR value <= COALESCE($4::float, 9223372036854775807)
   ) AND
   (
     $5::text = '' OR
-    p.name ILIKE '%' || $5::text || '%' OR
-    p.description ILIKE '%' || $5::text || '%'
+    name ILIKE '%' || $5::text || '%' OR
+    description ILIKE '%' || $5::text || '%'
   ) AND
-  ($6::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR p.created_at < $6::timestamptz)
-ORDER BY p.created_at DESC
+  ($6::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at < $6::timestamptz)
+ORDER BY created_at DESC
 LIMIT $7::int
 `
 
@@ -373,23 +367,7 @@ type ListProductsParams struct {
 	Count         int32     `json:"count"`
 }
 
-type ListProductsRow struct {
-	ID              string             `json:"id"`
-	CategoryID      *string            `json:"category_id"`
-	Name            string             `json:"name"`
-	UnitType        string             `json:"unit_type"`
-	Value           float64            `json:"value"`
-	CurrencyIsoCode string             `json:"currency_iso_code"`
-	Description     string             `json:"description"`
-	Image           string             `json:"image"`
-	CreatedBy       *string            `json:"created_by"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
-	WholeSale       bool               `json:"whole_sale"`
-	UnitTypeSlug    string             `json:"unit_type_slug"`
-}
-
-func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]ListProductsRow, error) {
+func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]Product, error) {
 	rows, err := q.db.Query(ctx, listProducts,
 		arg.CreatedBy,
 		arg.CategoryID,
@@ -403,9 +381,9 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]L
 		return nil, err
 	}
 	defer rows.Close()
-	items := []ListProductsRow{}
+	items := []Product{}
 	for rows.Next() {
-		var i ListProductsRow
+		var i Product
 		if err := rows.Scan(
 			&i.ID,
 			&i.CategoryID,
@@ -419,7 +397,6 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]L
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.WholeSale,
-			&i.UnitTypeSlug,
 		); err != nil {
 			return nil, err
 		}
