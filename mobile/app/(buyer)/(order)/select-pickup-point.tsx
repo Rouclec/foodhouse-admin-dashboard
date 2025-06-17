@@ -11,7 +11,6 @@ import {
   View,
 } from "react-native";
 import { Appbar, Button, Icon, Text, TextInput } from "react-native-paper";
-import { Region } from "react-native-maps";
 import { useQuery } from "@tanstack/react-query";
 import { ordersListDeliveryPointsOptions } from "@/client/orders.swagger/@tanstack/react-query.gen";
 import { Context, ContextType } from "@/app/_layout";
