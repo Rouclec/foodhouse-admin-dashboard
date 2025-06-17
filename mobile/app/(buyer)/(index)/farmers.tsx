@@ -231,13 +231,13 @@ export default function Farmers() {
                 setHasReachedEnd(false);
               }}
               onScrollEndDrag={() => {
-                if (hasReachedEnd && data?.nextKey) {
+                if (hasReachedEnd && !!data?.nextKey && data?.nextKey > 0) {
                   setCount((prev) => prev + 10);
                   setHasReachedEnd(false);
                 }
               }}
               ListFooterComponent={() =>
-                data?.nextKey ? (
+                !!data?.nextKey && data?.nextKey >= 0 ? (
                   <View style={defaultStyles.listFooterComponent}>
                     {hasReachedEnd && (
                       <ActivityIndicator
