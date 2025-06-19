@@ -105,7 +105,7 @@ const PhoneNumberInput: FC<Props> = ({
   }, [phoneNumber, countryCode]);
 
   useEffect(() => {
-    if (country?.dial_code) setCountryCode(country.dial_code);
+    if (country?.code) setCountryCode(country.code);
   }, [country]);
 
   return (
@@ -114,7 +114,7 @@ const PhoneNumberInput: FC<Props> = ({
         <TouchableOpacity onPress={() => setShowCountries(true)}>
           <View style={styles.countryCodeContainer}>
             <Text style={styles.countryCodeText}>{country?.emoji}</Text>
-            <Text style={styles.countryCodeText}>{country?.dial_code}</Text>
+            <Text style={styles.countryCodeText}>{country?.code}</Text>
 
             <Icon color={Colors.dark[0]} size={20} source={"chevron-down"} />
           </View>
