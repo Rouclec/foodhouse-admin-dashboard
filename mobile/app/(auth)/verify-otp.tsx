@@ -8,7 +8,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Appbar, Button, Icon, Snackbar, Text } from "react-native-paper";
+import {
+  Appbar,
+  Button,
+  Icon,
+  Snackbar,
+  Text,
+} from "react-native-paper";
+
 import { PaperOtpInput } from "react-native-paper-otp-input";
 
 import {
@@ -24,7 +31,7 @@ import i18n from "@/i18n";
 import { store } from "expo-router/build/global-state/router-store";
 
 const VerifyOtpScreen: FC = () => {
-  const { requestId, email, password, phoneNumber } = useLocalSearchParams();
+  const { requestId, email, password, phoneNumber, residenceCountryIsoCode } = useLocalSearchParams();
   const [requestIdState, setRequestIdState] = useState<string>(
     (requestId as string) ?? ""
   );
@@ -38,7 +45,7 @@ const VerifyOtpScreen: FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>();
   const [error, setError] = useState(false);
   const [userId, setUserId] = useState<string>();
-  const { role, setUserRole } = useContext(Context) as ContextType;
+  const { role } = useContext(Context) as ContextType;
 
   const { setUser } = useContext(Context) as ContextType;
 
@@ -54,6 +61,7 @@ const VerifyOtpScreen: FC = () => {
           },
           email: email as string,
           password: password as string,
+          residenceCountryIsoCode: residenceCountryIsoCode as string,
           userType: role,
         },
       });

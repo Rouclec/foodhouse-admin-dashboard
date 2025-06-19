@@ -20,6 +20,7 @@ export const selectionSubscriptionStyles = StyleSheet.create({
   contentContainer: {
     top: "20%",
     paddingHorizontal: 24,
+    paddingBottom: 24,
   },
   headerContainer: {
     top: 32,

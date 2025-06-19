@@ -31,7 +31,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const Info = () => {
   const [country, setCountry] = useState(CAMEROON);
-  const [callingCode, setCallingCode] = useState(country?.dial_code || "237");
+  const [callingCode, setCallingCode] = useState(country?.dial_code || CAMEROON.dial_code);
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,11 +45,6 @@ const Info = () => {
   const router = useRouter();
   const { role } = useContext(Context) as ContextType;
 
-  useEffect(() => {
-    if (country?.dial_code) {
-      setCallingCode(country.dial_code);
-    }
-  }, [country]);
 
   const handleSignUp = async () => {
     try {
@@ -84,6 +79,7 @@ const Info = () => {
           phoneNumber: `${callingCode}${mobile}`,
           email,
           password,
+          residenceCountryIsoCode: country?.code,
           role: role || "USER_ROLE_UNSPECIFIED",
         },
       });

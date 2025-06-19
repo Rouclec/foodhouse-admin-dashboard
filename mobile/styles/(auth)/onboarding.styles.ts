@@ -38,7 +38,7 @@ export const onboardingStyles = StyleSheet.create({
     lineHeight: 26,
     letterSpacing: -0.3,
     color: Colors.grey["61"],
-    paddingHorizontal: 10,
+    paddingHorizontal: 5,
     textAlign: "center",
   },
   dotContainer: {

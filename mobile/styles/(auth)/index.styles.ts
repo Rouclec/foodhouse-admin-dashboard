@@ -1,3 +1,4 @@
+import { Colors } from "@/constants";
 import { StyleSheet, Dimensions } from "react-native";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
@@ -10,12 +11,12 @@ export const index1 = StyleSheet.create({
     backgroundColor: "#6dcd47",
     
   },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 120, 
-  },
+  
   safeArea: {
     flex: 1,
+    flexDirection: "column",
+    paddingTop: 32,
+    backgroundColor: Colors.primary[500]
   },
   headingH1: {
     fontFamily: "Urbanist-Regular",
@@ -31,8 +32,9 @@ export const index1 = StyleSheet.create({
     lineHeight: 24,
   },
   textContainer: {
-    marginTop: screenHeight * 0.6,
+    marginTop: screenHeight * 0.65,
     paddingHorizontal: 24,
+    paddingBottom: 120,
   },
   imageContainer: {
     position: "absolute",
@@ -61,6 +63,10 @@ export const index1 = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  nopadding: {
+    paddingBottom: 0,
+  },
+  
   buttonContainer: {
     position: "absolute",
     bottom: 40,
