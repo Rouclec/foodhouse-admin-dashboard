@@ -284,19 +284,6 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 	if payment.PaymentEntity == ordersgrpc.PaymentEntity_PaymentEntity_SUBSCRIPTION.String() {
 		i.logger.Debug().Msgf("user subscription id ", payment.EntityID)
 
-		if err != nil {
-			return nil, status.Errorf(codes.Internal, "error getting subscription %v", err)
-		}
-
-		if err != nil {
-			i.logger.Debug().Msgf("error getting order for payment with ref %v, why: %v", req.GetExternalReference(), err)
-			return nil, status.Errorf(codes.Internal, "error getting order for payment with ref %v, why: %v", req.GetExternalReference(), err)
-		}
-
-		if err != nil {
-			return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
-		}
-
 		if req.GetStatus() != PaymentStatusSuccessful {
 			_, err := i.userService.DeleteUserSubscription(ctx, &usersgrpc.DeleteUserSubscriptionRequest{
 				UserSubscriptionId: payment.EntityID,
@@ -1418,6 +1405,7 @@ func (i *Impl) GetAdminStats(ctx context.Context,
 			ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String(),
 			ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String(),
 			ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL.String(),
+			ordersgrpc.OrderStatus_OrderStatus_REJECTED.String(),
 		},
 	})
 	if err != nil {
@@ -1432,6 +1420,7 @@ func (i *Impl) GetAdminStats(ctx context.Context,
 			ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String(),
 			ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String(),
 			ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL.String(),
+			ordersgrpc.OrderStatus_OrderStatus_REJECTED.String(),
 		},
 	})
 	if err != nil {

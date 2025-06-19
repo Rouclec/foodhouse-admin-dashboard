@@ -36,7 +36,7 @@ UPDATE orders
 SET
   status = $2,
   updated_at = now(),
-  dispatched_by = COALESCE($3, approved_by)
+  dispatched_by = COALESCE($3, dispatched_by)
 WHERE order_number = $1;
 
 
