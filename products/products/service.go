@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/foodhouse/foodhouseapp/grpc/go/productsgrpc"
@@ -31,6 +32,8 @@ const (
 	ResetPassword = "RESET_PASSWORD"
 
 	OneMillion = 1000000
+
+	CENT = 100
 )
 
 // Impl is the implementation of the products service.
@@ -81,6 +84,33 @@ func (i *Impl) CreateCategory(ctx context.Context, req *productsgrpc.CreateCateg
 	}, nil
 }
 
+// DeleteCategory implements productsgrpc.ProductsServer.
+func (i *Impl) DeleteCategory(ctx context.Context, req *productsgrpc.DeleteCategoryRequest) (*productsgrpc.DeleteCategoryResponse, error) {
+	err := i.repo.Do().DeleteCategory(ctx, req.GetCategoryId())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error deleting category %v", err)
+	}
+
+	return &productsgrpc.DeleteCategoryResponse{}, nil
+}
+
+// UpdateCategory implements productsgrpc.ProductsServer.
+func (i *Impl) UpdateCategory(ctx context.Context, req *productsgrpc.UpdateCategoryRequest) (*productsgrpc.UpdateCategoryResponse, error) {
+	i.logger.Debug().Msgf("name %v and slug %v", req.GetName(), slug.Make(req.GetName()))
+
+	err := i.repo.Do().UpdateCategory(ctx, sqlc.UpdateCategoryParams{
+		ID:   req.GetCategoryId(),
+		Name: req.GetName(),
+		Slug: slug.Make(req.GetName()),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error updating category %v", err)
+	}
+
+	return &productsgrpc.UpdateCategoryResponse{}, nil
+}
+
 // CreateProduct implements productsgrpc.ProductsServer.
 func (i *Impl) CreateProduct(ctx context.Context, req *productsgrpc.CreateProductRequest) (*productsgrpc.CreateProductResponse, error) {
 	i.logger.Debug().Msgf("name %v and slug %v", req.GetName(), slug.Make(req.GetName()))
@@ -92,7 +122,7 @@ func (i *Impl) CreateProduct(ctx context.Context, req *productsgrpc.CreateProduc
 	}
 
 	product, err := i.repo.Do().CreateProduct(ctx, sqlc.CreateProductParams{
-		CategoryID:      req.GetCategoryId(),
+		CategoryID:      &req.CategoryId,
 		Name:            req.GetName(),
 		UnitType:        req.GetUnitType(),
 		Value:           req.GetAmount().GetValue(),
@@ -114,10 +144,8 @@ func (i *Impl) CreateProduct(ctx context.Context, req *productsgrpc.CreateProduc
 				Name: category.Name,
 				Slug: category.Slug,
 			},
-			Name: product.Name,
-			UnitType: &productsgrpc.PriceType{
-				Id: product.UnitType,
-			},
+			Name:     product.Name,
+			UnitType: product.UnitType,
 			Amount: &types.Amount{
 				Value:           product.Value,
 				CurrencyIsoCode: product.CurrencyIsoCode,
@@ -281,7 +309,7 @@ func (i *Impl) UpdateProduct(ctx context.Context, req *productsgrpc.UpdateProduc
 	i.logger.Debug().Interface("product found: ", product).Msg("Product for update")
 
 	arg := sqlc.UpdateProductParams{
-		CategoryID:      req.GetCategoryId(),
+		CategoryID:      &req.CategoryId,
 		Name:            req.GetName(),
 		UnitType:        req.GetUnitType(),
 		Value:           req.Amount.GetValue(),
@@ -308,7 +336,7 @@ func (i *Impl) UpdateProduct(ctx context.Context, req *productsgrpc.UpdateProduc
 
 // GetFarmerProduct implements productsgrpc.ProductsServer.
 func (i *Impl) GetFarmerProduct(ctx context.Context, req *productsgrpc.GetFarmerProductRequest) (*productsgrpc.GetFarmerProductResponse, error) {
-	product, err := i.repo.Do().GetProductWithCategory(ctx, req.GetProductId())
+	product, err := i.repo.Do().GetProduct(ctx, req.GetProductId())
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error getting product %v", err)
@@ -326,7 +354,7 @@ func (i *Impl) GetFarmerProduct(ctx context.Context, req *productsgrpc.GetFarmer
 
 // GetProduct implements productsgrpc.ProductsServer.
 func (i *Impl) GetProduct(ctx context.Context, req *productsgrpc.GetProductRequest) (*productsgrpc.GetProductResponse, error) {
-	product, err := i.repo.Do().GetProductWithCategory(ctx, req.GetProductId())
+	product, err := i.repo.Do().GetProduct(ctx, req.GetProductId())
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error getting product %v", err)
@@ -372,7 +400,7 @@ func (i *Impl) CreatePriceType(ctx context.Context, req *productsgrpc.CreatePric
 	args := sqlc.CreatePriceTypeParams{
 		Name:       req.GetName(),
 		Slug:       slug.Make(req.GetName()),
-		CategoryID: req.GetCategoryId(),
+		CategoryID: &req.CategoryId,
 	}
 
 	priceType, err := i.repo.Do().CreatePriceType(ctx, args)
@@ -385,7 +413,7 @@ func (i *Impl) CreatePriceType(ctx context.Context, req *productsgrpc.CreatePric
 			Id:         priceType.ID,
 			Name:       priceType.Name,
 			Slug:       priceType.Slug,
-			CategoryId: priceType.CategoryID,
+			CategoryId: *priceType.CategoryID,
 		},
 	}, nil
 }
@@ -401,7 +429,7 @@ func (i *Impl) CreateProductName(ctx context.Context, req *productsgrpc.CreatePr
 	args := sqlc.CreateProductNameParams{
 		Name:       req.GetName(),
 		Slug:       slug.Make(req.GetName()),
-		CategoryID: req.GetCategoryId(),
+		CategoryID: &req.CategoryId,
 	}
 
 	productName, err := i.repo.Do().CreateProductName(ctx, args)
@@ -413,7 +441,7 @@ func (i *Impl) CreateProductName(ctx context.Context, req *productsgrpc.CreatePr
 		ProductName: &productsgrpc.ProductName{
 			Name:       productName.Name,
 			Slug:       productName.Slug,
-			CategoryId: productName.CategoryID,
+			CategoryId: *productName.CategoryID,
 		},
 	}, nil
 }
@@ -440,9 +468,9 @@ func (i *Impl) DeleteProductName(ctx context.Context, req *productsgrpc.DeletePr
 	return &productsgrpc.DeleteProductNameResponse{}, nil
 }
 
-// ListPriceTypesByCategory implements productsgrpc.ProductsServer.
-func (i *Impl) ListPriceTypesByCategory(ctx context.Context, req *productsgrpc.ListPriceTypesByCategoryRequest) (*productsgrpc.ListPriceTypesByCategoryResponse, error) {
-	sqlcPriceTypes, err := i.repo.Do().ListPriceTypesByCategory(ctx, req.GetCategoryId())
+// ListPriceTypes implements productsgrpc.ProductsServer.
+func (i *Impl) ListPriceTypes(ctx context.Context, req *productsgrpc.ListPriceTypesRequest) (*productsgrpc.ListPriceTypesResponse, error) {
+	sqlcPriceTypes, err := i.repo.Do().ListPriceTypes(ctx, req.GetCategoryId())
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error getting price types %v", err)
@@ -454,12 +482,12 @@ func (i *Impl) ListPriceTypesByCategory(ctx context.Context, req *productsgrpc.L
 		return nil, status.Errorf(codes.Internal, "error converting sqlc to proto price types, %v", err)
 	}
 
-	return &productsgrpc.ListPriceTypesByCategoryResponse{PriceTypes: protoPriceTypes}, nil
+	return &productsgrpc.ListPriceTypesResponse{PriceTypes: protoPriceTypes}, nil
 }
 
-// ListProductNamesByCategory implements productsgrpc.ProductsServer.
-func (i *Impl) ListProductNamesByCategory(ctx context.Context, req *productsgrpc.ListProductNamesByCategoryRequest) (*productsgrpc.ListProductNamesByCategoryResponse, error) {
-	sqlcProductNames, err := i.repo.Do().ListProductNamesByCategory(ctx, req.GetCategoryId())
+// ListProductNames implements productsgrpc.ProductsServer.
+func (i *Impl) ListProductNames(ctx context.Context, req *productsgrpc.ListProductNamesRequest) (*productsgrpc.ListProductNamesResponse, error) {
+	sqlcProductNames, err := i.repo.Do().ListProductNames(ctx, req.GetCategoryId())
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error getting product names %v", err)
@@ -471,7 +499,7 @@ func (i *Impl) ListProductNamesByCategory(ctx context.Context, req *productsgrpc
 		return nil, status.Errorf(codes.Internal, "error converting sqlc to proto product names, %v", err)
 	}
 
-	return &productsgrpc.ListProductNamesByCategoryResponse{ProductNames: protoProductNames}, nil
+	return &productsgrpc.ListProductNamesResponse{ProductNames: protoProductNames}, nil
 }
 
 // SumProductAmounts implements productsgrpc.ProductsServer.
@@ -489,5 +517,68 @@ func (i *Impl) SumProductAmounts(ctx context.Context,
 
 	return &productsgrpc.SumProductAmountsResponse{
 		Total: total,
+	}, nil
+}
+
+func getMonthRanges() (time.Time, time.Time, time.Time, time.Time) {
+	now := time.Now()
+
+	// Truncate to the start of this month
+	startOfThisMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+
+	// Start of next month, minus 1 second gives end of this month
+	endOfThisMonth := startOfThisMonth.AddDate(0, 1, 0).Add(-time.Second)
+
+	// Start of last month
+	startOfLastMonth := startOfThisMonth.AddDate(0, -1, 0)
+
+	// End of last month = start of this month - 1 second
+	endOfLastMonth := startOfThisMonth.Add(-time.Second)
+
+	return startOfThisMonth, endOfThisMonth, startOfLastMonth, endOfLastMonth
+}
+
+func percentageChange(oldValue, newValue float64) *float64 {
+	if oldValue == 0 {
+		change := 100.0
+		return &change
+	}
+	change := ((newValue - oldValue) / math.Abs(oldValue)) * CENT
+	return &change
+}
+
+// GetProductStats implements productsgrpc.ProductsServer.
+func (i *Impl) GetProductStats(ctx context.Context,
+	_ *productsgrpc.GetProductStatsRequest) (
+	*productsgrpc.GetProductStatsResponse, error) {
+	startThis, endThis, startLast, endLast := getMonthRanges()
+
+	productsThisMonth, err := i.repo.Do().GetProductStatsBetweenDates(ctx, sqlc.GetProductStatsBetweenDatesParams{
+		StartDate: startThis,
+		EndDate:   endThis,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	productsLastMonth, err := i.repo.Do().GetProductStatsBetweenDates(ctx, sqlc.GetProductStatsBetweenDatesParams{
+		StartDate: startLast,
+		EndDate:   endLast,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	stats := make([]*productsgrpc.StatItem, 0, 1)
+	stats = append(stats, &productsgrpc.StatItem{
+		Title:       "Total Products",
+		Value:       float64(productsThisMonth),
+		Change:      *percentageChange(float64(productsLastMonth), float64(productsThisMonth)),
+		Description: "Products created this month",
+	})
+
+	return &productsgrpc.GetProductStatsResponse{
+		Data: stats,
 	}, nil
 }

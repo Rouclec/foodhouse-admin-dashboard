@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math"
 	"regexp"
 	"strings"
 	"time"
@@ -37,7 +38,13 @@ const (
 
 	OneMillion = 1000000
 
-	DefaultRating = 0.00
+	DefaultRating = -1.00
+
+	CENT = 100
+
+	ClaimKeyRole = "role"
+
+	ClaimKeyStatus = "status"
 )
 
 // Impl is the implementation of the Users service.
@@ -259,7 +266,10 @@ func (i *Impl) Signup(ctx context.Context, req *usersgrpc.SignupRequest) (*users
 	}
 
 	// Generate an access token and refresh token
-	claims := map[string]any{}
+	claims := map[string]any{
+		ClaimKeyRole:   createdDBUser.Role,
+		ClaimKeyStatus: createdDBUser.UserStatus,
+	}
 	accessTokens, err := i.tokenManagerBuilder.WithQuerier(querier).GenerateAccessToken(ctx, createdDBUser.ID, claims)
 	if err != nil {
 		i.logger.Debug().Msgf("firebase error %v", err)
@@ -314,7 +324,11 @@ func (i *Impl) RefreshAccessToken(ctx context.Context, req *usersgrpc.RefreshAcc
 		return nil, status.Errorf(codes.Unauthenticated, "Refresh token is invalid")
 	}
 
-	claims := map[string]any{}
+	claims, err := i.getUserClaims(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user claims: %w", err)
+	}
+
 	accessToken, err := i.tokenManagerBuilder.WithQuerier(i.repo.Do()).GenerateAccessToken(ctx, userID, claims)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Failed to generate access token: %v", err)
@@ -506,7 +520,8 @@ func (i *Impl) getUserClaims(ctx context.Context, userID string) (map[string]any
 		return nil, status.Errorf(codes.Internal, "Failed to get user: %v", err)
 	}
 
-	claims["role"] = user.Role
+	claims[ClaimKeyRole] = user.Role
+	claims[ClaimKeyStatus] = user.UserStatus
 
 	return claims, nil
 }
@@ -808,12 +823,12 @@ func (i *Impl) GrantAdmin(
 	req *usersgrpc.GrantAdminRequest) (
 	*usersgrpc.GrantAdminResponse,
 	error) {
-	newadminPhoneNumber := req.GetPhoneNumber()
+	newAgentPhoneNumber := req.GetPhoneNumber()
 
 	// fetch the user via email from the db.
 	// If there is no user then we want to create one.
 	// We shall generate a random password and hash it too.
-	foundUser, err := i.repo.Do().GetUserByPhoneNumber(ctx, newadminPhoneNumber)
+	foundUser, err := i.repo.Do().GetUserByPhoneNumber(ctx, newAgentPhoneNumber)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, status.Errorf(codes.Internal, "Failed to check for existing users: %v", err)
 	}
@@ -824,7 +839,7 @@ func (i *Impl) GrantAdmin(
 		}
 		if userRole == int32(usersgrpc.UserRole_USER_ROLE_ADMIN) {
 			return nil, status.
-				Errorf(codes.AlreadyExists, "This phone number is already assigned to an admin: %v", newadminPhoneNumber)
+				Errorf(codes.AlreadyExists, "This phone number is already assigned to an admin: %v", newAgentPhoneNumber)
 		}
 
 		arg := sqlc.UpdateUserRoleParams{
@@ -859,7 +874,7 @@ func (i *Impl) GrantAdmin(
 	_, newErr = i.repo.Do().CreateUser(ctx, arg)
 	if newErr != nil {
 		return nil, status.
-			Errorf(codes.Internal, "Could not create a new admin user with phone number: %v: %v", newadminPhoneNumber, newErr)
+			Errorf(codes.Internal, "Could not create a new admin user with phone number: %v: %v", newAgentPhoneNumber, newErr)
 	}
 
 	return &usersgrpc.GrantAdminResponse{
@@ -885,13 +900,17 @@ func (i *Impl) CreateSubscription(ctx context.Context,
 		return nil, status.Errorf(codes.Internal, "Erro creating subscription: %v", err)
 	}
 
+	totalDays := int64(subscription.Duration.Months)*30 +
+		int64(subscription.Duration.Days) +
+		subscription.Duration.Microseconds/(24*60*60*OneMillion)
+
 	return &usersgrpc.CreateSubscriptionResponse{
 		Subscription: &usersgrpc.Subscription{
 			Id:          subscription.ID,
 			Title:       subscription.Title,
 			Description: subscription.Description,
 			// Convert microseconds back to days
-			Duration: subscription.Duration.Microseconds / (24 * 60 * 60 * OneMillion),
+			Duration: totalDays,
 			Amount: &types.Amount{
 				Value:           subscription.Amount,
 				CurrencyIsoCode: subscription.CurrencyIsoCode,
@@ -962,13 +981,16 @@ func (i *Impl) UpdateSubscription(ctx context.Context,
 		return nil, status.Errorf(codes.Internal, "Failed to commit the transaction: %v", err)
 	}
 
+	totalDays := int64(updatedSubscription.Duration.Months)*30 +
+		int64(updatedSubscription.Duration.Days) +
+		updatedSubscription.Duration.Microseconds/(24*60*60*OneMillion)
+
 	return &usersgrpc.UpdateSubscriptionResponse{
 		Subscription: &usersgrpc.Subscription{
 			Id:          updatedSubscription.ID,
 			Title:       updatedSubscription.Title,
 			Description: updatedSubscription.Description,
-			// Convert microseconds back to days
-			Duration: updatedSubscription.Duration.Microseconds / (24 * 60 * 60 * OneMillion),
+			Duration:    totalDays,
 			Amount: &types.Amount{
 				Value:           updatedSubscription.Amount,
 				CurrencyIsoCode: updatedSubscription.CurrencyIsoCode,
@@ -1066,10 +1088,56 @@ func (i *Impl) GetUserSubscriptions(context.Context,
 }
 
 // ListUsers implements usersgrpc.UsersServer.
-func (i *Impl) ListUsers(context.Context,
-	*usersgrpc.ListUsersRequest) (
+func (i *Impl) ListUsers(ctx context.Context,
+	req *usersgrpc.ListUsersRequest) (
 	*usersgrpc.ListUsersResponse, error) {
-	panic("unimplemented")
+	var err error
+	startKey := time.Now().Add(time.Hour)
+
+	count := req.GetCount()
+	if count == 0 {
+		count = 10
+	}
+
+	if req.GetStartKey() != "" {
+		startKey, err = time.Parse(time.RFC3339, req.GetStartKey())
+		if err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "Invalid start key")
+		}
+	}
+
+	i.logger.Debug().Msgf("Start key %v", startKey)
+
+	args := sqlc.ListUsersParams{
+		UserStatus: req.GetUserStatus().String(),
+		SearchKey:  req.GetSearch(),
+		Limit:      count,
+		Before:     startKey,
+		UserRole:   req.GetUserRole().String(),
+	}
+	sqlcUsers, err := i.repo.Do().ListUsers(ctx, args)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error fetching users: %v", err)
+	}
+
+	protoUsers, err := converters.SqlcToProtoUsers(sqlcUsers)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error converting sqlc to proto reviews %v", err)
+	}
+
+	nextKey := ""
+
+	if len(protoUsers) >= int(count) {
+		nextKey = protoUsers[len(protoUsers)-1].GetCreatedAt().AsTime().Format(time.RFC3339)
+	}
+
+	return &usersgrpc.ListUsersResponse{
+		Users:   protoUsers,
+		NextKey: nextKey,
+	}, nil
+	// panic("unimplemented")
 }
 
 // Subscribe implements usersgrpc.UsersServer.
@@ -1364,7 +1432,10 @@ func (i *Impl) ListFarmers(ctx context.Context,
 		CursorAverageRating: startKey,
 		Count:               count,
 		SearchKey:           req.GetSearchKey(),
+		UserStatus:          req.GetUserStatus().String(),
 	}
+
+	i.logger.Debug().Msgf("list farmers query %v", args)
 
 	farmers, err := i.repo.Do().ListFarmersByRating(ctx, args)
 
@@ -1386,5 +1457,190 @@ func (i *Impl) ListFarmers(ctx context.Context,
 	return &usersgrpc.ListFarmersResponse{
 		Farmers: protoFarmers,
 		NextKey: nextKey,
+	}, nil
+}
+
+func getMonthRanges() (time.Time, time.Time, time.Time, time.Time) {
+	now := time.Now()
+
+	// Truncate to the start of this month
+	startOfThisMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+
+	// Start of next month, minus 1 second gives end of this month
+	endOfThisMonth := startOfThisMonth.AddDate(0, 1, 0).Add(-time.Second)
+
+	// Start of last month
+	startOfLastMonth := startOfThisMonth.AddDate(0, -1, 0)
+
+	// End of last month = start of this month - 1 second
+	endOfLastMonth := startOfThisMonth.Add(-time.Second)
+
+	return startOfThisMonth, endOfThisMonth, startOfLastMonth, endOfLastMonth
+}
+
+func percentageChange(oldValue, newValue float64) *float64 {
+	if oldValue == 0 {
+		change := 100.0
+		return &change
+	}
+	change := ((newValue - oldValue) / math.Abs(oldValue)) * CENT
+	return &change
+}
+
+// GetUserStats implements usersgrpc.UsersServer.
+func (i *Impl) GetUserStats(ctx context.Context,
+	_ *usersgrpc.GetUserStatsRequest) (
+	*usersgrpc.GetUserStatsResponse, error) {
+	startThis, endThis, startLast, endLast := getMonthRanges()
+
+	statsThisMonth, err := i.repo.Do().GetUserStatsBetweenDates(ctx, sqlc.GetUserStatsBetweenDatesParams{
+		StartDate: startThis,
+		EndDate:   endThis,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	statsLastMonth, err := i.repo.Do().GetUserStatsBetweenDates(ctx, sqlc.GetUserStatsBetweenDatesParams{
+		StartDate: startLast,
+		EndDate:   endLast,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	const statItemCapacity = 2
+	stats := make([]*usersgrpc.StatItem, 0, statItemCapacity)
+
+	stats = append(stats, &usersgrpc.StatItem{
+		Title:       "Total Users",
+		Value:       float64(statsThisMonth.TotalUsers),
+		Change:      *percentageChange(float64(statsLastMonth.TotalUsers), float64(statsThisMonth.TotalUsers)),
+		Description: "New users this month",
+	})
+
+	stats = append(stats, &usersgrpc.StatItem{
+		Title:       "Total Farmers",
+		Value:       float64(statsThisMonth.TotalFarmers),
+		Change:      *percentageChange(float64(statsLastMonth.TotalFarmers), float64(statsThisMonth.TotalFarmers)),
+		Description: "Total active farmers",
+	})
+
+	return &usersgrpc.GetUserStatsResponse{
+		Data: stats,
+	}, nil
+}
+
+// SuspendUser implements usersgrpc.UsersServer.
+func (i *Impl) SuspendUser(ctx context.Context,
+	req *usersgrpc.SuspendUserRequest) (
+	*usersgrpc.SuspendUserResponse, error) {
+	err := i.repo.Do().SuspendUser(ctx, req.GetUserId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error suspending user %v", err)
+	}
+	return &usersgrpc.SuspendUserResponse{}, nil
+}
+
+// ReactivateUser implements usersgrpc.UsersServer.
+func (i *Impl) ReactivateUser(ctx context.Context,
+	req *usersgrpc.ReactivateUserRequest) (
+	*usersgrpc.ReactivateUserResponse, error) {
+	err := i.repo.Do().ReactivateUser(ctx, req.GetUserId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error re-activating user %v", err)
+	}
+	return &usersgrpc.ReactivateUserResponse{}, nil
+}
+
+// DeleteAgent implements usersgrpc.UsersServer.
+func (i *Impl) DeleteAgent(ctx context.Context,
+	req *usersgrpc.DeleteAgentRequest) (
+	*usersgrpc.DeleteAgentResponse, error) {
+	user, err := i.repo.Do().GetUser(ctx, req.GetUserId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error fetching user %v", err)
+	}
+
+	if user.Role != usersgrpc.UserRole_USER_ROLE_AGENT.String() {
+		return nil, status.Errorf(codes.Internal, "cannot delete user with role %v", user.Role)
+	}
+
+	err = i.repo.Do().DeleteUser(ctx, req.GetUserId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error deleting agent %v", err)
+	}
+
+	return &usersgrpc.DeleteAgentResponse{}, nil
+}
+
+// GrantAgent implements usersgrpc.UsersServer.
+func (i *Impl) GrantAgent(ctx context.Context,
+	req *usersgrpc.GrantAgentRequest) (
+	*usersgrpc.GrantAgentResponse, error) {
+	newAgentPhoneNumber := req.GetPhoneNumber()
+
+	// fetch the user via email from the db.
+	// If there is no user then we want to create one.
+	// We shall generate a random password and hash it too.
+	foundUser, err := i.repo.Do().GetUserByPhoneNumber(ctx, newAgentPhoneNumber)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return nil, status.Errorf(codes.Internal, "Failed to check for existing users: %v", err)
+	}
+	if err == nil {
+		userRole, ok := usersgrpc.UserRole_value[foundUser.Role]
+		if !ok {
+			return nil, status.Errorf(codes.Internal, "Invalid user role in database: %v", foundUser.Role)
+		}
+		if userRole != int32(usersgrpc.UserRole_USER_ROLE_BUYER) {
+			return nil, status.
+				Errorf(codes.AlreadyExists, "Phone number belongs to a user who is not a buyer: %v",
+					newAgentPhoneNumber)
+		}
+
+		arg := sqlc.UpdateUserRoleParams{
+			ID:   foundUser.ID,
+			Role: usersgrpc.UserRole_USER_ROLE_AGENT.String(),
+		}
+
+		err = i.repo.Do().UpdateUserRole(ctx, arg)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "Could not make user an agent: %v", err)
+		}
+
+		return &usersgrpc.GrantAgentResponse{
+			Message: "New agent successfully created.",
+		}, nil
+	}
+
+	// Generate random user password.
+	newHashedPassword, newErr := GeneratePassword(ctx)
+	if newErr != nil {
+		return nil, status.Errorf(codes.Internal, "Could not generate password for new user: %v", newErr)
+	}
+
+	// Create new user with hashed password in the db.
+	arg := sqlc.CreateUserParams{
+		PhoneNumber:             req.GetPhoneNumber(),
+		Password:                newHashedPassword,
+		ResidenceCountryIsoCode: req.GetResidenceCountryIsoCode(),
+		Email:                   &req.Email,
+		Role:                    usersgrpc.UserRole_USER_ROLE_AGENT.String(),
+	}
+
+	_, newErr = i.repo.Do().CreateUser(ctx, arg)
+	if newErr != nil {
+		return nil, status.
+			Errorf(codes.Internal, "Could not create a new admin user with phone number: %v: %v", newAgentPhoneNumber, newErr)
+	}
+
+	return &usersgrpc.GrantAgentResponse{
+		Message: "New agent successfully created.",
 	}, nil
 }

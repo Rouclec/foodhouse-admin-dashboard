@@ -75,4 +75,4 @@ jobs:
           EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}
           EXPO_APPLE_ID: ${{ secrets.EXPO_APPLE_ID }}
         working-directory: mobile
-        run: eas build --platform ios --profile production --auto-submit --non-interactive
+        run: eas build --platform ios --profile production --auto-submit --non-interactive --no-wait

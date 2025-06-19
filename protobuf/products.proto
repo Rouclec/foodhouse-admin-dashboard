@@ -19,7 +19,7 @@ message Product {
   string id = 1;
   Category category = 2;
   string name = 3;
-  PriceType unit_type = 4;
+  string unit_type = 4;
   types.Amount amount = 5;
   string description = 6;
   string image = 7;
@@ -47,6 +47,21 @@ message CreateCategoryRequest {
 }
 
 message CreateCategoryResponse { Category category = 1; }
+
+message UpdateCategoryRequest {
+  string user_id = 1;
+  string category_id = 2;
+  string name = 3;
+}
+
+message UpdateCategoryResponse {}
+
+message DeleteCategoryRequest {
+  string user_id = 1;
+  string category_id = 2;
+}
+
+message DeleteCategoryResponse {}
 
 message CreateProductRequest {
   string user_id = 1;
@@ -166,13 +181,11 @@ message DeletePriceTypeRequest {
 
 message DeletePriceTypeResponse {}
 
-message ListProductNamesByCategoryRequest { string category_id = 1; }
-message ListProductNamesByCategoryResponse {
-  repeated ProductName product_names = 1;
-}
+message ListProductNamesRequest { string category_id = 1; }
+message ListProductNamesResponse { repeated ProductName product_names = 1; }
 
-message ListPriceTypesByCategoryRequest { string category_id = 1; }
-message ListPriceTypesByCategoryResponse { repeated PriceType price_types = 1; }
+message ListPriceTypesRequest { string category_id = 1; }
+message ListPriceTypesResponse { repeated PriceType price_types = 1; }
 
 message SumProductAmountsRequest {
   repeated string product_ids = 1;
@@ -181,12 +194,35 @@ message SumProductAmountsRequest {
 
 message SumProductAmountsResponse { double total = 1; }
 
+message StatItem {
+  string title = 1;
+  double value = 2;
+  double change = 3;
+  string description = 4;
+}
+
+message GetProductStatsRequest {}
+message GetProductStatsResponse { repeated StatItem data = 1; }
+
 service Products {
 
   rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryResponse) {
     option (google.api.http) = {
       post : "/v1/admin/{user_id}/products/create-category"
       body : "*"
+    };
+  }
+
+  rpc UpdateCategory(UpdateCategoryRequest) returns (UpdateCategoryResponse) {
+    option (google.api.http) = {
+      put : "/v1/admin/{user_id}/products/{category_id}/update-category"
+      body : "*"
+    };
+  }
+
+  rpc DeleteCategory(DeleteCategoryRequest) returns (DeleteCategoryResponse) {
+    option (google.api.http) = {
+      delete : "/v1/admin/{user_id}/products/{category_id}/delete-category"
     };
   }
 
@@ -278,20 +314,21 @@ service Products {
     };
   }
 
-  rpc ListProductNamesByCategory(ListProductNamesByCategoryRequest)
-      returns (ListProductNamesByCategoryResponse) {
+  rpc ListProductNames(ListProductNamesRequest)
+      returns (ListProductNamesResponse) {
     option (google.api.http) = {
-      get : "/v1/public/products/{category_id}/list-product-names-by-category"
+      get : "/v1/public/products/list-product-names"
     };
   }
 
-  rpc ListPriceTypesByCategory(ListPriceTypesByCategoryRequest)
-      returns (ListPriceTypesByCategoryResponse) {
+  rpc ListPriceTypes(ListPriceTypesRequest) returns (ListPriceTypesResponse) {
     option (google.api.http) = {
-      get : "/v1/public/products/{category_id}/list-price-types-by-category"
+      get : "/v1/public/products/list-price-types"
     };
   }
 
   rpc SumProductAmounts(SumProductAmountsRequest)
       returns (SumProductAmountsResponse);
+
+  rpc GetProductStats(GetProductStatsRequest) returns (GetProductStatsResponse);
 }

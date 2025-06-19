@@ -21,6 +21,7 @@ func TestNewFirebaseAuthenticationInterceptor(t *testing.T) {
 		body               io.Reader
 		userID             string
 		role               string
+		status             string
 		expectedStatusCode int
 	}
 
@@ -43,6 +44,7 @@ func TestNewFirebaseAuthenticationInterceptor(t *testing.T) {
 			body:               nil,
 			userID:             "123",
 			role:               "",
+			status:             "UserStatus_ACTIVE",
 			expectedStatusCode: http.StatusForbidden,
 		},
 		"GET /v1/admin/users/123 with admin role": {
@@ -51,7 +53,17 @@ func TestNewFirebaseAuthenticationInterceptor(t *testing.T) {
 			body:               nil,
 			userID:             "123",
 			role:               interceptors.RoleAdmin,
+			status:             "UserStatus_ACTIVE",
 			expectedStatusCode: http.StatusOK,
+		},
+		"GET /v1/admin/users/123 suspended admin": {
+			method:             "GET",
+			path:               "/v1/admin/users/123",
+			body:               nil,
+			userID:             "123",
+			role:               interceptors.RoleAdmin,
+			status:             "UserStatus_SUSPENDED",
+			expectedStatusCode: http.StatusUnauthorized,
 		},
 		"GET /v1/users/123": {
 			method:             "GET",
@@ -59,7 +71,17 @@ func TestNewFirebaseAuthenticationInterceptor(t *testing.T) {
 			body:               nil,
 			userID:             "123",
 			role:               "",
+			status:             "UserStatus_ACTIVE",
 			expectedStatusCode: http.StatusOK,
+		},
+		"GET /v1/users/123 suspended user": {
+			method:             "GET",
+			path:               "/v1/users/123",
+			body:               nil,
+			userID:             "123",
+			role:               "",
+			status:             "UserStatus_SUSPENDED",
+			expectedStatusCode: http.StatusUnauthorized,
 		},
 		"GET /v1/users/123 wrong user id": {
 			method:             "GET",
@@ -67,6 +89,7 @@ func TestNewFirebaseAuthenticationInterceptor(t *testing.T) {
 			body:               nil,
 			userID:             "123",
 			role:               "",
+			status:             "UserStatus_ACTIVE",
 			expectedStatusCode: http.StatusForbidden,
 		},
 	}
@@ -81,7 +104,8 @@ func TestNewFirebaseAuthenticationInterceptor(t *testing.T) {
 			tokenVerifier := interceptors_mocks.NewMockTokenVerifier(ctrl)
 			if tc.userID != "" {
 				claims := map[string]interface{}{
-					"role": tc.role,
+					"role":   tc.role,
+					"status": tc.status,
 				}
 				tokenVerifier.EXPECT().VerifyIDToken(gomock.Any(), gomock.Any()).Return(&auth.Token{
 					UID:    tc.userID,
@@ -92,7 +116,8 @@ func TestNewFirebaseAuthenticationInterceptor(t *testing.T) {
 			handler := interceptors.WireDefaultInterceptors(tokenVerifier, okHandler)
 
 			handler.ServeHTTP(responseWriter, req)
-			assert.Equalf(t, tc.expectedStatusCode, responseWriter.Code, "expected status code 200, got %d", responseWriter.Code)
+			assert.Equalf(t, tc.expectedStatusCode, responseWriter.Code,
+				"expected status code %d, got %d", tc.expectedStatusCode, responseWriter.Code)
 		})
 	}
 }

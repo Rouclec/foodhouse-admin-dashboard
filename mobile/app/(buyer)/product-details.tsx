@@ -212,7 +212,7 @@ export default function ProductDetails() {
                 })}
                 <Text style={styles.greyText}>
                   {" "}
-                  {data?.product?.unitType?.slug?.replace("per_", "/")}
+                  {data?.product?.unitType?.replace("per_", "/")}
                 </Text>
               </Text>
             </View>

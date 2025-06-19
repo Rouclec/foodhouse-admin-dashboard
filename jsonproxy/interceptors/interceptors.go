@@ -14,11 +14,17 @@ const (
 	ContextKeyUserID = contextKey("userID")
 	// ContextKeyRole is the key for the user role in the request context.
 	ContextKeyRole = contextKey("role")
+	// ContextKeyStatus is the key for the user status in the request context.
+	ContextKeyStatus = contextKey("status")
 	// BearerPrefix is the prefix for the Authorization header value.
 	// The Authorization header value should be in the format "Bearer <JWT access token>".
 	BearerPrefix = "Bearer "
 	// RoleAdmin is the role for an admin user.
 	RoleAdmin = "USER_ROLE_ADMIN"
+	// RoleAgent is the role for agent users.
+	RoleAgent = "USER_ROLE_AGENT"
+	// UserActiveStatus is the status for active users.
+	UserActiveStatus = "UserStatus_ACTIVE"
 )
 
 // HTTPInterceptor is a type for HTTP middleware.

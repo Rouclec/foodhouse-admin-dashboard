@@ -43,6 +43,15 @@ func (q *Queries) CreateDeliveryPoint(ctx context.Context, arg CreateDeliveryPoi
 	return i, err
 }
 
+const deleteDeliveryPoint = `-- name: DeleteDeliveryPoint :exec
+DELETE FROM delivery_points WHERE id = $1
+`
+
+func (q *Queries) DeleteDeliveryPoint(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, deleteDeliveryPoint, id)
+	return err
+}
+
 const listDeliveryPoints = `-- name: ListDeliveryPoints :many
 SELECT id, delivery_location, location_name, delivery_point_name, city, created_at 
 FROM delivery_points
@@ -117,4 +126,29 @@ func (q *Queries) ListUniqueCities(ctx context.Context) ([]string, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateDeliveryPoint = `-- name: UpdateDeliveryPoint :exec
+UPDATE delivery_points
+SET (delivery_location, location_name, delivery_point_name, city) = ($2, $3, $4, $5)
+WHERE id = $1
+`
+
+type UpdateDeliveryPointParams struct {
+	ID                string       `json:"id"`
+	DeliveryLocation  pgtype.Point `json:"delivery_location"`
+	LocationName      string       `json:"location_name"`
+	DeliveryPointName string       `json:"delivery_point_name"`
+	City              string       `json:"city"`
+}
+
+func (q *Queries) UpdateDeliveryPoint(ctx context.Context, arg UpdateDeliveryPointParams) error {
+	_, err := q.db.Exec(ctx, updateDeliveryPoint,
+		arg.ID,
+		arg.DeliveryLocation,
+		arg.LocationName,
+		arg.DeliveryPointName,
+		arg.City,
+	)
+	return err
 }

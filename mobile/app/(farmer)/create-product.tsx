@@ -31,8 +31,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   productsCreateProductMutation,
   productsListCategoriesOptions,
-  productsListPriceTypesByCategoryOptions,
-  productsListProductNamesByCategoryOptions,
+  productsListPriceTypesOptions,
+  productsListProductNamesOptions,
 } from "@/client/products.swagger/@tanstack/react-query.gen";
 import { Context, ContextType } from "../_layout";
 
@@ -195,7 +195,7 @@ export default function ForgotPasswordEmailOtp() {
   });
 
   const { data: priceTypes, isLoading: isPriceTypesLoading } = useQuery({
-    ...productsListPriceTypesByCategoryOptions({
+    ...productsListPriceTypesOptions({
       path: {
         categoryId: productCategory ?? "",
       },
@@ -204,7 +204,7 @@ export default function ForgotPasswordEmailOtp() {
   });
 
   const { data: productNames, isLoading: isProductNamesLoading } = useQuery({
-    ...productsListProductNamesByCategoryOptions({
+    ...productsListProductNamesOptions({
       path: {
         categoryId: productCategory ?? "",
       },
@@ -290,8 +290,8 @@ export default function ForgotPasswordEmailOtp() {
                 onSelect={(value) => setPriceType(value)}
                 data={(priceTypes?.priceTypes ?? [])?.map((priceType) => {
                   return {
-                    label: priceType.name ?? "",
-                    value: priceType.id ?? "",
+                    label: `Per ${priceType.slug?.replace("per_", "") ?? ""}`,
+                    value: priceType.slug ?? "",
                   };
                 })}
                 loading={isPriceTypesLoading}

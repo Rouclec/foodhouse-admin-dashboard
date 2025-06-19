@@ -13,19 +13,25 @@ type Querier interface {
 	CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error)
 	CreateOrderAuditLog(ctx context.Context, arg CreateOrderAuditLogParams) error
 	CreatePayment(ctx context.Context, arg CreatePaymentParams) (Payment, error)
+	DeleteDeliveryPoint(ctx context.Context, id string) error
 	GetOrderByOrderNumber(ctx context.Context, orderNumber int64) (Order, error)
+	GetOrderStatsBetweenDates(ctx context.Context, arg GetOrderStatsBetweenDatesParams) (int64, error)
 	GetOrdersGroupedByDay(ctx context.Context, arg GetOrdersGroupedByDayParams) ([]GetOrdersGroupedByDayRow, error)
 	GetOrdersGroupedByMonth(ctx context.Context, arg GetOrdersGroupedByMonthParams) ([]GetOrdersGroupedByMonthRow, error)
 	GetOrdersGroupedByYear(ctx context.Context, arg GetOrdersGroupedByYearParams) ([]GetOrdersGroupedByYearRow, error)
 	GetPaymentByEntity(ctx context.Context, arg GetPaymentByEntityParams) (Payment, error)
 	GetPaymentById(ctx context.Context, id string) (Payment, error)
+	GetPaymentStatsBetweenDates(ctx context.Context, arg GetPaymentStatsBetweenDatesParams) (float64, error)
 	GetUserOrderBySecretKey(ctx context.Context, arg GetUserOrderBySecretKeyParams) (Order, error)
 	ListDeliveryPoints(ctx context.Context, arg ListDeliveryPointsParams) ([]DeliveryPoint, error)
 	ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersParams) ([]Order, error)
 	ListOrderAuditLogs(ctx context.Context, orderNumber int64) ([]OrdersAudit, error)
+	ListOrders(ctx context.Context, arg ListOrdersParams) ([]Order, error)
+	ListPayments(ctx context.Context, arg ListPaymentsParams) ([]Payment, error)
 	ListUniqueCities(ctx context.Context) ([]string, error)
 	ListUserOrders(ctx context.Context, arg ListUserOrdersParams) ([]Order, error)
 	ReviewOrder(ctx context.Context, arg ReviewOrderParams) error
+	UpdateDeliveryPoint(ctx context.Context, arg UpdateDeliveryPointParams) error
 	UpdateOrderStatus(ctx context.Context, arg UpdateOrderStatusParams) error
 	UpdatePaymentStatus(ctx context.Context, arg UpdatePaymentStatusParams) error
 }

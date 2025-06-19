@@ -22,6 +22,10 @@ func SqlcToProtoSubscriptions(sqlcSubscriptions []sqlc.Subscription) ([]*usersgr
 	protoSubscriptions := make([]*usersgrpc.Subscription, len(sqlcSubscriptions))
 
 	for i, sc := range sqlcSubscriptions {
+		totalDays := int64(sc.Duration.Months)*30 +
+			int64(sc.Duration.Days) +
+			sc.Duration.Microseconds/(24*60*60*OneMillion)
+
 		protoSubscriptions[i] = &usersgrpc.Subscription{
 			Id:          sc.ID,
 			Title:       sc.Title,
@@ -30,7 +34,7 @@ func SqlcToProtoSubscriptions(sqlcSubscriptions []sqlc.Subscription) ([]*usersgr
 				Value:           sc.Amount,
 				CurrencyIsoCode: sc.CurrencyIsoCode,
 			},
-			Duration: sc.Duration.Microseconds / (24 * 60 * 60 * OneMillion),
+			Duration: totalDays,
 		}
 	}
 	return protoSubscriptions, nil
@@ -58,17 +62,64 @@ func SqlcToProtoFarmers(sqlcFarmers []sqlc.ListFarmersByRatingRow) ([]*usersgrpc
 	protoFarmers := make([]*usersgrpc.FarmerWithRating, len(sqlcFarmers))
 
 	for i, sf := range sqlcFarmers {
+		var status usersgrpc.UserStatus
+
+		switch sf.UserStatus {
+		case usersgrpc.UserStatus_UserStatus_ACTIVE.String():
+			status = usersgrpc.UserStatus_UserStatus_ACTIVE
+		case usersgrpc.UserStatus_UserStatus_SUSPENDED.String():
+			status = usersgrpc.UserStatus_UserStatus_SUSPENDED
+		default:
+			status = usersgrpc.UserStatus_UserStatus_UNSPECIFIED
+		}
+
 		protoFarmers[i] = &usersgrpc.FarmerWithRating{
 			User: &usersgrpc.User{
 				UserId:       sf.ID,
 				FirstName:    derefString(sf.FirstName),
 				LastName:     derefString(sf.LastName),
 				ProfileImage: derefString(&sf.ProfileImage),
+				Address:      derefString(sf.Address),
+				Email:        derefString(sf.Email),
+				PhoneNumber:  derefString(&sf.PhoneNumber),
 				CreatedAt:    timestamppb.New(sf.CreatedAt.Time),
+				Status:       status,
 			},
 			Rating: sf.AverageRating,
 		}
 	}
 
 	return protoFarmers, nil
+}
+
+func SqlcToProtoUsers(sqlcUsers []sqlc.User) ([]*usersgrpc.User, error) {
+	protoUsers := make([]*usersgrpc.User, 0, len(sqlcUsers))
+
+	for _, su := range sqlcUsers {
+		var status usersgrpc.UserStatus
+
+		switch su.UserStatus {
+		case usersgrpc.UserStatus_UserStatus_ACTIVE.String():
+			status = usersgrpc.UserStatus_UserStatus_ACTIVE
+		case usersgrpc.UserStatus_UserStatus_SUSPENDED.String():
+			status = usersgrpc.UserStatus_UserStatus_SUSPENDED
+		default:
+			status = usersgrpc.UserStatus_UserStatus_UNSPECIFIED
+		}
+
+		protoUsers = append(protoUsers,
+			&usersgrpc.User{
+				UserId:       su.ID,
+				FirstName:    derefString(su.FirstName),
+				LastName:     derefString(su.LastName),
+				ProfileImage: derefString(&su.ProfileImage),
+				Address:      derefString(su.Address),
+				CreatedAt:    timestamppb.New(su.CreatedAt.Time),
+				Email:        derefString(su.Email),
+				PhoneNumber:  derefString(&su.PhoneNumber),
+				Status:       status,
+			})
+	}
+
+	return protoUsers, nil
 }

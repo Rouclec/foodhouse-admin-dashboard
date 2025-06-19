@@ -57,4 +57,4 @@ jobs:
       # The app will not be released without manual action
       - name: Build and Submit
         working-directory: mobile
-        run: eas build --platform android --profile preview-device
+        run: eas build --platform android --profile preview-device --no-wait

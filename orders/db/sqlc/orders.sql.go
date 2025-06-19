@@ -43,7 +43,7 @@ VALUES (
     $10::text,
     $11::bigint
 )
-RETURNING order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity
+RETURNING order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity, dispatched_by
 `
 
 type CreateOrderParams struct {
@@ -92,6 +92,7 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 		&i.PayoutPhoneNumber,
 		&i.DeliveryAddress,
 		&i.Quantity,
+		&i.DispatchedBy,
 	)
 	return i, err
 }
@@ -182,7 +183,7 @@ func (q *Queries) CreatePayment(ctx context.Context, arg CreatePaymentParams) (P
 }
 
 const getOrderByOrderNumber = `-- name: GetOrderByOrderNumber :one
-SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity FROM orders WHERE order_number = $1
+SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity, dispatched_by FROM orders WHERE order_number = $1
 `
 
 func (q *Queries) GetOrderByOrderNumber(ctx context.Context, orderNumber int64) (Order, error) {
@@ -205,8 +206,31 @@ func (q *Queries) GetOrderByOrderNumber(ctx context.Context, orderNumber int64) 
 		&i.PayoutPhoneNumber,
 		&i.DeliveryAddress,
 		&i.Quantity,
+		&i.DispatchedBy,
 	)
 	return i, err
+}
+
+const getOrderStatsBetweenDates = `-- name: GetOrderStatsBetweenDates :one
+SELECT 
+  COUNT(*) AS total_orders
+FROM orders
+WHERE status = ANY($1::TEXT[])
+  AND created_at >= $2::timestamptz
+  AND created_at <= $3::timestamptz
+`
+
+type GetOrderStatsBetweenDatesParams struct {
+	IncludedStatuses []string  `json:"included_statuses"`
+	StartDate        time.Time `json:"start_date"`
+	EndDate          time.Time `json:"end_date"`
+}
+
+func (q *Queries) GetOrderStatsBetweenDates(ctx context.Context, arg GetOrderStatsBetweenDatesParams) (int64, error) {
+	row := q.db.QueryRow(ctx, getOrderStatsBetweenDates, arg.IncludedStatuses, arg.StartDate, arg.EndDate)
+	var total_orders int64
+	err := row.Scan(&total_orders)
+	return total_orders, err
 }
 
 const getOrdersGroupedByDay = `-- name: GetOrdersGroupedByDay :many
@@ -419,8 +443,29 @@ func (q *Queries) GetPaymentById(ctx context.Context, id string) (Payment, error
 	return i, err
 }
 
+const getPaymentStatsBetweenDates = `-- name: GetPaymentStatsBetweenDates :one
+SELECT 
+  COALESCE(SUM(amount_value), 0)::float AS total_value
+FROM payments
+WHERE status = 'PaymentStatus_COMPLETED'
+  AND created_at >= $1::timestamptz
+  AND created_at <= $2::timestamptz
+`
+
+type GetPaymentStatsBetweenDatesParams struct {
+	StartDate time.Time `json:"start_date"`
+	EndDate   time.Time `json:"end_date"`
+}
+
+func (q *Queries) GetPaymentStatsBetweenDates(ctx context.Context, arg GetPaymentStatsBetweenDatesParams) (float64, error) {
+	row := q.db.QueryRow(ctx, getPaymentStatsBetweenDates, arg.StartDate, arg.EndDate)
+	var total_value float64
+	err := row.Scan(&total_value)
+	return total_value, err
+}
+
 const getUserOrderBySecretKey = `-- name: GetUserOrderBySecretKey :one
-SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity FROM orders WHERE secret_key = $1 AND created_by = $2
+SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity, dispatched_by FROM orders WHERE secret_key = $1 AND created_by = $2
 `
 
 type GetUserOrderBySecretKeyParams struct {
@@ -448,12 +493,13 @@ func (q *Queries) GetUserOrderBySecretKey(ctx context.Context, arg GetUserOrderB
 		&i.PayoutPhoneNumber,
 		&i.DeliveryAddress,
 		&i.Quantity,
+		&i.DispatchedBy,
 	)
 	return i, err
 }
 
 const listFarmerOrders = `-- name: ListFarmerOrders :many
-SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity 
+SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity, dispatched_by 
 FROM orders 
 WHERE product_owner = $1 AND 
   (
@@ -465,14 +511,19 @@ WHERE product_owner = $1 AND
     $3::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
     OR created_at < $3::timestamptz
   )
+  AND
+  (
+    $4::TEXT IS NULL OR order_number::TEXT ILIKE '%' || $4 || '%'
+  )
 ORDER BY created_at DESC
-LIMIT $4::int
+LIMIT $5::int
 `
 
 type ListFarmerOrdersParams struct {
 	ProductOwner     *string   `json:"product_owner"`
 	IncludedStatuses []string  `json:"included_statuses"`
 	CreatedBefore    time.Time `json:"created_before"`
+	SearchKey        string    `json:"search_key"`
 	Count            int32     `json:"count"`
 }
 
@@ -481,6 +532,7 @@ func (q *Queries) ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersPara
 		arg.ProductOwner,
 		arg.IncludedStatuses,
 		arg.CreatedBefore,
+		arg.SearchKey,
 		arg.Count,
 	)
 	if err != nil {
@@ -507,6 +559,7 @@ func (q *Queries) ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersPara
 			&i.PayoutPhoneNumber,
 			&i.DeliveryAddress,
 			&i.Quantity,
+			&i.DispatchedBy,
 		); err != nil {
 			return nil, err
 		}
@@ -551,31 +604,38 @@ func (q *Queries) ListOrderAuditLogs(ctx context.Context, orderNumber int64) ([]
 	return items, nil
 }
 
-const listUserOrders = `-- name: ListUserOrders :many
-SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity FROM orders 
-WHERE created_by = $1 AND 
+const listOrders = `-- name: ListOrders :many
+SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity, dispatched_by FROM orders 
+WHERE 
   (
-        $2::TEXT[] IS NULL OR
-        $2::TEXT[] = '{}'::TEXT[] OR
-        status::TEXT  = ANY($2)
+    $1::TEXT[] IS NULL OR
+    $1::TEXT[] = '{}'::TEXT[] OR
+    status::TEXT = ANY($1)
   ) AND 
-  ($3::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at < $3::timestamptz)
+  (
+    $2::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+    OR created_at < $2::timestamptz
+  ) AND
+  (
+    $3::TEXT IS NULL 
+    OR order_number::TEXT ILIKE '%' || $3 || '%'
+  )
 ORDER BY created_at DESC
 LIMIT $4::int
 `
 
-type ListUserOrdersParams struct {
-	CreatedBy        *string   `json:"created_by"`
+type ListOrdersParams struct {
 	IncludedStatuses []string  `json:"included_statuses"`
 	CreatedBefore    time.Time `json:"created_before"`
+	SearchKey        string    `json:"search_key"`
 	Count            int32     `json:"count"`
 }
 
-func (q *Queries) ListUserOrders(ctx context.Context, arg ListUserOrdersParams) ([]Order, error) {
-	rows, err := q.db.Query(ctx, listUserOrders,
-		arg.CreatedBy,
+func (q *Queries) ListOrders(ctx context.Context, arg ListOrdersParams) ([]Order, error) {
+	rows, err := q.db.Query(ctx, listOrders,
 		arg.IncludedStatuses,
 		arg.CreatedBefore,
+		arg.SearchKey,
 		arg.Count,
 	)
 	if err != nil {
@@ -602,6 +662,143 @@ func (q *Queries) ListUserOrders(ctx context.Context, arg ListUserOrdersParams) 
 			&i.PayoutPhoneNumber,
 			&i.DeliveryAddress,
 			&i.Quantity,
+			&i.DispatchedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listPayments = `-- name: ListPayments :many
+SELECT id, status, payment_entity, entity_id, amount_value, amount_currency, created_by, expires_at, created_at, updated_at, method, account_number FROM payments 
+WHERE
+  ( $1::TEXT = 'PaymentStatus_UNSPECIFIED' OR (status = $1::TEXT) ) 
+  AND  
+  ( $2::TEXT = 'PaymentEntity_UNSPECIFIED' OR (payment_entity = $2::TEXT) ) 
+  AND  
+  (
+    $3::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+    OR created_at < $3::timestamptz
+  ) AND
+  (
+    $4::TEXT IS NULL OR account_number ILIKE '%' || $4 || '%'
+  )
+ORDER BY created_at DESC
+LIMIT $5::int
+`
+
+type ListPaymentsParams struct {
+	PaymentStatus string    `json:"payment_status"`
+	PaymentEntity string    `json:"payment_entity"`
+	CreatedBefore time.Time `json:"created_before"`
+	SearchKey     string    `json:"search_key"`
+	Count         int32     `json:"count"`
+}
+
+func (q *Queries) ListPayments(ctx context.Context, arg ListPaymentsParams) ([]Payment, error) {
+	rows, err := q.db.Query(ctx, listPayments,
+		arg.PaymentStatus,
+		arg.PaymentEntity,
+		arg.CreatedBefore,
+		arg.SearchKey,
+		arg.Count,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Payment{}
+	for rows.Next() {
+		var i Payment
+		if err := rows.Scan(
+			&i.ID,
+			&i.Status,
+			&i.PaymentEntity,
+			&i.EntityID,
+			&i.AmountValue,
+			&i.AmountCurrency,
+			&i.CreatedBy,
+			&i.ExpiresAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Method,
+			&i.AccountNumber,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listUserOrders = `-- name: ListUserOrders :many
+SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity, dispatched_by FROM orders 
+WHERE created_by = $1 AND 
+  (
+    $2::TEXT[] IS NULL OR
+    $2::TEXT[] = '{}'::TEXT[] OR
+    status::TEXT = ANY($2)
+  ) AND 
+  (
+    $3::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+    OR created_at < $3::timestamptz
+  ) AND
+  (
+    $4::TEXT IS NULL OR order_number::TEXT ILIKE '%' || $4 || '%'
+  )
+ORDER BY created_at DESC
+LIMIT $5::int
+`
+
+type ListUserOrdersParams struct {
+	CreatedBy        *string   `json:"created_by"`
+	IncludedStatuses []string  `json:"included_statuses"`
+	CreatedBefore    time.Time `json:"created_before"`
+	SearchKey        string    `json:"search_key"`
+	Count            int32     `json:"count"`
+}
+
+func (q *Queries) ListUserOrders(ctx context.Context, arg ListUserOrdersParams) ([]Order, error) {
+	rows, err := q.db.Query(ctx, listUserOrders,
+		arg.CreatedBy,
+		arg.IncludedStatuses,
+		arg.CreatedBefore,
+		arg.SearchKey,
+		arg.Count,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Order{}
+	for rows.Next() {
+		var i Order
+		if err := rows.Scan(
+			&i.OrderNumber,
+			&i.DeliveryLocation,
+			&i.PriceValue,
+			&i.PriceCurrency,
+			&i.Status,
+			&i.Rating,
+			&i.Review,
+			&i.Product,
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.SecretKey,
+			&i.ProductOwner,
+			&i.PayoutPhoneNumber,
+			&i.DeliveryAddress,
+			&i.Quantity,
+			&i.DispatchedBy,
 		); err != nil {
 			return nil, err
 		}
@@ -629,16 +826,22 @@ func (q *Queries) ReviewOrder(ctx context.Context, arg ReviewOrderParams) error 
 }
 
 const updateOrderStatus = `-- name: UpdateOrderStatus :exec
-UPDATE orders SET status = $2, updated_at = now() WHERE order_number = $1
+UPDATE orders
+SET
+  status = $2,
+  updated_at = now(),
+  dispatched_by = COALESCE($3, dispatched_by)
+WHERE order_number = $1
 `
 
 type UpdateOrderStatusParams struct {
-	OrderNumber int64  `json:"order_number"`
-	Status      string `json:"status"`
+	OrderNumber  int64   `json:"order_number"`
+	Status       string  `json:"status"`
+	DispatchedBy *string `json:"dispatched_by"`
 }
 
 func (q *Queries) UpdateOrderStatus(ctx context.Context, arg UpdateOrderStatusParams) error {
-	_, err := q.db.Exec(ctx, updateOrderStatus, arg.OrderNumber, arg.Status)
+	_, err := q.db.Exec(ctx, updateOrderStatus, arg.OrderNumber, arg.Status, arg.DispatchedBy)
 	return err
 }
 

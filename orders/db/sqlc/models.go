@@ -34,6 +34,7 @@ type Order struct {
 	PayoutPhoneNumber *string            `json:"payout_phone_number"`
 	DeliveryAddress   string             `json:"delivery_address"`
 	Quantity          *int64             `json:"quantity"`
+	DispatchedBy      *string            `json:"dispatched_by"`
 }
 
 type OrdersAudit struct {
