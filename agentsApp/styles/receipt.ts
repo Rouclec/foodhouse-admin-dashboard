@@ -1,5 +1,6 @@
-import { StyleSheet } from "react-native";
 
+import { Colors } from "@/constants";
+import { StyleSheet } from "react-native";
 export const receiptStyles = StyleSheet.create({
   scrollContainer: {
     padding: 20,
@@ -12,98 +13,84 @@ export const receiptStyles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: '#2e7d32', // Dark green
+    color: Colors.primary[500],
     marginBottom: 8,
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#757575', // Medium gray
+   
     lineHeight: 20,
   },
   formContainer: {
     backgroundColor: '#ffffff',
-    borderRadius: 8,
-    padding: 20,
+    borderRadius: 12,
+    padding: 24,
     marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#c8e6c9', // Light green border
+    borderWidth: 1.2,
+    borderColor: Colors.primary[500],
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
   },
   formTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
-    color: '#2e7d32', // Dark green
-    marginBottom: 20,
+    color: Colors.primary[500],
+    marginBottom: 24,
     textAlign: "center",
   },
   section: {
     marginBottom: 25,
-    padding: 12,
-    backgroundColor: '#f5f5f5', // Light gray background
-    borderRadius: 6,
-    borderLeftWidth: 4,
-    borderLeftColor: '#81c784', // Medium green accent border
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: '#2e7d32', // Dark green
+    color: Colors.primary[500],
     marginBottom: 12,
   },
-//   detailItem: {
-//     marginBottom: 15,
-//     flex:1,
-//   },
-detailItem: {
-  marginBottom: 15,
-  flexDirection: 'column',
-  justifyContent: 'space-between'
-},
+  detailItem: {
+    marginBottom: 12,
+  },
   detailLabel: {
     fontSize: 15,
-    fontWeight: "bold",
-    color: '#212121', // Dark text
-    marginBottom: 5,
+    fontWeight: "600",
+    color: '#424242',
+    marginBottom: 2,
   },
   detailValue: {
     fontSize: 15,
-    color: '#424242', // Slightly lighter dark text
-    marginLeft: 10,
+    color: '#212121',
+    marginLeft: 0,
   },
   detailRow: {
-    flexDirection: "row",
-    marginBottom: 5,
-    alignItems: "flex-start",
-    padding:20,
+    flexDirection: "column",
+    marginBottom: 10,
   },
   uploadSection: {
     alignItems: "center",
     marginTop: 20,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#c8e6c9', // Light green border
+    
     borderRadius: 8,
-    backgroundColor: '#f5f5f5', // Light gray background
+   
   },
   uploadButton: {
-    backgroundColor: '#2e7d32', // Dark green
-    borderRadius: 6,
-    paddingVertical: 12,
+    backgroundColor: '#2e7d32',
+    borderRadius: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
     width: "100%",
-    marginBottom: 12,
   },
   uploadButtonText: {
-    color: '#ffffff', // White
+    color: '#ffffff',
     fontSize: 16,
     fontWeight: "bold",
-  },
-  uploadNote: {
-    fontSize: 14,
-    color: '#757575', // Medium gray
     textAlign: "center",
   },
 });

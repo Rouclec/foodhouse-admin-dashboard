@@ -23,6 +23,7 @@ import { Chase } from "react-native-animated-spinkit";
 import { Colors } from "@/constants";
 import { formatAmount } from "@/utils/amountFormater";
 import { usersGetPublicUserOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
+import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
 
 export default function OrderDetails() {
   const router = useRouter();
@@ -34,7 +35,6 @@ export default function OrderDetails() {
     data: orderDetails,
     isLoading: isOrderDetailsLoading,
     isError: errorLoadingOrder,
-    refetch,
   } = useQuery({
     ...ordersGetOrderDetailsOptions({
       path: {
@@ -43,6 +43,17 @@ export default function OrderDetails() {
       },
     }),
     enabled: !!orderNumber,
+  });
+
+  const {
+    data: productData,
+  } = useQuery({
+    ...productsGetProductOptions({
+      path: {
+        productId: orderDetails?.order?.product ?? "",
+      },
+    }),
+    enabled: !!orderDetails?.order,
   });
 
   // Fetch buyer details
@@ -174,12 +185,10 @@ export default function OrderDetails() {
           </Appbar.Header>
           
           <View style={defaultStyles.card}>
-            {seller?.productImage && (
-              <Image
-                source={{ uri: seller.productImage }}
-                style={styles.productImage}
-              />
-            )}
+           <Image
+              source={{ uri: productData?.product?.image }}
+              style={styles.productImage}
+            />
             <View style={styles.orderDetailsContainer}>
               <Text style={styles.leftText}>
                 {i18n.t("(farmer).order-details.orderNumber")}:{" "}
@@ -187,9 +196,9 @@ export default function OrderDetails() {
                   {orderDetails?.order?.orderNumber}
                 </Text>
               </Text>
-              <Text variant="titleMedium">
-                {seller?.item?.title || ""}
-              </Text>
+              
+                <Text variant="titleMedium">{productData?.product?.name}</Text>
+              
               <View style={styles.centerRow}>
                 <Text variant="titleSmall" style={styles.primaryText}>
                   {orderDetails?.order?.price?.currencyIsocode}{" "}
@@ -255,7 +264,7 @@ export default function OrderDetails() {
           onPress={handleViewReceipt}
         >
           <Text style={defaultStyles.buttonText}>
-            Accept Dispatch
+            Continue 
           </Text>
         </Button>
       </View>
