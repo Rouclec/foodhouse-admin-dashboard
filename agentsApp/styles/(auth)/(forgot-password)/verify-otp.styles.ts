@@ -38,6 +38,6 @@ export const forgotPasswordVerifyOtpStyles = StyleSheet.create({
     color: Colors.primary[500],
   },
   text: {
-    color: Colors.dark[0],
+    color: Colors.primary[0],
   },
 });

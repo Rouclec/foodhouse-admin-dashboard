@@ -9,12 +9,9 @@ import {
 import {
   Appbar,
   Button,
-  Dialog,
   Icon,
-  Portal,
   Snackbar,
   Text,
-  TextInput,
 } from "react-native-paper";
 import { defaultStyles, orderDetailsStyles as styles } from "@/styles";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -48,6 +45,7 @@ export default function OrderDetails() {
     enabled: !!orderNumber,
   });
 
+  // Fetch buyer details
   const { data: buyer } = useQuery({
     ...usersGetPublicUserOptions({
       path: {
@@ -57,7 +55,34 @@ export default function OrderDetails() {
     enabled: !!orderDetails?.order?.createdBy,
   });
 
-  if (isOrderDetailsLoading) {
+  // Fetch seller (product owner) details
+  const { data: seller, isLoading: isSellerLoading } = useQuery({
+    ...usersGetPublicUserOptions({
+      path: {
+        userId: orderDetails?.order?.productOwner ?? "",
+      },
+    }),
+    enabled: !!orderDetails?.order?.productOwner,
+  });
+
+  const handleViewReceipt = () => {
+    router.push({
+      pathname: "/receipt",
+      params: { 
+        orderNumber: orderNumber as string,
+        productName: seller?.productName,
+        productImage: seller?.productImage,
+        sellerName: seller?.name,
+        buyerName: buyer?.name,
+        amount: orderDetails?.order?.price?.value,
+        currency: orderDetails?.order?.price?.currencyIsocode,
+        quantity: orderDetails?.order?.quantity,
+        deliveryAddress: orderDetails?.order?.deliveryLocation?.address
+      }
+    });
+  };
+
+  if (isOrderDetailsLoading || isSellerLoading) {
     return (
       <KeyboardAvoidingView
         style={defaultStyles.container}
@@ -149,9 +174,9 @@ export default function OrderDetails() {
           </Appbar.Header>
           
           <View style={defaultStyles.card}>
-            {orderDetails?.order?.productImage && (
+            {seller?.productImage && (
               <Image
-                source={{ uri: orderDetails.order.productImage }}
+                source={{ uri: seller.productImage }}
                 style={styles.productImage}
               />
             )}
@@ -162,12 +187,14 @@ export default function OrderDetails() {
                   {orderDetails?.order?.orderNumber}
                 </Text>
               </Text>
-              <Text variant="titleMedium">{orderDetails?.order?.productName}</Text>
+              <Text variant="titleMedium">
+                {seller?.item?.title || ""}
+              </Text>
               <View style={styles.centerRow}>
                 <Text variant="titleSmall" style={styles.primaryText}>
-                  {orderDetails?.order?.price?.currencyIsoCode}{" "}
+                  {orderDetails?.order?.price?.currencyIsocode}{" "}
                   {formatAmount(
-                    orderDetails?.order?.totalAmount?.toString() ?? "",
+                    orderDetails?.order?.price?.value?.toString() ?? "",
                     { decimalPlaces: 2 }
                   )}
                 </Text>
@@ -190,7 +217,7 @@ export default function OrderDetails() {
                   {i18n.t("(farmer).order-details.customersName")}
                 </Text>
                 <Text variant="titleMedium" style={styles.rightText}>
-                  {buyer?.name || "N/A"}
+                  {buyer?.name || " "}
                 </Text>
               </View>
               <View style={styles.listItem}>
@@ -203,18 +230,10 @@ export default function OrderDetails() {
               </View>
               <View style={styles.listItem}>
                 <Text variant="titleSmall" style={styles.leftText}>
-                  {i18n.t("(farmer).order-details.status")}
+                  Created Date
                 </Text>
                 <Text variant="titleMedium" style={styles.rightText}>
-                  {orderDetails?.order?.status}
-                </Text>
-              </View>
-              <View style={styles.listItem}>
-                <Text variant="titleSmall" style={styles.leftText}>
-                  {i18n.t("(farmer).order-details.orderDate")}
-                </Text>
-                <Text variant="titleMedium" style={styles.rightText}>
-                  {new Date(orderDetails?.order?.orderDate ?? "").toLocaleDateString()}
+                  {new Date(orderDetails?.order?.createdAt ?? "").toLocaleDateString()}
                 </Text>
               </View>
               <View style={styles.listItem}>
@@ -222,13 +241,24 @@ export default function OrderDetails() {
                   {i18n.t("(farmer).order-details.deliveryAddress")}
                 </Text>
                 <Text variant="titleMedium" style={styles.rightText}>
-                  {orderDetails?.order?.deliveryAddress || "N/A"}
+                  {orderDetails?.order?.deliveryLocation?.address ?? ""}
                 </Text>
               </View>
             </View>
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
+
+      <View style={defaultStyles.bottomContainerWithContent}>
+        <Button
+          style={defaultStyles.primaryButton}
+          onPress={handleViewReceipt}
+        >
+          <Text style={defaultStyles.buttonText}>
+            Accept Dispatch
+          </Text>
+        </Button>
+      </View>
 
       <Snackbar
         visible={!!error}

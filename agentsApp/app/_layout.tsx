@@ -196,7 +196,7 @@ function RootLayoutNav() {
     dark: false,
     colors: {
       ...DefaultTheme.colors,
-      text: Colors.dark["0"], // Override text color globally
+      text: Colors.primary["0"], // Override text color globally
     },
     fonts: configureFonts({ config: fontConfig }),
   };
@@ -267,7 +267,7 @@ function RootLayoutNav() {
       <Context.Provider value={{ ...contextInfo, ...contextSetters }}>
         <PaperProvider theme={theme}>
           <GestureHandlerRootView style={defaultStyles.flex}>
-            <Stack initialRouteName="index">
+            <Stack initialRouteName="index" screenOptions={{headerShown: false}}>
               <Stack.Screen name="index" options={{ headerShown: false }} />
               <Stack.Screen name="(auth)" options={{ headerShown: false }} />
               <Stack.Screen name="(farmer)" options={{ headerShown: false }} />

@@ -136,7 +136,7 @@ export default function Login() {
               style={loginstyles.backButton}
               // onPress={() => router.replace("/onboarding")}
             >
-              <Icon source="arrow-left" size={24} color={Colors.dark[0]} />
+              <Icon source="arrow-left" size={24} color={Colors.primary[0]} />
             </TouchableOpacity>
 
             <View style={loginstyles.logoCircle}>

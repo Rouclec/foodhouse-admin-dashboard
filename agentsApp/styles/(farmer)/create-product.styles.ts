@@ -53,7 +53,7 @@ export const createProductStyles = StyleSheet.create({
   deleteImageButton: {
     position: "absolute",
     zIndex: 99,
-    backgroundColor: Colors.dark[0.8],
+    backgroundColor: Colors.primary[0.8],
     right: 8,
     top: 8,
     borderRadius: 4,

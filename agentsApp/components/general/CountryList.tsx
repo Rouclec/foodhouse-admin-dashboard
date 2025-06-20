@@ -68,7 +68,7 @@ export const CountryList: FC<Props> = ({
                   setCountryName(undefined);
                 }}
               >
-                <Icon size={24} color={Colors.dark[0]} source={"close"} />
+                <Icon size={24} color={Colors.primary[0]} source={"close"} />
               </TouchableOpacity>
               <TextInput
                 style={styles.searchInput}

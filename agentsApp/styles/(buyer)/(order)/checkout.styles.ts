@@ -35,7 +35,7 @@ export const checkoutStyles = StyleSheet.create({
     height: 32,
     alignItems: "center",
     justifyContent: "center",
-    borderColor: Colors.dark[10],
+    borderColor: Colors.primary[10],
     borderWidth: 1,
     borderRadius: 12,
   },

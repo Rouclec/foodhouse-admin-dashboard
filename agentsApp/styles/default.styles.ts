@@ -36,7 +36,7 @@ export const defaultStyles = StyleSheet.create({
     marginBottom: 14,
   },
   noItems: {
-    color: Colors.dark[10],
+    color: Colors.primary[10],
     fontSize: 24,
     lineHeight: 36,
     fontWeight: "400",

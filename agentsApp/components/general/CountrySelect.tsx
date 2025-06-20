@@ -42,7 +42,7 @@ export const CountrySelect: FC<Props> = ({
   containerStyle,
   countries = allCountries,
   activeColor = Colors.primary[500],
-  iconColor = Colors.dark[0],
+  iconColor = Colors.primary[0],
   labelColor = Colors.grey["61"],
   country,
   valueTextStyle,
