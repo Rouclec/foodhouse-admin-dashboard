@@ -1,0 +1,392 @@
+{
+  "hello": "Hello",
+  "language": "Language",
+  "suggested": "Suggested",
+  "others": "Others",
+  "(auth)": {
+    "index": {
+      "welcomeTo": "Welcome To",
+      "discoverFresh": "Discover fresh local produce and essentials delivered right to your doorstep, while supporting our community of farmers and local sellers who bring their best products to a wider audience.",
+      "continue": "Continue"
+    },
+    "onboarding": {
+      "1": {
+        "title": "Buy Fresh, Buy Cheap",
+        "description": "Enjoy farm-fresh product at affordable prices. We make it easy for you to buy directly from farmers and save on every purchase without compromising on quality"
+      },
+      "2": {
+        "title": "Eat fresh, Grow strong",
+        "description": "Eat Fresh, Grow strong Fuel your body. Our farmers provide nutrient-rich produce that help you stay healthy, supporting a wholesome lifestyle for you and your family."
+      },
+      "3": {
+        "title": "Eat healthy, Live Longer",
+        "description": "Prioritize your health with farm-to-table freshness. Our platform offers healthy, organic food options that promote a longer healthier life. Start your journey to better living today!"
+      },
+      "getStarted": "Get Started",
+      "next": "Next"
+    },
+    "login": {
+      "anUnknownError": "An unknown error occured",
+      "errorParsing": "Error parsing error response: ",
+      "emailRequired": "Email or phone number is required",
+      "invalidEmail": "Please enter a valid email",
+      "passwordRequired": "Password is required",
+      "loginTo": "Log in to your account",
+      "email": "Email or Phone number",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "login": "Login",
+      "orContinueWith": "or continue with",
+      "dontHaveAnAccount": "Don't have an account?",
+      "registerNow": "Register Now"
+    },
+    "verifyOtp": {
+      "verifyNumber": "Verify your phone number",
+      "codeSent": "Code has been sent to",
+      "verify": "verify",
+      "phoneNumberVerified": "Phone Number verified!",
+      "setupProfile": "You can now proceed to setup your Farmer's Profile",
+      "continue": "continue",
+      "resendCode": "Resend code in"
+    },
+    "profile": {
+      "completeRegistration": "Complete Registration",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "address": "Address",
+      "unknownError": "An unknown error occured",
+      "congratulations": "Congratulations",
+      "registrationCompleteMessage": "Your account is ready to use, you will be redirected to the home page in a few seconds"
+    },
+    "variety": {
+      "description": "Welcome to Food House app! Choose Your Variety and explore a wide range of products tailored to your preferences.",
+      "header": "Choose your variety"
+    },
+    "(forgot-password)": {
+      "index": {
+        "forgotPassword": "Forgot Password",
+        "enterYourEmail": "Enter your email to reset your password. We will send you an OTP for verification.",
+        "email": "Email",
+        "enterEmail": "Enter your email",
+        "invalidEmail": "Please enter a valid email",
+        "continue": "Continue",
+        "unknownError": "An unknown error occured"
+      },
+      "verify-otp": {
+        "forgotPassword": "Forgot Password",
+        "aCodeHasBeenSentTo": "A code has been sent to ",
+        "resendCode": "Resend code",
+        "in": "in",
+        "verifyOtp": "Verify otp"
+      },
+      "create-new-password": {
+        "createNewPassword": "Create new password",
+        "password": "Password",
+        "confirmPassword": "Confirm password",
+        "passwordMustBe": "Password must be at least 12 characters",
+        "passwordsDoNot": "Passwords do not match",
+        "continue": "Continue",
+        "yourPasswordHasBeenReset": "Your password has been reset successfully. You will be redirected to the login page in a few seconds.",
+        "unknownError": "An unknown error occured",
+        "passwordReset": "Password Reset!"
+      }
+    },
+    "register": {
+      "createAccount": "Create Account",
+      "registerNewAccount": "Register New Account",
+      "description": "What describes you the best?",
+      "buyer": "Buyer",
+      "seller": "Farmer or Seller",
+      "button": "Next",
+      "havingAccount": "Already have an account?",
+      "login": "Login"
+    },
+    "createAccount": {
+      "farmerAccount": "Create Farmer Account",
+      "buyerAccount": "Create Buyer Account",
+      "createPassword": "Create Password",
+      "createAccount": "Create Account",
+      "enterEmail": "Enter Your Email",
+      "reEnterPassword": "Re-enter your password",
+      "placeholder": "Password must be atleast 12 characters",
+      "passwordMustBe": "Password must be at least 12 characters"
+    },
+    "(subsciption-flow)": {
+      "index": {
+        "heading": "Be a VIP",
+        "subtitle": "Get Unlimited Access",
+        "benefit1": "Enjoy our app without ads and restrictions",
+        "benefit2": "Unlimited Calls with System",
+        "benefit3": "Easy Order Tracking",
+        "button1": "Skip",
+        "button2": "Subscribe Now",
+        "duration1": "1 month",
+        "duration2": "6 Months",
+        "duration3": "12 Months",
+        "description": "Pay once, cancel any time"
+      },
+      "payment-method": {
+        "description": "To proceed, please add your payment methods."
+      },
+      "account": {
+        "heading": "Make Payment",
+        "details": "Enter your phone number to innitiate payment",
+        "button": "Next",
+        "mtn": "MTN mobile money account number",
+        "orange": "Enter your Orange money account Number",
+        "cardDetails": "Mastercard details",
+        "cardNumber": "Enter your card number",
+        "cardholderName": "Holders name",
+        "cvv": "source",
+        "paymentSuccessful": "Payment Successful",
+        "paymentCompleteMessage": "Your payment has been completed successfully",
+        "paymentFailed": "Payment Failed",
+        "paymentFailedMessage": "Your payment did not complete successfully",
+        "instructionMoMo": "Dial *126# to confirm your payment",
+        "instructionOM": "Dial #156# to confirm your payment"
+      }
+    }
+  },
+  "(farmer)": {
+    "create-product": {
+      "addNewProduct": "Add New Product",
+      "cancel": "Cancel",
+      "post": "Post",
+      "productImage": "Product Image",
+      "uploadImage": "Upload an image (.jpg, .png, .jpeg).\nNot more than 10MB",
+      "productCategory": "Product category",
+      "productName": "Product name",
+      "priceType": "Price type",
+      "price": "Price",
+      "unknownError": "An unknown error occured",
+      "pleaseSelectAnImage": "Please select an image for this product",
+      "pleaseEnterAProductName": "Please enter a product name",
+      "pleaseEnterAPriceType": "Please enter a price type",
+      "pleaseSelectACategory": "Please select a category",
+      "pleaseEnterThePrice": "Please enter the product price",
+      "pleaseEnterADescription": "Please enter the product description",
+      "congratulations": "Congratulations",
+      "yourProductHasBeenUploaded": "Your product has been uploaded",
+      "description": "Description"
+    },
+    "(index)": {
+      "index": {
+        "goodMorning": "Good morning",
+        "goodAfternoon": "Good afternoon",
+        "goodEvening": "Good evening",
+        "searchOrder": "Search order",
+        "pending": "Pending",
+        "completed": "Completed",
+        "couldNotLoadProduct": "Could not load product details",
+        "details": "Details",
+        "noOrdersFound": "No orders found"
+      },
+      "my-products": {
+        "myProducts": "My products",
+        "products": "Products",
+        "noProductsFound": "No products found",
+        "searchProducts": "Search products"
+      }
+    },
+    "(profile-flow)": {
+      "profile": {
+        "title": "Account",
+        "heading": "Be A VIP",
+        "description": "Become a VIP and enjoy the app with no restrictions",
+        "button": "Be A VIP",
+        "tab1": "Settings",
+        "tab2": "Share App ",
+        "tab3": "Logout",
+        "tab4": "Invite friends",
+        "confirmation": "Are you sure you want to log out?",
+        "button1": "Cancel",
+        "button2": "Logout"
+      },
+      "(change-password)": {
+        "currentPassword": "Current Password",
+        "enterCurrentPassword": "Enter your Current Password",
+        "newPassword": "New Password",
+        "enterNewPassword": "Enter new password",
+        "confirmPassword": "Confirm New Password",
+        "placeholder": "Confirm new password",
+        "forgotPassword": "Forgot Password",
+        "save": "Save changes"
+      },
+      "(settings)": {
+        "heading": "Settings",
+        "heading1": "Personal Information",
+        "heading2": "Change Password",
+        "heading3": "Language",
+        "heading4": "Contact Us",
+        "heading6": "Terms and conditions",
+        "heading7": "Privacy Policy",
+        "heading8": "About Foodhouse",
+        "heading9": "Delete Account",
+        "english": "English (US)",
+        "french": "French",
+        "header": "Suggested",
+        "language": "Language",
+        "chat": "Chat on Whatsapp",
+        "contactUs": "Contact Us"
+      },
+      "(personal-info)": {
+        "heading": "Personal Information",
+        "fullName": "Full Name",
+        "fullNamePlaceholder": "Enter YOur Full Name",
+        "email": "Email",
+        "emailPlaceholder": "Enter your Email",
+        "address": "Address",
+        "addressPlaceholder": "Enter your Address",
+        "cancel": "Cancel",
+        "save": "Save Changes",
+        "edit": "Edit"
+      }
+    },
+    "order-details": {
+      "orderDetails": "Order Details",
+      "couldNotLoad": "Could not load order details",
+      "approveOrder": "Approve order",
+      "orderNumber": "Order number",
+      "customersName": "Customer's Name",
+      "quantity": "Quantity",
+      "deliveryAddress": "Delivery Address",
+      "unknownError": "An unknown error occured",
+      "congratulations": "Congratulations",
+      "youHaveApproved": "You have approved this order, go ahead and prepare it for delivery"
+    },
+    "sales": {
+      "sales": "Sales",
+      "earnings": "Earnings",
+      "completedOrders": "Completed Orders",
+      "noOrdersFound": "No orders found"
+    }
+  },
+  "(buyer)": {
+    "(index)": {
+      "products": {
+        "products": "Products",
+        "searchProducts": "Search products",
+        "goodMorning": "Good morning",
+        "goodAfternoon": "Good afternoon",
+        "goodEvening": "Good evening",
+        "categories": "Categories",
+        "noProductsFound": "No products found",
+        "all": "All",
+        "filter": "Filter",
+        "priceRange": "Price Range",
+        "ratings": "Ratings",
+        "close": "Close",
+        "apply": "Apply"
+      },
+      "orders": {
+        "myOrders": "My Orders",
+        "searchOrder": "Search order",
+        "noOrdersFound": "No orders found",
+        "writeReview": "Write review",
+        "trackOrder": "Track order",
+        "couldNotLoadProduct": "Could not load product details",
+        "pending": "Pending",
+        "completed": "Completed",
+        "leaveAReview": "Leave a review",
+        "howWasYourProduct": "How was your product?",
+        "pleaseGiveYourRating": "Please give your rating and also your review",
+        "review": "Review",
+        "cancel": "Cancel",
+        "submit": "Submit"
+      },
+      "farmers": {
+        "farmers": "Farmers",
+        "searchFarmers": "Search farmers",
+        "noFarmerFound": "No farmer found",
+        "viewDetails": "View details"
+      }
+    },
+    "product-details": {
+      "couldNotLoad": "Could not load product details",
+      "description": "Description",
+      "farmer": "Farmer",
+      "orderNow": "Order now",
+      "price": "Price"
+    },
+    "(order)": {
+      "index": {
+        "deliveryMethod": "Delivery method",
+        "continue": "Continue",
+        "chooseDeliveryMethod": "Choose how you'd like your order to be delivered",
+        "homeDelivery": "Home Delivery",
+        "deliveredTo": "Delivered to a location of your choice",
+        "pickupPoint": "Pickup Point",
+        "collectFrom": "Collect from a nearby location"
+      },
+      "checkout": {
+        "checkout": "Checkout",
+        "couldNotLoad": "Could not load product details",
+        "order": "Order",
+        "shippingAddress": "Shipping Address",
+        "confirmPayment": "Confirm Payment",
+        "amount": "Amount",
+        "delivery": "Delivery",
+        "transactionCharges": "Transaction charges",
+        "serviceCharges": "Service charges",
+        "total": "Total",
+        "pleaseAcceptPermissions": "Please accept permissions to access your location",
+        "errorGettingLocation": "Error getting location",
+        "currentLocation": "Current location",
+        "unknownError": "An unknown error occured"
+      },
+      "select-pickup-point": {
+        "selectPickupPoint": "Select Pickup Point",
+        "proceedToCheckout": "Proceed to checkout",
+        "enterCity": "Enter your city",
+        "noPickupPointsIn": "No pickup points in",
+        "availablePickup": "Available pickup locations"
+      },
+      "delivery-address": {
+        "deliveryAddress": "Delivery Address",
+        "proceedToCheckout": "Proceed to checkout",
+        "pleaseAcceptPermissions": "Please accept permissions to access your location",
+        "errorGettingLocation": "Error getting location",
+        "addressDetails": "Address Details",
+        "useCurrentLocation": "Use my current location",
+        "enterYourAddress": "Enter your address",
+        "addressHere": "Address here"
+      }
+    },
+    "track-order": {
+      "trackOrder": "Track Order",
+      "orderStatusDetails": "Order Status Details",
+      "couldNotLoad": "Could not load order details",
+      "orderPlaced": "Order placed",
+      "orderConfirmed": "Order confirmed",
+      "orderDispatched": "Order dispatched",
+      "orderDelivered": "Order delivered",
+      "unknownOrderStatus": "Unknown order status",
+      "paymentDone": "Payment done",
+      "farmerReceived": "The farmer has received your order",
+      "orderInTransit": "Your order is now in transit",
+      "orderCompleted": "Order has been deliverd to the delivery location",
+      "unknownState": "The state of this order is unknonw, contact admin for more info",
+      "orderNumber": "Order number"
+    },
+    "farmer-details": {
+      "farmerInformation": "Farmer Information",
+      "products": "Products",
+      "reviews": "Reviews",
+      "noProductsFound": "No products found",
+      "noReviewsYet": "No reviews yet"
+    }
+  },
+  "components": {
+    "Dropdown": {
+      "noData": "No data"
+    },
+    "ImagePicker": {
+      "photoGalery": "Photo Galery",
+      "camera": "Camera",
+      "cancel": "Cancel",
+      "permissionDenied": "Permission Denied",
+      "allowAccessToGallery": "Please allow access to gallery"
+    }
+  }
+}
