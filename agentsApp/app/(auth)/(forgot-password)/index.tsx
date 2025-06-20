@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import {
   View,
   KeyboardAvoidingView,
-  Keyboard,
+  
   Image,
   TouchableOpacity,
   ScrollView,

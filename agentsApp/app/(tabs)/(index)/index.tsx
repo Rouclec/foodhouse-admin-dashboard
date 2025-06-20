@@ -13,12 +13,25 @@ import { Colors } from "@/constants";
 import i18n from "@/i18n";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { ordersGetOrderDetailsOptions } from "@/client/orders.swagger/@tanstack/react-query.gen";
+import { useQuery } from "@tanstack/react-query";
 
 const HOUR_OF_DAY = new Date().getHours();
 
 export default function Orders() {
   const { user } = useContext(Context) as ContextType;
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Fetch user data if userId exists
+  const { data: userData } = useQuery({
+    ...ordersGetOrderDetailsOptions({
+      path: {
+        orderNumber: "",
+        userId: user?.userId ?? "",
+      },
+    }),
+    enabled: !!user,
+  });
 
   return (
     <KeyboardAvoidingView
@@ -70,8 +83,11 @@ export default function Orders() {
 
         {/* Body content */}
         <View style={[defaultStyles.container, { padding: 24 }]}>
-          <Text>Enter verification number</Text>
-          {/* Properly sized search field */}
+          <Text style={{ marginBottom: 8, fontSize: 16 }}>
+            Enter verification number
+          </Text>
+          
+          {/* Search input field */}
           <View style={{ marginBottom: 20 }}>
             <TextInput
               placeholder={i18n.t("(farmer).(index).index.searchOrder")}
@@ -79,7 +95,7 @@ export default function Orders() {
               style={[
                 defaultStyles.input, 
                 { 
-                  height: 48, // Fixed height
+                  height: 48,
                   backgroundColor: Colors.grey["fa"],
                 }
               ]}
@@ -109,19 +125,24 @@ export default function Orders() {
             />
           </View>
 
-         
-
+          {/* Get Details Button */}
           <View style={index1.buttonContainer}>
-        <TouchableOpacity
-          style={[index1.button, index1.buttonbg]}
-          onPress={() => router.replace("/order-details")}
-          activeOpacity={0.8}
-        >
-          <Text style={index1.buttonText}>
-            Get Details
-          </Text>
-        </TouchableOpacity>
-      </View>
+            <TouchableOpacity
+              style={[index1.button, index1.buttonbg]}
+              onPress={() => {
+                if (searchQuery.trim()) {
+                  router.push({
+                    pathname: "/order-details",
+                    params: { orderNumber: searchQuery }
+                  });
+                }
+              }}
+              activeOpacity={0.8}
+              disabled={!searchQuery.trim()}
+            >
+              <Text style={index1.buttonText}>Get Details</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </KeyboardAvoidingView>

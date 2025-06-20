@@ -119,7 +119,7 @@ export default function Profile() {
               <View style={styles.navigateSection}>
                 <TouchableOpacity
                   style={styles.navigationItem}
-                  // onPress={() => router.push("/(farmer)/settings")}
+                   onPress={() => router.push("/(tabs)/settings")}
                 >
                   <View style={styles.navigationContent}>
                     <View style={profileFlowStyles.iconContainer}>

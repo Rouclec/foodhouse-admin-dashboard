@@ -43,6 +43,8 @@ export type ordersgrpcCreateOrderResponse = {
     order?: ordersgrpcOrder;
 };
 
+export type ordersgrpcDeleteDeliveryPointResponse = unknown;
+
 export type ordersgrpcDeliveryPoint = {
     id?: string;
     address?: typesPoint;
@@ -59,6 +61,10 @@ export type ordersgrpcFarmerEarningsData = {
 };
 
 export type ordersgrpcFilterType = 'FilterType_UNSPECIFIED' | 'FilterType_THIS_WEEK' | 'FilterType_THIS_MONTH' | 'FilterType_THIS_YEAR' | 'FilterType_ALL_TIME';
+
+export type ordersgrpcGetAdminStatsResponse = {
+    data?: Array<ordersgrpcStatItem>;
+};
 
 export type ordersgrpcGetFarmerEarningsResponse = {
     data?: Array<ordersgrpcFarmerEarningsData>;
@@ -90,6 +96,16 @@ export type ordersgrpcListFarmerOrdersResponse = {
     nextKey?: string;
 };
 
+export type ordersgrpcListOrdersResponse = {
+    orders?: Array<ordersgrpcOrder>;
+    nextKey?: string;
+};
+
+export type ordersgrpcListPaymentsResponse = {
+    payments?: Array<ordersgrpcPayment>;
+    nextKey?: string;
+};
+
 export type ordersgrpcListUserOrdersResponse = {
     orders?: Array<ordersgrpcOrder>;
     nextKey?: string;
@@ -110,6 +126,7 @@ export type ordersgrpcOrder = {
     productOwner?: string;
     payoutPhoneNumber?: string;
     quantity?: string;
+    dispatchedBy?: string;
 };
 
 export type ordersgrpcOrderAuditLog = {
@@ -144,6 +161,16 @@ export type ordersgrpcPaymentStatus = 'PaymentStatus_UNSPECIFIED' | 'PaymentStat
 
 export type ordersgrpcRejectOrderResponse = unknown;
 
+export type ordersgrpcStatItem = {
+    title?: string;
+    value?: number;
+    change?: number;
+    description?: string;
+    currency?: string;
+};
+
+export type ordersgrpcUpdateDeliveryPointResponse = unknown;
+
 export type OrdersInitiatePaymentBody = {
     paymentEntity?: ordersgrpcPaymentEntity;
     entityId?: string;
@@ -153,6 +180,12 @@ export type OrdersInitiatePaymentBody = {
 
 export type OrdersRejectOrderBody = {
     reason?: string;
+};
+
+export type OrdersUpdateDeliveryPointBody = {
+    address?: typesPoint;
+    city?: string;
+    deliveryPointName?: string;
 };
 
 export type protobufAny = {
@@ -186,6 +219,72 @@ export type OrdersCreateDeliveryPointData = {
 export type OrdersCreateDeliveryPointResponse = (ordersgrpcCreateDeliveryPointResponse);
 
 export type OrdersCreateDeliveryPointError = (rpcStatus);
+
+export type OrdersGetAdminStatsData = {
+    path: {
+        userId: string;
+    };
+};
+
+export type OrdersGetAdminStatsResponse = (ordersgrpcGetAdminStatsResponse);
+
+export type OrdersGetAdminStatsError = (rpcStatus);
+
+export type OrdersListOrdersData = {
+    path: {
+        userId: string;
+    };
+    query?: {
+        count?: number;
+        searchKey?: string;
+        startKey?: string;
+        statuses?: Array<string>;
+    };
+};
+
+export type OrdersListOrdersResponse = (ordersgrpcListOrdersResponse);
+
+export type OrdersListOrdersError = (rpcStatus);
+
+export type OrdersListPaymentsData = {
+    path: {
+        userId: string;
+    };
+    query?: {
+        count?: number;
+        paymentEntity?: 'PaymentEntity_UNSPECIFIED' | 'PaymentEntity_ORDER' | 'PaymentEntity_SUBSCRIPTION';
+        paymentStatus?: 'PaymentStatus_UNSPECIFIED' | 'PaymentStatus_INITIATED' | 'PaymentStatus_COMPLETED' | 'PaymentStatus_FAILED' | 'PaymentStatus_CANCELED';
+        searchKey?: string;
+        startKey?: string;
+    };
+};
+
+export type OrdersListPaymentsResponse = (ordersgrpcListPaymentsResponse);
+
+export type OrdersListPaymentsError = (rpcStatus);
+
+export type OrdersDeleteDeliveryPointData = {
+    path: {
+        id: string;
+        userId: string;
+    };
+};
+
+export type OrdersDeleteDeliveryPointResponse = (ordersgrpcDeleteDeliveryPointResponse);
+
+export type OrdersDeleteDeliveryPointError = (rpcStatus);
+
+export type OrdersUpdateDeliveryPointData = {
+    body: OrdersUpdateDeliveryPointBody;
+    path: {
+        id: string;
+        userId: string;
+    };
+};
+
+export type OrdersUpdateDeliveryPointResponse = (ordersgrpcUpdateDeliveryPointResponse);
+
+export type OrdersUpdateDeliveryPointError = (rpcStatus);
 
 export type OrdersConfirmPaymentData = {
     query?: {
@@ -266,6 +365,7 @@ export type OrdersListFarmerOrdersData = {
     };
     query?: {
         count?: number;
+        searchKey?: string;
         startKey?: string;
         statuses?: Array<string>;
     };
@@ -332,6 +432,7 @@ export type OrdersListUserOrdersData = {
     };
     query?: {
         count?: number;
+        searchKey?: string;
         startKey?: string;
         statuses?: Array<string>;
     };

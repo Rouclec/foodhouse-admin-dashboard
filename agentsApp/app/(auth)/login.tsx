@@ -30,7 +30,7 @@ export default function Login() {
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [userId, setUserId] = useState<string>();
-  const { user, setUser } = useContext(Context) as ContextType;
+  const { setUser } = useContext(Context) as ContextType;
 
   // Fetch user data if userId exists
   const { data: userData } = useQuery({
@@ -50,7 +50,7 @@ export default function Login() {
       if (role === "USER_ROLE_AGENT") {
         router.replace("/(tabs)/(index)");
       } else {
-        // router.replace("/(buyer)/(index)");
+        console.error("not an agent")
       }
     }
   }, [userData]);
