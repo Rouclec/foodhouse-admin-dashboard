@@ -26,10 +26,9 @@ import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/r
 import { defaultStyles, receiptStyles as styles } from "@/styles";
 import { Chase } from "react-native-animated-spinkit";
 import { formatAmount } from "@/utils/amountFormater";
-import * as FileSystem from "expo-file-system";
-import * as MediaLibrary from "expo-media-library";
-import * as IntentLauncher from "expo-intent-launcher";
-import * as WebBrowser from "expo-web-browser";
+import { generateDispatchFormPdf } from "@/components";
+
+
 
 export default function Receipt() {
   const router = useRouter();
@@ -39,6 +38,13 @@ export default function Receipt() {
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [editablePhone, setEditablePhone] = useState("");
 
+  // Helper to get string from string|string[]|undefined safely
+  function asString(value?: string | string[]): string {
+    if (Array.isArray(value)) return value[0] ?? "";
+    return value ?? "";
+  }
+
+  // Read params safely as strings
   const {
     orderNumber,
     productName,
@@ -51,6 +57,17 @@ export default function Receipt() {
     deliveryAddress,
   } = useLocalSearchParams();
 
+  // Safe string values
+  const orderNumberStr = asString(orderNumber);
+  const productNameStr = asString(productName);
+  const sellerphoneNumberStr = asString(sellerphoneNumber);
+  const sellerNameStr = asString(sellerName);
+  const buyerNameStr = asString(buyerName);
+  const amountStr = asString(amount);
+  const currencyStr = asString(currency);
+  const quantityStr = asString(quantity);
+  const deliveryAddressStr = asString(deliveryAddress);
+
   const {
     data: orderDetails,
     isLoading,
@@ -59,10 +76,10 @@ export default function Receipt() {
     ...ordersGetOrderDetailsOptions({
       path: {
         userId: user?.userId ?? "",
-        orderNumber: (orderNumber as string) ?? "",
+        orderNumber: orderNumberStr,
       },
     }),
-    enabled: !!orderNumber,
+    enabled: !!orderNumberStr,
   });
 
   const { data: buyer } = useQuery({
@@ -87,10 +104,10 @@ export default function Receipt() {
   });
 
   useEffect(() => {
-    if (seller?.user?.phoneNumber || sellerphoneNumber) {
-      setEditablePhone(seller?.user?.phoneNumber || sellerphoneNumber);
+    if (seller?.user?.phoneNumber || sellerphoneNumberStr) {
+      setEditablePhone(seller?.user?.phoneNumber || sellerphoneNumberStr);
     }
-  }, [seller?.user?.phoneNumber, sellerphoneNumber]);
+  }, [seller?.user?.phoneNumber, sellerphoneNumberStr]);
 
   const { mutateAsync: dispatchOrder } = useMutation({
     ...ordersDispatchOrderMutation(),
@@ -140,44 +157,37 @@ export default function Receipt() {
     }
   };
 
-  const handleDownloadReceipt = async () => {
+  const handleGenerateReceipt = async () => {
     try {
-      const receiptUrl = `https://your-server.com/receipts/${orderDetails?.order?.orderNumber}.pdf`;
-      const fileName = `dispatch-${orderDetails?.order?.orderNumber}.pdf`;
-      const fileUri = `${FileSystem.documentDirectory}${fileName}`;
-
-      const downloadResumable = FileSystem.createDownloadResumable(
-        receiptUrl,
-        fileUri
-      );
-      const { uri } = await downloadResumable.downloadAsync();
-
-      if (Platform.OS === "android") {
-        const permissions = await MediaLibrary.requestPermissionsAsync();
-        if (permissions.granted) {
-          const asset = await MediaLibrary.createAssetAsync(uri);
-          const album = await MediaLibrary.getAlbumAsync("Download");
-          if (album) {
-            await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
-          } else {
-            await MediaLibrary.createAlbumAsync("Download", asset, false);
-          }
-
-          IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
-            data: asset.uri,
-            flags: 1,
-            type: "application/pdf",
-          });
-        }
-      } else {
-        await WebBrowser.openBrowserAsync(receiptUrl);
-      }
-
-      setSuccessModalVisible(false);
-      router.push("/(tabs)/(index)");
-    } catch (err) {
-      console.error("Download error:", err);
-      alert("Failed to download receipt.");
+      await generateReceiptPdf({
+        orderNumber: orderDetails?.order?.orderNumber || orderNumberStr,
+        product:
+          productData?.product?.name || productNameStr || "Unknown Product",
+        quantity: quantityStr || orderDetails?.order?.quantity?.toString() || "0",
+        amount:
+          (currencyStr ? `${currencyStr} ` : "") +
+          formatAmount(
+            amountStr || orderDetails?.order?.price?.value?.toString() || "0",
+            { decimalPlaces: 2 }
+          ),
+        address:
+          deliveryAddressStr ||
+          orderDetails?.order?.deliveryLocation?.address ||
+          "No Address",
+        sellerName:
+          seller?.user?.firstName && seller?.user?.lastName
+            ? `${seller.user.firstName} ${seller.user.lastName}`
+            : sellerNameStr,
+        sellerPhone: seller?.user?.phoneNumber || sellerphoneNumberStr || "",
+        buyerName:
+          buyer?.user?.firstName && buyer?.user?.lastName
+            ? `${buyer.user.firstName} ${buyer.user.lastName}`
+            : buyerNameStr,
+        buyerPhone: buyer?.user?.phoneNumber || "",
+      });
+    } catch (error) {
+      console.error("Error generating receipt PDF:", error);
+      alert("Failed to generate receipt PDF.");
     }
   };
 
@@ -225,29 +235,34 @@ export default function Receipt() {
             <Text style={styles.sectionTitle}>Order Details</Text>
             <View style={styles.detailItem}>
               <Text style={styles.detailLabel}>
-                Order Number: {orderDetails?.order?.orderNumber || orderNumber}
+                Order Number: {orderDetails?.order?.orderNumber || orderNumberStr}
               </Text>
               <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Product: {productData?.product?.name || productName}</Text>
+                <Text style={styles.detailLabel}>
+                  Product: {productData?.product?.name || productNameStr}
+                </Text>
               </View>
               <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Quantity:  {quantity || orderDetails?.order?.quantity}</Text>
-                
+                <Text style={styles.detailLabel}>
+                  Quantity: {quantityStr || orderDetails?.order?.quantity}
+                </Text>
               </View>
               <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Amount: {currency || orderDetails?.order?.price?.currencyIsocode}{" "}
+                <Text style={styles.detailLabel}>
+                  Amount:{" "}
+                  {currencyStr || orderDetails?.order?.price?.currencyIsocode}{" "}
                   {formatAmount(
-                    amount ||
+                    amountStr ||
                       orderDetails?.order?.price?.value?.toString() ||
                       "0",
                     { decimalPlaces: 2 }
-                  )}</Text>
-               
+                  )}
+                </Text>
               </View>
               <View style={styles.detailRow}>
                 <Text style={styles.detailLabel}>Delivery Address:</Text>
                 <Text style={styles.detailValue}>
-                  {deliveryAddress ||
+                  {deliveryAddressStr ||
                     orderDetails?.order?.deliveryLocation?.address ||
                     " "}
                 </Text>
@@ -258,26 +273,34 @@ export default function Receipt() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Seller</Text>
             <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Name: {seller?.user?.firstName + " " + seller?.user?.lastName ||
-                  sellerName ||
-                  " "}</Text>
-             
+              <Text style={styles.detailLabel}>
+                Name:{" "}
+                {seller?.user?.firstName && seller?.user?.lastName
+                  ? `${seller.user.firstName} ${seller.user.lastName}`
+                  : sellerNameStr || " "}
+              </Text>
             </View>
             <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Phone: {seller?.user?.phoneNumber || sellerphoneNumber || " "}</Text>
-             
+              <Text style={styles.detailLabel}>
+                Phone: {seller?.user?.phoneNumber || sellerphoneNumberStr || " "}
+              </Text>
             </View>
           </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Buyer</Text>
             <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Name: {buyer?.user?.firstName + " " + buyer?.user?.lastName ||
-                  buyerName ||
-                  " "}</Text>
+              <Text style={styles.detailLabel}>
+                Name:{" "}
+                {buyer?.user?.firstName && buyer?.user?.lastName
+                  ? `${buyer.user.firstName} ${buyer.user.lastName}`
+                  : buyerNameStr || " "}
+              </Text>
             </View>
             <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Phone: {buyer?.user?.phoneNumber || " "}</Text>
+              <Text style={styles.detailLabel}>
+                Phone: {buyer?.user?.phoneNumber || " "}
+              </Text>
             </View>
           </View>
         </View>
@@ -291,6 +314,14 @@ export default function Receipt() {
           >
             Confirm Dispatch Slip
           </Button>
+{/* 
+          <Button
+            mode="contained"
+            onPress={handleGenerateReceipt}
+            style={[defaultStyles.button, { marginTop: 12 }]}
+          >
+            Download Receipt
+          </Button> */}
         </View>
       </ScrollView>
 
@@ -331,16 +362,14 @@ export default function Receipt() {
             <Text style={defaultStyles.bodyText}>
               Download the dispatch receipt below.
             </Text>
-            <Button
-              onPress={handleDownloadReceipt}
-              mode="contained"
-              style={{ marginTop: 20 }}
-            >
-              Download Dispatch Form
-            </Button>
+            {/* Optionally, you can put a button here to download or share the receipt again */}
           </Dialog.Content>
         </Dialog>
       </Portal>
     </View>
   );
 }
+function generateReceiptPdf(arg0: { orderNumber: any; product: any; quantity: any; amount: string; address: any; sellerName: string; sellerPhone: any; buyerName: string; buyerPhone: any; }) {
+  throw new Error("Function not implemented.");
+}
+
