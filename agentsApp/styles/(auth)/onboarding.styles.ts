@@ -29,7 +29,7 @@ export const onboardingStyles = StyleSheet.create({
     lineHeight: 42,
     fontWeight: "bold",
     letterSpacing: -0.3,
-    color: Colors.primary[10],
+    color: Colors.dark[10],
     textAlign: "center",
     marginBottom: 12,
   },

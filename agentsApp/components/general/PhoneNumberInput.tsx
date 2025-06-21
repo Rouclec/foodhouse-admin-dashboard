@@ -116,7 +116,7 @@ const PhoneNumberInput: FC<Props> = ({
             <Text style={styles.countryCodeText}>{country?.emoji}</Text>
             <Text style={styles.countryCodeText}>{country?.dial_code}</Text>
 
-            <Icon color={Colors.primary[0]} size={20} source={"chevron-down"} />
+            <Icon color={Colors.dark[0]} size={20} source={"chevron-down"} />
           </View>
         </TouchableOpacity>
 

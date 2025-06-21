@@ -48,7 +48,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
   dropdownStyle,
   inputContainerStyle,
   activeColor = Colors.primary[500],
-  iconColor = Colors.primary[0],
+  iconColor = Colors.dark[0],
   labelColor = Colors.grey["61"],
   valueTextStyle,
   labelTextStyle,
