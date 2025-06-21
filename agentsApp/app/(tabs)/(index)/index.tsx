@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Icon, Text, TextInput } from "react-native-paper";
+import { Button, Icon, Text, TextInput } from "react-native-paper";
 import { Context, ContextType } from "../../_layout";
 import { defaultStyles, index1, farmerIndexStyles as styles } from "@/styles";
 import { Colors } from "@/constants";
@@ -125,10 +125,10 @@ export default function Orders() {
             />
           </View>
 
-          {/* Get Details Button */}
-          <View style={index1.buttonContainer}>
-            <TouchableOpacity
-              style={[index1.button, index1.buttonbg]}
+          
+          <View style={defaultStyles.bottomButtonContainer}>
+            <Button
+              style={defaultStyles.primaryButton}
               onPress={() => {
                 if (searchQuery.trim()) {
                   router.push({
@@ -137,11 +137,11 @@ export default function Orders() {
                   });
                 }
               }}
-              activeOpacity={0.8}
+              
               disabled={!searchQuery.trim()}
             >
-              <Text style={index1.buttonText}>Get Details</Text>
-            </TouchableOpacity>
+              <Text style={defaultStyles.buttonText}>Get Details</Text>
+            </Button>
           </View>
         </View>
       </View>

@@ -18,12 +18,12 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Context, ContextType } from "../_layout";
 import { useQuery } from "@tanstack/react-query";
 import { ordersGetOrderDetailsOptions } from "@/client/orders.swagger/@tanstack/react-query.gen";
-import i18n from "@/i18n";
 import { Chase } from "react-native-animated-spinkit";
 import { Colors } from "@/constants";
 import { formatAmount } from "@/utils/amountFormater";
-import { usersGetPublicUserOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
+import { usersGetUserByIdOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
+import i18n from "@/i18n";
 
 export default function OrderDetails() {
   const router = useRouter();
@@ -45,33 +45,23 @@ export default function OrderDetails() {
     enabled: !!orderNumber,
   });
 
-  const {
-    data: productData,
-  } = useQuery({
+  const { data: productData } = useQuery({
     ...productsGetProductOptions({
-      path: {
-        productId: orderDetails?.order?.product ?? "",
-      },
+      path: { productId: orderDetails?.order?.product ?? "" },
     }),
-    enabled: !!orderDetails?.order,
+    enabled: !!orderDetails?.order?.product,
   });
 
-  // Fetch buyer details
   const { data: buyer } = useQuery({
-    ...usersGetPublicUserOptions({
-      path: {
-        userId: orderDetails?.order?.createdBy ?? "",
-      },
+    ...usersGetUserByIdOptions({
+      path: { userId: orderDetails?.order?.createdBy ?? "" },
     }),
     enabled: !!orderDetails?.order?.createdBy,
   });
 
-  // Fetch seller (product owner) details
   const { data: seller, isLoading: isSellerLoading } = useQuery({
-    ...usersGetPublicUserOptions({
-      path: {
-        userId: orderDetails?.order?.productOwner ?? "",
-      },
+    ...usersGetUserByIdOptions({
+      path: { userId: orderDetails?.order?.productOwner ?? "" },
     }),
     enabled: !!orderDetails?.order?.productOwner,
   });
@@ -79,17 +69,22 @@ export default function OrderDetails() {
   const handleViewReceipt = () => {
     router.push({
       pathname: "/receipt",
-      params: { 
+      params: {
         orderNumber: orderNumber as string,
-        productName: seller?.productName,
-        productImage: seller?.productImage,
-        sellerName: seller?.name,
-        buyerName: buyer?.name,
         amount: orderDetails?.order?.price?.value,
         currency: orderDetails?.order?.price?.currencyIsocode,
         quantity: orderDetails?.order?.quantity,
-        deliveryAddress: orderDetails?.order?.deliveryLocation?.address
-      }
+        deliveryAddress: orderDetails?.order?.deliveryLocation?.address,
+        productName: productData?.product?.name,
+        productImage: productData?.product?.image,
+        sellerName: seller?.user
+          ? `${seller.user.firstName} ${seller.user.lastName}`
+          : "",
+        sellerphoneNumber: seller?.user?.phoneNumber,
+        buyerName: buyer?.user
+          ? `${buyer.user.firstName} ${buyer.user.lastName}`
+          : "",
+      },
     });
   };
 
@@ -183,25 +178,25 @@ export default function OrderDetails() {
             </Text>
             <View />
           </Appbar.Header>
-          
+
           <View style={defaultStyles.card}>
-           <Image
+            <Image
               source={{ uri: productData?.product?.image }}
               style={styles.productImage}
             />
             <View style={styles.orderDetailsContainer}>
               <Text style={styles.leftText}>
-                {i18n.t("(farmer).order-details.orderNumber")}:{" "}
+                {i18n.t("(farmer).order-details.orderNumber")}: {" "}
                 <Text variant="titleMedium" style={styles.rightText}>
                   {orderDetails?.order?.orderNumber}
                 </Text>
               </Text>
-              
-                <Text variant="titleMedium">{productData?.product?.name}</Text>
-              
+
+              <Text variant="titleMedium">{productData?.product?.name}</Text>
+
               <View style={styles.centerRow}>
                 <Text variant="titleSmall" style={styles.primaryText}>
-                  {orderDetails?.order?.price?.currencyIsocode}{" "}
+                  {orderDetails?.order?.price?.currencyIsocode} {" "}
                   {formatAmount(
                     orderDetails?.order?.price?.value?.toString() ?? "",
                     { decimalPlaces: 2 }
@@ -226,7 +221,9 @@ export default function OrderDetails() {
                   {i18n.t("(farmer).order-details.customersName")}
                 </Text>
                 <Text variant="titleMedium" style={styles.rightText}>
-                  {buyer?.name || " "}
+                  {buyer?.user
+                    ? `${buyer.user.firstName} ${buyer.user.lastName}`
+                    : " "}
                 </Text>
               </View>
               <View style={styles.listItem}>
@@ -258,14 +255,9 @@ export default function OrderDetails() {
         </View>
       </KeyboardAvoidingView>
 
-      <View style={defaultStyles.bottomContainerWithContent}>
-        <Button
-          style={defaultStyles.primaryButton}
-          onPress={handleViewReceipt}
-        >
-          <Text style={defaultStyles.buttonText}>
-            Continue 
-          </Text>
+      <View style={defaultStyles.bottomButtonContainer}>
+        <Button style={defaultStyles.primaryButton} onPress={handleViewReceipt}>
+          <Text style={defaultStyles.buttonText}>Continue</Text>
         </Button>
       </View>
 
