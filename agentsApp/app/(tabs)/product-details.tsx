@@ -216,21 +216,7 @@ export default function ProductDetails() {
                 </Text>
               </Text>
             </View>
-            <Button
-              style={[
-                defaultStyles.button,
-                defaultStyles.primaryButton,
-                styles.halfContainer,
-              ]}
-              onPress={() => {
-                setProductId(data?.product?.id);
-                // router.push("/(buyer)/(order)");
-              }}
-            >
-              <Text style={defaultStyles.buttonText}>
-                {i18n.t("(buyer).product-details.orderNow")}
-              </Text>
-            </Button>
+            
           </View>
         </SafeAreaView>
       </View>
