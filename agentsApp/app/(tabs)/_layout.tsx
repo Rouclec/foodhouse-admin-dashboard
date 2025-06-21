@@ -12,6 +12,7 @@ export default function FarmerLayout() {
       <Stack.Screen name="settings" options={{ headerShown: false }} />
       <Stack.Screen name="language" options={{ headerShown: false }} />
       <Stack.Screen name="receipt" options={{ headerShown: false }} />
+       <Stack.Screen name="product-details" options={{ headerShown: false }} />
     </Stack>
   );
 }

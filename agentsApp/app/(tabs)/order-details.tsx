@@ -18,12 +18,12 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Context, ContextType } from "../_layout";
 import { useQuery } from "@tanstack/react-query";
 import { ordersGetOrderDetailsOptions } from "@/client/orders.swagger/@tanstack/react-query.gen";
+import i18n from "@/i18n";
 import { Chase } from "react-native-animated-spinkit";
 import { Colors } from "@/constants";
 import { formatAmount } from "@/utils/amountFormater";
 import { usersGetUserByIdOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
-import i18n from "@/i18n";
 
 export default function OrderDetails() {
   const router = useRouter();
@@ -86,6 +86,15 @@ export default function OrderDetails() {
           : "",
       },
     });
+  };
+
+  const handleNavigateToProduct = () => {
+    if (productData?.product?.id) {
+      router.push({
+        pathname: "/product-details",
+        params: { productId: productData.product.id },
+      });
+    }
   };
 
   if (isOrderDetailsLoading || isSellerLoading) {
@@ -179,7 +188,11 @@ export default function OrderDetails() {
             <View />
           </Appbar.Header>
 
-          <View style={defaultStyles.card}>
+          <TouchableOpacity
+            onPress={handleNavigateToProduct}
+            activeOpacity={0.85}
+            style={defaultStyles.card}
+          >
             <Image
               source={{ uri: productData?.product?.image }}
               style={styles.productImage}
@@ -191,20 +204,21 @@ export default function OrderDetails() {
                   {orderDetails?.order?.orderNumber}
                 </Text>
               </Text>
-
               <Text variant="titleMedium">{productData?.product?.name}</Text>
-
               <View style={styles.centerRow}>
-                <Text variant="titleSmall" style={styles.primaryText}>
-                  {orderDetails?.order?.price?.currencyIsocode} {" "}
+               <Text variant="titleSmall" style={styles.primaryText}>
+                  {orderDetails?.order?.price?.currencyIsoCode}{" "}
                   {formatAmount(
-                    orderDetails?.order?.price?.value?.toString() ?? "",
+                    (
+                      (productData?.product?.amount?.value ?? 0) *
+                      parseInt(orderDetails?.order?.quantity ?? "")
+                    ).toString() ?? "",
                     { decimalPlaces: 2 }
                   )}
                 </Text>
               </View>
             </View>
-          </View>
+          </TouchableOpacity>
 
           <ScrollView
             contentContainerStyle={[
@@ -231,7 +245,10 @@ export default function OrderDetails() {
                   {i18n.t("(farmer).order-details.quantity")}
                 </Text>
                 <Text variant="titleMedium" style={styles.rightText}>
-                  {formatAmount(orderDetails?.order?.quantity ?? "")}
+                  {formatAmount(orderDetails?.order?.quantity ?? "")}{" "}
+                  {(productData?.product?.unitType ?? "").replace("per_", "")}
+                  {(parseInt(orderDetails?.order?.quantity ?? "") ?? 0) > 1 &&
+                    "s"}
                 </Text>
               </View>
               <View style={styles.listItem}>
@@ -255,7 +272,7 @@ export default function OrderDetails() {
         </View>
       </KeyboardAvoidingView>
 
-      <View style={defaultStyles.bottomButtonContainer}>
+      <View style={defaultStyles.bottomContainerWithContent}>
         <Button style={defaultStyles.primaryButton} onPress={handleViewReceipt}>
           <Text style={defaultStyles.buttonText}>Continue</Text>
         </Button>

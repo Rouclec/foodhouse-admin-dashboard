@@ -68,7 +68,7 @@ export default function ProductDetails() {
               onPress={() => router.back()}
               style={defaultStyles.backButtonContainer}
             >
-              <Icon source={"arrow-left"} size={24} color={Colors.primary[0]} />
+              <Icon source={"arrow-left"} size={24} color={Colors.dark[0]} />
             </TouchableOpacity>
             <View />
           </Appbar.Header>
@@ -102,7 +102,7 @@ export default function ProductDetails() {
               onPress={() => router.back()}
               style={defaultStyles.backButtonContainer}
             >
-              <Icon source={"arrow-left"} size={24} color={Colors.primary[0]} />
+              <Icon source={"arrow-left"} size={24} color={Colors.dark[0]} />
             </TouchableOpacity>
             <View />
           </Appbar.Header>
@@ -212,7 +212,7 @@ export default function ProductDetails() {
                 })}
                 <Text style={styles.greyText}>
                   {" "}
-                  {data?.product?.unitType?.slug?.replace("per_", "/")}
+                  {data?.product?.unitType?.replace("per_", "/")}
                 </Text>
               </Text>
             </View>
