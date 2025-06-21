@@ -1,304 +1,363 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import {
   View,
-  Text,
-  TouchableOpacity,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
+  TouchableOpacity,
+  TextInput,
+  Image,
 } from "react-native";
-import { Icon, Snackbar, TextInput } from "react-native-paper";
-import { Link, router } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import {
-  usersAuthenticateMutation,
-  usersGetUserByIdOptions,
-} from "@/client/users.swagger/@tanstack/react-query.gen";
+  Appbar,
+  Text,
+  Button,
+  Dialog,
+  Portal,
+} from "react-native-paper";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Context, ContextType } from "../_layout";
-import { defaultStyles, loginstyles } from "@/styles";
-import { Colors } from "@/constants";
-import i18n from "@/i18n";
-import { delay, storeData, updateAuthHeader } from "@/utils";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import {
+  ordersGetOrderDetailsOptions,
+  ordersDispatchOrderMutation,
+} from "@/client/orders.swagger/@tanstack/react-query.gen";
+import { usersGetUserByIdOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
+import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
+import { defaultStyles, receiptStyles as styles } from "@/styles";
+import { Chase } from "react-native-animated-spinkit";
+import { formatAmount } from "@/utils/amountFormater";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
 
-export default function Login() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [fields, setFields] = useState({ email: "", password: "" });
-  const [errors, setErrors] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [userId, setUserId] = useState<string>();
-  const { setUser } = useContext(Context) as ContextType;
+export default function Receipt() {
+  const router = useRouter();
+  const { user } = useContext(Context) as ContextType;
 
-  // Fetch user data if userId exists
-  const { data: userData } = useQuery({
-    ...usersGetUserByIdOptions({
+  const {
+    orderNumber,
+    productName,
+    sellerphoneNumber,
+    sellerName,
+    buyerName,
+    amount,
+    currency,
+    quantity,
+    deliveryAddress,
+  } = useLocalSearchParams();
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [editablePhone, setEditablePhone] = useState("");
+
+  const {
+    data: orderDetails,
+    isLoading,
+    isError,
+  } = useQuery({
+    ...ordersGetOrderDetailsOptions({
       path: {
-        userId: userId ?? "",
+        userId: user?.userId ?? "",
+        orderNumber: (orderNumber as string) ?? "",
       },
     }),
-    enabled: !!userId,
+    enabled: !!orderNumber,
+  });
+
+  const { data: buyer } = useQuery({
+    ...usersGetUserByIdOptions({
+      path: { userId: orderDetails?.order?.createdBy ?? "" },
+    }),
+    enabled: !!orderDetails?.order?.createdBy,
+  });
+
+  const { data: seller } = useQuery({
+    ...usersGetUserByIdOptions({
+      path: { userId: orderDetails?.order?.productOwner ?? "" },
+    }),
+    enabled: !!orderDetails?.order?.productOwner,
+  });
+
+  const { data: productData } = useQuery({
+    ...productsGetProductOptions({
+      path: { productId: orderDetails?.order?.product ?? "" },
+    }),
+    enabled: !!orderDetails?.order?.product,
   });
 
   useEffect(() => {
-    if (userData?.user) {
-      setUser(userData.user);
-      const role = userData?.user?.role;
-
-      if (role === "USER_ROLE_AGENT") {
-        router.replace("/(tabs)/(index)");
-      } else {
-        console.error("not an agent")
-      }
+    if (seller?.user?.phoneNumber || sellerphoneNumber) {
+      setEditablePhone(seller?.user?.phoneNumber || sellerphoneNumber);
     }
-  }, [userData]);
+  }, [seller, sellerphoneNumber]);
 
-  const { mutateAsync: authenticate } = useMutation({
-    ...usersAuthenticateMutation(),
-    onError: async (error) => {
-      setErrorMessage(
-        error?.response?.data?.message ?? i18n.t("(auth).login.anUnknownError")
-      );
-      setError(true);
-      await delay(5000);
-      setError(false);
+  const { mutateAsync: dispatchOrder } = useMutation({
+    ...ordersDispatchOrderMutation(),
+    onError: (err) => {
+      console.error("Dispatch error:", err);
     },
-    onSuccess: async (data) => {
-      try {
-        updateAuthHeader(data?.tokens?.accessToken ?? "");
-        await storeData("@refreshToken", data?.tokens?.refreshToken);
-        storeData("@userId", data?.userId);
-        setUserId(data?.userId ?? "");
-      } catch (err) {
-        console.error("Error handling login success:", err);
-      }
+    onSuccess: () => {
+      setModalVisible(false);
+      setSuccessModalVisible(true);
     },
   });
 
-  const handleInputChange = (name: string, value: string) => {
-    setFields({ ...fields, [name]: value });
-    setErrors({ ...errors, [name]: "" });
+  const handleUploadSlip = () => setModalVisible(true);
+
+  const handleConfirmDispatch = async () => {
+    if (!editablePhone) return;
+
+    await dispatchOrder({
+      path: {
+        orderNumber: orderNumber as string,
+        userId: user?.userId ?? "",
+      },
+      body: {
+        payoutPhoneNumber: editablePhone,
+      },
+    });
   };
 
-  const validateFields = () => {
-    const newErrors = { email: "", password: "" };
-    let isValid = true;
-
-    if (!fields.email.trim()) {
-      newErrors.email = i18n.t("(auth).login.emailRequired");
-      isValid = false;
-    }
-
-    if (!fields.password.trim()) {
-      newErrors.password = i18n.t("(auth).login.passwordRequired");
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
-  };
-
-  const handleLogIn = async () => {
-    if (!validateFields()) return;
-
+  const handleDownloadReceipt = async () => {
     try {
-      setLoading(true);
-      await authenticate({
-        body: {
-          factors: [
-            {
-              type: "FACTOR_TYPE_EMAIL_PHONE_PASSWORD",
-              id: fields.email,
-              secretValue: fields.password,
-            },
-          ],
-        },
-      });
+      const receiptUrl = `https://your-server.com/receipts/${orderDetails?.order?.orderNumber}.pdf`;
+      const fileUri =
+        FileSystem.documentDirectory +
+        `dispatch-${orderDetails?.order?.orderNumber}.pdf`;
+
+      const downloadResumable = FileSystem.createDownloadResumable(
+        receiptUrl,
+        fileUri
+      );
+      const { uri } = await downloadResumable.downloadAsync();
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri);
+      }
+
+      setSuccessModalVisible(false);
+      router.push("/(tabs)/(index)");
     } catch (err) {
-      console.warn(err);
-    } finally {
-      setLoading(false);
+      console.error("Download error:", err);
     }
   };
+
+  if (isLoading) {
+    return (
+      <View style={defaultStyles.container}>
+        <Appbar.Header dark={false} style={defaultStyles.appHeader}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={defaultStyles.backButtonContainer}
+          >
+            <Appbar.BackAction color="#000000" />
+          </TouchableOpacity>
+          <Text variant="titleMedium" style={defaultStyles.heading}>
+            Dispatch Receipt
+          </Text>
+          <View />
+        </Appbar.Header>
+        <View style={[defaultStyles.center, defaultStyles.notFoundContainer]}>
+          <Chase size={56} color="#2e7d32" />
+        </View>
+      </View>
+    );
+  }
+
+  if (isError) {
+    return (
+      <View style={defaultStyles.container}>
+        <Appbar.Header dark={false} style={defaultStyles.appHeader}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={defaultStyles.backButtonContainer}
+          >
+            <Appbar.BackAction color="#000000" />
+          </TouchableOpacity>
+          <Text variant="titleMedium" style={defaultStyles.heading}>
+            Dispatch Receipt
+          </Text>
+          <View />
+        </Appbar.Header>
+        <View style={[defaultStyles.center, defaultStyles.notFoundContainer]}>
+          <Text>Could not load receipt details</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
-    <>
-      <KeyboardAvoidingView
-        style={loginstyles.container}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
-      >
-        <View style={loginstyles.container}>
-          <View style={loginstyles.header}>
-            <TouchableOpacity
-              style={loginstyles.backButton}
-              // onPress={() => router.replace("/onboarding")}
-            >
-              <Icon source="arrow-left" size={24} color={Colors.primary[0]} />
-            </TouchableOpacity>
+    <View style={defaultStyles.container}>
+      <Appbar.Header dark={false} style={defaultStyles.appHeader}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={defaultStyles.backButtonContainer}
+        >
+          <Appbar.BackAction color="#000000" />
+        </TouchableOpacity>
+        <Text variant="titleMedium" style={defaultStyles.heading}>
+          Dispatch Receipt
+        </Text>
+        <View />
+      </Appbar.Header>
 
-            <View style={loginstyles.logoCircle}>
-              <Text style={loginstyles.logoText}>Food House</Text>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {/* Header */}
+        <View style={styles.headerSection}>
+          <Text style={styles.headerTitle}>Dispatch via Transport Agency</Text>
+          <Text style={styles.headerSubtitle}>
+            Upload the dispatch slip provided by the transport agency. Once
+            submitted, the order will be marked as dispatched.
+          </Text>
+        </View>
+
+        {/* Dispatch Form */}
+        <View style={styles.formContainer}>
+          <Text style={styles.formTitle}>Foodhouse Dispatched Form</Text>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Order Details</Text>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>
+                Order Number: {orderDetails?.order?.orderNumber || orderNumber}
+              </Text>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Product:</Text>
+                <Text style={styles.detailValue}>
+                  {productData?.product?.name || productName}
+                </Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Quantity:</Text>
+                <Text style={styles.detailValue}>
+                  {quantity || orderDetails?.order?.quantity}
+                </Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Amount:</Text>
+                <Text style={styles.detailValue}>
+                  {currency || orderDetails?.order?.price?.currencyIsocode}{" "}
+                  {formatAmount(
+                    amount ||
+                      orderDetails?.order?.price?.value?.toString() ||
+                      "0",
+                    { decimalPlaces: 2 }
+                  )}
+                </Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Delivery Address:</Text>
+                <Text style={styles.detailValue}>
+                  {deliveryAddress ||
+                    orderDetails?.order?.deliveryLocation?.address ||
+                    "N/A"}
+                </Text>
+              </View>
             </View>
           </View>
-          <ScrollView
-            contentContainerStyle={defaultStyles.scrollContainer}
-            showsVerticalScrollIndicator={false}
-            nestedScrollEnabled={true}
-            keyboardShouldPersistTaps="handled"
-          >
-            <View style={loginstyles.content}>
-              <Text style={loginstyles.loginTitle}>
-                {i18n.t("(auth).login.loginTo")}
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Seller</Text>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Name</Text>
+              <Text style={styles.detailValue}>
+                {seller?.user?.firstName + " " + seller?.user?.lastName ||
+                  sellerName ||
+                  "N/A"}
               </Text>
-
-              <TextInput
-                mode="outlined"
-                label={i18n.t("(auth).login.email")}
-                value={fields.email}
-                autoCapitalize="none"
-                onChangeText={(text) => handleInputChange("email", text)}
-                error={!!errors.email}
-                style={loginstyles.input}
-                theme={{
-                  colors: {
-                    primary: Colors.primary[500],
-                    background: Colors.grey["fa"],
-                    error: Colors.error,
-                  },
-                  roundness: 10,
-                }}
-                outlineColor={Colors.grey["bg"]}
-                left={
-                  <TextInput.Icon
-                    icon="account-outline"
-                    color={Colors.grey["61"]}
-                    size={20}
-                  />
-                }
-              />
-              {errors.email ? (
-                <Text style={loginstyles.errorText}>{errors.email}</Text>
-              ) : null}
-
-              <TextInput
-                mode="outlined"
-                label={i18n.t("(auth).login.password")}
-                secureTextEntry={!showPassword}
-                value={fields.password}
-                onChangeText={(text) => handleInputChange("password", text)}
-                error={!!errors.password}
-                style={loginstyles.input}
-                theme={{
-                  colors: {
-                    primary: Colors.primary[500],
-                    background: "#FAFAFA",
-                    error: Colors.error,
-                  },
-                  roundness: 10,
-                }}
-                outlineColor={Colors.grey["bg"]}
-                left={
-                  <TextInput.Icon
-                    icon="lock-outline"
-                    color={Colors.grey["61"]}
-                    size={20}
-                  />
-                }
-                right={
-                  <TextInput.Icon
-                    icon={showPassword ? "eye-off" : "eye"}
-                    onPress={() => setShowPassword(!showPassword)}
-                    color={Colors.grey[61]}
-                    size={20}
-                  />
-                }
-              />
-              {errors.password ? (
-                <Text style={loginstyles.errorText}>{errors.password}</Text>
-              ) : null}
-
-              <Link
-                style={loginstyles.forgotPassword}
-                href={"/(auth)/(forgot-password)"}
-              >
-                <Text style={loginstyles.forgotPasswordText}>
-                  {i18n.t("(auth).login.forgotPassword")}
-                </Text>
-              </Link>
-
-              <TouchableOpacity
-                style={[
-                  loginstyles.loginButton,
-                  loading && defaultStyles.greyButton,
-                ]}
-                onPress={handleLogIn}
-                disabled={loading}
-                activeOpacity={0.8}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={loginstyles.loginButtonText}>
-                    {i18n.t("(auth).login.login")}
-                  </Text>
-                )}
-              </TouchableOpacity>
-
-              <View style={loginstyles.dividerContainer}>
-                <View style={loginstyles.dividerLine} />
-                <Text style={loginstyles.dividerText}>
-                  {i18n.t("(auth).login.orContinueWith")}
-                </Text>
-                <View style={loginstyles.dividerLine} />
-              </View>
-
-              <View style={loginstyles.socialIconsContainer}>
-                <TouchableOpacity style={loginstyles.socialIcon}>
-                  <MaterialCommunityIcons
-                    name="facebook"
-                    size={24}
-                    color={Colors.primary[100]}
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity style={loginstyles.socialIcon}>
-                  <MaterialCommunityIcons
-                    name="google"
-                    size={24}
-                    color={Colors.primary[200]}
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity style={loginstyles.socialIcon}>
-                  <MaterialCommunityIcons name="apple" size={24} />
-                </TouchableOpacity>
-              </View>
-
-              <View style={loginstyles.registerContainer}>
-                <Text style={loginstyles.registerText}>
-                  {i18n.t("(auth).login.dontHaveAnAccount")}{" "}
-                </Text>
-                <TouchableOpacity
-                  onPress={() => router.push("/(tabs)/(index)")}
-                >
-                  <Text style={loginstyles.registerLink}>
-                    {i18n.t("(auth).login.registerNow")}
-                  </Text>
-                </TouchableOpacity>
-              </View>
             </View>
-          </ScrollView>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Phone</Text>
+              <Text style={styles.detailValue}>
+                {seller?.user?.phoneNumber || sellerphoneNumber || "N/A"}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Buyer</Text>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Name</Text>
+              <Text style={styles.detailValue}>
+                {buyer?.user?.firstName + " " + buyer?.user?.lastName ||
+                  buyerName ||
+                  "N/A"}
+              </Text>
+            </View>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Phone</Text>
+              <Text style={styles.detailValue}>
+                {buyer?.user?.phoneNumber || "N/A"}
+              </Text>
+            </View>
+          </View>
         </View>
-      </KeyboardAvoidingView>
-      <Snackbar
-        visible={!!error}
-        onDismiss={() => {}}
-        duration={3000}
-        style={defaultStyles.snackbar}
-      >
-        <Text style={defaultStyles.errorText}>{errorMessage}</Text>
-      </Snackbar>
-    </>
+
+        <View style={defaultStyles.bottomButtonContainer}>
+          <Button
+            mode="contained"
+            onPress={handleUploadSlip}
+            style={[defaultStyles.button, defaultStyles.primaryButton]}
+            labelStyle={styles.uploadButtonText}
+          >
+            Confirm Dispatch Slip
+          </Button>
+        </View>
+      </ScrollView>
+
+      {/* Edit Modal */}
+      <Portal>
+        <Dialog visible={modalVisible} onDismiss={() => setModalVisible(false)}>
+          <Dialog.Title>Confirm Dispatch</Dialog.Title>
+          <Dialog.Content>
+            <TextInput
+              value={editablePhone}
+              onChangeText={setEditablePhone}
+              keyboardType="phone-pad"
+              style={{
+                borderBottomWidth: 1,
+                padding: 8,
+                backgroundColor: "#fff",
+                color: "#000",
+              }}
+            />
+            <Button
+              onPress={handleConfirmDispatch}
+              mode="contained"
+              style={{ marginTop: 20 }}
+              disabled={!editablePhone}
+            >
+              Confirm Dispatch
+            </Button>
+          </Dialog.Content>
+        </Dialog>
+      </Portal>
+
+      {/* Success Modal */}
+      <Portal>
+        <Dialog
+          visible={successModalVisible}
+          onDismiss={() => setSuccessModalVisible(false)}
+        >
+          <Dialog.Content>
+            <Image
+              source={require("@/assets/images/success.png")}
+              style={defaultStyles.successImage}
+            />
+            <Text variant="titleLarge" style={defaultStyles.primaryText}>
+              Dispatch Completed
+            </Text>
+            <Text style={defaultStyles.bodyText}>
+              Download the dispatch receipt below.
+            </Text>
+            <Button
+              onPress={handleDownloadReceipt}
+              mode="contained"
+              style={{ marginTop: 20 }}
+            >
+              Download Dispatch Form
+            </Button>
+          </Dialog.Content>
+        </Dialog>
+      </Portal>
+    </View>
   );
 }
