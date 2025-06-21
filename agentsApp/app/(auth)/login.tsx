@@ -8,7 +8,7 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-import { Icon, Snackbar, TextInput } from "react-native-paper";
+import { Appbar, Icon, Snackbar, TextInput } from "react-native-paper";
 import { Link, router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -50,7 +50,7 @@ export default function Login() {
       if (role === "USER_ROLE_AGENT") {
         router.replace("/(tabs)/(index)");
       } else {
-        console.error("not an agent")
+        console.error("not an agent");
       }
     }
   }, [userData]);
@@ -132,12 +132,13 @@ export default function Login() {
       >
         <View style={loginstyles.container}>
           <View style={loginstyles.header}>
-            <TouchableOpacity
-              style={loginstyles.backButton}
-              // onPress={() => router.replace("/onboarding")}
-            >
-              <Icon source="arrow-left" size={24} color={Colors.dark[0]} />
-            </TouchableOpacity>
+            <Appbar.Header style={defaultStyles.appHeader}>
+              <TouchableOpacity onPress={() => router.back()}>
+                <Appbar.BackAction color="#000" />
+              </TouchableOpacity>
+             
+              <View />
+            </Appbar.Header>
 
             <View style={loginstyles.logoCircle}>
               <Text style={loginstyles.logoText}>Food House</Text>

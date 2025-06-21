@@ -7,6 +7,7 @@ import { CurrencySelect } from "./general/CurrencySelect";
 import { Product } from "./Product";
 import { FilterBottomSheet } from "./(buyer)/(index)/FilterBottomSheet";
 import { OrderItem } from "./(farmer)/OrderItem";
+import { generateDispatchFormPdf } from "./Agent/generateRecepient";
 
 export {
   CountryList,
@@ -18,4 +19,5 @@ export {
   Product,
   FilterBottomSheet,
   OrderItem,
+  generateDispatchFormPdf,
 };
