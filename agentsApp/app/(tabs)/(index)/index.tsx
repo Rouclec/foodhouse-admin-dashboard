@@ -71,7 +71,7 @@ export default function Orders() {
                     <Icon
                       source={"bell-outline"}
                       size={24}
-                      color={Colors.primary[100]}
+                      color={Colors.dark[10]}
                     />
                     <View style={styles.noticiatonIndicator} />
                   </View>
