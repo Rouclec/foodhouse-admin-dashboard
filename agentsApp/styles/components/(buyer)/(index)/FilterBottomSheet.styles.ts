@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native";
 export const filterBottomSheetStyles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: Colors.primary[0],
+    backgroundColor: Colors.dark[0],
     zIndex: 1,
   },
   sheetContainer: {

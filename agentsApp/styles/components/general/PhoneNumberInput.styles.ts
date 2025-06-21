@@ -76,7 +76,7 @@ export const phoneNumberInputStyles = StyleSheet.create({
     flexGrow: 1,
     height: 48,
     fontSize: 18,
-    color: Colors.primary[0],
+    color: Colors.dark[0],
   },
   backgroundDark: {
     backgroundColor: Colors.light[0],
@@ -111,7 +111,7 @@ export const phoneNumberInputStyles = StyleSheet.create({
   },
   countryName: {
     fontSize: 18,
-    color: Colors.primary[0],
+    color: Colors.dark[0],
   },
   countryContainer: {
     backgroundColor: Colors.grey["fa"],

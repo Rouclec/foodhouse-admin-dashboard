@@ -6,9 +6,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Icon, Text, TextInput } from "react-native-paper";
+import { Button, Icon, Text, TextInput } from "react-native-paper";
 import { Context, ContextType } from "../../_layout";
-import { defaultStyles, index1, farmerIndexStyles as styles } from "@/styles";
+import { defaultStyles, index1, loginstyles, farmerIndexStyles as styles } from "@/styles";
 import { Colors } from "@/constants";
 import i18n from "@/i18n";
 import { Feather } from "@expo/vector-icons";
@@ -22,7 +22,6 @@ export default function Orders() {
   const { user } = useContext(Context) as ContextType;
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Fetch user data if userId exists
   const { data: userData } = useQuery({
     ...ordersGetOrderDetailsOptions({
       path: {
@@ -40,7 +39,7 @@ export default function Orders() {
       keyboardVerticalOffset={0}
     >
       <View style={[defaultStyles.flex, styles.bgWhite]}>
-        {/* Header without search field */}
+        
         <View style={styles.appHeader}>
           <SafeAreaView style={styles.safeArea}>
             <View style={styles.appHeaderContent}>
@@ -81,28 +80,24 @@ export default function Orders() {
           </SafeAreaView>
         </View>
 
-        {/* Body content */}
         <View style={[defaultStyles.container, { padding: 24 }]}>
-          <Text style={{ marginBottom: 8, fontSize: 16 }}>
-            Enter verification number
-          </Text>
-          
-          {/* Search input field */}
-          <View style={{ marginBottom: 20 }}>
+
+          <View style={defaultStyles.mainContainer}>
             <TextInput
-              placeholder={i18n.t("(farmer).(index).index.searchOrder")}
+              label="Enter order number"
               placeholderTextColor={Colors.grey["bd"]}
-              style={[
-                defaultStyles.input, 
-                { 
-                  height: 48,
-                  backgroundColor: Colors.grey["fa"],
-                }
-              ]}
-              outlineStyle={{ borderRadius: 16 }}
+              mode="outlined"
+              theme={{
+                roundness: 15,
+                colors: {
+                  onSurfaceVariant: Colors.grey["e8"],
+                  primary: Colors.primary[500],
+                },
+              }}
+              outlineColor={Colors.grey["bg"]}
+              style={loginstyles.input}
               value={searchQuery}
               onChangeText={(text) => setSearchQuery(text)}
-              mode="outlined"
               left={
                 <TextInput.Icon
                   icon={() => (
@@ -114,34 +109,25 @@ export default function Orders() {
                   )}
                 />
               }
-              theme={{
-                colors: {
-                  primary: Colors.primary[500],
-                  background: Colors.grey["fa"],
-                  error: Colors.error,
-                },
-                roundness: 16,
-              }}
+              
             />
           </View>
 
-          {/* Get Details Button */}
-          <View style={index1.buttonContainer}>
-            <TouchableOpacity
-              style={[index1.button, index1.buttonbg]}
+          <View style={defaultStyles.bottomButtonContainer}>
+            <Button
+              style={defaultStyles.primaryButton}
               onPress={() => {
                 if (searchQuery.trim()) {
                   router.push({
                     pathname: "/order-details",
-                    params: { orderNumber: searchQuery }
+                    params: { orderNumber: searchQuery },
                   });
                 }
               }}
-              activeOpacity={0.8}
               disabled={!searchQuery.trim()}
             >
-              <Text style={index1.buttonText}>Get Details</Text>
-            </TouchableOpacity>
+              <Text style={defaultStyles.buttonText}>Get Details</Text>
+            </Button>
           </View>
         </View>
       </View>

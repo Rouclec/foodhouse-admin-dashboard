@@ -22,7 +22,7 @@ import i18n from "@/i18n";
 import { Chase } from "react-native-animated-spinkit";
 import { Colors } from "@/constants";
 import { formatAmount } from "@/utils/amountFormater";
-import { usersGetPublicUserOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
+import { usersGetUserByIdOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
 
 export default function OrderDetails() {
@@ -45,33 +45,23 @@ export default function OrderDetails() {
     enabled: !!orderNumber,
   });
 
-  const {
-    data: productData,
-  } = useQuery({
+  const { data: productData } = useQuery({
     ...productsGetProductOptions({
-      path: {
-        productId: orderDetails?.order?.product ?? "",
-      },
+      path: { productId: orderDetails?.order?.product ?? "" },
     }),
-    enabled: !!orderDetails?.order,
+    enabled: !!orderDetails?.order?.product,
   });
 
-  // Fetch buyer details
-  const { data: buyer } = useQuery({
-    ...usersGetPublicUserOptions({
-      path: {
-        userId: orderDetails?.order?.createdBy ?? "",
-      },
+  const { data: buyer, isLoading: isBuyerLoading } = useQuery({
+    ...usersGetUserByIdOptions({
+      path: { userId: orderDetails?.order?.createdBy ?? "" },
     }),
     enabled: !!orderDetails?.order?.createdBy,
   });
 
-  // Fetch seller (product owner) details
   const { data: seller, isLoading: isSellerLoading } = useQuery({
-    ...usersGetPublicUserOptions({
-      path: {
-        userId: orderDetails?.order?.productOwner ?? "",
-      },
+    ...usersGetUserByIdOptions({
+      path: { userId: orderDetails?.order?.productOwner ?? "" },
     }),
     enabled: !!orderDetails?.order?.productOwner,
   });
@@ -79,18 +69,32 @@ export default function OrderDetails() {
   const handleViewReceipt = () => {
     router.push({
       pathname: "/receipt",
-      params: { 
+      params: {
         orderNumber: orderNumber as string,
-        productName: seller?.productName,
-        productImage: seller?.productImage,
-        sellerName: seller?.name,
-        buyerName: buyer?.name,
         amount: orderDetails?.order?.price?.value,
         currency: orderDetails?.order?.price?.currencyIsocode,
         quantity: orderDetails?.order?.quantity,
-        deliveryAddress: orderDetails?.order?.deliveryLocation?.address
-      }
+        deliveryAddress: orderDetails?.order?.deliveryLocation?.address,
+        productName: productData?.product?.name,
+        productImage: productData?.product?.image,
+        sellerName: seller?.user
+          ? `${seller.user.firstName} ${seller.user.lastName}`
+          : "",
+        sellerphoneNumber: seller?.user?.phoneNumber,
+        buyerName: buyer?.user
+          ? `${buyer.user.firstName} ${buyer.user.lastName}`
+          : "",
+      },
     });
+  };
+
+  const handleNavigateToProduct = () => {
+    if (productData?.product?.id) {
+      router.push({
+        pathname: "/product-details",
+        params: { productId: productData.product.id },
+      });
+    }
   };
 
   if (isOrderDetailsLoading || isSellerLoading) {
@@ -183,33 +187,38 @@ export default function OrderDetails() {
             </Text>
             <View />
           </Appbar.Header>
-          
-          <View style={defaultStyles.card}>
-           <Image
+
+          <TouchableOpacity
+            onPress={handleNavigateToProduct}
+            activeOpacity={0.85}
+            style={defaultStyles.card}
+          >
+            <Image
               source={{ uri: productData?.product?.image }}
               style={styles.productImage}
             />
             <View style={styles.orderDetailsContainer}>
               <Text style={styles.leftText}>
-                {i18n.t("(farmer).order-details.orderNumber")}:{" "}
+                {i18n.t("(farmer).order-details.orderNumber")}: {" "}
                 <Text variant="titleMedium" style={styles.rightText}>
                   {orderDetails?.order?.orderNumber}
                 </Text>
               </Text>
-              
-                <Text variant="titleMedium">{productData?.product?.name}</Text>
-              
+              <Text variant="titleMedium">{productData?.product?.name}</Text>
               <View style={styles.centerRow}>
-                <Text variant="titleSmall" style={styles.primaryText}>
-                  {orderDetails?.order?.price?.currencyIsocode}{" "}
+               <Text variant="titleSmall" style={styles.primaryText}>
+                  {orderDetails?.order?.price?.currencyIsoCode}{" "}
                   {formatAmount(
-                    orderDetails?.order?.price?.value?.toString() ?? "",
+                    (
+                      (productData?.product?.amount?.value ?? 0) *
+                      parseInt(orderDetails?.order?.quantity ?? "")
+                    ).toString() ?? "",
                     { decimalPlaces: 2 }
                   )}
                 </Text>
               </View>
             </View>
-          </View>
+          </TouchableOpacity>
 
           <ScrollView
             contentContainerStyle={[
@@ -226,7 +235,9 @@ export default function OrderDetails() {
                   {i18n.t("(farmer).order-details.customersName")}
                 </Text>
                 <Text variant="titleMedium" style={styles.rightText}>
-                  {buyer?.name || " "}
+                  {buyer?.user
+                    ? `${buyer.user.firstName} ${buyer.user.lastName}`
+                    : " "}
                 </Text>
               </View>
               <View style={styles.listItem}>
@@ -234,7 +245,10 @@ export default function OrderDetails() {
                   {i18n.t("(farmer).order-details.quantity")}
                 </Text>
                 <Text variant="titleMedium" style={styles.rightText}>
-                  {formatAmount(orderDetails?.order?.quantity ?? "")}
+                  {formatAmount(orderDetails?.order?.quantity ?? "")}{" "}
+                  {(productData?.product?.unitType ?? "").replace("per_", "")}
+                  {(parseInt(orderDetails?.order?.quantity ?? "") ?? 0) > 1 &&
+                    "s"}
                 </Text>
               </View>
               <View style={styles.listItem}>
@@ -259,13 +273,8 @@ export default function OrderDetails() {
       </KeyboardAvoidingView>
 
       <View style={defaultStyles.bottomContainerWithContent}>
-        <Button
-          style={defaultStyles.primaryButton}
-          onPress={handleViewReceipt}
-        >
-          <Text style={defaultStyles.buttonText}>
-            Continue 
-          </Text>
+        <Button style={defaultStyles.primaryButton} onPress={handleViewReceipt}>
+          <Text style={defaultStyles.buttonText}>Continue</Text>
         </Button>
       </View>
 

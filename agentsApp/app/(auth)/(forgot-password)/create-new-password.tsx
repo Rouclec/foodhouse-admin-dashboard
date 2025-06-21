@@ -92,7 +92,7 @@ export default function CreateNewPassword() {
               onPress={() => router.back()}
               style={defaultStyles.backButtonContainer}
             >
-              <Icon source={"arrow-left"} size={24} color={Colors.primary[0]} />
+              <Icon source={"arrow-left"} size={24} color={Colors.dark[0]} />
             </TouchableOpacity>
             <Text variant="titleMedium" style={defaultStyles.heading}>
               {i18n.t(

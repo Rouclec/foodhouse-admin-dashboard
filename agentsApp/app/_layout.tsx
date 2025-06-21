@@ -196,7 +196,7 @@ function RootLayoutNav() {
     dark: false,
     colors: {
       ...DefaultTheme.colors,
-      text: Colors.primary["0"], // Override text color globally
+      text: Colors.dark["0"], // Override text color globally
     },
     fonts: configureFonts({ config: fontConfig }),
   };

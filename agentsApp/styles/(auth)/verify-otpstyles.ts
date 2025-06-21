@@ -47,7 +47,7 @@ export const verifyOtpStyles = StyleSheet.create({
     color: Colors.grey["surface"],
   },
   text: {
-    color: Colors.primary[0],
+    color: Colors.dark[0],
   },
   link: {
     color: Colors.grey["surface"],
@@ -106,7 +106,7 @@ export const verifyOtpStyles = StyleSheet.create({
   },
 
   backArrow: {
-    color: Colors.primary["0"],
+    color: Colors.dark["0"],
     backgroundColor: Colors.grey["ea"],
     borderColor: Colors.grey["e14"],
     borderRadius: 12,

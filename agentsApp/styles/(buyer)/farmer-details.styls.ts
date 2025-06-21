@@ -124,7 +124,7 @@ export const farmerDetailsStyle = StyleSheet.create({
   commentText: {
     fontSize: 14,
     lineHeight: 20,
-    color: Colors.primary["10"],
+    color: Colors.dark["10"],
     textAlign: "justify",
   },
   timeText: {

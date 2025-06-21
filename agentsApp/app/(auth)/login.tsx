@@ -132,13 +132,12 @@ export default function Login() {
       >
         <View style={loginstyles.container}>
           <View style={loginstyles.header}>
-            <Appbar.Header style={defaultStyles.appHeader}>
-              <TouchableOpacity onPress={() => router.back()}>
-                <Appbar.BackAction color="#000" />
-              </TouchableOpacity>
-             
-              <View />
-            </Appbar.Header>
+            <TouchableOpacity
+              style={loginstyles.backButton}
+              // onPress={() => router.replace("/onboarding")}
+            >
+              <Icon source="arrow-left" size={24} color={Colors.dark[0]} />
+            </TouchableOpacity>
 
             <View style={loginstyles.logoCircle}>
               <Text style={loginstyles.logoText}>Food House</Text>

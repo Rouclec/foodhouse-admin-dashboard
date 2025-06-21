@@ -48,7 +48,7 @@ export const dropdownStyles = StyleSheet.create({
   },
   itemText: {
     fontSize: 16,
-    color: Colors.primary[10],
+    color: Colors.dark[10],
   },
   noDataText: {
     textAlign: "center",
