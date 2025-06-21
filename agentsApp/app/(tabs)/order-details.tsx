@@ -52,7 +52,7 @@ export default function OrderDetails() {
     enabled: !!orderDetails?.order?.product,
   });
 
-  const { data: buyer } = useQuery({
+  const { data: buyer, isLoading: isBuyerLoading } = useQuery({
     ...usersGetUserByIdOptions({
       path: { userId: orderDetails?.order?.createdBy ?? "" },
     }),
