@@ -16,7 +16,13 @@ import {
 
 import PhoneNumber, { CountryCode } from "libphonenumber-js";
 
-import { Colors, countries as allCountries } from "@/constants";
+import {
+  Colors,
+  GABON,
+  RWANDA,
+  TANZANIA,
+  countries as allCountries,
+} from "@/constants";
 import { Country } from "@/interface";
 import { phoneNumberInputStyles as styles } from "@/styles";
 import { Icon, TextInput } from "react-native-paper";
@@ -155,7 +161,7 @@ const PhoneNumberInput: FC<Props> = ({
         visible={showCountries}
         setVisible={setShowCountries}
         setCountry={setCountry}
-        countries={countries}
+        countries={[CAMEROON, GABON, RWANDA, TANZANIA]}
       />
     </View>
   );

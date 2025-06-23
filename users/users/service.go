@@ -206,10 +206,12 @@ func (i *Impl) Signup(ctx context.Context, req *usersgrpc.SignupRequest) (*users
 
 	userPassword := req.GetPassword()
 
-	ok := isValidEmail(req.GetEmail())
+	if req.GetEmail() != "" {
+		ok := isValidEmail(req.GetEmail())
 
-	if !ok {
-		return nil, status.Errorf(codes.InvalidArgument, "Invalid email %v", req.GetEmail())
+		if !ok {
+			return nil, status.Errorf(codes.InvalidArgument, "Invalid email %v", req.GetEmail())
+		}
 	}
 
 	// Check password for minimum length

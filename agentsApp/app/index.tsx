@@ -59,8 +59,6 @@ export default function Index() {
       if (user) {
         if (user?.role === "USER_ROLE_AGENT") {
           return router.replace("/(tabs)/(index)");
-        } else {
-          return router.replace("/(buyer)/(index)");
         }
       }
       if (hasOnboarded) {

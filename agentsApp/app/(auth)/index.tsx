@@ -73,9 +73,9 @@ export default function TabOneScreen() {
               <Text style={{ fontWeight: "bold" }}>FoodHouse</Text>
             </Text>
 
-            <Text style={index1.subText}>
+            {/* <Text style={index1.subText}>
               {i18n.t("(auth).index.discoverFresh")}
-            </Text>
+            </Text> */}
           </View>
         </View>
       </ScrollView>
