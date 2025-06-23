@@ -60,7 +60,6 @@ export default function SettingsPage() {
                         name="user"
                         size={20}
                         color={Colors.primary[500]}
-                       
                       />
                     </View>
                     <Text style={styles.navigationText}>
@@ -80,7 +79,6 @@ export default function SettingsPage() {
                         name="lock"
                         size={20}
                         color={Colors.primary[500]}
-                        
                       />
                     </View>
                     <Text style={styles.navigationText}>
@@ -100,7 +98,6 @@ export default function SettingsPage() {
                         name="language"
                         size={20}
                         color={Colors.primary[500]}
-                        
                       />
                     </View>
                     <Text style={styles.navigationText}>
@@ -120,7 +117,6 @@ export default function SettingsPage() {
                         name="envelope"
                         size={20}
                         color={Colors.primary[500]}
-                        
                       />
                     </View>
                     <Text style={styles.navigationText}>
@@ -132,7 +128,7 @@ export default function SettingsPage() {
                 <TouchableOpacity
                   style={styles.navigationItem}
                   onPress={() =>
-                    Linking.openURL(process.env.EXPO_PUBLIC_WEBSITE_URL!)
+                    Linking.openURL(process.env.EXPO_PUBLIC_TC_URL!)
                   }
                 >
                   <View style={styles.navigationContent}>
@@ -141,11 +137,10 @@ export default function SettingsPage() {
                         name="file-text"
                         size={20}
                         color={Colors.primary[500]}
-                        
                       />
                     </View>
                     <Text style={styles.navigationText}>
-                      {i18n.t("(farmer).(profile-flow).(settings).heading6")}{" "}
+                      {i18n.t("(farmer).(profile-flow).(settings).heading6")}
                     </Text>
                   </View>
                   <List.Icon icon="chevron-right" />
@@ -154,7 +149,7 @@ export default function SettingsPage() {
                 <TouchableOpacity
                   style={styles.navigationItem}
                   onPress={() =>
-                    Linking.openURL(process.env.EXPO_PUBLIC_WEBSITE_URL!)
+                    Linking.openURL(process.env.EXPO_PUBLIC_PRIVACY_URL!)
                   }
                 >
                   <View style={styles.navigationContent}>
@@ -163,7 +158,6 @@ export default function SettingsPage() {
                         name="shield"
                         size={20}
                         color={Colors.primary[500]}
-                       
                       />
                     </View>
                     <Text style={styles.navigationText}>
@@ -175,9 +169,7 @@ export default function SettingsPage() {
                 <TouchableOpacity
                   style={styles.navigationItem}
                   onPress={() =>
-                    Linking.openURL(
-                      `${process.env.EXPO_PUBLIC_WEBSITE_URL!}/about`
-                    )
+                    Linking.openURL(process.env.EXPO_PUBLIC_ABOUT_URL!)
                   }
                 >
                   <View style={styles.navigationContent}>
@@ -186,7 +178,6 @@ export default function SettingsPage() {
                         name="info-circle"
                         size={20}
                         color={Colors.primary[500]}
-                        
                       />
                     </View>
                     <Text style={styles.navigationText}>
@@ -204,7 +195,6 @@ export default function SettingsPage() {
                         name="trash"
                         size={20}
                         color={Colors.error}
-                        
                       />
                     </View>
                     <Text style={styles.logout}>

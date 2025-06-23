@@ -238,47 +238,6 @@ export default function Login() {
                   {i18n.t("(auth).login.forgotPassword")}
                 </Text>
               </Link>
-
-              {/* <View style={loginstyles.dividerContainer}>
-                <View style={loginstyles.dividerLine} />
-                <Text style={loginstyles.dividerText}>
-                  {i18n.t("(auth).login.or")}
-                </Text>
-                <View style={loginstyles.dividerLine} />
-              </View>
-
-              <View style={loginstyles.socialIconsContainer}>
-                <TouchableOpacity style={loginstyles.socialIcon}>
-                  <MaterialCommunityIcons
-                    name="facebook"
-                    size={24}
-                    color={Colors.primary[100]}
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity style={loginstyles.socialIcon}>
-                  <MaterialCommunityIcons
-                    name="google"
-                    size={24}
-                    color={Colors.primary[200]}
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity style={loginstyles.socialIcon}>
-                  <MaterialCommunityIcons name="apple" size={24} />
-                </TouchableOpacity>
-              </View> */}
-
-              {/* <View style={loginstyles.registerContainer}>
-                <Text style={loginstyles.registerText}>
-                  {i18n.t("(auth).login.dontHaveAnAccount")}{" "}
-                </Text>
-                <TouchableOpacity
-                  onPress={() => router.push("/(tabs)/(index)")}
-                >
-                  <Text style={loginstyles.registerLink}>
-                    {i18n.t("(auth).login.registerNow")}
-                  </Text>
-                </TouchableOpacity>
-              </View> */}
             </View>
           </ScrollView>
           <View style={defaultStyles.bottomButtonContainer}>
