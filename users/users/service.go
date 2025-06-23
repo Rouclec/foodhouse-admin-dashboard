@@ -640,7 +640,7 @@ func (i *Impl) SendSmsOtp(ctx context.Context, req *usersgrpc.SendSmsOtpRequest,
 
 	// Send the Message to the formatted number
 	_, err = i.smsSender.SendSms(ctx, formattedNumber,
-		fmt.Sprintf("Your verification code for VsorPay is %s", otp))
+		fmt.Sprintf("Your verification code for FOOD HOUSE is %s", otp))
 	if err != nil {
 		return nil, fmt.Errorf("error sending SMS: %w", err)
 	}
@@ -686,7 +686,7 @@ func (i *Impl) SendEmailOtp(ctx context.Context,
 
 	// TODO: Send the Message to the formatted number
 	// _, err = i.smsSender.SendSms(ctx, formattedNumber,
-	// 	fmt.Sprintf("Your verification code for VsorPay is %s", otp))
+	// 	fmt.Sprintf("Your verification code for FOOD HOUSE is %s", otp))
 	// if err != nil {
 	// 	return nil, fmt.Errorf("error sending SMS: %w", err)
 	// }
