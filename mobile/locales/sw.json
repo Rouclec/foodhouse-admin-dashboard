@@ -1,0 +1,412 @@
+{
+  "hello": "Hujambo",
+  "language": "Lugha",
+  "suggested": "Ilivyopendekezwa",
+  "others": "Wengine",
+  "(auth)": {
+    "index": {
+      "welcomeTo": "Karibu kwa",
+      "discoverFresh": "Gundua mazao mapya ya kienyeji na mahitaji muhimu yakiletwa moja kwa moja hadi mlangoni pako, huku ukiunga mkono jamii yetu ya wakulima na wauzaji wa hapa wanaoleta bidhaa bora kwa hadhira pana.",
+      "continue": "Endelea"
+    },
+    "onboarding": {
+      "1": {
+        "title": "Nunua Safi, Nunua kwa Bei Nafuu",
+        "description": "Furahia bidhaa safi kutoka shambani kwa bei nafuu. Tunakurahisishia kununua moja kwa moja kutoka kwa wakulima na kuokoa pesa kwa kila ununuzi bila kuathiri ubora."
+      },
+      "2": {
+        "title": "Kula safi, Kua imara",
+        "description": "Kula safi, kua imara. Lisha mwili wako. Wakulima wetu hutoa mazao yenye virutubisho mengi yanayokusaidia kubaki na afya njema, yakikuza maisha yenye ustawi kwa familia yako."
+      },
+      "3": {
+        "title": "Kula kwa afya, Ishi muda mrefu",
+        "description": "Toa kipaumbele kwa afya yako kwa kutumia chakula safi moja kwa moja kutoka shambani. Jukwaa letu linatoa chaguzi za chakula bora na hai zinazochangia maisha marefu na yenye afya. Anza safari yako ya maisha bora leo!"
+      },
+      "getStarted": "Anza",
+      "next": "Ifuatayo"
+    },
+    "login": {
+      "anUnknownError": "Hitilafu isiyojulikana imetokea",
+      "errorParsing": "Hitilafu katika kuchanganua majibu ya kosa: ",
+      "emailRequired": "Barua pepe au nambari ya simu inahitajika",
+      "invalidEmail": "Tafadhali ingiza barua pepe halali",
+      "passwordRequired": "Nenosiri linahitajika",
+      "loginTo": "Ingia kwenye akaunti yako",
+      "email": "Barua pepe au Nambari ya simu",
+      "password": "Nenosiri",
+      "forgotPassword": "Umesahau nenosiri?",
+      "login": "Ingia",
+      "or": "au",
+      "continueWith": "Endelea na",
+      "dontHaveAnAccount": "Huna akaunti?",
+      "registerNow": "Jisajili sasa"
+    },
+    "verifyOtp": {
+      "verifyNumber": "Thibitisha nambari yako ya simu",
+      "codeSent": "Nambari imetumwa kwa",
+      "verify": "thibitisha",
+      "phoneNumberVerified": "Nambari ya simu imethibitishwa!",
+      "setupProfile": "Sasa unaweza kuendelea kuweka Wasifu wako wa Mkulima",
+      "continue": "endelea",
+      "resendCode": "Tuma tena nambari ndani ya"
+    },
+    "profile": {
+      "completeRegistration": "Kamilisha Usajili",
+      "firstName": "Jina la Kwanza",
+      "lastName": "Jina la Mwisho",
+      "email": "Barua Pepe",
+      "address": "Anuani",
+      "unknownError": "Hitilafu isiyojulikana imetokea",
+      "congratulations": "Hongera",
+      "registrationCompleteMessage": "Akaunti yako iko tayari kutumika, utapelekwa kwenye ukurasa wa nyumbani baada ya sekunde chache"
+    },
+    "variety": {
+      "description": "Karibu kwenye programu ya Food House! Chagua Aina Yako na gundua aina mbalimbali za bidhaa zinazolingana na mapendeleo yako.",
+      "header": "Chagua aina yako"
+    },
+    "(forgot-password)": {
+      "index": {
+        "forgotPassword": "Umesahau Nenosiri",
+        "enterYourPhoneNumber": "Weka nambari yako ya simu ili kuweka upya nenosiri lako. Tutakutumia OTP kwa ajili ya uthibitisho.",
+        "email": "Barua Pepe",
+        "enterEmail": "Weka barua pepe yako",
+        "invalidEmail": "Tafadhali weka barua pepe halali",
+        "continue": "Endelea",
+        "unknownError": "Hitilafu isiyojulikana imetokea"
+      },
+      "verify-otp": {
+        "forgotPassword": "Umesahau Nenosiri",
+        "aCodeHasBeenSentTo": "Nambari imetumwa kwa ",
+        "resendCode": "Tuma tena nambari",
+        "in": "ndani ya",
+        "verifyOtp": "Thibitisha OTP"
+      },
+      "create-new-password": {
+        "createNewPassword": "Unda nenosiri jipya",
+        "password": "Nenosiri",
+        "confirmPassword": "Thibitisha nenosiri",
+        "passwordMustBe": "Nenosiri lazima liwe na angalau herufi 12",
+        "passwordsDoNot": "Nenosiri hayalingani",
+        "continue": "Endelea",
+        "yourPasswordHasBeenReset": "Nenosiri lako limewekwa upya kwa mafanikio. Utaelekezwa kwenye ukurasa wa kuingia baada ya sekunde chache.",
+        "unknownError": "Hitilafu isiyojulikana imetokea",
+        "passwordReset": "Nenosiri Limewekwa Upya!"
+      }
+    },
+    "register": {
+      "createAccount": "Unda Akaunti",
+      "registerNewAccount": "Sajili Akaunti Mpya",
+      "description": "Ni ipi inakuelezea vyema zaidi?",
+      "buyer": "Mnunuzi",
+      "seller": "Mkulima au Muuzaji",
+      "button": "Ifuatayo",
+      "havingAccount": "Tayari una akaunti?",
+      "login": "Ingia"
+    },
+    "createAccount": {
+      "farmerAccount": "Unda Akaunti ya Mkulima",
+      "buyerAccount": "Unda Akaunti ya Mnunuzi",
+      "createPassword": "Unda Nenosiri",
+      "createAccount": "Unda Akaunti",
+      "enterEmail": "Weka Barua Pepe Yako",
+      "reEnterPassword": "Weka tena nenosiri lako",
+      "placeholder": "Nenosiri lazima liwe na angalau herufi 12",
+      "passwordMustBe": "Nenosiri lazima liwe na angalau herufi 12"
+    },
+    "(subsciption-flow)": {
+      "index": {
+        "heading": "Kuwa VIP",
+        "subtitle": "Pata Ufikiaji Usio na Kikomo",
+        "benefit1": "Furahia programu bila matangazo wala vizuizi",
+        "benefit2": "Mawasiliano yasiyo na kikomo na mfumo",
+        "benefit3": "Ufuatiliaji rahisi wa agizo",
+        "button1": "Ruka",
+        "button2": "Jisajili Sasa",
+        "duration1": "Mwezi 1",
+        "duration2": "Miezi 6",
+        "duration3": "Miezi 12",
+        "description": "Lipa mara moja, unaweza kughairi wakati wowote"
+      },
+      "payment-method": {
+        "description": "Ili kuendelea, tafadhali ongeza njia zako za malipo."
+      },
+      "account": {
+        "heading": "Fanya Malipo",
+        "details": "Weka nambari yako ya simu ili kuanzisha malipo",
+        "button": "Ifuatayo",
+        "mtn": "Nambari ya akaunti ya MTN Mobile Money",
+        "orange": "Weka nambari yako ya akaunti ya Orange Money",
+        "cardDetails": "Maelezo ya kadi ya Mastercard",
+        "cardNumber": "Weka nambari ya kadi yako",
+        "cardholderName": "Jina la mmiliki",
+        "cvv": "msimbo wa usalama (CVV)",
+        "paymentSuccessful": "Malipo yamefaulu",
+        "paymentCompleteMessage": "Malipo yako yamekamilika kwa mafanikio",
+        "paymentFailed": "Malipo yameshindikana",
+        "paymentFailedMessage": "Malipo yako hayajakamilika kwa mafanikio",
+        "instructionMoMo": "Piga *126# kuthibitisha malipo yako",
+        "instructionOM": "Piga #156# kuthibitisha malipo yako"
+      }
+    }
+  },
+  "(farmer)": {
+    "create-product": {
+      "addNewProduct": "Ongeza Bidhaa Mpya",
+      "cancel": "Ghairi",
+      "post": "Chapisha",
+      "productImage": "Picha ya Bidhaa",
+      "uploadImage": "Pakia picha (.jpg, .png, .jpeg).\\nIsiizidi 10 MB",
+      "productCategory": "Kategoria ya bidhaa",
+      "productName": "Jina la bidhaa",
+      "priceType": "Aina ya bei",
+      "price": "Bei",
+      "unknownError": "Hitilafu isiyojulikana imetokea",
+      "pleaseSelectAnImage": "Tafadhali chagua picha kwa bidhaa hii",
+      "pleaseEnterAProductName": "Tafadhali ingiza jina la bidhaa",
+      "pleaseEnterAPriceType": "Tafadhali ingiza aina ya bei",
+      "pleaseSelectACategory": "Tafadhali chagua kategoria",
+      "pleaseEnterThePrice": "Tafadhali ingiza bei ya bidhaa",
+      "pleaseEnterADescription": "Tafadhali ingiza maelezo ya bidhaa",
+      "congratulations": "Hongera",
+      "yourProductHasBeenUploaded": "Bidhaa yako imechapishwa",
+      "description": "Maelezo"
+    },
+    "(index)": {
+      "_layout": {
+        "orders": "Madai",
+        "myProducts": "Bidhaa Zangu",
+        "sales": "Mauzo",
+        "profile": "Wasifu"
+      },
+      "index": {
+        "goodMorning": "Habari ya asubuhi",
+        "goodAfternoon": "Habari ya mchana",
+        "goodEvening": "Habari ya jioni",
+        "searchOrder": "Tafuta agizo",
+        "pending": "Inasubiri",
+        "completed": "Imekamilika",
+        "couldNotLoadProduct": "Haiwezi kupakia maelezo ya bidhaa",
+        "details": "Maelezo",
+        "noOrdersFound": "Hakuna maagizo yaliyo patikana"
+      },
+      "my-products": {
+        "myProducts": "Bidhaa zangu",
+        "products": "Bidhaa",
+        "noProductsFound": "Hakuna bidhaa zilizo patikana",
+        "searchProducts": "Tafuta bidhaa"
+      }
+    },
+    "(profile-flow)": {
+      "profile": {
+        "title": "Akaunti",
+        "heading": "Kuwa VIP",
+        "description": "Kuwa VIP na ufurahie programu bila vizuizi",
+        "button": "Kuwa VIP",
+        "tab1": "Mipangilio",
+        "tab2": "Shiriki App",
+        "tab3": "Toka",
+        "tab4": "Mwalike marafiki",
+        "confirmation": "Una uhakika unataka kutoka?",
+        "button1": "Ghairi",
+        "button2": "Toka"
+      },
+      "(change-password)": {
+        "currentPassword": "Nenosiri la sasa",
+        "enterCurrentPassword": "Weka nenosiri la sasa",
+        "newPassword": "Nenosiri jipya",
+        "enterNewPassword": "Weka nenosiri jipya",
+        "confirmPassword": "Thibitisha nenosiri jipya",
+        "placeholder": "Thibitisha nenosiri jipya",
+        "forgotPassword": "Umesahau nenosiri",
+        "save": "Hifadhi mabadiliko"
+      },
+      "(settings)": {
+        "heading": "Mipangilio",
+        "heading1": "Taarifa binafsi",
+        "heading2": "Badilisha nenosiri",
+        "heading3": "Lugha",
+        "heading4": "Wasiliana nasi",
+        "heading6": "Masharti na vigezo",
+        "heading7": "Sera ya usiri",
+        "heading8": "Kuhusu Foodhouse",
+        "heading9": "Futa akaunti",
+        "english": "Kiingereza (US)",
+        "french": "Kifaransa",
+        "swahili": "Kiswahili",
+        "header": "Mapendekezo",
+        "language": "Lugha",
+        "chat": "Chat kwenye Whatsapp",
+        "contactUs": "Wasiliana nasi"
+      },
+      "(personal-info)": {
+        "heading": "Taarifa binafsi",
+        "fullName": "Jina kamili",
+        "fullNamePlaceholder": "Ingiza jina lako kamili",
+        "email": "Barua Pepe",
+        "emailPlaceholder": "Ingiza barua pepe yako",
+        "address": "Anwani",
+        "addressPlaceholder": "Ingiza anwani yako",
+        "cancel": "Ghairi",
+        "save": "Hifadhi mabadiliko",
+        "edit": "Hariri"
+      }
+    },
+    "order-details": {
+      "orderDetails": "Maelezo ya Agizo",
+      "couldNotLoad": "Haiwezi kupakia maelezo ya agizo",
+      "approveOrder": "Kubali agizo",
+      "orderNumber": "Nambari ya agizo",
+      "customersName": "Jina la mteja",
+      "quantity": "Kiasi",
+      "deliveryAddress": "Anwani ya utoaji",
+      "unknownError": "Hitilafu isiyojulikana imetokea",
+      "congratulations": "Hongera",
+      "youHaveApproved": "Umeikubali agizo hili, endelea kuandaa kwa utoaji",
+      "rejectOrder": "Kataa agizo",
+      "enterAReason": "Weka sababu ya kukataa agizo hili",
+      "reason": "Sababu",
+      "reject": "Kataa",
+      "orderRejected": "Agizo limekataliwa",
+      "youHaveRejected": "Umekataa agizo hili. Mteja ataarifiwa."
+    },
+    "sales": {
+      "sales": "Uuzaji",
+      "earnings": "Mapato",
+      "completedOrders": "Maagizo yaliyokamilika",
+      "noOrdersFound": "Hakuna maagizo yaliyopatikana"
+    }
+  },
+  "(buyer)": {
+    "(index)": {
+      "_layout": {
+        "home": "Mwanzo",
+        "farmers": "Wakulima",
+        "orders": "Madai",
+        "profile": "Wasifu"
+      },
+      "products": {
+        "products": "Bidhaa",
+        "searchProducts": "Tafuta bidhaa",
+        "goodMorning": "Habari za asubuhi",
+        "goodAfternoon": "Habari za mchana",
+        "goodEvening": "Habari za jioni",
+        "categories": "Makundi",
+        "noProductsFound": "Hakuna bidhaa zilizopatikana",
+        "all": "Zote",
+        "filter": "Chuja",
+        "priceRange": "Kiwango cha bei",
+        "ratings": "Madhihaki",
+        "close": "Funga",
+        "apply": "Tumia"
+      },
+      "orders": {
+        "myOrders": "Maagizo Yangu",
+        "searchOrder": "Tafuta agizo",
+        "noOrdersFound": "Hakuna maagizo yaliyopatikana",
+        "writeReview": "Andika tathmini",
+        "trackOrder": "Fuata agizo",
+        "couldNotLoadProduct": "Haiwezi kupakia maelezo ya bidhaa",
+        "pending": "Inasubiri",
+        "completed": "Imekamilika",
+        "leaveAReview": "Acha tathmini",
+        "howWasYourProduct": "Bidhaa yako ilikuwaje?",
+        "pleaseGiveYourRating": "Tafadhali toa alama yako na pia tathmini yako",
+        "review": "Tathmini",
+        "cancel": "Ghairi",
+        "submit": "Tuma"
+      },
+      "farmers": {
+        "farmers": "Wakulima",
+        "searchFarmers": "Tafuta wakulima",
+        "noFarmerFound": "Hakuna mkulima aliyepatikana",
+        "viewDetails": "Angalia maelezo"
+      }
+    },
+    "product-details": {
+      "couldNotLoad": "Haiwezi kupakia maelezo ya bidhaa",
+      "description": "Maelezo",
+      "farmer": "Mkulima",
+      "orderNow": "Agiza sasa",
+      "price": "Bei"
+    },
+    "(order)": {
+      "index": {
+        "deliveryMethod": "Njia ya utoaji",
+        "continue": "Endelea",
+        "chooseDeliveryMethod": "Chagua jinsi unavyotaka agizo lako lifikishwe",
+        "homeDelivery": "Utoaji wa nyumbani",
+        "deliveredTo": "Imetolewa mahali ulipotaka",
+        "pickupPoint": "Sehemu ya kuchukua",
+        "collectFrom": "Chukua kutoka mahali karibu"
+      },
+      "checkout": {
+        "checkout": "Lipa",
+        "couldNotLoad": "Haiwezi kupakia maelezo ya bidhaa",
+        "order": "Agizo",
+        "shippingAddress": "Anwani ya usafirishaji",
+        "confirmPayment": "Thibitisha malipo",
+        "amount": "Kiasi",
+        "delivery": "Utoaji",
+        "transactionCharges": "Ada za muamala",
+        "serviceCharges": "Ada za huduma",
+        "total": "Jumla",
+        "pleaseAcceptPermissions": "Tafadhali kubali ruhusa ili kupata eneo lako",
+        "errorGettingLocation": "Kosa katika kupata eneo",
+        "currentLocation": "Eneo la sasa",
+        "unknownError": "Hitilafu isiyojulikana imetokea"
+      },
+      "select-pickup-point": {
+        "selectPickupPoint": "Chagua sehemu ya kuchukua",
+        "proceedToCheckout": "Endelea kulipa",
+        "enterCity": "Ingiza jiji lako",
+        "noPickupPointsIn": "Hakuna sehemu za kuchukua katika",
+        "availablePickup": "Sehemu za kuchukua zilizopo"
+      },
+      "delivery-address": {
+        "deliveryAddress": "Anwani ya utoaji",
+        "proceedToCheckout": "Endelea kulipa",
+        "pleaseAcceptPermissions": "Tafadhali kubali ruhusa ili kupata eneo lako",
+        "errorGettingLocation": "Kosa katika kupata eneo",
+        "addressDetails": "Maelezo ya anwani",
+        "useCurrentLocation": "Tumia eneo langu la sasa",
+        "enterYourAddress": "Weka anwani yako",
+        "addressHere": "Anwani hapa"
+      }
+    },
+    "track-order": {
+      "trackOrder": "Fuata Agizo",
+      "orderStatusDetails": "Maelezo ya hali ya agizo",
+      "couldNotLoad": "Haiwezi kupakia maelezo ya agizo",
+      "orderPlaced": "Agizo limewekwa",
+      "orderConfirmed": "Agizo limekuzwa",
+      "orderDispatched": "Agizo limetumwa",
+      "orderDelivered": "Agizo limewasilishwa",
+      "unknownOrderStatus": "Hali ya agizo haijulikani",
+      "paymentDone": "Malipo yamefanyika",
+      "farmerReceived": "Mkulima amepokea agizo lako",
+      "orderInTransit": "Agizo lako liko njiani",
+      "orderCompleted": "Agizo limewasilishwa mahali pa utoaji",
+      "unknownState": "Hali ya agizo hili haijulikani, wasiliana na msimamizi kwa maelezo zaidi",
+      "orderNumber": "Nambari ya agizo"
+    },
+    "farmer-details": {
+      "farmerInformation": "Taarifa za mkulima",
+      "products": "Bidhaa",
+      "reviews": "Tathmini",
+      "noProductsFound": "Hakuna bidhaa zilizopatikana",
+      "noReviewsYet": "Hakuna tathmini bado"
+    }
+  },
+  "components": {
+    "Dropdown": {
+      "noData": "Hakuna data"
+    },
+    "ImagePicker": {
+      "photoGalery": "Maktaba ya Picha",
+      "camera": "Kamera",
+      "cancel": "Ghairi",
+      "permissionDenied": "Ruhusa imekataliwa",
+      "allowAccessToGallery": "Tafadhali ruhusu upatikanaji wa maktaba"
+    }
+  }
+}

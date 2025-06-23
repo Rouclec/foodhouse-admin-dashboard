@@ -99,7 +99,7 @@ export const loginstyles = StyleSheet.create({
     backgroundColor: Colors.grey["border"],
   },
   dividerText: {
-    width: 120,
+    width: 36,
     textAlign: "center",
     color: Colors.grey["61"],
   },

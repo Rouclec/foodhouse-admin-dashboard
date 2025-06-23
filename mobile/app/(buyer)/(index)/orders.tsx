@@ -47,20 +47,6 @@ const PENDING_ORDER_STATUSES: Array<ordersgrpcOrderStatus> = [
   "OrderStatus_IN_TRANSIT",
 ];
 
-const TAB_ITEMS: Array<{
-  name: string;
-  value: Array<ordersgrpcOrderStatus>;
-}> = [
-  {
-    name: i18n.t("(buyer).(index).orders.pending"),
-    value: PENDING_ORDER_STATUSES,
-  },
-  {
-    name: i18n.t("(buyer).(index).orders.completed"),
-    value: ["OrderStatus_DELIVERED"],
-  },
-];
-
 const { height } = Dimensions.get("window");
 interface OrderItemProps {
   item: ordersgrpcOrder | undefined;
@@ -123,6 +109,20 @@ const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
 };
 
 export default function Orders() {
+  const TAB_ITEMS: Array<{
+    name: string;
+    value: Array<ordersgrpcOrderStatus>;
+  }> = [
+    {
+      name: i18n.t("(buyer).(index).orders.pending"),
+      value: PENDING_ORDER_STATUSES,
+    },
+    {
+      name: i18n.t("(buyer).(index).orders.completed"),
+      value: ["OrderStatus_DELIVERED"],
+    },
+  ];
+
   const router = useRouter();
 
   const { user } = useContext(Context) as ContextType;

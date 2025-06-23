@@ -217,6 +217,7 @@ func TestSignup(t *testing.T) {
 				},
 				UserType: usersgrpc.UserType_USER_TYPE_FARMER,
 				Password: failedPassword,
+				Email:    "jaofjaoiij",
 			},
 			expectedError: fmt.Errorf("Invalid email"),
 			expectedResp:  nil,
