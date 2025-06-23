@@ -3,27 +3,27 @@ import * as Sharing from 'expo-sharing';
 
 interface DispatchFormProps {
   orderId: string;
-  dispatchCity: string;
-  destination: string;
+  product: string;
+  quantity: string;
+  amount: string;
   address: string;
   sellerName: string;
-  sellerChic: string;
-  sellerAddress: string;
+  sellerPhone: string;
   buyerName: string;
-  buyerAddress: string;
+  buyerPhone: string;
 }
 
 export const generateDispatchFormPdf = async (props: DispatchFormProps) => {
   const {
     orderId,
-    dispatchCity,
-    destination,
+    product,
+    quantity,
+    amount,
     address,
     sellerName,
-    sellerChic,
-    sellerAddress,
+    sellerPhone,
     buyerName,
-    buyerAddress
+    buyerPhone,
   } = props;
 
   const htmlContent = `
@@ -90,20 +90,6 @@ export const generateDispatchFormPdf = async (props: DispatchFormProps) => {
                     color: #777;
                     text-align: center;
                 }
-
-                .confirm-btn {
-                    display: block;
-                    width: 100%;
-                    padding: 12px;
-                    margin-top: 30px;
-                    background-color: #2625A8;
-                    color: white;
-                    border: none;
-                    border-radius: 5px;
-                    font-weight: bold;
-                    cursor: pointer;
-                    text-align: center;
-                }
             </style>
         </head>
         <body>
@@ -114,18 +100,21 @@ export const generateDispatchFormPdf = async (props: DispatchFormProps) => {
             <div class="section">
                 <div class="section-title">Order Details</div>
                 <div class="order-id">#${orderId}</div>
-                
                 <table>
                     <tr>
-                        <td>Dispatch City:</td>
-                        <td>${dispatchCity}</td>
+                        <td>Product:</td>
+                        <td>${product}</td>
                     </tr>
                     <tr>
-                        <td>Destination:</td>
-                        <td>${destination}</td>
+                        <td>Quantity:</td>
+                        <td>${quantity}</td>
                     </tr>
                     <tr>
-                        <td>Address:</td>
+                        <td>Amount:</td>
+                        <td>${amount}</td>
+                    </tr>
+                    <tr>
+                        <td>Delivery Address:</td>
                         <td>${address}</td>
                     </tr>
                 </table>
@@ -135,16 +124,14 @@ export const generateDispatchFormPdf = async (props: DispatchFormProps) => {
 
             <div class="section">
                 <div class="section-title">Seller</div>
-                <div style="font-weight: bold; margin-bottom: 5px;">${sellerName}</div>
-                
                 <table>
                     <tr>
-                        <td>CHIC:</td>
-                        <td>${sellerChic}</td>
+                        <td>Name:</td>
+                        <td>${sellerName}</td>
                     </tr>
                     <tr>
-                        <td>Address:</td>
-                        <td>${sellerAddress}</td>
+                        <td>Phone:</td>
+                        <td>${sellerPhone}</td>
                     </tr>
                 </table>
             </div>
@@ -153,28 +140,21 @@ export const generateDispatchFormPdf = async (props: DispatchFormProps) => {
 
             <div class="section">
                 <div class="section-title">Buyer</div>
-                <div style="font-weight: bold; margin-bottom: 5px;">${buyerName}</div>
-                
                 <table>
                     <tr>
-                        <td>Address:</td>
-                        <td>${buyerAddress}</td>
+                        <td>Name:</td>
+                        <td>${buyerName}</td>
+                    </tr>
+                    <tr>
+                        <td>Phone:</td>
+                        <td>${buyerPhone}</td>
                     </tr>
                 </table>
             </div>
 
-            <button class="confirm-btn" onclick="confirmDispatch()">Confirm Dispatch</button>
-
             <div class="footer">
                 © 2025 Foodhouse. All rights reserved.
             </div>
-
-            <script>
-                function confirmDispatch() {
-                    // This would need to be handled differently in a real app
-                    alert('Dispatch confirmed!');
-                }
-            </script>
         </body>
     </html>
   `;
@@ -190,11 +170,9 @@ export const generateDispatchFormPdf = async (props: DispatchFormProps) => {
 
 export const sharePdf = async (filePath: string) => {
   if (await Sharing.isAvailableAsync()) {
-    const uri = filePath.startsWith('file://')
-      ? filePath
-      : `file://${filePath}`;
+    const uri = filePath.startsWith('file://') ? filePath : `file://${filePath}`;
     await Sharing.shareAsync(uri);
   } else {
-    throw 'Sharing is not available on this device';
+    throw new Error('Sharing is not available on this device');
   }
 };

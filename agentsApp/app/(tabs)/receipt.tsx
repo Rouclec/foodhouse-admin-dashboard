@@ -4,8 +4,7 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  Image,
-  Platform,
+  Image
 } from "react-native";
 import { Appbar, Text, Button, Dialog, Portal } from "react-native-paper";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -37,7 +36,7 @@ export default function Receipt() {
     return value ?? "";
   }
 
-  // Read params safely as strings
+
   const {
     orderNumber,
     productName,
@@ -153,39 +152,38 @@ export default function Receipt() {
   };
 
   const handleGenerateReceipt = async () => {
-    try {
-      await generateReceiptPdf({
-        orderNumber: orderDetails?.order?.orderNumber || orderNumberStr,
-        product:
-          productData?.product?.name || productNameStr || "Unknown Product",
-        quantity:
-          quantityStr || orderDetails?.order?.quantity?.toString() || "0",
-        amount:
-          (currencyStr ? `${currencyStr} ` : "") +
-          formatAmount(
-            amountStr || orderDetails?.order?.price?.value?.toString() || "0",
-            { decimalPlaces: 2 }
-          ),
-        address:
-          deliveryAddressStr ||
-          orderDetails?.order?.deliveryLocation?.address ||
-          "No Address",
-        sellerName:
-          seller?.user?.firstName && seller?.user?.lastName
-            ? `${seller.user.firstName} ${seller.user.lastName}`
-            : sellerNameStr,
-        sellerPhone: seller?.user?.phoneNumber || sellerphoneNumberStr || "",
-        buyerName:
-          buyer?.user?.firstName && buyer?.user?.lastName
-            ? `${buyer.user.firstName} ${buyer.user.lastName}`
-            : buyerNameStr,
-        buyerPhone: buyer?.user?.phoneNumber || "",
-      });
-    } catch (error) {
-      console.error("Error generating receipt PDF:", error);
-      alert("Failed to generate receipt PDF.");
-    }
-  };
+  try {
+    await generateDispatchFormPdf({
+      orderId: orderDetails?.order?.orderNumber || orderNumberStr,
+      product: productData?.product?.name || productNameStr || "Unknown Product",
+      quantity: quantityStr || orderDetails?.order?.quantity?.toString() || "0",
+      amount:
+        (currencyStr ? `${currencyStr} ` : "") +
+        formatAmount(
+          amountStr || orderDetails?.order?.price?.value?.toString() || "0",
+          { decimalPlaces: 2 }
+        ),
+      address:
+        deliveryAddressStr ||
+        orderDetails?.order?.deliveryLocation?.address ||
+        "No Address",
+      sellerName:
+        seller?.user?.firstName && seller?.user?.lastName
+          ? `${seller.user.firstName} ${seller.user.lastName}`
+          : sellerNameStr || "Unknown Seller",
+      sellerPhone: seller?.user?.phoneNumber || sellerphoneNumberStr || "",
+      buyerName:
+        buyer?.user?.firstName && buyer?.user?.lastName
+          ? `${buyer.user.firstName} ${buyer.user.lastName}`
+          : buyerNameStr || "Unknown Buyer",
+      buyerPhone: buyer?.user?.phoneNumber || "",
+    });
+  } catch (error) {
+    console.error("Error generating receipt PDF:", error);
+    alert("Failed to generate receipt PDF.");
+  }
+};
+
 
   if (isLoading) {
     return (
@@ -374,16 +372,5 @@ export default function Receipt() {
     </View>
   );
 }
-function generateReceiptPdf(arg0: {
-  orderNumber: any;
-  product: any;
-  quantity: any;
-  amount: string;
-  address: any;
-  sellerName: string;
-  sellerPhone: any;
-  buyerName: string;
-  buyerPhone: any;
-}) {
-  throw new Error("Function not implemented.");
-}
+
+
