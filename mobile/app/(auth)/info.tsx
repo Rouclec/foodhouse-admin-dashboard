@@ -1,12 +1,10 @@
 import {
-  Keyboard,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { CountrySelect } from "@/components/general/CountrySelect";
 import { CAMEROON, Colors, countries } from "@/constants";
 import {
@@ -27,13 +25,13 @@ import i18n from "@/i18n";
 import { Context, ContextType } from "../_layout";
 import { delay } from "@/utils";
 
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const Info = () => {
   const [country, setCountry] = useState(CAMEROON);
-  const [callingCode, setCallingCode] = useState(country?.dial_code || CAMEROON.dial_code);
+  const [callingCode, setCallingCode] = useState(
+    country?.dial_code || CAMEROON.dial_code
+  );
   const [mobile, setMobile] = useState("");
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -44,7 +42,6 @@ const Info = () => {
 
   const router = useRouter();
   const { role } = useContext(Context) as ContextType;
-
 
   const handleSignUp = async () => {
     try {
@@ -77,7 +74,6 @@ const Info = () => {
         params: {
           requestId: data.requestId,
           phoneNumber: `${callingCode}${mobile}`,
-          email,
           password,
           residenceCountryIsoCode: country?.code,
           role: role || "USER_ROLE_UNSPECIFIED",
@@ -94,7 +90,7 @@ const Info = () => {
         keyboardVerticalOffset={0}
       >
         <View style={defaultStyles.flex}>
-        <Appbar.Header dark={false} style={defaultStyles.appHeader}>
+          <Appbar.Header dark={false} style={defaultStyles.appHeader}>
             <TouchableOpacity
               onPress={() => router.back()}
               style={defaultStyles.backButtonContainer}
@@ -130,26 +126,6 @@ const Info = () => {
                 setPhoneNumber={setMobile}
                 phoneNumber={mobile}
                 containerStyle={signupStyles.phoneNumberInputContainerStyle}
-              />
-
-              <TextInput
-                mode="outlined"
-                label={i18n.t("(auth).createAccount.enterEmail")}
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                error={email?.length > 0 && !emailRegex.test(email)}
-                outlineColor={Colors.grey["bg"]}
-                style={defaultStyles.input}
-                theme={{
-                  colors: {
-                    primary: Colors.primary[500],
-                    background: Colors.grey["fa"],
-                    error: Colors.error,
-                  },
-                  roundness: 10,
-                }}
               />
 
               <TextInput
@@ -242,7 +218,7 @@ const Info = () => {
                 loading ||
                 !country ||
                 !mobile ||
-                !email ||
+                // !email ||
                 !password ||
                 password.length < 12 ||
                 password !== confirmPassword

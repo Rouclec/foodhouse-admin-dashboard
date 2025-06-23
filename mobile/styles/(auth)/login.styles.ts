@@ -1,11 +1,10 @@
 import { Colors } from "@/constants";
 import { StyleSheet } from "react-native";
 
-
 export const loginstyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light['bg'],
+    backgroundColor: Colors.light["bg"],
   },
   header: {
     paddingHorizontal: 15,
@@ -41,7 +40,7 @@ export const loginstyles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 32,
-    margin: 12
+    margin: 12,
   },
   loginTitle: {
     fontSize: 24,
@@ -91,7 +90,7 @@ export const loginstyles = StyleSheet.create({
   dividerContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 30,
+    marginBottom: 24,
   },
   dividerLine: {
     flexGrow: 1,
@@ -99,24 +98,28 @@ export const loginstyles = StyleSheet.create({
     backgroundColor: Colors.grey["border"],
   },
   dividerText: {
-    width: 120,
+    width: 36,
     textAlign: "center",
     color: Colors.grey["61"],
   },
   socialIconsContainer: {
-    flexDirection: "row",
+    // flexDirection: "row",
+    // alignItems: "center",
     justifyContent: "center",
-    marginBottom: 30,
+    rowGap: 16,
+    marginBottom: 16,
   },
   socialIcon: {
-    width: 88,
+    // width: 88,
     height: 60,
-    borderRadius: 10,
+    flexDirection: "row",
+    columnGap: 12,
+    borderRadius: 64,
     borderWidth: 1,
-    borderColor:  Colors.grey["border"],
+    borderColor: Colors.grey["border"],
     justifyContent: "center",
     alignItems: "center",
-    marginHorizontal: 10,
+    // marginHorizontal: 10,
   },
   registerContainer: {
     flexDirection: "row",
@@ -144,7 +147,7 @@ export const loginstyles = StyleSheet.create({
     height: 155,
     alignItems: "center",
     borderWidth: 2,
-    borderColor:  Colors.grey["border"],
+    borderColor: Colors.grey["border"],
   },
   selectedVarietyCard: {
     borderColor: Colors.primary[500],
@@ -155,7 +158,7 @@ export const loginstyles = StyleSheet.create({
     marginBottom: 8,
     borderRadius: 24,
   },
- 
+
   varietyName: {
     fontSize: 18,
     fontWeight: "bold",

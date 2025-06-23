@@ -35,7 +35,8 @@
       "password": "Mot de passe",
       "forgotPassword": "Mot de passe oublié ?",
       "login": "Connexion",
-      "orContinueWith": "ou continuer avec",
+      "or": "ou",
+      "continueWith": "Continuer avec",
       "dontHaveAnAccount": "Vous n'avez pas de compte ?",
       "registerNow": "Inscrivez-vous maintenant"
     },
@@ -156,7 +157,6 @@
         "language": "Langue",
         "chat": "Discuter sur WhatsApp",
         "contactUs": "Contactez-nous"
-
       },
       "(personal-info)": {
         "heading": "Informations personnelles",

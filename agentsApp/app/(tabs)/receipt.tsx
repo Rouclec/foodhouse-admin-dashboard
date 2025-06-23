@@ -7,13 +7,7 @@ import {
   Image,
   Platform,
 } from "react-native";
-import {
-  Appbar,
-  Text,
-  Button,
-  Dialog,
-  Portal,
-} from "react-native-paper";
+import { Appbar, Text, Button, Dialog, Portal } from "react-native-paper";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Context, ContextType } from "../_layout";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -28,8 +22,6 @@ import { Chase } from "react-native-animated-spinkit";
 import { formatAmount } from "@/utils/amountFormater";
 import { generateDispatchFormPdf } from "@/components";
 import i18n from "@/i18n";
-
-
 
 export default function Receipt() {
   const router = useRouter();
@@ -124,7 +116,9 @@ export default function Receipt() {
       } else if (error?.message) {
         console.error("Error message:", error.message);
       }
-      alert("Failed to dispatch order. Please check your network and try again.");
+      alert(
+        "Failed to dispatch order. Please check your network and try again."
+      );
     },
   });
 
@@ -164,7 +158,8 @@ export default function Receipt() {
         orderNumber: orderDetails?.order?.orderNumber || orderNumberStr,
         product:
           productData?.product?.name || productNameStr || "Unknown Product",
-        quantity: quantityStr || orderDetails?.order?.quantity?.toString() || "0",
+        quantity:
+          quantityStr || orderDetails?.order?.quantity?.toString() || "0",
         amount:
           (currencyStr ? `${currencyStr} ` : "") +
           formatAmount(
@@ -236,7 +231,8 @@ export default function Receipt() {
             <Text style={styles.sectionTitle}>Order Details</Text>
             <View style={styles.detailItem}>
               <Text style={styles.detailLabel}>
-                Order Number: {orderDetails?.order?.orderNumber || orderNumberStr}
+                Order Number:{" "}
+                {orderDetails?.order?.orderNumber || orderNumberStr}
               </Text>
               <View style={styles.detailRow}>
                 <Text style={styles.detailLabel}>
@@ -283,7 +279,8 @@ export default function Receipt() {
             </View>
             <View style={styles.detailItem}>
               <Text style={styles.detailLabel}>
-                Phone: {seller?.user?.phoneNumber || sellerphoneNumberStr || " "}
+                Phone:{" "}
+                {seller?.user?.phoneNumber || sellerphoneNumberStr || " "}
               </Text>
             </View>
           </View>
@@ -315,7 +312,6 @@ export default function Receipt() {
           >
             Confirm Dispatch Slip
           </Button>
-
         </View>
       </ScrollView>
 
@@ -340,9 +336,7 @@ export default function Receipt() {
         </Dialog>
       </Portal>
 
-   
-
-       <Portal>
+      <Portal>
         <Dialog
           visible={successModalVisible}
           onDismiss={() => setSuccessModalVisible(false)}
@@ -361,7 +355,9 @@ export default function Receipt() {
           </Dialog.Content>
           <Dialog.Content>
             <Text style={defaultStyles.bodyText}>
-              {i18n.t("(auth).(subsciption-flow).account.paymentCompleteMessage")}
+              {i18n.t(
+                "(auth).(subsciption-flow).account.paymentCompleteMessage"
+              )}
             </Text>
           </Dialog.Content>
           <Dialog.Content>
@@ -375,13 +371,19 @@ export default function Receipt() {
           </Dialog.Content>
         </Dialog>
       </Portal>
-
-
-
     </View>
   );
 }
-function generateReceiptPdf(arg0: { orderNumber: any; product: any; quantity: any; amount: string; address: any; sellerName: string; sellerPhone: any; buyerName: string; buyerPhone: any; }) {
+function generateReceiptPdf(arg0: {
+  orderNumber: any;
+  product: any;
+  quantity: any;
+  amount: string;
+  address: any;
+  sellerName: string;
+  sellerPhone: any;
+  buyerName: string;
+  buyerPhone: any;
+}) {
   throw new Error("Function not implemented.");
 }
-

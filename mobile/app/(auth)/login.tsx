@@ -250,7 +250,7 @@ export default function Login() {
               <View style={loginstyles.dividerContainer}>
                 <View style={loginstyles.dividerLine} />
                 <Text style={loginstyles.dividerText}>
-                  {i18n.t("(auth).login.orContinueWith")}
+                  {i18n.t("(auth).login.or")}
                 </Text>
                 <View style={loginstyles.dividerLine} />
               </View>
@@ -258,20 +258,15 @@ export default function Login() {
               <View style={loginstyles.socialIconsContainer}>
                 <TouchableOpacity style={loginstyles.socialIcon}>
                   <MaterialCommunityIcons
-                    name="facebook"
-                    size={24}
-                    color={Colors.primary[100]}
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity style={loginstyles.socialIcon}>
-                  <MaterialCommunityIcons
                     name="google"
                     size={24}
                     color={Colors.primary[200]}
                   />
+                  <Text>{i18n.t("(auth).login.continueWith")} Google</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={loginstyles.socialIcon}>
                   <MaterialCommunityIcons name="apple" size={24} />
+                  <Text>{i18n.t("(auth).login.continueWith")} Apple</Text>
                 </TouchableOpacity>
               </View>
 

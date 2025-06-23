@@ -36,7 +36,8 @@
       "password": "Password",
       "forgotPassword": "Forgot password?",
       "login": "Login",
-      "orContinueWith": "or continue with",
+      "or": "or",
+      "continueWith": "Continue with",
       "dontHaveAnAccount": "Don't have an account?",
       "registerNow": "Register Now"
     },
