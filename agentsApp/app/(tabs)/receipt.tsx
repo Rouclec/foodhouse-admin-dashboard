@@ -1,12 +1,13 @@
 import React, { useContext, useEffect, useState } from "react";
+import { View, ScrollView, TouchableOpacity, Image } from "react-native";
 import {
-  View,
-  ScrollView,
-  TouchableOpacity,
+  Appbar,
+  Text,
+  Button,
+  Dialog,
+  Portal,
   TextInput,
-  Image
-} from "react-native";
-import { Appbar, Text, Button, Dialog, Portal } from "react-native-paper";
+} from "react-native-paper";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Context, ContextType } from "../_layout";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -16,11 +17,12 @@ import {
 } from "@/client/orders.swagger/@tanstack/react-query.gen";
 import { usersGetUserByIdOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
-import { defaultStyles, receiptStyles as styles } from "@/styles";
+import { defaultStyles, loginstyles, receiptStyles as styles } from "@/styles";
 import { Chase } from "react-native-animated-spinkit";
 import { formatAmount } from "@/utils/amountFormater";
 import { generateDispatchFormPdf } from "@/components";
 import i18n from "@/i18n";
+import { Colors } from "@/constants";
 
 export default function Receipt() {
   const router = useRouter();
@@ -35,7 +37,6 @@ export default function Receipt() {
     if (Array.isArray(value)) return value[0] ?? "";
     return value ?? "";
   }
-
 
   const {
     orderNumber,
@@ -152,38 +153,37 @@ export default function Receipt() {
   };
 
   const handleGenerateReceipt = async () => {
-  try {
-    await generateDispatchFormPdf({
-      orderId: orderDetails?.order?.orderNumber || orderNumberStr,
-      product: productData?.product?.name || productNameStr || "Unknown Product",
-      quantity: quantityStr || orderDetails?.order?.quantity?.toString() || "0",
-      amount:
-        (currencyStr ? `${currencyStr} ` : "") +
-        formatAmount(
-          amountStr || orderDetails?.order?.price?.value?.toString() || "0",
-          { decimalPlaces: 2 }
-        ),
-      address:
-        deliveryAddressStr ||
-        orderDetails?.order?.deliveryLocation?.address ||
-        "No Address",
-      sellerName:
-        seller?.user?.firstName && seller?.user?.lastName
-          ? `${seller.user.firstName} ${seller.user.lastName}`
-          : sellerNameStr || "Unknown Seller",
-      sellerPhone: seller?.user?.phoneNumber || sellerphoneNumberStr || "",
-      buyerName:
-        buyer?.user?.firstName && buyer?.user?.lastName
-          ? `${buyer.user.firstName} ${buyer.user.lastName}`
-          : buyerNameStr || "Unknown Buyer",
-      buyerPhone: buyer?.user?.phoneNumber || "",
-    });
-  } catch (error) {
-    console.error("Error generating receipt PDF:", error);
-    alert("Failed to generate receipt PDF.");
-  }
-};
-
+    try {
+      await generateDispatchFormPdf({
+        orderId: orderDetails?.order?.orderNumber || orderNumberStr,
+        quantity:
+          quantityStr || orderDetails?.order?.quantity?.toString() || "0",
+        deliveryLocation:
+          deliveryAddressStr ||
+          orderDetails?.order?.deliveryLocation?.address ||
+          "No Address",
+        farmerName:
+          seller?.user?.firstName && seller?.user?.lastName
+            ? `${seller.user.firstName} ${seller.user.lastName}`
+            : sellerNameStr || "Unknown Farmer",
+        farmerAddress: seller?.user?.address?.street || "Unknown Address",
+        farmerPhone: seller?.user?.phoneNumber || sellerphoneNumberStr || "",
+        buyerName:
+          buyer?.user?.firstName && buyer?.user?.lastName
+            ? `${buyer.user.firstName} ${buyer.user.lastName}`
+            : buyerNameStr || "Unknown Buyer",
+        buyerPhone: buyer?.user?.phoneNumber || "",
+        agentName:
+          user?.firstName && user?.lastName
+            ? `${user.firstName} ${user.lastName}`
+            : "Unknown Agent",
+        agentPhone: user?.phoneNumber || "",
+      });
+    } catch (error) {
+      console.error("Error generating receipt PDF:", error);
+      alert("Failed to generate receipt PDF.");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -214,90 +214,132 @@ export default function Receipt() {
       </Appbar.Header>
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.headerSection}>
-          <Text style={styles.headerTitle}>Dispatch via Transport Agency</Text>
-          <Text style={styles.headerSubtitle}>
-            Upload the dispatch slip provided by the transport agency.
-          </Text>
-        </View>
-
         {/* Dispatch Form */}
         <View style={styles.formContainer}>
-          <Text style={styles.formTitle}>Foodhouse Dispatched Form</Text>
+          {/* Header with logo circle and title */}
+          <View style={styles.header}>
+            <View style={styles.logocircle}>
+              <Text style={styles.Logotext}>Food{"\n"}House</Text>
+            </View>
+            <Text style={styles.formTitle}>Foodhouse Dispatched Form</Text>
+          </View>
 
+          {/* Order Details Section */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Order Details</Text>
-            <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>
-                Order Number:{" "}
-                {orderDetails?.order?.orderNumber || orderNumberStr}
+            <View style={styles.infoRow}>
+              <Text>
+                <Text style={styles.infoLabel}>Order Number: </Text>
+                <Text style={styles.infoValue}>
+                  #{orderDetails?.order?.orderNumber || orderNumberStr}
+                </Text>
               </Text>
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>
-                  Product: {productData?.product?.name || productNameStr}
+            </View>
+            <View style={styles.infoRow}>
+              <Text>
+                <Text style={styles.infoLabel}>Quantity: </Text>
+                <Text variant="titleMedium" style={styles.infoValue}>
+                  {formatAmount(orderDetails?.order?.quantity ?? "")}{" "}
+                  {(productData?.product?.unitType ?? "").replace("per_", "")}
+                  {(parseInt(orderDetails?.order?.quantity ?? "") ?? 0) > 1 &&
+                    "s"}
                 </Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>
-                  Quantity: {quantityStr || orderDetails?.order?.quantity}
-                </Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>
-                  Amount:{" "}
-                  {currencyStr || orderDetails?.order?.price?.currencyIsocode}{" "}
-                  {formatAmount(
-                    amountStr ||
-                      orderDetails?.order?.price?.value?.toString() ||
-                      "0",
-                    { decimalPlaces: 2 }
-                  )}
-                </Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Delivery Address:</Text>
-                <Text style={styles.detailValue}>
+              </Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text>
+                <Text style={styles.infoLabel}>Delivery Location: </Text>
+                <Text style={styles.infoValue}>
                   {deliveryAddressStr ||
                     orderDetails?.order?.deliveryLocation?.address ||
                     " "}
                 </Text>
-              </View>
+              </Text>
             </View>
           </View>
 
+          {/* Farmer Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Seller</Text>
-            <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>
-                Name:{" "}
-                {seller?.user?.firstName && seller?.user?.lastName
-                  ? `${seller.user.firstName} ${seller.user.lastName}`
-                  : sellerNameStr || " "}
+            <Text style={styles.sectionTitle}>Farmer</Text>
+            <View style={styles.infoRow}>
+              <Text>
+                <Text style={styles.infoLabel}>Name: </Text>
+                <Text style={styles.infoValue}>
+                  {seller?.user?.firstName && seller?.user?.lastName
+                    ? `${seller.user.firstName} ${seller.user.lastName}`
+                    : sellerNameStr || " "}
+                </Text>
               </Text>
             </View>
-            <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>
-                Phone:{" "}
-                {seller?.user?.phoneNumber || sellerphoneNumberStr || " "}
+            <View style={styles.infoRow}>
+              <Text>
+                <Text style={styles.infoLabel}>Address: </Text>
+                <Text style={styles.infoValue}>
+                  {seller?.user?.address || " "}
+                </Text>
+              </Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text>
+                <Text style={styles.infoLabel}>Phone: </Text>
+                <Text style={styles.infoValue}>
+                  {editablePhone ||
+                    seller?.user?.phoneNumber ||
+                    sellerphoneNumberStr ||
+                    " "}
+                </Text>
               </Text>
             </View>
           </View>
 
+          {/* Buyer Section */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Buyer</Text>
-            <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>
-                Name:{" "}
-                {buyer?.user?.firstName && buyer?.user?.lastName
-                  ? `${buyer.user.firstName} ${buyer.user.lastName}`
-                  : buyerNameStr || " "}
+            <View style={styles.infoRow}>
+              <Text>
+                <Text style={styles.infoLabel}>Name: </Text>
+                <Text style={styles.infoValue}>
+                  {buyer?.user?.firstName && buyer?.user?.lastName
+                    ? `${buyer.user.firstName} ${buyer.user.lastName}`
+                    : buyerNameStr || " "}
+                </Text>
               </Text>
             </View>
-            <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>
-                Phone: {buyer?.user?.phoneNumber || " "}
+            <View style={styles.infoRow}>
+              <Text>
+                <Text style={styles.infoLabel}>Phone: </Text>
+                <Text style={styles.infoValue}>
+                  {buyer?.user?.phoneNumber || " "}
+                </Text>
               </Text>
             </View>
+          </View>
+
+          {/* Agent Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Agent</Text>
+            <View style={styles.infoRow}>
+              <Text>
+                <Text style={styles.infoLabel}>Name: </Text>
+                <Text style={styles.infoValue}>
+                  {user?.firstName && user?.lastName
+                    ? `${user.firstName} ${user.lastName}`
+                    : " "}
+                </Text>
+              </Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text>
+                <Text style={styles.infoLabel}>Phone: </Text>
+                <Text style={styles.infoValue}>{user?.phoneNumber || " "}</Text>
+              </Text>
+            </View>
+          </View>
+
+          {/* Footer */}
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>📞 +237 654 456 789</Text>
+            <Text style={styles.footerText}>✉️ info@foodhouse.com</Text>
           </View>
         </View>
 
@@ -308,32 +350,51 @@ export default function Receipt() {
             style={[defaultStyles.button, defaultStyles.primaryButton]}
             labelStyle={styles.uploadButtonText}
           >
-            Confirm Dispatch Slip
+            Continue
           </Button>
         </View>
       </ScrollView>
 
       <Portal>
-        <Dialog visible={modalVisible} onDismiss={() => setModalVisible(false)}>
-          <Dialog.Title>Edit Seller Phone</Dialog.Title>
+        <Dialog visible={modalVisible} onDismiss={() => setModalVisible(false)} style={styles.dialogContainer}>
+          <Dialog.Content>
+            <Text variant="titleLarge" style={styles.primaryText}>
+              Confirm Phone Number
+            </Text>
+            <Dialog.Content>
+              <Text style={defaultStyles.bodyText}>
+                Confirm the farmer's preferred payment number
+              </Text>
+            </Dialog.Content>
+          </Dialog.Content>
           <Dialog.Content>
             <TextInput
+              mode="outlined"
               value={editablePhone}
               onChangeText={setEditablePhone}
-              style={{ borderBottomWidth: 1, padding: 8 }}
               keyboardType="phone-pad"
+              theme={{
+                roundness: 15,
+                colors: {
+                  onSurfaceVariant: Colors.grey["e8"],
+                  primary: Colors.primary[500],
+                },
+              }}
+              outlineColor={Colors.grey["bg"]}
+              style={[loginstyles.input, styles.inputMargin]}
             />
+
             <Button
               onPress={handleConfirmDispatch}
               mode="contained"
-              style={{ marginTop: 20 }}
+              style={[defaultStyles.button, defaultStyles.primaryButton]}
+              labelStyle={styles.uploadButtonText}
             >
-              Confirm Dispatch
+              Confirm Phone Number
             </Button>
           </Dialog.Content>
         </Dialog>
       </Portal>
-
       <Portal>
         <Dialog
           visible={successModalVisible}
@@ -372,5 +433,3 @@ export default function Receipt() {
     </View>
   );
 }
-
-
