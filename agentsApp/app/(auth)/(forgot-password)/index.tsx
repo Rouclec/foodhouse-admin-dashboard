@@ -1,44 +1,39 @@
-import { Colors } from "@/constants";
-import { defaultStyles, forgotPasswordIndexStyles as styles } from "@/styles";
+import { CAMEROON, Colors } from "@/constants";
+import {
+  defaultStyles,
+  signupStyles,
+  forgotPasswordIndexStyles as styles,
+} from "@/styles";
 import React, { useState } from "react";
 import {
   View,
   KeyboardAvoidingView,
-  
   Image,
   TouchableOpacity,
   ScrollView,
   Platform,
 } from "react-native";
-import {
-  Appbar,
-  Button,
-  HelperText,
-  Icon,
-  Text,
-  Snackbar,
-  TextInput,
-} from "react-native-paper";
+import { Appbar, Button, Icon, Text, Snackbar } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { delay } from "@/utils";
 import i18n from "@/i18n";
 import { useMutation } from "@tanstack/react-query";
-import { usersSendEmailOtpMutation } from "@/client/users.swagger/@tanstack/react-query.gen";
-
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { usersSendSmsOtpMutation } from "@/client/users.swagger/@tanstack/react-query.gen";
+import PhoneNumberInput from "@/components/general/PhoneNumberInput";
 
 export default function ForgotPassword() {
   const router = useRouter();
-  const [email, setEmail] = useState<string>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
+  const [callingCode, setCallingCode] = useState<string>(CAMEROON.dial_code);
+  const [mobile, setMobile] = useState<string>("");
 
   const handleForgotPassword = async () => {
     try {
       setLoading(true);
       await mutateAsync({
         body: {
-          email: email,
+          phoneNumber: `${callingCode}${mobile}`,
           intent: "OTP_INTENT_RESET_PASSWORD",
         },
       });
@@ -50,16 +45,16 @@ export default function ForgotPassword() {
   };
 
   const { mutateAsync } = useMutation({
-    ...usersSendEmailOtpMutation(),
+    ...usersSendSmsOtpMutation(),
     onSuccess: (data) => {
       router.push({
         pathname: "/(auth)/(forgot-password)/verify-otp",
         params: {
           requestId: data?.requestId,
-          email: email,
+          phoneNumber: `${callingCode}${mobile}`,
         },
       });
-      setEmail("");
+      setMobile("");
     },
     onError: async (error) => {
       setError(
@@ -89,7 +84,7 @@ export default function ForgotPassword() {
             <Text variant="titleMedium" style={defaultStyles.heading}>
               {i18n.t("(auth).(forgot-password).index.forgotPassword")}
             </Text>
-             <View /> 
+            <View />
           </Appbar.Header>
           <ScrollView
             contentContainerStyle={defaultStyles.scrollContainer}
@@ -105,44 +100,17 @@ export default function ForgotPassword() {
               </View>
               <View>
                 <Text style={defaultStyles.subheaderText}>
-                  {i18n.t("(auth).(forgot-password).index.enterYourEmail")}
+                  {i18n.t("(auth).(forgot-password).index.enterYourPhoneNumber")}
                 </Text>
               </View>
               <View style={defaultStyles.inputsContainer}>
-                <TextInput
-                  mode="outlined"
-                  label={i18n.t("(auth).(forgot-password).index.email")}
-                  value={email}
-                  onChangeText={(text) => setEmail(text)}
-                  error={
-                    !!email &&
-                    ((!!email?.length && email?.length < 3) ||
-                      !emailRegex.test(email ?? ""))
-                  }
-                  style={defaultStyles.input}
-                  theme={{
-                    colors: {
-                      primary: Colors.primary[500],
-                      background: Colors.grey["fa"],
-                      error: Colors.error,
-                    },
-                    roundness: 10,
-                  }}
-                  outlineColor={Colors.grey["bg"]}
-                  left={
-                    <TextInput.Icon
-                      icon="email-outline"
-                      color={Colors.grey["61"]}
-                      size={20}
-                    />
-                  }
-                  autoCapitalize="none"
+                <PhoneNumberInput
+                  setCountryCode={setCallingCode}
+                  countryCode={callingCode}
+                  setPhoneNumber={setMobile}
+                  phoneNumber={mobile}
+                  containerStyle={signupStyles.phoneNumberInputContainerStyle}
                 />
-                {!!email && !emailRegex.test(email) && (
-                  <HelperText type="error">
-                    {i18n.t("(auth).(forgot-password).index.invalidEmail")}
-                  </HelperText>
-                )}
               </View>
             </View>
           </ScrollView>
@@ -152,7 +120,7 @@ export default function ForgotPassword() {
         <Button
           mode="contained"
           buttonColor={Colors.primary["500"]}
-          disabled={!email || !emailRegex.test(email ?? "") || loading}
+          disabled={!mobile || loading}
           loading={loading}
           onPress={handleForgotPassword}
           style={defaultStyles.button}

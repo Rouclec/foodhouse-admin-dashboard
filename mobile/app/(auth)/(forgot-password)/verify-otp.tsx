@@ -12,7 +12,7 @@ import { Appbar, Button, Icon, Snackbar, Text } from "react-native-paper";
 import { PaperOtpInput } from "react-native-paper-otp-input";
 
 import {
-  usersSendEmailOtpMutation,
+  usersSendSmsOtpMutation,
   usersVerifyOtpMutation,
 } from "@/client/users.swagger/@tanstack/react-query.gen";
 import {
@@ -24,13 +24,13 @@ import { useMutation } from "@tanstack/react-query";
 import i18n from "@/i18n";
 
 export default function ForgotPasswordEmailOtp() {
-  const { requestId, email } = useLocalSearchParams();
+  const { requestId, phoneNumber } = useLocalSearchParams();
 
   const [requestIdState, setRequestIdState] = useState<string>(
     (requestId as string) ?? ""
   );
 
-  const [emailState] = useState(email);
+  const [phoneState] = useState(phoneNumber);
 
   const router = useRouter();
   const [currentTimeLeft, setCurrentTimeLeft] = useState(120);
@@ -48,7 +48,7 @@ export default function ForgotPasswordEmailOtp() {
         body: {
           authFactor: {
             id: requestIdState,
-            type: "FACTOR_TYPE_EMAIL_OTP",
+            type: "FACTOR_TYPE_SMS_OTP",
             secretValue: otp,
           },
         },
@@ -74,7 +74,7 @@ export default function ForgotPasswordEmailOtp() {
       setLoading(true);
       await resendOtp({
         body: {
-          email: emailState as string,
+          phoneNumber: phoneState as string,
           intent: "OTP_INTENT_RESET_PASSWORD",
         },
       });
@@ -135,7 +135,7 @@ export default function ForgotPasswordEmailOtp() {
   }, [currentTimeLeft]);
 
   const { mutateAsync: resendOtp } = useMutation({
-    ...usersSendEmailOtpMutation(),
+    ...usersSendSmsOtpMutation(),
     onError: async (error) => {
       setErrorMessage(() => {
         const errorData = error?.response?.data;
@@ -174,7 +174,7 @@ export default function ForgotPasswordEmailOtp() {
       <KeyboardAvoidingView
         style={defaultStyles.container}
         behavior={"padding"}
-        keyboardVerticalOffset={0} 
+        keyboardVerticalOffset={0}
       >
         <View style={defaultStyles.flex}>
           <Appbar.Header dark={false} style={defaultStyles.appHeader}>
@@ -192,7 +192,7 @@ export default function ForgotPasswordEmailOtp() {
           <View style={styles.directionContainer}>
             <Text style={styles.direction}>
               {i18n.t("(auth).(forgot-password).verify-otp.aCodeHasBeenSentTo")}{" "}
-              {email}
+              {phoneNumber}
             </Text>
           </View>
           <ScrollView
