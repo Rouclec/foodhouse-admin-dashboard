@@ -4,8 +4,7 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  Image,
-  Platform,
+  Image
 } from "react-native";
 import {
   Appbar,
@@ -45,7 +44,7 @@ export default function Receipt() {
     return value ?? "";
   }
 
-  // Read params safely as strings
+
   const {
     orderNumber,
     productName,
