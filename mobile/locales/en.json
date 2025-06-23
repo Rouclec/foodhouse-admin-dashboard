@@ -172,6 +172,12 @@
       "description": "Description"
     },
     "(index)": {
+      "_layout": {
+        "orders": "Orders",
+        "myProducts": "My products",
+        "sales": "Sales",
+        "profile": "Profile"
+      },
       "index": {
         "goodMorning": "Good morning",
         "goodAfternoon": "Good afternoon",
@@ -226,6 +232,7 @@
         "heading9": "Delete Account",
         "english": "English (US)",
         "french": "French",
+        "swahili": "Swahili",
         "header": "Suggested",
         "language": "Language",
         "chat": "Chat on Whatsapp",
@@ -271,6 +278,12 @@
   },
   "(buyer)": {
     "(index)": {
+      "_layout": {
+        "home": "Home",
+        "farmers": "Farmers",
+        "orders": "Orders",
+        "profile": "Profile"
+      },
       "products": {
         "products": "Products",
         "searchProducts": "Search products",

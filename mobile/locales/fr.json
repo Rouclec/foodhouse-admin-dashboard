@@ -6,32 +6,33 @@
   "(auth)": {
     "index": {
       "welcomeTo": "Bienvenue à",
-      "discoverFresh": "Découvrez des produits locaux frais et des articles essentiels livrés directement à votre porte, tout en soutenant notre communauté d'agriculteurs et de vendeurs locaux qui proposent leurs meilleurs produits à un public plus large.",
+      "discoverFresh": "Découvrez des produits locaux frais et des articles essentiels livrés directement à votre porte, tout en soutenant notre communauté d'agriculteurs et de vendeurs locaux qui offrent leurs meilleurs produits à un public plus large.",
       "continue": "Continuer"
     },
     "onboarding": {
       "1": {
         "title": "Achetez frais, achetez pas cher",
-        "description": "Profitez de produits frais de la ferme à des prix abordables. En supprimant les intermédiaires, nous vous permettons d'acheter directement auprès des agriculteurs et d’économiser sur chaque achat sans compromettre la qualité."
+        "description": "Profitez de produits frais de la ferme à des prix abordables. Nous vous facilitons l'achat direct auprès des agriculteurs, ce qui vous permet d'économiser sur chaque achat sans compromettre la qualité."
       },
       "2": {
-        "title": "Mangez frais, grandissez fort",
-        "description": "Mangez frais, grandissez fort. Alimentez votre corps avec les ingrédients les plus frais. Nos agriculteurs fournissent des produits riches en nutriments qui vous aident à rester en bonne santé et fort, pour un mode de vie sain pour vous et votre famille. Commencez dès maintenant."
+        "title": "Mangez frais, devenez fort",
+        "description": "Mangez frais, devenez fort. Alimentez votre corps. Nos agriculteurs fournissent des produits riches en nutriments qui vous aident à rester en bonne santé, soutenant un mode de vie sain pour vous et votre famille."
       },
       "3": {
-        "title": "Mangez sain, vivez plus longtemps",
-        "description": "Priorisez votre santé avec la fraîcheur de la ferme à votre table. Notre plateforme propose des options alimentaires saines et biologiques qui favorisent une vie plus longue et plus saine. Commencez votre chemin vers une meilleure vie dès aujourd’hui !"
+        "title": "Mangez sainement, vivez plus longtemps",
+        "description": "Donnez la priorité à votre santé avec la fraîcheur de la ferme à la table. Notre plateforme propose des options alimentaires saines et biologiques qui favorisent une vie plus longue et plus saine. Commencez votre chemin vers une meilleure vie dès aujourd'hui !"
       },
-      "getStarted": "Commencer"
+      "getStarted": "Commencer",
+      "next": "Suivant"
     },
     "login": {
       "anUnknownError": "Une erreur inconnue s'est produite",
       "errorParsing": "Erreur lors de l'analyse de la réponse d'erreur : ",
-      "emailRequired": "L'adresse e-mail est requise",
-      "invalidEmail": "Veuillez entrer une adresse e-mail valide",
+      "emailRequired": "L'email ou le numéro de téléphone est requis",
+      "invalidEmail": "Veuillez entrer un email valide",
       "passwordRequired": "Le mot de passe est requis",
       "loginTo": "Connectez-vous à votre compte",
-      "email": "E-mail",
+      "email": "Email ou numéro de téléphone",
       "password": "Mot de passe",
       "forgotPassword": "Mot de passe oublié ?",
       "login": "Connexion",
@@ -40,10 +41,62 @@
       "dontHaveAnAccount": "Vous n'avez pas de compte ?",
       "registerNow": "Inscrivez-vous maintenant"
     },
+    "verifyOtp": {
+      "verifyNumber": "Vérifiez votre numéro de téléphone",
+      "codeSent": "Le code a été envoyé à",
+      "verify": "vérifier",
+      "phoneNumberVerified": "Numéro de téléphone vérifié !",
+      "setupProfile": "Vous pouvez maintenant configurer le profil de votre agriculteur",
+      "continue": "continuer",
+      "resendCode": "Renvoyer le code dans"
+    },
+    "profile": {
+      "completeRegistration": "Compléter l'inscription",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "email": "Email",
+      "address": "Adresse",
+      "unknownError": "Une erreur inconnue s'est produite",
+      "congratulations": "Félicitations",
+      "registrationCompleteMessage": "Votre compte est prêt à être utilisé, vous serez redirigé vers la page d'accueil dans quelques secondes"
+    },
+    "variety": {
+      "description": "Bienvenue sur l'application Food House ! Choisissez votre variété et explorez une large gamme de produits adaptés à vos préférences.",
+      "header": "Choisissez votre variété"
+    },
+    "(forgot-password)": {
+      "index": {
+        "forgotPassword": "Mot de passe oublié",
+        "enterYourPhoneNumber": "Entrez votre numéro de téléphone pour réinitialiser votre mot de passe. Nous vous enverrons un code OTP pour vérification.",
+        "email": "Email",
+        "enterEmail": "Entrez votre email",
+        "invalidEmail": "Veuillez entrer un email valide",
+        "continue": "Continuer",
+        "unknownError": "Une erreur inconnue s'est produite"
+      },
+      "verify-otp": {
+        "forgotPassword": "Mot de passe oublié",
+        "aCodeHasBeenSentTo": "Un code a été envoyé à ",
+        "resendCode": "Renvoyer le code",
+        "in": "dans",
+        "verifyOtp": "Vérifier le code OTP"
+      },
+      "create-new-password": {
+        "createNewPassword": "Créer un nouveau mot de passe",
+        "password": "Mot de passe",
+        "confirmPassword": "Confirmez le mot de passe",
+        "passwordMustBe": "Le mot de passe doit contenir au moins 12 caractères",
+        "passwordsDoNot": "Les mots de passe ne correspondent pas",
+        "continue": "Continuer",
+        "yourPasswordHasBeenReset": "Votre mot de passe a été réinitialisé avec succès. Vous serez redirigé vers la page de connexion dans quelques secondes.",
+        "unknownError": "Une erreur inconnue s'est produite",
+        "passwordReset": "Réinitialisation du mot de passe!"
+      }
+    },
     "register": {
       "createAccount": "Créer un compte",
-      "RegisterNewAccount": "Enregistrer un nouveau compte",
-      "description": "Qu'est-ce qui vous décrit le mieux ?",
+      "registerNewAccount": "Enregistrer un nouveau compte",
+      "description": "Quelle option vous décrit le mieux ?",
       "buyer": "Acheteur",
       "seller": "Agriculteur ou Vendeur",
       "button": "Suivant",
@@ -52,24 +105,13 @@
     },
     "createAccount": {
       "farmerAccount": "Créer un compte agriculteur",
+      "buyerAccount": "Créer un compte acheteur",
       "createPassword": "Créer un mot de passe",
-      "createAccount": "Créer un compte"
-    },
-    "verifyOtp": {
-      "verifyNumber": "Vérifiez votre numéro de téléphone",
-      "codeSent": "Le code a été envoyé à",
-      "verify": "vérifier",
-      "phoneNumberVerified": "Numéro de téléphone vérifié !",
-      "setupProfile": "Vous pouvez maintenant configurer le profil de l'agriculteur",
-      "continue": "continuer",
-      "resendCode": "Renvoyer le code dans"
-    },
-    "profile": {
-      "completeRegistration": "Terminer l'inscription",
-      "firstName": "Prénom",
-      "lastName": "Nom de famille",
-      "email": "E-mail",
-      "address": "Adresse"
+      "createAccount": "Créer un compte",
+      "enterEmail": "Entrez votre email",
+      "reEnterPassword": "Ressaisissez votre mot de passe",
+      "placeholder": "Le mot de passe doit contenir au moins 12 caractères",
+      "passwordMustBe": "Le mot de passe doit contenir au moins 12 caractères"
     },
     "(subsciption-flow)": {
       "index": {
@@ -77,13 +119,33 @@
         "subtitle": "Accès illimité",
         "benefit1": "Profitez de notre application sans publicités ni restrictions",
         "benefit2": "Appels illimités avec le système",
-        "benefit3": "Suivi de commande facile",
+        "benefit3": "Suivi facile des commandes",
         "button1": "Passer",
-        "button2": "S’abonner maintenant",
+        "button2": "S'abonner maintenant",
         "duration1": "1 mois",
         "duration2": "6 mois",
         "duration3": "12 mois",
         "description": "Payez une fois, annulez à tout moment"
+      },
+      "payment-method": {
+        "description": "Pour continuer, veuillez ajouter vos méthodes de paiement."
+      },
+      "account": {
+        "heading": "Effectuer le paiement",
+        "details": "Entrez votre numéro de téléphone pour initier le paiement",
+        "button": "Suivant",
+        "mtn": "Numéro de compte MTN Mobile Money",
+        "orange": "Entrez votre numéro Orange Money",
+        "cardDetails": "Détails de la carte Mastercard",
+        "cardNumber": "Entrez votre numéro de carte",
+        "cardholderName": "Nom du titulaire",
+        "cvv": "code CVV",
+        "paymentSuccessful": "Paiement réussi",
+        "paymentCompleteMessage": "Votre paiement a été effectué avec succès",
+        "paymentFailed": "Paiement échoué",
+        "paymentFailedMessage": "Votre paiement n'a pas été effectué avec succès",
+        "instructionMoMo": "Composez le *126# pour confirmer votre paiement",
+        "instructionOM": "Composez le #156# pour confirmer votre paiement"
       }
     }
   },
@@ -93,8 +155,8 @@
       "cancel": "Annuler",
       "post": "Publier",
       "productImage": "Image du produit",
-      "uploadImage": "Téléchargez une image (.jpg, .png, .jpeg).\nPas plus de 10 Mo",
-      "productCategory": "Catégorie de produit",
+      "uploadImage": "Télécharger une image (.jpg, .png, .jpeg).\\nPas plus de 10 Mo",
+      "productCategory": "Catégorie du produit",
       "productName": "Nom du produit",
       "priceType": "Type de prix",
       "price": "Prix",
@@ -106,10 +168,27 @@
       "pleaseEnterThePrice": "Veuillez entrer le prix du produit",
       "pleaseEnterADescription": "Veuillez entrer la description du produit",
       "congratulations": "Félicitations",
-      "yourProductHasBeenUploaded": "Votre produit a été téléchargé",
+      "yourProductHasBeenUploaded": "Votre produit a été mis en ligne",
       "description": "Description"
     },
     "(index)": {
+      "_layout": {
+        "orders": "Commandes",
+        "myProducts": "Mes produits",
+        "sales": "Ventes",
+        "profile": "Profil"
+      },
+      "index": {
+        "goodMorning": "Bonjour",
+        "goodAfternoon": "Bon après-midi",
+        "goodEvening": "Bonsoir",
+        "searchOrder": "Rechercher une commande",
+        "pending": "En attente",
+        "completed": "Terminées",
+        "couldNotLoadProduct": "Impossible de charger les détails du produit",
+        "details": "Détails",
+        "noOrdersFound": "Aucune commande trouvée"
+      },
       "my-products": {
         "myProducts": "Mes produits",
         "products": "Produits",
@@ -121,22 +200,22 @@
       "profile": {
         "title": "Compte",
         "heading": "Devenez VIP",
-        "description": "Devenez un VIP et profitez de l'application sans aucune restriction",
+        "description": "Devenez VIP et profitez de l'app sans restrictions",
         "button": "Devenir VIP",
         "tab1": "Paramètres",
-        "tab2": "Partager l'application",
-        "tab3": "Se déconnecter",
+        "tab2": "Partager l'app",
+        "tab3": "Déconnexion",
         "tab4": "Inviter des amis",
-        "confirmation": "Êtes-vous sûr de vouloir vous déconnecter ?",
+        "confirmation": "Êtes-vous sûr de vouloir vous déconnecter ?",
         "button1": "Annuler",
-        "button2": "Se déconnecter"
+        "button2": "Déconnexion"
       },
       "(change-password)": {
         "currentPassword": "Mot de passe actuel",
         "enterCurrentPassword": "Entrez votre mot de passe actuel",
         "newPassword": "Nouveau mot de passe",
-        "enterNewPassword": "Entrez un nouveau mot de passe",
-        "confirmPassword": "Confirmer le nouveau mot de passe",
+        "enterNewPassword": "Entrez le nouveau mot de passe",
+        "confirmPassword": "Confirmez le nouveau mot de passe",
         "placeholder": "Confirmez le nouveau mot de passe",
         "forgotPassword": "Mot de passe oublié",
         "save": "Enregistrer les modifications"
@@ -146,30 +225,188 @@
         "heading1": "Informations personnelles",
         "heading2": "Changer le mot de passe",
         "heading3": "Langue",
-        "heading4": "Nous contacter",
-        "heading6": "Termes et conditions",
+        "heading4": "Contactez-nous",
+        "heading6": "Conditions générales",
         "heading7": "Politique de confidentialité",
         "heading8": "À propos de Foodhouse",
         "heading9": "Supprimer le compte",
         "english": "Anglais (US)",
         "french": "Français",
-        "header": "Suggéré",
+        "swahili": "Swahili",
+        "header": "Suggestions",
         "language": "Langue",
-        "chat": "Discuter sur WhatsApp",
+        "chat": "Chat sur Whatsapp",
         "contactUs": "Contactez-nous"
       },
       "(personal-info)": {
         "heading": "Informations personnelles",
         "fullName": "Nom complet",
         "fullNamePlaceholder": "Entrez votre nom complet",
-        "email": "E-mail",
-        "emailPlaceholder": "Entrez votre e-mail",
+        "email": "Email",
+        "emailPlaceholder": "Entrez votre email",
         "address": "Adresse",
         "addressPlaceholder": "Entrez votre adresse",
         "cancel": "Annuler",
         "save": "Enregistrer les modifications",
         "edit": "Modifier"
       }
+    },
+    "order-details": {
+      "orderDetails": "Détails de la commande",
+      "couldNotLoad": "Impossible de charger les détails de la commande",
+      "approveOrder": "Approuver la commande",
+      "orderNumber": "Numéro de commande",
+      "customersName": "Nom du client",
+      "quantity": "Quantité",
+      "deliveryAddress": "Adresse de livraison",
+      "unknownError": "Une erreur inconnue s'est produite",
+      "congratulations": "Félicitations",
+      "youHaveApproved": "Vous avez approuvé cette commande, préparez-la pour la livraison",
+      "rejectOrder": "Refuser la commande",
+      "enterAReason": "Entrez une raison pour refuser cette commande",
+      "reason": "Raison",
+      "reject": "Refuser",
+      "orderRejected": "Commande refusée",
+      "youHaveRejected": "Vous avez refusé cette commande. Le client sera informé de cette action"
+    },
+    "sales": {
+      "sales": "Ventes",
+      "earnings": "Revenus",
+      "completedOrders": "Commandes terminées",
+      "noOrdersFound": "Aucune commande trouvée"
+    }
+  },
+  "(buyer)": {
+    "(index)": {
+      "_layout": {
+        "home": "Accueil",
+        "farmers": "Agriculteurs",
+        "orders": "Commandes",
+        "profile": "Profil"
+      },
+      "products": {
+        "products": "Produits",
+        "searchProducts": "Rechercher des produits",
+        "goodMorning": "Bonjour",
+        "goodAfternoon": "Bon après-midi",
+        "goodEvening": "Bonsoir",
+        "categories": "Catégories",
+        "noProductsFound": "Aucun produit trouvé",
+        "all": "Tous",
+        "filter": "Filtrer",
+        "priceRange": "Fourchette de prix",
+        "ratings": "Évaluations",
+        "close": "Fermer",
+        "apply": "Appliquer"
+      },
+      "orders": {
+        "myOrders": "Mes commandes",
+        "searchOrder": "Rechercher une commande",
+        "noOrdersFound": "Aucune commande trouvée",
+        "writeReview": "Écrire un avis",
+        "trackOrder": "Suivre la commande",
+        "couldNotLoadProduct": "Impossible de charger les détails du produit",
+        "pending": "En attente",
+        "completed": "Terminées",
+        "leaveAReview": "Laisser un avis",
+        "howWasYourProduct": "Comment était votre produit ?",
+        "pleaseGiveYourRating": "Veuillez donner votre note et aussi votre avis",
+        "review": "Avis",
+        "cancel": "Annuler",
+        "submit": "Soumettre"
+      },
+      "farmers": {
+        "farmers": "Agriculteurs",
+        "searchFarmers": "Rechercher des agriculteurs",
+        "noFarmerFound": "Aucun agriculteur trouvé",
+        "viewDetails": "Voir les détails"
+      }
+    },
+    "product-details": {
+      "couldNotLoad": "Impossible de charger les détails du produit",
+      "description": "Description",
+      "farmer": "Agriculteur",
+      "orderNow": "Commander",
+      "price": "Prix"
+    },
+    "(order)": {
+      "index": {
+        "deliveryMethod": "Méthode de livraison",
+        "continue": "Continuer",
+        "chooseDeliveryMethod": "Choisissez comment vous souhaitez que votre commande soit livrée",
+        "homeDelivery": "Livraison à domicile",
+        "deliveredTo": "Livré à un lieu de votre choix",
+        "pickupPoint": "Point de collecte",
+        "collectFrom": "Retirer d'un lieu proche"
+      },
+      "checkout": {
+        "checkout": "Paiement",
+        "couldNotLoad": "Impossible de charger les détails du produit",
+        "order": "Commande",
+        "shippingAddress": "Adresse de livraison",
+        "confirmPayment": "Confirmer le paiement",
+        "amount": "Montant",
+        "delivery": "Livraison",
+        "transactionCharges": "Frais de transaction",
+        "serviceCharges": "Frais de service",
+        "total": "Total",
+        "pleaseAcceptPermissions": "Veuillez accepter les autorisations pour accéder à votre localisation",
+        "errorGettingLocation": "Erreur lors de l'obtention de la localisation",
+        "currentLocation": "Localisation actuelle",
+        "unknownError": "Une erreur inconnue s'est produite"
+      },
+      "select-pickup-point": {
+        "selectPickupPoint": "Sélectionner un point de collecte",
+        "proceedToCheckout": "Passer au paiement",
+        "enterCity": "Entrez votre ville",
+        "noPickupPointsIn": "Aucun point de collecte dans",
+        "availablePickup": "Points de collecte disponibles"
+      },
+      "delivery-address": {
+        "deliveryAddress": "Adresse de livraison",
+        "proceedToCheckout": "Passer au paiement",
+        "pleaseAcceptPermissions": "Veuillez accepter les autorisations pour accéder à votre localisation",
+        "errorGettingLocation": "Erreur lors de l'obtention de la localisation",
+        "addressDetails": "Détails de l'adresse",
+        "useCurrentLocation": "Utiliser ma localisation actuelle",
+        "enterYourAddress": "Entrez votre adresse",
+        "addressHere": "Adresse ici"
+      }
+    },
+    "track-order": {
+      "trackOrder": "Suivre la commande",
+      "orderStatusDetails": "Détails du statut de la commande",
+      "couldNotLoad": "Impossible de charger les détails de la commande",
+      "orderPlaced": "Commande passée",
+      "orderConfirmed": "Commande confirmée",
+      "orderDispatched": "Commande expédiée",
+      "orderDelivered": "Commande livrée",
+      "unknownOrderStatus": "Statut de commande inconnu",
+      "paymentDone": "Paiement effectué",
+      "farmerReceived": "L'agriculteur a reçu votre commande",
+      "orderInTransit": "Votre commande est en transit",
+      "orderCompleted": "La commande a été livrée à l'adresse de livraison",
+      "unknownState": "L'état de cette commande est inconnu, contactez l'administrateur pour plus d'informations",
+      "orderNumber": "Numéro de commande"
+    },
+    "farmer-details": {
+      "farmerInformation": "Informations sur l'agriculteur",
+      "products": "Produits",
+      "reviews": "Avis",
+      "noProductsFound": "Aucun produit trouvé",
+      "noReviewsYet": "Pas encore d'avis"
+    }
+  },
+  "components": {
+    "Dropdown": {
+      "noData": "Pas de données"
+    },
+    "ImagePicker": {
+      "photoGalery": "Galerie de photos",
+      "camera": "Caméra",
+      "cancel": "Annuler",
+      "permissionDenied": "Permission refusée",
+      "allowAccessToGallery": "Veuillez autoriser l'accès à la galerie"
     }
   }
 }

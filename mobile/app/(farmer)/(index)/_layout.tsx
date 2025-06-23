@@ -7,6 +7,7 @@ import { Icon, Text } from "react-native-paper";
 import { tabStyles as styles } from "@/styles";
 import { Colors } from "@/constants";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
+import i18n from "@/i18n";
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
@@ -37,7 +38,7 @@ export default function TabLayout() {
                 color={focused ? Colors.primary[500] : Colors.grey["9e"]}
               />
               <Text style={[styles.tabItemText, focused && styles.focusedText]}>
-                Orders
+                {i18n.t("(farmer).(index)._layout.orders")}
               </Text>
             </View>
           ),
@@ -54,7 +55,7 @@ export default function TabLayout() {
                 color={focused ? Colors.primary[500] : Colors.grey["9e"]}
               />
               <Text style={[styles.tabItemText, focused && styles.focusedText]}>
-                My Products
+                {i18n.t("(farmer).(index)._layout.myProducts")}
               </Text>
             </View>
           ),
@@ -71,7 +72,7 @@ export default function TabLayout() {
                 color={focused ? Colors.primary[500] : Colors.grey["9e"]}
               />
               <Text style={[styles.tabItemText, focused && styles.focusedText]}>
-                Sales
+                {i18n.t("(farmer).(index)._layout.sales")}
               </Text>
             </View>
           ),
@@ -109,7 +110,7 @@ export default function TabLayout() {
                 color={focused ? Colors.primary[500] : Colors.grey["9e"]}
               />
               <Text style={[styles.tabItemText, focused && styles.focusedText]}>
-                Profile
+                {i18n.t("(farmer).(index)._layout.profile")}
               </Text>
             </View>
           ),
