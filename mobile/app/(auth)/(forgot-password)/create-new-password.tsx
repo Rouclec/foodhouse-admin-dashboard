@@ -47,7 +47,7 @@ export default function CreateNewPassword() {
         body: {
           newPassword: password,
           emailFactor: {
-            type: "FACTOR_TYPE_EMAIL_OTP",
+            type: "FACTOR_TYPE_SMS_OTP",
             id: requestId as string,
             secretValue: otp as string,
           },

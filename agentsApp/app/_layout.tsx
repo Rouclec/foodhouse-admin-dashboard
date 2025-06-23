@@ -267,13 +267,13 @@ function RootLayoutNav() {
       <Context.Provider value={{ ...contextInfo, ...contextSetters }}>
         <PaperProvider theme={theme}>
           <GestureHandlerRootView style={defaultStyles.flex}>
-            <Stack initialRouteName="index" screenOptions={{headerShown: false}}>
+            <Stack
+              initialRouteName="index"
+              screenOptions={{ headerShown: false }}
+            >
               <Stack.Screen name="index" options={{ headerShown: false }} />
               <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-              <Stack.Screen name="(farmer)" options={{ headerShown: false }} />
-              <Stack.Screen name="(buyer)" options={{ headerShown: false }} />
-              <Stack.Screen name="(payment)" options={{ headerShown: false }} />
-              <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             </Stack>
           </GestureHandlerRootView>
         </PaperProvider>

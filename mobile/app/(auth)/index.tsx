@@ -14,11 +14,14 @@ import React from "react";
 export default function TabOneScreen() {
   return (
     <>
-      <ScrollView contentContainerStyle={[defaultStyles.scrollContainer, index1.nopadding]}>
+      <ScrollView
+        contentContainerStyle={[
+          defaultStyles.scrollContainer,
+          index1.nopadding,
+        ]}
+      >
         <View style={index1.safeArea}>
-          
           <View style={index1.imageContainer}>
-            
             <View style={[index1.imageRows]}>
               {[
                 require("@/assets/images/rectangle11.png"),
@@ -73,9 +76,9 @@ export default function TabOneScreen() {
               <Text style={{ fontWeight: "bold" }}>FoodHouse</Text>
             </Text>
 
-            <Text style={index1.subText}>
+            {/* <Text style={index1.subText}>
               {i18n.t("(auth).index.discoverFresh")}
-            </Text>
+            </Text> */}
           </View>
         </View>
       </ScrollView>
@@ -91,7 +94,6 @@ export default function TabOneScreen() {
           </Text>
         </TouchableOpacity>
       </View>
-    
     </>
   );
 }

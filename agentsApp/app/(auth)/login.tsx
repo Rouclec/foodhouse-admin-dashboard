@@ -43,16 +43,25 @@ export default function Login() {
   });
 
   useEffect(() => {
-    if (userData?.user) {
-      setUser(userData.user);
-      const role = userData?.user?.role;
+    const checkAndLogin = async () => {
+      console.log("checking to log in");
+      if (userData?.user) {
+        setUser(userData.user);
+        const role = userData?.user?.role;
 
-      if (role === "USER_ROLE_AGENT") {
-        router.replace("/(tabs)/(index)");
-      } else {
-        console.error("not an agent");
+        if (role === "USER_ROLE_AGENT") {
+          router.replace("/(tabs)/(index)");
+        } else {
+          console.error("not an agent");
+          setError(true);
+          setErrorMessage("Failed to login: Unauthorized");
+          await delay(5000);
+          setError(false);
+          setErrorMessage("");
+        }
       }
-    }
+    };
+    checkAndLogin();
   }, [userData]);
 
   const { mutateAsync: authenticate } = useMutation({
@@ -136,7 +145,7 @@ export default function Login() {
               <TouchableOpacity onPress={() => router.back()}>
                 <Appbar.BackAction color="#000" />
               </TouchableOpacity>
-             
+
               <View />
             </Appbar.Header>
 
@@ -276,7 +285,7 @@ export default function Login() {
                 </TouchableOpacity>
               </View>
 
-              <View style={loginstyles.registerContainer}>
+              {/* <View style={loginstyles.registerContainer}>
                 <Text style={loginstyles.registerText}>
                   {i18n.t("(auth).login.dontHaveAnAccount")}{" "}
                 </Text>
@@ -287,7 +296,7 @@ export default function Login() {
                     {i18n.t("(auth).login.registerNow")}
                   </Text>
                 </TouchableOpacity>
-              </View>
+              </View> */}
             </View>
           </ScrollView>
         </View>
