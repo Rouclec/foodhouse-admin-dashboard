@@ -239,28 +239,10 @@ export default function Login() {
                 </Text>
               </Link>
 
-              <TouchableOpacity
-                style={[
-                  loginstyles.loginButton,
-                  loading && defaultStyles.greyButton,
-                ]}
-                onPress={handleLogIn}
-                disabled={loading}
-                activeOpacity={0.8}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={loginstyles.loginButtonText}>
-                    {i18n.t("(auth).login.login")}
-                  </Text>
-                )}
-              </TouchableOpacity>
-
-              <View style={loginstyles.dividerContainer}>
+              {/* <View style={loginstyles.dividerContainer}>
                 <View style={loginstyles.dividerLine} />
                 <Text style={loginstyles.dividerText}>
-                  {i18n.t("(auth).login.orContinueWith")}
+                  {i18n.t("(auth).login.or")}
                 </Text>
                 <View style={loginstyles.dividerLine} />
               </View>
@@ -283,7 +265,7 @@ export default function Login() {
                 <TouchableOpacity style={loginstyles.socialIcon}>
                   <MaterialCommunityIcons name="apple" size={24} />
                 </TouchableOpacity>
-              </View>
+              </View> */}
 
               {/* <View style={loginstyles.registerContainer}>
                 <Text style={loginstyles.registerText}>
@@ -299,6 +281,25 @@ export default function Login() {
               </View> */}
             </View>
           </ScrollView>
+          <View style={defaultStyles.bottomButtonContainer}>
+            <TouchableOpacity
+              style={[
+                loginstyles.loginButton,
+                loading && defaultStyles.greyButton,
+              ]}
+              onPress={handleLogIn}
+              disabled={loading}
+              activeOpacity={0.8}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={loginstyles.loginButtonText}>
+                  {i18n.t("(auth).login.login")}
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
       </KeyboardAvoidingView>
       <Snackbar

@@ -27,13 +27,13 @@ import { Context, ContextType } from "../_layout";
 import i18n from "@/i18n";
 import { ImagePicker } from "@/components";
 import { Chase } from "react-native-animated-spinkit";
-import { Colors } from "@/constants";
+import { Colors, emailRegex } from "@/constants";
 
 const ProfilePage = () => {
   const { user, setUser } = useContext(Context) as ContextType;
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  //const [email, setEmail] = useState(user?.email);
+  const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [profileImage, setProfileImage] =
@@ -56,12 +56,12 @@ const ProfilePage = () => {
     },
     onSuccess: async () => {
       setSuccessModalVisible(true);
-     
+
       setTimeout(() => {
         if (role === "USER_TYPE_FARMER") {
           router.replace("/(farmer)/(index)");
         } else {
-          router.replace("/variety");
+          router.replace("/(buyer)/(index)");
         }
       }, 3000);
     },
@@ -83,7 +83,7 @@ const ProfilePage = () => {
       const data = {
         firstName,
         lastName,
-        email: user?.email,
+        email,
         address,
         profileImage: imageUrl || undefined,
       };
@@ -94,7 +94,7 @@ const ProfilePage = () => {
           userId: user?.userId ?? "",
         },
       });
-       setUser({ ...data });
+      setUser({ ...data });
     } catch (error) {
       console.error("Error completing registration:", error);
       setErrorMessage(i18n.t("(auth).profile.uploadError"));
@@ -194,6 +194,26 @@ const ProfilePage = () => {
               />
 
               <TextInput
+                mode="outlined"
+                label={i18n.t("(auth).profile.email")}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                error={email?.length > 0 && !emailRegex.test(email)}
+                outlineColor={Colors.grey["bg"]}
+                style={defaultStyles.input}
+                theme={{
+                  colors: {
+                    primary: Colors.primary[500],
+                    background: Colors.grey["fa"],
+                    error: Colors.error,
+                  },
+                  roundness: 10,
+                }}
+              />
+
+              <TextInput
                 label={i18n.t("(auth).profile.address")}
                 value={address}
                 onChangeText={setAddress}
@@ -218,7 +238,13 @@ const ProfilePage = () => {
               mode="contained"
               textColor={Colors.primary["500"]}
               buttonColor={Colors.primary["50"]}
-              onPress={() => router.replace("/(farmer)/(index)")}
+              onPress={() => {
+                if (role === "USER_TYPE_FARMER") {
+                  router.replace("/(farmer)/(index)");
+                } else {
+                  router.replace("/(buyer)/(index)");
+                }
+              }}
               style={[defaultStyles.button, signupStyles.button]}
               disabled={loading}
             >
@@ -231,9 +257,7 @@ const ProfilePage = () => {
               buttonColor={Colors.primary["500"]}
               style={[defaultStyles.button, signupStyles.button]}
               loading={loading}
-              disabled={
-                !firstName || !lastName  || !address || loading
-              }
+              disabled={!firstName || !lastName || !address || loading}
               onPress={handleComplete}
             >
               <Text style={defaultStyles.buttonText}>Complete</Text>

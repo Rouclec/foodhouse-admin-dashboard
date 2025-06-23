@@ -18,35 +18,31 @@ import { Colors } from "@/constants";
 import i18n from "@/i18n";
 import { Feather } from "@expo/vector-icons";
 import { ordersListFarmerOrdersOptions } from "@/client/orders.swagger/@tanstack/react-query.gen";
-import {
-  ordersgrpcOrderStatus,
-} from "@/client/orders.swagger";
+import { ordersgrpcOrderStatus } from "@/client/orders.swagger";
 import { Chase } from "react-native-animated-spinkit";
 import { OrderItem } from "@/components";
 
 const HOUR_OF_DAY = new Date().getHours();
 
-const TAB_ITEMS: Array<{
-  name: string;
-  value: Array<ordersgrpcOrderStatus>;
-}> = [
-  {
-    name: i18n.t("(farmer).(index).index.pending"),
-    value: [
-      "OrderStatus_PAYMENT_SUCCESSFUL",
-      "OrderStatus_APPROVED",
-      "OrderStatus_IN_TRANSIT",
-    ],
-  },
-  {
-    name: i18n.t("(farmer).(index).index.completed"),
-    value: ["OrderStatus_DELIVERED"],
-  },
-];
-
-
-
 export default function Orders() {
+  const TAB_ITEMS: Array<{
+    name: string;
+    value: Array<ordersgrpcOrderStatus>;
+  }> = [
+    {
+      name: i18n.t("(farmer).(index).index.pending"),
+      value: [
+        "OrderStatus_PAYMENT_SUCCESSFUL",
+        "OrderStatus_APPROVED",
+        "OrderStatus_IN_TRANSIT",
+      ],
+    },
+    {
+      name: i18n.t("(farmer).(index).index.completed"),
+      value: ["OrderStatus_DELIVERED"],
+    },
+  ];
+
   const { user } = useContext(Context) as ContextType;
 
   const [hasReachedEnd, setHasReachedEnd] = useState(false);
