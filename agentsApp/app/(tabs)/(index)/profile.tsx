@@ -67,7 +67,7 @@ export default function Profile() {
 
   const shareApp = async () => {
     await Share.share({
-      message: `Check out this awesome app: ${process.env.EXPO_PUBLIC_WEBSITE_URL}`,
+      message: `Check out this awesome app: ${process.env.EXPO_PUBLIC_APP_URL}`,
       title: "Share App",
     });
   };
@@ -119,7 +119,7 @@ export default function Profile() {
               <View style={styles.navigateSection}>
                 <TouchableOpacity
                   style={styles.navigationItem}
-                   onPress={() => router.push("/(tabs)/settings")}
+                  onPress={() => router.push("/(tabs)/settings")}
                 >
                   <View style={styles.navigationContent}>
                     <View style={profileFlowStyles.iconContainer}>
