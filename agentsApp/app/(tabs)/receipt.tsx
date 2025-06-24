@@ -7,6 +7,8 @@ import {
   Dialog,
   Portal,
   TextInput,
+  Snackbar,
+  Icon,
 } from "react-native-paper";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Context, ContextType } from "../_layout";
@@ -31,6 +33,11 @@ export default function Receipt() {
   const [modalVisible, setModalVisible] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [editablePhone, setEditablePhone] = useState("");
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+
+  const FOODHOUSE_PHONE = process.env.EXPO_PUBLIC_PHONE_NUMBER;
+  const FOODHOUSE_EMAIL = process.env.EXPO_PUBLIC_EMAIL;
 
   // Helper to get string from string|string[]|undefined safely
   function asString(value?: string | string[]): string {
@@ -60,6 +67,8 @@ export default function Receipt() {
   const currencyStr = asString(currency);
   const quantityStr = asString(quantity);
   const deliveryAddressStr = asString(deliveryAddress);
+  const [messageModalVisible, setMessageModalVisible] = useState(false);
+  const [messageModalText, setMessageModalText] = useState("");
 
   const {
     data: orderDetails,
@@ -121,6 +130,41 @@ export default function Receipt() {
       );
     },
   });
+
+  const handleContinue = () => {
+    const status = orderDetails?.order?.status;
+
+    if (
+      status === "OrderStatus_PAYMENT_SUCCESSFUL" ||
+      status === "OrderStatus_IN_TRANSIT"
+    ) {
+      setMessageModalText(
+        "This order has not been approved by the farmer"
+      );
+      setMessageModalVisible(true);
+      return;
+    }
+
+    if (
+      status === "OrderStatus_CREATED" ||
+      status === "OrderStatus_PAYMENT_FAILED" ||
+      status === "OrderStatus_REJECTED"
+    ) {
+      setMessageModalText(
+        "This order has not been approved"
+      );
+      setMessageModalVisible(true);
+      return;
+    }
+
+    if (status === "OrderStatus_APPROVED") {
+      setModalVisible(true);
+      return;
+    }
+
+    setMessageModalText("Order status is unknown or invalid for dispatch.");
+    setMessageModalVisible(true);
+  };
 
   const handleConfirmDispatch = async () => {
     if (!orderDetails?.order?.orderNumber || !user?.userId) {
@@ -203,28 +247,37 @@ export default function Receipt() {
 
   return (
     <View style={defaultStyles.container}>
-      <Appbar.Header style={defaultStyles.appHeader}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Appbar.BackAction color="#000" />
+      <Appbar.Header dark={false} style={defaultStyles.appHeader}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={defaultStyles.backButtonContainer}
+        >
+          <Icon source={"arrow-left"} size={24} />
         </TouchableOpacity>
         <Text variant="titleMedium" style={defaultStyles.heading}>
-          Dispatch Receipt
+          Dispatch Info
         </Text>
         <View />
       </Appbar.Header>
 
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Dispatch Form */}
+      <ScrollView
+        contentContainerStyle={defaultStyles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+        nestedScrollEnabled={true}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.formContainer}>
-          {/* Header with logo circle and title */}
+          {snackbarVisible && (
+            <View style={styles.snackbarContainer}>
+              <Text style={styles.snackbarText}>{snackbarMessage}</Text>
+            </View>
+          )}
           <View style={styles.header}>
             <View style={styles.logocircle}>
               <Text style={styles.Logotext}>Food{"\n"}House</Text>
             </View>
             <Text style={styles.formTitle}>Foodhouse Dispatched Form</Text>
           </View>
-
-          {/* Order Details Section */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Order Details</Text>
             <View style={styles.infoRow}>
@@ -258,7 +311,6 @@ export default function Receipt() {
             </View>
           </View>
 
-          {/* Farmer Section */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Farmer</Text>
             <View style={styles.infoRow}>
@@ -292,7 +344,6 @@ export default function Receipt() {
             </View>
           </View>
 
-          {/* Buyer Section */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Buyer</Text>
             <View style={styles.infoRow}>
@@ -315,7 +366,6 @@ export default function Receipt() {
             </View>
           </View>
 
-          {/* Agent Section */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Agent</Text>
             <View style={styles.infoRow}>
@@ -336,17 +386,16 @@ export default function Receipt() {
             </View>
           </View>
 
-          {/* Footer */}
           <View style={styles.footer}>
-            <Text style={styles.footerText}>📞 +237 654 456 789</Text>
-            <Text style={styles.footerText}>✉️ info@foodhouse.com</Text>
+            <Text style={styles.footerText}>📞 {FOODHOUSE_PHONE}</Text>
+            <Text style={styles.footerText}>✉️ {FOODHOUSE_EMAIL}</Text>
           </View>
         </View>
 
         <View style={defaultStyles.bottomButtonContainer}>
           <Button
             mode="contained"
-            onPress={() => setModalVisible(true)}
+            onPress={handleContinue}
             style={[defaultStyles.button, defaultStyles.primaryButton]}
             labelStyle={styles.uploadButtonText}
           >
@@ -356,7 +405,37 @@ export default function Receipt() {
       </ScrollView>
 
       <Portal>
-        <Dialog visible={modalVisible} onDismiss={() => setModalVisible(false)} style={styles.dialogContainer}>
+        <Dialog
+          visible={messageModalVisible}
+          onDismiss={() => setMessageModalVisible(false)}
+          style={styles.dialogContainer}
+        >
+          <Dialog.Content>
+            <Text variant="titleLarge" style={styles.primaryText}>
+              Notice
+            </Text>
+          </Dialog.Content>
+          <Dialog.Content>
+            <Text style={defaultStyles.bodyText}>{messageModalText}</Text>
+          </Dialog.Content>
+          <Dialog.Content>
+            <Button
+              mode="contained"
+              onPress={() => setMessageModalVisible(false)}
+              style={[defaultStyles.button, defaultStyles.primaryButton]}
+            >
+              OK
+            </Button>
+          </Dialog.Content>
+        </Dialog>
+      </Portal>
+
+      <Portal>
+        <Dialog
+          visible={modalVisible}
+          onDismiss={() => setModalVisible(false)}
+          style={styles.dialogContainer}
+        >
           <Dialog.Content>
             <Text variant="titleLarge" style={styles.primaryText}>
               Confirm Phone Number

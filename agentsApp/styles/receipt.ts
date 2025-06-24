@@ -174,5 +174,28 @@ dialogContainer: {
     color: Colors.primary[500],
     textAlign: 'center',
   },
+  snackbarContainer: {
+  position: "absolute",
+  top: 50,
+  alignSelf: "center",
+  backgroundColor: "#fff",
+  borderColor: "red",
+  borderWidth: 2,
+  borderRadius: 8,
+  paddingHorizontal: 16,
+  paddingVertical: 10,
+  zIndex: 999,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.25,
+  shadowRadius: 3.84,
+  elevation: 5,
+},
+
+snackbarText: {
+  color: "#000",
+  fontSize: 14,
+},
+
 
 });

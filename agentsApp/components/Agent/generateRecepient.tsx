@@ -1,5 +1,5 @@
-import RNHTMLtoPDF from 'react-native-html-to-pdf';
-import * as Sharing from 'expo-sharing';
+import RNHTMLtoPDF from "react-native-html-to-pdf";
+import * as Sharing from "expo-sharing";
 
 interface DispatchFormProps {
   orderId: string;
@@ -27,6 +27,9 @@ export const generateDispatchFormPdf = async (props: DispatchFormProps) => {
     agentName,
     agentPhone,
   } = props;
+
+  const FOODHOUSE_PHONE = process.env.EXPO_PUBLIC_PHONE_NUMBER;
+  const FOODHOUSE_EMAIL = process.env.EXPO_PUBLIC_EMAIL;
 
   const htmlContent = `
     <!DOCTYPE html>
@@ -164,9 +167,10 @@ export const generateDispatchFormPdf = async (props: DispatchFormProps) => {
         </div>
 
         <div class="footer">
-          <div>📞 +237 654 456 789</div>
-          <div>✉️ info@foodhouse.com</div>
+          <div>📞 ${FOODHOUSE_PHONE}</div>
+          <div>✉️ ${FOODHOUSE_EMAIL}</div>
         </div>
+
       </div>
     </body>
     </html>
@@ -178,14 +182,16 @@ export const generateDispatchFormPdf = async (props: DispatchFormProps) => {
     base64: false,
   });
 
-  await sharePdf(file.filePath ?? '');
+  await sharePdf(file.filePath ?? "");
 };
 
 export const sharePdf = async (filePath: string) => {
   if (await Sharing.isAvailableAsync()) {
-    const uri = filePath.startsWith('file://') ? filePath : `file://${filePath}`;
+    const uri = filePath.startsWith("file://")
+      ? filePath
+      : `file://${filePath}`;
     await Sharing.shareAsync(uri);
   } else {
-    throw new Error('Sharing is not available on this device');
+    throw new Error("Sharing is not available on this device");
   }
 };
