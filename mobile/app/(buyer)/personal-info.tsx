@@ -91,15 +91,11 @@ export default function PersonalInfo() {
       let imageUrl = originalProfileImage;
 
       if (profileImage !== originalProfileImage) {
-        console.log("Uploading new image...");
         imageUrl = await uploadImage({
           uri: profileImage,
           filename: `profile_${user?.userId}_${Date.now()}.jpg`,
           directory: "profile_images",
         });
-        console.log("New Firebase image URL:", imageUrl);
-      } else {
-        console.log("No image change detected, skipping upload.");
       }
 
       const firstNameSplit = formData.fullName.split(" ")[0];

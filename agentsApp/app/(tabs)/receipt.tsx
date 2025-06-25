@@ -116,12 +116,10 @@ export default function Receipt() {
   const { mutateAsync: dispatchOrder } = useMutation({
     ...ordersDispatchOrderMutation(),
     onSuccess: async () => {
-      console.log("Dispatch order succeeded");
       setModalVisible(false);
       setSuccessModalVisible(true);
     },
     onError: (error: any) => {
-      console.error("Dispatch error", error);
       if (error?.response) {
         console.error("Error response data:", error.response.data);
       } else if (error?.message) {
@@ -183,11 +181,6 @@ export default function Receipt() {
       });
       return;
     }
-    console.log("Dispatching order with:", {
-      orderNumber: orderDetails.order.orderNumber,
-      userId: user.userId,
-      payoutPhoneNumber: editablePhone,
-    });
 
     try {
       await dispatchOrder({
@@ -243,11 +236,6 @@ export default function Receipt() {
     }
   };
 
-  console.log(
-    "s string: ",
-    parseInt(quantityStr),
-    `${parseInt(quantityStr) > 1 ? "s" : ""}`
-  );
   if (isLoading) {
     return (
       <View style={defaultStyles.container}>
@@ -427,8 +415,7 @@ export default function Receipt() {
         <View style={defaultStyles.bottomButtonContainer}>
           <Button
             mode="contained"
-            // onPress={handleContinue}
-            onPress={handleGenerateReceipt}
+            onPress={handleContinue}
             style={[defaultStyles.button, defaultStyles.primaryButton]}
             labelStyle={styles.uploadButtonText}
           >
