@@ -11,16 +11,16 @@
     },
     "onboarding": {
       "1": {
-        "title": "Achetez frais, achetez pas cher",
-        "description": "Profitez de produits frais de la ferme à des prix abordables. Nous vous facilitons l'achat direct auprès des agriculteurs, ce qui vous permet d'économiser sur chaque achat sans compromettre la qualité."
+        "title": "Achetez Frais, Achetez Bon Marché",
+        "description": "Directement de la ferme, à prix avantageux. Achetez directement, économisez plus, sans compromis."
       },
       "2": {
-        "title": "Mangez frais, devenez fort",
-        "description": "Mangez frais, devenez fort. Alimentez votre corps. Nos agriculteurs fournissent des produits riches en nutriments qui vous aident à rester en bonne santé, soutenant un mode de vie sain pour vous et votre famille."
+        "title": "Mangez frais, Grandissez fort",
+        "description": "Nourrissez votre corps avec de vrais aliments. Cultivés à la ferme, riches en nutriments, adaptés à toute la famille."
       },
       "3": {
-        "title": "Mangez sainement, vivez plus longtemps",
-        "description": "Donnez la priorité à votre santé avec la fraîcheur de la ferme à la table. Notre plateforme propose des options alimentaires saines et biologiques qui favorisent une vie plus longue et plus saine. Commencez votre chemin vers une meilleure vie dès aujourd'hui !"
+        "title": "Mangez sainement, Vivez plus longtemps",
+        "description": "Mangez sainement. Vivez mieux, des produits biologiques pour une vie plus saine."
       },
       "getStarted": "Commencer",
       "next": "Suivant"

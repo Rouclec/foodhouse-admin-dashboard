@@ -1,27 +1,30 @@
 {
   "expo": {
-    "name": "agentsApp",
-    "slug": "agentsApp",
+    "name": "Foodhouse Agent",
+    "slug": "foodhouse-agent",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "agentsapp",
+    "scheme": "foodhouse-agent",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#6dcd47"
+      "backgroundColor": "#6dcd47",
+      "width": 186
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.foodhousecmr.foodhouse.agent"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.foodhousecmr.foodhouse.agent"
     },
     "web": {
       "bundler": "metro",
@@ -33,6 +36,13 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "owner": "foodhouse_user",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "713e0298-0df0-48f8-988c-678ac7d9e467"
+      }
     }
   }
 }

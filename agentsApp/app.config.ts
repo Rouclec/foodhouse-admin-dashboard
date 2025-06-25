@@ -6,11 +6,11 @@ dotenv.config();
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: "Foodhouse",
-  slug: "foodhouse",
+  name: "Foodhouse Agent",
+  slug: "foodhouse-agent",
   ios: {
     supportsTablet: true,
-    bundleIdentifier: "com.foodhousecmr.foodhouse",
+    bundleIdentifier: "com.foodhousecmr.foodhousea",
     config: {
       googleMapsApiKey: process.env.EXPO_PUBLIC_MAP_QUERY_KEY,
     },
@@ -21,7 +21,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: "#ffffff",
     },
     softwareKeyboardLayoutMode: "pan",
-    package: "com.foodhousecmr.foodhouse",
+    package: "com.foodhousecmr.foodhouse.agent",
     config: {
       googleMaps: {
         apiKey: process.env.EXPO_PUBLIC_MAP_QUERY_KEY,

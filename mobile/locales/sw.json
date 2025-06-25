@@ -11,16 +11,16 @@
     },
     "onboarding": {
       "1": {
-        "title": "Nunua Safi, Nunua kwa Bei Nafuu",
-        "description": "Furahia bidhaa safi kutoka shambani kwa bei nafuu. Tunakurahisishia kununua moja kwa moja kutoka kwa wakulima na kuokoa pesa kwa kila ununuzi bila kuathiri ubora."
+        "title": "Nunua Freshi, Nunua Bei Nafuu",
+        "description": "Moja kwa moja kutoka shambani, bei rafiki kwako. Nunua moja kwa moja, okoa zaidi, bila kukosa ubora."
       },
       "2": {
-        "title": "Kula safi, Kua imara",
-        "description": "Kula safi, kua imara. Lisha mwili wako. Wakulima wetu hutoa mazao yenye virutubisho mengi yanayokusaidia kubaki na afya njema, yakikuza maisha yenye ustawi kwa familia yako."
+        "title": "Kula freshi, Kua imara",
+        "description": "Lisha mwili wako kwa chakula halisi. Mazao ya shambani, yenye virutubisho, rafiki kwa familia."
       },
       "3": {
-        "title": "Kula kwa afya, Ishi muda mrefu",
-        "description": "Toa kipaumbele kwa afya yako kwa kutumia chakula safi moja kwa moja kutoka shambani. Jukwaa letu linatoa chaguzi za chakula bora na hai zinazochangia maisha marefu na yenye afya. Anza safari yako ya maisha bora leo!"
+        "title": "Kula kiafya, Ishi kwa muda mrefu",
+        "description": "Kula safi. Ishi vyema, mazao ya kikaboni yanayosaidia maisha yenye afya."
       },
       "getStarted": "Anza",
       "next": "Ifuatayo"
