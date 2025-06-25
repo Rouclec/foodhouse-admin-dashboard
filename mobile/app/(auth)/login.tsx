@@ -247,7 +247,7 @@ export default function Login() {
                 )}
               </TouchableOpacity>
 
-              <View style={loginstyles.dividerContainer}>
+              {/* <View style={loginstyles.dividerContainer}>
                 <View style={loginstyles.dividerLine} />
                 <Text style={loginstyles.dividerText}>
                   {i18n.t("(auth).login.or")}
@@ -268,7 +268,7 @@ export default function Login() {
                   <MaterialCommunityIcons name="apple" size={24} />
                   <Text>{i18n.t("(auth).login.continueWith")} Apple</Text>
                 </TouchableOpacity>
-              </View>
+              </View> */}
 
               <View style={loginstyles.registerContainer}>
                 <Text style={loginstyles.registerText}>
