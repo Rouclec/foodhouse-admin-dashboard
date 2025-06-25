@@ -139,7 +139,7 @@ export default function Receipt() {
       status === "OrderStatus_IN_TRANSIT"
     ) {
       setMessageModalText(
-        "This order has not been approved by the farmer"
+        `This orders has already been dispatched, it is in status: ${status.replace("OrderStatus_", "").split("_").join(" ")}`
       );
       setMessageModalVisible(true);
       return;
