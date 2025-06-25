@@ -277,6 +277,7 @@ export const defaultStyles = StyleSheet.create({
   successImage: { width: 180, height: 180 },
   primaryText: {
     color: Colors.primary[500],
+   
   },
   bodyText: {
     fontSize: 16,

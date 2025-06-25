@@ -15,6 +15,8 @@ import { Text } from "react-native-paper";
 import { Chase } from "react-native-animated-spinkit";
 import { Colors } from "@/constants";
 
+
+
 export default function Index() {
   const router = useRouter();
 
@@ -148,6 +150,7 @@ export default function Index() {
           FoodHouse
         </Text>
       </View>
+       
 
       <View style={styles.spinnerContainer}>
         <Chase size={56} color={Colors.light[10]} />

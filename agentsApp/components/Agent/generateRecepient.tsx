@@ -1,161 +1,178 @@
-import RNHTMLtoPDF from 'react-native-html-to-pdf';
-import * as Sharing from 'expo-sharing';
+import RNHTMLtoPDF from "react-native-html-to-pdf";
+import * as Sharing from "expo-sharing";
 
 interface DispatchFormProps {
   orderId: string;
-  product: string;
   quantity: string;
-  amount: string;
-  address: string;
-  sellerName: string;
-  sellerPhone: string;
+  deliveryLocation: string;
+  farmerName: string;
+  farmerAddress: string;
+  farmerPhone: string;
   buyerName: string;
   buyerPhone: string;
+  agentName: string;
+  agentPhone: string;
 }
 
 export const generateDispatchFormPdf = async (props: DispatchFormProps) => {
   const {
     orderId,
-    product,
     quantity,
-    amount,
-    address,
-    sellerName,
-    sellerPhone,
+    deliveryLocation,
+    farmerName,
+    farmerAddress,
+    farmerPhone,
     buyerName,
     buyerPhone,
+    agentName,
+    agentPhone,
   } = props;
+
+  const FOODHOUSE_PHONE = process.env.EXPO_PUBLIC_PHONE_NUMBER;
+  const FOODHOUSE_EMAIL = process.env.EXPO_PUBLIC_EMAIL;
 
   const htmlContent = `
     <!DOCTYPE html>
-    <html>
-        <head>
-            <meta charset="UTF-8" />
-            <title>Foodhouse Dispatch Form</title>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    padding: 24px;
-                    color: #333;
-                }
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+      <title>Foodhouse Dispatch Receipt</title>
+      <style>
+        body {
+          font-family: sans-serif;
+          background: #f4f4f4;
+          padding: 2rem;
+          margin: 0;
+        }
 
-                .header h1 {
-                    margin: 0;
-                    color: #2625A8;
-                    text-align: center;
-                }
+        .receipt {
+          max-width: 600px;
+          margin: 0 auto;
+          background: #fff;
+          border: 1px solid #e0e0e0;
+          border-radius: 10px;
+          overflow: hidden;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+          display: flex;
+          flex-direction: column;
+        }
 
-                .section {
-                    margin-top: 20px;
-                }
+        .receipt-inner {
+          padding: 2rem;
+        }
 
-                .section-title {
-                    font-weight: bold;
-                    font-size: 18px;
-                    margin-bottom: 10px;
-                    border-bottom: 1px solid #ccc;
-                    padding-bottom: 5px;
-                }
+        .header {
+          text-align: center;
+        }
 
-                .order-id {
-                    font-weight: bold;
-                    font-size: 16px;
-                    margin-bottom: 15px;
-                }
+        .logocircle {
+          width: 80px;
+          height: 80px;
+          background-color: #4caf50;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 0.75rem;
+        }
 
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-bottom: 15px;
-                }
+        .Logotext {
+          color: white;
+          font-weight: bold;
+          font-size: 0.9rem;
+          text-align: center;
+          line-height: 1.2;
+        }
 
-                table td {
-                    padding: 8px 0;
-                    vertical-align: top;
-                }
+        .header h2 {
+          margin: 0.25rem 0;
+          font-size: 1.4rem;
+        }
 
-                table td:first-child {
-                    font-weight: bold;
-                    width: 30%;
-                }
+        .section {
+          margin-top: 2rem;
+        }
 
-                .divider {
-                    border-top: 1px dashed #ccc;
-                    margin: 20px 0;
-                }
+        .section-title {
+          font-weight: bold;
+          color: #2e7d32;
+          margin-bottom: 0.5rem;
+        }
 
-                .footer {
-                    margin-top: 40px;
-                    font-size: 12px;
-                    color: #777;
-                    text-align: center;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h1>Foodhouse Dispatched Form</h1>
+        .info-row {
+          margin-bottom: 0.5rem;
+        }
+
+        .info-row span {
+          display: block;
+          color: #555;
+        }
+
+        .info-row strong {
+          color: #222;
+        }
+
+        .footer {
+          background-color: #4caf50;
+          color: white;
+          display: flex;
+          justify-content: space-between;
+          padding: 1rem 2rem;
+          font-size: 14px;
+        }
+
+        .footer div {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="receipt">
+        <div class="receipt-inner">
+          <div class="header">
+            <div class="logocircle">
+              <p class="Logotext">Food<br />House</p>
             </div>
+            <h2>Foodhouse Dispatched Form</h2>
+          </div>
 
-            <div class="section">
-                <div class="section-title">Order Details</div>
-                <div class="order-id">#${orderId}</div>
-                <table>
-                    <tr>
-                        <td>Product:</td>
-                        <td>${product}</td>
-                    </tr>
-                    <tr>
-                        <td>Quantity:</td>
-                        <td>${quantity}</td>
-                    </tr>
-                    <tr>
-                        <td>Amount:</td>
-                        <td>${amount}</td>
-                    </tr>
-                    <tr>
-                        <td>Delivery Address:</td>
-                        <td>${address}</td>
-                    </tr>
-                </table>
-            </div>
+          <div class="section">
+            <div class="section-title">Order Details</div>
+            <div class="info-row"><span><strong>Order Number:</strong> #${orderId}</span></div>
+            <div class="info-row"><span><strong>Quantity:</strong> ${quantity}</span></div>
+            <div class="info-row"><span><strong>Delivery Location:</strong> ${deliveryLocation}</span></div>
+          </div>
 
-            <div class="divider"></div>
+          <div class="section">
+            <div class="section-title">Farmer</div>
+            <div class="info-row"><span><strong>Name:</strong> ${farmerName}</span></div>
+            <div class="info-row"><span><strong>Address:</strong> ${farmerAddress}</span></div>
+            <div class="info-row"><span><strong>Phone:</strong> ${farmerPhone}</span></div>
+          </div>
 
-            <div class="section">
-                <div class="section-title">Seller</div>
-                <table>
-                    <tr>
-                        <td>Name:</td>
-                        <td>${sellerName}</td>
-                    </tr>
-                    <tr>
-                        <td>Phone:</td>
-                        <td>${sellerPhone}</td>
-                    </tr>
-                </table>
-            </div>
+          <div class="section">
+            <div class="section-title">Buyer</div>
+            <div class="info-row"><span><strong>Name:</strong> ${buyerName}</span></div>
+            <div class="info-row"><span><strong>Phone:</strong> ${buyerPhone}</span></div>
+          </div>
 
-            <div class="divider"></div>
+          <div class="section">
+            <div class="section-title">Agent</div>
+            <div class="info-row"><span><strong>Name:</strong> ${agentName}</span></div>
+            <div class="info-row"><span><strong>Phone:</strong> ${agentPhone}</span></div>
+          </div>
+        </div>
 
-            <div class="section">
-                <div class="section-title">Buyer</div>
-                <table>
-                    <tr>
-                        <td>Name:</td>
-                        <td>${buyerName}</td>
-                    </tr>
-                    <tr>
-                        <td>Phone:</td>
-                        <td>${buyerPhone}</td>
-                    </tr>
-                </table>
-            </div>
+        <div class="footer">
+          <div>📞 ${FOODHOUSE_PHONE}</div>
+          <div>✉️ ${FOODHOUSE_EMAIL}</div>
+        </div>
 
-            <div class="footer">
-                © 2025 Foodhouse. All rights reserved.
-            </div>
-        </body>
+      </div>
+    </body>
     </html>
   `;
 
@@ -165,14 +182,16 @@ export const generateDispatchFormPdf = async (props: DispatchFormProps) => {
     base64: false,
   });
 
-  await sharePdf(file.filePath ?? '');
+  await sharePdf(file.filePath ?? "");
 };
 
 export const sharePdf = async (filePath: string) => {
   if (await Sharing.isAvailableAsync()) {
-    const uri = filePath.startsWith('file://') ? filePath : `file://${filePath}`;
+    const uri = filePath.startsWith("file://")
+      ? filePath
+      : `file://${filePath}`;
     await Sharing.shareAsync(uri);
   } else {
-    throw new Error('Sharing is not available on this device');
+    throw new Error("Sharing is not available on this device");
   }
 };
