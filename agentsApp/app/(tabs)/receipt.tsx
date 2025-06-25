@@ -25,6 +25,7 @@ import { formatAmount } from "@/utils/amountFormater";
 import { generateDispatchFormPdf } from "@/components";
 import i18n from "@/i18n";
 import { Colors } from "@/constants";
+import parsePhoneNumberFromString from "libphonenumber-js";
 
 export default function Receipt() {
   const router = useRouter();
@@ -35,6 +36,7 @@ export default function Receipt() {
   const [editablePhone, setEditablePhone] = useState("");
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const FOODHOUSE_PHONE = process.env.EXPO_PUBLIC_PHONE_NUMBER;
   const FOODHOUSE_EMAIL = process.env.EXPO_PUBLIC_EMAIL;
@@ -114,12 +116,10 @@ export default function Receipt() {
   const { mutateAsync: dispatchOrder } = useMutation({
     ...ordersDispatchOrderMutation(),
     onSuccess: async () => {
-      console.log("Dispatch order succeeded");
       setModalVisible(false);
       setSuccessModalVisible(true);
     },
     onError: (error: any) => {
-      console.error("Dispatch error", error);
       if (error?.response) {
         console.error("Error response data:", error.response.data);
       } else if (error?.message) {
@@ -139,7 +139,10 @@ export default function Receipt() {
       status === "OrderStatus_IN_TRANSIT"
     ) {
       setMessageModalText(
-        `This orders has already been dispatched, it is in status: ${status.replace("OrderStatus_", "").split("_").join(" ")}`
+        `This orders has already been dispatched.\nOrder status: ${status
+          .replace("OrderStatus_", "")
+          .split("_")
+          .join(" ")}`
       );
       setMessageModalVisible(true);
       return;
@@ -151,7 +154,10 @@ export default function Receipt() {
       status === "OrderStatus_REJECTED"
     ) {
       setMessageModalText(
-        "This order has not been approved"
+        `This order is not in a status to be dispatched\nOrder status: ${status
+          .replace("OrderStatus_", "")
+          .split("_")
+          .join(" ")}`
       );
       setMessageModalVisible(true);
       return;
@@ -175,11 +181,6 @@ export default function Receipt() {
       });
       return;
     }
-    console.log("Dispatching order with:", {
-      orderNumber: orderDetails.order.orderNumber,
-      userId: user.userId,
-      payoutPhoneNumber: editablePhone,
-    });
 
     try {
       await dispatchOrder({
@@ -198,6 +199,7 @@ export default function Receipt() {
 
   const handleGenerateReceipt = async () => {
     try {
+      setLoading(true);
       await generateDispatchFormPdf({
         orderId: orderDetails?.order?.orderNumber || orderNumberStr,
         quantity:
@@ -210,7 +212,7 @@ export default function Receipt() {
           seller?.user?.firstName && seller?.user?.lastName
             ? `${seller.user.firstName} ${seller.user.lastName}`
             : sellerNameStr || "Unknown Farmer",
-        farmerAddress: seller?.user?.address?.street || "Unknown Address",
+        farmerAddress: seller?.user?.address || "Unknown Address",
         farmerPhone: seller?.user?.phoneNumber || sellerphoneNumberStr || "",
         buyerName:
           buyer?.user?.firstName && buyer?.user?.lastName
@@ -222,10 +224,15 @@ export default function Receipt() {
             ? `${user.firstName} ${user.lastName}`
             : "Unknown Agent",
         agentPhone: user?.phoneNumber || "",
+        unit: `${productData?.product?.unitType?.replace("per_", "").trim()}${
+          parseInt(quantityStr) > 1 ? "s" : ""
+        }`,
       });
     } catch (error) {
       console.error("Error generating receipt PDF:", error);
       alert("Failed to generate receipt PDF.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -335,10 +342,12 @@ export default function Receipt() {
               <Text>
                 <Text style={styles.infoLabel}>Phone: </Text>
                 <Text style={styles.infoValue}>
-                  {editablePhone ||
-                    seller?.user?.phoneNumber ||
-                    sellerphoneNumberStr ||
-                    " "}
+                  {parsePhoneNumberFromString(
+                    editablePhone ||
+                      seller?.user?.phoneNumber ||
+                      sellerphoneNumberStr ||
+                      " "
+                  )?.formatInternational()}
                 </Text>
               </Text>
             </View>
@@ -360,7 +369,9 @@ export default function Receipt() {
               <Text>
                 <Text style={styles.infoLabel}>Phone: </Text>
                 <Text style={styles.infoValue}>
-                  {buyer?.user?.phoneNumber || " "}
+                  {parsePhoneNumberFromString(
+                    buyer?.user?.phoneNumber || " "
+                  )?.formatInternational()}
                 </Text>
               </Text>
             </View>
@@ -381,13 +392,22 @@ export default function Receipt() {
             <View style={styles.infoRow}>
               <Text>
                 <Text style={styles.infoLabel}>Phone: </Text>
-                <Text style={styles.infoValue}>{user?.phoneNumber || " "}</Text>
+                <Text style={styles.infoValue}>
+                  {parsePhoneNumberFromString(
+                    user?.phoneNumber || " "
+                  )?.formatInternational()}
+                </Text>
               </Text>
             </View>
           </View>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>📞 {FOODHOUSE_PHONE}</Text>
+            <Text style={styles.footerText}>
+              📞{" "}
+              {parsePhoneNumberFromString(
+                FOODHOUSE_PHONE ?? ""
+              )?.formatInternational()}
+            </Text>
             <Text style={styles.footerText}>✉️ {FOODHOUSE_EMAIL}</Text>
           </View>
         </View>
@@ -502,7 +522,13 @@ export default function Receipt() {
             <Button
               mode="contained"
               onPress={handleGenerateReceipt}
-              style={[defaultStyles.button, defaultStyles.primaryButton]}
+              loading={loading}
+              disabled={loading}
+              style={[
+                defaultStyles.button,
+                defaultStyles.primaryButton,
+                loading && defaultStyles.greyButton,
+              ]}
             >
               <Text style={defaultStyles.buttonText}>Download Receipt</Text>
             </Button>

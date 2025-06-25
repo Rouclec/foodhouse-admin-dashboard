@@ -12,6 +12,7 @@ import { defaultStyles, profileFlowStyles, signupStyles } from "@/styles";
 import { ScrollView } from "react-native-gesture-handler";
 import i18n from "@/i18n";
 import { Colors } from "@/constants";
+import parsePhoneNumberFromString from "libphonenumber-js";
 
 const email = process.env.EXPO_PUBLIC_EMAIL;
 const phoneNumber = process.env.EXPO_PUBLIC_PHONE_NUMBER;
@@ -93,7 +94,9 @@ const ContactUsScreen = () => {
                   <Ionicons name="call" size={20} color={Colors.primary[500]} />
                 </View>
                 <Text style={profileFlowStyles.navigationText}>
-                  {phoneNumber || ""}
+                  {parsePhoneNumberFromString(
+                    phoneNumber || ""
+                  )?.formatInternational()}
                 </Text>
               </TouchableOpacity>
 

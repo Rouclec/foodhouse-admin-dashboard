@@ -44,7 +44,6 @@ export default function Login() {
 
   useEffect(() => {
     const checkAndLogin = async () => {
-      console.log("checking to log in");
       if (userData?.user) {
         setUser(userData.user);
         const role = userData?.user?.role;

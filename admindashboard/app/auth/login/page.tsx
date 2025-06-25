@@ -70,7 +70,6 @@ export default function LoginPage() {
       localStorage.setItem("@userId", data?.userId ?? "");
       localStorage.setItem("@accessToken", data?.tokens?.accessToken ?? "");
       updateAuthHeader(data?.tokens?.accessToken ?? "");
-      console.log({ data });
       setUserIdState(data?.userId ?? "");
     },
     onError: async (error) => {
@@ -84,7 +83,6 @@ export default function LoginPage() {
     },
   });
 
-  console.log({ userIdState });
 
   const { data: userData } = useQuery({
     ...usersGetUserByIdOptions({
