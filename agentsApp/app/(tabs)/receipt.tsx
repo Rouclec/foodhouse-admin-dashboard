@@ -135,7 +135,7 @@ export default function Receipt() {
     const status = orderDetails?.order?.status;
 
     if (
-      status === "OrderStatus_PAYMENT_SUCCESSFUL" ||
+      status === "OrderStatus_DELIVERED" ||
       status === "OrderStatus_IN_TRANSIT"
     ) {
       setMessageModalText(
