@@ -68,9 +68,9 @@ export const index1 = StyleSheet.create({
   buttonContainer: {
     position: "absolute",
     bottom: 40,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 20,
+    left: 24,
+    right: 24,
+    paddingHorizontal: 24,
     alignItems: "center",
   },
   button: {

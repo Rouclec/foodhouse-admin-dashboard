@@ -8,7 +8,7 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-import { Icon, Snackbar, TextInput } from "react-native-paper";
+import { Appbar, Icon, Snackbar, TextInput } from "react-native-paper";
 import { Link, router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -126,30 +126,31 @@ export default function Login() {
   return (
     <>
       <KeyboardAvoidingView
-        style={loginstyles.container}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+        style={defaultStyles.container}
+        behavior={"padding"}
+        keyboardVerticalOffset={0}
       >
-        <View style={loginstyles.container}>
-          <View style={loginstyles.header}>
+        <View style={defaultStyles.flex}>
+          <Appbar.Header dark={false} style={defaultStyles.appHeader}>
             <TouchableOpacity
-              style={loginstyles.backButton}
-              onPress={() => router.replace("/onboarding")}
+              onPress={() => router.back()}
+              style={defaultStyles.backButtonContainer}
             >
-              <Icon source="arrow-left" size={24} color={Colors.dark[0]} />
+              <Icon source={"arrow-left"} size={24} />
             </TouchableOpacity>
-
-            <View style={loginstyles.logoCircle}>
-              <Text style={loginstyles.logoText}>Food House</Text>
-            </View>
-          </View>
+            <View />
+            <View />
+          </Appbar.Header>
           <ScrollView
             contentContainerStyle={defaultStyles.scrollContainer}
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={loginstyles.content}>
+            <View style={loginstyles.logoCircle}>
+              <Text style={loginstyles.logoText}>Food House</Text>
+            </View>
+            <View style={defaultStyles.inputsContainer}>
               <Text style={loginstyles.loginTitle}>
                 {i18n.t("(auth).login.loginTo")}
               </Text>
@@ -228,26 +229,28 @@ export default function Login() {
                   {i18n.t("(auth).login.forgotPassword")}
                 </Text>
               </Link>
+            </View>
+          </ScrollView>
+          <View style={defaultStyles.bottomButtonContainer}>
+            <TouchableOpacity
+              style={[
+                loginstyles.loginButton,
+                loading && defaultStyles.greyButton,
+              ]}
+              onPress={handleLogIn}
+              disabled={loading}
+              activeOpacity={0.8}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={loginstyles.loginButtonText}>
+                  {i18n.t("(auth).login.login")}
+                </Text>
+              )}
+            </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[
-                  loginstyles.loginButton,
-                  loading && defaultStyles.greyButton,
-                ]}
-                onPress={handleLogIn}
-                disabled={loading}
-                activeOpacity={0.8}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={loginstyles.loginButtonText}>
-                    {i18n.t("(auth).login.login")}
-                  </Text>
-                )}
-              </TouchableOpacity>
-
-              {/* <View style={loginstyles.dividerContainer}>
+            {/* <View style={loginstyles.dividerContainer}>
                 <View style={loginstyles.dividerLine} />
                 <Text style={loginstyles.dividerText}>
                   {i18n.t("(auth).login.or")}
@@ -270,20 +273,17 @@ export default function Login() {
                 </TouchableOpacity>
               </View> */}
 
-              <View style={loginstyles.registerContainer}>
-                <Text style={loginstyles.registerText}>
-                  {i18n.t("(auth).login.dontHaveAnAccount")}{" "}
+            <View style={loginstyles.registerContainer}>
+              <Text style={loginstyles.registerText}>
+                {i18n.t("(auth).login.dontHaveAnAccount")}{" "}
+              </Text>
+              <TouchableOpacity onPress={() => router.push("/(auth)/register")}>
+                <Text style={loginstyles.registerLink}>
+                  {i18n.t("(auth).login.registerNow")}
                 </Text>
-                <TouchableOpacity
-                  onPress={() => router.push("/(auth)/register")}
-                >
-                  <Text style={loginstyles.registerLink}>
-                    {i18n.t("(auth).login.registerNow")}
-                  </Text>
-                </TouchableOpacity>
-              </View>
+              </TouchableOpacity>
             </View>
-          </ScrollView>
+          </View>
         </View>
       </KeyboardAvoidingView>
       <Snackbar
