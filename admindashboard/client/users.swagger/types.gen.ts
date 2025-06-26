@@ -41,6 +41,7 @@ export type UsersCreateSubscriptionBody = {
 export type UsersGrantAdminBody = {
     phoneNumber?: string;
     residenceCountryIsoCode?: string;
+    password?: string;
 };
 
 export type UsersGrantAgentBody = {
@@ -48,6 +49,7 @@ export type UsersGrantAgentBody = {
     residenceCountryIsoCode?: string;
     address?: string;
     email?: string;
+    password?: string;
 };
 
 export type usersgrpcActivateUserSubscriptionResponse = unknown;
