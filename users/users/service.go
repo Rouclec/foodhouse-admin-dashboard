@@ -1621,25 +1621,44 @@ func (i *Impl) GrantAgent(ctx context.Context,
 		}, nil
 	}
 
-	// Generate random user password.
-	newHashedPassword, newErr := GeneratePassword(ctx)
-	if newErr != nil {
-		return nil, status.Errorf(codes.Internal, "Could not generate password for new user: %v", newErr)
+	var password string
+	var newErr error
+
+	agentPassword := req.GetPassword()
+
+	if agentPassword != "" {
+		// Check password for minimum length
+		if len(agentPassword) < MinimumPasswordLength {
+			return nil, status.Errorf(codes.InvalidArgument, "Password should be at least %v characters long",
+				MinimumPasswordLength)
+		}
+
+		// Hash password using bcrypt
+		password, newErr = HashPassword(agentPassword)
+		if newErr != nil {
+			return nil, status.Errorf(codes.Internal, "Failed to hash password: %v", newErr)
+		}
+	} else {
+		// Generate random user password.
+		password, newErr = GeneratePassword(ctx)
+		if newErr != nil {
+			return nil, status.Errorf(codes.Internal, "Could not generate password for new user: %v", newErr)
+		}
 	}
 
 	// Create new user with hashed password in the db.
 	arg := sqlc.CreateUserParams{
 		PhoneNumber:             req.GetPhoneNumber(),
-		Password:                newHashedPassword,
+		Password:                password,
 		ResidenceCountryIsoCode: req.GetResidenceCountryIsoCode(),
 		Email:                   &req.Email,
 		Role:                    usersgrpc.UserRole_USER_ROLE_AGENT.String(),
 	}
 
-	_, newErr = i.repo.Do().CreateUser(ctx, arg)
-	if newErr != nil {
+	_, err = i.repo.Do().CreateUser(ctx, arg)
+	if err != nil {
 		return nil, status.
-			Errorf(codes.Internal, "Could not create a new admin user with phone number: %v: %v", newAgentPhoneNumber, newErr)
+			Errorf(codes.Internal, "Could not create a new admin user with phone number: %v: %v", newAgentPhoneNumber, err)
 	}
 
 	return &usersgrpc.GrantAgentResponse{

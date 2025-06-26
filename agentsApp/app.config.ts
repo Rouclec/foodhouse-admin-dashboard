@@ -10,7 +10,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   slug: "foodhouse-agent",
   ios: {
     supportsTablet: true,
-    bundleIdentifier: "com.foodhousecmr.foodhousea",
+    bundleIdentifier: "com.foodhousecmr.foodhouse.agent",
     config: {
       googleMapsApiKey: process.env.EXPO_PUBLIC_MAP_QUERY_KEY,
     },

@@ -252,6 +252,7 @@ message GrantAdminRequest {
   string admin_user_id = 1;
   string phone_number = 2;
   string residence_country_iso_code = 3;
+  string password = 6;
 }
 
 message GrantAdminResponse { string message = 1; }
@@ -262,6 +263,7 @@ message GrantAgentRequest {
   string residence_country_iso_code = 3;
   string address = 4;
   string email = 5;
+  string password = 6;
 }
 
 message GrantAgentResponse { string message = 1; }
