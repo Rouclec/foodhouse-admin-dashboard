@@ -1,14 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
   View,
-  Text,
   TouchableOpacity,
   ActivityIndicator,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
 } from "react-native";
-import { Appbar, Icon, Snackbar, TextInput } from "react-native-paper";
+import { Appbar, Icon, Snackbar, TextInput, Text } from "react-native-paper";
 import { Link, router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -134,31 +132,31 @@ export default function Login() {
   return (
     <>
       <KeyboardAvoidingView
-        style={loginstyles.container}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+        style={defaultStyles.container}
+        behavior={"padding"}
+        keyboardVerticalOffset={0}
       >
-        <View style={loginstyles.container}>
-          <View style={loginstyles.header}>
-            <Appbar.Header style={defaultStyles.appHeader}>
-              <TouchableOpacity onPress={() => router.back()}>
-                <Appbar.BackAction color="#000" />
-              </TouchableOpacity>
-
-              <View />
-            </Appbar.Header>
-
-            <View style={loginstyles.logoCircle}>
-              <Text style={loginstyles.logoText}>Food House</Text>
-            </View>
-          </View>
+        <View style={defaultStyles.flex}>
+          <Appbar.Header dark={false} style={defaultStyles.appHeader}>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={defaultStyles.backButtonContainer}
+            >
+              <Icon source={"arrow-left"} size={24} />
+            </TouchableOpacity>
+            <View />
+            <View />
+          </Appbar.Header>
           <ScrollView
             contentContainerStyle={defaultStyles.scrollContainer}
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={loginstyles.content}>
+            <View style={loginstyles.logoCircle}>
+              <Text style={loginstyles.logoText}>Food House</Text>
+            </View>
+            <View style={defaultStyles.inputsContainer}>
               <Text style={loginstyles.loginTitle}>
                 {i18n.t("(auth).login.loginTo")}
               </Text>
