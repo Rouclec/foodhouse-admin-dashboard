@@ -80,3 +80,4 @@ export const formatAmount = (
 export * from "./utils";
 export * from "./auth";
 export * from "./interceptor";
+export * from "./password-generator";

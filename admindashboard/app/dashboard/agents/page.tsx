@@ -56,6 +56,8 @@ import { useQueryLoading } from "@/hooks/use-query-loading";
 import moment from "moment";
 import { useConfirmDelete } from "@/hooks/use-confirm-delete";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
+import { AgentCreatedSuccessModal } from "@/components/agent-created-success-modal";
+import { generateSecurePassword } from "@/utils";
 
 const STATUS_FILTERS: Array<{
   label: string;
@@ -82,6 +84,9 @@ export default function AgentsPage() {
   const [suspendingAgent, setSuspendingAgent] = useState<string>();
   const [deletingAgentId, setDeletingAgentId] = useState<string>();
   const [deletingAgentName, setDeletingAgentName] = useState<string>();
+  const [agentCreated, setAgentCreated] = useState<usersgrpcUser>();
+  const [showAgentCreatedModal, setShowAgentCreatedModal] = useState(false);
+  const [agentPassword, setAgentPassword] = useState<string>();
 
   const [loading, setLoading] = useState(false);
 
@@ -210,12 +215,17 @@ export default function AgentsPage() {
       // Create new agent
       setLoading(true);
 
+      // generate a random passowrd for the agent
+      const generatedPassowrd = generateSecurePassword();
+      setAgentPassword(generatedPassowrd);
+
       await createAgent({
         body: {
           phoneNumber: formData?.phone,
           residenceCountryIsoCode: formData.residenceCountryIsoCode,
           address: formData?.address ?? "",
           email: formData?.email ?? "",
+          password: generatedPassowrd,
         },
         path: {
           adminUserId: user?.userId ?? "",
@@ -225,9 +235,6 @@ export default function AgentsPage() {
         title: "Agent created",
         description: "The new field agent has been successfully created.",
       });
-
-      resetForm();
-      refetch();
     } catch (error) {
     } finally {
       setLoading(false);
@@ -309,6 +316,14 @@ export default function AgentsPage() {
 
   const { mutateAsync: createAgent } = useMutation({
     ...usersGrantAgentMutation(),
+    onSuccess: () => {
+      setAgentCreated({
+        email: formData.email,
+      });
+      resetForm();
+      refetch();
+      setShowAgentCreatedModal(true);
+    },
     onError: (error) => {
       toast({
         title: "Error creating agent",
@@ -640,6 +655,12 @@ export default function AgentsPage() {
         {...confirmDelete.dialogProps}
         itemName={deletingAgentName}
         isLoading={loading}
+      />
+      <AgentCreatedSuccessModal
+        isOpen={showAgentCreatedModal}
+        onClose={() => setShowAgentCreatedModal(false)}
+        agentEmail={agentCreated?.email ?? ""}
+        password={agentPassword ?? ""}
       />
     </>
   );
