@@ -7,7 +7,7 @@ import {
 } from "react-native";
 import { RelativePathString, useRouter } from "expo-router";
 import { Button, Snackbar, Text } from "react-native-paper";
-import { LinearGradient } from "expo-linear-gradient";
+// import { LinearGradient } from "expo-linear-gradient";
 import {
   defaultStyles,
   imagePickerStyles,
@@ -96,7 +96,7 @@ export default function Index() {
         style={selectionSubscriptionStyles.backgroundImage}
         resizeMode="cover"
       >
-        <LinearGradient
+        {/* <LinearGradient
           colors={[
             "rgba(255,255,255,0)",
             "rgba(255,255,255,0.8)",
@@ -104,7 +104,7 @@ export default function Index() {
           ]}
           locations={[0, 0.5, 2]}
           style={selectionSubscriptionStyles.gradientOverlay}
-        />
+        /> */}
 
         <ScrollView
           contentContainerStyle={defaultStyles.scrollContainer}

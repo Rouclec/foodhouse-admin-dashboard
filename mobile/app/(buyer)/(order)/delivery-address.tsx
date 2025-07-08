@@ -1,11 +1,11 @@
-import "react-native-get-random-values";
+import 'react-native-get-random-values';
 
-import { Context, ContextType } from "@/app/_layout";
-import { Colors } from "@/constants";
-import i18n from "@/i18n";
-import { defaultStyles } from "@/styles";
-import { useRouter } from "expo-router";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import { Context, ContextType } from '@/app/_layout';
+import { Colors } from '@/constants';
+import i18n from '@/i18n';
+import { defaultStyles } from '@/styles';
+import { useRouter } from 'expo-router';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   View,
   KeyboardAvoidingView,
@@ -13,22 +13,23 @@ import {
   ActivityIndicator,
   LayoutChangeEvent,
   Dimensions,
-} from "react-native";
+  Platform,
+} from 'react-native';
 import MapView, {
   Callout,
   Marker,
-  PROVIDER_DEFAULT,
+  PROVIDER_GOOGLE,
   Region,
-} from "react-native-maps";
-import * as Location from "expo-location";
+} from 'react-native-maps';
+import * as Location from 'expo-location';
 
-import { Appbar, Button, Checkbox, Icon, Text } from "react-native-paper";
-import { FilterBottomSheetRef } from "@/components/(buyer)/(index)/FilterBottomSheet";
-import { deliveryAddressStyles as styles } from "@/styles";
+import { Appbar, Button, Checkbox, Icon, Text } from 'react-native-paper';
+import { FilterBottomSheetRef } from '@/components/(buyer)/(index)/FilterBottomSheet';
+import { deliveryAddressStyles as styles } from '@/styles';
 import {
   GooglePlacesAutocomplete,
   GooglePlacesAutocompleteRef,
-} from "react-native-google-places-autocomplete";
+} from 'react-native-google-places-autocomplete';
 
 const INITIAL_REGION = {
   latitude: 4.1594, // Latitude of Buea
@@ -37,7 +38,8 @@ const INITIAL_REGION = {
   longitudeDelta: 0.01,
 };
 
-const { height } = Dimensions.get("window");
+const { height } = Dimensions.get('window');
+
 export default function DeliveryAddress() {
   const mapRef = useRef<MapView>(null);
   const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
@@ -53,7 +55,7 @@ export default function DeliveryAddress() {
   };
 
   const { deliveryLocation, setDeliveryLocation } = useContext(
-    Context
+    Context,
   ) as ContextType;
 
   const [currentLocation, setCurrentLocation] = useState<{
@@ -66,9 +68,9 @@ export default function DeliveryAddress() {
       try {
         setLoadingLocation(true);
         const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
+        if (status !== 'granted') {
           alert(
-            i18n.t("(buyer).(order).delivery-address.pleaseAcceptPermissions")
+            i18n.t('(buyer).(order).delivery-address.pleaseAcceptPermissions'),
           );
           return;
         }
@@ -76,7 +78,7 @@ export default function DeliveryAddress() {
         const currentLocation = await Location.getCurrentPositionAsync({});
 
         const address = await Location.reverseGeocodeAsync(
-          currentLocation.coords
+          currentLocation.coords,
         );
 
         setCurrentLocation({
@@ -88,8 +90,8 @@ export default function DeliveryAddress() {
           },
         });
       } catch (error) {
-        console.error("Error getting location: ", error);
-        alert(i18n.t("(buyer).(order).delivery-address.errorGettingLocation"));
+        console.error('Error getting location: ', error);
+        alert(i18n.t('(buyer).(order).delivery-address.errorGettingLocation'));
       } finally {
         setLoadingLocation(false);
       }
@@ -111,7 +113,7 @@ export default function DeliveryAddress() {
   useEffect(() => {
     if (googlePlacesAutoCompleteRef?.current && deliveryLocation?.description) {
       googlePlacesAutoCompleteRef.current.setAddressText(
-        deliveryLocation?.description
+        deliveryLocation?.description,
       );
     }
   }, [deliveryLocation]);
@@ -120,27 +122,24 @@ export default function DeliveryAddress() {
     <>
       <KeyboardAvoidingView
         style={defaultStyles.flex}
-        behavior={"padding"}
-        keyboardVerticalOffset={0}
-      >
+        behavior={'padding'}
+        keyboardVerticalOffset={0}>
         <View style={defaultStyles.flex}>
           <Appbar.Header
             dark={false}
-            style={[defaultStyles.appHeader, defaultStyles.px12]}
-          >
+            style={[defaultStyles.appHeader, defaultStyles.px12]}>
             <TouchableOpacity
               onPress={() => router.back()}
-              style={defaultStyles.backButtonContainer}
-            >
-              <Icon source={"arrow-left"} size={24} />
+              style={defaultStyles.backButtonContainer}>
+              <Icon source={'arrow-left'} size={24} />
             </TouchableOpacity>
             <Text variant="titleMedium" style={defaultStyles.heading}>
-              {i18n.t("(buyer).(order).delivery-address.deliveryAddress")}
+              {i18n.t('(buyer).(order).delivery-address.deliveryAddress')}
             </Text>
             <View />
           </Appbar.Header>
           <MapView
-            key={"map-instance"}
+            key={'map-instance'}
             style={{
               height: height - (sheetHeight + 90),
             }}
@@ -150,10 +149,9 @@ export default function DeliveryAddress() {
             showsUserLocation
             showsMyLocationButton
             paddingAdjustmentBehavior="automatic"
-            provider={PROVIDER_DEFAULT} // use this in production
+            provider={PROVIDER_GOOGLE} // use this in production
             mapType="standard" // Choose 'standard', 'satellite', or 'hybrid' as desired
-            scrollEnabled={true}
-          >
+            scrollEnabled={true}>
             {(deliveryLocation || currentLocation)?.region ? (
               <Marker
                 key={`${
@@ -168,7 +166,7 @@ export default function DeliveryAddress() {
                     0,
                 }}
                 draggable
-                onDragEnd={async (e) => {
+                onDragEnd={async e => {
                   const newCoordinates = e.nativeEvent.coordinate;
                   const address = await Location.reverseGeocodeAsync({
                     latitude: newCoordinates.latitude,
@@ -176,8 +174,9 @@ export default function DeliveryAddress() {
                   });
                 }}
                 title={(deliveryLocation || currentLocation)?.description}
-                description={(deliveryLocation || currentLocation)?.description}
-              >
+                description={
+                  (deliveryLocation || currentLocation)?.description
+                }>
                 <Callout>
                   <Text>
                     {(deliveryLocation || currentLocation)?.description}
@@ -193,19 +192,18 @@ export default function DeliveryAddress() {
 
         <Text
           variant="titleMedium"
-          style={[defaultStyles.textCenter, styles.marginTop12]}
-        >
-          {i18n.t("(buyer).(order).delivery-address.addressDetails")}
+          style={[defaultStyles.textCenter, styles.marginTop12]}>
+          {i18n.t('(buyer).(order).delivery-address.addressDetails')}
         </Text>
         <View style={styles.bottomSheetContent}>
           <View style={styles.z99}>
             <Text variant="titleMedium" style={defaultStyles.text16}>
-              {i18n.t("(buyer).(order).delivery-address.enterYourAddress")}
+              {i18n.t('(buyer).(order).delivery-address.enterYourAddress')}
             </Text>
             <GooglePlacesAutocomplete
               ref={googlePlacesAutoCompleteRef}
               placeholder={i18n.t(
-                "(buyer).(order).delivery-address.addressHere"
+                '(buyer).(order).delivery-address.addressHere',
               )}
               styles={{
                 textInput: styles.googlePlacesAutocompleteTextInput,
@@ -213,7 +211,7 @@ export default function DeliveryAddress() {
               }}
               predefinedPlaces={[]}
               textInputProps={{
-                placeholderTextColor: Colors.grey["3c"],
+                placeholderTextColor: Colors.grey['3c'],
               }}
               onPress={(data, details = null) => {
                 setLoadingLocation(false);
@@ -232,10 +230,13 @@ export default function DeliveryAddress() {
               nearbyPlacesAPI="GooglePlacesSearch"
               minLength={2}
               enablePoweredByContainer={false}
-              debounce={0}
+              debounce={100}
               query={{
-                key: process.env.EXPO_PUBLIC_MAP_QUERY_KEY,
-                language: "en",
+                key:
+                  Platform.OS === 'ios'
+                    ? process.env.EXPO_PUBLIC_IOS_MAP_QUERY_KEY
+                    : process.env.EXPO_PUBLIC_ANDROID_MAP_QUERY_KEY,
+                language: 'en',
               }}
               keyboardShouldPersistTaps="always"
             />
@@ -249,8 +250,8 @@ export default function DeliveryAddress() {
                   status={
                     currentLocation?.description ===
                     deliveryLocation?.description
-                      ? "checked"
-                      : "unchecked"
+                      ? 'checked'
+                      : 'unchecked'
                   }
                   onPress={() => {
                     if (
@@ -271,14 +272,14 @@ export default function DeliveryAddress() {
               <View style={styles.flexRowSmall}>
                 <Text variant="titleMedium" style={defaultStyles.text16}>
                   {i18n.t(
-                    "(buyer).(order).delivery-address.useCurrentLocation"
+                    '(buyer).(order).delivery-address.useCurrentLocation',
                   )}
                 </Text>
                 <View style={styles.iconContainer}>
                   <Icon
-                    source={"map-marker-outline"}
+                    source={'map-marker-outline'}
                     size={12}
-                    color={Colors.grey["61"]}
+                    color={Colors.grey['61']}
                   />
                 </View>
               </View>
@@ -286,8 +287,10 @@ export default function DeliveryAddress() {
           </View>
         </View>
         <View
-          style={[defaultStyles.bottomButtonContainer, defaultStyles.bgLight10]}
-        >
+          style={[
+            defaultStyles.bottomButtonContainer,
+            defaultStyles.bgLight10,
+          ]}>
           <Button
             style={[
               defaultStyles.button,
@@ -296,16 +299,15 @@ export default function DeliveryAddress() {
             ]}
             disabled={!deliveryLocation}
             contentStyle={[defaultStyles.center]}
-            onPress={() => router.push("/(buyer)/(order)/checkout")}
-          >
+            onPress={() => router.push('/(buyer)/(order)/checkout')}>
             <View style={defaultStyles.innerButtonContainer}>
               <View>
                 <Text variant="titleMedium" style={defaultStyles?.buttonText}>
-                  {i18n.t("(buyer).(order).delivery-address.proceedToCheckout")}
+                  {i18n.t('(buyer).(order).delivery-address.proceedToCheckout')}
                 </Text>
               </View>
 
-              <Icon source={"arrow-right"} color={Colors.light[10]} size={24} />
+              <Icon source={'arrow-right'} color={Colors.light[10]} size={24} />
             </View>
           </Button>
         </View>

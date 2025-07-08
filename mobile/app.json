@@ -16,7 +16,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.foodhousecmr.foodhouse"
+      "bundleIdentifier": "com.foodhousecmr.foodhouse",
+      "config": {
+        "googleMapsApiKey": "AIzaSyCm3xPkE00Y0QEkgVTjAaKkS0pyevGZ1uU"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -34,7 +37,10 @@
         "android.permission.ACCESS_BACKGROUND_LOCATION",
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_LOCATION"
-      ]
+      ],
+      "googleMaps": {
+        "apiKey": "AIzaSyDuGdaHFlh9PRpIcFTAltiEYQ6UHdpnTxo"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -68,8 +74,7 @@
           "isIosBackgroundLocationEnabled": true,
           "isAndroidBackgroundLocationEnabled": true
         }
-      ],
-      "react-native-maps"
+      ]
     ],
     "experiments": {
       "typedRoutes": true
