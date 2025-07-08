@@ -3,10 +3,7 @@
     "dependencies": {
         "@hey-api/client-axios": "^0.3.1",
         "@hey-api/client-fetch": "^0.5.4",
-        "axios": "^1.7.9",
-        "install": "^0.13.0",
-        "react-native-gesture-handler": "^2.25.0",
-        "react-native-reanimated": "^3.17.5"
+        "axios": "^1.7.9"
     },
     "devDependencies": {
         "@hey-api/openapi-ts": "^0.59.2",

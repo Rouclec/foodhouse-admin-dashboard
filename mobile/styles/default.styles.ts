@@ -328,7 +328,7 @@ export const defaultStyles = StyleSheet.create({
   checkInnercontainer: {
     width: 12,
     height: 12,
-    borderRadius: 12,
+    borderRadius: 48,
   },
   checkPrimaryOutterContainer: {
     borderColor: Colors.primary[500],

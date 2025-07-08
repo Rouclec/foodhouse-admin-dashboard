@@ -66,9 +66,15 @@ export default function Profile() {
   });
 
   const shareApp = async () => {
+    const shareMessage = `Check out Foodhouse - your trusted source for fresh, farm-to-home food items!\n
+    Download now:\n
+    📱 Android: ${process.env.EXPO_PUBLIC_APP_ANDROID_URL}\n
+    🍏 iOS: ${process.env.EXPO_PUBLIC_APP_IOS_URL}\n
+    Eat clean, Live well!`;
+
     await Share.share({
-      message: `Check out this awesome app: ${process.env.EXPO_PUBLIC_APP_URL}`,
-      title: "Share App",
+      message: shareMessage,
+      title: "FOODHOUSE",
     });
   };
 

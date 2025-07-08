@@ -110,7 +110,7 @@ export default function Login() {
           factors: [
             {
               type: "FACTOR_TYPE_EMAIL_PHONE_PASSWORD",
-              id: fields.email,
+              id: fields.email.trim(),
               secretValue: fields.password,
             },
           ],

@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useRef, useState } from 'react';
 import {
   View,
   ScrollView,
@@ -7,31 +7,31 @@ import {
   Share,
   KeyboardAvoidingView,
   Keyboard,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { Appbar, Button, Text, Divider, List, Icon } from "react-native-paper";
-import { Colors } from "@/constants";
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { Appbar, Button, Text, Divider, List, Icon } from 'react-native-paper';
+import { Colors } from '@/constants';
 import {
   buyerProductsStyles,
   defaultStyles,
   profileFlowStyles,
   signupStyles,
   profileFlowStyles as styles,
-} from "@/styles";
-import i18n from "@/i18n";
-import { Context, ContextType } from "@/app/_layout";
+} from '@/styles';
+import i18n from '@/i18n';
+import { Context, ContextType } from '@/app/_layout';
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   usersGetUserActiveSubscriptionOptions,
   usersRevokeRefreshTokenMutation,
-} from "@/client/users.swagger/@tanstack/react-query.gen";
-import { FontAwesome } from "@expo/vector-icons";
+} from '@/client/users.swagger/@tanstack/react-query.gen';
+import { FontAwesome } from '@expo/vector-icons';
 import {
   FilterBottomSheet,
   FilterBottomSheetRef,
-} from "@/components/(buyer)/(index)/FilterBottomSheet";
-import { clearStorage, readData, updateAuthHeader } from "@/utils";
+} from '@/components/(buyer)/(index)/FilterBottomSheet';
+import { clearStorage, readData, updateAuthHeader } from '@/utils';
 
 export default function Profile() {
   const router = useRouter();
@@ -42,7 +42,7 @@ export default function Profile() {
   const handleLogout = async () => {
     try {
       setLoading(true);
-      const refreshToken = await readData("@refreshToken");
+      const refreshToken = await readData('@refreshToken');
 
       await revokeRefreshToken({
         body: {
@@ -51,11 +51,11 @@ export default function Profile() {
       });
 
       await clearStorage();
-      updateAuthHeader("");
+      updateAuthHeader('');
       setUser(undefined);
-      router.replace("/(auth)/login");
+      router.replace('/(auth)/login');
     } catch (error) {
-      console.error({ error }, "logging out");
+      console.error({ error }, 'logging out');
     } finally {
       setLoading(false);
     }
@@ -63,26 +63,32 @@ export default function Profile() {
 
   const { mutateAsync: revokeRefreshToken } = useMutation({
     ...usersRevokeRefreshTokenMutation(),
-    onError: async (error) => {
-      console.error("error logging out: ", error);
+    onError: async error => {
+      console.error('error logging out: ', error);
     },
   });
   const handleBecomeVIP = () => {
-    router.push("/(auth)/subscribe");
+    router.push('/(auth)/subscribe');
   };
 
   const { data: userActiveSubscription } = useQuery({
     ...usersGetUserActiveSubscriptionOptions({
       path: {
-        userId: user?.userId ?? "",
+        userId: user?.userId ?? '',
       },
     }),
   });
 
   const shareApp = async () => {
+    const shareMessage = `Check out Foodhouse - your trusted source for fresh, farm-to-home food items!\n
+    Download now:\n
+    📱 Android: ${process.env.EXPO_PUBLIC_APP_ANDROID_URL}\n
+    🍏 iOS: ${process.env.EXPO_PUBLIC_APP_IOS_URL}\n
+    Eat clean, Live well!`;
+
     await Share.share({
-      message: `Check out this awesome app: ${process.env.EXPO_PUBLIC_APP_URL}`,
-      title: "Share App",
+      message: shareMessage,
+      title: 'FOODHOUSE',
     });
   };
 
@@ -91,13 +97,12 @@ export default function Profile() {
       <KeyboardAvoidingView
         style={defaultStyles.container}
         // behavior={Platform.OS === "ios" ? "padding" : undefined}
-        behavior={"padding"}
-        keyboardVerticalOffset={0}
-      >
+        behavior={'padding'}
+        keyboardVerticalOffset={0}>
         <View style={defaultStyles.flex}>
           <Appbar.Header dark={false} style={defaultStyles.appHeader}>
             <Appbar.Content
-              title={i18n.t("(farmer).(profile-flow).profile.title")}
+              title={i18n.t('(farmer).(profile-flow).profile.title')}
             />
           </Appbar.Header>
           <View style={signupStyles.imageContainer}>
@@ -110,7 +115,7 @@ export default function Profile() {
                   />
                 ) : (
                   <Image
-                    source={require("@/assets/images/avatar.png")}
+                    source={require('@/assets/images/avatar.png')}
                     style={signupStyles.avatar}
                   />
                 )}
@@ -120,41 +125,38 @@ export default function Profile() {
               </View>
             </TouchableOpacity>
             <Text variant="titleLarge">
-              {`${user?.firstName || ""} ${user?.lastName || ""}`.trim()}
+              {`${user?.firstName || ''} ${user?.lastName || ''}`.trim()}
             </Text>
           </View>
           <ScrollView
             contentContainerStyle={defaultStyles.scrollContainer}
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
-            keyboardShouldPersistTaps="handled"
-          >
+            keyboardShouldPersistTaps="handled">
             <View style={signupStyles.allInput}>
               {!userActiveSubscription?.userSubscription && (
                 <View style={styles.sectionCard}>
                   <View style={styles.vip}>
                     <Text
                       variant="titleMedium"
-                      style={[styles.shrinkHeading, { color: "#fff" }]}
-                    >
-                      {i18n.t("(farmer).(profile-flow).profile.heading")}
+                      style={[styles.shrinkHeading, { color: '#fff' }]}>
+                      {i18n.t('(farmer).(profile-flow).profile.heading')}
                     </Text>
-                    <Text style={[{ color: "#fff", marginBottom: 12 }]}>
-                      {i18n.t("(farmer).(profile-flow).profile.description")}
+                    <Text style={[{ color: '#fff', marginBottom: 12 }]}>
+                      {i18n.t('(farmer).(profile-flow).profile.description')}
                     </Text>
                     <Button
                       mode="contained"
                       onPress={handleBecomeVIP}
                       style={styles.vipButton}
-                      labelStyle={{ color: Colors.primary[500] }}
-                    >
-                      {i18n.t("(farmer).(profile-flow).profile.button")}
+                      labelStyle={{ color: Colors.primary[500] }}>
+                      {i18n.t('(farmer).(profile-flow).profile.button')}
                     </Button>
                   </View>
 
-                  <View style={{ justifyContent: "center" }}>
+                  <View style={{ justifyContent: 'center' }}>
                     <Image
-                      source={require("@/assets/images/icons/vip1.png")}
+                      source={require('@/assets/images/icons/vip1.png')}
                       style={{ width: 100, height: 100 }}
                       resizeMode="contain"
                     />
@@ -165,8 +167,7 @@ export default function Profile() {
               <View style={styles.navigateSection}>
                 <TouchableOpacity
                   style={styles.navigationItem}
-                  onPress={() => router.push("/(buyer)/settings")}
-                >
+                  onPress={() => router.push('/(buyer)/settings')}>
                   <View style={styles.navigationContent}>
                     <View style={profileFlowStyles.iconContainer}>
                       <FontAwesome
@@ -176,7 +177,7 @@ export default function Profile() {
                       />
                     </View>
                     <Text style={styles.navigationText}>
-                      {i18n.t("(farmer).(profile-flow).profile.tab1")}
+                      {i18n.t('(farmer).(profile-flow).profile.tab1')}
                     </Text>
                   </View>
                   <List.Icon icon="chevron-right" />
@@ -184,8 +185,7 @@ export default function Profile() {
 
                 <TouchableOpacity
                   style={styles.navigationItem}
-                  onPress={shareApp}
-                >
+                  onPress={shareApp}>
                   <View style={styles.navigationContent}>
                     <View style={profileFlowStyles.iconContainer}>
                       <FontAwesome
@@ -195,7 +195,7 @@ export default function Profile() {
                       />
                     </View>
                     <Text style={styles.navigationText}>
-                      {i18n.t("(farmer).(profile-flow).profile.tab2")}
+                      {i18n.t('(farmer).(profile-flow).profile.tab2')}
                     </Text>
                   </View>
                   <List.Icon icon="chevron-right" />
@@ -203,11 +203,10 @@ export default function Profile() {
                 <Divider style={styles.divider} />
                 <TouchableOpacity
                   style={styles.navigationItem}
-                  onPress={(e) => {
+                  onPress={e => {
                     Keyboard.dismiss();
                     sheetRef.current?.open();
-                  }}
-                >
+                  }}>
                   <View style={profileFlowStyles.row}>
                     <View style={profileFlowStyles.dangerContainer}>
                       <FontAwesome
@@ -218,7 +217,7 @@ export default function Profile() {
                     </View>
 
                     <Text style={styles.logout}>
-                      {i18n.t("(farmer).(profile-flow).profile.tab3")}
+                      {i18n.t('(farmer).(profile-flow).profile.tab3')}
                     </Text>
                   </View>
                 </TouchableOpacity>
@@ -232,11 +231,11 @@ export default function Profile() {
         <View style={[buyerProductsStyles.filtersContainer]}>
           <View style={profileFlowStyles.content}>
             <Text variant="titleMedium" style={buyerProductsStyles.title}>
-              {i18n.t("(farmer).(profile-flow).profile.tab3")}
+              {i18n.t('(farmer).(profile-flow).profile.tab3')}
             </Text>
 
             <Text style={defaultStyles.dialogSubtitle}>
-              {i18n.t("(farmer).(profile-flow).profile.confirmation")}
+              {i18n.t('(farmer).(profile-flow).profile.confirmation')}
             </Text>
           </View>
           <View style={buyerProductsStyles.bottomButtonContainer}>
@@ -249,10 +248,9 @@ export default function Profile() {
                 defaultStyles.secondaryButton,
                 buyerProductsStyles.halfButton,
               ]}
-              disabled={loading}
-            >
+              disabled={loading}>
               <Text style={defaultStyles.primaryText}>
-                {i18n.t("(farmer).(profile-flow).profile.button1")}
+                {i18n.t('(farmer).(profile-flow).profile.button1')}
               </Text>
             </Button>
             <Button
@@ -265,10 +263,9 @@ export default function Profile() {
                 buyerProductsStyles.halfButton,
               ]}
               loading={loading}
-              disabled={loading}
-            >
+              disabled={loading}>
               <Text style={defaultStyles.buttonText}>
-                {i18n.t("(farmer).(profile-flow).profile.button2")}
+                {i18n.t('(farmer).(profile-flow).profile.button2')}
               </Text>
             </Button>
           </View>

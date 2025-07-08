@@ -1,7 +1,7 @@
-import { Colors } from "@/constants";
-import { Dimensions, StyleSheet } from "react-native";
+import { Colors } from '@/constants';
+import { Dimensions, StyleSheet } from 'react-native';
 
-const { width } = Dimensions.get("window");
+const { width } = Dimensions.get('window');
 export const buyerProductsStyles = StyleSheet.create({
   bgWhite: {
     backgroundColor: Colors.light['bg'],
@@ -10,27 +10,27 @@ export const buyerProductsStyles = StyleSheet.create({
     backgroundColor: Colors.primary[500],
     width,
     padding: 24,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   safeArea: {
-    width: "100%",
+    width: '100%',
   },
   appHeaderContent: {
     rowGap: 24,
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   appHeaderTopContainer: {
     paddingTop: 12,
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   noticiatonIndicator: {
-    position: "absolute",
+    position: 'absolute',
     backgroundColor: Colors.primary[500],
     width: 8,
     height: 8,
@@ -39,8 +39,8 @@ export const buyerProductsStyles = StyleSheet.create({
     right: 3,
   },
   appHeaderLeftContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     columnGap: 10,
   },
   iconContainer: {
@@ -48,11 +48,20 @@ export const buyerProductsStyles = StyleSheet.create({
     width: 48,
     borderRadius: 48,
     backgroundColor: Colors.light[10],
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileImage: {
+    width: 46,
+    height: 46,
+    borderRadius: 46,
+  },
+  avatarImage: {
+    width: 28,
+    height: 28,
   },
   backButtonContainer: {
-    alignItems: "flex-end",
+    alignItems: 'flex-end',
   },
   heading: {
     marginLeft: 0,
@@ -60,7 +69,7 @@ export const buyerProductsStyles = StyleSheet.create({
   title: {
     marginTop: 24,
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   marginHorizontal24: {
     marginHorizontal: 24,
@@ -68,20 +77,20 @@ export const buyerProductsStyles = StyleSheet.create({
   separator: {
     marginVertical: 30,
     height: 1,
-    width: "80%",
+    width: '80%',
   },
   searchContainer: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
-    height: "100%",
-    width: "100%",
-    backgroundColor: "#fff",
-    flexDirection: "row",
-    alignItems: "center",
+    height: '100%',
+    width: '100%',
+    backgroundColor: '#fff',
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 16,
   },
   searchInput: {
-    width: "100%",
+    width: '100%',
     marginHorizontal: 24,
     height: 56,
     paddingHorizontal: 0,
@@ -103,24 +112,24 @@ export const buyerProductsStyles = StyleSheet.create({
   },
   flatListColumnWrapper: {
     columnGap: 32,
-    alignItems: "center",
-    justifyContent: "space-between",
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   addProductButton: {
-    position: "absolute",
+    position: 'absolute',
     right: 24,
     backgroundColor: Colors.primary[500],
     width: 64,
     height: 64,
     borderRadius: 64,
     bottom: 56,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   greetingsText: {
     fontSize: 16,
     lineHeight: 22,
-    color: Colors.light["10.87"],
+    color: Colors.light['10.87'],
   },
   nameText: {
     color: Colors.light[10],
@@ -134,8 +143,8 @@ export const buyerProductsStyles = StyleSheet.create({
 
   horizontailFlatListContent: {
     columnGap: 32,
-    alignItems: "flex-start",
-    height: "100%",
+    alignItems: 'flex-start',
+    height: '100%',
   },
   paddingRight24: {
     paddingRight: 24,
@@ -144,13 +153,13 @@ export const buyerProductsStyles = StyleSheet.create({
     paddingLeft: 24,
   },
   categoryItem: {
-    flexDirection: "row",
+    flexDirection: 'row',
     columnGap: 4,
     height: 40,
     paddingHorizontal: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: Colors.grey["f8"],
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.grey['f8'],
     borderRadius: 100,
   },
   selectedCategoryItem: {
@@ -160,8 +169,8 @@ export const buyerProductsStyles = StyleSheet.create({
     height: 64,
   },
   filtersContainer: {
-    height: "100%",
-    alignItems: "center",
+    height: '100%',
+    alignItems: 'center',
     paddingBottom: 24,
   },
   mainFilterContainer: {
@@ -170,23 +179,23 @@ export const buyerProductsStyles = StyleSheet.create({
     flexGrow: 1,
     borderTopWidth: 0.5,
     borderBottomWidth: 0.5,
-    borderColor: Colors.grey["border"],
+    borderColor: Colors.grey['border'],
   },
   halfButton: {
-    width: "45%",
+    width: '45%',
   },
   bottomButtonContainer: {
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   silderContainer: {
     // alignItems: "center",
     marginLeft: 16,
   },
   sliderTrack: {
-    width: "100%",
+    width: '100%',
     height: 8,
     borderRadius: 20,
   },
@@ -202,7 +211,7 @@ export const buyerProductsStyles = StyleSheet.create({
   },
 
   tooltipContainer: {
-    position: "absolute",
+    position: 'absolute',
     top: -20,
     right: -16,
   },
@@ -211,28 +220,28 @@ export const buyerProductsStyles = StyleSheet.create({
     padding: 1,
     borderRadius: 2,
     width: 56,
-    position: "relative",
-    alignItems: "center",
-    justifyContent: "center",
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   tooltipText: {
-    color: "white",
+    color: 'white',
     fontSize: 14,
     flexShrink: 1,
-    overflow: "hidden",
+    overflow: 'hidden',
   },
   tooltipArrow: {
-    position: "absolute",
+    position: 'absolute',
     bottom: -4, // position below the tooltip box
-    left: "50%",
+    left: '50%',
     marginLeft: -4, // half of border width to center it
     width: 0,
     height: 0,
     borderLeftWidth: 4,
     borderRightWidth: 4,
     borderTopWidth: 4,
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
     borderTopColor: Colors.primary[500],
   },
   ratingText: {
