@@ -42,7 +42,6 @@ const ProfilePage = () => {
   const [error, setError] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
-  const { role } = useContext(Context) as ContextType;
 
   const { mutateAsync: updateUserRegistration } = useMutation({
     ...usersCompleteRegistrationMutation(),
@@ -58,7 +57,7 @@ const ProfilePage = () => {
       setSuccessModalVisible(true);
 
       setTimeout(() => {
-        if (role === "USER_TYPE_AGENT") {
+        if (user?.role === "USER_ROLE_AGENT") {
           router.replace("/(tabs)/(index)");
         } else {
           console.error("not found");
