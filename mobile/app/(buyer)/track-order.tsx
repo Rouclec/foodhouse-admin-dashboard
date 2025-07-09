@@ -1,9 +1,9 @@
-import { ordersGetOrderDetailsOptions } from "@/client/orders.swagger/@tanstack/react-query.gen";
-import i18n from "@/i18n";
-import { defaultStyles } from "@/styles";
-import { useQuery } from "@tanstack/react-query";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useContext, useEffect, useState } from "react";
+import { ordersGetOrderDetailsOptions } from '@/client/orders.swagger/@tanstack/react-query.gen';
+import i18n from '@/i18n';
+import { defaultStyles } from '@/styles';
+import { useQuery } from '@tanstack/react-query';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   FlatList,
   Image,
@@ -11,17 +11,18 @@ import {
   ScrollView,
   TouchableOpacity,
   View,
-} from "react-native";
-import { Appbar, Icon, Text } from "react-native-paper";
-import { Context, ContextType } from "../_layout";
-import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
-import { Chase } from "react-native-animated-spinkit";
-import { Colors } from "@/constants";
-import { trackOrderStyles as styles } from "@/styles";
-import { formatAmount } from "@/utils/amountFormater";
-import { ordersgrpcOrderAuditLog } from "@/client/orders.swagger";
-import { MaterialIcons } from "@expo/vector-icons";
-import moment from "moment";
+} from 'react-native';
+import { Appbar, Icon, Text } from 'react-native-paper';
+import { Context, ContextType } from '../_layout';
+import { productsGetProductOptions } from '@/client/products.swagger/@tanstack/react-query.gen';
+import { Chase } from 'react-native-animated-spinkit';
+import { Colors } from '@/constants';
+import { trackOrderStyles as styles } from '@/styles';
+import { formatAmount } from '@/utils/amountFormater';
+import { ordersgrpcOrderAuditLog } from '@/client/orders.swagger';
+import { MaterialIcons } from '@expo/vector-icons';
+import moment from 'moment';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TrackOrder() {
   const router = useRouter();
@@ -37,8 +38,8 @@ export default function TrackOrder() {
   } = useQuery({
     ...ordersGetOrderDetailsOptions({
       path: {
-        userId: user?.userId ?? "",
-        orderNumber: (orderNumber as string) ?? "",
+        userId: user?.userId ?? '',
+        orderNumber: (orderNumber as string) ?? '',
       },
     }),
     enabled: !!orderNumber,
@@ -51,7 +52,7 @@ export default function TrackOrder() {
   } = useQuery({
     ...productsGetProductOptions({
       path: {
-        productId: orderDetails?.order?.product ?? "",
+        productId: orderDetails?.order?.product ?? '',
       },
     }),
     enabled: !!orderDetails?.order,
@@ -66,42 +67,47 @@ export default function TrackOrder() {
           if (!key) return acc; // Skip if action is undefined or empty
           if (
             !acc[key] ||
-            new Date(item.timestamp ?? "") > new Date(acc[key].timestamp ?? "")
+            new Date(item.timestamp ?? '') > new Date(acc[key].timestamp ?? '')
           ) {
             acc[key] = item;
           }
           return acc;
         },
-        {}
-      )
+        {},
+      ),
     )
-      .filter((item) => item.action !== "CreateOrder") // filter create order logs are they are not neccesary
+      .filter(item => item.action !== 'CreateOrder') // filter create order logs are they are not neccesary
       .sort(
         (a, b) =>
-          new Date(a.timestamp ?? "").getTime() -
-          new Date(b.timestamp ?? "").getTime()
+          new Date(a.timestamp ?? '').getTime() -
+          new Date(b.timestamp ?? '').getTime(),
       );
     setFilterdLogs(latestByAction);
   }, [orderDetails]);
+
+  const insets = useSafeAreaInsets();
 
   if (isOrderDetailsLoading || isProductLoading) {
     return (
       <>
         <KeyboardAvoidingView
-          style={defaultStyles.container}
-          behavior={"padding"}
-          keyboardVerticalOffset={0}
-        >
+          style={[
+            defaultStyles.container,
+            {
+              paddingBottom: insets.bottom,
+            },
+          ]}
+          behavior={'padding'}
+          keyboardVerticalOffset={0}>
           <View style={defaultStyles.flex}>
             <Appbar.Header dark={false} style={defaultStyles.appHeader}>
               <TouchableOpacity
                 onPress={() => router.back()}
-                style={defaultStyles.backButtonContainer}
-              >
-                <Icon source={"arrow-left"} size={24} />
+                style={defaultStyles.backButtonContainer}>
+                <Icon source={'arrow-left'} size={24} />
               </TouchableOpacity>
               <Text variant="titleMedium" style={defaultStyles.heading}>
-                {i18n.t("(buyer).track-order.trackOrder")}
+                {i18n.t('(buyer).track-order.trackOrder')}
               </Text>
               <View />
             </Appbar.Header>
@@ -109,11 +115,9 @@ export default function TrackOrder() {
               contentContainerStyle={defaultStyles.scrollContainer}
               showsVerticalScrollIndicator={false}
               nestedScrollEnabled={true}
-              keyboardShouldPersistTaps="handled"
-            >
+              keyboardShouldPersistTaps="handled">
               <View
-                style={[defaultStyles.center, defaultStyles.notFoundContainer]}
-              >
+                style={[defaultStyles.center, defaultStyles.notFoundContainer]}>
                 <Chase size={56} color={Colors.primary[500]} />
               </View>
             </ScrollView>
@@ -128,19 +132,17 @@ export default function TrackOrder() {
       <>
         <KeyboardAvoidingView
           style={defaultStyles.container}
-          behavior={"padding"}
-          keyboardVerticalOffset={0}
-        >
+          behavior={'padding'}
+          keyboardVerticalOffset={0}>
           <View style={defaultStyles.flex}>
             <Appbar.Header dark={false} style={defaultStyles.appHeader}>
               <TouchableOpacity
                 onPress={() => router.back()}
-                style={defaultStyles.backButtonContainer}
-              >
-                <Icon source={"arrow-left"} size={24} />
+                style={defaultStyles.backButtonContainer}>
+                <Icon source={'arrow-left'} size={24} />
               </TouchableOpacity>
               <Text variant="titleMedium" style={defaultStyles.heading}>
-                {i18n.t("(buyer).track-order.trackOrder")}
+                {i18n.t('(buyer).track-order.trackOrder')}
               </Text>
               <View />
             </Appbar.Header>
@@ -148,12 +150,10 @@ export default function TrackOrder() {
               contentContainerStyle={defaultStyles.scrollContainer}
               showsVerticalScrollIndicator={false}
               nestedScrollEnabled={true}
-              keyboardShouldPersistTaps="handled"
-            >
+              keyboardShouldPersistTaps="handled">
               <View
-                style={[defaultStyles.center, defaultStyles.notFoundContainer]}
-              >
-                <Text>{i18n.t("(buyer).track-order.couldNotLoad")}</Text>
+                style={[defaultStyles.center, defaultStyles.notFoundContainer]}>
+                <Text>{i18n.t('(buyer).track-order.couldNotLoad')}</Text>
               </View>
             </ScrollView>
           </View>
@@ -166,19 +166,17 @@ export default function TrackOrder() {
     <>
       <KeyboardAvoidingView
         style={defaultStyles.container}
-        behavior={"padding"}
-        keyboardVerticalOffset={0}
-      >
+        behavior={'padding'}
+        keyboardVerticalOffset={0}>
         <View style={defaultStyles.flex}>
           <Appbar.Header dark={false} style={defaultStyles.appHeader}>
             <TouchableOpacity
               onPress={() => router.back()}
-              style={defaultStyles.backButtonContainer}
-            >
-              <Icon source={"arrow-left"} size={24} />
+              style={defaultStyles.backButtonContainer}>
+              <Icon source={'arrow-left'} size={24} />
             </TouchableOpacity>
             <Text variant="titleMedium" style={defaultStyles.heading}>
-              {i18n.t("(buyer).track-order.trackOrder")}
+              {i18n.t('(buyer).track-order.trackOrder')}
             </Text>
             <View />
           </Appbar.Header>
@@ -189,20 +187,20 @@ export default function TrackOrder() {
             />
             <View style={styles.orderDetailsContainer}>
               <Text style={styles.leftText}>
-                {i18n.t("(buyer).track-order.orderNumber")}:{" "}
+                {i18n.t('(buyer).track-order.orderNumber')}:{' '}
                 <Text variant="titleMedium" style={styles.rightText}>
                   {orderDetails?.order?.orderNumber}
                 </Text>
               </Text>
               <Text variant="titleSmall" style={styles.text20}>
-                {productData?.product?.name} - {orderDetails?.order?.quantity}{" "}
-                {productData?.product?.unitType?.replace("per_", "")}
-                {parseInt(orderDetails?.order?.quantity ?? "") > 1 && "s"}
+                {productData?.product?.name} - {orderDetails?.order?.quantity}{' '}
+                {productData?.product?.unitType?.replace('per_', '')}
+                {parseInt(orderDetails?.order?.quantity ?? '') > 1 && 's'}
               </Text>
               <View style={styles.centerRow}>
                 <Text variant="titleSmall" style={styles.primaryText}>
-                  {orderDetails?.order?.price?.currencyIsoCode}{" "}
-                  {formatAmount(orderDetails?.order?.price?.value ?? "", {
+                  {orderDetails?.order?.price?.currencyIsoCode}{' '}
+                  {formatAmount(orderDetails?.order?.price?.value ?? '', {
                     decimalPlaces: 2,
                   })}
                 </Text>
@@ -219,7 +217,7 @@ export default function TrackOrder() {
 
                 const getIcon = () => {
                   switch (item?.action) {
-                    case "ConfirmOrderPayment":
+                    case 'ConfirmOrderPayment':
                       return (
                         <MaterialIcons
                           name="paid"
@@ -227,7 +225,7 @@ export default function TrackOrder() {
                           color={Colors.primary[500]}
                         />
                       );
-                    case "ApproveOrder":
+                    case 'ApproveOrder':
                       return (
                         <Icon
                           source="timer-sand"
@@ -235,7 +233,7 @@ export default function TrackOrder() {
                           color={Colors.primary[500]}
                         />
                       );
-                    case "DispatchOrder":
+                    case 'DispatchOrder':
                       return (
                         <Icon
                           source="truck"
@@ -277,39 +275,38 @@ export default function TrackOrder() {
             contentContainerStyle={defaultStyles.scrollContainer}
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
-            keyboardShouldPersistTaps="handled"
-          >
+            keyboardShouldPersistTaps="handled">
             <View style={[defaultStyles.flex, styles.contentContainer]}>
               <Text variant="titleMedium">
-                {i18n.t("(buyer).track-order.orderStatusDetails")}
+                {i18n.t('(buyer).track-order.orderStatusDetails')}
               </Text>
               {filteredLogs?.map((item, index) => {
                 const getTitle = () => {
                   switch (item?.action) {
-                    case "ConfirmOrderPayment":
+                    case 'ConfirmOrderPayment':
                       return [
-                        i18n.t("(buyer).track-order.orderPlaced"),
-                        i18n.t("(buyer).track-order.paymentDone"),
+                        i18n.t('(buyer).track-order.orderPlaced'),
+                        i18n.t('(buyer).track-order.paymentDone'),
                       ];
-                    case "ApproveOrder":
+                    case 'ApproveOrder':
                       return [
-                        i18n.t("(buyer).track-order.orderConfirmed"),
-                        i18n.t("(buyer).track-order.farmerReceived"),
+                        i18n.t('(buyer).track-order.orderConfirmed'),
+                        i18n.t('(buyer).track-order.farmerReceived'),
                       ];
-                    case "DispatchOrder":
+                    case 'DispatchOrder':
                       return [
-                        i18n.t("(buyer).track-order.orderDispatched"),
-                        i18n.t("(buyer).track-order.orderInTransit"),
+                        i18n.t('(buyer).track-order.orderDispatched'),
+                        i18n.t('(buyer).track-order.orderInTransit'),
                       ];
-                    case "ConfirmDelivery":
+                    case 'ConfirmDelivery':
                       return [
-                        i18n.t("(buyer).track-order.orderDelivered"),
-                        i18n.t("(buyer).track-order.orderCompleted"),
+                        i18n.t('(buyer).track-order.orderDelivered'),
+                        i18n.t('(buyer).track-order.orderCompleted'),
                       ];
                     default:
                       return [
-                        i18n.t("(buyer).track-order.unknownOrderStatus"),
-                        i18n.t("(buyer).track-order.unknownState"),
+                        i18n.t('(buyer).track-order.unknownOrderStatus'),
+                        i18n.t('(buyer).track-order.unknownState'),
                       ];
                   }
                 };
@@ -320,8 +317,7 @@ export default function TrackOrder() {
                         style={[
                           defaultStyles.checkOutterContainer,
                           defaultStyles.checkPrimaryOutterContainer,
-                        ]}
-                      >
+                        ]}>
                         <View
                           style={[
                             defaultStyles.checkInnercontainer,
@@ -338,18 +334,17 @@ export default function TrackOrder() {
                         <Text
                           variant="titleMedium"
                           style={defaultStyles.text16}
-                          ellipsizeMode="tail"
-                        >
+                          ellipsizeMode="tail">
                           {getTitle()[0]}
-                          {" - "}
-                          {moment(item?.timestamp ?? "").format("MMMM DD")}
+                          {' - '}
+                          {moment(item?.timestamp ?? '').format('MMMM DD')}
                         </Text>
                         <Text style={styles.bodyText} ellipsizeMode="tail">
                           {getTitle()[1]}
                         </Text>
                       </View>
                       <Text style={styles.timeText}>
-                        {moment(item?.timestamp ?? "").format("hh:mm A")}
+                        {moment(item?.timestamp ?? '').format('hh:mm A')}
                       </Text>
                     </View>
                   </View>

@@ -1,9 +1,16 @@
-import { Stack } from "expo-router";
-import React from "react";
+import { Stack } from 'expo-router';
+import React from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function FarmerLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
-    <Stack screenOptions={{ headerShown: false }} initialRouteName="(index)">
+    <Stack
+      screenOptions={{
+        headerShown: false,
+      }}
+      initialRouteName="(index)">
       <Stack.Screen name="(index)" options={{ headerShown: false }} />
       <Stack.Screen name="create-product" options={{ headerShown: false }} />
       <Stack.Screen name="change-password" options={{ headerShown: false }} />

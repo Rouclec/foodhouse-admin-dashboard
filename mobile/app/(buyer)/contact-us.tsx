@@ -1,18 +1,19 @@
-import React from "react";
+import React from 'react';
 import {
   View,
   Linking,
   TouchableOpacity,
   KeyboardAvoidingView,
-} from "react-native";
-import { Ionicons, FontAwesome } from "@expo/vector-icons";
-import { Appbar, Icon, Text } from "react-native-paper";
-import { router } from "expo-router";
-import { defaultStyles, profileFlowStyles, signupStyles } from "@/styles";
-import { ScrollView } from "react-native-gesture-handler";
-import i18n from "@/i18n";
-import { Colors } from "@/constants";
-import parsePhoneNumberFromString from "libphonenumber-js";
+} from 'react-native';
+import { Ionicons, FontAwesome } from '@expo/vector-icons';
+import { Appbar, Icon, Text } from 'react-native-paper';
+import { router } from 'expo-router';
+import { defaultStyles, profileFlowStyles, signupStyles } from '@/styles';
+import { ScrollView } from 'react-native-gesture-handler';
+import i18n from '@/i18n';
+import { Colors } from '@/constants';
+import parsePhoneNumberFromString from 'libphonenumber-js';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const email = process.env.EXPO_PUBLIC_EMAIL;
 const phoneNumber = process.env.EXPO_PUBLIC_PHONE_NUMBER;
@@ -23,7 +24,7 @@ const ContactUsScreen = () => {
     if (email) {
       Linking.openURL(`mailto:${email}`);
     } else {
-      console.warn("Email not defined in env file.");
+      console.warn('Email not defined in env file.');
     }
   };
 
@@ -31,39 +32,44 @@ const ContactUsScreen = () => {
     if (phoneNumber) {
       Linking.openURL(`tel:${phoneNumber}`);
     } else {
-      console.warn("Phone number not defined in env file.");
+      console.warn('Phone number not defined in env file.');
     }
   };
 
   const handleWhatsAppPress = () => {
     if (phoneNumber) {
-      const message = "Hello, I need support.";
+      const message = 'Hello, I need support.';
       Linking.openURL(
-        `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`
+        `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`,
       );
     } else {
-      console.warn("Phone number not defined for WhatsApp.");
+      console.warn('Phone number not defined for WhatsApp.');
     }
   };
+
+  const insets = useSafeAreaInsets();
 
   return (
     <>
       <KeyboardAvoidingView
-        style={defaultStyles.container}
+        style={[
+          defaultStyles.container,
+          {
+            paddingBottom: insets.bottom,
+          },
+        ]}
         // behavior={Platform.OS === "ios" ? "padding" : undefined}
-        behavior={"padding"}
-        keyboardVerticalOffset={0}
-      >
+        behavior={'padding'}
+        keyboardVerticalOffset={0}>
         <View style={defaultStyles.flex}>
           <Appbar.Header dark={false} style={defaultStyles.appHeader}>
             <TouchableOpacity
               onPress={() => router.back()}
-              style={defaultStyles.backButtonContainer}
-            >
-              <Icon source={"arrow-left"} size={24} />
+              style={defaultStyles.backButtonContainer}>
+              <Icon source={'arrow-left'} size={24} />
             </TouchableOpacity>
             <Text variant="titleMedium" style={defaultStyles.heading}>
-              {i18n.t("(farmer).(profile-flow).(settings).contactUs")}
+              {i18n.t('(farmer).(profile-flow).(settings).contactUs')}
             </Text>
             <View />
           </Appbar.Header>
@@ -71,39 +77,35 @@ const ContactUsScreen = () => {
             contentContainerStyle={defaultStyles.scrollContainer}
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
-            keyboardShouldPersistTaps="handled"
-          >
+            keyboardShouldPersistTaps="handled">
             <View style={profileFlowStyles.innerContainer}>
               <TouchableOpacity
                 style={profileFlowStyles.row}
-                onPress={handleEmailPress}
-              >
+                onPress={handleEmailPress}>
                 <View style={profileFlowStyles.iconContainer}>
                   <Ionicons name="mail" size={20} color={Colors.primary[500]} />
                 </View>
                 <Text style={profileFlowStyles.navigationText}>
-                  {email || "support@foodhouse.com"}
+                  {email || 'support@foodhouse.com'}
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={profileFlowStyles.row}
-                onPress={handlePhonePress}
-              >
+                onPress={handlePhonePress}>
                 <View style={profileFlowStyles.iconContainer}>
                   <Ionicons name="call" size={20} color={Colors.primary[500]} />
                 </View>
                 <Text style={profileFlowStyles.navigationText}>
                   {parsePhoneNumberFromString(
-                    phoneNumber || ""
+                    phoneNumber || '',
                   )?.formatInternational()}
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={profileFlowStyles.row}
-                onPress={handleWhatsAppPress}
-              >
+                onPress={handleWhatsAppPress}>
                 <View style={profileFlowStyles.iconContainer}>
                   <FontAwesome
                     name="whatsapp"
@@ -112,7 +114,7 @@ const ContactUsScreen = () => {
                   />
                 </View>
                 <Text style={profileFlowStyles.navigationText}>
-                  {i18n.t("(farmer).(profile-flow).(settings).chat")}
+                  {i18n.t('(farmer).(profile-flow).(settings).chat')}
                 </Text>
               </TouchableOpacity>
             </View>

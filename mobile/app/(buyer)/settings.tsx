@@ -1,44 +1,50 @@
-import React from "react";
+import React from 'react';
 import {
   View,
   ScrollView,
   Linking,
   TouchableOpacity,
   KeyboardAvoidingView,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { Appbar, Text, List, Divider, Icon } from "react-native-paper";
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { Appbar, Text, List, Divider, Icon } from 'react-native-paper';
 import {
   defaultStyles,
   profileFlowStyles,
   signupStyles,
   profileFlowStyles as styles,
-} from "@/styles";
-import i18n from "@/i18n";
-import { FontAwesome } from "@expo/vector-icons";
-import { Colors } from "@/constants";
+} from '@/styles';
+import i18n from '@/i18n';
+import { FontAwesome } from '@expo/vector-icons';
+import { Colors } from '@/constants';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function SettingsPage() {
   const router = useRouter();
 
+  const insets = useSafeAreaInsets();
+
   return (
     <>
       <KeyboardAvoidingView
-        style={defaultStyles.container}
+        style={[
+          defaultStyles.container,
+          {
+            paddingBottom: insets.bottom,
+          },
+        ]}
         // behavior={Platform.OS === "ios" ? "padding" : undefined}
-        behavior={"padding"}
-        keyboardVerticalOffset={0}
-      >
+        behavior={'padding'}
+        keyboardVerticalOffset={0}>
         <View style={defaultStyles.flex}>
           <Appbar.Header dark={false} style={defaultStyles.appHeader}>
             <TouchableOpacity
               onPress={() => router.back()}
-              style={defaultStyles.backButtonContainer}
-            >
-              <Icon source={"arrow-left"} size={24} />
+              style={defaultStyles.backButtonContainer}>
+              <Icon source={'arrow-left'} size={24} />
             </TouchableOpacity>
             <Text variant="titleMedium" style={defaultStyles.heading}>
-              {i18n.t("(farmer).(profile-flow).(settings).heading")}
+              {i18n.t('(farmer).(profile-flow).(settings).heading')}
             </Text>
             <View />
           </Appbar.Header>
@@ -46,14 +52,12 @@ export default function SettingsPage() {
             contentContainerStyle={defaultStyles.scrollContainer}
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
-            keyboardShouldPersistTaps="handled"
-          >
+            keyboardShouldPersistTaps="handled">
             <View style={signupStyles.allInput}>
               <View style={styles.navigateSection}>
                 <TouchableOpacity
                   style={styles.navigationItem}
-                  onPress={() => router.push("/(buyer)/personal-info")}
-                >
+                  onPress={() => router.push('/(buyer)/personal-info')}>
                   <View style={styles.navigationContent}>
                     <View style={profileFlowStyles.iconContainer}>
                       <FontAwesome
@@ -63,7 +67,7 @@ export default function SettingsPage() {
                       />
                     </View>
                     <Text style={styles.navigationText}>
-                      {i18n.t("(farmer).(profile-flow).(settings).heading1")}{" "}
+                      {i18n.t('(farmer).(profile-flow).(settings).heading1')}{' '}
                     </Text>
                   </View>
                   <List.Icon icon="chevron-right" />
@@ -71,8 +75,7 @@ export default function SettingsPage() {
 
                 <TouchableOpacity
                   style={styles.navigationItem}
-                  onPress={() => router.push("/(buyer)/change-password")}
-                >
+                  onPress={() => router.push('/(buyer)/change-password')}>
                   <View style={styles.navigationContent}>
                     <View style={profileFlowStyles.iconContainer}>
                       <FontAwesome
@@ -82,7 +85,7 @@ export default function SettingsPage() {
                       />
                     </View>
                     <Text style={styles.navigationText}>
-                      {i18n.t("(farmer).(profile-flow).(settings).heading2")}{" "}
+                      {i18n.t('(farmer).(profile-flow).(settings).heading2')}{' '}
                     </Text>
                   </View>
                   <List.Icon icon="chevron-right" />
@@ -90,8 +93,7 @@ export default function SettingsPage() {
 
                 <TouchableOpacity
                   style={styles.navigationItem}
-                  onPress={() => router.push("/(buyer)/language")}
-                >
+                  onPress={() => router.push('/(buyer)/language')}>
                   <View style={styles.navigationContent}>
                     <View style={profileFlowStyles.iconContainer}>
                       <FontAwesome
@@ -101,7 +103,7 @@ export default function SettingsPage() {
                       />
                     </View>
                     <Text style={styles.navigationText}>
-                      {i18n.t("(farmer).(profile-flow).(settings).heading3")}
+                      {i18n.t('(farmer).(profile-flow).(settings).heading3')}
                     </Text>
                   </View>
                   <List.Icon icon="chevron-right" />
@@ -109,8 +111,7 @@ export default function SettingsPage() {
 
                 <TouchableOpacity
                   style={styles.navigationItem}
-                  onPress={() => router.push("/(buyer)/contact-us")}
-                >
+                  onPress={() => router.push('/(buyer)/contact-us')}>
                   <View style={styles.navigationContent}>
                     <View style={profileFlowStyles.iconContainer}>
                       <FontAwesome
@@ -120,7 +121,7 @@ export default function SettingsPage() {
                       />
                     </View>
                     <Text style={styles.navigationText}>
-                      {i18n.t("(farmer).(profile-flow).(settings).heading4")}{" "}
+                      {i18n.t('(farmer).(profile-flow).(settings).heading4')}{' '}
                     </Text>
                   </View>
                   <List.Icon icon="chevron-right" />
@@ -129,8 +130,7 @@ export default function SettingsPage() {
                   style={styles.navigationItem}
                   onPress={() =>
                     Linking.openURL(process.env.EXPO_PUBLIC_TC_URL!)
-                  }
-                >
+                  }>
                   <View style={styles.navigationContent}>
                     <View style={profileFlowStyles.iconContainer}>
                       <FontAwesome
@@ -140,7 +140,7 @@ export default function SettingsPage() {
                       />
                     </View>
                     <Text style={styles.navigationText}>
-                      {i18n.t("(farmer).(profile-flow).(settings).heading6")}
+                      {i18n.t('(farmer).(profile-flow).(settings).heading6')}
                     </Text>
                   </View>
                   <List.Icon icon="chevron-right" />
@@ -150,8 +150,7 @@ export default function SettingsPage() {
                   style={styles.navigationItem}
                   onPress={() =>
                     Linking.openURL(process.env.EXPO_PUBLIC_PRIVACY_URL!)
-                  }
-                >
+                  }>
                   <View style={styles.navigationContent}>
                     <View style={profileFlowStyles.iconContainer}>
                       <FontAwesome
@@ -161,7 +160,7 @@ export default function SettingsPage() {
                       />
                     </View>
                     <Text style={styles.navigationText}>
-                      {i18n.t("(farmer).(profile-flow).(settings).heading7")}
+                      {i18n.t('(farmer).(profile-flow).(settings).heading7')}
                     </Text>
                   </View>
                   <List.Icon icon="chevron-right" />
@@ -170,8 +169,7 @@ export default function SettingsPage() {
                   style={styles.navigationItem}
                   onPress={() =>
                     Linking.openURL(process.env.EXPO_PUBLIC_ABOUT_URL!)
-                  }
-                >
+                  }>
                   <View style={styles.navigationContent}>
                     <View style={profileFlowStyles.iconContainer}>
                       <FontAwesome
@@ -181,7 +179,7 @@ export default function SettingsPage() {
                       />
                     </View>
                     <Text style={styles.navigationText}>
-                      {i18n.t("(farmer).(profile-flow).(settings).heading8")}{" "}
+                      {i18n.t('(farmer).(profile-flow).(settings).heading8')}{' '}
                     </Text>
                   </View>
                   <List.Icon icon="chevron-right" />
@@ -198,7 +196,7 @@ export default function SettingsPage() {
                       />
                     </View>
                     <Text style={styles.logout}>
-                      {i18n.t("(farmer).(profile-flow).(settings).heading9")}{" "}
+                      {i18n.t('(farmer).(profile-flow).(settings).heading9')}{' '}
                     </Text>
                   </View>
                 </TouchableOpacity>

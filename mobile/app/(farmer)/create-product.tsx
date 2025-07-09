@@ -35,6 +35,7 @@ import {
   productsListProductNamesOptions,
 } from "@/client/products.swagger/@tanstack/react-query.gen";
 import { Context, ContextType } from "../_layout";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ForgotPasswordEmailOtp() {
   const { user } = useContext(Context) as ContextType;
@@ -212,10 +213,17 @@ export default function ForgotPasswordEmailOtp() {
     enabled: !!productCategory,
   });
 
+  const insets = useSafeAreaInsets();
+
   return (
     <>
       <KeyboardAvoidingView
-        style={defaultStyles.container}
+        style={[
+          defaultStyles.container,
+          {
+            paddingBottom: insets.bottom,
+          },
+        ]}
         // behavior={Platform.OS === "ios" ? "padding" : undefined}
         behavior={"padding"}
         keyboardVerticalOffset={0}

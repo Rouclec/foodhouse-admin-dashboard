@@ -13,7 +13,6 @@ import {
   ActivityIndicator,
   LayoutChangeEvent,
   Dimensions,
-  Platform,
 } from 'react-native';
 import MapView, {
   Callout,
@@ -30,6 +29,7 @@ import {
   GooglePlacesAutocomplete,
   GooglePlacesAutocompleteRef,
 } from 'react-native-google-places-autocomplete';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const INITIAL_REGION = {
   latitude: 4.1594, // Latitude of Buea
@@ -41,6 +41,7 @@ const INITIAL_REGION = {
 const { height } = Dimensions.get('window');
 
 export default function DeliveryAddress() {
+  const insets = useSafeAreaInsets();
   const mapRef = useRef<MapView>(null);
   const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
   const router = useRouter();
@@ -51,7 +52,7 @@ export default function DeliveryAddress() {
 
   const onBottomSheetLayout = (event: LayoutChangeEvent) => {
     const { height } = event.nativeEvent.layout;
-    setSheetHeight(height);
+    setSheetHeight(height + insets.bottom);
   };
 
   const { deliveryLocation, setDeliveryLocation } = useContext(
@@ -121,9 +122,9 @@ export default function DeliveryAddress() {
   return (
     <>
       <KeyboardAvoidingView
-        style={defaultStyles.flex}
+        style={[defaultStyles.flex]}
         behavior={'padding'}
-        keyboardVerticalOffset={0}>
+        keyboardVerticalOffset={256}>
         <View style={defaultStyles.flex}>
           <Appbar.Header
             dark={false}
@@ -141,7 +142,7 @@ export default function DeliveryAddress() {
           <MapView
             key={'map-instance'}
             style={{
-              height: height - (sheetHeight + 90),
+              height: height - (sheetHeight - insets.bottom),
             }}
             pointerEvents="none"
             ref={mapRef}
@@ -168,10 +169,10 @@ export default function DeliveryAddress() {
                 draggable
                 onDragEnd={async e => {
                   const newCoordinates = e.nativeEvent.coordinate;
-                  const address = await Location.reverseGeocodeAsync({
-                    latitude: newCoordinates.latitude,
-                    longitude: newCoordinates.longitude,
-                  });
+                  // const address = await Location.reverseGeocodeAsync({
+                  //   latitude: newCoordinates.latitude,
+                  //   longitude: newCoordinates.longitude,
+                  // });
                 }}
                 title={(deliveryLocation || currentLocation)?.description}
                 description={
@@ -186,132 +187,139 @@ export default function DeliveryAddress() {
             ) : null}
           </MapView>
         </View>
-      </KeyboardAvoidingView>
-      <View style={[styles.sheetContainer]} onLayout={onBottomSheetLayout}>
-        <View style={styles.notch} />
+        <View style={[styles.sheetContainer]} onLayout={onBottomSheetLayout}>
+          <View style={styles.notch} />
 
-        <Text
-          variant="titleMedium"
-          style={[defaultStyles.textCenter, styles.marginTop12]}>
-          {i18n.t('(buyer).(order).delivery-address.addressDetails')}
-        </Text>
-        <View style={styles.bottomSheetContent}>
-          <View style={styles.z99}>
-            <Text variant="titleMedium" style={defaultStyles.text16}>
-              {i18n.t('(buyer).(order).delivery-address.enterYourAddress')}
-            </Text>
-            <GooglePlacesAutocomplete
-              ref={googlePlacesAutoCompleteRef}
-              placeholder={i18n.t(
-                '(buyer).(order).delivery-address.addressHere',
-              )}
-              styles={{
-                textInput: styles.googlePlacesAutocompleteTextInput,
-                listView: styles.listView,
-              }}
-              predefinedPlaces={[]}
-              textInputProps={{
-                placeholderTextColor: Colors.grey['3c'],
-              }}
-              onPress={(data, details = null) => {
-                setLoadingLocation(false);
-                setDeliveryLocation({
-                  description: data.description,
-                  address: data?.description,
-                  region: {
-                    latitude: details?.geometry.location.lat ?? 0,
-                    longitude: details?.geometry.location.lng ?? 0,
-                    latitudeDelta: 0.01,
-                    longitudeDelta: 0.01,
-                  },
-                });
-              }}
-              fetchDetails={true}
-              nearbyPlacesAPI="GooglePlacesSearch"
-              minLength={2}
-              enablePoweredByContainer={false}
-              debounce={100}
-              query={{
-                key:
-                  Platform.OS === 'ios'
-                    ? process.env.EXPO_PUBLIC_IOS_MAP_QUERY_KEY
-                    : process.env.EXPO_PUBLIC_ANDROID_MAP_QUERY_KEY,
-                language: 'en',
-              }}
-              keyboardShouldPersistTaps="always"
-            />
-            <View style={[styles.flexRow, styles.marginTop12]}>
-              {loadingLocation ? (
-                <ActivityIndicator color={Colors.primary[500]} />
-              ) : (
-                <Checkbox.Android
-                  color={Colors.primary[500]}
-                  style={styles.checkBox}
-                  status={
-                    currentLocation?.description ===
-                    deliveryLocation?.description
-                      ? 'checked'
-                      : 'unchecked'
-                  }
-                  onPress={() => {
-                    if (
+          <Text
+            variant="titleMedium"
+            style={[defaultStyles.textCenter, styles.marginTop12]}>
+            {i18n.t('(buyer).(order).delivery-address.addressDetails')}
+          </Text>
+          <View style={styles.bottomSheetContent}>
+            <View style={styles.z99}>
+              <Text variant="titleMedium" style={defaultStyles.text16}>
+                {i18n.t('(buyer).(order).delivery-address.enterYourAddress')}
+              </Text>
+              <GooglePlacesAutocomplete
+                ref={googlePlacesAutoCompleteRef}
+                placeholder={i18n.t(
+                  '(buyer).(order).delivery-address.addressHere',
+                )}
+                styles={{
+                  textInput: styles.googlePlacesAutocompleteTextInput,
+                  listView: styles.listView,
+                }}
+                textInputProps={{
+                  placeholderTextColor: Colors.grey['3c'],
+                }}
+                onPress={(data, details = null) => {
+                  setLoadingLocation(false);
+                  setDeliveryLocation({
+                    description: data.description,
+                    address: data?.description,
+                    region: {
+                      latitude: details?.geometry.location.lat ?? 0,
+                      longitude: details?.geometry.location.lng ?? 0,
+                      latitudeDelta: 0.01,
+                      longitudeDelta: 0.01,
+                    },
+                  });
+                }}
+                fetchDetails={true}
+                nearbyPlacesAPI="GooglePlacesSearch"
+                debounce={200}
+                timeout={20000}
+                minLength={3}
+                predefinedPlaces={[]}
+                enablePoweredByContainer={false}
+                query={{
+                  key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_AUTOCOMPLETE_KEY,
+                  language: 'en',
+                }}
+                keyboardShouldPersistTaps="always"
+              />
+              <View style={[styles.flexRow, styles.marginTop12]}>
+                {loadingLocation ? (
+                  <ActivityIndicator color={Colors.primary[500]} />
+                ) : (
+                  <Checkbox.Android
+                    color={Colors.primary[500]}
+                    style={styles.checkBox}
+                    status={
                       currentLocation?.description ===
                       deliveryLocation?.description
-                    ) {
-                      setDeliveryLocation(undefined);
-                    } else if (currentLocation) {
-                      setDeliveryLocation({
-                        description: currentLocation?.description,
-                        address: currentLocation?.description,
-                        region: currentLocation?.region,
-                      });
+                        ? 'checked'
+                        : 'unchecked'
                     }
-                  }}
-                />
-              )}
-              <View style={styles.flexRowSmall}>
-                <Text variant="titleMedium" style={defaultStyles.text16}>
-                  {i18n.t(
-                    '(buyer).(order).delivery-address.useCurrentLocation',
-                  )}
-                </Text>
-                <View style={styles.iconContainer}>
-                  <Icon
-                    source={'map-marker-outline'}
-                    size={12}
-                    color={Colors.grey['61']}
+                    onPress={() => {
+                      if (
+                        currentLocation?.description ===
+                        deliveryLocation?.description
+                      ) {
+                        setDeliveryLocation(undefined);
+                      } else if (currentLocation) {
+                        setDeliveryLocation({
+                          description: currentLocation?.description,
+                          address: currentLocation?.description,
+                          region: currentLocation?.region,
+                        });
+                      }
+                    }}
                   />
+                )}
+                <View style={styles.flexRowSmall}>
+                  <Text variant="titleMedium" style={defaultStyles.text16}>
+                    {i18n.t(
+                      '(buyer).(order).delivery-address.useCurrentLocation',
+                    )}
+                  </Text>
+                  <View style={styles.iconContainer}>
+                    <Icon
+                      source={'map-marker-outline'}
+                      size={12}
+                      color={Colors.grey['61']}
+                    />
+                  </View>
                 </View>
               </View>
             </View>
           </View>
-        </View>
-        <View
-          style={[
-            defaultStyles.bottomButtonContainer,
-            defaultStyles.bgLight10,
-          ]}>
-          <Button
+          <View
             style={[
-              defaultStyles.button,
-              defaultStyles.primaryButton,
-              !deliveryLocation && defaultStyles.greyButton,
-            ]}
-            disabled={!deliveryLocation}
-            contentStyle={[defaultStyles.center]}
-            onPress={() => router.push('/(buyer)/(order)/checkout')}>
-            <View style={defaultStyles.innerButtonContainer}>
-              <View>
-                <Text variant="titleMedium" style={defaultStyles?.buttonText}>
-                  {i18n.t('(buyer).(order).delivery-address.proceedToCheckout')}
-                </Text>
-              </View>
+              defaultStyles.bottomButtonContainer,
+              defaultStyles.bgLight10,
+              {
+                paddingBottom: insets.bottom,
+              },
+            ]}>
+            <Button
+              style={[
+                defaultStyles.button,
+                defaultStyles.primaryButton,
+                !deliveryLocation && defaultStyles.greyButton,
+              ]}
+              disabled={!deliveryLocation}
+              contentStyle={[defaultStyles.center]}
+              onPress={() => router.push('/(buyer)/(order)/checkout')}>
+              <View style={defaultStyles.innerButtonContainer}>
+                <View>
+                  <Text variant="titleMedium" style={defaultStyles?.buttonText}>
+                    {i18n.t(
+                      '(buyer).(order).delivery-address.proceedToCheckout',
+                    )}
+                  </Text>
+                </View>
 
-              <Icon source={'arrow-right'} color={Colors.light[10]} size={24} />
-            </View>
-          </Button>
+                <Icon
+                  source={'arrow-right'}
+                  color={Colors.light[10]}
+                  size={24}
+                />
+              </View>
+            </Button>
+          </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </>
   );
 }

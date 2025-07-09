@@ -13,6 +13,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import i18n from "@/i18n";
 import { Colors } from "@/constants";
 import parsePhoneNumberFromString from "libphonenumber-js";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const email = process.env.EXPO_PUBLIC_EMAIL;
 const phoneNumber = process.env.EXPO_PUBLIC_PHONE_NUMBER;
@@ -46,10 +47,17 @@ const ContactUsScreen = () => {
     }
   };
 
+  const insets = useSafeAreaInsets();
+
   return (
     <>
       <KeyboardAvoidingView
-        style={defaultStyles.container}
+        style={[
+          defaultStyles.container,
+          {
+            paddingBottom: insets.bottom,
+          },
+        ]}
         // behavior={Platform.OS === "ios" ? "padding" : undefined}
         behavior={"padding"}
         keyboardVerticalOffset={0}
