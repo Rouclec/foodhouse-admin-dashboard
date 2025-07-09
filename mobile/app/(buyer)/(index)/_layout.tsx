@@ -6,7 +6,7 @@ import { Platform, SafeAreaView, View } from "react-native";
 import { Icon, Text } from "react-native-paper";
 import { tabStyles as styles } from "@/styles";
 import { Colors } from "@/constants";
-import { FontAwesome5, FontAwesome6, Ionicons } from "@expo/vector-icons";
+import { FontAwesome5 } from "@expo/vector-icons";
 import i18n from "@/i18n";
 
 export default function TabLayout() {

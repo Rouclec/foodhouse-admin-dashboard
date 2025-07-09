@@ -1,22 +1,22 @@
-import { Context, ContextType } from "@/app/_layout";
-import { ordersgrpcOrderStatus } from "@/client/orders.swagger";
-import { productsListProductsOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
-import { usersGetPublicUser, usersgrpcReview } from "@/client/users.swagger";
+import { Context, ContextType } from '@/app/_layout';
+import { ordersgrpcOrderStatus } from '@/client/orders.swagger';
+import { productsListProductsOptions } from '@/client/products.swagger/@tanstack/react-query.gen';
+import { usersGetPublicUser, usersgrpcReview } from '@/client/users.swagger';
 import {
   usersGetFarmerByIdOptions,
   usersGetPublicUserOptions,
   usersListFarmersReivewsOptions,
   usersReviewFarmerMutation,
-} from "@/client/users.swagger/@tanstack/react-query.gen";
-import { Product } from "@/components";
-import { Colors } from "@/constants";
-import i18n from "@/i18n";
-import { defaultStyles, farmerDetailsStyle as styles } from "@/styles";
-import { formatAmount } from "@/utils/amountFormater";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import moment, { defaultFormat } from "moment";
-import React, { FC, useContext, useState } from "react";
+} from '@/client/users.swagger/@tanstack/react-query.gen';
+import { Product } from '@/components';
+import { Colors } from '@/constants';
+import i18n from '@/i18n';
+import { defaultStyles, farmerDetailsStyle as styles } from '@/styles';
+import { formatAmount } from '@/utils/amountFormater';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import moment, { defaultFormat } from 'moment';
+import React, { FC, useContext, useState } from 'react';
 import {
   View,
   KeyboardAvoidingView,
@@ -24,21 +24,22 @@ import {
   FlatList,
   ActivityIndicator,
   Image,
-} from "react-native";
-import { Chase } from "react-native-animated-spinkit";
-import { Appbar, Icon, Text } from "react-native-paper";
+} from 'react-native';
+import { Chase } from 'react-native-animated-spinkit';
+import { Appbar, Icon, Text } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const TAB_ITEMS: Array<{
   name: string;
-  value: "PRODUCTS" | "REVIEWS";
+  value: 'PRODUCTS' | 'REVIEWS';
 }> = [
   {
-    name: i18n.t("(buyer).farmer-details.products"),
-    value: "PRODUCTS",
+    name: i18n.t('(buyer).farmer-details.products'),
+    value: 'PRODUCTS',
   },
   {
-    name: i18n.t("(buyer).farmer-details.reviews"),
-    value: "REVIEWS",
+    name: i18n.t('(buyer).farmer-details.reviews'),
+    value: 'REVIEWS',
   },
 ];
 
@@ -49,7 +50,7 @@ const CommentItem: FC<CommentItemProps> = ({ item }) => {
   const { data } = useQuery({
     ...usersGetPublicUserOptions({
       path: {
-        userId: item?.createdBy ?? "",
+        userId: item?.createdBy ?? '',
       },
     }),
   });
@@ -66,7 +67,7 @@ const CommentItem: FC<CommentItemProps> = ({ item }) => {
               />
             ) : (
               <Image
-                source={require("@/assets/images/avatar.png")}
+                source={require('@/assets/images/avatar.png')}
                 style={styles.smallAvatar}
               />
             )}
@@ -80,10 +81,10 @@ const CommentItem: FC<CommentItemProps> = ({ item }) => {
             <Icon
               source={
                 Math.floor(item?.rating ?? 0) >= 5
-                  ? "star"
+                  ? 'star'
                   : item?.rating ?? 0 > 0
-                  ? "star-half-full"
-                  : "star-outline"
+                  ? 'star-half-full'
+                  : 'star-outline'
               }
               size={12}
               color={Colors.primary[500]}
@@ -119,14 +120,14 @@ export default function FarmerDetails() {
 
   const [tabItem, setTabItem] = useState<{
     name: string;
-    value: "PRODUCTS" | "REVIEWS";
+    value: 'PRODUCTS' | 'REVIEWS';
   }>(TAB_ITEMS[0]);
 
   const { data: farmerDetails } = useQuery({
     ...usersGetFarmerByIdOptions({
       path: {
         farmerId: farmerId as string,
-        userId: user?.userId ?? "",
+        userId: user?.userId ?? '',
       },
     }),
   });
@@ -135,11 +136,11 @@ export default function FarmerDetails() {
     ...usersListFarmersReivewsOptions({
       path: {
         farmerId: farmerId as string,
-        userId: user?.userId ?? "",
+        userId: user?.userId ?? '',
       },
       query: {
         count: reviewCount,
-        startKey: "",
+        startKey: '',
       },
     }),
   });
@@ -147,7 +148,7 @@ export default function FarmerDetails() {
   const { data: farmerProducts, isLoading: isProductsLoading } = useQuery({
     ...productsListProductsOptions({
       query: {
-        startKey: "",
+        startKey: '',
         count: productsCount,
         createdBy: farmerId as string,
       },
@@ -178,24 +179,29 @@ export default function FarmerDetails() {
   //     ...usersReviewFarmerMutation(),
   //   });
 
+  const insets = useSafeAreaInsets();
+
   return (
     <>
       <KeyboardAvoidingView
-        style={defaultStyles.container}
-        behavior={"padding"}
-        keyboardVerticalOffset={0}
-      >
+        style={[
+          defaultStyles.container,
+          {
+            paddingBottom: insets.bottom,
+          },
+        ]}
+        behavior={'padding'}
+        keyboardVerticalOffset={0}>
         <View style={defaultStyles.flex}>
           <Appbar.Header dark={false} style={defaultStyles.appHeader}>
             <TouchableOpacity
               onPress={() => router.back()}
-              style={defaultStyles.backButtonContainer}
-            >
-              <Icon source={"arrow-left"} size={24} color={Colors.dark[0]} />
+              style={defaultStyles.backButtonContainer}>
+              <Icon source={'arrow-left'} size={24} color={Colors.dark[0]} />
             </TouchableOpacity>
 
             <Text variant="titleMedium" style={defaultStyles.heading}>
-              {i18n.t("(buyer).farmer-details.farmerInformation")}
+              {i18n.t('(buyer).farmer-details.farmerInformation')}
             </Text>
             <View />
           </Appbar.Header>
@@ -209,7 +215,7 @@ export default function FarmerDetails() {
                   />
                 ) : (
                   <Image
-                    source={require("@/assets/images/avatar.png")}
+                    source={require('@/assets/images/avatar.png')}
                     style={styles.avatar}
                   />
                 )}
@@ -218,23 +224,23 @@ export default function FarmerDetails() {
                 <Text variant="titleSmall" style={styles.farmerName}>
                   {!!farmerDetails?.user?.firstName
                     ? farmerDetails?.user?.firstName
-                    : "Anonymous"}{" "}
+                    : 'Anonymous'}{' '}
                   {farmerDetails?.user?.lastName}
                 </Text>
                 <View style={styles.ratingsContainer}>
                   {Math.floor(farmerDetails?.rating ?? 0) >= 5.0 ? (
-                    <Icon source={"star"} size={24} color={Colors.gold} />
+                    <Icon source={'star'} size={24} color={Colors.gold} />
                   ) : farmerDetails?.rating ?? 0 > 0 ? (
                     <Icon
-                      source={"star-half-full"}
+                      source={'star-half-full'}
                       size={24}
                       color={Colors.gold}
                     />
                   ) : (
                     <Icon
-                      source={"star-outline"}
+                      source={'star-outline'}
                       size={24}
-                      color={Colors.grey["61"]}
+                      color={Colors.grey['61']}
                     />
                   )}
                   <Text style={styles.ratingsText}>
@@ -253,7 +259,7 @@ export default function FarmerDetails() {
             </View>
           </View>
           <View style={styles.tabItemsMainContainer}>
-            {TAB_ITEMS.map((item) => {
+            {TAB_ITEMS.map(item => {
               return (
                 <TouchableOpacity
                   key={item?.value[0]}
@@ -262,15 +268,13 @@ export default function FarmerDetails() {
                     styles.tabItemContainer,
                     tabItem.value === item?.value &&
                       styles.tabItemActiveContainer,
-                  ]}
-                >
+                  ]}>
                   <Text
                     variant="titleSmall"
                     style={[
                       styles.tabItemText,
                       tabItem.value === item?.value && styles.tabItemActiveText,
-                    ]}
-                  >
+                    ]}>
                     {item?.name}
                   </Text>
                 </TouchableOpacity>
@@ -278,7 +282,7 @@ export default function FarmerDetails() {
             })}
           </View>
 
-          {tabItem.value === "REVIEWS" ? (
+          {tabItem.value === 'REVIEWS' ? (
             <>
               {isReviewsLoading && !farmerReviews ? (
                 <View style={[defaultStyles.container, defaultStyles.center]}>
@@ -286,7 +290,7 @@ export default function FarmerDetails() {
                 </View>
               ) : (
                 <FlatList
-                  key={"REVIEWS"}
+                  key={'REVIEWS'}
                   data={farmerReviews?.reviews}
                   keyExtractor={(item, index) =>
                     item?.createdAt ?? index.toString()
@@ -298,7 +302,7 @@ export default function FarmerDetails() {
                   ListEmptyComponent={
                     <View style={defaultStyles.noItemsContainer}>
                       <Text style={defaultStyles.noItems}>
-                        {i18n.t("(buyer).farmer-details.noReviewsYet")}
+                        {i18n.t('(buyer).farmer-details.noReviewsYet')}
                       </Text>
                     </View>
                   }
@@ -317,7 +321,7 @@ export default function FarmerDetails() {
                   }}
                   onScrollEndDrag={() => {
                     if (reviewsHaveReachedEnd && farmerReviews?.nextKey) {
-                      setReviewCount((prev) => prev + 10);
+                      setReviewCount(prev => prev + 10);
                       setReviewsHaveReachedEnd(false);
                     }
                   }}
@@ -344,7 +348,7 @@ export default function FarmerDetails() {
                 </View>
               ) : (
                 <FlatList
-                  key={"PRODUCTS"}
+                  key={'PRODUCTS'}
                   data={farmerProducts?.products}
                   keyExtractor={(item, index) => item?.id ?? index.toString()}
                   contentContainerStyle={[
@@ -354,7 +358,7 @@ export default function FarmerDetails() {
                   ListEmptyComponent={
                     <View style={defaultStyles.noItemsContainer}>
                       <Text style={defaultStyles.noItems}>
-                        {i18n.t("(buyer).farmer-details.noProductsFound")}
+                        {i18n.t('(buyer).farmer-details.noProductsFound')}
                       </Text>
                     </View>
                   }
@@ -372,7 +376,7 @@ export default function FarmerDetails() {
                         product={item}
                         OnPress={() =>
                           router.push({
-                            pathname: "/(buyer)/product-details",
+                            pathname: '/(buyer)/product-details',
                             params: {
                               productId: item?.id,
                             },
@@ -387,7 +391,7 @@ export default function FarmerDetails() {
                   }}
                   onScrollEndDrag={() => {
                     if (productsHaveReachedEnd && farmerProducts?.nextKey) {
-                      setProductsCount((prev) => prev + 10);
+                      setProductsCount(prev => prev + 10);
                       setProductsHaveReachedEnd(false);
                     }
                   }}

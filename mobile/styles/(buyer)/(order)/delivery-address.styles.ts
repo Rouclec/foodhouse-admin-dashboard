@@ -25,7 +25,7 @@ export const deliveryAddressStyles = StyleSheet.create({
   },
   listView: {
     position: "absolute",
-    top: 72,
+    bottom: 72,
     backgroundColor: Colors.light["10"],
     width: "100%",
     height: 164,

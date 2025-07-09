@@ -42,7 +42,6 @@ const ProfilePage = () => {
   const [error, setError] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
-  const { role } = useContext(Context) as ContextType;
 
   const { mutateAsync: updateUserRegistration } = useMutation({
     ...usersCompleteRegistrationMutation(),
@@ -56,12 +55,12 @@ const ProfilePage = () => {
     },
     onSuccess: async () => {
       setSuccessModalVisible(true);
-     
+
       setTimeout(() => {
-        if (role === "USER_ROLE_AGENT") {
+        if (user?.role === "USER_ROLE_AGENT") {
           router.replace("/(tabs)/(index)");
         } else {
-          console.error("not found")
+          console.error("not found");
         }
       }, 3000);
     },
@@ -94,7 +93,7 @@ const ProfilePage = () => {
           userId: user?.userId ?? "",
         },
       });
-       setUser({ ...data });
+      setUser({ ...data });
     } catch (error) {
       console.error("Error completing registration:", error);
       setErrorMessage(i18n.t("(auth).profile.uploadError"));
@@ -231,9 +230,7 @@ const ProfilePage = () => {
               buttonColor={Colors.primary["500"]}
               style={[defaultStyles.button, signupStyles.button]}
               loading={loading}
-              disabled={
-                !firstName || !lastName  || !address || loading
-              }
+              disabled={!firstName || !lastName || !address || loading}
               onPress={handleComplete}
             >
               <Text style={defaultStyles.buttonText}>Complete</Text>

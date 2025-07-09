@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 import { Appbar, Icon, Text } from "react-native-paper";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function () {
   const { t, i18n } = useTranslation();
@@ -30,10 +31,17 @@ export default function () {
     await i18n.changeLanguage(lng);
   };
 
+  const insets = useSafeAreaInsets();
+
   return (
     <>
       <KeyboardAvoidingView
-        style={defaultStyles.container}
+        style={[
+          defaultStyles.container,
+          {
+            paddingBottom: insets.bottom,
+          },
+        ]}
         // behavior={Platform.OS === "ios" ? "padding" : undefined}
         behavior={"padding"}
         keyboardVerticalOffset={0}

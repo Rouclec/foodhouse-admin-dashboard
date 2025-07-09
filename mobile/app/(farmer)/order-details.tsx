@@ -1,11 +1,11 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState } from 'react';
 import {
   Image,
   KeyboardAvoidingView,
   ScrollView,
   TouchableOpacity,
   View,
-} from "react-native";
+} from 'react-native';
 import {
   Appbar,
   Button,
@@ -15,23 +15,24 @@ import {
   Snackbar,
   Text,
   TextInput,
-} from "react-native-paper";
-import { defaultStyles, orderDetailsStyles as styles } from "@/styles";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { Context, ContextType } from "../_layout";
-import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
+} from 'react-native-paper';
+import { defaultStyles, orderDetailsStyles as styles } from '@/styles';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Context, ContextType } from '../_layout';
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
 import {
   ordersApproveOrderMutation,
   ordersGetOrderDetailsOptions,
   ordersRejectOrderMutation,
-} from "@/client/orders.swagger/@tanstack/react-query.gen";
-import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
-import i18n from "@/i18n";
-import { Chase } from "react-native-animated-spinkit";
-import { Colors } from "@/constants";
-import { formatAmount } from "@/utils/amountFormater";
-import { usersGetPublicUserOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
-import { delay } from "@/utils";
+} from '@/client/orders.swagger/@tanstack/react-query.gen';
+import { productsGetProductOptions } from '@/client/products.swagger/@tanstack/react-query.gen';
+import i18n from '@/i18n';
+import { Chase } from 'react-native-animated-spinkit';
+import { Colors } from '@/constants';
+import { formatAmount } from '@/utils/amountFormater';
+import { usersGetPublicUserOptions } from '@/client/users.swagger/@tanstack/react-query.gen';
+import { delay } from '@/utils';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function OrderDetails() {
   const router = useRouter();
@@ -54,8 +55,8 @@ export default function OrderDetails() {
   } = useQuery({
     ...ordersGetOrderDetailsOptions({
       path: {
-        userId: user?.userId ?? "",
-        orderNumber: (orderNumber as string) ?? "",
+        userId: user?.userId ?? '',
+        orderNumber: (orderNumber as string) ?? '',
       },
     }),
     enabled: !!orderNumber,
@@ -69,7 +70,7 @@ export default function OrderDetails() {
   } = useQuery({
     ...productsGetProductOptions({
       path: {
-        productId: orderDetails?.order?.product ?? "",
+        productId: orderDetails?.order?.product ?? '',
       },
     }),
     enabled: !!orderDetails?.order,
@@ -78,7 +79,7 @@ export default function OrderDetails() {
   const { data: buyer } = useQuery({
     ...usersGetPublicUserOptions({
       path: {
-        userId: orderDetails?.order?.createdBy ?? "",
+        userId: orderDetails?.order?.createdBy ?? '',
       },
     }),
     enabled: !!orderDetails?.order?.createdBy,
@@ -90,12 +91,12 @@ export default function OrderDetails() {
       await mutateAsync({
         body: {},
         path: {
-          orderId: orderDetails?.order?.orderNumber ?? "",
-          userId: user?.userId ?? "",
+          orderId: orderDetails?.order?.orderNumber ?? '',
+          userId: user?.userId ?? '',
         },
       });
     } catch (error) {
-      console.error({ error }, "approving order");
+      console.error({ error }, 'approving order');
     } finally {
       setLoading(false);
     }
@@ -109,12 +110,12 @@ export default function OrderDetails() {
           reason: rejectReason,
         },
         path: {
-          orderId: orderDetails?.order?.orderNumber ?? "",
-          userId: user?.userId ?? "",
+          orderId: orderDetails?.order?.orderNumber ?? '',
+          userId: user?.userId ?? '',
         },
       });
     } catch (error) {
-      console.error({ error }, "approving order");
+      console.error({ error }, 'approving order');
     } finally {
       setLoading(false);
     }
@@ -129,10 +130,10 @@ export default function OrderDetails() {
       await delay(5000);
       setShowRejectedModal(false);
     },
-    onError: async (error) => {
+    onError: async error => {
       setError(
         error?.response?.data?.message ??
-          i18n.t("(farmer).order-details.unknownError")
+          i18n.t('(farmer).order-details.unknownError'),
       );
       await delay(5000);
       setError(undefined);
@@ -147,34 +148,39 @@ export default function OrderDetails() {
       await delay(5000);
       setShowSuccessModal(false);
     },
-    onError: async (error) => {
+    onError: async error => {
       setError(
         error?.response?.data?.message ??
-          i18n.t("(farmer).order-details.unknownError")
+          i18n.t('(farmer).order-details.unknownError'),
       );
       await delay(5000);
       setError(undefined);
     },
   });
 
+  const insets = useSafeAreaInsets();
+
   if (isOrderDetailsLoading || isProductLoading) {
     return (
       <>
         <KeyboardAvoidingView
-          style={defaultStyles.container}
-          behavior={"padding"}
-          keyboardVerticalOffset={0}
-        >
+          style={[
+            defaultStyles.container,
+            {
+              paddingBottom: insets.bottom,
+            },
+          ]}
+          behavior={'padding'}
+          keyboardVerticalOffset={0}>
           <View style={defaultStyles.flex}>
             <Appbar.Header dark={false} style={defaultStyles.appHeader}>
               <TouchableOpacity
                 onPress={() => router.back()}
-                style={defaultStyles.backButtonContainer}
-              >
-                <Icon source={"arrow-left"} size={24} />
+                style={defaultStyles.backButtonContainer}>
+                <Icon source={'arrow-left'} size={24} />
               </TouchableOpacity>
               <Text variant="titleMedium" style={defaultStyles.heading}>
-                {i18n.t("(farmer).order-details.orderDetails")}
+                {i18n.t('(farmer).order-details.orderDetails')}
               </Text>
               <View />
             </Appbar.Header>
@@ -182,11 +188,9 @@ export default function OrderDetails() {
               contentContainerStyle={defaultStyles.scrollContainer}
               showsVerticalScrollIndicator={false}
               nestedScrollEnabled={true}
-              keyboardShouldPersistTaps="handled"
-            >
+              keyboardShouldPersistTaps="handled">
               <View
-                style={[defaultStyles.center, defaultStyles.notFoundContainer]}
-              >
+                style={[defaultStyles.center, defaultStyles.notFoundContainer]}>
                 <Chase size={56} color={Colors.primary[500]} />
               </View>
             </ScrollView>
@@ -201,19 +205,17 @@ export default function OrderDetails() {
       <>
         <KeyboardAvoidingView
           style={defaultStyles.container}
-          behavior={"padding"}
-          keyboardVerticalOffset={0}
-        >
+          behavior={'padding'}
+          keyboardVerticalOffset={0}>
           <View style={defaultStyles.flex}>
             <Appbar.Header dark={false} style={defaultStyles.appHeader}>
               <TouchableOpacity
                 onPress={() => router.back()}
-                style={defaultStyles.backButtonContainer}
-              >
-                <Icon source={"arrow-left"} size={24} />
+                style={defaultStyles.backButtonContainer}>
+                <Icon source={'arrow-left'} size={24} />
               </TouchableOpacity>
               <Text variant="titleMedium" style={defaultStyles.heading}>
-                {i18n.t("(farmer).order-details.orderDetails")}
+                {i18n.t('(farmer).order-details.orderDetails')}
               </Text>
               <View />
             </Appbar.Header>
@@ -221,12 +223,10 @@ export default function OrderDetails() {
               contentContainerStyle={defaultStyles.scrollContainer}
               showsVerticalScrollIndicator={false}
               nestedScrollEnabled={true}
-              keyboardShouldPersistTaps="handled"
-            >
+              keyboardShouldPersistTaps="handled">
               <View
-                style={[defaultStyles.center, defaultStyles.notFoundContainer]}
-              >
-                <Text>{i18n.t("(farmer).order-details.couldNotLoad")}</Text>
+                style={[defaultStyles.center, defaultStyles.notFoundContainer]}>
+                <Text>{i18n.t('(farmer).order-details.couldNotLoad')}</Text>
               </View>
             </ScrollView>
           </View>
@@ -239,19 +239,17 @@ export default function OrderDetails() {
     <>
       <KeyboardAvoidingView
         style={defaultStyles.container}
-        behavior={"padding"}
-        keyboardVerticalOffset={0}
-      >
+        behavior={'padding'}
+        keyboardVerticalOffset={0}>
         <View style={defaultStyles.flex}>
           <Appbar.Header dark={false} style={defaultStyles.appHeader}>
             <TouchableOpacity
               onPress={() => router.back()}
-              style={defaultStyles.backButtonContainer}
-            >
-              <Icon source={"arrow-left"} size={24} />
+              style={defaultStyles.backButtonContainer}>
+              <Icon source={'arrow-left'} size={24} />
             </TouchableOpacity>
             <Text variant="titleMedium" style={defaultStyles.heading}>
-              {i18n.t("(farmer).order-details.orderDetails")}
+              {i18n.t('(farmer).order-details.orderDetails')}
             </Text>
             <View />
           </Appbar.Header>
@@ -262,7 +260,7 @@ export default function OrderDetails() {
             />
             <View style={styles.orderDetailsContainer}>
               <Text style={styles.leftText}>
-                {i18n.t("(farmer).order-details.orderNumber")}:{" "}
+                {i18n.t('(farmer).order-details.orderNumber')}:{' '}
                 <Text variant="titleMedium" style={styles.rightText}>
                   {orderDetails?.order?.orderNumber}
                 </Text>
@@ -270,13 +268,13 @@ export default function OrderDetails() {
               <Text variant="titleMedium">{productData?.product?.name}</Text>
               <View style={styles.centerRow}>
                 <Text variant="titleSmall" style={styles.primaryText}>
-                  {orderDetails?.order?.price?.currencyIsoCode}{" "}
+                  {orderDetails?.order?.price?.currencyIsoCode}{' '}
                   {formatAmount(
                     (
                       (productData?.product?.amount?.value ?? 0) *
-                      parseInt(orderDetails?.order?.quantity ?? "")
-                    ).toString() ?? "",
-                    { decimalPlaces: 2 }
+                      parseInt(orderDetails?.order?.quantity ?? '')
+                    ).toString() ?? '',
+                    { decimalPlaces: 2 },
                   )}
                 </Text>
               </View>
@@ -289,12 +287,11 @@ export default function OrderDetails() {
             ]}
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
-            keyboardShouldPersistTaps="handled"
-          >
+            keyboardShouldPersistTaps="handled">
             <View style={styles.card}>
               <View style={styles.listItem}>
                 <Text variant="titleSmall" style={styles.leftText}>
-                  {i18n.t("(farmer).order-details.customersName")}
+                  {i18n.t('(farmer).order-details.customersName')}
                 </Text>
                 <Text variant="titleMedium" style={styles.rightText}>
                   {buyer?.name}
@@ -302,18 +299,18 @@ export default function OrderDetails() {
               </View>
               <View style={styles.listItem}>
                 <Text variant="titleSmall" style={styles.leftText}>
-                  {i18n.t("(farmer).order-details.quantity")}
+                  {i18n.t('(farmer).order-details.quantity')}
                 </Text>
                 <Text variant="titleMedium" style={styles.rightText}>
-                  {formatAmount(orderDetails?.order?.quantity ?? "")}{" "}
-                  {(productData?.product?.unitType ?? "").replace("per_", "")}
-                  {(parseInt(orderDetails?.order?.quantity ?? "") ?? 0) > 1 &&
-                    "s"}
+                  {formatAmount(orderDetails?.order?.quantity ?? '')}{' '}
+                  {(productData?.product?.unitType ?? '').replace('per_', '')}
+                  {(parseInt(orderDetails?.order?.quantity ?? '') ?? 0) > 1 &&
+                    's'}
                 </Text>
               </View>
               <View style={styles.listItem}>
                 <Text variant="titleSmall" style={styles.leftText}>
-                  {i18n.t("(farmer).order-details.deliveryAddress")}
+                  {i18n.t('(farmer).order-details.deliveryAddress')}
                 </Text>
                 <Text variant="titleMedium" style={styles.rightText}>
                   {orderDetails?.order?.deliveryLocation?.address}
@@ -323,7 +320,7 @@ export default function OrderDetails() {
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
-      {orderDetails?.order?.status === "OrderStatus_PAYMENT_SUCCESSFUL" && (
+      {orderDetails?.order?.status === 'OrderStatus_PAYMENT_SUCCESSFUL' && (
         <View style={defaultStyles.bottomContainerWithContent}>
           <Button
             style={[
@@ -332,10 +329,9 @@ export default function OrderDetails() {
               loading && defaultStyles.greyButton,
             ]}
             disabled={loading}
-            onPress={() => setShowRejectModal(true)}
-          >
+            onPress={() => setShowRejectModal(true)}>
             <Text style={defaultStyles.buttonText}>
-              {i18n.t("(farmer).order-details.rejectOrder")}
+              {i18n.t('(farmer).order-details.rejectOrder')}
             </Text>
           </Button>
           <Button
@@ -345,10 +341,9 @@ export default function OrderDetails() {
             ]}
             loading={loading}
             disabled={loading}
-            onPress={handleApproveOrder}
-          >
+            onPress={handleApproveOrder}>
             <Text style={defaultStyles.buttonText}>
-              {i18n.t("(farmer).order-details.approveOrder")}
+              {i18n.t('(farmer).order-details.approveOrder')}
             </Text>
           </Button>
         </View>
@@ -357,22 +352,21 @@ export default function OrderDetails() {
         <Dialog
           visible={showSuccessModal}
           onDismiss={() => setShowSuccessModal(false)}
-          style={defaultStyles.dialogSuccessContainer}
-        >
+          style={defaultStyles.dialogSuccessContainer}>
           <Dialog.Content>
             <Image
-              source={require("@/assets/images/success.png")}
+              source={require('@/assets/images/success.png')}
               style={defaultStyles.successImage}
             />
           </Dialog.Content>
           <Dialog.Content>
             <Text variant="titleLarge" style={defaultStyles.primaryText}>
-              {i18n.t("(farmer).order-details.congratulations")}
+              {i18n.t('(farmer).order-details.congratulations')}
             </Text>
           </Dialog.Content>
           <Dialog.Content>
             <Text style={defaultStyles.bodyText}>
-              {i18n.t("(farmer).order-details.youHaveApproved")}
+              {i18n.t('(farmer).order-details.youHaveApproved')}
             </Text>
           </Dialog.Content>
         </Dialog>
@@ -382,16 +376,15 @@ export default function OrderDetails() {
         <Dialog
           visible={showRejectedModal}
           onDismiss={() => setShowRejectedModal(false)}
-          style={defaultStyles.dialogSuccessContainer}
-        >
+          style={defaultStyles.dialogSuccessContainer}>
           <Dialog.Content>
             <Text variant="titleLarge" style={defaultStyles.primaryText}>
-              {i18n.t("(farmer).order-details.orderRejected")}
+              {i18n.t('(farmer).order-details.orderRejected')}
             </Text>
           </Dialog.Content>
           <Dialog.Content>
             <Text style={defaultStyles.bodyText}>
-              {i18n.t("(farmer).order-details.youHaveRejected")}
+              {i18n.t('(farmer).order-details.youHaveRejected')}
             </Text>
           </Dialog.Content>
         </Dialog>
@@ -401,23 +394,24 @@ export default function OrderDetails() {
         <Dialog
           visible={showRejectModal}
           onDismiss={() => setShowRejectModal(false)}
-          style={[defaultStyles.dialogSuccessContainer, styles.dialogContainer]}
-        >
+          style={[
+            defaultStyles.dialogSuccessContainer,
+            styles.dialogContainer,
+          ]}>
           <Dialog.Content style={styles.selfCenter}>
             <Text
               variant="titleLarge"
-              style={[defaultStyles.errorText, defaultStyles.textCenter]}
-            >
-              {i18n.t("(farmer).order-details.rejectOrder")}
+              style={[defaultStyles.errorText, defaultStyles.textCenter]}>
+              {i18n.t('(farmer).order-details.rejectOrder')}
             </Text>
           </Dialog.Content>
           <Dialog.Content>
-            <Text>{i18n.t("(farmer).order-details.enterAReason")}</Text>
+            <Text>{i18n.t('(farmer).order-details.enterAReason')}</Text>
           </Dialog.Content>
           <Dialog.Content style={styles.widthFull}>
             <View style={styles.inputContainer}>
               <TextInput
-                label={i18n.t("(farmer).order-details.reason")}
+                label={i18n.t('(farmer).order-details.reason')}
                 mode="outlined"
                 value={rejectReason}
                 onChangeText={setRejectReason}
@@ -425,12 +419,12 @@ export default function OrderDetails() {
                 theme={{
                   colors: {
                     primary: Colors.primary[500],
-                    background: Colors.grey["fa"],
+                    background: Colors.grey['fa'],
                     error: Colors.error,
                   },
                   roundness: 10,
                 }}
-                outlineColor={Colors.grey["bg"]}
+                outlineColor={Colors.grey['bg']}
                 multiline
               />
             </View>
@@ -445,10 +439,9 @@ export default function OrderDetails() {
               ]}
               disabled={loading && !rejectReason}
               loading={loading}
-              onPress={handleRejectOrder}
-            >
+              onPress={handleRejectOrder}>
               <Text style={defaultStyles.buttonText}>
-                {i18n.t("(farmer).order-details.reject")}
+                {i18n.t('(farmer).order-details.reject')}
               </Text>
             </Button>
           </Dialog.Actions>
@@ -458,8 +451,7 @@ export default function OrderDetails() {
         visible={!!error}
         onDismiss={() => {}}
         duration={3000}
-        style={[defaultStyles.snackbar, defaultStyles.marginHorizontal24]}
-      >
+        style={[defaultStyles.snackbar, defaultStyles.marginHorizontal24]}>
         <Text style={defaultStyles.errorText}>{error}</Text>
       </Snackbar>
     </>

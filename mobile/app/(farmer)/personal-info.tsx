@@ -28,6 +28,7 @@ import { ImagePicker } from "@/components";
 import { usersCompleteRegistrationMutation } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { delay, uploadImage } from "@/utils";
 import { useMutation } from "@tanstack/react-query";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function PersonalInfo() {
   const router = useRouter();
@@ -124,10 +125,17 @@ export default function PersonalInfo() {
     }
   };
 
+  const insets = useSafeAreaInsets();
+
   return (
     <>
       <KeyboardAvoidingView
-        style={defaultStyles.container}
+         style={[
+          defaultStyles.container,
+          {
+            paddingBottom: insets.bottom,
+          },
+        ]}
         behavior={"padding"}
         keyboardVerticalOffset={0}
       >

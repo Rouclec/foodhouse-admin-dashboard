@@ -21,6 +21,7 @@ import { delay } from "@/utils";
 import i18n from "@/i18n";
 import { Colors } from "@/constants";
 import { Context, ContextType } from "../_layout";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ChangePasswordScreen() {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -87,10 +88,17 @@ export default function ChangePasswordScreen() {
     } catch (err) {}
   };
 
+  const insets = useSafeAreaInsets();
+
   return (
     <>
       <KeyboardAvoidingView
-        style={defaultStyles.container}
+        style={[
+          defaultStyles.container,
+          {
+            paddingBottom: insets.bottom,
+          },
+        ]}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
       >
