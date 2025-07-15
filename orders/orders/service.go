@@ -709,7 +709,8 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 		return nil, status.Errorf(codes.Internal, "payment method %s not supported", req.GetAccount().GetPaymentMethod())
 	}
 
-	// check if a payment has already been initiated for that entity, to avoid users intiating payments twice
+	// check if a payment has already been initiated for that entity, 
+	// to avoid users intiating payments twice
 	_, err = querier.GetPaymentByEntity(ctx, sqlc.GetPaymentByEntityParams{
 		EntityID:      req.GetEntityId(),
 		PaymentEntity: req.GetPaymentEntity().String(),
