@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/rs/zerolog"
 )
@@ -120,7 +121,7 @@ func (tp *TrustPayWayProvider) RequestPayment(ctx context.Context, from string, 
 	requestBody := InitiatePaymentRequest{
 		Amount:           amount,
 		Currency:         currency,
-		SubscriberMsisdn: from,
+		SubscriberMsisdn: RemovePlusPrefix(from),
 		Descrtiption:     description,
 		OrderId:          *externalReference,
 		NotifUrl:         tp.WebHook,
@@ -179,7 +180,7 @@ func (tp *TrustPayWayProvider) WithdrawFunds(ctx context.Context, to string, amo
 	requestBody := InitiateWithdrawalRequest{
 		Amount:           amount,
 		Currency:         currency,
-		SubscriberMsisdn: to,
+		SubscriberMsisdn: RemovePlusPrefix(to),
 		Descrtiption:     description,
 		OrderId:          *externalReference,
 		NotifUrl:         tp.WebHook,
@@ -305,4 +306,13 @@ func (tp *TrustPayWayProvider) authenticate(ctx context.Context) (*LoginResponse
 	}
 
 	return &response, nil
+}
+
+// RemovePlusPrefix removes the '+' from the start of the number if present.
+func RemovePlusPrefix(number string) string {
+	number = strings.TrimSpace(number)
+	if strings.HasPrefix(number, "+") {
+		return number[1:]
+	}
+	return number
 }

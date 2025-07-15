@@ -669,7 +669,7 @@ func generateHexSecretKey(length int) (string, error) {
 func formatPhoneNumber(phoneNumber string) (string, error) {
 	parsedNumber, err := phonenumbers.Parse(phoneNumber, "+1")
 	if err != nil {
-		return "", status.Errorf(codes.InvalidArgument, "Error validating phone number: %v", err)
+		return "", status.Errorf(codes.InvalidArgument, "error validating phone number: %v", err)
 	}
 
 	// Check if the number is valid
