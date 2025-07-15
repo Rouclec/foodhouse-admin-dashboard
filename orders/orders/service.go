@@ -508,6 +508,7 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 		return nil, status.Errorf(codes.Internal, "error getting product %v", err)
 	}
 
+	// calculate payout amount from product price and order quantity
 	payoutAmount := float64(product.GetProduct().GetAmount().GetValue()) * float64(*order.Quantity)
 
 	i.logger.Debug().Msgf("payout phone number %v", req.GetPayoutPhoneNumber())
