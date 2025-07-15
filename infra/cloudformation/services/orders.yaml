@@ -136,6 +136,14 @@ Resources:
               ValueFrom: !Sub "${CampaySecretArn}:password::"
             - Name: CAMPAY_BASE_URL
               ValueFrom: !Sub "${CampaySecretArn}:base_url::"
+            - Name: TRUST_PAY_WAY_SECRET_KEY
+              ValueFrom: !Sub "${CampaySecretArn}:tpw_secret_key::"
+            - Name: TRUST_PAY_WAY_BASE_URL
+              ValueFrom: !Sub "${CampaySecretArn}:tpw_base_url::"
+		        - Name: TRUST_PAY_WAY_APP_TOKEN
+              ValueFrom: !Sub "${CampaySecretArn}:tpw_app_token::"
+	          - Name: TRUST_PAY_WAY_WEBHOOK
+              ValueFrom: !Sub "${CampaySecretArn}:tpw_webhook::"
 
   # We create a data in the RDS instance for the application.
   # We do this with a custom Cloudformation resource that will run a lambda function.
