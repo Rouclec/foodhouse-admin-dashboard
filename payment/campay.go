@@ -26,7 +26,8 @@ func NewCampayProvider(campayUsername string, campayPassword string, campayBaseU
 	}, nil
 }
 
-func (cp *CampayProvider) RequestPayment(ctx context.Context, from string, amount float64, currency string, description string, externalReference *string) (*string, error) {
+func (cp *CampayProvider) RequestPayment(ctx context.Context, from string, amount float64, currency string, description string, externalReference *string) (
+	*string, error) {
 	campayClient, err := campay.NewPaymentClient(cp.CampayUserName, cp.CampayPassword, cp.CampayBaseUrl)
 
 	if err != nil {
@@ -74,4 +75,8 @@ func (cp *CampayProvider) WithdrawFunds(ctx context.Context, to string, amount f
 	}
 
 	return &response.Reference, nil
+}
+
+func (cp *CampayProvider) CheckPaymentStatus(context.Context, string) (PaymentStatus, error) {
+	panic("unimplimented")
 }

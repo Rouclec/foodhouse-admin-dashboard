@@ -33,8 +33,8 @@ import (
 type Config struct {
 	DB DBConfig
 
-	ListenPort uint `conf:"env:LISTEN_PORT,required"`
-	UsersHostPort string `conf:"env:USERS_HOST_PORT,required"`
+	ListenPort       uint   `conf:"env:LISTEN_PORT,required"`
+	UsersHostPort    string `conf:"env:USERS_HOST_PORT,required"`
 	ProductsHostPort string `conf:"env:PRODUCTS_HOST_PORT,required"`
 
 	MigrationPath string `conf:"env:MIGRATION_PATH,required"`
@@ -44,6 +44,13 @@ type Config struct {
 	EnableDevMethods bool `conf:"env:ENABLE_DEV_METHODS,default:false"`
 
 	CampayConfig CampayConfig
+
+	TrustPayWay struct {
+		SecretKey string `conf:"env:TRUST_PAY_WAY_SECRET_KEY,required"`
+		BaseUrl   string `conf:"env:TRUST_PAY_WAY_BASE_URL,required"`
+		AppToken  string `conf:"env:TRUST_PAY_WAY_APP_TOKEN,required"`
+		WebHook   string `conf:"env:TRUST_PAY_WAY_WEBHOOK,required"`
+	}
 }
 
 type DBConfig struct {
@@ -126,7 +133,8 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 	grpcServer := grpc.NewServer(svrOpts...)
 	reflection.Register(grpcServer)
 
-	paymentService, err := payment.NewCampayProvider(config.CampayConfig.CampayUsername, config.CampayConfig.CampayPassword, config.CampayConfig.CampayBaseUrl, config.CampayConfig.CampayWebHook)
+	// paymentService, err := payment.NewCampayProvider(config.CampayConfig.CampayUsername, config.CampayConfig.CampayPassword, config.CampayConfig.CampayBaseUrl, config.CampayConfig.CampayWebHook)
+	paymentService, err := payment.NewTPWProvider(config.TrustPayWay.SecretKey, config.TrustPayWay.AppToken, config.TrustPayWay.BaseUrl, config.TrustPayWay.WebHook, logger)
 
 	if err != nil {
 		return fmt.Errorf("error initializing campay provider: %w", err)

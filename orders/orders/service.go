@@ -176,6 +176,8 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 		return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)
 	}
 
+	i.logger.Debug().Interface("tpw webhook response: %v", req)
+
 	i.logger.Debug().Msgf("payment id %v", req.GetExternalReference())
 	i.logger.Debug().Msgf("payment status %v", req.GetStatus())
 
@@ -493,12 +495,21 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 	}
 
 	paymentReference := fmt.Sprintf("payount-%s-%s", strconv.FormatInt(order.OrderNumber, 10), time.Now().Format("20060102150405"))
-	testAmount := 10
+
+	product, err := i.productService.GetProduct(ctx, &productsgrpc.GetProductRequest{
+		ProductId: *order.Product,
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting product %v", err)
+	}
+
+	payoutAmount := float64(product.GetProduct().GetAmount().GetValue()) * float64(*order.Quantity)
 
 	i.logger.Debug().Msgf("payout phone number %v", req.GetPayoutPhoneNumber())
 
 	_, err = i.paymentService.WithdrawFunds(ctx,
-		req.GetPayoutPhoneNumber(), float64(testAmount),
+		req.GetPayoutPhoneNumber(), payoutAmount,
 		*order.PriceCurrency, fmt.Sprintf("payment for order %v", order.OrderNumber),
 		&paymentReference)
 
@@ -753,13 +764,11 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 		return nil, status.Errorf(codes.Internal, "currency %s is not supported", req.GetAmount().GetCurrencyIsoCode())
 	}
 
-	// TODO: revert to actual amount when live
-	// _, err = i.paymentService.RequestPayment(ctx, formattedNumber, *payment.AmountValue, *payment.AmountCurrency, fmt.Sprintf("payment for entity: %s  with id: %s", req.GetPaymentEntity(), req.GetEntityId()), &payment.ID)
-
 	// Using test amount while in sandbox mode
 
-	testAmount := float64(10)
-	_, err = i.paymentService.RequestPayment(ctx, formattedNumber, testAmount, "XAF", fmt.Sprintf("payment for entity: %s  with id: %s", req.GetPaymentEntity(), req.GetEntityId()), &payment.ID)
+	// testAmount := float64(10)
+
+	_, err = i.paymentService.RequestPayment(ctx, formattedNumber, req.GetAmount().GetValue(), req.GetAmount().GetCurrencyIsoCode(), fmt.Sprintf("payment for entity: %s  with id: %s", req.GetPaymentEntity(), req.GetEntityId()), &payment.ID)
 
 	if err != nil {
 		i.logger.Debug().Msgf("payment error %v", err)
