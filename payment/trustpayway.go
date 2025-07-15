@@ -28,7 +28,7 @@ const (
 )
 
 type LoginRequest struct {
-	AppicationID string `json:"appicationId,requrired"`
+	ApplicationID string `json:"applicationId,requrired"`
 }
 
 type LoginResponse struct {
@@ -266,7 +266,7 @@ func (tp *TrustPayWayProvider) authenticate(ctx context.Context) (*LoginResponse
 	url := fmt.Sprintf("%s/api/login", tp.BaseUrl)
 
 	requestBody := LoginRequest{
-		AppicationID: tp.AppToken,
+		ApplicationID: tp.AppToken,
 	}
 
 	tp.Logger.Debug().Msgf("login request body: %v", requestBody)
