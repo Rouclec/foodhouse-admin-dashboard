@@ -39,7 +39,7 @@ func DetectProvider(phoneNumber string) Provider {
 		return ProviderOrange
 	case "65":
 		switch prefix3 {
-		case "651", "652", "653", "654":
+		case "650", "651", "652", "653", "654":
 			return ProviderMTN
 		case "655", "656", "657", "658", "659":
 			return ProviderOrange
