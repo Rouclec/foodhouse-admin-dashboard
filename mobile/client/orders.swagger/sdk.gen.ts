@@ -47,8 +47,8 @@ export const ordersUpdateDeliveryPoint = <ThrowOnError extends boolean = false>(
     });
 };
 
-export const ordersConfirmPayment = <ThrowOnError extends boolean = false>(options?: OptionsLegacyParser<OrdersConfirmPaymentData, ThrowOnError>) => {
-    return (options?.client ?? client).get<OrdersConfirmPaymentResponse, OrdersConfirmPaymentError, ThrowOnError>({
+export const ordersConfirmPayment = <ThrowOnError extends boolean = false>(options: OptionsLegacyParser<OrdersConfirmPaymentData, ThrowOnError>) => {
+    return (options?.client ?? client).post<OrdersConfirmPaymentResponse, OrdersConfirmPaymentError, ThrowOnError>({
         ...options,
         url: '/v1/public/confirm-payment'
     });
