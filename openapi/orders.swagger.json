@@ -309,7 +309,7 @@
       }
     },
     "/v1/public/confirm-payment": {
-      "get": {
+      "post": {
         "operationId": "Orders_ConfirmPayment",
         "responses": {
           "200": {
@@ -327,81 +327,12 @@
         },
         "parameters": [
           {
-            "name": "status",
-            "description": "\"SUCCESSFUL\" or \"FAILED\",",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "reference",
-            "description": "\"Reference of the transaction. A valid UUID4\",",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "amount",
-            "description": "\"Transaction amount\",",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "currency",
-            "description": "\"Transaction currency\",",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "operator",
-            "description": "\"MTN or ORANGE\",",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "code",
-            "description": "\"CamPay Reference\",",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "operatorReference",
-            "description": "\"Mobile Operator Reference\"",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "signature",
-            "description": "\"jwt token. You can validate this request that is coming from",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "endpoint",
-            "description": "\"collect\" or \"withdraw\". This shows the kind of",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "externalReference",
-            "description": "The reference on the platform that initiated the transaction.",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "phoneNumber",
-            "description": "The phone number that initiated the transaction",
-            "in": "query",
-            "required": false,
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcConfirmPaymentRequest"
+            }
           }
         ],
         "tags": [
@@ -1140,6 +1071,55 @@
     },
     "ordersgrpcConfirmDeliveryResponse": {
       "type": "object"
+    },
+    "ordersgrpcConfirmPaymentRequest": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "title": "\"SUCCESSFUL\" or \"FAILED\","
+        },
+        "reference": {
+          "type": "string",
+          "title": "\"Reference of the transaction. A valid UUID4\","
+        },
+        "amount": {
+          "type": "string",
+          "title": "\"Transaction amount\","
+        },
+        "currency": {
+          "type": "string",
+          "title": "\"Transaction currency\","
+        },
+        "operator": {
+          "type": "string",
+          "title": "\"MTN or ORANGE\","
+        },
+        "code": {
+          "type": "string",
+          "title": "\"CamPay Reference\","
+        },
+        "operatorReference": {
+          "type": "string",
+          "title": "\"Mobile Operator Reference\""
+        },
+        "signature": {
+          "type": "string",
+          "title": "\"jwt token. You can validate this request that is coming from"
+        },
+        "endpoint": {
+          "type": "string",
+          "title": "\"collect\" or \"withdraw\". This shows the kind of"
+        },
+        "externalReference": {
+          "type": "string",
+          "description": "The reference on the platform that initiated the transaction."
+        },
+        "phoneNumber": {
+          "type": "string",
+          "title": "The phone number that initiated the transaction"
+        }
+      }
     },
     "ordersgrpcConfirmPaymentResponse": {
       "type": "object"

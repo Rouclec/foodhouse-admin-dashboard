@@ -2,7 +2,7 @@
 
 import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
-import type { OrdersCreateDeliveryPointData, OrdersCreateDeliveryPointError, OrdersCreateDeliveryPointResponse, OrdersGetAdminStatsData, OrdersListOrdersData, OrdersListPaymentsData, OrdersDeleteDeliveryPointData, OrdersDeleteDeliveryPointError, OrdersDeleteDeliveryPointResponse, OrdersUpdateDeliveryPointData, OrdersUpdateDeliveryPointError, OrdersUpdateDeliveryPointResponse, OrdersConfirmPaymentData, OrdersGetFarmerEarningsData, OrdersListFarmerOrdersData, OrdersCreateOrderData, OrdersCreateOrderError, OrdersCreateOrderResponse, OrdersInitiatePaymentData, OrdersInitiatePaymentError, OrdersInitiatePaymentResponse, OrdersListDeliveryCitiesData, OrdersListDeliveryPointsData, OrdersListUserOrdersData, OrdersApproveOrderData, OrdersApproveOrderError, OrdersApproveOrderResponse, OrdersRejectOrderData, OrdersRejectOrderError, OrdersRejectOrderResponse, OrdersDispatchOrderData, OrdersDispatchOrderError, OrdersDispatchOrderResponse, OrdersGetOrderDetailsData, OrdersCheckPaymentStatusData, OrdersConfirmDeliveryData, OrdersConfirmDeliveryError, OrdersConfirmDeliveryResponse } from '../types.gen';
+import type { OrdersCreateDeliveryPointData, OrdersCreateDeliveryPointError, OrdersCreateDeliveryPointResponse, OrdersGetAdminStatsData, OrdersListOrdersData, OrdersListPaymentsData, OrdersDeleteDeliveryPointData, OrdersDeleteDeliveryPointError, OrdersDeleteDeliveryPointResponse, OrdersUpdateDeliveryPointData, OrdersUpdateDeliveryPointError, OrdersUpdateDeliveryPointResponse, OrdersConfirmPaymentData, OrdersConfirmPaymentError, OrdersConfirmPaymentResponse, OrdersGetFarmerEarningsData, OrdersListFarmerOrdersData, OrdersCreateOrderData, OrdersCreateOrderError, OrdersCreateOrderResponse, OrdersInitiatePaymentData, OrdersInitiatePaymentError, OrdersInitiatePaymentResponse, OrdersListDeliveryCitiesData, OrdersListDeliveryPointsData, OrdersListUserOrdersData, OrdersApproveOrderData, OrdersApproveOrderError, OrdersApproveOrderResponse, OrdersRejectOrderData, OrdersRejectOrderError, OrdersRejectOrderResponse, OrdersDispatchOrderData, OrdersDispatchOrderError, OrdersDispatchOrderResponse, OrdersGetOrderDetailsData, OrdersCheckPaymentStatusData, OrdersConfirmDeliveryData, OrdersConfirmDeliveryError, OrdersConfirmDeliveryResponse } from '../types.gen';
 import type { AxiosError } from 'axios';
 import { client, ordersCreateDeliveryPoint, ordersGetAdminStats, ordersListOrders, ordersListPayments, ordersDeleteDeliveryPoint, ordersUpdateDeliveryPoint, ordersConfirmPayment, ordersHealthCheck, ordersGetFarmerEarnings, ordersListFarmerOrders, ordersCreateOrder, ordersInitiatePayment, ordersListDeliveryCities, ordersListDeliveryPoints, ordersListUserOrders, ordersApproveOrder, ordersRejectOrder, ordersDispatchOrder, ordersGetOrderDetails, ordersCheckPaymentStatus, ordersConfirmDelivery } from '../sdk.gen';
 
@@ -151,11 +151,11 @@ export const ordersUpdateDeliveryPointMutation = (options?: Partial<OptionsLegac
     return mutationOptions;
 };
 
-export const ordersConfirmPaymentQueryKey = (options?: OptionsLegacyParser<OrdersConfirmPaymentData>) => [
+export const ordersConfirmPaymentQueryKey = (options: OptionsLegacyParser<OrdersConfirmPaymentData>) => [
     createQueryKey('ordersConfirmPayment', options)
 ];
 
-export const ordersConfirmPaymentOptions = (options?: OptionsLegacyParser<OrdersConfirmPaymentData>) => {
+export const ordersConfirmPaymentOptions = (options: OptionsLegacyParser<OrdersConfirmPaymentData>) => {
     return queryOptions({
         queryFn: async ({ queryKey, signal }) => {
             const { data } = await ordersConfirmPayment({
@@ -168,6 +168,20 @@ export const ordersConfirmPaymentOptions = (options?: OptionsLegacyParser<Orders
         },
         queryKey: ordersConfirmPaymentQueryKey(options)
     });
+};
+
+export const ordersConfirmPaymentMutation = (options?: Partial<OptionsLegacyParser<OrdersConfirmPaymentData>>) => {
+    const mutationOptions: UseMutationOptions<OrdersConfirmPaymentResponse, AxiosError<OrdersConfirmPaymentError>, OptionsLegacyParser<OrdersConfirmPaymentData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await ordersConfirmPayment({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
 };
 
 export const ordersHealthCheckQueryKey = (options?: OptionsLegacyParser) => [

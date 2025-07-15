@@ -47,6 +47,10 @@ const (
 
 	PaymentStatusFailed = "FAILED"
 
+	TPWPaymentStatusCompleted = "COMPLETED"
+
+	TPWPaymentStatusFailed = "FAILED"
+
 	TotalPercentage = 1.08
 
 	CENT = 100
@@ -224,7 +228,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 		var updatedPaymentStatus ordersgrpc.PaymentStatus
 		var updatedOrderStatus ordersgrpc.OrderStatus
 
-		if req.GetStatus() == PaymentStatusSuccessful {
+		if req.GetStatus() == TPWPaymentStatusCompleted {
 			updatedPaymentStatus = ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED
 			updatedOrderStatus = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL
 		} else {
@@ -286,7 +290,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 	if payment.PaymentEntity == ordersgrpc.PaymentEntity_PaymentEntity_SUBSCRIPTION.String() {
 		i.logger.Debug().Msgf("user subscription id ", payment.EntityID)
 
-		if req.GetStatus() != PaymentStatusSuccessful {
+		if req.GetStatus() != TPWPaymentStatusCompleted {
 			_, err := i.userService.DeleteUserSubscription(ctx, &usersgrpc.DeleteUserSubscriptionRequest{
 				UserSubscriptionId: payment.EntityID,
 			})
@@ -709,7 +713,7 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 		return nil, status.Errorf(codes.Internal, "payment method %s not supported", req.GetAccount().GetPaymentMethod())
 	}
 
-	// check if a payment has already been initiated for that entity, 
+	// check if a payment has already been initiated for that entity,
 	// to avoid users intiating payments twice
 	_, err = querier.GetPaymentByEntity(ctx, sqlc.GetPaymentByEntityParams{
 		EntityID:      req.GetEntityId(),

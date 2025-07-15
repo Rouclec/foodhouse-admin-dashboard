@@ -33,6 +33,23 @@ export type ordersgrpcCheckPaymentStatusResponse = {
 
 export type ordersgrpcConfirmDeliveryResponse = unknown;
 
+export type ordersgrpcConfirmPaymentRequest = {
+    status?: string;
+    reference?: string;
+    amount?: string;
+    currency?: string;
+    operator?: string;
+    code?: string;
+    operatorReference?: string;
+    signature?: string;
+    endpoint?: string;
+    /**
+     * The reference on the platform that initiated the transaction.
+     */
+    externalReference?: string;
+    phoneNumber?: string;
+};
+
 export type ordersgrpcConfirmPaymentResponse = unknown;
 
 export type ordersgrpcCreateDeliveryPointResponse = {
@@ -287,52 +304,7 @@ export type OrdersUpdateDeliveryPointResponse = (ordersgrpcUpdateDeliveryPointRe
 export type OrdersUpdateDeliveryPointError = (rpcStatus);
 
 export type OrdersConfirmPaymentData = {
-    query?: {
-        /**
-         * "Transaction amount",
-         */
-        amount?: string;
-        /**
-         * "CamPay Reference",
-         */
-        code?: string;
-        /**
-         * "Transaction currency",
-         */
-        currency?: string;
-        /**
-         * "collect" or "withdraw". This shows the kind of
-         */
-        endpoint?: string;
-        /**
-         * The reference on the platform that initiated the transaction.
-         */
-        externalReference?: string;
-        /**
-         * "MTN or ORANGE",
-         */
-        operator?: string;
-        /**
-         * "Mobile Operator Reference"
-         */
-        operatorReference?: string;
-        /**
-         * The phone number that initiated the transaction
-         */
-        phoneNumber?: string;
-        /**
-         * "Reference of the transaction. A valid UUID4",
-         */
-        reference?: string;
-        /**
-         * "jwt token. You can validate this request that is coming from
-         */
-        signature?: string;
-        /**
-         * "SUCCESSFUL" or "FAILED",
-         */
-        status?: string;
-    };
+    body: ordersgrpcConfirmPaymentRequest;
 };
 
 export type OrdersConfirmPaymentResponse = (ordersgrpcConfirmPaymentResponse);
