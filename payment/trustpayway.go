@@ -109,11 +109,13 @@ func (tp *TrustPayWayProvider) RequestPayment(ctx context.Context, from string, 
 
 	url := fmt.Sprintf("%s/api/%s/process-payment", tp.BaseUrl, network)
 
-	LoginResponse, err := tp.authenticate(ctx)
+	loginResponse, err := tp.authenticate(ctx)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to authenticate request %v", err)
 	}
+
+	tp.Logger.Debug().Msgf("login response %v", loginResponse)
 
 	requestBody := InitiatePaymentRequest{
 		Amount:           amount,
@@ -131,15 +133,15 @@ func (tp *TrustPayWayProvider) RequestPayment(ctx context.Context, from string, 
 		return nil, fmt.Errorf("failed to marshal payment request: %w", err)
 	}
 
-	tp.Logger.Debug().Msgf("JSON body %v", jsonBody)
-
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	req.Header.Set("Authorization", "Bearer "+LoginResponse.AccessToken)
+	req.Header.Set("Authorization", "Bearer "+loginResponse.AccessToken)
 	req.Header.Set("Content-Type", "application/json")
+
+	tp.Logger.Debug().Msgf("raw request: %v", req)
 
 	resp, err := tp.Client.Do(req)
 	if err != nil {
@@ -154,7 +156,7 @@ func (tp *TrustPayWayProvider) RequestPayment(ctx context.Context, from string, 
 		return nil, fmt.Errorf("failed to decode Infobip response: %w", err)
 	}
 
-	tp.Logger.Debug().Msgf("Withdrawal response body %v", response)
+	tp.Logger.Debug().Msgf("Payment response body %v", response)
 
 	return &response.Data.TransactionId, nil
 }
@@ -168,7 +170,7 @@ func (tp *TrustPayWayProvider) WithdrawFunds(ctx context.Context, to string, amo
 
 	url := fmt.Sprintf("%s/api/%s/process-cashin", tp.BaseUrl, network)
 
-	LoginResponse, err := tp.authenticate(ctx)
+	loginResponse, err := tp.authenticate(ctx)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to authenticate request %v", err)
@@ -197,7 +199,7 @@ func (tp *TrustPayWayProvider) WithdrawFunds(ctx context.Context, to string, amo
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	req.Header.Set("Authorization", "Bearer "+LoginResponse.AccessToken)
+	req.Header.Set("Authorization", "Bearer "+loginResponse.AccessToken)
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := tp.Client.Do(req)
@@ -222,7 +224,7 @@ func (tp *TrustPayWayProvider) CheckPaymentStatus(ctx context.Context, paymentId
 
 	url := fmt.Sprintf("%s/api/%s/get-status/%s", tp.BaseUrl, ProviderMTN, paymentId)
 
-	LoginResponse, err := tp.authenticate(ctx)
+	loginResponse, err := tp.authenticate(ctx)
 
 	if err != nil {
 		return StatusUnknown, fmt.Errorf("failed to authenticate request %v", err)
@@ -233,7 +235,7 @@ func (tp *TrustPayWayProvider) CheckPaymentStatus(ctx context.Context, paymentId
 		return StatusUnknown, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	req.Header.Set("Authorization", "Bearer "+LoginResponse.AccessToken)
+	req.Header.Set("Authorization", "Bearer "+loginResponse.AccessToken)
 
 	resp, err := tp.Client.Do(req)
 	if err != nil {

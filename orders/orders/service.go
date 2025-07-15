@@ -743,7 +743,7 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 	})
 
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error creating payment %v", err)
+		return nil, status.Errorf(codes.Internal, "error creating payment entity %v", err)
 	}
 
 	formattedNumber, err := formatPhoneNumber(req.Account.GetAccountNumber())
