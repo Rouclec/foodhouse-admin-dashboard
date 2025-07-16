@@ -48,6 +48,7 @@ export type ordersgrpcConfirmPaymentRequest = {
      */
     externalReference?: string;
     phoneNumber?: string;
+    orderId?: string;
 };
 
 export type ordersgrpcConfirmPaymentResponse = unknown;

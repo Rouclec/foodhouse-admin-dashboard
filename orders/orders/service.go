@@ -182,7 +182,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 
 	i.logger.Debug().Interface("tpw webhook response: %v", req)
 
-	i.logger.Debug().Msgf("payment id %v", req.GetExternalReference())
+	i.logger.Debug().Msgf("payment id %v", req.GetOrderId())
 	i.logger.Debug().Msgf("payment status %v", req.GetStatus())
 
 	// Proper rollback handling
@@ -193,7 +193,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 		}
 	}()
 
-	payment, err := querier.GetPaymentById(ctx, req.GetExternalReference())
+	payment, err := querier.GetPaymentById(ctx, req.GetOrderId())
 
 	if err != nil {
 		i.logger.Debug().Msgf("error getting payment %v", err)
