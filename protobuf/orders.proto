@@ -157,6 +157,8 @@ message ConfirmPaymentRequest {
       10; // The reference on the platform that initiated the transaction.
 
   string phone_number = 11; // The phone number that initiated the transaction
+
+  string order_id = 12; // This is the external id from TrustPayWay
 }
 
 message ConfirmPaymentResponse {}

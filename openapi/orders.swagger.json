@@ -1118,6 +1118,10 @@
         "phoneNumber": {
           "type": "string",
           "title": "The phone number that initiated the transaction"
+        },
+        "orderId": {
+          "type": "string",
+          "title": "This is the external id from TrustPayWay"
         }
       }
     },
