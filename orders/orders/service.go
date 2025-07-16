@@ -215,8 +215,8 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 		order, err := querier.GetOrderByOrderNumber(ctx, orderId)
 
 		if err != nil {
-			i.logger.Debug().Msgf("error getting order for payment with ref %v, why: %v", req.GetExternalReference(), err)
-			return nil, status.Errorf(codes.Internal, "error getting order for payment with ref %v, why: %v", req.GetExternalReference(), err)
+			i.logger.Debug().Msgf("error getting order for payment with ref %v, why: %v", req.GetOrderId(), err)
+			return nil, status.Errorf(codes.Internal, "error getting order for payment with ref %v, why: %v", req.GetOrderId(), err)
 		}
 
 		beforeBytes, err := protojson.Marshal(converters.SqlcOrderToProto(order))
@@ -237,7 +237,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 		}
 
 		err = querier.UpdatePaymentStatus(ctx, sqlc.UpdatePaymentStatusParams{
-			ID:     req.GetExternalReference(),
+			ID:     req.GetOrderId(),
 			Status: updatedPaymentStatus.String(),
 		})
 
@@ -300,7 +300,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 			}
 
 			err = querier.UpdatePaymentStatus(ctx, sqlc.UpdatePaymentStatusParams{
-				ID:     req.GetExternalReference(),
+				ID:     req.GetOrderId(),
 				Status: ordersgrpc.PaymentStatus_PaymentStatus_FAILED.String(),
 			})
 
@@ -317,7 +317,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 		}
 
 		err = querier.UpdatePaymentStatus(ctx, sqlc.UpdatePaymentStatusParams{
-			ID:     req.GetExternalReference(),
+			ID:     req.GetOrderId(),
 			Status: ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED.String(),
 		})
 
