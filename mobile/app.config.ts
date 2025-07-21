@@ -24,12 +24,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     package: 'com.foodhousecmr.foodhouse',
     permissions: [
       'android.permission.CAMERA',
-      'android.permission.RECORD_AUDIO',
-      'android.permission.ACCESS_COARSE_LOCATION',
       'android.permission.ACCESS_FINE_LOCATION',
-      'android.permission.ACCESS_BACKGROUND_LOCATION',
-      'android.permission.FOREGROUND_SERVICE',
-      'android.permission.FOREGROUND_SERVICE_LOCATION',
     ],
     edgeToEdgeEnabled: true,
     config: {
