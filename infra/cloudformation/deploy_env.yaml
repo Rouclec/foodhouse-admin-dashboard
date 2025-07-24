@@ -323,6 +323,8 @@ Resources:
         ClusterArn: !GetAtt EcsStack.Outputs.ClusterArn
         DbAdminSecretArn: !GetAtt "RdsStack.Outputs.AdminSecretArn"
         CampaySecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.CampaySecretArn"
+        SmtpSecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.SmtpSecretArn"
+        CompanyInfoArn: !GetAtt "ThirdPartySecretsStack.Outputs.CompanyInfoArn"
         DomainName: !Ref DomainName
         # TODO: Get this from users stack
         UsersHostPort: "users:80" 

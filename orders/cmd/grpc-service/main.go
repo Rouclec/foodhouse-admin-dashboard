@@ -16,6 +16,7 @@ import (
 	"github.com/foodhouse/foodhouseapp/grpc/go/productsgrpc"
 	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
 	"github.com/foodhouse/foodhouseapp/orders/db/repo"
+	"github.com/foodhouse/foodhouseapp/orders/email"
 	"github.com/foodhouse/foodhouseapp/orders/orders"
 	"github.com/foodhouse/foodhouseapp/payment"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
@@ -51,6 +52,18 @@ type Config struct {
 		AppToken  string `conf:"env:TRUST_PAY_WAY_APP_TOKEN,required"`
 		WebHook   string `conf:"env:TRUST_PAY_WAY_WEBHOOK,required"`
 	}
+
+	Email struct {
+		Smtp struct {
+			Host     string `conf:"env:SMTP_HOST,required"`
+			Port     string `conf:"env:SMTP_PORT,required"`
+			Username string `conf:"env:SMTP_USERNAME,required"`
+			Password string `conf:"env:SMTP_PASSWORD,required"`
+		}
+	}
+
+	CompanyEmail string `conf:"env:COMPANY_EMAIL,required"`
+	CompanyPhone string `conf:"env:COMPANY_PHONE,required"`
 }
 
 type DBConfig struct {
@@ -140,7 +153,18 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 		return fmt.Errorf("error initializing campay provider: %w", err)
 	}
 
-	ordersgrpc.RegisterOrdersServer(grpcServer, orders.NewOrders(ordersRepo, logger, config.EnableDevMethods, paymentService, usersClient, productsClient))
+	emailSender, err := email.NewSMTPService(config.Email.Smtp.Host,
+		config.Email.Smtp.Port,
+		config.Email.Smtp.Username,
+		config.Email.Smtp.Password)
+
+	if err != nil {
+		return fmt.Errorf("error initializing email client: %w", err)
+	}
+
+	ordersgrpc.RegisterOrdersServer(grpcServer, orders.NewOrders(ordersRepo, logger,
+		config.EnableDevMethods, paymentService,
+		usersClient, productsClient, emailSender, config.CompanyEmail, config.CompanyPhone))
 
 	logger.Info().Msg("Successfully registered ordersgrpc...")
 

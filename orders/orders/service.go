@@ -20,6 +20,7 @@ import (
 	"github.com/foodhouse/foodhouseapp/orders/db/converters"
 	"github.com/foodhouse/foodhouseapp/orders/db/repo"
 	"github.com/foodhouse/foodhouseapp/orders/db/sqlc"
+	"github.com/foodhouse/foodhouseapp/orders/email"
 	"github.com/foodhouse/foodhouseapp/payment"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/nyaruka/phonenumbers"
@@ -68,6 +69,9 @@ type Impl struct {
 	paymentService     payment.PaymentProvider
 	userService        usersgrpc.UsersClient
 	productService     productsgrpc.ProductsClient
+	emailSender        EmailSender
+	companyEmail       string
+	companyPhone       string
 	ordersgrpc.UnsafeOrdersServer
 }
 
@@ -81,6 +85,9 @@ func NewOrders(
 	paymentService payment.PaymentProvider,
 	userService usersgrpc.UsersClient,
 	productService productsgrpc.ProductsClient,
+	emailSender EmailSender,
+	companyEmail string,
+	companyPhone string,
 ) *Impl {
 	return &Impl{
 		repo:               repo,
@@ -89,6 +96,9 @@ func NewOrders(
 		paymentService:     paymentService,
 		userService:        userService,
 		productService:     productService,
+		emailSender:        emailSender,
+		companyEmail:       companyEmail,
+		companyPhone:       companyPhone,
 	}
 }
 
@@ -172,6 +182,32 @@ func (i *Impl) ConfirmDelivery(ctx context.Context, req *ordersgrpc.ConfirmDeliv
 	return &ordersgrpc.ConfirmDeliveryResponse{}, nil
 }
 
+func Last4Chars(s string) string {
+	if len(s) < 4 {
+		return s
+	}
+	return s[len(s)-4:]
+}
+
+func GenerateReceiptNumber(orderNumber int64) string {
+	today := time.Now().Format("20060102") // YYYYMMDD
+	return fmt.Sprintf("RCT-%s-%03d", today, orderNumber)
+}
+
+func CleanLabel(input string, prefixToRemove string) string {
+	// Step 1: Remove prefix if present
+	clean := strings.TrimPrefix(input, prefixToRemove)
+
+	// Step 2: Replace underscores with spaces
+	clean = strings.ReplaceAll(clean, "_", " ")
+
+	// Step 3: Capitalize first letter
+	if len(clean) == 0 {
+		return ""
+	}
+	return strings.ToUpper(string(clean[0])) + clean[1:]
+}
+
 // ConfirmPayment implements ordersgrpc.OrdersServer.
 func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymentRequest) (*ordersgrpc.ConfirmPaymentResponse, error) {
 	// TODO: add valiadation to confirm that request is coming from campay
@@ -179,8 +215,6 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)
 	}
-
-	i.logger.Debug().Interface("tpw webhook response: %v", req)
 
 	i.logger.Debug().Msgf("payment id %v", req.GetOrderId())
 	i.logger.Debug().Msgf("payment status %v", req.GetStatus())
@@ -227,10 +261,12 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 
 		var updatedPaymentStatus ordersgrpc.PaymentStatus
 		var updatedOrderStatus ordersgrpc.OrderStatus
+		shouldSendReceipt := false
 
 		if req.GetStatus() == TPWPaymentStatusCompleted {
 			updatedPaymentStatus = ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED
 			updatedOrderStatus = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL
+			shouldSendReceipt = true
 		} else {
 			updatedPaymentStatus = ordersgrpc.PaymentStatus_PaymentStatus_FAILED
 			updatedOrderStatus = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED
@@ -277,6 +313,62 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 			Before:         beforeBytes,
 			After:          afterBytes,
 		})
+
+		if shouldSendReceipt {
+			// fetch the user and get their email
+			user, err := i.userService.GetUserByID(ctx, &usersgrpc.GetUserByIDRequest{
+				UserId: *order.CreatedBy,
+			})
+
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "error getting user for payment receipt %w", err)
+			}
+
+			product, err := i.productService.GetProduct(ctx, &productsgrpc.GetProductRequest{ProductId: *order.Product})
+
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "error getting product for payment receipt %w", err)
+			}
+
+			// send email receipt
+			err = i.emailSender.SendPaymentReceipt(ctx,
+				// user.GetUser().GetEmail(), // TODO: use user's email when we migrate elastic mail to prod
+				"fhouseapp@gmail.com",
+				fmt.Sprintf(
+					CleanLabel(
+						ordersgrpc.PaymentEntity_PaymentEntity_ORDER.String(), "PaymentEntity_")+" "+string(order.OrderNumber)),
+				email.ReceiptData{
+					ReceiptID:    GenerateReceiptNumber(order.OrderNumber),
+					Date:         time.Now(),
+					CompanyName:  "FoodHouse",
+					CompanyEmail: i.companyEmail,
+					CompanyPhone: i.companyPhone,
+					CustomerName: fmt.Sprintf(user.GetUser().GetFirstName() + " " + user.GetUser().GetLastName()),
+					// CustomerEmail: user.GetUser().GetEmail(), // TODO: use user's email when we migrate elastic mail to prod
+					CustomerEmail: "fhouseapp@gmail.com", // using foodhouse email for now because we are in testing
+					PaymentMethod: fmt.Sprintf(
+						CleanLabel(ordersgrpc.PaymentMethodType_PaymentMethodType_MOBILE_MONEY.String(),
+							"PaymentMethodType_") +
+							" ending in - " + Last4Chars(payment.AccountNumber)),
+					TransactionID: payment.ID,
+					Items: []email.ReceiptItem{
+						{Name: product.GetProduct().GetName(),
+							Quantity: *order.Quantity,
+							Amount: email.Amount{Value: product.GetProduct().GetAmount().GetValue(),
+								CurrencyIsoCode: product.GetProduct().GetAmount().GetCurrencyIsoCode()},
+							Unit: product.GetProduct().GetUnitType()},
+					},
+					ServiceFee: email.Amount{Value: product.Product.GetAmount().GetValue() * float64(*order.Quantity) * 0.05,
+						CurrencyIsoCode: *payment.AmountCurrency},
+					TransactionFee: email.Amount{Value: product.Product.GetAmount().GetValue() * float64(*order.Quantity) * 0.03,
+						CurrencyIsoCode: *payment.AmountCurrency},
+					DeliveryFee: email.Amount{Value: 0, CurrencyIsoCode: "XAF"},
+				})
+
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "error sending email receipt %w", err)
+			}
+		}
 
 		err = tx.Commit(ctx)
 		if err != nil {

@@ -1809,10 +1809,11 @@
         "OTP_INTENT_UNSPECIFIED",
         "OTP_INTENT_LOGIN",
         "OTP_INTENT_RESET_PASSWORD",
-        "OTP_INTENT_SIGNUP"
+        "OTP_INTENT_SIGNUP",
+        "OTP_INTENT_VERIFY_EMAIL"
       ],
       "default": "OTP_INTENT_UNSPECIFIED",
-      "title": "- OTP_INTENT_UNSPECIFIED: Default value if no intent is specified\n - OTP_INTENT_LOGIN: OTP for login\n - OTP_INTENT_RESET_PASSWORD: OTP for resetting password\n - OTP_INTENT_SIGNUP: OTP for signing up"
+      "title": "- OTP_INTENT_UNSPECIFIED: Default value if no intent is specified\n - OTP_INTENT_LOGIN: OTP for login\n - OTP_INTENT_RESET_PASSWORD: OTP for resetting password\n - OTP_INTENT_SIGNUP: OTP for signing up\n - OTP_INTENT_VERIFY_EMAIL: OTP for verifying email"
     },
     "usersgrpcPaymentMethod": {
       "type": "object",

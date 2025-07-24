@@ -53,6 +53,7 @@ enum OtpIntent {
   OTP_INTENT_LOGIN = 1;          // OTP for login
   OTP_INTENT_RESET_PASSWORD = 2; // OTP for resetting password
   OTP_INTENT_SIGNUP = 3;         // OTP for signing up
+  OTP_INTENT_VERIFY_EMAIL = 4;   // OTP for verifying email
 }
 
 enum FactorType {

@@ -183,7 +183,7 @@ export type usersgrpcListUsersResponse = {
     nextKey?: string;
 };
 
-export type usersgrpcOtpIntent = 'OTP_INTENT_UNSPECIFIED' | 'OTP_INTENT_LOGIN' | 'OTP_INTENT_RESET_PASSWORD' | 'OTP_INTENT_SIGNUP';
+export type usersgrpcOtpIntent = 'OTP_INTENT_UNSPECIFIED' | 'OTP_INTENT_LOGIN' | 'OTP_INTENT_RESET_PASSWORD' | 'OTP_INTENT_SIGNUP' | 'OTP_INTENT_VERIFY_EMAIL';
 
 export type usersgrpcPaymentMethod = {
     method?: string;

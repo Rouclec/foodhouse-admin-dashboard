@@ -79,6 +79,15 @@ type Config struct {
 	EnableDevMethods bool `conf:"env:ENABLE_DEV_METHODS,default:false"`
 
 	AwsRegion string `conf:"env:AWS_REGION,required"`
+
+	// Email struct {
+	// 	Smtp struct {
+	// 		Host     string `conf:"env:SMTP_HOST,required"`
+	// 		Port     string `conf:"env:SMTP_PORT,required"`
+	// 		Username string `conf:"env:SMTP_USERNAME,required"`
+	// 		Password string `conf:"env:SMTP_PASSWORD,required"`
+	// 	}
+	// }
 }
 
 type DBConfig struct {
@@ -140,6 +149,11 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 
 	grpcServer := grpc.NewServer(svrOpts...)
 	reflection.Register(grpcServer)
+
+	// emailSender, err := email.NewSMTPService(config.Email.Smtp.Host,
+	// 	config.Email.Smtp.Port,
+	// 	config.Email.Smtp.Username,
+	// 	config.Email.Smtp.Password)
 
 	otpGenerator, err := users.NewOtpGenerator(config.OtpNumberOfDigits, usersRepo.Do())
 	if err != nil {

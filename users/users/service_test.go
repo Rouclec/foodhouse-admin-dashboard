@@ -306,7 +306,8 @@ func TestSignup(t *testing.T) {
 
 			tc.setupMocks(mockRepo, mockQuerier, mockTokenManager, mockOtpGenerator)
 
-			usersService := users.NewUsers(mockRepo, logger, nil, mockOtpGenerator, mockTokenManagerBuilder, false)
+			usersService := users.NewUsers(mockRepo, logger, nil, mockOtpGenerator,
+				mockTokenManagerBuilder, false)
 
 			resp, err := usersService.Signup(context.Background(), tc.request)
 
