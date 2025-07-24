@@ -151,17 +151,17 @@ Resources:
             - Name: TRUST_PAY_WAY_WEBHOOK
               ValueFrom: !Sub "${CampaySecretArn}:tpw_webhook::"
             - Name: SMTP_HOST
-              ValueFrom: !Sub "${SmtpSecretArn}:host::
+              ValueFrom: !Sub "${SmtpSecretArn}:host::"
             - Name: SMTP_PORT
-              ValueFrom: !Sub "${SmtpSecretArn}:port::
+              ValueFrom: !Sub "${SmtpSecretArn}:port::"
             - Name: SMTP_USERNAME
-              ValueFrom: !Sub "${SmtpSecretArn}:username::
+              ValueFrom: !Sub "${SmtpSecretArn}:username::"
             - Name: SMTP_PASSWORD
-              ValueFrom: !Sub "${SmtpSecretArn}:password::
+              ValueFrom: !Sub "${SmtpSecretArn}:password::"
             - Name: COMPANY_EMAIL
-              ValueFrom: !Sub "${CompanyInfoArn}:email::
+              ValueFrom: !Sub "${CompanyInfoArn}:email::"
             - Name: COMPANY_PHONE
-              ValueFrom: !Sub "${CompanyInfoArn}:phone::
+              ValueFrom: !Sub "${CompanyInfoArn}:phone::"
 
 
   # We create a data in the RDS instance for the application.

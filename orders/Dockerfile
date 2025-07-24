@@ -17,6 +17,7 @@ RUN apk add --no-cache curl
 COPY orders ./orders
 COPY grpc ./grpc
 COPY payment ./payment
+COPY email ./email
 # COPY mutations ./mutations
 
 # Build the orders service
