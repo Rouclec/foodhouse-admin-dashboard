@@ -116,6 +116,8 @@ Resources:
               Value: !Ref ContainerPort
             - Name: MIGRATION_PATH
               Value: "/app/migrations"
+            - Name: EMAIL_TEMPLATE_PATH
+              Value: "/app/email/templates"
             - Name: ENABLE_DEV_METHODS
               Value: "true"
             - Name: CAMPAY_WEBHOOK

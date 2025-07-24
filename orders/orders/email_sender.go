@@ -3,7 +3,7 @@ package orders
 import (
 	"context"
 
-	"github.com/foodhouse/foodhouseapp/orders/email"
+	"github.com/foodhouse/foodhouseapp/email"
 )
 
 //go:generate go run go.uber.org/mock/mockgen@v0.5.0 -destination=mocks/mock_email_sender.go -package=mocks -source=./email_sender.go EmailSender

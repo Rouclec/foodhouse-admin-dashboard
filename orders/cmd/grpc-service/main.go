@@ -12,11 +12,11 @@ import (
 	"syscall"
 
 	"github.com/ardanlabs/conf/v3"
+	"github.com/foodhouse/foodhouseapp/email"
 	"github.com/foodhouse/foodhouseapp/grpc/go/ordersgrpc"
 	"github.com/foodhouse/foodhouseapp/grpc/go/productsgrpc"
 	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
 	"github.com/foodhouse/foodhouseapp/orders/db/repo"
-	"github.com/foodhouse/foodhouseapp/orders/email"
 	"github.com/foodhouse/foodhouseapp/orders/orders"
 	"github.com/foodhouse/foodhouseapp/payment"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
@@ -62,8 +62,9 @@ type Config struct {
 		}
 	}
 
-	CompanyEmail string `conf:"env:COMPANY_EMAIL,required"`
-	CompanyPhone string `conf:"env:COMPANY_PHONE,required"`
+	CompanyEmail      string `conf:"env:COMPANY_EMAIL,required"`
+	CompanyPhone      string `conf:"env:COMPANY_PHONE,required"`
+	EmailTemplatePath string `conf:"env:EMAIL_TEMPLATE_PATH,required"`
 }
 
 type DBConfig struct {
@@ -156,7 +157,7 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 	emailSender, err := email.NewSMTPService(config.Email.Smtp.Host,
 		config.Email.Smtp.Port,
 		config.Email.Smtp.Username,
-		config.Email.Smtp.Password)
+		config.Email.Smtp.Password, config.EmailTemplatePath)
 
 	if err != nil {
 		return fmt.Errorf("error initializing email client: %w", err)

@@ -59,13 +59,18 @@ type ReceiptData struct {
 }
 
 // NewSMTPSerivce initializes templates and config.
-func NewSMTPService(host, port, username, password string) (*EmailService, error) {
-	otpTpl, err := template.ParseFiles("email/templates/otp.html")
+func NewSMTPService(host, port, username, password, templatePath string) (*EmailService, error) {
+	absTemplatePath, err := filepath.Abs(templatePath)
+	if err != nil {
+		return nil, fmt.Errorf("resolving absolute template path: %w", err)
+	}
+
+	otpTpl, err := template.ParseFiles(fmt.Sprint(absTemplatePath + "/otp.html"))
 	if err != nil {
 		return nil, fmt.Errorf("loading OTP template: %w", err)
 	}
 
-	receiptTpl, err := template.ParseFiles("email/templates/receipt.html")
+	receiptTpl, err := template.ParseFiles(fmt.Sprint(absTemplatePath + "/receipt.html"))
 	if err != nil {
 		return nil, fmt.Errorf("loading receipt template: %w", err)
 	}

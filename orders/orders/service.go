@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/foodhouse/foodhouseapp/email"
 	"github.com/foodhouse/foodhouseapp/grpc/go/ordersgrpc"
 	"github.com/foodhouse/foodhouseapp/grpc/go/productsgrpc"
 	"github.com/foodhouse/foodhouseapp/grpc/go/types"
@@ -20,7 +21,6 @@ import (
 	"github.com/foodhouse/foodhouseapp/orders/db/converters"
 	"github.com/foodhouse/foodhouseapp/orders/db/repo"
 	"github.com/foodhouse/foodhouseapp/orders/db/sqlc"
-	"github.com/foodhouse/foodhouseapp/orders/email"
 	"github.com/foodhouse/foodhouseapp/payment"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/nyaruka/phonenumbers"

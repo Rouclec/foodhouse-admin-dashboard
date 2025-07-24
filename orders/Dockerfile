@@ -17,6 +17,7 @@ RUN apk add --no-cache curl
 COPY orders ./orders
 COPY grpc ./grpc
 COPY payment ./payment
+COPY email ./email
 # COPY mutations ./mutations
 
 # Build the orders service
@@ -32,6 +33,9 @@ COPY --from=builder /app/grpc-service .
 
 # Copy the database migration files
 COPY orders/db/migrations ./migrations
+
+# Copy the email files
+COPY email ./email
 
 # Add timezone data
 RUN apk add --no-cache tzdata
