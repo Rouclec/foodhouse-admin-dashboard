@@ -13,7 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	email "github.com/foodhouse/foodhouseapp/orders/email"
+	email "github.com/foodhouse/foodhouseapp/email"
 	gomock "go.uber.org/mock/gomock"
 )
 
