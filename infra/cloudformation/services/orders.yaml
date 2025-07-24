@@ -28,6 +28,12 @@ Parameters:
 
   CampaySecretArn:
     Type: String
+  
+  SmtpSecretArn:
+    Type: String
+  
+  CompanyInfoArn:
+    Type: String
 
   CustomResourcesServiceToken:
     Type: String
@@ -144,6 +150,19 @@ Resources:
               ValueFrom: !Sub "${CampaySecretArn}:tpw_app_token::"
             - Name: TRUST_PAY_WAY_WEBHOOK
               ValueFrom: !Sub "${CampaySecretArn}:tpw_webhook::"
+            - Name: SMTP_HOST
+              ValueFrom: !Sub "${SmtpSecretArn}:host::
+            - Name: SMTP_PORT
+              ValueFrom: !Sub "${SmtpSecretArn}:port::
+            - Name: SMTP_USERNAME
+              ValueFrom: !Sub "${SmtpSecretArn}:username::
+            - Name: SMTP_PASSWORD
+              ValueFrom: !Sub "${SmtpSecretArn}:password::
+            - Name: COMPANY_EMAIL
+              ValueFrom: !Sub "${CompanyInfoArn}:email::
+            - Name: COMPANY_PHONE
+              ValueFrom: !Sub "${CompanyInfoArn}:phone::
+
 
   # We create a data in the RDS instance for the application.
   # We do this with a custom Cloudformation resource that will run a lambda function.
@@ -185,6 +204,8 @@ Resources:
                   - !Ref AppDatabaseSecret
                   - !Ref DbAdminSecretArn
                   - !Ref CampaySecretArn
+                  - !Ref SmtpSecretArn
+                  - !Ref CompanyInfoArn
 
   # A role for the containers
   TaskRole:
