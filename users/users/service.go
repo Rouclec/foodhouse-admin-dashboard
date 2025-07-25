@@ -1660,12 +1660,19 @@ func (i *Impl) GrantAgent(ctx context.Context,
 		}
 	}
 
+	var email *string
+
+	if req.GetEmail() != "" {
+		e := req.GetEmail()
+		email = &e
+	}
+
 	// Create new user with hashed password in the db.
 	arg := sqlc.CreateUserParams{
 		PhoneNumber:             req.GetPhoneNumber(),
 		Password:                password,
 		ResidenceCountryIsoCode: req.GetResidenceCountryIsoCode(),
-		Email:                   &req.Email,
+		Email:                   email,
 		Role:                    usersgrpc.UserRole_USER_ROLE_AGENT.String(),
 	}
 
