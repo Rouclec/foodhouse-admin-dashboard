@@ -35,7 +35,8 @@
       ],
       "googleMaps": {
         "apiKey": "AIzaSyDuGdaHFlh9PRpIcFTAltiEYQ6UHdpnTxo"
-      }
+      },
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -80,6 +81,11 @@
     },
     "updates": {
       "url": "https://u.expo.dev/2cebe744-985e-4d89-8e7e-5a795ca5c815"
+    },
+    "googleSignIn": {
+      "webClientId": "167587991754-5ohaq1hmkghc7iaia3cfeumv5nm9fs75.apps.googleusercontent.com",
+      "androidClientId": "167587991754-4fpebduab96uq0b8alteq4au25a4ua1l.apps.googleusercontent.com",
+      "iosClientId": "167587991754-o3f51jlva90d3tci1kimj5q0flr2ej6q.apps.googleusercontent.com"
     }
   }
 }
