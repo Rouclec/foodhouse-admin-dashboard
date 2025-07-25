@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "167587991754",
+    "project_id": "foodhouse-int",
+    "storage_bucket": "foodhouse-int.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:167587991754:android:1287f3f4bbc32b530c2433",
+        "android_client_info": {
+          "package_name": "com.foodhousecmr.foodhouse"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "167587991754-4fpebduab96uq0b8alteq4au25a4ua1l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.foodhousecmr.foodhouse",
+            "certificate_hash": "2d33c3bbac8cf458824d481da39d6295233a5d2b"
+          }
+        },
+        {
+          "client_id": "167587991754-5ohaq1hmkghc7iaia3cfeumv5nm9fs75.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA7sMdNp-Uv8K_yf7oG1OdL4XjM3vkKpIo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "167587991754-5ohaq1hmkghc7iaia3cfeumv5nm9fs75.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -9,7 +9,7 @@
       ]
     },
     "jsx": "react",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
     "typeRoots": ["./types", "./node_modules/@types"]
   },

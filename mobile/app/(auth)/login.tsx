@@ -1,3 +1,4 @@
+
 import React, { useContext, useEffect, useState } from "react";
 import {
   View,
@@ -5,8 +6,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
+  Alert
 } from "react-native";
 import { Appbar, Icon, Snackbar, TextInput } from "react-native-paper";
 import { Link, router } from "expo-router";
@@ -21,6 +22,10 @@ import { defaultStyles, loginstyles } from "@/styles";
 import { Colors } from "@/constants";
 import i18n from "@/i18n";
 import { delay, storeData, updateAuthHeader } from "@/utils";
+import { auth } from '@/firebase';
+import { AuthCredential, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
+import * as Google from 'expo-auth-session/providers/google';
+import { Prompt } from 'expo-auth-session';
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -32,7 +37,14 @@ export default function Login() {
   const [userId, setUserId] = useState<string>();
   const { user, setUser } = useContext(Context) as ContextType;
 
-  // Fetch user data if userId exists
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
+    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+    scopes: ['profile', 'email'],
+    prompt: Prompt.SelectAccount,
+  });
+
   const { data: userData } = useQuery({
     ...usersGetUserByIdOptions({
       path: {
@@ -45,17 +57,12 @@ export default function Login() {
   useEffect(() => {
     if (userData?.user) {
       setUser(userData.user);
-      const role = userData?.user?.role;
-
-      if (role === "USER_ROLE_FARMER") {
-        router.replace("/(farmer)/(index)");
-      } else {
-        router.replace("/(buyer)/(index)");
-      }
+      router.replace("/(farmer)/(index)");
     }
   }, [userData]);
 
-  const { mutateAsync: authenticate } = useMutation({
+
+   const { mutateAsync: authenticate } = useMutation({
     ...usersAuthenticateMutation(),
     onError: async (error) => {
       setErrorMessage(
@@ -76,6 +83,97 @@ export default function Login() {
       }
     },
   });
+
+  useEffect(() => {
+    if (!response) {
+      return;
+    }
+
+    switch (response.type) {
+      case 'success':
+      
+        if (response.authentication) {
+        
+          const { idToken } = response.authentication;
+          
+          if (idToken) {
+            setLoading(true);
+            const credential = GoogleAuthProvider.credential(idToken);
+            signInWithFirebase(credential);
+          }
+        }
+        break;
+
+      case 'error':
+        console.error("Expo Google Auth Error:", response.error);
+        setErrorMessage(response.error?.message || i18n.t("(auth).login.googleSignInFailed"));
+        setError(true);
+        setLoading(false);
+        break;
+
+      case 'cancel':
+        console.log("Google Sign-In cancelled by user.");
+        setLoading(false);
+        break;
+    }
+  }, [response]);
+  
+ 
+  const signInWithFirebase = async (credential: AuthCredential) => {
+  try {
+    const userCredential = await signInWithCredential(auth, credential);
+    const firebaseUser = userCredential.user;
+    const firebaseIdToken = await firebaseUser.getIdToken(true); 
+    updateAuthHeader(firebaseIdToken);
+
+    /**
+     *  TODO: Send the Firebase ID Token to your backend.
+     * - Backend will verify it using Firebase Admin SDK
+     * - Determine if user is new or returning
+     * - If new: backend creates user, adds claims
+     * - Backend returns: accessToken, refreshToken, userId, and isNewUser
+     */
+
+    // Example:
+    /*
+    const data = await authenticate({
+      body: {
+        firebaseIdToken,
+      },
+    });
+
+    const { tokens, userId, isNewUser } = data;
+
+    //  Replace Firebase token with your custom accessToken
+    updateAuthHeader(tokens.accessToken);
+    await storeData("@refreshToken", tokens.refreshToken);
+    storeData("@userId", userId);
+    setUserId(userId);
+
+    if (isNewUser) {
+      //  call endpoint to set custom claims (e.g. assign 'farmer' role)
+      // await assignInitialClaims(userId);
+    }
+
+    // Redirect to home/dashboard
+    router.replace("/(farmer)/(index)");
+    */
+
+    //  TEMP fallback until backend is ready:
+    await storeData("@userId", firebaseUser.uid);
+    setUserId(firebaseUser.uid);
+
+  } catch (firebaseError: any) {
+    console.error(" Firebase Google Sign-In Error:", firebaseError);
+    setErrorMessage(firebaseError.message || i18n.t("(auth).login.googleSignInFailed"));
+    setError(true);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
 
   const handleInputChange = (name: string, value: string) => {
     setFields({ ...fields, [name]: value });
@@ -121,6 +219,14 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleSignInPress = async () => {
+    if (!request) {
+      Alert.alert(i18n.t("(auth).login.configurationError"), i18n.t("(auth).login.googleConfigMissing"));
+      return;
+    }
+    await promptAsync();
   };
 
   return (
@@ -250,7 +356,7 @@ export default function Login() {
               )}
             </TouchableOpacity>
 
-            {/* <View style={loginstyles.dividerContainer}>
+             <View style={loginstyles.dividerContainer}>
                 <View style={loginstyles.dividerLine} />
                 <Text style={loginstyles.dividerText}>
                   {i18n.t("(auth).login.or")}
@@ -259,19 +365,32 @@ export default function Login() {
               </View>
 
               <View style={loginstyles.socialIconsContainer}>
-                <TouchableOpacity style={loginstyles.socialIcon}>
-                  <MaterialCommunityIcons
-                    name="google"
-                    size={24}
-                    color={Colors.primary[200]}
-                  />
-                  <Text>{i18n.t("(auth).login.continueWith")} Google</Text>
+                <TouchableOpacity
+                  style={[
+                    loginstyles.socialIcon,
+                    loading && defaultStyles.greyButton,
+                  ]}
+                  onPress={handleGoogleSignInPress}
+                  disabled={loading || !request}
+                >
+                  {loading ? (
+                    <ActivityIndicator color={Colors.primary[200]} />
+                  ) : (
+                    <>
+                      <MaterialCommunityIcons
+                        name="google"
+                        size={24}
+                        color={Colors.primary[200]}
+                      />
+                      <Text>{i18n.t("(auth).login.continueWith")} Google</Text>
+                    </>
+                  )}
                 </TouchableOpacity>
                 <TouchableOpacity style={loginstyles.socialIcon}>
                   <MaterialCommunityIcons name="apple" size={24} />
                   <Text>{i18n.t("(auth).login.continueWith")} Apple</Text>
                 </TouchableOpacity>
-              </View> */}
+              </View>
 
             <View style={loginstyles.registerContainer}>
               <Text style={loginstyles.registerText}>
