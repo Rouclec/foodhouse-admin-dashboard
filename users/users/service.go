@@ -251,10 +251,17 @@ func (i *Impl) Signup(ctx context.Context, req *usersgrpc.SignupRequest) (*users
 		return nil, status.Errorf(codes.Internal, "could not convert user type to role %v", err)
 	}
 
+	var email *string
+
+	if req.GetEmail() != "" {
+		e := req.GetEmail()
+		email = &e
+	}
+
 	newUser := sqlc.CreateUserParams{
 		PhoneNumber:             otpPhoneNumber,
 		Password:                hashedPassword,
-		Email:                   &req.Email,
+		Email:                   email,
 		ResidenceCountryIsoCode: req.GetResidenceCountryIsoCode(),
 		Role:                    userRole.String(),
 	}
@@ -426,11 +433,18 @@ func (i *Impl) CompleteRegistration(
 
 	i.logger.Debug().Interface("args", req).Msg("Arguments")
 
+	var email *string
+
+	if req.GetEmail() != "" {
+		e := req.GetEmail()
+		email = &e
+	}
+
 	arg := sqlc.UpdateUserParams{
 		ID:        userID,
 		FirstName: &req.FirstName,
 		LastName:  &req.LastName,
-		Email:     &req.Email,
+		Email:     email,
 		LocationCoordinates: pgtype.Point{
 			P: pgtype.Vec2{X: float64(req.GetLocationCoordinates().GetLon()),
 				Y: float64(req.GetLocationCoordinates().GetLat())}, Valid: true},
