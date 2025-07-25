@@ -54,13 +54,18 @@ export default function Login() {
     enabled: !!userId,
   });
 
-  useEffect(() => {
+   useEffect(() => {
     if (userData?.user) {
       setUser(userData.user);
-      router.replace("/(farmer)/(index)");
+      const role = userData?.user?.role;
+
+      if (role === "USER_ROLE_FARMER") {
+        router.replace("/(farmer)/(index)");
+      } else {
+        router.replace("/(buyer)/(index)");
+      }
     }
   }, [userData]);
-
 
    const { mutateAsync: authenticate } = useMutation({
     ...usersAuthenticateMutation(),
