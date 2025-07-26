@@ -67,6 +67,7 @@ const quantityUnits = [
   "liter",
   "gallon",
   "bottle",
+  "bucket"
 ];
 
 export default function PriceTypesPage() {
