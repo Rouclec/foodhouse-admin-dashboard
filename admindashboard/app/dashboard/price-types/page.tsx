@@ -37,7 +37,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, DollarSign } from "lucide-react";
+import { Plus, Trash2, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Context, ContextType } from "@/app/contexts/QueryProvider";
 import { productsgrpcPriceType } from "@/client/products.swagger";
@@ -51,6 +51,7 @@ import {
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useQueryLoading } from "@/hooks/use-query-loading";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
+import { Input } from "@/components/ui/input";
 
 const quantityUnits = [
   "kg",
@@ -67,13 +68,17 @@ const quantityUnits = [
   "liter",
   "gallon",
   "bottle",
-  "bucket"
+  "bucket",
+  "head",
+  "tray",
+  "others",
 ];
 
 export default function PriceTypesPage() {
   const { user } = useContext(Context) as ContextType;
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState<string>();
+  const [customUnit, setCustomUnit] = useState<string>();
   const [loading, setLoading] = useState(false);
   const [deletingPriceType, setDeletingPriceType] =
     useState<productsgrpcPriceType>();
@@ -90,10 +95,19 @@ export default function PriceTypesPage() {
         (cat) => cat.id === selectedCategoryId
       );
       if (!selectedCategory) return;
+      if (
+        selectedUnit === "others" &&
+        (!customUnit || (customUnit && customUnit?.length < 3))
+      )
+        return;
 
       await createPriceType({
         body: {
-          name: `per_${selectedUnit}`,
+          name: `per_${
+            selectedUnit !== "others"
+              ? selectedUnit
+              : customUnit?.toLowerCase()?.trim()
+          }`,
           categoryId: selectedCategoryId,
         },
         path: {
@@ -126,7 +140,7 @@ export default function PriceTypesPage() {
       }
       setLoading(false);
     },
-    itemType: deletingPriceType?.name,
+    itemType: deletingPriceType?.name?.split("_")?.join(" "),
     description:
       "Deleting this price will delete all the products associated with it",
   });
@@ -252,17 +266,39 @@ export default function PriceTypesPage() {
                       <SelectContent>
                         {quantityUnits.map((unit) => (
                           <SelectItem key={unit} value={unit}>
-                            per {unit}
+                            {`${unit !== "others" ? `per ` : ""}${unit}`}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
+                  {selectedUnit === "others" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="category">Custom Unit</Label>
+                      <div className="relative">
+                        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                          per
+                        </div>
+                        <Input
+                          value={customUnit}
+                          onChange={(e) => setCustomUnit(e.target.value)}
+                          placeholder="unit, liter, meter, etc."
+                          className="pl-10"
+                          required={selectedUnit === "others"}
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   {selectedUnit && (
                     <div className="p-3 bg-green-50 rounded-lg">
                       <p className="text-sm text-green-700">
                         <strong>Preview:</strong> Price will be displayed as
-                        "per {selectedUnit}"
+                        "per{" "}
+                        {selectedUnit !== "others"
+                          ? selectedUnit
+                          : customUnit?.toLowerCase()?.trim()}
+                        "
                       </p>
                     </div>
                   )}
