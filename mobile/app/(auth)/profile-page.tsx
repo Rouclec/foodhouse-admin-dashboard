@@ -1,11 +1,11 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState } from 'react';
 import {
   KeyboardAvoidingView,
   ScrollView,
   TouchableOpacity,
   View,
   Image,
-} from "react-native";
+} from 'react-native';
 import {
   Appbar,
   Icon,
@@ -16,25 +16,25 @@ import {
   Text,
   Avatar,
   Snackbar,
-} from "react-native-paper";
-import * as ExpoImagePicker from "expo-image-picker";
-import { imagePickerStyles, signupStyles, defaultStyles } from "@/styles";
-import { router } from "expo-router";
-import { usersCompleteRegistrationMutation } from "@/client/users.swagger/@tanstack/react-query.gen";
-import { useMutation } from "@tanstack/react-query";
-import { delay, uploadImage } from "@/utils";
-import { Context, ContextType } from "../_layout";
-import i18n from "@/i18n";
-import { ImagePicker } from "@/components";
-import { Chase } from "react-native-animated-spinkit";
-import { Colors, emailRegex } from "@/constants";
+} from 'react-native-paper';
+import * as ExpoImagePicker from 'expo-image-picker';
+import { imagePickerStyles, signupStyles, defaultStyles } from '@/styles';
+import { router } from 'expo-router';
+import { usersCompleteRegistrationMutation } from '@/client/users.swagger/@tanstack/react-query.gen';
+import { useMutation } from '@tanstack/react-query';
+import { delay, uploadImage } from '@/utils';
+import { Context, ContextType } from '../_layout';
+import i18n from '@/i18n';
+import { ImagePicker } from '@/components';
+import { Chase } from 'react-native-animated-spinkit';
+import { Colors, emailRegex } from '@/constants';
 
 const ProfilePage = () => {
   const { user, setUser } = useContext(Context) as ContextType;
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [address, setAddress] = useState("");
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
   const [profileImage, setProfileImage] =
     useState<ExpoImagePicker.ImagePickerAsset>();
@@ -46,9 +46,9 @@ const ProfilePage = () => {
 
   const { mutateAsync: updateUserRegistration } = useMutation({
     ...usersCompleteRegistrationMutation(),
-    onError: async (error) => {
+    onError: async error => {
       setErrorMessage(
-        error?.response?.data?.message ?? i18n.t("(auth).profile.unknownError")
+        error?.response?.data?.message ?? i18n.t('(auth).profile.unknownError'),
       );
       setError(true);
       await delay(5000);
@@ -58,10 +58,10 @@ const ProfilePage = () => {
       setSuccessModalVisible(true);
 
       setTimeout(() => {
-        if (role === "USER_TYPE_FARMER") {
-          router.replace("/(farmer)/(index)");
+        if (role === 'USER_TYPE_FARMER') {
+          router.replace('/(farmer)/(index)');
         } else {
-          router.replace("/(buyer)/(index)");
+          router.replace('/(buyer)/(index)');
         }
       }, 3000);
     },
@@ -76,7 +76,7 @@ const ProfilePage = () => {
         imageUrl = await uploadImage({
           uri: profileImage.uri,
           filename: `profile_${user?.userId}_${Date.now()}.jpg`,
-          directory: "profile_images",
+          directory: 'profile_images',
         });
       }
 
@@ -91,13 +91,13 @@ const ProfilePage = () => {
       await updateUserRegistration({
         body: data,
         path: {
-          userId: user?.userId ?? "",
+          userId: user?.userId ?? '',
         },
       });
       setUser({ ...data });
     } catch (error) {
-      console.error("Error completing registration:", error);
-      setErrorMessage(i18n.t("(auth).profile.uploadError"));
+      console.error('Error completing registration:', error);
+      setErrorMessage(i18n.t('(auth).profile.uploadError'));
       setError(true);
       await delay(5000);
       setError(false);
@@ -109,27 +109,24 @@ const ProfilePage = () => {
     <>
       <KeyboardAvoidingView
         style={defaultStyles.container}
-        behavior={"padding"}
-        keyboardVerticalOffset={0}
-      >
+        behavior={'padding'}
+        keyboardVerticalOffset={0}>
         <View style={defaultStyles.flex}>
           <Appbar.Header dark={false} style={defaultStyles.appHeader}>
             <TouchableOpacity
               onPress={() => router.back()}
-              style={defaultStyles.backButtonContainer}
-            >
-              <Icon source={"arrow-left"} size={24} />
+              style={defaultStyles.backButtonContainer}>
+              <Icon source={'arrow-left'} size={24} />
             </TouchableOpacity>
             <Text variant="titleMedium" style={defaultStyles.heading}>
-              {i18n.t("(auth).profile.completeRegistration")}
+              {i18n.t('(auth).profile.completeRegistration')}
             </Text>
             <View />
           </Appbar.Header>
           <View style={signupStyles.imageContainer}>
             <TouchableOpacity
               onPress={() => setIsImagePickerVisible(true)}
-              style={signupStyles.imageUpload}
-            >
+              style={signupStyles.imageUpload}>
               {profileImage ? (
                 <Image
                   source={{ uri: profileImage.uri }}
@@ -156,11 +153,10 @@ const ProfilePage = () => {
             contentContainerStyle={defaultStyles.scrollContainer}
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
-            keyboardShouldPersistTaps="handled"
-          >
+            keyboardShouldPersistTaps="handled">
             <View style={signupStyles.allInput}>
               <TextInput
-                label={i18n.t("(auth).profile.firstName")}
+                label={i18n.t('(auth).profile.firstName')}
                 value={firstName}
                 onChangeText={setFirstName}
                 mode="outlined"
@@ -168,16 +164,16 @@ const ProfilePage = () => {
                 theme={{
                   colors: {
                     primary: Colors.primary[500],
-                    background: Colors.grey["fa"],
+                    background: Colors.grey['fa'],
                     error: Colors.error,
                   },
                   roundness: 10,
                 }}
-                outlineColor={Colors.grey["bg"]}
+                outlineColor={Colors.grey['bg']}
               />
 
               <TextInput
-                label={i18n.t("(auth).profile.lastName")}
+                label={i18n.t('(auth).profile.lastName')}
                 value={lastName}
                 onChangeText={setLastName}
                 mode="outlined"
@@ -185,28 +181,28 @@ const ProfilePage = () => {
                 theme={{
                   colors: {
                     primary: Colors.primary[500],
-                    background: Colors.grey["fa"],
+                    background: Colors.grey['fa'],
                     error: Colors.error,
                   },
                   roundness: 10,
                 }}
-                outlineColor={Colors.grey["bg"]}
+                outlineColor={Colors.grey['bg']}
               />
 
               <TextInput
                 mode="outlined"
-                label={i18n.t("(auth).profile.email")}
+                label={i18n.t('(auth).profile.email')}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 error={email?.length > 0 && !emailRegex.test(email)}
-                outlineColor={Colors.grey["bg"]}
+                outlineColor={Colors.grey['bg']}
                 style={defaultStyles.input}
                 theme={{
                   colors: {
                     primary: Colors.primary[500],
-                    background: Colors.grey["fa"],
+                    background: Colors.grey['fa'],
                     error: Colors.error,
                   },
                   roundness: 10,
@@ -214,7 +210,7 @@ const ProfilePage = () => {
               />
 
               <TextInput
-                label={i18n.t("(auth).profile.address")}
+                label={i18n.t('(auth).profile.address')}
                 value={address}
                 onChangeText={setAddress}
                 mode="outlined"
@@ -222,12 +218,12 @@ const ProfilePage = () => {
                 theme={{
                   colors: {
                     primary: Colors.primary[500],
-                    background: Colors.grey["fa"],
+                    background: Colors.grey['fa'],
                     error: Colors.error,
                   },
                   roundness: 10,
                 }}
-                outlineColor={Colors.grey["bg"]}
+                outlineColor={Colors.grey['bg']}
               />
             </View>
           </ScrollView>
@@ -236,30 +232,28 @@ const ProfilePage = () => {
           <View style={signupStyles.flexButtonContainer}>
             <Button
               mode="contained"
-              textColor={Colors.primary["500"]}
-              buttonColor={Colors.primary["50"]}
+              textColor={Colors.primary['500']}
+              buttonColor={Colors.primary['50']}
               onPress={() => {
-                if (role === "USER_TYPE_FARMER") {
-                  router.replace("/(farmer)/(index)");
+                if (role === 'USER_TYPE_FARMER') {
+                  router.replace('/(farmer)/(index)');
                 } else {
-                  router.replace("/(buyer)/(index)");
+                  router.replace('/(buyer)/(index)');
                 }
               }}
               style={[defaultStyles.button, signupStyles.button]}
-              disabled={loading}
-            >
+              disabled={loading}>
               <Text style={defaultStyles.secondaryButtonText}>Skip</Text>
             </Button>
 
             <Button
               mode="contained"
-              textColor={Colors.light["0"]}
-              buttonColor={Colors.primary["500"]}
+              textColor={Colors.light['0']}
+              buttonColor={Colors.primary['500']}
               style={[defaultStyles.button, signupStyles.button]}
               loading={loading}
               disabled={!firstName || !lastName || !address || loading}
-              onPress={handleComplete}
-            >
+              onPress={handleComplete}>
               <Text style={defaultStyles.buttonText}>Complete</Text>
             </Button>
           </View>
@@ -277,22 +271,21 @@ const ProfilePage = () => {
         <Dialog
           visible={successModalVisible}
           onDismiss={() => {}}
-          style={defaultStyles.dialogSuccessContainer}
-        >
+          style={defaultStyles.dialogSuccessContainer}>
           <Dialog.Content>
             <Image
-              source={require("@/assets/images/success.png")}
+              source={require('@/assets/images/success.png')}
               style={defaultStyles.successImage}
             />
           </Dialog.Content>
           <Dialog.Content>
             <Text variant="titleLarge" style={defaultStyles.primaryText}>
-              {i18n.t("(auth).profile.congratulations")}
+              {i18n.t('(auth).profile.congratulations')}
             </Text>
           </Dialog.Content>
           <Dialog.Content>
             <Text style={defaultStyles.bodyText}>
-              {i18n.t("(auth).profile.registrationCompleteMessage")}
+              {i18n.t('(auth).profile.registrationCompleteMessage')}
             </Text>
           </Dialog.Content>
           <Dialog.Content>
@@ -305,8 +298,7 @@ const ProfilePage = () => {
         visible={!!error}
         onDismiss={() => {}}
         duration={3000}
-        style={defaultStyles.snackbar}
-      >
+        style={defaultStyles.snackbar}>
         <Text style={defaultStyles.errorText}>{errorMessage}</Text>
       </Snackbar>
     </>
