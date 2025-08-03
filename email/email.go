@@ -88,7 +88,44 @@ func NewSMTPService(host, port, username, password, templatePath string) (*Email
 }
 
 func FormatAmount(a Amount) string {
-	return fmt.Sprintf("%s %.2f", a.CurrencyIsoCode, a.Value)
+	// Split into integer and decimal parts
+	intPart, fracPart := splitFloat(a.Value)
+	// Add commas to integer part
+	intWithCommas := addCommas(intPart)
+	// Return formatted string with 2 decimal places
+	return fmt.Sprintf("%s %s.%s", a.CurrencyIsoCode, intWithCommas, fracPart)
+}
+
+// Splits float into integer and decimal string parts
+func splitFloat(f float64) (string, string) {
+	s := fmt.Sprintf("%.2f", f)    // Always 2 decimal places
+	parts := strings.Split(s, ".") // Split at the decimal point
+	return parts[0], parts[1]
+}
+
+// Adds commas to a string representing an integer number
+func addCommas(s string) string {
+	n := len(s)
+	if n <= 3 {
+		return s
+	}
+
+	var b strings.Builder
+	pre := n % 3
+	if pre > 0 {
+		b.WriteString(s[:pre])
+		if n > pre {
+			b.WriteString(",")
+		}
+	}
+
+	for i := pre; i < n; i += 3 {
+		b.WriteString(s[i : i+3])
+		if i+3 < n {
+			b.WriteString(",")
+		}
+	}
+	return b.String()
 }
 
 // SendOTPEmail sends an OTP email using a predefined template.
@@ -130,6 +167,8 @@ func (s *EmailService) SendPaymentReceipt(ctx context.Context, toEmail, entityNa
 		return ctx.Err()
 	default:
 	}
+
+	fmt.Println("entity name: ", entityName)
 
 	// Generate PDF and write to temp file
 	pdfPath, err := GeneratePDFReceipt(receiptData)

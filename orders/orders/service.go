@@ -210,7 +210,6 @@ func CleanLabel(input string, prefixToRemove string) string {
 
 // ConfirmPayment implements ordersgrpc.OrdersServer.
 func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymentRequest) (*ordersgrpc.ConfirmPaymentResponse, error) {
-	// TODO: add valiadation to confirm that request is coming from campay
 	querier, tx, err := i.repo.Begin(ctx)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)
@@ -315,6 +314,8 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 		})
 
 		if shouldSendReceipt {
+			i.logger.Debug().Msgf("should send receipt")
+
 			// fetch the user and get their email
 			user, err := i.userService.GetUserByID(ctx, &usersgrpc.GetUserByIDRequest{
 				UserId: *order.CreatedBy,
@@ -324,28 +325,30 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 				return nil, status.Errorf(codes.Internal, "error getting user for payment receipt %w", err)
 			}
 
+			i.logger.Debug().Msgf("should send receipt to user %v", user.GetUser().GetEmail())
+
 			product, err := i.productService.GetProduct(ctx, &productsgrpc.GetProductRequest{ProductId: *order.Product})
 
 			if err != nil {
 				return nil, status.Errorf(codes.Internal, "error getting product for payment receipt %w", err)
 			}
 
+			i.logger.Debug().Msgf("product %v", product.GetProduct())
+
 			// send email receipt
 			err = i.emailSender.SendPaymentReceipt(ctx,
-				// user.GetUser().GetEmail(), // TODO: use user's email when we migrate elastic mail to prod
-				"fhouseapp@gmail.com",
+				user.GetUser().GetEmail(),
 				fmt.Sprintf(
 					CleanLabel(
-						ordersgrpc.PaymentEntity_PaymentEntity_ORDER.String(), "PaymentEntity_")+" "+string(order.OrderNumber)),
+						ordersgrpc.PaymentEntity_PaymentEntity_ORDER.String(), "PaymentEntity_")+" "+strconv.FormatInt(order.OrderNumber, 10)),
 				email.ReceiptData{
-					ReceiptID:    GenerateReceiptNumber(order.OrderNumber),
-					Date:         time.Now(),
-					CompanyName:  "FoodHouse",
-					CompanyEmail: i.companyEmail,
-					CompanyPhone: i.companyPhone,
-					CustomerName: fmt.Sprintf(user.GetUser().GetFirstName() + " " + user.GetUser().GetLastName()),
-					// CustomerEmail: user.GetUser().GetEmail(), // TODO: use user's email when we migrate elastic mail to prod
-					CustomerEmail: "fhouseapp@gmail.com", // using foodhouse email for now because we are in testing
+					ReceiptID:     GenerateReceiptNumber(order.OrderNumber),
+					Date:          time.Now(),
+					CompanyName:   "FoodHouse",
+					CompanyEmail:  i.companyEmail,
+					CompanyPhone:  i.companyPhone,
+					CustomerName:  fmt.Sprintf(user.GetUser().GetFirstName() + " " + user.GetUser().GetLastName()),
+					CustomerEmail: user.GetUser().GetEmail(),
 					PaymentMethod: fmt.Sprintf(
 						CleanLabel(ordersgrpc.PaymentMethodType_PaymentMethodType_MOBILE_MONEY.String(),
 							"PaymentMethodType_") +
