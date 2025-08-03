@@ -163,7 +163,17 @@ func (i *Impl) CreateProduct(ctx context.Context, req *productsgrpc.CreateProduc
 func (i *Impl) DeleteProduct(ctx context.Context, req *productsgrpc.DeleteProductRequest) (*productsgrpc.DeleteProductResponse, error) {
 	i.logger.Debug().Msgf("product id: %v", req.GetProductId())
 
-	err := i.repo.Do().DeleteProduct(ctx, req.GetProductId())
+	product, err := i.repo.Do().GetProduct(ctx, req.GetProductId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error deleting product %v", err)
+	}
+
+	if product.CreatedBy != &req.UserId {
+		return nil, status.Errorf(codes.PermissionDenied, "you don't have permission to delete this product")
+	}
+
+	err = i.repo.Do().DeleteProduct(ctx, req.GetProductId())
 
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "error deleting product %v", err)
@@ -307,6 +317,10 @@ func (i *Impl) UpdateProduct(ctx context.Context, req *productsgrpc.UpdateProduc
 	}
 
 	i.logger.Debug().Interface("product found: ", product).Msg("Product for update")
+
+	if product.CreatedBy != &req.UserId {
+		return nil, status.Errorf(codes.PermissionDenied, "you don't have permission to edit this product")
+	}
 
 	arg := sqlc.UpdateProductParams{
 		CategoryID:      &req.CategoryId,
