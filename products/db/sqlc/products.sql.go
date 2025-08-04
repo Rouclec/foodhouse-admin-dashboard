@@ -59,14 +59,14 @@ func (q *Queries) CreatePriceType(ctx context.Context, arg CreatePriceTypeParams
 }
 
 const createProduct = `-- name: CreateProduct :one
-INSERT INTO product (
+INSERT INTO products (
   category_id, name, unit_type, value, currency_iso_code,
   description, image, created_by, whole_sale
 ) VALUES (
   $1, $2, $3, $4, $5,
   $6, $7, $8, $9
 )
-RETURNING id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale
+RETURNING id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at
 `
 
 type CreateProductParams struct {
@@ -107,6 +107,7 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.WholeSale,
+		&i.DeletedAt,
 	)
 	return i, err
 }
@@ -150,8 +151,7 @@ func (q *Queries) DeletePriceType(ctx context.Context, id string) error {
 }
 
 const deleteProduct = `-- name: DeleteProduct :exec
-DELETE FROM product
-WHERE id = $1
+UPDATE products SET deleted_at = now() WHERE id = $1
 `
 
 func (q *Queries) DeleteProduct(ctx context.Context, id string) error {
@@ -185,7 +185,7 @@ func (q *Queries) GetCategory(ctx context.Context, id string) (Category, error) 
 }
 
 const getProduct = `-- name: GetProduct :one
-SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale FROM product where id = $1
+SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at FROM products where id = $1
 `
 
 func (q *Queries) GetProduct(ctx context.Context, id string) (Product, error) {
@@ -204,12 +204,15 @@ func (q *Queries) GetProduct(ctx context.Context, id string) (Product, error) {
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.WholeSale,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getProductForUpdate = `-- name: GetProductForUpdate :one
-SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale FROM product where id = $1 FOR UPDATE
+SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at FROM products WHERE   
+deleted_at IS NULL AND  
+id = $1 FOR UPDATE
 `
 
 func (q *Queries) GetProductForUpdate(ctx context.Context, id string) (Product, error) {
@@ -228,6 +231,7 @@ func (q *Queries) GetProductForUpdate(ctx context.Context, id string) (Product, 
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.WholeSale,
+		&i.DeletedAt,
 	)
 	return i, err
 }
@@ -235,7 +239,7 @@ func (q *Queries) GetProductForUpdate(ctx context.Context, id string) (Product, 
 const getProductStatsBetweenDates = `-- name: GetProductStatsBetweenDates :one
 SELECT
   COUNT(*) AS total_products
-FROM product
+FROM products
 WHERE created_at >= $1::timestamptz
   AND created_at <= $2::timestamptz
 `
@@ -339,8 +343,9 @@ func (q *Queries) ListProductNames(ctx context.Context, categoryID string) ([]Pr
 }
 
 const listProducts = `-- name: ListProducts :many
-SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale FROM product
+SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at FROM products
 WHERE
+  deleted_at IS NULL AND
   ($1::varchar = '' OR created_by = $1::varchar) AND
   ($2::varchar = '' OR category_id = $2::varchar) AND
   ($3::float = 0 OR value >= $3::float) AND
@@ -397,6 +402,7 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]P
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.WholeSale,
+			&i.DeletedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -416,7 +422,7 @@ FROM (
     UNNEST($1::text[]) AS id,
     UNNEST($2::bigint[]) AS quantity
 ) AS t
-JOIN product p ON p.id = t.id
+JOIN products p ON p.id = t.id
 `
 
 type SumProductAmountsParams struct {
@@ -450,7 +456,7 @@ func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) 
 }
 
 const updateProduct = `-- name: UpdateProduct :exec
-UPDATE product
+UPDATE products
 SET category_id = $3,
     name = $4,
     unit_type = $5,

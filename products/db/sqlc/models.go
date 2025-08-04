@@ -35,6 +35,7 @@ type Product struct {
 	CreatedAt       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
 	WholeSale       bool               `json:"whole_sale"`
+	DeletedAt       pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type ProductName struct {

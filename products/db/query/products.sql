@@ -20,7 +20,7 @@ SELECT * FROM categories;
 SELECT * FROM categories where id = $1;
 
 -- name: CreateProduct :one
-INSERT INTO product (
+INSERT INTO products (
   category_id, name, unit_type, value, currency_iso_code,
   description, image, created_by, whole_sale
 ) VALUES (
@@ -30,7 +30,7 @@ INSERT INTO product (
 RETURNING *;
 
 -- name: UpdateProduct :exec
-UPDATE product
+UPDATE products
 SET category_id = $3,
     name = $4,
     unit_type = $5,
@@ -43,12 +43,12 @@ SET category_id = $3,
 WHERE id = $2 AND created_by = $1;
 
 -- name: DeleteProduct :exec
-DELETE FROM product
-WHERE id = $1;
+UPDATE products SET deleted_at = now() WHERE id = $1;
 
 -- name: ListProducts :many
-SELECT * FROM product
+SELECT * FROM products
 WHERE
+  deleted_at IS NULL AND
   (sqlc.arg(created_by)::varchar = '' OR created_by = sqlc.arg(created_by)::varchar) AND
   (sqlc.arg(category_id)::varchar = '' OR category_id = sqlc.arg(category_id)::varchar) AND
   (sqlc.arg(min_value)::float = 0 OR value >= sqlc.arg(min_value)::float) AND
@@ -65,10 +65,12 @@ ORDER BY created_at DESC
 LIMIT sqlc.arg(count)::int;
 
 -- name: GetProductForUpdate :one
-SELECT * FROM product where id = $1 FOR UPDATE;
+SELECT * FROM products WHERE   
+deleted_at IS NULL AND  
+id = $1 FOR UPDATE;
 
 -- name: GetProduct :one
-SELECT * FROM product where id = $1; 
+SELECT * FROM products where id = $1; 
 
 -- name: CreateProductName :one
 INSERT INTO product_names (name, slug, category_id)
@@ -105,12 +107,12 @@ FROM (
     UNNEST(sqlc.arg(product_ids)::text[]) AS id,
     UNNEST(sqlc.arg(quantities)::bigint[]) AS quantity
 ) AS t
-JOIN product p ON p.id = t.id;
+JOIN products p ON p.id = t.id;
 
 
 -- name: GetProductStatsBetweenDates :one
 SELECT
   COUNT(*) AS total_products
-FROM product
+FROM products
 WHERE created_at >= sqlc.arg(start_date)::timestamptz
   AND created_at <= sqlc.arg(end_date)::timestamptz;
