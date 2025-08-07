@@ -169,6 +169,8 @@ func (i *Impl) DeleteProduct(ctx context.Context, req *productsgrpc.DeleteProduc
 		return nil, status.Errorf(codes.Internal, "error deleting product %v", err)
 	}
 
+	i.logger.Debug().Msgf("conditions: %v, %v, %v", product.CreatedBy, &req.UserId, product.CreatedBy != &req.UserId)
+
 	if product.CreatedBy != &req.UserId {
 		return nil, status.Errorf(codes.PermissionDenied, "you don't have permission to delete this product")
 	}
