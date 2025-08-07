@@ -169,7 +169,10 @@
       "pleaseEnterADescription": "Please enter the product description",
       "congratulations": "Congratulations",
       "yourProductHasBeenUploaded": "Your product has been uploaded",
-      "description": "Description"
+      "description": "Description",
+      "editProduct": "Edit Product",
+      "currency": "currency",
+      "save": "Save"
     },
     "(index)": {
       "_layout": {
@@ -327,7 +330,11 @@
       "description": "Description",
       "farmer": "Farmer",
       "orderNow": "Order now",
-      "price": "Price"
+      "price": "Price",
+      "edit": "Edit",
+      "delete": "Delete",
+      "confirmation": "Are you sure you want to delete this product?",
+      "confirmation2":"This action cannot be undone. The product will be permanently removed."
     },
     "(order)": {
       "index": {
