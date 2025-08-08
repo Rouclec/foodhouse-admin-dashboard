@@ -228,6 +228,7 @@ export const defaultStyles = StyleSheet.create({
   deleteContainer: {
     backgroundColor: Colors.light[10],
     alignItems: "center",
+    textAlign: "center",
     padding: 10,
     borderRadius: 48,
     borderWidth: 2,
