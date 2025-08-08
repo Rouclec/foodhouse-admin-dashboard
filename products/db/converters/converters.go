@@ -113,7 +113,7 @@ func SqlcToProtoProductNames(sqlcProductNames []sqlc.ProductName) ([]*productsgr
 		protoProductName := &productsgrpc.ProductName{
 			Name:       pn.Name,
 			Slug:       pn.Slug,
-			CategoryId: *pn.CategoryID,
+			CategoryId: derefString(pn.CategoryID),
 		}
 		protoProductNames = append(protoProductNames, protoProductName)
 	}
