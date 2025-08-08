@@ -65,11 +65,19 @@ export const defaultStyles = StyleSheet.create({
     borderColor: Colors.error,
     backgroundColor: Colors.light["0"],
   },
+  snackbarSuccess: {
+    borderWidth: 1,
+    borderColor: Colors.primary[500],
+    backgroundColor: Colors.light["0"],
+  },
   marginBottom: {
     marginBottom: 64,
   },
   errorText: {
     color: Colors.error,
+  },
+  successText: {
+    color: Colors.primary[500],
   },
   errorDarkText: {
     color: Colors.errorDark,
@@ -216,6 +224,14 @@ export const defaultStyles = StyleSheet.create({
     alignItems: "center",
     padding: 32,
     borderRadius: 48,
+  },
+  deleteContainer: {
+    backgroundColor: Colors.light[10],
+    alignItems: "center",
+    padding: 10,
+    borderRadius: 48,
+    borderWidth: 2,
+    borderColor: Colors.error
   },
   paddingHorizontal: {
     marginTop: 16,

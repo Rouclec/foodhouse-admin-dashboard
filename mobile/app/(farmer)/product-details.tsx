@@ -61,7 +61,7 @@ export default function ProductDetails() {
     }),
     enabled: !!productId,
   });
- 
+
   const deleteMutation = useMutation({
     ...productsDeleteProductMutation({
       path: {
@@ -73,7 +73,7 @@ export default function ProductDetails() {
       setMessageModalText('Product deleted successfully');
       setMessageModalVisible(true);
       setTimeout(() => {
-        setMessageModalVisible(false); 
+        setMessageModalVisible(false);
         router.back();
       }, 1500);
     },
@@ -225,15 +225,10 @@ export default function ProductDetails() {
         <View style={defaultStyles.bottomButtonContainer}>
           <View style={createProductStyles.flexButtonContainer}>
             <Button
-            mode='contained'
-             textColor={Colors.light['0']}
-                          buttonColor={Colors.primary['500']}
-              style={[
-                defaultStyles.button,
-                createProductStyles.button,
-               
-              ]}
-              
+              mode="contained"
+              textColor={Colors.light['0']}
+              buttonColor={Colors.primary['500']}
+              style={[defaultStyles.button, createProductStyles.button]}
               onPress={() => {
                 setProductId(data?.product?.id);
                 router.push({
@@ -241,20 +236,20 @@ export default function ProductDetails() {
                   params: { productId: data?.product?.id },
                 });
               }}>
-              <Text style={defaultStyles.buttonText}>{i18n.t('(buyer).product-details.edit')}</Text>
+              <Text style={defaultStyles.buttonText}>
+                {i18n.t('(buyer).product-details.edit')}
+              </Text>
             </Button>
             <Button
-              mode='contained'
-               textColor={Colors.light['0']}
-                            buttonColor={Colors.error}
-              style={[
-                defaultStyles.button,
-                createProductStyles.button,
-                
-              ]}
+              mode="contained"
+              textColor={Colors.light['0']}
+              buttonColor={Colors.error}
+              style={[defaultStyles.button, createProductStyles.button]}
               onPress={() => setDeleteModalVisible(true)}
               loading={deleteMutation.isPending}>
-              <Text style={defaultStyles.buttonText}>{i18n.t('(buyer).product-details.delete')}</Text>
+              <Text style={defaultStyles.buttonText}>
+                {i18n.t('(buyer).product-details.delete')}
+              </Text>
             </Button>
           </View>
         </View>
@@ -263,37 +258,39 @@ export default function ProductDetails() {
       <Portal>
         <Dialog
           visible={deleteModalVisible}
-          onDismiss={() => setDeleteModalVisible(false)}>
+          onDismiss={() => setDeleteModalVisible(false)}
+          style={defaultStyles.deleteContainer}>
           <Dialog.Content>
-            <Text variant="titleLarge">
+            <Text variant="titleMedium" style={defaultStyles.errorText}>
               {i18n.t('(buyer).product-details.confirmation')}
             </Text>
           </Dialog.Content>
           <Dialog.Content>
-            <Text style={defaultStyles.bodyText}>
-               {i18n.t('(buyer).product-details.confirmation2')}
-            </Text>
+            <Text>{i18n.t('(buyer).product-details.confirmation2')}</Text>
           </Dialog.Content>
           <Dialog.Actions style={buyerProductsStyles.bottomButtonContainer}>
             <Button
               onPress={() => setDeleteModalVisible(false)}
+              textColor={Colors.light['0']}
+              buttonColor={Colors.err}
               style={[
                 defaultStyles.button,
                 defaultStyles.secondaryButton,
                 buyerProductsStyles.halfButton,
               ]}>
-              <Text style={defaultStyles.primaryText}> {i18n.t('(farmer).create-product.cancel')}</Text>
+              <Text style={defaultStyles.primaryText}>
+                {' '}
+                {i18n.t('(farmer).create-product.cancel')}
+              </Text>
             </Button>
             <Button
               mode="contained"
               onPress={handleDelete}
-              style={[
-                defaultStyles.button,
-                defaultStyles.primaryButton,
-                buyerProductsStyles.halfButton,
-              ]}
+              textColor={Colors.light['0']}
+              buttonColor={Colors.error}
+              style={[defaultStyles.button, createProductStyles.button]}
               loading={deleteMutation.isPending}>
-              <Text style={defaultStyles.buttonText}>Confirm Delete</Text>
+              <Text style={defaultStyles.buttonText}> Delete</Text>
             </Button>
           </Dialog.Actions>
         </Dialog>

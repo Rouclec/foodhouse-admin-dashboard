@@ -172,7 +172,9 @@
       "description": "Description",
       "editProduct": "Edit Product",
       "currency": "currency",
-      "save": "Save"
+      "save": "Save",
+     
+      "message": "Product successfully updated"
     },
     "(index)": {
       "_layout": {

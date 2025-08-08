@@ -38,7 +38,6 @@ import {
 } from '@/client/products.swagger/@tanstack/react-query.gen';
 import { Context, ContextType } from '../_layout';
 
-
 export default function UpdateProduct() {
   const { user } = useContext(Context) as ContextType;
   const router = useRouter();
@@ -56,7 +55,7 @@ export default function UpdateProduct() {
   const [description, setDescription] = useState<string>();
   const [image, setImage] = useState<ExpoImagePicker.ImagePickerAsset>();
   const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string>();
   const [validationError, setValidationError] = useState({
     productCategory: '',
     productName: '',
@@ -82,10 +81,7 @@ export default function UpdateProduct() {
     }
   }, [params?.productId]);
 
-  const {
-    data: productData,
-    refetch,
-  } = useQuery({
+  const { data: productData, refetch } = useQuery({
     ...productsGetProductOptions({
       path: {
         productId: productId ?? '',
@@ -218,11 +214,12 @@ export default function UpdateProduct() {
   const updateMutation = useMutation({
     ...productsUpdateProductMutation(),
     onSuccess: async () => {
-      setShowSuccessModal(true);
-      await delay(3000);
-      setShowSuccessModal(false);
-      refetch();
-    },
+    setSuccessMessage(i18n.t('(farmer).create-product.message'));
+    await delay(3000);
+    setSuccessMessage(undefined);
+    refetch();
+    router.back();
+  },
     onError: async error => {
       setError(
         error?.response?.data?.message ??
@@ -295,7 +292,7 @@ export default function UpdateProduct() {
                   value={productCategory}
                   onSelect={value => {
                     setProductCategory(value);
-                    setEditingField(null); 
+                    setEditingField(null);
                   }}
                   data={(categories?.categories ?? []).map(category => ({
                     label: category.name ?? '',
@@ -312,8 +309,7 @@ export default function UpdateProduct() {
                     }
                   }}
                   style={styles.inputContainer}
-                  activeOpacity={0.7} 
-                >
+                  activeOpacity={0.7}>
                   <Text style={styles.inputLabel}>
                     {i18n.t('(farmer).create-product.productCategory')}
                   </Text>
@@ -337,7 +333,7 @@ export default function UpdateProduct() {
                   value={productName}
                   onSelect={value => {
                     setProductName(value);
-                    setEditingField(null); 
+                    setEditingField(null);
                   }}
                   data={(productNames?.productNames ?? []).map(product => ({
                     label: product.name ?? '',
@@ -354,8 +350,7 @@ export default function UpdateProduct() {
                     }
                   }}
                   style={styles.inputContainer}
-                  activeOpacity={0.7} 
-                >
+                  activeOpacity={0.7}>
                   <Text style={styles.inputLabel}>
                     {i18n.t('(farmer).create-product.productName')}
                   </Text>
@@ -378,7 +373,7 @@ export default function UpdateProduct() {
                   value={priceType}
                   onSelect={value => {
                     setPriceType(value);
-                    setEditingField(null); 
+                    setEditingField(null);
                   }}
                   data={(priceTypes?.priceTypes ?? []).map(type => ({
                     label: `Per ${type.slug?.replace('per_', '') ?? ''}`,
@@ -611,29 +606,14 @@ export default function UpdateProduct() {
         visible={isImagePickerVisible}
         aspect={[16, 9]}
       />
-      <Portal>
-        <Dialog
-          visible={showSuccessModal}
-          onDismiss={() => {}}
-          style={defaultStyles.dialogSuccessContainer}>
-          <Dialog.Content>
-            <Image
-              source={require('@/assets/images/success.png')}
-              style={defaultStyles.successImage}
-            />
-          </Dialog.Content>
-          <Dialog.Content>
-            <Text variant="titleLarge" style={defaultStyles.primaryText}>
-              {i18n.t('(farmer).update-product.successTitle')}
-            </Text>
-          </Dialog.Content>
-          <Dialog.Content>
-            <Text style={defaultStyles.bodyText}>
-              {i18n.t('(farmer).update-product.yourProductHasBeenUpdated')}
-            </Text>
-          </Dialog.Content>
-        </Dialog>
-      </Portal>
+      <Snackbar
+        visible={!!successMessage}
+        onDismiss={() => setSuccessMessage(undefined)}
+        duration={3000}
+        style={defaultStyles.snackbarSuccess}>
+        <Text style={defaultStyles.successText}>{successMessage}</Text>
+      </Snackbar>
+
       <Snackbar
         visible={!!error}
         onDismiss={() => {}}
