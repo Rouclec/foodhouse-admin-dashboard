@@ -304,7 +304,7 @@ func (i *Impl) UpdateProduct(ctx context.Context, req *productsgrpc.UpdateProduc
 		return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)
 	}
 
-	// Proper rollback handling
+	// Proper rollback handling.
 	defer func() {
 		err = tx.Rollback(ctx)
 		if err != nil && !errors.Is(err, sql.ErrTxDone) {

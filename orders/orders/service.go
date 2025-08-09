@@ -218,7 +218,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 	i.logger.Debug().Msgf("payment id %v", req.GetOrderId())
 	i.logger.Debug().Msgf("payment status %v", req.GetStatus())
 
-	// Proper rollback handling
+	// Proper rollback handling.
 	defer func() {
 		err = tx.Rollback(ctx)
 		if err != nil && !errors.Is(err, sql.ErrTxDone) {

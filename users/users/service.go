@@ -415,7 +415,7 @@ func (i *Impl) CompleteRegistration(
 		return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)
 	}
 
-	// Proper rollback handling
+	// Proper rollback handling.
 	defer func() {
 		if rollbackErr := tx.Rollback(ctx); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
 			err = rollbackErr
