@@ -51,7 +51,7 @@ Resources:
   PgAdminSecret:
     Type: "AWS::SecretsManager::Secret"
     Properties:
-      Name: !Sub "/${EnvId}/${AppName}_Secret"
+      Name: !Sub "/${EnvId}/${AppName}_Secret_new"
       GenerateSecretString:
         SecretStringTemplate: '{"email": "admin@foodhousetesting.xyz"}'
         GenerateStringKey: "password"

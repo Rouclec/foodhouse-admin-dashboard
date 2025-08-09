@@ -59,7 +59,7 @@ Resources:
   AppDatabaseSecret:
     Type: "AWS::SecretsManager::Secret"
     Properties:
-      Name: !Sub "/${EnvId}/${AppName}_database"
+      Name: !Sub "/${EnvId}/${AppName}_database_new"
       GenerateSecretString:
         SecretStringTemplate: !Sub '{"username": "${AppName}", "dbname": "${AppName}"}'
         GenerateStringKey: "password"
