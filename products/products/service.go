@@ -332,6 +332,7 @@ func (i *Impl) UpdateProduct(ctx context.Context, req *productsgrpc.UpdateProduc
 		CurrencyIsoCode: req.GetAmount().GetCurrencyIsoCode(),
 		Description:     req.GetDescription(),
 		Image:           req.GetImage(),
+		CreatedBy:       &req.UserId,
 	}
 
 	err = querier.UpdateProduct(ctx, arg)

@@ -71,6 +71,7 @@ Resources:
     Properties:
       Parameters:
         EnvId: !Ref "EnvId"
+        IsDevelopmentGrade: true
         VpcId: !GetAtt VpcStack.Outputs.VPC
         SubnetIds:
           !Join [
