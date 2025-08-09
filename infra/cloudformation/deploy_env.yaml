@@ -224,50 +224,50 @@ Resources:
           ],
         ]
 
-  # UsersStack:
-  #   Type: AWS::CloudFormation::Stack
-  #   DependsOn:
-  #     - VpcStack
-  #     - RdsStack
-  #   Properties:
-  #     Parameters:
-  #       EnvId: !Ref "EnvId"
-  #       Image: !Ref UsersImageTag
-  #       VPC: !GetAtt VpcStack.Outputs.VPC
-  #       LogGroupName: !Ref LogGroup
-  #       ClusterArn: !GetAtt EcsStack.Outputs.ClusterArn
-  #       DbAdminSecretArn: !GetAtt "RdsStack.Outputs.AdminSecretArn"
-  #       TwilioClientSecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.TwilioClientSecretArn"
-  #       FirebaseServiceAccountSecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.FirebaseServiceAccountSecretArn"
-  #       GoogleChatClientSecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.GoogleChatClientSecretArn"
-  #       FirebaseSdkSecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.FirebaseSdkSecretArn"
-  #       InfoBipClientSecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.InfoBipClientSecretArn"
-  #       NexahClientSecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.NexahClientSecretArn"
-  #       DomainName: !Ref DomainName
-  #       SubnetIds:
-  #         !Join [
-  #           ",",
-  #           [
-  #             !GetAtt VpcStack.Outputs.SubnetAPrivate,
-  #             !GetAtt VpcStack.Outputs.SubnetBPrivate,
-  #           ],
-  #         ]
-  #       CustomResourcesServiceToken: !GetAtt RdsStack.Outputs.DatabaseInitLambdaArn
-  #       DesiredCount: 1
-  #     Tags:
-  #       - Key: EnvId
-  #         Value: !Ref "EnvId"
-  #     TemplateURL:
-  #       !Join [
-  #         "",
-  #         [
-  #           "https://s3.amazonaws.com/",
-  #           !Ref "InfraArtifactsBucket",
-  #           "/cloudformation/",
-  #           !Ref "InfraReleaseHash",
-  #           "/services/users.yaml",
-  #         ],
-  #       ]
+  UsersStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - VpcStack
+      - RdsStack
+    Properties:
+      Parameters:
+        EnvId: !Ref "EnvId"
+        Image: !Ref UsersImageTag
+        VPC: !GetAtt VpcStack.Outputs.VPC
+        LogGroupName: !Ref LogGroup
+        ClusterArn: !GetAtt EcsStack.Outputs.ClusterArn
+        DbAdminSecretArn: !GetAtt "RdsStack.Outputs.AdminSecretArn"
+        TwilioClientSecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.TwilioClientSecretArn"
+        FirebaseServiceAccountSecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.FirebaseServiceAccountSecretArn"
+        GoogleChatClientSecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.GoogleChatClientSecretArn"
+        FirebaseSdkSecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.FirebaseSdkSecretArn"
+        InfoBipClientSecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.InfoBipClientSecretArn"
+        NexahClientSecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.NexahClientSecretArn"
+        DomainName: !Ref DomainName
+        SubnetIds:
+          !Join [
+            ",",
+            [
+              !GetAtt VpcStack.Outputs.SubnetAPrivate,
+              !GetAtt VpcStack.Outputs.SubnetBPrivate,
+            ],
+          ]
+        CustomResourcesServiceToken: !GetAtt RdsStack.Outputs.DatabaseInitLambdaArn
+        DesiredCount: 1
+      Tags:
+        - Key: EnvId
+          Value: !Ref "EnvId"
+      TemplateURL:
+        !Join [
+          "",
+          [
+            "https://s3.amazonaws.com/",
+            !Ref "InfraArtifactsBucket",
+            "/cloudformation/",
+            !Ref "InfraReleaseHash",
+            "/services/users.yaml",
+          ],
+        ]
 
 
   # ProductsStack:
