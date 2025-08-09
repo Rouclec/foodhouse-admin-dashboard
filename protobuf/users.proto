@@ -408,7 +408,7 @@ message ReviewFarmerResponse {}
 
 message ListFarmersRequest {
   string user_id = 1;
-  double start_key = 2;
+  string start_key = 2;
   int32 count = 3;
   string search_key = 4;
   UserStatus user_status = 5;
@@ -421,7 +421,7 @@ message FarmerWithRating {
 
 message ListFarmersResponse {
   repeated FarmerWithRating farmers = 1;
-  double next_key = 2;
+  string next_key = 2;
 }
 
 message ListFarmersReviewsRequest {

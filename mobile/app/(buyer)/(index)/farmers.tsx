@@ -70,7 +70,7 @@ export default function Farmers() {
       },
       query: {
         count: count,
-        startKey: 5.1,
+        startKey: "",
         searchKey: debounceQuery,
       },
     }),
@@ -231,13 +231,13 @@ export default function Farmers() {
                 setHasReachedEnd(false);
               }}
               onScrollEndDrag={() => {
-                if (hasReachedEnd && !!data?.nextKey && data?.nextKey > 0) {
+                if (hasReachedEnd && !!data?.nextKey && data?.nextKey != "") {
                   setCount((prev) => prev + 10);
                   setHasReachedEnd(false);
                 }
               }}
               ListFooterComponent={() =>
-                !!data?.nextKey && data?.nextKey >= 0 ? (
+                !!data?.nextKey && data?.nextKey != "" ? (
                   <View style={defaultStyles.listFooterComponent}>
                     {hasReachedEnd && (
                       <ActivityIndicator

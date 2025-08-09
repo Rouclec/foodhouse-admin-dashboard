@@ -300,28 +300,34 @@ LEFT JOIN (
 WHERE
     ( $1::TEXT = 'UserStatus_UNSPECIFIED' OR (f.user_status = $1::TEXT) )
     AND role = 'USER_ROLE_FARMER'
-    AND
-    (
+    AND (
         $2::float = 0.0
-        OR COALESCE(fr.average_rating, 0) < $2::float
+        OR (
+            fr.average_rating < $2::float
+            OR (
+                fr.average_rating = $2::float
+                AND f.created_at > $3::timestamptz
+            )
+        )
     )
     AND (
-        $3 = ''
+        $4 = ''
         OR (
-            LOWER(f.first_name) LIKE LOWER('%' || $3 || '%')
-            OR LOWER(f.last_name) LIKE LOWER('%' || $3 || '%')
-            OR LOWER(f.email) LIKE LOWER('%' || $3 || '%')
+            LOWER(f.first_name) LIKE LOWER('%' || $4 || '%')
+            OR LOWER(f.last_name) LIKE LOWER('%' || $4 || '%')
+            OR LOWER(f.email) LIKE LOWER('%' || $4 || '%')
         )
     )
 ORDER BY
     average_rating DESC,
-    f.created_at ASC -- Oldest farmers take precedence if ratings are tied
-LIMIT $4
+    f.created_at ASC
+LIMIT $5
 `
 
 type ListFarmersByRatingParams struct {
 	UserStatus          string      `json:"user_status"`
 	CursorAverageRating float64     `json:"cursor_average_rating"`
+	CursorCreatedAt     time.Time   `json:"cursor_created_at"`
 	SearchKey           interface{} `json:"search_key"`
 	Count               int32       `json:"count"`
 }
@@ -343,6 +349,7 @@ func (q *Queries) ListFarmersByRating(ctx context.Context, arg ListFarmersByRati
 	rows, err := q.db.Query(ctx, listFarmersByRating,
 		arg.UserStatus,
 		arg.CursorAverageRating,
+		arg.CursorCreatedAt,
 		arg.SearchKey,
 		arg.Count,
 	)

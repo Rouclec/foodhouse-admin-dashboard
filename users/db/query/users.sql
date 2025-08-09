@@ -71,10 +71,15 @@ LEFT JOIN (
 WHERE
     ( sqlc.arg(user_status)::TEXT = 'UserStatus_UNSPECIFIED' OR (f.user_status = sqlc.arg(user_status)::TEXT) )
     AND role = 'USER_ROLE_FARMER'
-    AND
-    (
+    AND (
         sqlc.arg(cursor_average_rating)::float = 0.0
-        OR COALESCE(fr.average_rating, 0) < sqlc.arg(cursor_average_rating)::float
+        OR (
+            fr.average_rating < sqlc.arg(cursor_average_rating)::float
+            OR (
+                fr.average_rating = sqlc.arg(cursor_average_rating)::float
+                AND f.created_at > sqlc.arg(cursor_created_at)::timestamptz
+            )
+        )
     )
     AND (
         sqlc.arg(search_key) = ''
@@ -86,7 +91,7 @@ WHERE
     )
 ORDER BY
     average_rating DESC,
-    f.created_at ASC -- Oldest farmers take precedence if ratings are tied
+    f.created_at ASC
 LIMIT sqlc.arg(count);
 
 -- name: ListUsers :many
