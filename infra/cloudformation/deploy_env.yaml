@@ -270,91 +270,91 @@ Resources:
         ]
 
 
-  # ProductsStack:
-  #   Type: AWS::CloudFormation::Stack
-  #   DependsOn:
-  #     - VpcStack
-  #     - RdsStack
-  #   Properties:
-  #     Parameters:
-  #       EnvId: !Ref "EnvId"
-  #       Image: !Ref ProductsImageTag
-  #       VPC: !GetAtt VpcStack.Outputs.VPC
-  #       LogGroupName: !Ref LogGroup
-  #       ClusterArn: !GetAtt EcsStack.Outputs.ClusterArn
-  #       DbAdminSecretArn: !GetAtt "RdsStack.Outputs.AdminSecretArn"
-  #       DomainName: !Ref DomainName
-  #       SubnetIds:
-  #         !Join [
-  #           ",",
-  #           [
-  #             !GetAtt VpcStack.Outputs.SubnetAPrivate,
-  #             !GetAtt VpcStack.Outputs.SubnetBPrivate,
-  #           ],
-  #         ]
-  #       CustomResourcesServiceToken: !GetAtt RdsStack.Outputs.DatabaseInitLambdaArn
-  #       DesiredCount: 1
-  #     Tags:
-  #       - Key: EnvId
-  #         Value: !Ref "EnvId"
-  #     TemplateURL:
-  #       !Join [
-  #         "",
-  #         [
-  #           "https://s3.amazonaws.com/",
-  #           !Ref "InfraArtifactsBucket",
-  #           "/cloudformation/",
-  #           !Ref "InfraReleaseHash",
-  #           "/services/products.yaml",
-  #         ],
-  #       ]
+  ProductsStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - VpcStack
+      - RdsStack
+    Properties:
+      Parameters:
+        EnvId: !Ref "EnvId"
+        Image: !Ref ProductsImageTag
+        VPC: !GetAtt VpcStack.Outputs.VPC
+        LogGroupName: !Ref LogGroup
+        ClusterArn: !GetAtt EcsStack.Outputs.ClusterArn
+        DbAdminSecretArn: !GetAtt "RdsStack.Outputs.AdminSecretArn"
+        DomainName: !Ref DomainName
+        SubnetIds:
+          !Join [
+            ",",
+            [
+              !GetAtt VpcStack.Outputs.SubnetAPrivate,
+              !GetAtt VpcStack.Outputs.SubnetBPrivate,
+            ],
+          ]
+        CustomResourcesServiceToken: !GetAtt RdsStack.Outputs.DatabaseInitLambdaArn
+        DesiredCount: 1
+      Tags:
+        - Key: EnvId
+          Value: !Ref "EnvId"
+      TemplateURL:
+        !Join [
+          "",
+          [
+            "https://s3.amazonaws.com/",
+            !Ref "InfraArtifactsBucket",
+            "/cloudformation/",
+            !Ref "InfraReleaseHash",
+            "/services/products.yaml",
+          ],
+        ]
 
-  # OrdersStack:
-  #   Type: AWS::CloudFormation::Stack
-  #   DependsOn:
-  #     - VpcStack
-  #     - RdsStack
-  #     - ThirdPartySecretsStack
-  #   Properties:
-  #     Parameters:
-  #       EnvId: !Ref "EnvId"
-  #       Image: !Ref OrdersImageTag
-  #       VPC: !GetAtt VpcStack.Outputs.VPC
-  #       LogGroupName: !Ref LogGroup
-  #       ClusterArn: !GetAtt EcsStack.Outputs.ClusterArn
-  #       DbAdminSecretArn: !GetAtt "RdsStack.Outputs.AdminSecretArn"
-  #       CampaySecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.CampaySecretArn"
-  #       SmtpSecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.SmtpSecretArn"
-  #       CompanyInfoArn: !GetAtt "ThirdPartySecretsStack.Outputs.CompanyInfoArn"
-  #       DomainName: !Ref DomainName
-  #       # TODO: Get this from users stack
-  #       UsersHostPort: "users:80" 
-  #       #TODO: Get this from products stack
-  #       ProductsHostPort: "products:80"
-  #       SubnetIds:
-  #         !Join [
-  #           ",",
-  #           [
-  #             !GetAtt VpcStack.Outputs.SubnetAPrivate,
-  #             !GetAtt VpcStack.Outputs.SubnetBPrivate,
-  #           ],
-  #         ]
-  #       CustomResourcesServiceToken: !GetAtt RdsStack.Outputs.DatabaseInitLambdaArn
-  #       DesiredCount: 1
-  #     Tags:
-  #       - Key: EnvId
-  #         Value: !Ref "EnvId"
-  #     TemplateURL:
-  #       !Join [
-  #         "",
-  #         [
-  #           "https://s3.amazonaws.com/",
-  #           !Ref "InfraArtifactsBucket",
-  #           "/cloudformation/",
-  #           !Ref "InfraReleaseHash",
-  #           "/services/orders.yaml",
-  #         ],
-  #       ]
+  OrdersStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - VpcStack
+      - RdsStack
+      - ThirdPartySecretsStack
+    Properties:
+      Parameters:
+        EnvId: !Ref "EnvId"
+        Image: !Ref OrdersImageTag
+        VPC: !GetAtt VpcStack.Outputs.VPC
+        LogGroupName: !Ref LogGroup
+        ClusterArn: !GetAtt EcsStack.Outputs.ClusterArn
+        DbAdminSecretArn: !GetAtt "RdsStack.Outputs.AdminSecretArn"
+        CampaySecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.CampaySecretArn"
+        SmtpSecretArn: !GetAtt "ThirdPartySecretsStack.Outputs.SmtpSecretArn"
+        CompanyInfoArn: !GetAtt "ThirdPartySecretsStack.Outputs.CompanyInfoArn"
+        DomainName: !Ref DomainName
+        # TODO: Get this from users stack
+        UsersHostPort: "users:80" 
+        #TODO: Get this from products stack
+        ProductsHostPort: "products:80"
+        SubnetIds:
+          !Join [
+            ",",
+            [
+              !GetAtt VpcStack.Outputs.SubnetAPrivate,
+              !GetAtt VpcStack.Outputs.SubnetBPrivate,
+            ],
+          ]
+        CustomResourcesServiceToken: !GetAtt RdsStack.Outputs.DatabaseInitLambdaArn
+        DesiredCount: 1
+      Tags:
+        - Key: EnvId
+          Value: !Ref "EnvId"
+      TemplateURL:
+        !Join [
+          "",
+          [
+            "https://s3.amazonaws.com/",
+            !Ref "InfraArtifactsBucket",
+            "/cloudformation/",
+            !Ref "InfraReleaseHash",
+            "/services/orders.yaml",
+          ],
+        ]
 
 
   JsonproxyStack:
