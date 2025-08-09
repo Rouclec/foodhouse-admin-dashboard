@@ -75,7 +75,7 @@ func run(ctx context.Context, log zerolog.Logger) error {
 
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 
-	// Register users grpc server
+	// Register users grpc server.
 	err = usersgrpc.RegisterUsersHandlerFromEndpoint(ctx, jsonproxyMux, config.UsersHostPort, opts)
 	if err != nil {
 		return fmt.Errorf("failed to register users gRPC server: %w", err)
@@ -83,7 +83,7 @@ func run(ctx context.Context, log zerolog.Logger) error {
 
 	log.Info().Msgf("Successfully registered usersgrpc on host and port %v", config.UsersHostPort)
 
-	// Register product grpc server
+	// Register product grpc server.
 	err = productsgrpc.RegisterProductsHandlerFromEndpoint(ctx, jsonproxyMux, config.ProductsHostPort, opts)
 	if err != nil {
 		return fmt.Errorf("failed to register products gRPC server: %w", err)
@@ -91,7 +91,7 @@ func run(ctx context.Context, log zerolog.Logger) error {
 
 	log.Info().Msgf("Successfully registered productsgrpc on host and port %v", config.ProductsHostPort)
 
-	// Register orders grpc server
+	// Register orders grpc server.
 	err = ordersgrpc.RegisterOrdersHandlerFromEndpoint(ctx, jsonproxyMux, config.OrdersHostPort, opts)
 	if err != nil {
 		return fmt.Errorf("failed to register ordrers gRPC server: %w", err)
