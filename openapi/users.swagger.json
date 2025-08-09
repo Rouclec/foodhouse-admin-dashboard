@@ -885,8 +885,7 @@
             "name": "startKey",
             "in": "query",
             "required": false,
-            "type": "number",
-            "format": "double"
+            "type": "string"
           },
           {
             "name": "count",
@@ -1768,8 +1767,7 @@
           }
         },
         "nextKey": {
-          "type": "number",
-          "format": "double"
+          "type": "string"
         }
       }
     },

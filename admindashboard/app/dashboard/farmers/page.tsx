@@ -65,7 +65,7 @@ export default function FarmersPage() {
   const [suspendingFarmer, setSuspendingFarmer] = useState<string>();
 
   const pagination = useCursorPagination({
-    initialStartKey: "5.1",
+    initialStartKey: "",
     pageSize: 10,
   });
 
@@ -88,7 +88,7 @@ export default function FarmersPage() {
       },
       query: {
         searchKey: searchTerm,
-        startKey: parseFloat(pagination.startKey ?? "5.1"),
+        startKey: "",
         userStatus: statusFilter,
         count: pagination.pageSize,
       },
@@ -190,7 +190,7 @@ export default function FarmersPage() {
 
   const handleNextPage = () => {
     // Only proceed if nextKey exists and is not empty
-    if (farmersData?.nextKey && farmersData.nextKey !== -1) {
+    if (farmersData?.nextKey && farmersData.nextKey !== "") {
       pagination.goToNextPage(farmersData.nextKey.toString());
     }
   };

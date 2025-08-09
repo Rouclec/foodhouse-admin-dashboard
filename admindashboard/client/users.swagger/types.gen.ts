@@ -171,7 +171,7 @@ export type usersgrpcListFarmersReivewsResponse = {
 
 export type usersgrpcListFarmersResponse = {
     farmers?: Array<usersgrpcFarmerWithRating>;
-    nextKey?: number;
+    nextKey?: string;
 };
 
 export type usersgrpcListSubscriptionsResponse = {
@@ -610,7 +610,7 @@ export type UsersListFarmersData = {
     query?: {
         count?: number;
         searchKey?: string;
-        startKey?: number;
+        startKey?: string;
         userStatus?: 'UserStatus_UNSPECIFIED' | 'UserStatus_SUSPENDED' | 'UserStatus_ACTIVE';
     };
 };
