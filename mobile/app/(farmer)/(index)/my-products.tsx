@@ -195,6 +195,7 @@ export default function MyProducts() {
                 );
               }}
               onScrollBeginDrag={() => {
+// Reset flag when user starts dragging
                 setHasReachedEnd(false);
               }}
               onScrollEndDrag={() => {
