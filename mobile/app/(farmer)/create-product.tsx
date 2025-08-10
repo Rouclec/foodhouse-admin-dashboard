@@ -158,7 +158,6 @@ export default function CreateProduct() {
     }
   };
 
-  console.log({ user });
 
   const resetInputs = () => {
     setValidationError({
