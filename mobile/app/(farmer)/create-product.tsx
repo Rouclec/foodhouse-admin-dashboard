@@ -37,7 +37,7 @@ import {
 import { Context, ContextType } from '../_layout';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export default function ForgotPasswordEmailOtp() {
+export default function CreateProduct() {
   const { user } = useContext(Context) as ContextType;
   const router = useRouter();
   const [error, setError] = useState<string>();
@@ -157,6 +157,7 @@ export default function ForgotPasswordEmailOtp() {
       setLoading(false);
     }
   };
+
 
   const resetInputs = () => {
     setValidationError({

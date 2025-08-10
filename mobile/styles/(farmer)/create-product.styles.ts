@@ -72,4 +72,36 @@ export const createProductStyles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
   },
+
+      inputLabel: {
+        fontSize: 12,
+        //color: Colors.grey[700],
+        marginBottom: 4,
+      },
+      inputValue: {
+        fontSize: 16,
+        //color: Colors.grey[900],
+        paddingVertical: 12,
+        paddingHorizontal: 15,
+        borderWidth: 1,
+        borderColor: Colors.grey['bg'],
+        borderRadius: 10,
+        backgroundColor: Colors.grey['fa'],
+        minHeight: 56,
+        justifyContent: 'center',
+      },
+      inputContainer: {
+        marginBottom: 16,
+      },
+      textAreaValue: {
+        minHeight: 120,
+        paddingTop: 12,
+        paddingBottom: 12,
+        textAlignVertical: 'top',
+      },
+      editableField: {
+        borderColor: Colors.primary[500],
+        borderWidth: 1,
+      }
+    
 });

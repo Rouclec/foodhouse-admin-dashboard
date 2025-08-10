@@ -65,8 +65,7 @@ export default function MyProducts() {
   }, [searchQuery]);
 
   const router = useRouter();
-
-  const { user } = useContext(Context) as ContextType;
+  const { user, setProductId } = useContext(Context) as ContextType;
   const {
     isLoading: isProductsLoading,
     data,
@@ -78,10 +77,6 @@ export default function MyProducts() {
       },
       query: {
         count: count,
-        // "maxAmount.currencyIsoCode": "XAF",
-        // "maxAmount.value": "10000000000",
-        // "minAmount.currencyIsoCode": "XAF",
-        // "minAmount.value": "0",
         search: debounceQuery,
         startKey: "",
       },
@@ -183,10 +178,24 @@ export default function MyProducts() {
                 }
               }}
               renderItem={({ item }) => {
-                return <Product product={item} />;
+                return (
+                  
+                    <Product
+                                        product={item}
+                                        OnPress={() =>
+                                          router.push({
+                                            pathname: '/(farmer)/product-details',
+                                            params: {
+                                              productId: item?.id,
+                                            },
+                                          })
+                                        }
+                                      />
+                  
+                );
               }}
               onScrollBeginDrag={() => {
-                // Reset flag when user starts dragging
+// Reset flag when user starts dragging
                 setHasReachedEnd(false);
               }}
               onScrollEndDrag={() => {

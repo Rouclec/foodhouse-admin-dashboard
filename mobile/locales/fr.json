@@ -169,7 +169,12 @@
       "pleaseEnterADescription": "Veuillez entrer la description du produit",
       "congratulations": "Félicitations",
       "yourProductHasBeenUploaded": "Votre produit a été mis en ligne",
-      "description": "Description"
+      "description": "Description",
+      "editProduct": "Modifier le produit",
+      "currency": "devise",
+      "save": "Enregistrer",
+      "message": "Produit mis à jour avec succès"
+
     },
     "(index)": {
       "_layout": {
@@ -326,8 +331,12 @@
       "couldNotLoad": "Impossible de charger les détails du produit",
       "description": "Description",
       "farmer": "Agriculteur",
-      "orderNow": "Commander",
-      "price": "Prix"
+      "orderNow": "Commander maintenant",
+      "price": "Prix",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "confirmation": "Êtes-vous sûr de vouloir supprimer ce produit ?",
+      "confirmation2": "Cette action est irréversible. Le produit sera définitivement supprimé."
     },
     "(order)": {
       "index": {
