@@ -72,26 +72,47 @@ WHERE
     ( sqlc.arg(user_status)::TEXT = 'UserStatus_UNSPECIFIED' OR (f.user_status = sqlc.arg(user_status)::TEXT) )
     AND role = 'USER_ROLE_FARMER'
     AND (
-        sqlc.arg(cursor_average_rating)::float = 0.0
-        OR (
-            fr.average_rating < sqlc.arg(cursor_average_rating)::float
-            OR (
-                fr.average_rating = sqlc.arg(cursor_average_rating)::float
-                AND f.created_at > sqlc.arg(cursor_created_at)::timestamptz
-            )
+      (
+        sqlc.arg(cursor_average_rating)::float = 0
+        AND COALESCE(fr.average_rating, 0) = 0
+        AND (
+          CASE WHEN sqlc.arg(sort_created_at_desc) THEN
+            f.created_at < sqlc.arg(cursor_created_at)::timestamptz
+          ELSE
+            f.created_at > sqlc.arg(cursor_created_at)::timestamptz
+          END
         )
+      )
+      OR (
+        sqlc.arg(cursor_average_rating)::float != 0
+        AND (
+          COALESCE(fr.average_rating, 0) < sqlc.arg(cursor_average_rating)::float
+          OR (
+            COALESCE(fr.average_rating, 0) = sqlc.arg(cursor_average_rating)::float
+            AND (
+              CASE WHEN sqlc.arg(sort_created_at_desc) THEN
+                f.created_at < sqlc.arg(cursor_created_at)::timestamptz
+              ELSE
+                f.created_at > sqlc.arg(cursor_created_at)::timestamptz
+              END
+            )
+          )
+        )
+      )
+      OR sqlc.arg(cursor_average_rating)::float > 5.0
     )
     AND (
-        sqlc.arg(search_key) = ''
-        OR (
-            LOWER(f.first_name) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
-            OR LOWER(f.last_name) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
-            OR LOWER(f.email) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
-        )
+    sqlc.arg(search_key) = ''
+    OR (
+        LOWER(f.first_name) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
+        OR LOWER(f.last_name) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
+        OR LOWER(f.email) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
+    )
     )
 ORDER BY
-    average_rating DESC,
-    f.created_at ASC
+    COALESCE(fr.average_rating, 0) DESC,
+    CASE WHEN sqlc.arg(sort_created_at_desc) THEN f.created_at END DESC,
+    CASE WHEN NOT sqlc.arg(sort_created_at_desc) THEN f.created_at END ASC
 LIMIT sqlc.arg(count);
 
 -- name: ListUsers :many

@@ -1455,55 +1455,61 @@ func decodeCursor(cursor string) (float64, time.Time, error) {
 
 // ListFarmers implements usersgrpc.UsersServer.
 func (i *Impl) ListFarmers(ctx context.Context,
-    req *usersgrpc.ListFarmersRequest) (
-    *usersgrpc.ListFarmersResponse, error) {
+	req *usersgrpc.ListFarmersRequest) (
+	*usersgrpc.ListFarmersResponse, error) {
 
-    var startRating float64 = 0.0
-    var startCreatedAt time.Time = time.Time{}
+	var startRating float64 = 0.0
+	var startCreatedAt time.Time = time.Time{}
 
-    if req.GetStartKey() != "" {
-        var err error
-        startRating, startCreatedAt, err = decodeCursor(req.GetStartKey())
-        if err != nil {
-            return nil, status.Errorf(codes.InvalidArgument, "invalid start key")
-        }
-    }
+	if req.GetStartKey() != "" {
+		var err error
+		startRating, startCreatedAt, err = decodeCursor(req.GetStartKey())
+		if err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "invalid start key")
+		}
+	}
 
-    count := req.GetCount()
-    if count == 0 {
-        count = 10
-    }
+	count := req.GetCount()
+	if count == 0 {
+		count = 10
+	}
 
-    args := sqlc.ListFarmersByRatingParams{
-        CursorAverageRating: startRating,
-        CursorCreatedAt:     startCreatedAt,
-        Count:               count,
-        SearchKey:           req.GetSearchKey(),
-        UserStatus:          req.GetUserStatus().String(),
-    }
+	var sortDesc bool = false
 
-    farmers, err := i.repo.Do().ListFarmersByRating(ctx, args)
-    if err != nil {
-        return nil, status.Errorf(codes.Internal, "error fetching farmers: %v", err)
-    }
+	if req.GetSortCreatedAtDesc() {
+		sortDesc = req.GetSortCreatedAtDesc()
+	}
 
-    protoFarmers, err := converters.SqlcToProtoFarmers(farmers)
-    if err != nil {
-        return nil, status.Errorf(codes.Internal, "error converting sqlc to proto farmers: %v", err)
-    }
+	args := sqlc.ListFarmersByRatingParams{
+		CursorAverageRating: startRating,
+		CursorCreatedAt:     startCreatedAt,
+		Count:               count,
+		SearchKey:           req.GetSearchKey(),
+		UserStatus:          req.GetUserStatus().String(),
+		SortCreatedAtDesc:   sortDesc,
+	}
 
-    nextKey := ""
-    if len(protoFarmers) >= int(count) {
-        lastFarmer := protoFarmers[len(protoFarmers)-1]
-        nextKey = encodeCursor(lastFarmer.GetRating(), lastFarmer.GetUser().GetCreatedAt().AsTime())
-    }
+	farmers, err := i.repo.Do().ListFarmersByRating(ctx, args)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error fetching farmers: %v", err)
+	}
 
-    return &usersgrpc.ListFarmersResponse{
-        Farmers: protoFarmers,
-        NextKey: nextKey,
-    }, nil
+	protoFarmers, err := converters.SqlcToProtoFarmers(farmers)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error converting sqlc to proto farmers: %v", err)
+	}
+
+	nextKey := ""
+	if len(protoFarmers) >= int(count) {
+		lastFarmer := protoFarmers[len(protoFarmers)-1]
+		nextKey = encodeCursor(lastFarmer.GetRating(), lastFarmer.GetUser().GetCreatedAt().AsTime())
+	}
+
+	return &usersgrpc.ListFarmersResponse{
+		Farmers: protoFarmers,
+		NextKey: nextKey,
+	}, nil
 }
-
 
 func getMonthRanges() (time.Time, time.Time, time.Time, time.Time) {
 	now := time.Now()

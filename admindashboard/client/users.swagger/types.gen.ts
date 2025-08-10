@@ -610,6 +610,7 @@ export type UsersListFarmersData = {
     query?: {
         count?: number;
         searchKey?: string;
+        sortCreatedAtDesc?: boolean;
         startKey?: string;
         userStatus?: 'UserStatus_UNSPECIFIED' | 'UserStatus_SUSPENDED' | 'UserStatus_ACTIVE';
     };

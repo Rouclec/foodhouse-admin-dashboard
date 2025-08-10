@@ -412,6 +412,7 @@ message ListFarmersRequest {
   int32 count = 3;
   string search_key = 4;
   UserStatus user_status = 5;
+  optional bool sort_created_at_desc = 6;
 }
 
 message FarmerWithRating {

@@ -911,6 +911,12 @@
               "UserStatus_ACTIVE"
             ],
             "default": "UserStatus_UNSPECIFIED"
+          },
+          {
+            "name": "sortCreatedAtDesc",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "tags": [

@@ -88,7 +88,7 @@ export default function FarmersPage() {
       },
       query: {
         searchKey: searchTerm,
-        startKey: "",
+        startKey: pagination.startKey,
         userStatus: statusFilter,
         count: pagination.pageSize,
       },
@@ -191,8 +191,11 @@ export default function FarmersPage() {
   const handleNextPage = () => {
     // Only proceed if nextKey exists and is not empty
     if (farmersData?.nextKey && farmersData.nextKey !== "") {
+      console.log("going to next page: ", farmersData.nextKey);
       pagination.goToNextPage(farmersData.nextKey.toString());
     }
+
+    console.log({ pagination });
   };
 
   return (

@@ -301,32 +301,54 @@ WHERE
     ( $1::TEXT = 'UserStatus_UNSPECIFIED' OR (f.user_status = $1::TEXT) )
     AND role = 'USER_ROLE_FARMER'
     AND (
-        $2::float = 0.0
-        OR (
-            fr.average_rating < $2::float
-            OR (
-                fr.average_rating = $2::float
-                AND f.created_at > $3::timestamptz
-            )
+      (
+        $2::float = 0
+        AND COALESCE(fr.average_rating, 0) = 0
+        AND (
+          CASE WHEN $3 THEN
+            f.created_at < $4::timestamptz
+          ELSE
+            f.created_at > $4::timestamptz
+          END
         )
+      )
+      OR (
+        $2::float != 0
+        AND (
+          COALESCE(fr.average_rating, 0) < $2::float
+          OR (
+            COALESCE(fr.average_rating, 0) = $2::float
+            AND (
+              CASE WHEN $3 THEN
+                f.created_at < $4::timestamptz
+              ELSE
+                f.created_at > $4::timestamptz
+              END
+            )
+          )
+        )
+      )
+      OR $2::float > 5.0
     )
     AND (
-        $4 = ''
-        OR (
-            LOWER(f.first_name) LIKE LOWER('%' || $4 || '%')
-            OR LOWER(f.last_name) LIKE LOWER('%' || $4 || '%')
-            OR LOWER(f.email) LIKE LOWER('%' || $4 || '%')
-        )
+    $5 = ''
+    OR (
+        LOWER(f.first_name) LIKE LOWER('%' || $5 || '%')
+        OR LOWER(f.last_name) LIKE LOWER('%' || $5 || '%')
+        OR LOWER(f.email) LIKE LOWER('%' || $5 || '%')
+    )
     )
 ORDER BY
-    average_rating DESC,
-    f.created_at ASC
-LIMIT $5
+    COALESCE(fr.average_rating, 0) DESC,
+    CASE WHEN $3 THEN f.created_at END DESC,
+    CASE WHEN NOT $3 THEN f.created_at END ASC
+LIMIT $6
 `
 
 type ListFarmersByRatingParams struct {
 	UserStatus          string      `json:"user_status"`
 	CursorAverageRating float64     `json:"cursor_average_rating"`
+	SortCreatedAtDesc   interface{} `json:"sort_created_at_desc"`
 	CursorCreatedAt     time.Time   `json:"cursor_created_at"`
 	SearchKey           interface{} `json:"search_key"`
 	Count               int32       `json:"count"`
@@ -349,6 +371,7 @@ func (q *Queries) ListFarmersByRating(ctx context.Context, arg ListFarmersByRati
 	rows, err := q.db.Query(ctx, listFarmersByRating,
 		arg.UserStatus,
 		arg.CursorAverageRating,
+		arg.SortCreatedAtDesc,
 		arg.CursorCreatedAt,
 		arg.SearchKey,
 		arg.Count,
