@@ -91,6 +91,7 @@ export default function FarmersPage() {
         startKey: pagination.startKey,
         userStatus: statusFilter,
         count: pagination.pageSize,
+        sortCreatedAtDesc: true,
       },
     }),
     placeholderData: keepPreviousData,

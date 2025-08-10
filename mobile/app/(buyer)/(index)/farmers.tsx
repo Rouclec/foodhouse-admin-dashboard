@@ -1,13 +1,13 @@
-import { Context, ContextType } from "@/app/_layout";
-import { usersListFarmersOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
-import { Colors } from "@/constants";
-import i18n from "@/i18n";
-import { defaultStyles, farmersStyles as styles } from "@/styles";
-import { formatAmount } from "@/utils/amountFormater";
-import { Feather } from "@expo/vector-icons";
-import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import { Context, ContextType } from '@/app/_layout';
+import { usersListFarmersOptions } from '@/client/users.swagger/@tanstack/react-query.gen';
+import { Colors } from '@/constants';
+import i18n from '@/i18n';
+import { defaultStyles, farmersStyles as styles } from '@/styles';
+import { formatAmount } from '@/utils/amountFormater';
+import { Feather } from '@expo/vector-icons';
+import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   View,
   KeyboardAvoidingView,
@@ -17,11 +17,11 @@ import {
   FlatList,
   ActivityIndicator,
   Image,
-} from "react-native";
-import { Chase } from "react-native-animated-spinkit";
-import { Appbar, Button, Icon, Text, TextInput } from "react-native-paper";
+} from 'react-native';
+import { Chase } from 'react-native-animated-spinkit';
+import { Appbar, Button, Icon, Text, TextInput } from 'react-native-paper';
 
-const { width } = Dimensions.get("window");
+const { width } = Dimensions.get('window');
 
 export default function Farmers() {
   const router = useRouter();
@@ -30,8 +30,8 @@ export default function Farmers() {
 
   const [hasReachedEnd, setHasReachedEnd] = useState(false);
   const [searchVisible, setSearchVisible] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debounceQuery, setDebounceQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debounceQuery, setDebounceQuery] = useState('');
   const [count, setCount] = useState(10);
 
   const slideAnim = useRef(new Animated.Value(width)).current;
@@ -43,8 +43,8 @@ export default function Farmers() {
         duration: 500,
         useNativeDriver: true,
       }).start(() => setSearchVisible(false));
-      setSearchQuery("");
-      setDebounceQuery("");
+      setSearchQuery('');
+      setDebounceQuery('');
     } else {
       setSearchVisible(true);
       Animated.timing(slideAnim, {
@@ -66,11 +66,11 @@ export default function Farmers() {
   const { data, isLoading } = useQuery({
     ...usersListFarmersOptions({
       path: {
-        userId: user?.userId ?? "",
+        userId: user?.userId ?? '',
       },
       query: {
         count: count,
-        startKey: "",
+        startKey: '',
         searchKey: debounceQuery,
       },
     }),
@@ -80,14 +80,13 @@ export default function Farmers() {
     <>
       <KeyboardAvoidingView
         style={defaultStyles.container}
-        behavior={"padding"}
-        keyboardVerticalOffset={0}
-      >
+        behavior={'padding'}
+        keyboardVerticalOffset={0}>
         <View style={[defaultStyles.flex, defaultStyles.relativeContainer]}>
           <Appbar.Header dark={false} style={[defaultStyles.appHeader]}>
             {!searchVisible && (
               <Text variant="titleMedium" style={styles.title}>
-                {i18n.t("(buyer).(index).farmers.farmers")}
+                {i18n.t('(buyer).(index).farmers.farmers')}
               </Text>
             )}
 
@@ -102,19 +101,18 @@ export default function Farmers() {
                 style={[
                   styles.searchContainer,
                   { transform: [{ translateX: slideAnim }] },
-                ]}
-              >
+                ]}>
                 <TextInput
-                  label={i18n.t("(buyer).(index).farmers.searchFarmers")}
+                  label={i18n.t('(buyer).(index).farmers.searchFarmers')}
                   style={[defaultStyles.input, styles.searchInput]}
                   autoFocus
                   value={searchQuery}
-                  onChangeText={(text) => setSearchQuery(text)}
+                  onChangeText={text => setSearchQuery(text)}
                   mode="outlined"
                   theme={{
                     colors: {
                       primary: Colors.primary[500],
-                      background: Colors.grey["fa"],
+                      background: Colors.grey['fa'],
                       error: Colors.error,
                     },
                     roundness: 10,
@@ -122,9 +120,8 @@ export default function Farmers() {
                 />
                 <TouchableOpacity
                   onPress={toggleSearch}
-                  style={styles.closeIcon}
-                >
-                  <Icon source={"close"} size={24} color={Colors.dark[0]} />
+                  style={styles.closeIcon}>
+                  <Icon source={'close'} size={24} color={Colors.dark[0]} />
                 </TouchableOpacity>
               </Animated.View>
             )}
@@ -146,7 +143,7 @@ export default function Farmers() {
               ListEmptyComponent={
                 <View style={defaultStyles.noItemsContainer}>
                   <Text style={defaultStyles.noItems}>
-                    {i18n.t("(buyer).(index).farmers.noFarmerFound")}
+                    {i18n.t('(buyer).(index).farmers.noFarmerFound')}
                   </Text>
                 </View>
               }
@@ -168,7 +165,7 @@ export default function Farmers() {
                           />
                         ) : (
                           <Image
-                            source={require("@/assets/images/avatar.png")}
+                            source={require('@/assets/images/avatar.png')}
                             style={styles.avatar}
                           />
                         )}
@@ -177,27 +174,27 @@ export default function Farmers() {
                         <Text variant="titleSmall" style={styles.text18}>
                           {!!item?.user?.firstName
                             ? item?.user?.firstName
-                            : "Anonymous"}{" "}
+                            : 'Anonymous'}{' '}
                           {item?.user?.lastName}
                         </Text>
                         <View style={styles.ratingsContainer}>
                           {Math.floor(item?.rating ?? 0) >= 5.0 ? (
                             <Icon
-                              source={"star"}
+                              source={'star'}
                               size={24}
                               color={Colors.gold}
                             />
                           ) : item?.rating ?? 0 > 0 ? (
                             <Icon
-                              source={"star-half-full"}
+                              source={'star-half-full'}
                               size={24}
                               color={Colors.gold}
                             />
                           ) : (
                             <Icon
-                              source={"star-outline"}
+                              source={'star-outline'}
                               size={24}
-                              color={Colors.grey["61"]}
+                              color={Colors.grey['61']}
                             />
                           )}
                           <Text style={styles.ratingsText}>
@@ -212,15 +209,14 @@ export default function Farmers() {
                       style={styles.button}
                       onPress={() =>
                         router.push({
-                          pathname: "/(buyer)/farmer-details",
+                          pathname: '/(buyer)/farmer-details',
                           params: {
                             farmerId: item?.user?.userId,
                           },
                         })
-                      }
-                    >
+                      }>
                       <Text style={defaultStyles.buttonText}>
-                        {i18n.t("(buyer).(index).farmers.viewDetails")}
+                        {i18n.t('(buyer).(index).farmers.viewDetails')}
                       </Text>
                     </Button>
                   </View>
@@ -231,13 +227,13 @@ export default function Farmers() {
                 setHasReachedEnd(false);
               }}
               onScrollEndDrag={() => {
-                if (hasReachedEnd && !!data?.nextKey && data?.nextKey != "") {
-                  setCount((prev) => prev + 10);
+                if (hasReachedEnd && !!data?.nextKey && data?.nextKey != '') {
+                  setCount(prev => prev + 10);
                   setHasReachedEnd(false);
                 }
               }}
               ListFooterComponent={() =>
-                !!data?.nextKey && data?.nextKey != "" ? (
+                !!data?.nextKey && data?.nextKey != '' ? (
                   <View style={defaultStyles.listFooterComponent}>
                     {hasReachedEnd && (
                       <ActivityIndicator

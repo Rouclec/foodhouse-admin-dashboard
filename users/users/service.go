@@ -1458,10 +1458,17 @@ func (i *Impl) ListFarmers(ctx context.Context,
 	req *usersgrpc.ListFarmersRequest) (
 	*usersgrpc.ListFarmersResponse, error) {
 
-	var startRating float64 = 0.0
-	var startCreatedAt time.Time = time.Time{}
+	var startRating float64
+	var startCreatedAt time.Time
 
-	if req.GetStartKey() != "" {
+	if req.GetStartKey() == "" {
+		startRating = 6.0 // sentinel > max rating
+		if req.GetSortCreatedAtDesc() {
+			startCreatedAt = time.Now()
+		} else {
+			startCreatedAt = time.Time{}
+		}
+	} else {
 		var err error
 		startRating, startCreatedAt, err = decodeCursor(req.GetStartKey())
 		if err != nil {
