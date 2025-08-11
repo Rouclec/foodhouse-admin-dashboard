@@ -46,6 +46,8 @@ const (
 	ClaimKeyRole = "role"
 
 	ClaimKeyStatus = "status"
+
+	TWO = 2
 )
 
 // Impl is the implementation of the Users service.
@@ -1428,15 +1430,15 @@ func (i *Impl) ReviewFarmer(ctx context.Context,
 	return &usersgrpc.ReviewFarmerResponse{}, nil
 }
 
-// encodes the nextkey for ListFarmers by concatenating the rating and createdAt in a string
+// encodes the nextkey for ListFarmers by concatenating the rating and createdAt in a string.
 func encodeCursor(rating float64, createdAt time.Time) string {
 	return fmt.Sprintf("%f|%s", rating, createdAt.UTC().Format(time.RFC3339Nano))
 }
 
-// decodes the concatenated string into a number and a time
+// decodes the concatenated string into a number and a time.
 func decodeCursor(cursor string) (float64, time.Time, error) {
 	parts := strings.Split(cursor, "|")
-	if len(parts) != 2 {
+	if len(parts) != TWO {
 		return 0, time.Time{}, fmt.Errorf("invalid cursor format")
 	}
 
@@ -1457,7 +1459,6 @@ func decodeCursor(cursor string) (float64, time.Time, error) {
 func (i *Impl) ListFarmers(ctx context.Context,
 	req *usersgrpc.ListFarmersRequest) (
 	*usersgrpc.ListFarmersResponse, error) {
-
 	var startRating float64
 	var startCreatedAt time.Time
 
@@ -1481,7 +1482,7 @@ func (i *Impl) ListFarmers(ctx context.Context,
 		count = 10
 	}
 
-	var sortDesc bool = false
+	var sortDesc = false
 
 	if req.GetSortCreatedAtDesc() {
 		sortDesc = req.GetSortCreatedAtDesc()

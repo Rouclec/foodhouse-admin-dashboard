@@ -325,6 +325,7 @@ func (i *Impl) UpdateProduct(ctx context.Context, req *productsgrpc.UpdateProduc
 	}
 
 	arg := sqlc.UpdateProductParams{
+		ID:              req.GetProductId(),
 		CategoryID:      &req.CategoryId,
 		Name:            req.GetName(),
 		UnitType:        req.GetUnitType(),
