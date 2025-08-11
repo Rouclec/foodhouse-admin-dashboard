@@ -1,33 +1,40 @@
-import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
-import { Colors } from "@/constants";
-import i18n from "@/i18n";
-import { defaultStyles } from "@/styles";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { RelativePathString, useRouter } from "expo-router";
-import React, { useContext, useEffect, useState } from "react";
+import { productsGetProductOptions } from '@/client/products.swagger/@tanstack/react-query.gen';
+import { Colors } from '@/constants';
+import i18n from '@/i18n';
+import { defaultStyles } from '@/styles';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { RelativePathString, useRouter } from 'expo-router';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   View,
   KeyboardAvoidingView,
   TouchableOpacity,
   ScrollView,
   Image,
-} from "react-native";
-import { Chase } from "react-native-animated-spinkit";
-import { Appbar, Button, Icon, Snackbar, Text } from "react-native-paper";
-import { checkoutStyles as styles } from "@/styles";
-import { formatAmount } from "@/utils/amountFormater";
-import { ordersCreateOrderMutation } from "@/client/orders.swagger/@tanstack/react-query.gen";
-import { Context, ContextType } from "@/app/_layout";
-import { delay } from "@/utils";
+} from 'react-native';
+import { Chase } from 'react-native-animated-spinkit';
+import {
+  Appbar,
+  Button,
+  Icon,
+  Snackbar,
+  Text,
+  TextInput,
+} from 'react-native-paper';
+import { checkoutStyles as styles } from '@/styles';
+import { formatAmount } from '@/utils/amountFormater';
+import { ordersCreateOrderMutation } from '@/client/orders.swagger/@tanstack/react-query.gen';
+import { Context, ContextType } from '@/app/_layout';
+import { delay } from '@/utils';
 
 export default function Checkout() {
   const router = useRouter();
 
   const { user, productId, deliveryLocation, setPaymentData } = useContext(
-    Context
+    Context,
   ) as ContextType;
 
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState('1');
   const [totalPrice, setTotalPrice] = useState<number>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
@@ -39,34 +46,37 @@ export default function Checkout() {
   } = useQuery({
     ...productsGetProductOptions({
       path: {
-        productId: productId ?? "",
+        productId: productId ?? '',
       },
     }),
     enabled: !!productId,
   });
 
   useEffect(() => {
-    setTotalPrice((productData?.product?.amount?.value ?? 0) * quantity);
+    setTotalPrice(
+      (productData?.product?.amount?.value ?? 0) *
+        (!quantity ? 0 : parseInt(quantity)),
+    );
   }, [productData, quantity]);
 
   const { mutateAsync } = useMutation({
     ...ordersCreateOrderMutation(),
-    onSuccess: (data) => {
+    onSuccess: data => {
       setPaymentData({
-        entity: "PaymentEntity_ORDER",
-        entityId: data?.order?.orderNumber ?? "",
-        nextScreen: "/(buyer)/(index)" as RelativePathString,
+        entity: 'PaymentEntity_ORDER',
+        entityId: data?.order?.orderNumber ?? '',
+        nextScreen: '/(buyer)/(index)' as RelativePathString,
         amount: {
           value: (totalPrice ?? 0) * 1.08,
           currencyIsoCode: productData?.product?.amount?.currencyIsoCode,
         },
       });
-      router.push("/(payment)");
+      router.push('/(payment)');
     },
-    onError: async (error) => {
+    onError: async error => {
       setError(
         error?.response?.data?.message ??
-          i18n.t("(buyer).(order).checkout.unknownError")
+          i18n.t('(buyer).(order).checkout.unknownError'),
       );
       await delay(5000);
       setError(undefined);
@@ -87,11 +97,11 @@ export default function Checkout() {
           },
         },
         path: {
-          userId: user?.userId ?? "",
+          userId: user?.userId ?? '',
         },
       });
     } catch (error) {
-      console.error("error creating order ", error);
+      console.error('error creating order ', error);
     } finally {
       setLoading(false);
     }
@@ -101,16 +111,14 @@ export default function Checkout() {
     return (
       <KeyboardAvoidingView
         style={defaultStyles.container}
-        behavior={"padding"}
-        keyboardVerticalOffset={0}
-      >
+        behavior={'padding'}
+        keyboardVerticalOffset={0}>
         <View style={defaultStyles.flex}>
           <Appbar.Header dark={false} style={defaultStyles.appHeader}>
             <TouchableOpacity
               onPress={() => router.back()}
-              style={defaultStyles.backButtonContainer}
-            >
-              <Icon source={"arrow-left"} size={24} color={Colors.dark[0]} />
+              style={defaultStyles.backButtonContainer}>
+              <Icon source={'arrow-left'} size={24} color={Colors.dark[0]} />
             </TouchableOpacity>
             <View />
           </Appbar.Header>
@@ -118,8 +126,7 @@ export default function Checkout() {
             contentContainerStyle={defaultStyles.scrollContainer}
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
-            keyboardShouldPersistTaps="handled"
-          >
+            keyboardShouldPersistTaps="handled">
             <View style={[defaultStyles.center, styles.notFoundContainer]}>
               <Chase size={56} color={Colors.primary[500]} />
             </View>
@@ -133,19 +140,17 @@ export default function Checkout() {
     return (
       <KeyboardAvoidingView
         style={defaultStyles.container}
-        behavior={"padding"}
-        keyboardVerticalOffset={0}
-      >
+        behavior={'padding'}
+        keyboardVerticalOffset={0}>
         <View style={defaultStyles.flex}>
           <Appbar.Header dark={false} style={defaultStyles.appHeader}>
             <TouchableOpacity
               onPress={() => router.back()}
-              style={defaultStyles.backButtonContainer}
-            >
-              <Icon source={"arrow-left"} size={24} />
+              style={defaultStyles.backButtonContainer}>
+              <Icon source={'arrow-left'} size={24} />
             </TouchableOpacity>
             <Text variant="titleMedium" style={defaultStyles.heading}>
-              {i18n.t("(buyer).(order).checkout.checkout")}
+              {i18n.t('(buyer).(order).checkout.checkout')}
             </Text>
             <View />
           </Appbar.Header>
@@ -153,10 +158,9 @@ export default function Checkout() {
             contentContainerStyle={defaultStyles.scrollContainer}
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
-            keyboardShouldPersistTaps="handled"
-          >
+            keyboardShouldPersistTaps="handled">
             <View style={[defaultStyles.center, styles.notFoundContainer]}>
-              <Text>{i18n.t("(buyer).(order).checkout.couldNotLoad")}</Text>
+              <Text>{i18n.t('(buyer).(order).checkout.couldNotLoad')}</Text>
             </View>
           </ScrollView>
         </View>
@@ -168,19 +172,17 @@ export default function Checkout() {
     <>
       <KeyboardAvoidingView
         style={defaultStyles.container}
-        behavior={"padding"}
-        keyboardVerticalOffset={0}
-      >
+        behavior={'padding'}
+        keyboardVerticalOffset={0}>
         <View style={defaultStyles.flex}>
           <Appbar.Header dark={false} style={defaultStyles.appHeader}>
             <TouchableOpacity
               onPress={() => router.back()}
-              style={defaultStyles.backButtonContainer}
-            >
-              <Icon source={"arrow-left"} size={24} />
+              style={defaultStyles.backButtonContainer}>
+              <Icon source={'arrow-left'} size={24} />
             </TouchableOpacity>
             <Text variant="titleMedium" style={defaultStyles.heading}>
-              {i18n.t("(buyer).(order).checkout.checkout")}
+              {i18n.t('(buyer).(order).checkout.checkout')}
             </Text>
             <View />
           </Appbar.Header>
@@ -188,11 +190,10 @@ export default function Checkout() {
             contentContainerStyle={defaultStyles.scrollContainer}
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
-            keyboardShouldPersistTaps="handled"
-          >
+            keyboardShouldPersistTaps="handled">
             <View style={styles.orderContainer}>
               <Text variant="titleMedium">
-                {i18n.t("(buyer).(order).checkout.order")}
+                {i18n.t('(buyer).(order).checkout.order')}
               </Text>
               <View style={styles.orderDetailsContainer}>
                 <Image
@@ -204,41 +205,53 @@ export default function Checkout() {
                     {productData?.product?.name}
                   </Text>
                   <Text style={styles.price}>
-                    {productData?.product?.amount?.currencyIsoCode}{" "}
+                    {productData?.product?.amount?.currencyIsoCode}{' '}
                     {productData?.product?.amount?.value}
                     <Text style={styles.greyText}>
-                      {" "}
-                      {productData?.product?.unitType?.replace("per_", "/")}
+                      {' '}
+                      {productData?.product?.unitType?.replace('per_', '/')}
                     </Text>
                   </Text>
                   <View style={styles.buttonsContainer}>
                     <TouchableOpacity
-                      disabled={quantity === 1}
+                      disabled={parseInt(quantity) === 1}
                       onPress={() => {
-                        setQuantity((prev) => prev - 1);
+                        setQuantity(prev => (parseInt(prev) - 1).toString());
                       }}
                       style={[
                         styles.quantityButton,
-                        quantity === 1 && styles.inactiveButton,
-                      ]}
-                    >
+                        parseInt(quantity) === 1 && styles.inactiveButton,
+                      ]}>
                       <Text
                         variant="titleMedium"
                         style={[
                           styles.textCenter,
-                          quantity === 1 && styles.inactiveText,
-                        ]}
-                      >
+                          parseInt(quantity) === 1 && styles.inactiveText,
+                        ]}>
                         -
                       </Text>
                     </TouchableOpacity>
-                    <Text>{String(quantity).padStart(2, "0")}</Text>
+                    <TextInput
+                      style={styles.quantityInput}
+                      theme={{
+                        colors: {
+                          primary: Colors.primary[500],
+                          background: Colors.grey['fa'],
+                          error: Colors.error,
+                        },
+                        roundness: 10,
+                      }}
+                      contentStyle={styles.quantityInputContent}
+                      mode="outlined"
+                      value={quantity}
+                      onChangeText={text => setQuantity(text)}
+                      inputMode="numeric"
+                    />
                     <TouchableOpacity
                       onPress={() => {
-                        setQuantity((prev) => prev + 1);
+                        setQuantity(prev => (parseInt(prev) + 1).toString());
                       }}
-                      style={styles.quantityButton}
-                    >
+                      style={styles.quantityButton}>
                       <Text variant="titleMedium" style={styles.textCenter}>
                         +
                       </Text>
@@ -247,13 +260,13 @@ export default function Checkout() {
                 </View>
               </View>
               <Text variant="titleMedium">
-                {i18n.t("(buyer).(order).checkout.shippingAddress")}
+                {i18n.t('(buyer).(order).checkout.shippingAddress')}
               </Text>
               <View style={[styles.orderDetailsContainer, styles.flexRow]}>
                 <View style={styles.outterLocationIconContainer}>
                   <View style={styles.innerLocationIconContainer}>
                     <Icon
-                      source={"map-marker"}
+                      source={'map-marker'}
                       size={24}
                       color={Colors.light[10]}
                     />
@@ -269,73 +282,72 @@ export default function Checkout() {
                   </Text>
                 </View>
                 <TouchableOpacity
-                  onPress={() => router.push("/(buyer)/(order)")}
-                >
-                  <Icon source={"pencil-outline"} size={24} />
+                  onPress={() => router.push('/(buyer)/(order)')}>
+                  <Icon source={'pencil-outline'} size={24} />
                 </TouchableOpacity>
               </View>
               <View style={[styles.orderDetailsContainer, styles.flexColumn]}>
                 <View style={styles.rowItem}>
                   <Text style={styles.textSmall}>
-                    {i18n.t("(buyer).(order).checkout.amount")}
+                    {i18n.t('(buyer).(order).checkout.amount')}
                   </Text>
                   <Text style={styles.textAlignRight} variant="titleMedium">
-                    {productData?.product?.amount?.currencyIsoCode}{" "}
-                    {formatAmount(totalPrice?.toString() ?? "", {
+                    {productData?.product?.amount?.currencyIsoCode}{' '}
+                    {formatAmount(totalPrice?.toString() ?? '', {
                       decimalPlaces: 2,
                     })}
                   </Text>
                 </View>
                 <View style={styles.rowItem}>
                   <Text style={styles.textSmall}>
-                    {i18n.t("(buyer).(order).checkout.delivery")}
+                    {i18n.t('(buyer).(order).checkout.delivery')}
                   </Text>
                   <Text style={styles.textAlignRight} variant="titleMedium">
-                    {productData?.product?.amount?.currencyIsoCode}{" "}
-                    {formatAmount("0", {
+                    {productData?.product?.amount?.currencyIsoCode}{' '}
+                    {formatAmount('0', {
                       decimalPlaces: 2,
                     })}
                   </Text>
                 </View>
                 <View style={styles.rowItem}>
                   <Text style={styles.textSmall}>
-                    {i18n.t("(buyer).(order).checkout.transactionCharges")}
+                    {i18n.t('(buyer).(order).checkout.transactionCharges')}
                   </Text>
                   <Text style={styles.textAlignRight} variant="titleMedium">
-                    {productData?.product?.amount?.currencyIsoCode}{" "}
+                    {productData?.product?.amount?.currencyIsoCode}{' '}
                     {formatAmount(
-                      ((totalPrice ?? 0) * 0.03)?.toString() ?? "",
+                      ((totalPrice ?? 0) * 0.03)?.toString() ?? '',
                       {
                         decimalPlaces: 2,
-                      }
+                      },
                     )}
                   </Text>
                 </View>
                 <View style={styles.rowItem}>
                   <Text style={styles.textSmall}>
-                    {i18n.t("(buyer).(order).checkout.serviceCharges")}
+                    {i18n.t('(buyer).(order).checkout.serviceCharges')}
                   </Text>
                   <Text style={styles.textAlignRight} variant="titleMedium">
-                    {productData?.product?.amount?.currencyIsoCode}{" "}
+                    {productData?.product?.amount?.currencyIsoCode}{' '}
                     {formatAmount(
-                      ((totalPrice ?? 0) * 0.05)?.toString() ?? "",
+                      ((totalPrice ?? 0) * 0.05)?.toString() ?? '',
                       {
                         decimalPlaces: 2,
-                      }
+                      },
                     )}
                   </Text>
                 </View>
                 <View style={[styles.rowItem, styles.lastRowItem]}>
                   <Text style={styles.textSmall}>
-                    {i18n.t("(buyer).(order).checkout.total")}
+                    {i18n.t('(buyer).(order).checkout.total')}
                   </Text>
                   <Text style={styles.textAlignRight} variant="titleMedium">
-                    {productData?.product?.amount?.currencyIsoCode}{" "}
+                    {productData?.product?.amount?.currencyIsoCode}{' '}
                     {formatAmount(
-                      ((totalPrice ?? 0) * 1.08)?.toString() ?? "",
+                      ((totalPrice ?? 0) * 1.08)?.toString() ?? '',
                       {
                         decimalPlaces: 2,
-                      }
+                      },
                     )}
                   </Text>
                 </View>
@@ -349,16 +361,15 @@ export default function Checkout() {
           style={[
             defaultStyles.button,
             defaultStyles.primaryButton,
-            loading && defaultStyles.greyButton,
+            (loading || !quantity) && defaultStyles.greyButton,
           ]}
           loading={loading}
-          disabled={loading}
-          onPress={handleCreateOrder}
-        >
+          disabled={loading || !quantity}
+          onPress={handleCreateOrder}>
           <Text variant="titleMedium" style={defaultStyles?.buttonText}>
-            {i18n.t("(buyer).(order).checkout.confirmPayment")}{" "}
-            {productData?.product?.amount?.currencyIsoCode}{" "}
-            {formatAmount(((totalPrice ?? 0) * 1.08)?.toString() ?? "", {
+            {i18n.t('(buyer).(order).checkout.confirmPayment')}{' '}
+            {productData?.product?.amount?.currencyIsoCode}{' '}
+            {formatAmount(((totalPrice ?? 0) * 1.08)?.toString() ?? '', {
               decimalPlaces: 2,
             })}
           </Text>
@@ -368,8 +379,7 @@ export default function Checkout() {
         visible={!!error}
         onDismiss={() => {}}
         duration={3000}
-        style={defaultStyles.snackbar}
-      >
+        style={defaultStyles.snackbar}>
         <Text style={defaultStyles.errorText}>{error}</Text>
       </Snackbar>
     </>

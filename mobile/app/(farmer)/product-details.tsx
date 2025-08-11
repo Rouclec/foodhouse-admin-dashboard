@@ -269,12 +269,16 @@ export default function ProductDetails() {
           onDismiss={() => setDeleteModalVisible(false)}
           style={defaultStyles.deleteContainer}>
           <Dialog.Content>
-            <Text variant="titleMedium" style={defaultStyles.errorText}>
+            <Text
+              variant="titleMedium"
+              style={[defaultStyles.errorText, defaultStyles.textCenter]}>
               {i18n.t('(buyer).product-details.confirmation')}
             </Text>
           </Dialog.Content>
           <Dialog.Content>
-            <Text>{i18n.t('(buyer).product-details.confirmation2')}</Text>
+            <Text style={defaultStyles.textJustify}>
+              {i18n.t('(buyer).product-details.confirmation2')}
+            </Text>
           </Dialog.Content>
           <Dialog.Actions style={buyerProductsStyles.bottomButtonContainer}>
             <Button

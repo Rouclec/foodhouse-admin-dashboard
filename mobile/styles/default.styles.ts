@@ -1,7 +1,7 @@
-import { Colors } from "@/constants";
-import { Dimensions, StyleSheet } from "react-native";
+import { Colors } from '@/constants';
+import { Dimensions, StyleSheet } from 'react-native';
 
-const { width } = Dimensions.get("window");
+const { width } = Dimensions.get('window');
 
 export const defaultStyles = StyleSheet.create({
   container: {
@@ -9,17 +9,17 @@ export const defaultStyles = StyleSheet.create({
     gap: 32,
     paddingHorizontal: 24,
     paddingTop: 16,
-    backgroundColor: Colors.light["bg"],
+    backgroundColor: Colors.light['bg'],
   },
   bgWhite: {
-    backgroundColor: Colors.light["bg"],
+    backgroundColor: Colors.light['bg'],
   },
   bgLight10: {
     backgroundColor: Colors.light[10],
   },
   center: {
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   listFooterComponent: {
     paddingVertical: 12,
@@ -27,9 +27,9 @@ export const defaultStyles = StyleSheet.create({
   listFooterIndicator: { transform: [{ scale: 1.4 }], marginTop: 4 },
   noItemsContainer: {
     paddingBottom: 26,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 10,
     paddingLeft: 22,
     paddingVertical: 12,
@@ -39,7 +39,7 @@ export const defaultStyles = StyleSheet.create({
     color: Colors.dark[10],
     fontSize: 24,
     lineHeight: 36,
-    fontWeight: "400",
+    fontWeight: '400',
   },
   paddingVertical: {
     paddingTop: 24,
@@ -47,28 +47,28 @@ export const defaultStyles = StyleSheet.create({
   },
   heading: {
     marginLeft: -56,
-    textAlign: "center",
+    textAlign: 'center',
     flexShrink: 1,
   },
   paddingBottom: {
     paddingBottom: 64,
   },
   backButtonContainer: {
-    backgroundColor: "transparent",
+    backgroundColor: 'transparent',
     width: 64,
     height: 64,
-    alignItems: "flex-start",
-    justifyContent: "center",
+    alignItems: 'flex-start',
+    justifyContent: 'center',
   },
   snackbar: {
     borderWidth: 1,
     borderColor: Colors.error,
-    backgroundColor: Colors.light["0"],
+    backgroundColor: Colors.light['0'],
   },
   snackbarSuccess: {
     borderWidth: 1,
     borderColor: Colors.primary[500],
-    backgroundColor: Colors.light["0"],
+    backgroundColor: Colors.light['0'],
   },
   marginBottom: {
     marginBottom: 64,
@@ -88,7 +88,7 @@ export const defaultStyles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     gap: 16,
-    justifyContent: "space-evenly",
+    justifyContent: 'space-evenly',
     flexGrow: 1,
     flexShrink: 1,
   },
@@ -104,12 +104,12 @@ export const defaultStyles = StyleSheet.create({
   },
   bottomButtonContainer: {
     // position: "absolute",
-    alignSelf: "center",
+    alignSelf: 'center',
     bottom: 0,
-    backgroundColor: Colors.light["bg"],
+    backgroundColor: Colors.light['bg'],
     // backgroundColor: "transparent",
     // height: 96,
-    height: "auto",
+    height: 'auto',
     width: width,
     paddingBottom: 32,
     paddingHorizontal: 24,
@@ -119,17 +119,17 @@ export const defaultStyles = StyleSheet.create({
   bottomContainerWithContent: {
     paddingTop: 12,
     // position: 'absolute',
-    alignSelf: "center",
+    alignSelf: 'center',
     bottom: 0,
     paddingBottom: 24,
-    backgroundColor: Colors.light["bg"],
+    backgroundColor: Colors.light['bg'],
     width: width,
     paddingHorizontal: 16,
     rowGap: 12,
   },
   button: {
     // flexWrap: "wrap",
-    justifyContent: "center",
+    justifyContent: 'center',
     borderRadius: 100,
     minHeight: 48,
     minWidth: 124,
@@ -138,7 +138,7 @@ export const defaultStyles = StyleSheet.create({
     backgroundColor: Colors.primary[500],
   },
   greyButton: {
-    backgroundColor: Colors.grey["bg"],
+    backgroundColor: Colors.grey['bg'],
   },
   secondaryButton: {
     borderWidth: 1,
@@ -148,25 +148,25 @@ export const defaultStyles = StyleSheet.create({
     color: Colors.primary[500],
   },
   gentiumText: {
-    fontFamily: "gentium",
+    fontFamily: 'gentium',
   },
   font14: {
     fontSize: 14,
   },
   buttonText: {
     // flexShrink: 1,
-    flexWrap: "wrap",
-    fontWeight: "500",
-    color: Colors.light["10"],
+    flexWrap: 'wrap',
+    fontWeight: '500',
+    color: Colors.light['10'],
     fontSize: 16,
     lineHeight: 24,
-    textAlign: "center",
+    textAlign: 'center',
   },
   appHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: Colors.light["bg"],
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.light['bg'],
+    justifyContent: 'space-between',
     columnGap: 24,
   },
   headerTextContainer: {
@@ -178,13 +178,13 @@ export const defaultStyles = StyleSheet.create({
     marginRight: 32,
   },
   headerText: {
-    textAlign: "center",
+    textAlign: 'center',
     fontSize: 20,
-    fontWeight: "500",
-    color: Colors.primary["500"],
+    fontWeight: '500',
+    color: Colors.primary['500'],
   },
   subheaderText: {
-    textAlign: "center",
+    textAlign: 'center',
   },
   input: {
     flexGrow: 1,
@@ -201,38 +201,38 @@ export const defaultStyles = StyleSheet.create({
   },
   outlineStyle: {
     borderWidth: 0,
-    borderColor: "transparent",
+    borderColor: 'transparent',
   },
   linkText: {
     color: Colors.primary[300],
   },
   relativeContainer: {
-    position: "relative",
+    position: 'relative',
   },
   dialogContainer: {
-    backgroundColor: Colors.light["10"],
+    backgroundColor: Colors.light['10'],
     borderRadius: 8,
-    position: "relative",
+    position: 'relative',
     rowGap: 0,
     paddingVertical: 4,
     width: width * 0.94,
-    alignSelf: "center",
+    alignSelf: 'center',
     marginHorizontal: 0,
   },
   dialogSuccessContainer: {
     backgroundColor: Colors.light[10],
-    alignItems: "center",
+    alignItems: 'center',
     padding: 32,
     borderRadius: 48,
   },
   deleteContainer: {
     backgroundColor: Colors.light[10],
-    alignItems: "center",
-    textAlign: "center",
+    alignItems: 'center',
+    textAlign: 'center',
     padding: 10,
     borderRadius: 48,
     borderWidth: 2,
-    borderColor: Colors.error
+    borderColor: Colors.error,
   },
   paddingHorizontal: {
     marginTop: 16,
@@ -244,22 +244,22 @@ export const defaultStyles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   dialogSubtitleContainer: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
     columnGap: 4,
     paddingHorizontal: 12,
     paddingBottom: 16,
-    overflowX: "hidden",
+    overflowX: 'hidden',
     flexShrink: 1,
   },
   dialogFirstContent: {
-    alignSelf: "flex-end",
+    alignSelf: 'flex-end',
     paddingVertical: 0,
     marginTop: 4,
     marginRight: 4,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingTop: 0,
     paddingBottom: 2,
     paddingLeft: 0,
@@ -268,12 +268,12 @@ export const defaultStyles = StyleSheet.create({
   dialogTitle: {
     fontSize: 16,
     color: Colors.primary[500],
-    textAlign: "center",
-    fontFamily: "gentium",
+    textAlign: 'center',
+    fontFamily: 'gentium',
     marginHorizontal: 24,
   },
   dialogSubtitle: {
-    textAlign: "center",
+    textAlign: 'center',
   },
   marginHorizontal24: {
     marginHorizontal: 24,
@@ -282,13 +282,13 @@ export const defaultStyles = StyleSheet.create({
     marginVertical: 24,
   },
   dialogActionContainer: {
-    flexDirection: "row",
+    flexDirection: 'row',
     columnGap: 24,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 16,
     paddingBottom: 0,
-    overflowX: "hidden",
+    overflowX: 'hidden',
   },
   dialogContentContainer: { paddingTop: 0, paddingBottom: 2 },
   successImage: { width: 180, height: 180 },
@@ -299,15 +299,18 @@ export const defaultStyles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 22,
     letterSpacing: 0.2,
-    textAlign: "center",
+    textAlign: 'center',
   },
   textCenter: {
-    textAlign: "center",
+    textAlign: 'center',
+  },
+  textJustify: {
+    textAlign: 'justify',
   },
   innerButtonContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center", // center contents
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center', // center contents
     columnGap: 8,
   },
   text14: {
@@ -320,10 +323,10 @@ export const defaultStyles = StyleSheet.create({
     backgroundColor: Colors.light[10],
     padding: 20,
     borderRadius: 16,
-    flexDirection: "row",
+    flexDirection: 'row',
     columnGap: 16,
-    alignItems: "center",
-    shadowColor: "#000",
+    alignItems: 'center',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -339,8 +342,8 @@ export const defaultStyles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     borderColor: Colors.blue,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   checkInnercontainer: {
     width: 12,

@@ -150,7 +150,7 @@ export default function BuyerProducts() {
                       </Text>
                     </View>
                   </View>
-                  <TouchableOpacity style={styles.iconContainer}>
+                  {/* <TouchableOpacity style={styles.iconContainer}>
                     <View style={defaultStyles.relativeContainer}>
                       <Icon
                         source={'bell-outline'}
@@ -159,7 +159,7 @@ export default function BuyerProducts() {
                       />
                       <View style={styles.noticiatonIndicator} />
                     </View>
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
                 </View>
                 <TextInput
                   placeholder={i18n.t(
