@@ -337,6 +337,7 @@ func (i *Impl) UpdateProduct(ctx context.Context, req *productsgrpc.UpdateProduc
 	}
 
 	i.logger.Debug().Msgf("update product params: %v", arg)
+	i.logger.Debug().Msgf("product id: %v", arg.ID)
 	err = querier.UpdateProduct(ctx, arg)
 
 	if err != nil {

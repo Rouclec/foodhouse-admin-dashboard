@@ -457,20 +457,19 @@ func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) 
 
 const updateProduct = `-- name: UpdateProduct :exec
 UPDATE products
-SET category_id = $3,
-    name = $4,
-    unit_type = $5,
-    value = $6,
-    currency_iso_code = $7,
-    description = $8,
-    image = $9,
-    whole_sale = $10,
+SET category_id = $2,
+    name = $3,
+    unit_type = $4,
+    value = $5,
+    currency_iso_code = $6,
+    description = $7,
+    image = $8,
+    whole_sale = $9,
     updated_at = now()
-WHERE id = $2 AND created_by = $1
+WHERE id = $1
 `
 
 type UpdateProductParams struct {
-	CreatedBy       *string `json:"created_by"`
 	ID              string  `json:"id"`
 	CategoryID      *string `json:"category_id"`
 	Name            string  `json:"name"`
@@ -484,7 +483,6 @@ type UpdateProductParams struct {
 
 func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) error {
 	_, err := q.db.Exec(ctx, updateProduct,
-		arg.CreatedBy,
 		arg.ID,
 		arg.CategoryID,
 		arg.Name,
