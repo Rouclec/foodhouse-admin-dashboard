@@ -174,7 +174,6 @@
       "currency": "devise",
       "save": "Enregistrer",
       "message": "Produit mis à jour avec succès"
-
     },
     "(index)": {
       "_layout": {
@@ -279,6 +278,15 @@
       "earnings": "Revenus",
       "completedOrders": "Commandes terminées",
       "noOrdersFound": "Aucune commande trouvée"
+    },
+    "update-product": {
+      "unknownError": "Une erreur inconnue est survenue",
+      "errorLoadingProduct": "Erreur lors du chargement du produit",
+      "noProductIdFound": "Aucun identifiant de produit trouvé"
+    },
+    "product-details": {
+      "productDeletedSuccessfully": "Produit supprimé avec succès",
+      "failedToDeleteProduct": "Échec de la suppression du produit"
     }
   },
   "(buyer)": {

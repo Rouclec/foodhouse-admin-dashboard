@@ -31,16 +31,16 @@ RETURNING *;
 
 -- name: UpdateProduct :exec
 UPDATE products
-SET category_id = $3,
-    name = $4,
-    unit_type = $5,
-    value = $6,
-    currency_iso_code = $7,
-    description = $8,
-    image = $9,
-    whole_sale = $10,
+SET category_id = $2,
+    name = $3,
+    unit_type = $4,
+    value = $5,
+    currency_iso_code = $6,
+    description = $7,
+    image = $8,
+    whole_sale = $9,
     updated_at = now()
-WHERE id = $2 AND created_by = $1;
+WHERE id = $1;
 
 -- name: DeleteProduct :exec
 UPDATE products SET deleted_at = now() WHERE id = $1;

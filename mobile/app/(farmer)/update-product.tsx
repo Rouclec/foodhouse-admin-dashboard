@@ -12,10 +12,8 @@ import {
 import {
   Appbar,
   Button,
-  Dialog,
   HelperText,
   Icon,
-  Portal,
   Snackbar,
   Text,
   TextInput,
@@ -63,8 +61,6 @@ export default function UpdateProduct() {
     price: '',
     description: '',
   });
-
-  const [editingField, setEditingField] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -214,12 +210,12 @@ export default function UpdateProduct() {
   const updateMutation = useMutation({
     ...productsUpdateProductMutation(),
     onSuccess: async () => {
-    setSuccessMessage(i18n.t('(farmer).create-product.message'));
-    await delay(3000);
-    setSuccessMessage(undefined);
-    refetch();
-    router.back();
-  },
+      setSuccessMessage(i18n.t('(farmer).create-product.message'));
+      await delay(3000);
+      setSuccessMessage(undefined);
+      refetch();
+      router.back();
+    },
     onError: async error => {
       setError(
         error?.response?.data?.message ??
@@ -252,14 +248,6 @@ export default function UpdateProduct() {
     enabled: !!productCategory,
   });
 
-  const handleFieldPress = (fieldName: string) => {
-    setEditingField(fieldName);
-  };
-
-  const handleFieldBlur = () => {
-    setEditingField(null);
-  };
-
   return (
     <>
       <KeyboardAvoidingView
@@ -286,245 +274,144 @@ export default function UpdateProduct() {
             <View
               style={[defaultStyles.inputsContainer, styles.inputsContainer]}>
               {/* Product Category */}
-              {editingField === 'productCategory' ? (
-                <Dropdown
-                  label={i18n.t('(farmer).create-product.productCategory')}
-                  value={productCategory}
-                  onSelect={value => {
-                    setProductCategory(value);
-                    setEditingField(null);
-                  }}
-                  data={(categories?.categories ?? []).map(category => ({
-                    label: category.name ?? '',
-                    value: category.id ?? '',
-                  }))}
-                  loading={isCategoriesLoading}
-                />
-              ) : (
-                <TouchableOpacity
-                  onPress={() => {
-                    setEditingField('productCategory');
-                    if (!categories) {
-                      refetch();
-                    }
-                  }}
-                  style={styles.inputContainer}
-                  activeOpacity={0.7}>
-                  <Text style={styles.inputLabel}>
-                    {i18n.t('(farmer).create-product.productCategory')}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.inputValue,
-                      editingField === 'productCategory'
-                        ? styles.editableField
-                        : null,
-                    ]}>
-                    {categories?.categories?.find(c => c.id === productCategory)
-                      ?.name || 'Select category'}
-                  </Text>
-                </TouchableOpacity>
-              )}
+              <Dropdown
+                label={i18n.t('(farmer).create-product.productCategory')}
+                value={productCategory}
+                onSelect={value => {
+                  setProductCategory(value);
+                }}
+                data={(categories?.categories ?? []).map(category => ({
+                  label: category.name ?? '',
+                  value: category.id ?? '',
+                }))}
+                defaultSelected={{
+                  label:
+                    categories?.categories?.find(
+                      cat => cat.id === productCategory,
+                    )?.name ?? '',
+                  value:
+                    categories?.categories?.find(
+                      cat => cat.id === productCategory,
+                    )?.id ?? '',
+                }}
+                loading={isCategoriesLoading}
+              />
 
               {/* Product Name */}
-              {editingField === 'productName' ? (
-                <Dropdown
-                  label={i18n.t('(farmer).create-product.productName')}
-                  value={productName}
-                  onSelect={value => {
-                    setProductName(value);
-                    setEditingField(null);
-                  }}
-                  data={(productNames?.productNames ?? []).map(product => ({
-                    label: product.name ?? '',
-                    value: product.name ?? '',
-                  }))}
-                  loading={isProductNamesLoading}
-                />
-              ) : (
-                <TouchableOpacity
-                  onPress={() => {
-                    setEditingField('productName');
-                    if (!productNames && productCategory) {
-                      refetch();
-                    }
-                  }}
-                  style={styles.inputContainer}
-                  activeOpacity={0.7}>
-                  <Text style={styles.inputLabel}>
-                    {i18n.t('(farmer).create-product.productName')}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.inputValue,
-                      editingField === 'productName'
-                        ? styles.editableField
-                        : null,
-                    ]}>
-                    {productName || 'Select product name'}
-                  </Text>
-                </TouchableOpacity>
-              )}
+              <Dropdown
+                label={i18n.t('(farmer).create-product.productName')}
+                value={productName}
+                onSelect={value => {
+                  setProductName(value);
+                }}
+                data={(productNames?.productNames ?? []).map(product => ({
+                  label: product.name ?? '',
+                  value: product.name ?? '',
+                }))}
+                defaultSelected={{
+                  label:
+                    productNames?.productNames?.find(
+                      pn => pn.name === productName,
+                    )?.name ?? '',
+                  value:
+                    productNames?.productNames?.find(
+                      pn => pn.name === productName,
+                    )?.name ?? '',
+                }}
+                loading={isProductNamesLoading}
+              />
 
               {/* Price Type */}
-              {editingField === 'priceType' ? (
-                <Dropdown
-                  label={i18n.t('(farmer).create-product.priceType')}
-                  value={priceType}
-                  onSelect={value => {
-                    setPriceType(value);
-                    setEditingField(null);
-                  }}
-                  data={(priceTypes?.priceTypes ?? []).map(type => ({
-                    label: `Per ${type.slug?.replace('per_', '') ?? ''}`,
-                    value: type.slug ?? '',
-                  }))}
-                  loading={isPriceTypesLoading}
-                />
-              ) : (
-                <TouchableOpacity
-                  onPress={() => handleFieldPress('priceType')}
-                  style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>
-                    {i18n.t('(farmer).create-product.priceType')}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.inputValue,
-                      editingField === 'priceType'
-                        ? styles.editableField
-                        : null,
-                    ]}>
-                    {priceTypes?.priceTypes
-                      ?.find(pt => pt.slug === priceType)
-                      ?.slug?.replace('per_', 'Per ') || 'Select price type'}
-                  </Text>
-                </TouchableOpacity>
-              )}
+              <Dropdown
+                label={i18n.t('(farmer).create-product.priceType')}
+                value={priceType}
+                onSelect={value => {
+                  setPriceType(value);
+                }}
+                data={(priceTypes?.priceTypes ?? []).map(type => ({
+                  label: `Per ${type.slug?.replace('per_', '') ?? ''}`,
+                  value: type.slug ?? '',
+                }))}
+                defaultSelected={{
+                  label: `Per ${
+                    priceTypes?.priceTypes
+                      ?.find(type => type.slug === priceType)
+                      ?.slug?.replace('per_', '') ?? ''
+                  }`,
+                  value:
+                    priceTypes?.priceTypes?.find(
+                      type => type.slug === priceType,
+                    )?.slug ?? '',
+                }}
+                loading={isPriceTypesLoading}
+              />
 
               {/* Currency */}
-              {editingField === 'currency' ? (
-                <CurrencySelect
-                  setCountry={country => {
-                    setCurrencyCountry(country);
-                    setEditingField(null);
-                  }}
-                  country={currencyCountry}
-                />
-              ) : (
-                <TouchableOpacity
-                  onPress={() => handleFieldPress('currency')}
-                  style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>
-                    {i18n.t('(farmer).create-product.currency')}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.inputValue,
-                      editingField === 'currency' ? styles.editableField : null,
-                    ]}>
-                    {currencyCountry.currency_code ?? 'N/A'}
-                  </Text>
-                </TouchableOpacity>
-              )}
+              <CurrencySelect
+                setCountry={country => {
+                  setCurrencyCountry(country);
+                }}
+                country={currencyCountry}
+              />
 
               {/* Price */}
-              {editingField === 'price' ? (
-                <View>
-                  <TextInput
-                    label={i18n.t('(farmer).create-product.price')}
-                    mode="outlined"
-                    keyboardType="numeric"
-                    value={price}
-                    onChangeText={text => setPrice(text)}
-                    style={defaultStyles.input}
-                    theme={{
-                      colors: {
-                        primary: Colors.primary[500],
-                        background: Colors.grey['fa'],
-                        error: Colors.error,
-                      },
-                      roundness: 10,
-                    }}
-                    outlineColor={Colors.grey['bg']}
-                    error={!!validationError.price}
-                    onFocus={() => {
-                      setValidationError(prev => ({
-                        ...prev,
-                        price: '',
-                      }));
-                    }}
-                    onBlur={handleFieldBlur}
-                  />
-                </View>
-              ) : (
-                <TouchableOpacity
-                  onPress={() => handleFieldPress('price')}
-                  style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>
-                    {i18n.t('(farmer).create-product.price')}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.inputValue,
-                      editingField === 'price' ? styles.editableField : null,
-                    ]}>
-                    {price ? ` ${price}` : 'N/A'}
-                  </Text>
-                </TouchableOpacity>
-              )}
+              <View>
+                <TextInput
+                  label={i18n.t('(farmer).create-product.price')}
+                  mode="outlined"
+                  keyboardType="numeric"
+                  value={price}
+                  onChangeText={text => setPrice(text)}
+                  style={defaultStyles.input}
+                  theme={{
+                    colors: {
+                      primary: Colors.primary[500],
+                      background: Colors.grey['fa'],
+                      error: Colors.error,
+                    },
+                    roundness: 10,
+                  }}
+                  outlineColor={Colors.grey['bg']}
+                  error={!!validationError.price}
+                  onFocus={() => {
+                    setValidationError(prev => ({
+                      ...prev,
+                      price: '',
+                    }));
+                  }}
+                />
+              </View>
 
               {/* Description */}
-              {editingField === 'description' ? (
-                <View>
-                  <TextInput
-                    label={i18n.t('(farmer).create-product.description')}
-                    mode="outlined"
-                    multiline
-                    value={description}
-                    onChangeText={text => setDescription(text)}
-                    style={[defaultStyles.input, styles.textArea]}
-                    theme={{
-                      colors: {
-                        primary: Colors.primary[500],
-                        background: Colors.grey['fa'],
-                        error: Colors.error,
-                      },
-                      roundness: 10,
-                    }}
-                    outlineColor={Colors.grey['bg']}
-                    error={!!validationError.description}
-                    onFocus={() => {
-                      setValidationError(prev => ({
-                        ...prev,
-                        description: '',
-                      }));
-                    }}
-                    onBlur={handleFieldBlur}
-                  />
-                  <HelperText type="error" style={defaultStyles.errorText}>
-                    {validationError.description}
-                  </HelperText>
-                </View>
-              ) : (
-                <TouchableOpacity
-                  onPress={() => handleFieldPress('description')}
-                  style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>
-                    {i18n.t('(farmer).create-product.description')}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.inputValue,
-                      styles.textAreaValue,
-                      editingField === 'description'
-                        ? styles.editableField
-                        : null,
-                    ]}>
-                    {description ?? 'N/A'}
-                  </Text>
-                </TouchableOpacity>
-              )}
+              <View>
+                <TextInput
+                  label={i18n.t('(farmer).create-product.description')}
+                  mode="outlined"
+                  multiline
+                  value={description}
+                  onChangeText={text => setDescription(text)}
+                  style={[defaultStyles.input, styles.textArea]}
+                  theme={{
+                    colors: {
+                      primary: Colors.primary[500],
+                      background: Colors.grey['fa'],
+                      error: Colors.error,
+                    },
+                    roundness: 10,
+                  }}
+                  outlineColor={Colors.grey['bg']}
+                  error={!!validationError.description}
+                  onFocus={() => {
+                    setValidationError(prev => ({
+                      ...prev,
+                      description: '',
+                    }));
+                  }}
+                />
+                <HelperText type="error" style={defaultStyles.errorText}>
+                  {validationError.description}
+                </HelperText>
+              </View>
 
               {/* Image */}
               <View style={styles.addImageContainer}>

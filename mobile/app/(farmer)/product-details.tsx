@@ -70,7 +70,9 @@ export default function ProductDetails() {
       },
     }),
     onSuccess: () => {
-      setMessageModalText('Product deleted successfully');
+      setMessageModalText(
+        i18n.t('(farmer).product-details.productDeletedSuccessfully'),
+      );
       setMessageModalVisible(true);
       setTimeout(() => {
         setMessageModalVisible(false);
@@ -79,7 +81,8 @@ export default function ProductDetails() {
     },
     onError: error => {
       setMessageModalText(
-        error.response?.data?.message || 'Failed to delete product',
+        error.response?.data?.message ||
+          i18n.t('(farmer).product-details.failedToDeleteProduct'),
       );
       setMessageModalVisible(true);
     },
@@ -223,7 +226,12 @@ export default function ProductDetails() {
           </View>
         </ScrollView>
         <View style={defaultStyles.bottomButtonContainer}>
-          <View style={createProductStyles.flexButtonContainer}>
+          <View
+            style={[
+              createProductStyles.flexButtonContainer,
+              createProductStyles.justifyBetween,
+              createProductStyles.paddingHorizontal0,
+            ]}>
             <Button
               mode="contained"
               textColor={Colors.light['0']}

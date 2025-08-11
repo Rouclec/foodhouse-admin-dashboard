@@ -274,6 +274,15 @@
       "earnings": "Mapato",
       "completedOrders": "Maagizo yaliyokamilika",
       "noOrdersFound": "Hakuna maagizo yaliyopatikana"
+    },
+    "update-product": {
+      "unknownError": "Hitilafu isiyojulikana imetokea",
+      "errorLoadingProduct": "Hitilafu katika kupakia bidhaa",
+      "noProductIdFound": "Hakuna kitambulisho cha bidhaa kilichopatikana"
+    },
+    "product-details": {
+      "productDeletedSuccessfully": "Bidhaa imefutwa kwa mafanikio",
+      "failedToDeleteProduct": "Imeshindikana kufuta bidhaa"
     }
   },
   "(buyer)": {

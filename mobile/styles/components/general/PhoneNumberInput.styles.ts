@@ -138,7 +138,7 @@ export const phoneNumberInputStyles = StyleSheet.create({
   flexSmallContainer: {
     flexDirection: "row",
     columnGap: 16,
-    width: '100%',
+    // width: '100%',
     paddingHorizontal: 16,
   },
 });

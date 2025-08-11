@@ -279,6 +279,15 @@
       "earnings": "Earnings",
       "completedOrders": "Completed Orders",
       "noOrdersFound": "No orders found"
+    },
+    "update-product": {
+      "unknownError":"An unknown error occured",
+      "errorLoadingProduct": "Error loading product",
+      "noProductIdFound": "No product Id found"
+    },
+    "product-details": {
+      "productDeletedSuccessfully": "Product deleted successfully",
+      "failedToDeleteProduct": "Failed to delete product"
     }
   },
   "(buyer)": {
