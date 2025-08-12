@@ -412,6 +412,45 @@
         ]
       }
     },
+    "/v1/oauth/{factor.id}": {
+      "post": {
+        "operationId": "Users_OAuth",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcAuthenticateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "factor.id",
+            "description": "for OTPs this will be a request_id, for email_password this\nwill be the email address",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UsersOAuthBody"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
     "/v1/public/revoke-refresh-token": {
       "post": {
         "operationId": "Users_RevokeRefreshToken",
@@ -1358,6 +1397,29 @@
         }
       }
     },
+    "UsersOAuthBody": {
+      "type": "object",
+      "properties": {
+        "factor": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "$ref": "#/definitions/usersgrpcFactorType"
+            },
+            "secretValue": {
+              "type": "string",
+              "title": "Value of the factor (e.g., password or OTP)"
+            }
+          }
+        },
+        "user": {
+          "$ref": "#/definitions/usersgrpcUser"
+        },
+        "userType": {
+          "$ref": "#/definitions/usersgrpcUserType"
+        }
+      }
+    },
     "UsersReactivateUserBody": {
       "type": "object"
     },
@@ -1617,7 +1679,9 @@
         "FACTOR_TYPE_EMAIL_PASSWORD",
         "FACTOR_TYPE_SMS_OTP",
         "FACTOR_TYPE_EMAIL_OTP",
-        "FACTOR_TYPE_EMAIL_PHONE_PASSWORD"
+        "FACTOR_TYPE_EMAIL_PHONE_PASSWORD",
+        "FACTOR_TYPE_GOOGLE",
+        "FACTOR_TYPE_FACEBOOK"
       ],
       "default": "FACTOR_TYPE_UNSPECIFIED"
     },

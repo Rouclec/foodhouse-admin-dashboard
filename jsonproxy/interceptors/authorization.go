@@ -8,6 +8,7 @@ import (
 
 var (
 	PublicEndpointPrefixRegex = regexp.MustCompile(`^/v1/public/`)
+	OAuthEndpointPrefixRegex  = regexp.MustCompile(`^/v1/oauth/`)
 	AdminEndpointPrefixRegex  = regexp.MustCompile(`^/v1/admin/`)
 )
 
@@ -25,48 +26,53 @@ var (
 func NewAuthorizationInterceptor() HTTPInterceptor {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if isPublicEndpoint(r.URL.Path) {
-				next.ServeHTTP(w, r)
+			if allowed, status, msg := isRequestAllowed(r); !allowed {
+				http.Error(w, msg, status)
 				return
 			}
-
-			ctx := r.Context()
-			userID, _ := ctx.Value(ContextKeyUserID).(string)
-			role, _ := ctx.Value(ContextKeyRole).(string)
-			status, _ := ctx.Value(ContextKeyStatus).(string)
-
-			if !isUserActive(status) {
-				http.Error(w, "User is inactive", http.StatusUnauthorized)
-				return
-			}
-
-			if isAdmin(role) {
-				next.ServeHTTP(w, r)
-				return
-			}
-
-			if isAdminEndpoint(r.URL.Path) {
-				http.Error(w, "Unauthorized", http.StatusForbidden)
-				return
-			}
-
-			if isAgent(role) {
-				next.ServeHTTP(w, r)
-				return
-			}
-
-			if !isPathValidAndAuthorized(r.URL.Path, userID) {
-				http.Error(w, "Unauthorized", http.StatusForbidden)
-				return
-			}
-
 			next.ServeHTTP(w, r)
 		})
 	}
 }
 
+func isRequestAllowed(r *http.Request) (bool, int, string) {
+	ctx := r.Context()
+
+	userID, _ := ctx.Value(ContextKeyUserID).(string)
+	role, _ := ctx.Value(ContextKeyRole).(string)
+	status, _ := ctx.Value(ContextKeyStatus).(string)
+
+	if isPublicEndpoint(r.URL.Path) {
+		return true, 0, ""
+	}
+	if isOAuthEndpoint(r.URL.Path) {
+		return true, 0, ""
+	}
+	if !isUserActive(status) {
+		return false, http.StatusUnauthorized, "User is inactive"
+	}
+	if isAdmin(role) {
+		return true, 0, ""
+	}
+	if isAdminEndpoint(r.URL.Path) {
+		return false, http.StatusForbidden, "Unauthorized"
+	}
+	if isAgent(role) {
+		return true, 0, ""
+	}
+	if !isPathValidAndAuthorized(r.URL.Path, userID) {
+		return false, http.StatusForbidden, "Unauthorized"
+	}
+
+	return true, 0, ""
+}
+
 func isPublicEndpoint(path string) bool {
 	return PublicEndpointPrefixRegex.MatchString(path)
+}
+
+func isOAuthEndpoint(path string) bool {
+	return OAuthEndpointPrefixRegex.MatchString(path)
 }
 
 func isUserActive(status string) bool {

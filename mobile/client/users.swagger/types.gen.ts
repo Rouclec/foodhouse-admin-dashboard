@@ -109,7 +109,7 @@ export type usersgrpcDeleteUserPaymentMethodResponse = {
 
 export type usersgrpcDeleteUserSubscriptionResponse = unknown;
 
-export type usersgrpcFactorType = 'FACTOR_TYPE_UNSPECIFIED' | 'FACTOR_TYPE_EMAIL_PASSWORD' | 'FACTOR_TYPE_SMS_OTP' | 'FACTOR_TYPE_EMAIL_OTP' | 'FACTOR_TYPE_EMAIL_PHONE_PASSWORD';
+export type usersgrpcFactorType = 'FACTOR_TYPE_UNSPECIFIED' | 'FACTOR_TYPE_EMAIL_PASSWORD' | 'FACTOR_TYPE_SMS_OTP' | 'FACTOR_TYPE_EMAIL_OTP' | 'FACTOR_TYPE_EMAIL_PHONE_PASSWORD' | 'FACTOR_TYPE_GOOGLE' | 'FACTOR_TYPE_FACEBOOK';
 
 export type usersgrpcFarmerWithRating = {
     user?: usersgrpcUser;
@@ -338,6 +338,15 @@ export type usersgrpcVerifyOtpResponse = {
     valid?: boolean;
 };
 
+export type UsersOAuthBody = {
+    factor?: {
+        type?: usersgrpcFactorType;
+        secretValue?: string;
+    };
+    user?: usersgrpcUser;
+    userType?: usersgrpcUserType;
+};
+
 export type UsersReactivateUserBody = unknown;
 
 export type UsersReviewFarmerBody = {
@@ -481,6 +490,21 @@ export type UsersSuspendUserData = {
 export type UsersSuspendUserResponse = (usersgrpcSuspendUserResponse);
 
 export type UsersSuspendUserError = (rpcStatus);
+
+export type UsersOAuthData = {
+    body: UsersOAuthBody;
+    path: {
+        /**
+         * for OTPs this will be a request_id, for email_password this
+         * will be the email address
+         */
+        'factor.id': string;
+    };
+};
+
+export type UsersOAuthResponse = (usersgrpcAuthenticateResponse);
+
+export type UsersOAuthError = (rpcStatus);
 
 export type UsersRevokeRefreshTokenData = {
     body: usersgrpcRevokeRefreshTokenRequest;

@@ -33,7 +33,6 @@ const ProfilePage = () => {
   const { user, setUser } = useContext(Context) as ContextType;
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  //const [email, setEmail] = useState(user?.email);
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [profileImage, setProfileImage] =

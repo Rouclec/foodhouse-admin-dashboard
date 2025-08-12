@@ -1729,3 +1729,138 @@ func (i *Impl) GrantAgent(ctx context.Context,
 		Message: "New agent successfully created.",
 	}, nil
 }
+
+// OAuth implements usersgrpc.UsersServer.
+func (i *Impl) OAuth(ctx context.Context, req *usersgrpc.OAuthRequest) (*usersgrpc.AuthenticateResponse, error) {
+	authFactor := req.GetFactor()
+	var isOAuth bool
+
+	switch authFactor.GetType() {
+	case usersgrpc.FactorType_FACTOR_TYPE_GOOGLE:
+		isOAuth = true
+	case usersgrpc.FactorType_FACTOR_TYPE_FACEBOOK:
+		isOAuth = true
+	default:
+		isOAuth = false
+	}
+
+	if !isOAuth {
+		return nil, status.Errorf(codes.Unauthenticated, "unauthorized request")
+	}
+
+	querier, tx, err := i.repo.Begin(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)
+	}
+
+	// Proper rollback handling
+	defer func() {
+		err = tx.Rollback(ctx)
+		if err != nil && !errors.Is(err, sql.ErrTxDone) {
+			i.logger.Err(err).Msgf("Failed to rollback transaction: %v", req)
+		}
+	}()
+
+	user, err := querier.GetUserByEmail(ctx, &req.GetUser().Email)
+	if err == nil {
+		// If no error and user exists, generate token for this user and return
+		claims, newErr := i.getUserClaims(ctx, user.ID)
+		if newErr != nil {
+			i.logger.Err(err).Str("user_id", user.ID).Msg("Failed to get user claims")
+			return nil, newErr
+		}
+
+		accessToken, newErr := i.tokenManagerBuilder.WithQuerier(i.repo.Do()).GenerateAccessToken(ctx, user.ID, claims)
+		if newErr != nil {
+			i.logger.Err(err).Str("user_id", user.ID).Msg("Failed to generate access token")
+			return nil, status.Errorf(codes.Internal, "Failed to generate access token: %v", newErr)
+		}
+
+		refreshToken, newErr := i.tokenManagerBuilder.WithQuerier(i.repo.Do()).GenerateRefreshToken(ctx, user.ID)
+		if newErr != nil {
+			i.logger.Err(err).Str("user_id", user.ID).Msg("Failed to generate refresh token")
+			return nil, status.Errorf(codes.Internal, "Failed to generate refresh token: %v", newErr)
+		}
+
+		return &usersgrpc.AuthenticateResponse{
+			LoginComplete: true,
+			Tokens: &usersgrpc.Tokens{
+				AccessToken:  accessToken,
+				RefreshToken: refreshToken,
+			},
+			UserId: user.ID,
+		}, nil
+	}
+
+	// Check if the error indicates the user does not exist (success case)
+	// This is an error we can't handle, return immediately.
+	if !errors.Is(err, sql.ErrNoRows) {
+		return nil, fmt.Errorf("failed to check for existing users: %w", err)
+	}
+
+	// if user does not exits, grab the user info from the request and create a new user.
+
+	// Generate random user password.
+	newHashedPassword, err := GeneratePassword(ctx)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error generating user password: %v", err)
+	}
+
+	var email *string
+
+	if req.GetUser().GetEmail() != "" {
+		email = &req.GetUser().Email
+	}
+
+	userType, ok := usersgrpc.UserType_value[req.GetUserType().String()]
+	if !ok {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid user type in request: %v", req.GetUserType().String())
+	}
+
+	userRole, err := getUserRoleFromType(usersgrpc.UserType(userType))
+
+	// Create new user with hashed password in the db.
+	arg := sqlc.CreateUserParams{
+		PhoneNumber: req.GetUser().GetPhoneNumber(),
+		Email:       email,
+		FirstName:   &req.GetUser().FirstName,
+		LastName:    &req.GetUser().LastName,
+		Password:    newHashedPassword,
+		Role:        userRole.String(),
+	}
+
+	createdDBUser, err := querier.CreateUser(ctx, arg)
+
+	// Generate an access token and refresh token
+	claims := map[string]any{
+		ClaimKeyRole:   createdDBUser.Role,
+		ClaimKeyStatus: createdDBUser.UserStatus,
+	}
+
+	accessToken, err := i.tokenManagerBuilder.WithQuerier(querier).GenerateAccessToken(ctx, createdDBUser.ID, claims)
+	if err != nil {
+		i.logger.Debug().Msgf("firebase error %v", err)
+		return nil, status.Errorf(codes.Internal, "Failed to generate tokens: %v", err)
+	}
+
+	refreshToken, err := i.tokenManagerBuilder.WithQuerier(querier).GenerateRefreshToken(ctx, createdDBUser.ID)
+	if err != nil {
+		i.logger.Debug().Msgf("firebase error %v", err)
+		return nil, status.Errorf(codes.Internal, "Failed to generate tokens: %v", err)
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
+	}
+
+	return &usersgrpc.AuthenticateResponse{
+		LoginComplete: true,
+		Tokens: &usersgrpc.Tokens{
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
+		},
+		UserId: createdDBUser.ID,
+	}, nil
+}
