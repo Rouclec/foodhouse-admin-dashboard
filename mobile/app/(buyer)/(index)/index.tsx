@@ -94,7 +94,7 @@ export default function BuyerProducts() {
     }
   }, [isFocused]);
 
-  // control variables for filter container
+  // control variables for filter container.
   const sheetRef = useRef<FilterBottomSheetRef>(null);
   const [filterSelectedCategoryId, setFilterSelectedCategoryId] =
     useState<string>();
