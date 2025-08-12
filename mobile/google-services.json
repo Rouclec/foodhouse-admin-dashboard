@@ -18,6 +18,14 @@
           "client_type": 1,
           "android_info": {
             "package_name": "com.foodhousecmr.foodhouse",
+            "certificate_hash": "0b16dd2e9e78bdc77522385f65c9b2dc0384cb07"
+          }
+        },
+        {
+          "client_id": "167587991754-ip6u5u3uno4032hqdj5u4cb2ah2cr0ds.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.foodhousecmr.foodhouse",
             "certificate_hash": "2d33c3bbac8cf458824d481da39d6295233a5d2b"
           }
         },
@@ -37,6 +45,14 @@
             {
               "client_id": "167587991754-5ohaq1hmkghc7iaia3cfeumv5nm9fs75.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "167587991754-o3f51jlva90d3tci1kimj5q0flr2ej6q.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.foodhousecmr.foodhouse",
+                "app_store_id": "6747904153"
+              }
             }
           ]
         }
