@@ -15,6 +15,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   usersAuthenticateMutation,
   usersGetUserByIdOptions,
+  usersOAuthMutation,
 } from '@/client/users.swagger/@tanstack/react-query.gen';
 import { Context, ContextType } from '../_layout';
 import { defaultStyles, loginstyles } from '@/styles';
@@ -38,6 +39,7 @@ export default function Login() {
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [userId, setUserId] = useState<string>();
+  const [firebaseUserId, setFirebaseUserId] = useState<string>();
   const { user, setUser } = useContext(Context) as ContextType;
 
   const [request, response, promptAsync] = Google.useAuthRequest({
@@ -92,6 +94,36 @@ export default function Login() {
     },
   });
 
+  const { mutateAsync: oAuth } = useMutation({
+    ...usersOAuthMutation(),
+    onError: async error => {
+      setErrorMessage(
+        error?.response?.data?.message ?? i18n.t('(auth).login.anUnknownError'),
+      );
+      setError(true);
+      await delay(5000);
+      setError(false);
+    },
+    onSuccess: async data => {
+      if (!data.loginComplete) {
+        return router.push({
+          pathname: '/(auth)/select-role-for-oauth',
+          params: {
+            firebaseUserId,
+          },
+        });
+      }
+      try {
+        updateAuthHeader(data?.tokens?.accessToken ?? '');
+        await storeData('@refreshToken', data?.tokens?.refreshToken);
+        storeData('@userId', data?.userId);
+        setUserId(data?.userId ?? '');
+      } catch (err) {
+        console.error('Error handling login success:', err);
+      }
+    },
+  });
+
   useEffect(() => {
     if (!response) {
       return;
@@ -127,50 +159,49 @@ export default function Login() {
   }, [response]);
 
   const signInWithFirebase = async (credential: AuthCredential) => {
-    console.log(credential);
     try {
       const userCredential = await signInWithCredential(auth, credential);
       const firebaseUser = userCredential.user;
       const firebaseIdToken = await firebaseUser.getIdToken(true);
-      console.log({ userCredential, firebaseUser, firebaseIdToken });
+
+      if (!firebaseUser) {
+        setErrorMessage(i18n.t('(auth).login.invalidUser'));
+        setError(true);
+        await delay(5000);
+        setError(false);
+        return;
+      }
+
+      // update the auth header with the firebase token
       updateAuthHeader(firebaseIdToken);
 
-      /**
-       *  TODO: Send the Firebase ID Token to your backend.
-       * - Backend will verify it using Firebase Admin SDK
-       * - Determine if user is new or returning
-       * - If new: backend creates user, adds claims
-       * - Backend returns: accessToken, refreshToken, userId, and isNewUser
-       */
+      setFirebaseUserId(firebaseUser.uid);
 
-      // Example:
-      /*
-    const data = await authenticate({
-      body: {
-        firebaseIdToken,
-      },
-    });
+      // set the user data with the response from firebase
+      setUser({
+        email: firebaseUser?.email ?? '',
+        phoneNumber: firebaseUser?.phoneNumber ?? '',
+        firstName: firebaseUser?.displayName?.split(' ')[0],
+        lastName: firebaseUser?.displayName?.split(' ')[1],
+      });
 
-    const { tokens, userId, isNewUser } = data;
-
-    //  Replace Firebase token with your custom accessToken
-    updateAuthHeader(tokens.accessToken);
-    await storeData("@refreshToken", tokens.refreshToken);
-    storeData("@userId", userId);
-    setUserId(userId);
-
-    if (isNewUser) {
-      //  call endpoint to set custom claims (e.g. assign 'farmer' role)
-      // await assignInitialClaims(userId);
-    }
-
-    // Redirect to home/dashboard
-    router.replace("/(farmer)/(index)");
-    */
-
-      //  TEMP fallback until backend is ready:
-      await storeData('@userId', firebaseUser.uid);
-      setUserId(firebaseUser.uid);
+      // call the oAuth endpoint
+      await oAuth({
+        body: {
+          user: {
+            email: firebaseUser?.email ?? '',
+            phoneNumber: firebaseUser?.phoneNumber ?? '',
+            firstName: firebaseUser?.displayName?.split(' ')[0],
+            lastName: firebaseUser?.displayName?.split(' ')[1],
+          },
+          factor: {
+            type: 'FACTOR_TYPE_GOOGLE',
+          },
+        },
+        path: {
+          'factor.id': firebaseUser.uid,
+        },
+      });
     } catch (firebaseError: any) {
       console.error(' Firebase Google Sign-In Error:', firebaseError);
       setErrorMessage(

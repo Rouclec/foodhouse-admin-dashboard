@@ -24,6 +24,10 @@ export default function AuthLayout() {
       <Stack.Screen name="variety" options={{ headerShown: false }} />
       <Stack.Screen name="subscribe" options={{ headerShown: false }} />
       <Stack.Screen name="(forgot-password)" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="select-role-for-oauth"
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }
