@@ -12,36 +12,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - name: Check if 'mobile' directory changed
-        id: changes
-        run: |
-          echo "changed=false" >> $GITHUB_OUTPUT
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^mobile/' ; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Skip if no changes in 'mobile'
-        if: steps.changes.outputs.changed != 'true'
-        run: echo "No changes in 'mobile' directory, skipping build."
-
       - name: Check for EXPO_TOKEN
-        if: steps.changes.outputs.changed == 'true'
         run: |
           if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
             echo "You must provide an EXPO_TOKEN secret linked to this project's Expo account in this repo's secrets. Learn more: https://docs.expo.dev/eas-update/github-actions"
             exit 1
           fi
-
+      # The EXPO_APPLE_APP_SPECIFIC_PASSWORD and EXPO_APPLE_ID are required for Apple builds.
+      # They're used for testflight and appstore submission.
       - name: Check for EXPO_APPLE_APP_SPECIFIC_PASSWORD
-        if: steps.changes.outputs.changed == 'true'
         run: |
           if [ -z "${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}" ]; then
             echo "You must provide an EXPO_APPLE_APP_SPECIFIC_PASSWORD to deploy to testflight"
             exit 1
           fi
-
       - name: Check for EXPO_APPLE_ID
-        if: steps.changes.outputs.changed == 'true'
         run: |
           if [ -z "${{ secrets.EXPO_APPLE_ID }}" ]; then
             echo "You must provide an EXPO_APPLE_ID to deploy to testflight"
@@ -49,11 +34,10 @@ jobs:
           fi
 
       - name: Checkout repository
-        if: steps.changes.outputs.changed == 'true'
         uses: actions/checkout@v2
 
+      # Trying to install dependencies from cache
       - name: Cache node modules
-        if: steps.changes.outputs.changed == 'true'
         id: cache-npm
         uses: actions/cache@v3
         env:
@@ -66,27 +50,26 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      - if: steps.changes.outputs.changed == 'true' && steps.cache-npm.outputs.cache-hit == 'false'
+      - if: ${{ steps.cache-npm.outputs.cache-hit == 'false' }}
         name: List the state of node modules
         continue-on-error: true
         working-directory: mobile
         run: yarn list
 
       - name: Install dependencies
-        if: steps.changes.outputs.changed == 'true'
         working-directory: mobile
         run: yarn install
 
       - name: Setup Expo
-        if: steps.changes.outputs.changed == 'true'
         uses: expo/expo-github-action@v7
         with:
           expo-version: latest
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      # With the flag --auto-submit the build will be submitted to testflight / playstore automatically.
+      # The app will not be released without manual action
       - name: Build and Submit
-        if: steps.changes.outputs.changed == 'true'
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}
@@ -99,36 +82,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - name: Check if 'agentsApp' directory changed
-        id: changes
-        run: |
-          echo "changed=false" >> $GITHUB_OUTPUT
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^agentsApp/' ; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Skip if no changes in 'agentsApp'
-        if: steps.changes.outputs.changed != 'true'
-        run: echo "No changes in 'agentsApp' directory, skipping build."
-
       - name: Check for EXPO_TOKEN
-        if: steps.changes.outputs.changed == 'true'
         run: |
           if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
             echo "You must provide an EXPO_TOKEN secret linked to this project's Expo account in this repo's secrets. Learn more: https://docs.expo.dev/eas-update/github-actions"
             exit 1
           fi
-
+      # The EXPO_APPLE_APP_SPECIFIC_PASSWORD and EXPO_APPLE_ID are required for Apple builds.
+      # They're used for testflight and appstore submission.
       - name: Check for EXPO_APPLE_APP_SPECIFIC_PASSWORD
-        if: steps.changes.outputs.changed == 'true'
         run: |
           if [ -z "${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}" ]; then
             echo "You must provide an EXPO_APPLE_APP_SPECIFIC_PASSWORD to deploy to testflight"
             exit 1
           fi
-
       - name: Check for EXPO_APPLE_ID
-        if: steps.changes.outputs.changed == 'true'
         run: |
           if [ -z "${{ secrets.EXPO_APPLE_ID }}" ]; then
             echo "You must provide an EXPO_APPLE_ID to deploy to testflight"
@@ -136,11 +104,10 @@ jobs:
           fi
 
       - name: Checkout repository
-        if: steps.changes.outputs.changed == 'true'
         uses: actions/checkout@v2
 
+      # Trying to install dependencies from cache
       - name: Cache node modules
-        if: steps.changes.outputs.changed == 'true'
         id: cache-npm
         uses: actions/cache@v3
         env:
@@ -153,27 +120,26 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      - if: steps.changes.outputs.changed == 'true' && steps.cache-npm.outputs.cache-hit == 'false'
+      - if: ${{ steps.cache-npm.outputs.cache-hit == 'false' }}
         name: List the state of node modules
         continue-on-error: true
         working-directory: agentsApp
         run: yarn list
 
       - name: Install dependencies
-        if: steps.changes.outputs.changed == 'true'
         working-directory: agentsApp
         run: yarn install
 
       - name: Setup Expo
-        if: steps.changes.outputs.changed == 'true'
         uses: expo/expo-github-action@v7
         with:
           expo-version: latest
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      # With the flag --auto-submit the build will be submitted to testflight / playstore automatically.
+      # The app will not be released without manual action
       - name: Build and Submit
-        if: steps.changes.outputs.changed == 'true'
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}
