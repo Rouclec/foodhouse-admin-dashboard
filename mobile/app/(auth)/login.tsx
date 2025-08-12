@@ -1,5 +1,4 @@
-
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,33 +6,37 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   ScrollView,
-  Alert
-} from "react-native";
-import { Appbar, Icon, Snackbar, TextInput } from "react-native-paper";
-import { Link, router } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useMutation, useQuery } from "@tanstack/react-query";
+  Alert,
+} from 'react-native';
+import { Appbar, Icon, Snackbar, TextInput } from 'react-native-paper';
+import { Link, router } from 'expo-router';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   usersAuthenticateMutation,
   usersGetUserByIdOptions,
-} from "@/client/users.swagger/@tanstack/react-query.gen";
-import { Context, ContextType } from "../_layout";
-import { defaultStyles, loginstyles } from "@/styles";
-import { Colors } from "@/constants";
-import i18n from "@/i18n";
-import { delay, storeData, updateAuthHeader } from "@/utils";
+} from '@/client/users.swagger/@tanstack/react-query.gen';
+import { Context, ContextType } from '../_layout';
+import { defaultStyles, loginstyles } from '@/styles';
+import { Colors } from '@/constants';
+import i18n from '@/i18n';
+import { delay, storeData, updateAuthHeader } from '@/utils';
 import { auth } from '@/firebase';
-import { AuthCredential, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
+import {
+  AuthCredential,
+  GoogleAuthProvider,
+  signInWithCredential,
+} from 'firebase/auth';
 import * as Google from 'expo-auth-session/providers/google';
 import { Prompt } from 'expo-auth-session';
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
-  const [fields, setFields] = useState({ email: "", password: "" });
-  const [errors, setErrors] = useState({ email: "", password: "" });
+  const [fields, setFields] = useState({ email: '', password: '' });
+  const [errors, setErrors] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState('');
   const [userId, setUserId] = useState<string>();
   const { user, setUser } = useContext(Context) as ContextType;
 
@@ -48,43 +51,43 @@ export default function Login() {
   const { data: userData } = useQuery({
     ...usersGetUserByIdOptions({
       path: {
-        userId: userId ?? "",
+        userId: userId ?? '',
       },
     }),
     enabled: !!userId,
   });
 
-   useEffect(() => {
+  useEffect(() => {
     if (userData?.user) {
       setUser(userData.user);
       const role = userData?.user?.role;
 
-      if (role === "USER_ROLE_FARMER") {
-        router.replace("/(farmer)/(index)");
+      if (role === 'USER_ROLE_FARMER') {
+        router.replace('/(farmer)/(index)');
       } else {
-        router.replace("/(buyer)/(index)");
+        router.replace('/(buyer)/(index)');
       }
     }
   }, [userData]);
 
-   const { mutateAsync: authenticate } = useMutation({
+  const { mutateAsync: authenticate } = useMutation({
     ...usersAuthenticateMutation(),
-    onError: async (error) => {
+    onError: async error => {
       setErrorMessage(
-        error?.response?.data?.message ?? i18n.t("(auth).login.anUnknownError")
+        error?.response?.data?.message ?? i18n.t('(auth).login.anUnknownError'),
       );
       setError(true);
       await delay(5000);
       setError(false);
     },
-    onSuccess: async (data) => {
+    onSuccess: async data => {
       try {
-        updateAuthHeader(data?.tokens?.accessToken ?? "");
-        await storeData("@refreshToken", data?.tokens?.refreshToken);
-        storeData("@userId", data?.userId);
-        setUserId(data?.userId ?? "");
+        updateAuthHeader(data?.tokens?.accessToken ?? '');
+        await storeData('@refreshToken', data?.tokens?.refreshToken);
+        storeData('@userId', data?.userId);
+        setUserId(data?.userId ?? '');
       } catch (err) {
-        console.error("Error handling login success:", err);
+        console.error('Error handling login success:', err);
       }
     },
   });
@@ -96,11 +99,9 @@ export default function Login() {
 
     switch (response.type) {
       case 'success':
-      
         if (response.authentication) {
-        
           const { idToken } = response.authentication;
-          
+
           if (idToken) {
             setLoading(true);
             const credential = GoogleAuthProvider.credential(idToken);
@@ -110,37 +111,40 @@ export default function Login() {
         break;
 
       case 'error':
-        console.error("Expo Google Auth Error:", response.error);
-        setErrorMessage(response.error?.message || i18n.t("(auth).login.googleSignInFailed"));
+        console.error('Expo Google Auth Error:', response.error);
+        setErrorMessage(
+          response.error?.message || i18n.t('(auth).login.googleSignInFailed'),
+        );
         setError(true);
         setLoading(false);
         break;
 
       case 'cancel':
-        console.log("Google Sign-In cancelled by user.");
+        console.log('Google Sign-In cancelled by user.');
         setLoading(false);
         break;
     }
   }, [response]);
-  
- 
+
   const signInWithFirebase = async (credential: AuthCredential) => {
-  try {
-    const userCredential = await signInWithCredential(auth, credential);
-    const firebaseUser = userCredential.user;
-    const firebaseIdToken = await firebaseUser.getIdToken(true); 
-    updateAuthHeader(firebaseIdToken);
+    console.log(credential);
+    try {
+      const userCredential = await signInWithCredential(auth, credential);
+      const firebaseUser = userCredential.user;
+      const firebaseIdToken = await firebaseUser.getIdToken(true);
+      console.log({ userCredential, firebaseUser, firebaseIdToken });
+      updateAuthHeader(firebaseIdToken);
 
-    /**
-     *  TODO: Send the Firebase ID Token to your backend.
-     * - Backend will verify it using Firebase Admin SDK
-     * - Determine if user is new or returning
-     * - If new: backend creates user, adds claims
-     * - Backend returns: accessToken, refreshToken, userId, and isNewUser
-     */
+      /**
+       *  TODO: Send the Firebase ID Token to your backend.
+       * - Backend will verify it using Firebase Admin SDK
+       * - Determine if user is new or returning
+       * - If new: backend creates user, adds claims
+       * - Backend returns: accessToken, refreshToken, userId, and isNewUser
+       */
 
-    // Example:
-    /*
+      // Example:
+      /*
     const data = await authenticate({
       body: {
         firebaseIdToken,
@@ -164,38 +168,36 @@ export default function Login() {
     router.replace("/(farmer)/(index)");
     */
 
-    //  TEMP fallback until backend is ready:
-    await storeData("@userId", firebaseUser.uid);
-    setUserId(firebaseUser.uid);
-
-  } catch (firebaseError: any) {
-    console.error(" Firebase Google Sign-In Error:", firebaseError);
-    setErrorMessage(firebaseError.message || i18n.t("(auth).login.googleSignInFailed"));
-    setError(true);
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-
+      //  TEMP fallback until backend is ready:
+      await storeData('@userId', firebaseUser.uid);
+      setUserId(firebaseUser.uid);
+    } catch (firebaseError: any) {
+      console.error(' Firebase Google Sign-In Error:', firebaseError);
+      setErrorMessage(
+        firebaseError.message || i18n.t('(auth).login.googleSignInFailed'),
+      );
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (name: string, value: string) => {
     setFields({ ...fields, [name]: value });
-    setErrors({ ...errors, [name]: "" });
+    setErrors({ ...errors, [name]: '' });
   };
 
   const validateFields = () => {
-    const newErrors = { email: "", password: "" };
+    const newErrors = { email: '', password: '' };
     let isValid = true;
 
     if (!fields.email.trim()) {
-      newErrors.email = i18n.t("(auth).login.emailRequired");
+      newErrors.email = i18n.t('(auth).login.emailRequired');
       isValid = false;
     }
 
     if (!fields.password.trim()) {
-      newErrors.password = i18n.t("(auth).login.passwordRequired");
+      newErrors.password = i18n.t('(auth).login.passwordRequired');
       isValid = false;
     }
 
@@ -212,7 +214,7 @@ export default function Login() {
         body: {
           factors: [
             {
-              type: "FACTOR_TYPE_EMAIL_PHONE_PASSWORD",
+              type: 'FACTOR_TYPE_EMAIL_PHONE_PASSWORD',
               id: fields.email.trim(),
               secretValue: fields.password,
             },
@@ -228,7 +230,10 @@ export default function Login() {
 
   const handleGoogleSignInPress = async () => {
     if (!request) {
-      Alert.alert(i18n.t("(auth).login.configurationError"), i18n.t("(auth).login.googleConfigMissing"));
+      Alert.alert(
+        i18n.t('(auth).login.configurationError'),
+        i18n.t('(auth).login.googleConfigMissing'),
+      );
       return;
     }
     await promptAsync();
@@ -238,16 +243,14 @@ export default function Login() {
     <>
       <KeyboardAvoidingView
         style={defaultStyles.container}
-        behavior={"padding"}
-        keyboardVerticalOffset={0}
-      >
+        behavior={'padding'}
+        keyboardVerticalOffset={0}>
         <View style={defaultStyles.flex}>
           <Appbar.Header dark={false} style={defaultStyles.appHeader}>
             <TouchableOpacity
               onPress={() => router.back()}
-              style={defaultStyles.backButtonContainer}
-            >
-              <Icon source={"arrow-left"} size={24} />
+              style={defaultStyles.backButtonContainer}>
+              <Icon source={'arrow-left'} size={24} />
             </TouchableOpacity>
             <View />
             <View />
@@ -256,37 +259,36 @@ export default function Login() {
             contentContainerStyle={defaultStyles.scrollContainer}
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
-            keyboardShouldPersistTaps="handled"
-          >
+            keyboardShouldPersistTaps="handled">
             <View style={loginstyles.logoCircle}>
               <Text style={loginstyles.logoText}>Food House</Text>
             </View>
             <View style={defaultStyles.inputsContainer}>
               <Text style={loginstyles.loginTitle}>
-                {i18n.t("(auth).login.loginTo")}
+                {i18n.t('(auth).login.loginTo')}
               </Text>
 
               <TextInput
                 mode="outlined"
-                label={i18n.t("(auth).login.email")}
+                label={i18n.t('(auth).login.email')}
                 value={fields.email}
                 autoCapitalize="none"
-                onChangeText={(text) => handleInputChange("email", text)}
+                onChangeText={text => handleInputChange('email', text)}
                 error={!!errors.email}
                 style={loginstyles.input}
                 theme={{
                   colors: {
                     primary: Colors.primary[500],
-                    background: Colors.grey["fa"],
+                    background: Colors.grey['fa'],
                     error: Colors.error,
                   },
                   roundness: 10,
                 }}
-                outlineColor={Colors.grey["bg"]}
+                outlineColor={Colors.grey['bg']}
                 left={
                   <TextInput.Icon
                     icon="account-outline"
-                    color={Colors.grey["61"]}
+                    color={Colors.grey['61']}
                     size={20}
                   />
                 }
@@ -297,31 +299,31 @@ export default function Login() {
 
               <TextInput
                 mode="outlined"
-                label={i18n.t("(auth).login.password")}
+                label={i18n.t('(auth).login.password')}
                 secureTextEntry={!showPassword}
                 value={fields.password}
-                onChangeText={(text) => handleInputChange("password", text)}
+                onChangeText={text => handleInputChange('password', text)}
                 error={!!errors.password}
                 style={loginstyles.input}
                 theme={{
                   colors: {
                     primary: Colors.primary[500],
-                    background: "#FAFAFA",
+                    background: '#FAFAFA',
                     error: Colors.error,
                   },
                   roundness: 10,
                 }}
-                outlineColor={Colors.grey["bg"]}
+                outlineColor={Colors.grey['bg']}
                 left={
                   <TextInput.Icon
                     icon="lock-outline"
-                    color={Colors.grey["61"]}
+                    color={Colors.grey['61']}
                     size={20}
                   />
                 }
                 right={
                   <TextInput.Icon
-                    icon={showPassword ? "eye-off" : "eye"}
+                    icon={showPassword ? 'eye-off' : 'eye'}
                     onPress={() => setShowPassword(!showPassword)}
                     color={Colors.grey[61]}
                     size={20}
@@ -334,10 +336,9 @@ export default function Login() {
 
               <Link
                 style={loginstyles.forgotPassword}
-                href={"/(auth)/(forgot-password)"}
-              >
+                href={'/(auth)/(forgot-password)'}>
                 <Text style={loginstyles.forgotPasswordText}>
-                  {i18n.t("(auth).login.forgotPassword")}
+                  {i18n.t('(auth).login.forgotPassword')}
                 </Text>
               </Link>
             </View>
@@ -350,60 +351,58 @@ export default function Login() {
               ]}
               onPress={handleLogIn}
               disabled={loading}
-              activeOpacity={0.8}
-            >
+              activeOpacity={0.8}>
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
                 <Text style={loginstyles.loginButtonText}>
-                  {i18n.t("(auth).login.login")}
+                  {i18n.t('(auth).login.login')}
                 </Text>
               )}
             </TouchableOpacity>
 
-             <View style={loginstyles.dividerContainer}>
-                <View style={loginstyles.dividerLine} />
-                <Text style={loginstyles.dividerText}>
-                  {i18n.t("(auth).login.or")}
-                </Text>
-                <View style={loginstyles.dividerLine} />
-              </View>
+            <View style={loginstyles.dividerContainer}>
+              <View style={loginstyles.dividerLine} />
+              <Text style={loginstyles.dividerText}>
+                {i18n.t('(auth).login.or')}
+              </Text>
+              <View style={loginstyles.dividerLine} />
+            </View>
 
-              <View style={loginstyles.socialIconsContainer}>
-                <TouchableOpacity
-                  style={[
-                    loginstyles.socialIcon,
-                    loading && defaultStyles.greyButton,
-                  ]}
-                  onPress={handleGoogleSignInPress}
-                  disabled={loading || !request}
-                >
-                  {loading ? (
-                    <ActivityIndicator color={Colors.primary[200]} />
-                  ) : (
-                    <>
-                      <MaterialCommunityIcons
-                        name="google"
-                        size={24}
-                        color={Colors.primary[200]}
-                      />
-                      <Text>{i18n.t("(auth).login.continueWith")} Google</Text>
-                    </>
-                  )}
-                </TouchableOpacity>
-                <TouchableOpacity style={loginstyles.socialIcon}>
-                  <MaterialCommunityIcons name="apple" size={24} />
-                  <Text>{i18n.t("(auth).login.continueWith")} Apple</Text>
-                </TouchableOpacity>
-              </View>
+            <View style={loginstyles.socialIconsContainer}>
+              <TouchableOpacity
+                style={[
+                  loginstyles.socialIcon,
+                  loading && defaultStyles.greyButton,
+                ]}
+                onPress={handleGoogleSignInPress}
+                disabled={loading || !request}>
+                {loading ? (
+                  <ActivityIndicator color={Colors.primary[200]} />
+                ) : (
+                  <>
+                    <MaterialCommunityIcons
+                      name="google"
+                      size={24}
+                      color={Colors.primary[200]}
+                    />
+                    <Text>{i18n.t('(auth).login.continueWith')} Google</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity style={loginstyles.socialIcon}>
+                <MaterialCommunityIcons name="apple" size={24} />
+                <Text>{i18n.t('(auth).login.continueWith')} Apple</Text>
+              </TouchableOpacity>
+            </View>
 
             <View style={loginstyles.registerContainer}>
               <Text style={loginstyles.registerText}>
-                {i18n.t("(auth).login.dontHaveAnAccount")}{" "}
+                {i18n.t('(auth).login.dontHaveAnAccount')}{' '}
               </Text>
-              <TouchableOpacity onPress={() => router.push("/(auth)/register")}>
+              <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
                 <Text style={loginstyles.registerLink}>
-                  {i18n.t("(auth).login.registerNow")}
+                  {i18n.t('(auth).login.registerNow')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -414,8 +413,7 @@ export default function Login() {
         visible={!!error}
         onDismiss={() => {}}
         duration={3000}
-        style={defaultStyles.snackbar}
-      >
+        style={defaultStyles.snackbar}>
         <Text style={defaultStyles.errorText}>{errorMessage}</Text>
       </Snackbar>
     </>

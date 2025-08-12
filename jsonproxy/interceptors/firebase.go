@@ -50,8 +50,16 @@ func NewFirebaseAuthenticationInterceptor(client TokenVerifier) HTTPInterceptor 
 			ctx := context.WithValue(r.Context(), ContextKeyRole, userRole)
 			// Set the user ID in the request context
 			ctx = context.WithValue(ctx, ContextKeyUserID, token.UID)
-			// Set the status in the request context
-			ctx = context.WithValue(ctx, ContextKeyStatus, userStatus)
+
+			// Skip token verification for public routes
+			if strings.HasPrefix(r.URL.Path, "/v1/oauth") {
+				// Automatically set user as active if they are calling an oAuth endpoint
+				ctx = context.WithValue(ctx, ContextKeyStatus, UserActiveStatus)
+			} else {
+				// Set the status in the request context
+				ctx = context.WithValue(ctx, ContextKeyStatus, userStatus)
+			}
+
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
