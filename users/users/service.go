@@ -1800,6 +1800,17 @@ func (i *Impl) OAuth(ctx context.Context, req *usersgrpc.OAuthRequest) (*usersgr
 
 	// if user does not exits, grab the user info from the request and create a new user.
 
+	// check if the user type does not exist in the request
+	if req.GetUserType() == usersgrpc.UserType_USER_TYPE_UNSPECIFIED {
+		return &usersgrpc.AuthenticateResponse{
+			LoginComplete: false,
+			AdditionalFactor: &usersgrpc.AdditionalFactor{
+				FactorType: authFactor.GetType(),
+				FactorHint: "include user type",
+			},
+		}, nil
+	}
+
 	// Generate random user password.
 	newHashedPassword, err := GeneratePassword(ctx)
 
