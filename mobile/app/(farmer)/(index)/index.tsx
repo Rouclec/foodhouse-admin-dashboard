@@ -1,7 +1,7 @@
-import React, { FC, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
-import { useContext, useState } from "react";
+import React, { FC, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
+import { useContext, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -10,17 +10,17 @@ import {
   SafeAreaView,
   TouchableOpacity,
   View,
-} from "react-native";
-import { Icon, Text, TextInput } from "react-native-paper";
-import { Context, ContextType } from "../../_layout";
-import { defaultStyles, farmerIndexStyles as styles } from "@/styles";
-import { Colors } from "@/constants";
-import i18n from "@/i18n";
-import { Feather } from "@expo/vector-icons";
-import { ordersListFarmerOrdersOptions } from "@/client/orders.swagger/@tanstack/react-query.gen";
-import { ordersgrpcOrderStatus } from "@/client/orders.swagger";
-import { Chase } from "react-native-animated-spinkit";
-import { OrderItem } from "@/components";
+} from 'react-native';
+import { Icon, Text, TextInput } from 'react-native-paper';
+import { Context, ContextType } from '../../_layout';
+import { defaultStyles, farmerIndexStyles as styles } from '@/styles';
+import { Colors } from '@/constants';
+import i18n from '@/i18n';
+import { Feather } from '@expo/vector-icons';
+import { ordersListFarmerOrdersOptions } from '@/client/orders.swagger/@tanstack/react-query.gen';
+import { ordersgrpcOrderStatus } from '@/client/orders.swagger';
+import { Chase } from 'react-native-animated-spinkit';
+import { OrderItem } from '@/components';
 
 const HOUR_OF_DAY = new Date().getHours();
 
@@ -30,24 +30,24 @@ export default function Orders() {
     value: Array<ordersgrpcOrderStatus>;
   }> = [
     {
-      name: i18n.t("(farmer).(index).index.pending"),
+      name: i18n.t('(farmer).(index).index.pending'),
       value: [
-        "OrderStatus_PAYMENT_SUCCESSFUL",
-        "OrderStatus_APPROVED",
-        "OrderStatus_IN_TRANSIT",
+        'OrderStatus_PAYMENT_SUCCESSFUL',
+        'OrderStatus_APPROVED',
+        'OrderStatus_IN_TRANSIT',
       ],
     },
     {
-      name: i18n.t("(farmer).(index).index.completed"),
-      value: ["OrderStatus_DELIVERED"],
+      name: i18n.t('(farmer).(index).index.completed'),
+      value: ['OrderStatus_DELIVERED'],
     },
   ];
 
   const { user } = useContext(Context) as ContextType;
 
   const [hasReachedEnd, setHasReachedEnd] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debounceQuery, setDebounceQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debounceQuery, setDebounceQuery] = useState('');
   const [count, setCount] = useState(10);
   const [tabItem, setTabItem] = useState<{
     name: string;
@@ -65,48 +65,57 @@ export default function Orders() {
   const { data: ordersData, isLoading: isOrdersLoading } = useQuery({
     ...ordersListFarmerOrdersOptions({
       path: {
-        farmerId: user?.userId ?? "",
+        farmerId: user?.userId ?? '',
       },
       query: {
         count: count,
-        startKey: "",
+        startKey: '',
         statuses: tabItem.value,
       },
     }),
   });
 
+  const router = useRouter();
+
   return (
     <>
       <KeyboardAvoidingView
         style={defaultStyles.flex}
-        behavior={"padding"}
-        keyboardVerticalOffset={0}
-      >
+        behavior={'padding'}
+        keyboardVerticalOffset={0}>
         <View
           style={[
             defaultStyles.flex,
             styles.bgWhite,
             defaultStyles.relativeContainer,
-          ]}
-        >
+          ]}>
           <View style={styles.appHeader}>
             <SafeAreaView style={styles.safeArea}>
               <View style={styles.appHeaderContent}>
                 <View style={styles.appHeaderTopContainer}>
                   <View style={styles.appHeaderLeftContainer}>
-                    <View style={styles.iconContainer}>
-                      <Image
-                        source={require("@/assets/images/carrots.png")}
-                        tintColor={Colors.primary[500]}
-                      />
-                    </View>
+                    <TouchableOpacity
+                      style={styles.iconContainer}
+                      onPress={() => router.push('/(farmer)/(index)/profile')}>
+                      {user?.profileImage ? (
+                        <Image
+                          source={{ uri: user?.profileImage }}
+                          style={styles.profileImage}
+                        />
+                      ) : (
+                        <Image
+                          source={require('@/assets/images/avatar.png')}
+                          style={styles.avatarImage}
+                        />
+                      )}
+                    </TouchableOpacity>
                     <View>
                       <Text style={styles.greetingsText} variant="bodyLarge">
                         {HOUR_OF_DAY < 12
-                          ? i18n.t("(farmer).(index).index.goodMorning")
+                          ? i18n.t('(farmer).(index).index.goodMorning')
                           : HOUR_OF_DAY < 17
-                          ? i18n.t("(farmer).(index).index.goodAfternoon")
-                          : i18n.t("(farmer).(index).index.goodEvening")}{" "}
+                          ? i18n.t('(farmer).(index).index.goodAfternoon')
+                          : i18n.t('(farmer).(index).index.goodEvening')}{' '}
                         👋
                       </Text>
                       <Text style={styles.nameText} variant="titleLarge">
@@ -114,24 +123,24 @@ export default function Orders() {
                       </Text>
                     </View>
                   </View>
-                  <TouchableOpacity style={styles.iconContainer}>
+                  {/* <TouchableOpacity style={styles.iconContainer}>
                     <View style={defaultStyles.relativeContainer}>
                       <Icon
-                        source={"bell-outline"}
+                        source={'bell-outline'}
                         size={24}
                         color={Colors.dark[10]}
                       />
                       <View style={styles.noticiatonIndicator} />
                     </View>
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
                 </View>
                 <TextInput
-                  placeholder={i18n.t("(farmer).(index).index.searchOrder")}
-                  placeholderTextColor={Colors.grey["bd"]}
+                  placeholder={i18n.t('(farmer).(index).index.searchOrder')}
+                  placeholderTextColor={Colors.grey['bd']}
                   style={[defaultStyles.input, styles.searchInput]}
                   outlineStyle={styles.searchInputOutline}
                   value={searchQuery}
-                  onChangeText={(text) => setSearchQuery(text)}
+                  onChangeText={text => setSearchQuery(text)}
                   mode="outlined"
                   left={
                     <TextInput.Icon
@@ -139,17 +148,17 @@ export default function Orders() {
                         <Feather
                           name="search"
                           size={20}
-                          color={Colors.grey["bd"]}
+                          color={Colors.grey['bd']}
                         />
                       )}
                       size={24}
-                      color={Colors.grey["61"]}
+                      color={Colors.grey['61']}
                     />
                   }
                   theme={{
                     colors: {
                       primary: Colors.primary[500],
-                      background: Colors.grey["fa"],
+                      background: Colors.grey['fa'],
                       error: Colors.error,
                     },
                     roundness: 16,
@@ -159,7 +168,7 @@ export default function Orders() {
             </SafeAreaView>
           </View>
           <View style={styles.tabItemsMainContainer}>
-            {TAB_ITEMS.map((item) => {
+            {TAB_ITEMS.map(item => {
               return (
                 <TouchableOpacity
                   key={item?.value[0]}
@@ -168,15 +177,13 @@ export default function Orders() {
                     styles.tabItemContainer,
                     tabItem.value === item?.value &&
                       styles.tabItemActiveContainer,
-                  ]}
-                >
+                  ]}>
                   <Text
                     variant="titleSmall"
                     style={[
                       styles.tabItemText,
                       tabItem.value === item?.value && styles.tabItemActiveText,
-                    ]}
-                  >
+                    ]}>
                     {item?.name}
                   </Text>
                 </TouchableOpacity>
@@ -200,7 +207,7 @@ export default function Orders() {
               ListEmptyComponent={
                 <View style={defaultStyles.noItemsContainer}>
                   <Text style={defaultStyles.noItems}>
-                    {i18n.t("(farmer).(index).index.noOrdersFound")}
+                    {i18n.t('(farmer).(index).index.noOrdersFound')}
                   </Text>
                 </View>
               }
@@ -219,7 +226,7 @@ export default function Orders() {
               }}
               onScrollEndDrag={() => {
                 if (hasReachedEnd && ordersData?.nextKey) {
-                  setCount((prev) => prev + 10);
+                  setCount(prev => prev + 10);
                   setHasReachedEnd(false);
                 }
               }}

@@ -39,7 +39,8 @@
       "or": "or",
       "continueWith": "Continue with",
       "dontHaveAnAccount": "Don't have an account?",
-      "registerNow": "Register Now"
+      "registerNow": "Register Now",
+      "invalidUser": "Invalid user"
     },
     "verifyOtp": {
       "verifyNumber": "Verify your phone number",
@@ -173,7 +174,7 @@
       "editProduct": "Edit Product",
       "currency": "currency",
       "save": "Save",
-     
+
       "message": "Product successfully updated"
     },
     "(index)": {
@@ -281,7 +282,7 @@
       "noOrdersFound": "No orders found"
     },
     "update-product": {
-      "unknownError":"An unknown error occured",
+      "unknownError": "An unknown error occured",
       "errorLoadingProduct": "Error loading product",
       "noProductIdFound": "No product Id found"
     },
@@ -345,7 +346,7 @@
       "edit": "Edit",
       "delete": "Delete",
       "confirmation": "Are you sure you want to delete this product?",
-      "confirmation2":"This action cannot be undone. The product will be permanently removed."
+      "confirmation2": "This action cannot be undone. The product will be permanently removed."
     },
     "(order)": {
       "index": {
