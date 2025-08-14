@@ -29,6 +29,7 @@ type Querier interface {
 	GetFarmer(ctx context.Context, id string) (User, error)
 	GetFarmerRating(ctx context.Context, farmerID string) (float64, error)
 	GetLatestSentOtpByFactor(ctx context.Context, arg GetLatestSentOtpByFactorParams) ([]SentOtp, error)
+	GetReferralByReferredID(ctx context.Context, referredID string) (Referral, error)
 	GetRefreshToken(ctx context.Context, token string) (RefreshToken, error)
 	GetSentOtpByRequestId(ctx context.Context, requestID string) (SentOtp, error)
 	GetSubscriptionByID(ctx context.Context, id string) (Subscription, error)

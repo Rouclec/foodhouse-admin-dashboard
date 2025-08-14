@@ -111,7 +111,7 @@ type CreateCommissionParams struct {
 	ReferredID       string             `json:"referred_id"`
 	OrderNumber      int64              `json:"order_number"`
 	CurrencyCode     string             `json:"currency_code"`
-	CommissionAmount pgtype.Numeric     `json:"commission_amount"`
+	CommissionAmount float64            `json:"commission_amount"`
 	PaidAt           pgtype.Timestamptz `json:"paid_at"`
 	PaymentReference *string            `json:"payment_reference"`
 }

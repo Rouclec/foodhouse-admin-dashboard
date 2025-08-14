@@ -335,6 +335,21 @@ func (mr *MockQuerierMockRecorder) GetLatestSentOtpByFactor(ctx, arg any) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLatestSentOtpByFactor", reflect.TypeOf((*MockQuerier)(nil).GetLatestSentOtpByFactor), ctx, arg)
 }
 
+// GetReferralByReferredID mocks base method.
+func (m *MockQuerier) GetReferralByReferredID(ctx context.Context, referredID string) (sqlc.Referral, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetReferralByReferredID", ctx, referredID)
+	ret0, _ := ret[0].(sqlc.Referral)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetReferralByReferredID indicates an expected call of GetReferralByReferredID.
+func (mr *MockQuerierMockRecorder) GetReferralByReferredID(ctx, referredID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetReferralByReferredID", reflect.TypeOf((*MockQuerier)(nil).GetReferralByReferredID), ctx, referredID)
+}
+
 // GetRefreshToken mocks base method.
 func (m *MockQuerier) GetRefreshToken(ctx context.Context, token string) (sqlc.RefreshToken, error) {
 	m.ctrl.T.Helper()

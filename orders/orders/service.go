@@ -56,6 +56,8 @@ const (
 
 	FarmersPercentage = 0.95
 
+	ReferralCommissionPercentage = 0.0225
+
 	CENT = 100
 )
 
@@ -636,12 +638,86 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 		return nil, status.Errorf(codes.Internal, "error creating payment entity %v", err)
 	}
 
+	err = i.CreateCommissions(ctx, order, querier)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error creating comissions for order with number %v: %v", order.OrderNumber, err)
+	}
+
 	err = tx.Commit(ctx)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
 	}
 
 	return &ordersgrpc.DispatchOrderResponse{}, nil
+}
+
+func (i *Impl) getReferral(ctx context.Context, referredID string) (*usersgrpc.Referral, error) {
+	resp, err := i.userService.GetReferralByReferredId(ctx, &usersgrpc.GetReferralByReferredIdRequest{
+		ReferredId: referredID,
+	})
+	if err != nil {
+		// Check if it's a NotFound error
+		if status.Code(err) == codes.NotFound {
+			// No referral exists, return nil without failing
+			return nil, nil
+		}
+		// Some other gRPC error, propagate it
+		return nil, err
+	}
+
+	return resp.Referral, nil
+}
+
+// create commissions is a helper method that creates the commissions neccesary for any given transaction
+func (i *Impl) CreateCommissions(ctx context.Context, order sqlc.Order, querier sqlc.Querier) error {
+
+	var commissionsToCreate []sqlc.Commission
+
+	// 1. Get referral for buyer
+	if buyerReferral, err := i.getReferral(ctx, *order.CreatedBy); err != nil {
+		return err // gRPC error other than NotFound
+	} else if buyerReferral != nil {
+		commissionsToCreate = append(commissionsToCreate, sqlc.Commission{
+			ReferrerID:       buyerReferral.ReferrerId,
+			ReferredID:       *order.CreatedBy,
+			OrderNumber:      order.OrderNumber,
+			CurrencyCode:     *order.PriceCurrency,
+			CommissionAmount: calculateCommission(*order.PriceValue),
+		})
+	}
+
+	// 2. Get referral for farmer
+	if farmerReferral, err := i.getReferral(ctx, *order.ProductOwner); err != nil {
+		return err
+	} else if farmerReferral != nil {
+		commissionsToCreate = append(commissionsToCreate, sqlc.Commission{
+			ReferrerID:       farmerReferral.ReferrerId,
+			ReferredID:       *order.ProductOwner,
+			OrderNumber:      order.OrderNumber,
+			CurrencyCode:     *order.PriceCurrency,
+			CommissionAmount: calculateCommission(*order.PriceValue),
+		})
+	}
+
+	// 3. Create all commissions outside the if blocks
+	for _, c := range commissionsToCreate {
+		if _, err := querier.CreateCommission(ctx, sqlc.CreateCommissionParams{
+			ReferrerID:       c.ReferrerID,
+			ReferredID:       c.ReferredID,
+			OrderNumber:      c.OrderNumber,
+			CurrencyCode:     c.CurrencyCode,
+			CommissionAmount: c.CommissionAmount,
+		}); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func calculateCommission(orderAmount float64) float64 {
+	return (orderAmount * ReferralCommissionPercentage) / TotalPercentage
 }
 
 // GetOrderDetails implements ordersgrpc.OrdersServer.

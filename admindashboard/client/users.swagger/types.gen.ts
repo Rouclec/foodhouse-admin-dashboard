@@ -127,6 +127,10 @@ export type usersgrpcGetPublicUserResponse = {
     profileImage?: string;
 };
 
+export type usersgrpcGetReferralByReferredIdResponse = {
+    referral?: usersgrpcReferral;
+};
+
 export type usersgrpcGetUserActiveSubscriptionResponse = {
     userSubscription?: usersgrpcUserSubscription;
 };
@@ -192,6 +196,13 @@ export type usersgrpcPaymentMethod = {
 };
 
 export type usersgrpcReactivateUserResponse = unknown;
+
+export type usersgrpcReferral = {
+    id?: string;
+    referrerId?: string;
+    referredId?: string;
+    createdAt?: string;
+};
 
 export type usersgrpcRefreshAccessTokenRequest = {
     refreshToken?: string;

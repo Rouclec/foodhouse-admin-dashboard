@@ -1896,3 +1896,24 @@ func (i *Impl) OAuth(ctx context.Context, req *usersgrpc.OAuthRequest) (*usersgr
 		UserId: createdDBUser.ID,
 	}, nil
 }
+
+// GetReferralByReferredId implements usersgrpc.UsersServer.
+func (i *Impl) GetReferralByReferredId(ctx context.Context, req *usersgrpc.GetReferralByReferredIdRequest) (*usersgrpc.GetReferralByReferredIdResponse, error) {
+	referral, err := i.repo.Do().GetReferralByReferredID(ctx, req.GetReferredId())
+	if err != nil {
+		// if it is a not found error
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, status.Errorf(codes.NotFound, "no referral found for user with id %v", req.GetReferredId())
+		}
+		// Otherwise, some other error occurred
+		return nil, status.Errorf(codes.Internal, "error getting referral %v", err)
+	}
+	return &usersgrpc.GetReferralByReferredIdResponse{
+		Referral: &usersgrpc.Referral{
+			Id:         referral.ID,
+			ReferrerId: referral.ReferrerID,
+			ReferredId: referral.ReferredID,
+			CreatedAt:  timestamppb.New(referral.CreatedAt.Time),
+		},
+	}, nil
+}

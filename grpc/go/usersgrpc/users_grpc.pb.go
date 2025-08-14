@@ -57,6 +57,7 @@ const (
 	Users_SuspendUser_FullMethodName                   = "/usersgrpc.Users/SuspendUser"
 	Users_ReactivateUser_FullMethodName                = "/usersgrpc.Users/ReactivateUser"
 	Users_DeleteAgent_FullMethodName                   = "/usersgrpc.Users/DeleteAgent"
+	Users_GetReferralByReferredId_FullMethodName       = "/usersgrpc.Users/GetReferralByReferredId"
 )
 
 // UsersClient is the client API for Users service.
@@ -101,6 +102,7 @@ type UsersClient interface {
 	SuspendUser(ctx context.Context, in *SuspendUserRequest, opts ...grpc.CallOption) (*SuspendUserResponse, error)
 	ReactivateUser(ctx context.Context, in *ReactivateUserRequest, opts ...grpc.CallOption) (*ReactivateUserResponse, error)
 	DeleteAgent(ctx context.Context, in *DeleteAgentRequest, opts ...grpc.CallOption) (*DeleteAgentResponse, error)
+	GetReferralByReferredId(ctx context.Context, in *GetReferralByReferredIdRequest, opts ...grpc.CallOption) (*GetReferralByReferredIdResponse, error)
 }
 
 type usersClient struct {
@@ -491,6 +493,16 @@ func (c *usersClient) DeleteAgent(ctx context.Context, in *DeleteAgentRequest, o
 	return out, nil
 }
 
+func (c *usersClient) GetReferralByReferredId(ctx context.Context, in *GetReferralByReferredIdRequest, opts ...grpc.CallOption) (*GetReferralByReferredIdResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetReferralByReferredIdResponse)
+	err := c.cc.Invoke(ctx, Users_GetReferralByReferredId_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsersServer is the server API for Users service.
 // All implementations must embed UnimplementedUsersServer
 // for forward compatibility.
@@ -533,6 +545,7 @@ type UsersServer interface {
 	SuspendUser(context.Context, *SuspendUserRequest) (*SuspendUserResponse, error)
 	ReactivateUser(context.Context, *ReactivateUserRequest) (*ReactivateUserResponse, error)
 	DeleteAgent(context.Context, *DeleteAgentRequest) (*DeleteAgentResponse, error)
+	GetReferralByReferredId(context.Context, *GetReferralByReferredIdRequest) (*GetReferralByReferredIdResponse, error)
 	mustEmbedUnimplementedUsersServer()
 }
 
@@ -656,6 +669,9 @@ func (UnimplementedUsersServer) ReactivateUser(context.Context, *ReactivateUserR
 }
 func (UnimplementedUsersServer) DeleteAgent(context.Context, *DeleteAgentRequest) (*DeleteAgentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteAgent not implemented")
+}
+func (UnimplementedUsersServer) GetReferralByReferredId(context.Context, *GetReferralByReferredIdRequest) (*GetReferralByReferredIdResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetReferralByReferredId not implemented")
 }
 func (UnimplementedUsersServer) mustEmbedUnimplementedUsersServer() {}
 func (UnimplementedUsersServer) testEmbeddedByValue()               {}
@@ -1362,6 +1378,24 @@ func _Users_DeleteAgent_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Users_GetReferralByReferredId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetReferralByReferredIdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).GetReferralByReferredId(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Users_GetReferralByReferredId_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).GetReferralByReferredId(ctx, req.(*GetReferralByReferredIdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Users_ServiceDesc is the grpc.ServiceDesc for Users service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1520,6 +1554,10 @@ var Users_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteAgent",
 			Handler:    _Users_DeleteAgent_Handler,
+		},
+		{
+			MethodName: "GetReferralByReferredId",
+			Handler:    _Users_GetReferralByReferredId_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

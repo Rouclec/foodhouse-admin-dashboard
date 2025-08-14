@@ -44,3 +44,21 @@ func (q *Queries) CreateReferral(ctx context.Context, arg CreateReferralParams) 
 	)
 	return i, err
 }
+
+const getReferralByReferredID = `-- name: GetReferralByReferredID :one
+SELECT id, referrer_id, referred_id, created_at
+FROM referrals
+WHERE referred_id = $1
+`
+
+func (q *Queries) GetReferralByReferredID(ctx context.Context, referredID string) (Referral, error) {
+	row := q.db.QueryRow(ctx, getReferralByReferredID, referredID)
+	var i Referral
+	err := row.Scan(
+		&i.ID,
+		&i.ReferrerID,
+		&i.ReferredID,
+		&i.CreatedAt,
+	)
+	return i, err
+}

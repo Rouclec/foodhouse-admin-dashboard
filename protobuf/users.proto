@@ -477,6 +477,21 @@ message DeleteAgentRequest {
 
 message DeleteAgentResponse {}
 
+message Referral {
+  string id = 1;
+  string referrer_id = 2;
+  string referred_id = 3;
+  google.protobuf.Timestamp created_at = 4;
+}
+
+message GetReferralByReferredIdRequest {
+  string referred_id = 1;
+}
+
+message GetReferralByReferredIdResponse {
+  Referral referral = 1;
+}
+
 service Users {
 
   rpc SendSignupSmsOtp(SendSignupSmsOtpRequest)
@@ -734,4 +749,7 @@ service Users {
       delete : "/v1/admin/{admin_user_id}/users/{user_id}/delete-agent"
     };
   }
+
+  rpc GetReferralByReferredId(GetReferralByReferredIdRequest)
+      returns (GetReferralByReferredIdResponse) {}
 }

@@ -1725,6 +1725,14 @@
         }
       }
     },
+    "usersgrpcGetReferralByReferredIdResponse": {
+      "type": "object",
+      "properties": {
+        "referral": {
+          "$ref": "#/definitions/usersgrpcReferral"
+        }
+      }
+    },
     "usersgrpcGetUserActiveSubscriptionResponse": {
       "type": "object",
       "properties": {
@@ -1899,6 +1907,24 @@
     },
     "usersgrpcReactivateUserResponse": {
       "type": "object"
+    },
+    "usersgrpcReferral": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "referrerId": {
+          "type": "string"
+        },
+        "referredId": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
     },
     "usersgrpcRefreshAccessTokenRequest": {
       "type": "object",
