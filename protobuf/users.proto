@@ -216,6 +216,7 @@ message CompleteRegistrationRequest {
   string address = 5;
   string profile_image = 6;
   types.Point location_coordinates = 7;
+  string referral_code = 8;
 }
 
 // Response message for UpdateUser

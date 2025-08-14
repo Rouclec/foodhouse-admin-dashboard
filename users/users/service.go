@@ -1730,21 +1730,20 @@ func (i *Impl) GrantAgent(ctx context.Context,
 	}, nil
 }
 
-// OAuth implements usersgrpc.UsersServer.
-func (i *Impl) OAuth(ctx context.Context, req *usersgrpc.OAuthRequest) (*usersgrpc.AuthenticateResponse, error) {
-	authFactor := req.GetFactor()
-	var isOAuth bool
-
+func checkIsOAuth(authFactor *usersgrpc.AuthFactor) bool {
 	switch authFactor.GetType() {
 	case usersgrpc.FactorType_FACTOR_TYPE_GOOGLE:
-		isOAuth = true
+		return true
 	case usersgrpc.FactorType_FACTOR_TYPE_FACEBOOK:
-		isOAuth = true
+		return true
 	default:
-		isOAuth = false
+		return false
 	}
+}
 
-	if !isOAuth {
+// OAuth implements usersgrpc.UsersServer.
+func (i *Impl) OAuth(ctx context.Context, req *usersgrpc.OAuthRequest) (*usersgrpc.AuthenticateResponse, error) {
+	if ok := checkIsOAuth(req.GetFactor()); !ok {
 		return nil, status.Errorf(codes.Unauthenticated, "unauthorized request")
 	}
 
@@ -1805,7 +1804,7 @@ func (i *Impl) OAuth(ctx context.Context, req *usersgrpc.OAuthRequest) (*usersgr
 		return &usersgrpc.AuthenticateResponse{
 			LoginComplete: false,
 			AdditionalFactor: &usersgrpc.AdditionalFactor{
-				FactorType: authFactor.GetType(),
+				FactorType: req.GetFactor().GetType(),
 				FactorHint: "include user type",
 			},
 		}, nil

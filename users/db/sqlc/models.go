@@ -21,6 +21,13 @@ type FarmersReview struct {
 	CreatedBy *string            `json:"created_by"`
 }
 
+type Referral struct {
+	ID         string             `json:"id"`
+	ReferrerID string             `json:"referrer_id"`
+	ReferredID string             `json:"referred_id"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+}
+
 type RefreshToken struct {
 	Token     string             `json:"token"`
 	UserID    string             `json:"user_id"`
@@ -63,6 +70,7 @@ type User struct {
 	CreatedAt               pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt               pgtype.Timestamptz `json:"updated_at"`
 	UserStatus              string             `json:"user_status"`
+	ReferralCode            string             `json:"referral_code"`
 }
 
 type UserPaymentMethod struct {

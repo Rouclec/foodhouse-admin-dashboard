@@ -31,7 +31,7 @@ func (q *Queries) CountUsers(ctx context.Context, arg CountUsersParams) (int64, 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (phone_number, email, "password", first_name, last_name, residence_country_iso_code, "address", location_coordinates, profile_image, "role", user_status)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'UserStatus_ACTIVE')
-RETURNING id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status
+RETURNING id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code
 `
 
 type CreateUserParams struct {
@@ -76,6 +76,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.UserStatus,
+		&i.ReferralCode,
 	)
 	return i, err
 }
@@ -90,7 +91,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id string) error {
 }
 
 const getFarmer = `-- name: GetFarmer :one
-SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status FROM users WHERE id = $1 AND role = 'USER_ROLE_FARMER'
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code FROM users WHERE id = $1 AND role = 'USER_ROLE_FARMER'
 `
 
 func (q *Queries) GetFarmer(ctx context.Context, id string) (User, error) {
@@ -111,12 +112,13 @@ func (q *Queries) GetFarmer(ctx context.Context, id string) (User, error) {
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.UserStatus,
+		&i.ReferralCode,
 	)
 	return i, err
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status FROM users WHERE id = $1
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
@@ -137,12 +139,13 @@ func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.UserStatus,
+		&i.ReferralCode,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status FROM users WHERE email = $1
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code FROM users WHERE email = $1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email *string) (User, error) {
@@ -163,12 +166,13 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email *string) (User, erro
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.UserStatus,
+		&i.ReferralCode,
 	)
 	return i, err
 }
 
 const getUserByNationalNumber = `-- name: GetUserByNationalNumber :one
-SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code
 FROM users
 WHERE RIGHT(phone_number, CHAR_LENGTH($1::TEXT)) = $1::TEXT
   AND CHAR_LENGTH(phone_number) - CHAR_LENGTH($1::TEXT) BETWEEN 1 AND 5
@@ -192,12 +196,13 @@ func (q *Queries) GetUserByNationalNumber(ctx context.Context, nationalNumber st
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.UserStatus,
+		&i.ReferralCode,
 	)
 	return i, err
 }
 
 const getUserByPhoneNumber = `-- name: GetUserByPhoneNumber :one
-SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status FROM users WHERE phone_number = $1
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code FROM users WHERE phone_number = $1
 `
 
 func (q *Queries) GetUserByPhoneNumber(ctx context.Context, phoneNumber string) (User, error) {
@@ -218,12 +223,13 @@ func (q *Queries) GetUserByPhoneNumber(ctx context.Context, phoneNumber string) 
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.UserStatus,
+		&i.ReferralCode,
 	)
 	return i, err
 }
 
 const getUserForUpdate = `-- name: GetUserForUpdate :one
-SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status FROM users WHERE id = $1 FOR UPDATE
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code FROM users WHERE id = $1 FOR UPDATE
 `
 
 func (q *Queries) GetUserForUpdate(ctx context.Context, id string) (User, error) {
@@ -244,6 +250,7 @@ func (q *Queries) GetUserForUpdate(ctx context.Context, id string) (User, error)
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.UserStatus,
+		&i.ReferralCode,
 	)
 	return i, err
 }
@@ -406,7 +413,7 @@ func (q *Queries) ListFarmersByRating(ctx context.Context, arg ListFarmersByRati
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code
 FROM users 
 WHERE
     ( $2::TEXT = 'UserStatus_UNSPECIFIED' OR (user_status = $2::TEXT) )
@@ -462,6 +469,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.UserStatus,
+			&i.ReferralCode,
 		); err != nil {
 			return nil, err
 		}
@@ -503,7 +511,7 @@ SET
 WHERE
     id = $7
 RETURNING
-    id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status
+    id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code
 `
 
 type UpdateUserParams struct {
@@ -542,6 +550,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.UserStatus,
+		&i.ReferralCode,
 	)
 	return i, err
 }

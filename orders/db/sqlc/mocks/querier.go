@@ -41,6 +41,65 @@ func (m *MockQuerier) EXPECT() *MockQuerierMockRecorder {
 	return m.recorder
 }
 
+// AggregateCommissionByReferrer mocks base method.
+func (m *MockQuerier) AggregateCommissionByReferrer(ctx context.Context, arg sqlc.AggregateCommissionByReferrerParams) ([]sqlc.AggregateCommissionByReferrerRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AggregateCommissionByReferrer", ctx, arg)
+	ret0, _ := ret[0].([]sqlc.AggregateCommissionByReferrerRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AggregateCommissionByReferrer indicates an expected call of AggregateCommissionByReferrer.
+func (mr *MockQuerierMockRecorder) AggregateCommissionByReferrer(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AggregateCommissionByReferrer", reflect.TypeOf((*MockQuerier)(nil).AggregateCommissionByReferrer), ctx, arg)
+}
+
+// BulkSettleCommissions mocks base method.
+func (m *MockQuerier) BulkSettleCommissions(ctx context.Context, arg sqlc.BulkSettleCommissionsParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BulkSettleCommissions", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// BulkSettleCommissions indicates an expected call of BulkSettleCommissions.
+func (mr *MockQuerierMockRecorder) BulkSettleCommissions(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BulkSettleCommissions", reflect.TypeOf((*MockQuerier)(nil).BulkSettleCommissions), ctx, arg)
+}
+
+// CountUniqueOrdersByReferrer mocks base method.
+func (m *MockQuerier) CountUniqueOrdersByReferrer(ctx context.Context, arg sqlc.CountUniqueOrdersByReferrerParams) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CountUniqueOrdersByReferrer", ctx, arg)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CountUniqueOrdersByReferrer indicates an expected call of CountUniqueOrdersByReferrer.
+func (mr *MockQuerierMockRecorder) CountUniqueOrdersByReferrer(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountUniqueOrdersByReferrer", reflect.TypeOf((*MockQuerier)(nil).CountUniqueOrdersByReferrer), ctx, arg)
+}
+
+// CreateCommission mocks base method.
+func (m *MockQuerier) CreateCommission(ctx context.Context, arg sqlc.CreateCommissionParams) (sqlc.Commission, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateCommission", ctx, arg)
+	ret0, _ := ret[0].(sqlc.Commission)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateCommission indicates an expected call of CreateCommission.
+func (mr *MockQuerierMockRecorder) CreateCommission(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCommission", reflect.TypeOf((*MockQuerier)(nil).CreateCommission), ctx, arg)
+}
+
 // CreateDeliveryPoint mocks base method.
 func (m *MockQuerier) CreateDeliveryPoint(ctx context.Context, arg sqlc.CreateDeliveryPointParams) (sqlc.DeliveryPoint, error) {
 	m.ctrl.T.Helper()

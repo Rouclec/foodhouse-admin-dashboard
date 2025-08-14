@@ -9,6 +9,10 @@ import (
 )
 
 type Querier interface {
+	AggregateCommissionByReferrer(ctx context.Context, arg AggregateCommissionByReferrerParams) ([]AggregateCommissionByReferrerRow, error)
+	BulkSettleCommissions(ctx context.Context, arg BulkSettleCommissionsParams) error
+	CountUniqueOrdersByReferrer(ctx context.Context, arg CountUniqueOrdersByReferrerParams) (int64, error)
+	CreateCommission(ctx context.Context, arg CreateCommissionParams) (Commission, error)
 	CreateDeliveryPoint(ctx context.Context, arg CreateDeliveryPointParams) (DeliveryPoint, error)
 	CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error)
 	CreateOrderAuditLog(ctx context.Context, arg CreateOrderAuditLogParams) error

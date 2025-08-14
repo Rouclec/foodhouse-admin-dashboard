@@ -55,6 +55,21 @@ func (mr *MockQuerierMockRecorder) ActivateUserSubscription(ctx, id any) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ActivateUserSubscription", reflect.TypeOf((*MockQuerier)(nil).ActivateUserSubscription), ctx, id)
 }
 
+// CountReferralsByReferrer mocks base method.
+func (m *MockQuerier) CountReferralsByReferrer(ctx context.Context, referrerID string) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CountReferralsByReferrer", ctx, referrerID)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CountReferralsByReferrer indicates an expected call of CountReferralsByReferrer.
+func (mr *MockQuerierMockRecorder) CountReferralsByReferrer(ctx, referrerID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountReferralsByReferrer", reflect.TypeOf((*MockQuerier)(nil).CountReferralsByReferrer), ctx, referrerID)
+}
+
 // CountSentOtpsToFactorToday mocks base method.
 func (m *MockQuerier) CountSentOtpsToFactorToday(ctx context.Context, factor string) (int64, error) {
 	m.ctrl.T.Helper()
@@ -83,6 +98,21 @@ func (m *MockQuerier) CountUsers(ctx context.Context, arg sqlc.CountUsersParams)
 func (mr *MockQuerierMockRecorder) CountUsers(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountUsers", reflect.TypeOf((*MockQuerier)(nil).CountUsers), ctx, arg)
+}
+
+// CreateReferral mocks base method.
+func (m *MockQuerier) CreateReferral(ctx context.Context, arg sqlc.CreateReferralParams) (sqlc.Referral, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateReferral", ctx, arg)
+	ret0, _ := ret[0].(sqlc.Referral)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateReferral indicates an expected call of CreateReferral.
+func (mr *MockQuerierMockRecorder) CreateReferral(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateReferral", reflect.TypeOf((*MockQuerier)(nil).CreateReferral), ctx, arg)
 }
 
 // CreateRefreshToken mocks base method.

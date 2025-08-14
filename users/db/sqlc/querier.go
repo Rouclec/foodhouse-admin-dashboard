@@ -10,8 +10,10 @@ import (
 
 type Querier interface {
 	ActivateUserSubscription(ctx context.Context, id string) error
+	CountReferralsByReferrer(ctx context.Context, referrerID string) (int64, error)
 	CountSentOtpsToFactorToday(ctx context.Context, factor string) (int64, error)
 	CountUsers(ctx context.Context, arg CountUsersParams) (int64, error)
+	CreateReferral(ctx context.Context, arg CreateReferralParams) (Referral, error)
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) error
 	CreateReview(ctx context.Context, arg CreateReviewParams) (FarmersReview, error)
 	CreateSentOtp(ctx context.Context, arg CreateSentOtpParams) (SentOtp, error)

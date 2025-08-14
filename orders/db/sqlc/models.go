@@ -8,6 +8,18 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Commission struct {
+	Iid              string             `json:"iid"`
+	ReferrerID       string             `json:"referrer_id"`
+	ReferredID       string             `json:"referred_id"`
+	OrderNumber      int64              `json:"order_number"`
+	CurrencyCode     string             `json:"currency_code"`
+	CommissionAmount pgtype.Numeric     `json:"commission_amount"`
+	PaidAt           pgtype.Timestamptz `json:"paid_at"`
+	PaymentReference *string            `json:"payment_reference"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+}
+
 type DeliveryPoint struct {
 	ID                string             `json:"id"`
 	DeliveryLocation  pgtype.Point       `json:"delivery_location"`
