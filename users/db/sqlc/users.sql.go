@@ -228,6 +228,33 @@ func (q *Queries) GetUserByPhoneNumber(ctx context.Context, phoneNumber string) 
 	return i, err
 }
 
+const getUserByReferralCode = `-- name: GetUserByReferralCode :one
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code FROM users WHERE referral_code = $1
+`
+
+func (q *Queries) GetUserByReferralCode(ctx context.Context, referralCode string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByReferralCode, referralCode)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Role,
+		&i.PhoneNumber,
+		&i.Email,
+		&i.FirstName,
+		&i.LastName,
+		&i.ResidenceCountryIsoCode,
+		&i.Address,
+		&i.LocationCoordinates,
+		&i.ProfileImage,
+		&i.Password,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.UserStatus,
+		&i.ReferralCode,
+	)
+	return i, err
+}
+
 const getUserForUpdate = `-- name: GetUserForUpdate :one
 SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code FROM users WHERE id = $1 FOR UPDATE
 `

@@ -457,6 +457,12 @@ func (i *Impl) CompleteRegistration(
 
 	i.logger.Debug().Interface("update user params: ", arg)
 
+	err = i.CreateReferral(ctx, querier, req.GetReferralCode(), userID)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error creating referral %v", err)
+	}
+
 	_, err = querier.UpdateUser(ctx, arg)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "User cannot be updated, wrong argument: %v", err)
@@ -469,6 +475,22 @@ func (i *Impl) CompleteRegistration(
 	return &usersgrpc.CompleteRegistrationResponse{
 		Message: "Registration completed successfully.",
 	}, nil
+}
+
+func (i *Impl) CreateReferral(ctx context.Context, querrier sqlc.Querier, referralCode string, userID string) error {
+	if referralCode == "" {
+		return nil
+	}
+
+	referrer, err := querrier.GetUserByReferralCode(ctx, referralCode)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = querrier.CreateReferral(ctx, sqlc.CreateReferralParams{ReferrerID: referrer.ID, ReferredID: userID})
+
+	return err
 }
 
 // Authenticate implements usersgrpc.UsersServer.

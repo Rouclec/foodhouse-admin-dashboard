@@ -154,3 +154,6 @@ WHERE id = $1;
 
 -- name: DeleteUser :exec
 DELETE FROM users where id = $1;
+
+-- name: GetUserByReferralCode :one
+SELECT * FROM users WHERE referral_code = $1;
