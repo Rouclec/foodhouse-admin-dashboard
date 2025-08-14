@@ -621,7 +621,7 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 
 	_, err = querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
 		PaymentEntity:  ordersgrpc.PaymentEntity_PaymentEntity_ORDER.String(),
-		EntityID:       string(req.GetOrderNumber()),
+		EntityID:       strconv.FormatInt(req.GetOrderNumber(), 10),
 		AmountValue:    &payoutAmount,
 		AmountCurrency: order.PriceCurrency,
 		AccountNumber:  req.GetPayoutPhoneNumber(),
