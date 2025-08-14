@@ -1337,7 +1337,7 @@
         "locationCoordinates": {
           "$ref": "#/definitions/typesPoint"
         },
-        "referalCode": {
+        "referralCode": {
           "type": "string"
         }
       },

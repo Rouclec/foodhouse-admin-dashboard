@@ -28,7 +28,7 @@ export type UsersCompleteRegistrationBody = {
     address?: string;
     profileImage?: string;
     locationCoordinates?: typesPoint;
-    referalCode?: string;
+    referralCode?: string;
 };
 
 export type UsersCreateSubscriptionBody = {
