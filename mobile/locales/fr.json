@@ -145,7 +145,7 @@
         "paymentFailed": "Paiement échoué",
         "paymentFailedMessage": "Votre paiement n'a pas été effectué avec succès",
         "instructionMoMo": "Composez le *126# pour confirmer votre paiement",
-        "instructionOM": "Composez le #156# pour confirmer votre paiement"
+        "instructionOM": "Composez le #150*50# pour confirmer votre paiement"
       }
     }
   },

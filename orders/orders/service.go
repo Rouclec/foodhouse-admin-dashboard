@@ -52,7 +52,9 @@ const (
 
 	TPWPaymentStatusFailed = "FAILED"
 
-	TotalPercentage = 1.08
+	TotalPercentage = 1.10
+
+	FarmersPercentage = 0.95
 
 	CENT = 100
 )
@@ -604,7 +606,7 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 	}
 
 	// calculate payout amount from product price and order quantity
-	payoutAmount := float64(product.GetProduct().GetAmount().GetValue()) * float64(*order.Quantity)
+	payoutAmount := float64(product.GetProduct().GetAmount().GetValue()) * float64(*order.Quantity) * FarmersPercentage
 
 	i.logger.Debug().Msgf("payout phone number %v", req.GetPayoutPhoneNumber())
 
