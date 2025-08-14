@@ -169,13 +169,16 @@ export type ordersgrpcPayment = {
     updatedAt?: string;
     status?: ordersgrpcPaymentStatus;
     account?: ordersgrpcAccount;
+    type?: ordersgrpcPaymentType;
 };
 
-export type ordersgrpcPaymentEntity = 'PaymentEntity_UNSPECIFIED' | 'PaymentEntity_ORDER' | 'PaymentEntity_SUBSCRIPTION';
+export type ordersgrpcPaymentEntity = 'PaymentEntity_UNSPECIFIED' | 'PaymentEntity_ORDER' | 'PaymentEntity_SUBSCRIPTION' | 'PaymentEntity_COMMISSION';
 
 export type ordersgrpcPaymentMethodType = 'PaymentMethodType_UNSPECIFIED' | 'PaymentMethodType_MOBILE_MONEY' | 'PaymentMethodType_ORANGE_MONEY' | 'PaymentMethodType_CREDIT_CARD';
 
 export type ordersgrpcPaymentStatus = 'PaymentStatus_UNSPECIFIED' | 'PaymentStatus_INITIATED' | 'PaymentStatus_COMPLETED' | 'PaymentStatus_FAILED' | 'PaymentStatus_CANCELED';
+
+export type ordersgrpcPaymentType = 'PaymentType_UNSPECIFIED' | 'PaymentType_CREDIT' | 'PaymentType_DEBIT';
 
 export type ordersgrpcRejectOrderResponse = unknown;
 
@@ -270,7 +273,7 @@ export type OrdersListPaymentsData = {
     };
     query?: {
         count?: number;
-        paymentEntity?: 'PaymentEntity_UNSPECIFIED' | 'PaymentEntity_ORDER' | 'PaymentEntity_SUBSCRIPTION';
+        paymentEntity?: 'PaymentEntity_UNSPECIFIED' | 'PaymentEntity_ORDER' | 'PaymentEntity_SUBSCRIPTION' | 'PaymentEntity_COMMISSION';
         paymentStatus?: 'PaymentStatus_UNSPECIFIED' | 'PaymentStatus_INITIATED' | 'PaymentStatus_COMPLETED' | 'PaymentStatus_FAILED' | 'PaymentStatus_CANCELED';
         searchKey?: string;
         startKey?: string;

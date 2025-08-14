@@ -78,6 +78,7 @@ enum PaymentEntity {
   PaymentEntity_UNSPECIFIED = 0;
   PaymentEntity_ORDER = 1;
   PaymentEntity_SUBSCRIPTION = 2;
+  PaymentEntity_COMMISSION = 3;
 }
 
 enum PaymentMethodType {
@@ -85,6 +86,12 @@ enum PaymentMethodType {
   PaymentMethodType_MOBILE_MONEY = 1;
   PaymentMethodType_ORANGE_MONEY = 2;
   PaymentMethodType_CREDIT_CARD = 3;
+}
+
+enum PaymentType {
+  PaymentType_UNSPECIFIED = 0;
+  PaymentType_CREDIT = 1;
+  PaymentType_DEBIT = 2;
 }
 
 message Account {
@@ -103,10 +110,10 @@ message Payment {
   google.protobuf.Timestamp updated_at = 8;
   PaymentStatus status = 9;
   Account account = 10;
+  PaymentType type = 11;
 }
 
 message InitiatePaymentRequest {
-
   PaymentEntity payment_entity = 1;
   string entity_id = 2;
   string user_id = 3;

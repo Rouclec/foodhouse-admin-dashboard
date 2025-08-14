@@ -123,8 +123,8 @@ VALUES ($1, $2, $3, $4, $5, $6, $7);
 SELECT * from orders_audit WHERE order_number = $1;
 
 -- name: CreatePayment :one
-INSERT INTO payments (payment_entity, entity_id, amount_value, amount_currency, status, created_by, expires_at, method, account_number)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+INSERT INTO payments (payment_entity, entity_id, amount_value, amount_currency, status, created_by, expires_at, method, account_number, type)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 RETURNING *;
 
 -- name: GetPaymentById :one
@@ -200,14 +200,17 @@ WHERE status = 'PaymentStatus_COMPLETED'
 -- name: ListPayments :many
 SELECT * FROM payments 
 WHERE
-  ( sqlc.arg(payment_status)::TEXT = 'PaymentStatus_UNSPECIFIED' OR (status = sqlc.arg(payment_status)::TEXT) ) 
+  ( sqlc.arg(payment_status)::TEXT = 'PaymentStatus_UNSPECIFIED' OR status = sqlc.arg(payment_status)::TEXT ) 
   AND  
-  ( sqlc.arg(payment_entity)::TEXT = 'PaymentEntity_UNSPECIFIED' OR (payment_entity = sqlc.arg(payment_entity)::TEXT) ) 
+  ( sqlc.arg(payment_entity)::TEXT = 'PaymentEntity_UNSPECIFIED' OR payment_entity = sqlc.arg(payment_entity)::TEXT ) 
   AND  
+  ( sqlc.arg(payment_type)::TEXT = 'PaymentType_UNSPECIFIED' OR type = sqlc.arg(payment_type)::TEXT ) 
+  AND
   (
     sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
     OR created_at < sqlc.arg(created_before)::timestamptz
-  ) AND
+  ) 
+  AND
   (
     sqlc.arg(search_key)::TEXT IS NULL OR account_number ILIKE '%' || sqlc.arg(search_key) || '%'
   )

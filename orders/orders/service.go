@@ -619,6 +619,23 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 		return nil, status.Errorf(codes.Internal, "error making payout %v", err)
 	}
 
+	_, err = querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
+		PaymentEntity:  ordersgrpc.PaymentEntity_PaymentEntity_ORDER.String(),
+		EntityID:       string(req.GetOrderNumber()),
+		AmountValue:    &payoutAmount,
+		AmountCurrency: order.PriceCurrency,
+		AccountNumber:  req.GetPayoutPhoneNumber(),
+		Method:         ordersgrpc.PaymentMethodType_PaymentMethodType_MOBILE_MONEY.String(),
+		Status:         ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED.String(),
+		ExpiresAt:      pgtype.Timestamptz{Time: time.Now().Add(5 * time.Minute), Valid: true},
+		CreatedBy:      *order.ProductOwner,
+		Type:           ordersgrpc.PaymentType_PaymentType_DEBIT.String(),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error creating payment entity %v", err)
+	}
+
 	err = tx.Commit(ctx)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
@@ -842,6 +859,7 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 		Status:         ordersgrpc.PaymentStatus_PaymentStatus_INITIATED.String(),
 		ExpiresAt:      pgtype.Timestamptz{Time: time.Now().Add(5 * time.Minute), Valid: true},
 		CreatedBy:      req.GetUserId(),
+		Type:           ordersgrpc.PaymentType_PaymentType_CREDIT.String(),
 	})
 
 	if err != nil {

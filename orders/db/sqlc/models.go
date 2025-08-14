@@ -73,4 +73,5 @@ type Payment struct {
 	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
 	Method         string             `json:"method"`
 	AccountNumber  string             `json:"account_number"`
+	Type           string             `json:"type"`
 }

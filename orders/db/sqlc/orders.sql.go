@@ -135,9 +135,9 @@ func (q *Queries) CreateOrderAuditLog(ctx context.Context, arg CreateOrderAuditL
 }
 
 const createPayment = `-- name: CreatePayment :one
-INSERT INTO payments (payment_entity, entity_id, amount_value, amount_currency, status, created_by, expires_at, method, account_number)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-RETURNING id, status, payment_entity, entity_id, amount_value, amount_currency, created_by, expires_at, created_at, updated_at, method, account_number
+INSERT INTO payments (payment_entity, entity_id, amount_value, amount_currency, status, created_by, expires_at, method, account_number, type)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+RETURNING id, status, payment_entity, entity_id, amount_value, amount_currency, created_by, expires_at, created_at, updated_at, method, account_number, type
 `
 
 type CreatePaymentParams struct {
@@ -150,6 +150,7 @@ type CreatePaymentParams struct {
 	ExpiresAt      pgtype.Timestamptz `json:"expires_at"`
 	Method         string             `json:"method"`
 	AccountNumber  string             `json:"account_number"`
+	Type           string             `json:"type"`
 }
 
 func (q *Queries) CreatePayment(ctx context.Context, arg CreatePaymentParams) (Payment, error) {
@@ -163,6 +164,7 @@ func (q *Queries) CreatePayment(ctx context.Context, arg CreatePaymentParams) (P
 		arg.ExpiresAt,
 		arg.Method,
 		arg.AccountNumber,
+		arg.Type,
 	)
 	var i Payment
 	err := row.Scan(
@@ -178,6 +180,7 @@ func (q *Queries) CreatePayment(ctx context.Context, arg CreatePaymentParams) (P
 		&i.UpdatedAt,
 		&i.Method,
 		&i.AccountNumber,
+		&i.Type,
 	)
 	return i, err
 }
@@ -390,7 +393,7 @@ func (q *Queries) GetOrdersGroupedByYear(ctx context.Context, arg GetOrdersGroup
 }
 
 const getPaymentByEntity = `-- name: GetPaymentByEntity :one
-SELECT id, status, payment_entity, entity_id, amount_value, amount_currency, created_by, expires_at, created_at, updated_at, method, account_number from payments WHERE payment_entity = $1 AND entity_id = $2
+SELECT id, status, payment_entity, entity_id, amount_value, amount_currency, created_by, expires_at, created_at, updated_at, method, account_number, type from payments WHERE payment_entity = $1 AND entity_id = $2
 `
 
 type GetPaymentByEntityParams struct {
@@ -414,12 +417,13 @@ func (q *Queries) GetPaymentByEntity(ctx context.Context, arg GetPaymentByEntity
 		&i.UpdatedAt,
 		&i.Method,
 		&i.AccountNumber,
+		&i.Type,
 	)
 	return i, err
 }
 
 const getPaymentById = `-- name: GetPaymentById :one
-SELECT id, status, payment_entity, entity_id, amount_value, amount_currency, created_by, expires_at, created_at, updated_at, method, account_number from payments WHERE id = $1
+SELECT id, status, payment_entity, entity_id, amount_value, amount_currency, created_by, expires_at, created_at, updated_at, method, account_number, type from payments WHERE id = $1
 LIMIT 1
 `
 
@@ -439,6 +443,7 @@ func (q *Queries) GetPaymentById(ctx context.Context, id string) (Payment, error
 		&i.UpdatedAt,
 		&i.Method,
 		&i.AccountNumber,
+		&i.Type,
 	)
 	return i, err
 }
@@ -675,26 +680,30 @@ func (q *Queries) ListOrders(ctx context.Context, arg ListOrdersParams) ([]Order
 }
 
 const listPayments = `-- name: ListPayments :many
-SELECT id, status, payment_entity, entity_id, amount_value, amount_currency, created_by, expires_at, created_at, updated_at, method, account_number FROM payments 
+SELECT id, status, payment_entity, entity_id, amount_value, amount_currency, created_by, expires_at, created_at, updated_at, method, account_number, type FROM payments 
 WHERE
-  ( $1::TEXT = 'PaymentStatus_UNSPECIFIED' OR (status = $1::TEXT) ) 
+  ( $1::TEXT = 'PaymentStatus_UNSPECIFIED' OR status = $1::TEXT ) 
   AND  
-  ( $2::TEXT = 'PaymentEntity_UNSPECIFIED' OR (payment_entity = $2::TEXT) ) 
+  ( $2::TEXT = 'PaymentEntity_UNSPECIFIED' OR payment_entity = $2::TEXT ) 
   AND  
+  ( $3::TEXT = 'PaymentType_UNSPECIFIED' OR type = $3::TEXT ) 
+  AND
   (
-    $3::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
-    OR created_at < $3::timestamptz
-  ) AND
+    $4::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+    OR created_at < $4::timestamptz
+  ) 
+  AND
   (
-    $4::TEXT IS NULL OR account_number ILIKE '%' || $4 || '%'
+    $5::TEXT IS NULL OR account_number ILIKE '%' || $5 || '%'
   )
 ORDER BY created_at DESC
-LIMIT $5::int
+LIMIT $6::int
 `
 
 type ListPaymentsParams struct {
 	PaymentStatus string    `json:"payment_status"`
 	PaymentEntity string    `json:"payment_entity"`
+	PaymentType   string    `json:"payment_type"`
 	CreatedBefore time.Time `json:"created_before"`
 	SearchKey     string    `json:"search_key"`
 	Count         int32     `json:"count"`
@@ -704,6 +713,7 @@ func (q *Queries) ListPayments(ctx context.Context, arg ListPaymentsParams) ([]P
 	rows, err := q.db.Query(ctx, listPayments,
 		arg.PaymentStatus,
 		arg.PaymentEntity,
+		arg.PaymentType,
 		arg.CreatedBefore,
 		arg.SearchKey,
 		arg.Count,
@@ -728,6 +738,7 @@ func (q *Queries) ListPayments(ctx context.Context, arg ListPaymentsParams) ([]P
 			&i.UpdatedAt,
 			&i.Method,
 			&i.AccountNumber,
+			&i.Type,
 		); err != nil {
 			return nil, err
 		}

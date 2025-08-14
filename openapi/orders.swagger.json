@@ -218,7 +218,8 @@
             "enum": [
               "PaymentEntity_UNSPECIFIED",
               "PaymentEntity_ORDER",
-              "PaymentEntity_SUBSCRIPTION"
+              "PaymentEntity_SUBSCRIPTION",
+              "PaymentEntity_COMMISSION"
             ],
             "default": "PaymentEntity_UNSPECIFIED"
           }
@@ -1460,6 +1461,9 @@
         },
         "account": {
           "$ref": "#/definitions/ordersgrpcAccount"
+        },
+        "type": {
+          "$ref": "#/definitions/ordersgrpcPaymentType"
         }
       }
     },
@@ -1468,7 +1472,8 @@
       "enum": [
         "PaymentEntity_UNSPECIFIED",
         "PaymentEntity_ORDER",
-        "PaymentEntity_SUBSCRIPTION"
+        "PaymentEntity_SUBSCRIPTION",
+        "PaymentEntity_COMMISSION"
       ],
       "default": "PaymentEntity_UNSPECIFIED"
     },
@@ -1492,6 +1497,15 @@
         "PaymentStatus_CANCELED"
       ],
       "default": "PaymentStatus_UNSPECIFIED"
+    },
+    "ordersgrpcPaymentType": {
+      "type": "string",
+      "enum": [
+        "PaymentType_UNSPECIFIED",
+        "PaymentType_CREDIT",
+        "PaymentType_DEBIT"
+      ],
+      "default": "PaymentType_UNSPECIFIED"
     },
     "ordersgrpcRejectOrderResponse": {
       "type": "object"
