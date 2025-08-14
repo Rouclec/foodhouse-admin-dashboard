@@ -1,24 +1,24 @@
-import { Context, ContextType } from "@/app/_layout";
+import { Context, ContextType } from '@/app/_layout';
 import {
   ordersgrpcOrder,
   ordersgrpcOrderStatus,
-} from "@/client/orders.swagger";
-import { ordersListUserOrdersOptions } from "@/client/orders.swagger/@tanstack/react-query.gen";
-import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
-import { usersReviewFarmerMutation } from "@/client/users.swagger/@tanstack/react-query.gen";
+} from '@/client/orders.swagger';
+import { ordersListUserOrdersOptions } from '@/client/orders.swagger/@tanstack/react-query.gen';
+import { productsGetProductOptions } from '@/client/products.swagger/@tanstack/react-query.gen';
+import { usersReviewFarmerMutation } from '@/client/users.swagger/@tanstack/react-query.gen';
 import {
   FilterBottomSheet,
   FilterBottomSheetRef,
-} from "@/components/(buyer)/(index)/FilterBottomSheet";
-import { Colors } from "@/constants";
-import i18n from "@/i18n";
-import { defaultStyles, ordersStyles as styles } from "@/styles";
-import { delay } from "@/utils";
-import { formatAmount } from "@/utils/amountFormater";
-import { Feather } from "@expo/vector-icons";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
-import React, { FC, useContext, useEffect, useRef, useState } from "react";
+} from '@/components/(buyer)/(index)/FilterBottomSheet';
+import { Colors } from '@/constants';
+import i18n from '@/i18n';
+import { defaultStyles, ordersStyles as styles } from '@/styles';
+import { delay } from '@/utils';
+import { formatAmount } from '@/utils/amountFormater';
+import { Feather } from '@expo/vector-icons';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
+import React, { FC, useContext, useEffect, useRef, useState } from 'react';
 import {
   View,
   KeyboardAvoidingView,
@@ -28,8 +28,8 @@ import {
   FlatList,
   ActivityIndicator,
   Image,
-} from "react-native";
-import { Chase } from "react-native-animated-spinkit";
+} from 'react-native';
+import { Chase } from 'react-native-animated-spinkit';
 import {
   Appbar,
   Button,
@@ -37,17 +37,17 @@ import {
   Snackbar,
   Text,
   TextInput,
-} from "react-native-paper";
+} from 'react-native-paper';
 
-const { width } = Dimensions.get("window");
+const { width } = Dimensions.get('window');
 
 const PENDING_ORDER_STATUSES: Array<ordersgrpcOrderStatus> = [
-  "OrderStatus_PAYMENT_SUCCESSFUL",
-  "OrderStatus_APPROVED",
-  "OrderStatus_IN_TRANSIT",
+  'OrderStatus_PAYMENT_SUCCESSFUL',
+  'OrderStatus_APPROVED',
+  'OrderStatus_IN_TRANSIT',
 ];
 
-const { height } = Dimensions.get("window");
+const { height } = Dimensions.get('window');
 interface OrderItemProps {
   item: ordersgrpcOrder | undefined;
   onPress?: () => void;
@@ -60,7 +60,7 @@ const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
   } = useQuery({
     ...productsGetProductOptions({
       path: {
-        productId: item?.product ?? "",
+        productId: item?.product ?? '',
       },
     }),
   });
@@ -75,11 +75,10 @@ const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
   if (isError) {
     return (
       <View style={defaultStyles.center}>
-        <Text>{i18n.t("(buyer).(index).orders.couldNotLoadProduct")}</Text>
+        <Text>{i18n.t('(buyer).(index).orders.couldNotLoadProduct')}</Text>
       </View>
     );
   }
-
   return (
     <View style={defaultStyles.card}>
       <Image
@@ -90,16 +89,16 @@ const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
         <Text variant="titleMedium">{productData?.product?.name}</Text>
         <View style={styles.centerRow}>
           <Text variant="titleSmall" style={styles.primaryText}>
-            {item?.price?.currencyIsoCode}{" "}
-            {formatAmount(item?.price?.value ?? "", { decimalPlaces: 2 })}
+            {item?.price?.currencyIsoCode} {item?.price?.currencyIsoCode}{' '}
+            {formatAmount(item?.price?.value ?? '', { decimalPlaces: 2 })}
           </Text>
         </View>
         {!!onPress && (
           <Button style={defaultStyles.primaryButton} onPress={onPress}>
             <Text style={defaultStyles.buttonText}>
-              {item?.status === "OrderStatus_DELIVERED"
-                ? i18n.t("(buyer).(index).orders.writeReview")
-                : i18n.t("(buyer).(index).orders.trackOrder")}
+              {item?.status === 'OrderStatus_DELIVERED'
+                ? i18n.t('(buyer).(index).orders.writeReview')
+                : i18n.t('(buyer).(index).orders.trackOrder')}
             </Text>
           </Button>
         )}
@@ -114,12 +113,12 @@ export default function Orders() {
     value: Array<ordersgrpcOrderStatus>;
   }> = [
     {
-      name: i18n.t("(buyer).(index).orders.pending"),
+      name: i18n.t('(buyer).(index).orders.pending'),
       value: PENDING_ORDER_STATUSES,
     },
     {
-      name: i18n.t("(buyer).(index).orders.completed"),
-      value: ["OrderStatus_DELIVERED"],
+      name: i18n.t('(buyer).(index).orders.completed'),
+      value: ['OrderStatus_DELIVERED'],
     },
   ];
 
@@ -131,8 +130,8 @@ export default function Orders() {
   const [searchVisible, setSearchVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<ordersgrpcOrder>();
   const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debounceQuery, setDebounceQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debounceQuery, setDebounceQuery] = useState('');
   const [count, setCount] = useState(10);
   const [tabItem, setTabItem] = useState<{
     name: string;
@@ -143,7 +142,7 @@ export default function Orders() {
 
   const sheetRef = useRef<FilterBottomSheetRef>(null);
   const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState("");
+  const [comment, setComment] = useState('');
   const [error, setError] = useState<string>();
 
   const toggleSearch = () => {
@@ -153,8 +152,8 @@ export default function Orders() {
         duration: 500,
         useNativeDriver: true,
       }).start(() => setSearchVisible(false));
-      setSearchQuery("");
-      setDebounceQuery("");
+      setSearchQuery('');
+      setDebounceQuery('');
     } else {
       setSearchVisible(true);
       Animated.timing(slideAnim, {
@@ -176,11 +175,11 @@ export default function Orders() {
   const { data, isLoading } = useQuery({
     ...ordersListUserOrdersOptions({
       path: {
-        userId: user?.userId ?? "",
+        userId: user?.userId ?? '',
       },
       query: {
         count: count,
-        startKey: "",
+        startKey: '',
         statuses: tabItem.value,
       },
     }),
@@ -190,12 +189,12 @@ export default function Orders() {
     ...usersReviewFarmerMutation(),
     onSuccess: () => {
       setRating(0);
-      setComment("");
+      setComment('');
       sheetRef?.current?.close();
     },
-    onError: async (error) => {
+    onError: async error => {
       setError(
-        error?.response?.data?.message ?? i18n.t("(auth).login.anUnknownError")
+        error?.response?.data?.message ?? i18n.t('(auth).login.anUnknownError'),
       );
       await delay(5000);
       setError(undefined);
@@ -207,14 +206,14 @@ export default function Orders() {
       setLoading(true);
       await mutateAsync({
         body: {
-          farmerId: selectedOrder?.productOwner ?? "",
-          orderId: selectedOrder?.orderNumber ?? "",
-          productId: selectedOrder?.product ?? "",
+          farmerId: selectedOrder?.productOwner ?? '',
+          orderId: selectedOrder?.orderNumber ?? '',
+          productId: selectedOrder?.product ?? '',
           rating: rating,
           comment: comment,
         },
         path: {
-          userId: user?.userId ?? "",
+          userId: user?.userId ?? '',
         },
       });
     } catch (error) {
@@ -227,14 +226,13 @@ export default function Orders() {
     <>
       <KeyboardAvoidingView
         style={defaultStyles.container}
-        behavior={"padding"}
-        keyboardVerticalOffset={0}
-      >
+        behavior={'padding'}
+        keyboardVerticalOffset={0}>
         <View style={[defaultStyles.flex, defaultStyles.relativeContainer]}>
           <Appbar.Header dark={false} style={[defaultStyles.appHeader]}>
             {!searchVisible && (
               <Text variant="titleMedium" style={styles.title}>
-                {i18n.t("(buyer).(index).orders.myOrders")}
+                {i18n.t('(buyer).(index).orders.myOrders')}
               </Text>
             )}
 
@@ -249,19 +247,18 @@ export default function Orders() {
                 style={[
                   styles.searchContainer,
                   { transform: [{ translateX: slideAnim }] },
-                ]}
-              >
+                ]}>
                 <TextInput
-                  label={i18n.t("(buyer).(index).orders.searchOrder")}
+                  label={i18n.t('(buyer).(index).orders.searchOrder')}
                   style={[defaultStyles.input, styles.searchInput]}
                   autoFocus
                   value={searchQuery}
-                  onChangeText={(text) => setSearchQuery(text)}
+                  onChangeText={text => setSearchQuery(text)}
                   mode="outlined"
                   theme={{
                     colors: {
                       primary: Colors.primary[500],
-                      background: Colors.grey["fa"],
+                      background: Colors.grey['fa'],
                       error: Colors.error,
                     },
                     roundness: 10,
@@ -269,15 +266,14 @@ export default function Orders() {
                 />
                 <TouchableOpacity
                   onPress={toggleSearch}
-                  style={styles.closeIcon}
-                >
-                  <Icon source={"close"} size={24} color={Colors.dark[0]} />
+                  style={styles.closeIcon}>
+                  <Icon source={'close'} size={24} color={Colors.dark[0]} />
                 </TouchableOpacity>
               </Animated.View>
             )}
           </Appbar.Header>
           <View style={styles.tabItemsMainContainer}>
-            {TAB_ITEMS.map((item) => {
+            {TAB_ITEMS.map(item => {
               return (
                 <TouchableOpacity
                   key={item?.value[0]}
@@ -286,15 +282,13 @@ export default function Orders() {
                     styles.tabItemContainer,
                     tabItem.value === item?.value &&
                       styles.tabItemActiveContainer,
-                  ]}
-                >
+                  ]}>
                   <Text
                     variant="titleSmall"
                     style={[
                       styles.tabItemText,
                       tabItem.value === item?.value && styles.tabItemActiveText,
-                    ]}
-                  >
+                    ]}>
                     {item?.name}
                   </Text>
                 </TouchableOpacity>
@@ -318,7 +312,7 @@ export default function Orders() {
               ListEmptyComponent={
                 <View style={defaultStyles.noItemsContainer}>
                   <Text style={defaultStyles.noItems}>
-                    {i18n.t("(buyer).(index).orders.noOrdersFound")}
+                    {i18n.t('(buyer).(index).orders.noOrdersFound')}
                   </Text>
                 </View>
               }
@@ -333,17 +327,17 @@ export default function Orders() {
                   <OrderItem
                     item={item}
                     onPress={
-                      item?.status === "OrderStatus_DELIVERED"
+                      item?.status === 'OrderStatus_DELIVERED'
                         ? () => {
                             setSelectedOrder(item);
                             sheetRef?.current?.open();
                           }
                         : PENDING_ORDER_STATUSES.includes(
-                            item?.status as ordersgrpcOrderStatus
+                            item?.status as ordersgrpcOrderStatus,
                           )
                         ? () => {
                             router.push({
-                              pathname: "/(buyer)/track-order",
+                              pathname: '/(buyer)/track-order',
                               params: {
                                 orderNumber: item?.orderNumber,
                               },
@@ -360,7 +354,7 @@ export default function Orders() {
               }}
               onScrollEndDrag={() => {
                 if (hasReachedEnd && data?.nextKey) {
-                  setCount((prev) => prev + 10);
+                  setCount(prev => prev + 10);
                   setHasReachedEnd(false);
                 }
               }}
@@ -382,14 +376,12 @@ export default function Orders() {
       </KeyboardAvoidingView>
       <FilterBottomSheet
         ref={sheetRef}
-        sheetHeight={height * 0.9 > 643 ? 643 : height * 0.9}
-      >
+        sheetHeight={height * 0.9 > 643 ? 643 : height * 0.9}>
         <View style={styles.ratingTitleContainer}>
           <Text
             variant="titleMedium"
-            style={[styles.ratingTitle, defaultStyles.textCenter]}
-          >
-            {i18n.t("(buyer).(index).orders.leaveAReview")}
+            style={[styles.ratingTitle, defaultStyles.textCenter]}>
+            {i18n.t('(buyer).(index).orders.leaveAReview')}
           </Text>
         </View>
         <View style={styles.ratingTitleContainer}>
@@ -400,49 +392,44 @@ export default function Orders() {
             rowGap: 24,
             paddingVertical: 24,
             borderBottomWidth: 1,
-            borderColor: Colors.grey["border"],
-          }}
-        >
+            borderColor: Colors.grey['border'],
+          }}>
           <View
             style={{
-              alignItems: "center",
-              justifyContent: "center",
+              alignItems: 'center',
+              justifyContent: 'center',
               rowGap: 12,
-            }}
-          >
+            }}>
             <Text variant="titleMedium" style={defaultStyles.textCenter}>
-              {i18n.t("(buyer).(index).orders.howWasYourProduct")}
+              {i18n.t('(buyer).(index).orders.howWasYourProduct')}
             </Text>
             <Text
               style={[
                 defaultStyles.textCenter,
-                { fontSize: 16, color: Colors.grey["61"] },
+                { fontSize: 16, color: Colors.grey['61'] },
               ]}
-              variant="bodyLarge"
-            >
-              {i18n.t("(buyer).(index).orders.pleaseGiveYourRating")}
+              variant="bodyLarge">
+              {i18n.t('(buyer).(index).orders.pleaseGiveYourRating')}
             </Text>
           </View>
           <View
             style={[
               defaultStyles.center,
               {
-                flexDirection: "row",
+                flexDirection: 'row',
                 columnGap: 24,
               },
-            ]}
-          >
+            ]}>
             {Array(5)
-              .fill("a")
+              .fill('a')
               .map((_item, index) => {
                 return (
                   <TouchableOpacity
                     onPress={() => setRating(index + 1)}
-                    key={index}
-                  >
+                    key={index}>
                     <Icon
                       size={32}
-                      source={rating >= index + 1 ? "star" : "star-outline"}
+                      source={rating >= index + 1 ? 'star' : 'star-outline'}
                       color={
                         rating >= index + 1
                           ? Colors.primary[500]
@@ -457,18 +444,18 @@ export default function Orders() {
             <TextInput
               // style={defaultStyles.input}
               mode="outlined"
-              label={i18n.t("(buyer).(index).orders.review")}
+              label={i18n.t('(buyer).(index).orders.review')}
               value={comment}
               onChangeText={setComment}
               theme={{
                 colors: {
                   primary: Colors.primary[500],
-                  background: Colors.grey["fa"],
+                  background: Colors.grey['fa'],
                   error: Colors.error,
                 },
                 roundness: 10,
               }}
-              outlineColor={Colors.grey["bg"]}
+              outlineColor={Colors.grey['bg']}
             />
           </View>
         </View>
@@ -481,12 +468,11 @@ export default function Orders() {
             ]}
             onPress={() => {
               setRating(0);
-              setComment("");
+              setComment('');
               sheetRef?.current?.close();
-            }}
-          >
+            }}>
             <Text style={defaultStyles.secondaryButtonText}>
-              {i18n.t("(buyer).(index).orders.cancel")}
+              {i18n.t('(buyer).(index).orders.cancel')}
             </Text>
           </Button>
           <Button
@@ -498,10 +484,9 @@ export default function Orders() {
             ]}
             disabled={!rating || !comment || loading}
             loading={loading}
-            onPress={handleReview}
-          >
+            onPress={handleReview}>
             <Text style={defaultStyles.buttonText}>
-              {i18n.t("(buyer).(index).orders.submit")}
+              {i18n.t('(buyer).(index).orders.submit')}
             </Text>
           </Button>
         </View>
@@ -509,8 +494,7 @@ export default function Orders() {
           visible={!!error}
           onDismiss={() => {}}
           duration={3000}
-          style={defaultStyles.snackbar}
-        >
+          style={defaultStyles.snackbar}>
           <Text style={defaultStyles.errorText}>{error}</Text>
         </Snackbar>
       </FilterBottomSheet>

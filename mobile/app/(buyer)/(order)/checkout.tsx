@@ -67,7 +67,7 @@ export default function Checkout() {
         entityId: data?.order?.orderNumber ?? '',
         nextScreen: '/(buyer)/(index)' as RelativePathString,
         amount: {
-          value: (totalPrice ?? 0) * 1.08,
+          value: (totalPrice ?? 0) * 1.10,
           currencyIsoCode: productData?.product?.amount?.currencyIsoCode,
         },
       });
@@ -311,26 +311,12 @@ export default function Checkout() {
                 </View>
                 <View style={styles.rowItem}>
                   <Text style={styles.textSmall}>
-                    {i18n.t('(buyer).(order).checkout.transactionCharges')}
-                  </Text>
-                  <Text style={styles.textAlignRight} variant="titleMedium">
-                    {productData?.product?.amount?.currencyIsoCode}{' '}
-                    {formatAmount(
-                      ((totalPrice ?? 0) * 0.03)?.toString() ?? '',
-                      {
-                        decimalPlaces: 2,
-                      },
-                    )}
-                  </Text>
-                </View>
-                <View style={styles.rowItem}>
-                  <Text style={styles.textSmall}>
                     {i18n.t('(buyer).(order).checkout.serviceCharges')}
                   </Text>
                   <Text style={styles.textAlignRight} variant="titleMedium">
                     {productData?.product?.amount?.currencyIsoCode}{' '}
                     {formatAmount(
-                      ((totalPrice ?? 0) * 0.05)?.toString() ?? '',
+                      ((totalPrice ?? 0) * 0.10)?.toString() ?? '',
                       {
                         decimalPlaces: 2,
                       },
@@ -344,7 +330,7 @@ export default function Checkout() {
                   <Text style={styles.textAlignRight} variant="titleMedium">
                     {productData?.product?.amount?.currencyIsoCode}{' '}
                     {formatAmount(
-                      ((totalPrice ?? 0) * 1.08)?.toString() ?? '',
+                      ((totalPrice ?? 0) * 1.10)?.toString() ?? '',
                       {
                         decimalPlaces: 2,
                       },
@@ -369,7 +355,7 @@ export default function Checkout() {
           <Text variant="titleMedium" style={defaultStyles?.buttonText}>
             {i18n.t('(buyer).(order).checkout.confirmPayment')}{' '}
             {productData?.product?.amount?.currencyIsoCode}{' '}
-            {formatAmount(((totalPrice ?? 0) * 1.08)?.toString() ?? '', {
+            {formatAmount(((totalPrice ?? 0) * 1.10)?.toString() ?? '', {
               decimalPlaces: 2,
             })}
           </Text>
