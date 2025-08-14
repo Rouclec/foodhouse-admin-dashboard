@@ -38,6 +38,7 @@ type Querier interface {
 	GetUserByEmail(ctx context.Context, email *string) (User, error)
 	GetUserByNationalNumber(ctx context.Context, nationalNumber string) (User, error)
 	GetUserByPhoneNumber(ctx context.Context, phoneNumber string) (User, error)
+	GetUserByReferralCode(ctx context.Context, referralCode string) (User, error)
 	GetUserForUpdate(ctx context.Context, id string) (User, error)
 	GetUserPaymentMethodsByUserID(ctx context.Context, userID string) ([]UserPaymentMethod, error)
 	GetUserStatsBetweenDates(ctx context.Context, arg GetUserStatsBetweenDatesParams) (GetUserStatsBetweenDatesRow, error)

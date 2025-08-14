@@ -470,6 +470,21 @@ func (mr *MockQuerierMockRecorder) GetUserByPhoneNumber(ctx, phoneNumber any) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByPhoneNumber", reflect.TypeOf((*MockQuerier)(nil).GetUserByPhoneNumber), ctx, phoneNumber)
 }
 
+// GetUserByReferralCode mocks base method.
+func (m *MockQuerier) GetUserByReferralCode(ctx context.Context, referralCode string) (sqlc.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByReferralCode", ctx, referralCode)
+	ret0, _ := ret[0].(sqlc.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserByReferralCode indicates an expected call of GetUserByReferralCode.
+func (mr *MockQuerierMockRecorder) GetUserByReferralCode(ctx, referralCode any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByReferralCode", reflect.TypeOf((*MockQuerier)(nil).GetUserByReferralCode), ctx, referralCode)
+}
+
 // GetUserForUpdate mocks base method.
 func (m *MockQuerier) GetUserForUpdate(ctx context.Context, id string) (sqlc.User, error) {
 	m.ctrl.T.Helper()
