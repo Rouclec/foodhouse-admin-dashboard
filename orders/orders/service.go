@@ -324,7 +324,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 			})
 
 			if err != nil {
-				return nil, status.Errorf(codes.Internal, "error getting user for payment receipt %w", err)
+				return nil, status.Errorf(codes.Internal, "error getting user for payment receipt %v", err)
 			}
 
 			i.logger.Debug().Msgf("should send receipt to user %v", user.GetUser().GetEmail())
@@ -332,7 +332,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 			product, err := i.productService.GetProduct(ctx, &productsgrpc.GetProductRequest{ProductId: *order.Product})
 
 			if err != nil {
-				return nil, status.Errorf(codes.Internal, "error getting product for payment receipt %w", err)
+				return nil, status.Errorf(codes.Internal, "error getting product for payment receipt %v", err)
 			}
 
 			i.logger.Debug().Msgf("product %v", product.GetProduct())
@@ -371,7 +371,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 				})
 
 			if err != nil {
-				return nil, status.Errorf(codes.Internal, "error sending email receipt %w", err)
+				return nil, status.Errorf(codes.Internal, "error sending email receipt %v", err)
 			}
 		}
 
@@ -385,7 +385,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 
 	// case for when payment is for a user subscription
 	if payment.PaymentEntity == ordersgrpc.PaymentEntity_PaymentEntity_SUBSCRIPTION.String() {
-		i.logger.Debug().Msgf("user subscription id ", payment.EntityID)
+		i.logger.Debug().Msgf("user subscription id %v", payment.EntityID)
 
 		if req.GetStatus() != TPWPaymentStatusCompleted {
 			_, err := i.userService.DeleteUserSubscription(ctx, &usersgrpc.DeleteUserSubscriptionRequest{
@@ -825,7 +825,7 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 
 	// if there is an error different from no rows error, then it could be in internal server error, return
 	if !errors.Is(err, sql.ErrNoRows) {
-		return nil, fmt.Errorf("failed to check for existing payment: %w", err)
+		return nil, fmt.Errorf("failed to check for existing payment: %v", err)
 	}
 
 	if _, ok := supportedCurrencies[req.GetAmount().GetCurrencyIsoCode()]; !ok {
@@ -1112,7 +1112,7 @@ func ParsePaymentStatus(status string) (ordersgrpc.PaymentStatus, error) {
 
 // CheckPaymentStatus implements ordersgrpc.OrdersServer.
 func (i *Impl) CheckPaymentStatus(ctx context.Context, req *ordersgrpc.CheckPaymentStatusRequest) (*ordersgrpc.CheckPaymentStatusResponse, error) {
-	i.logger.Debug().Msgf("payment id ", req.GetPaymentId())
+	i.logger.Debug().Msgf("payment id %v", req.GetPaymentId())
 
 	payment, err := i.repo.Do().GetPaymentById(ctx, req.GetPaymentId())
 
@@ -1297,7 +1297,7 @@ func (i *Impl) GetFarmerEarnings(ctx context.Context,
 			var products []ProductQuantity
 			err := json.Unmarshal(r.Products, &products)
 			if err != nil {
-				return nil, status.Errorf(codes.Internal, "failed to parse product group: %w", err)
+				return nil, status.Errorf(codes.Internal, "failed to parse product group: %v", err)
 			}
 			rawResults[i] = Group{
 				GroupDate: pgtype.Timestamptz{Valid: true, Time: r.GroupDate},
@@ -1326,7 +1326,7 @@ func (i *Impl) GetFarmerEarnings(ctx context.Context,
 			var products []ProductQuantity
 			err := json.Unmarshal(r.Products, &products)
 			if err != nil {
-				return nil, status.Errorf(codes.Internal, "failed to parse product group: %w", err)
+				return nil, status.Errorf(codes.Internal, "failed to parse product group: %v", err)
 			}
 			rawResults[i] = Group{
 				GroupDate: pgtype.Timestamptz{Valid: true, Time: r.GroupDate},
@@ -1355,7 +1355,7 @@ func (i *Impl) GetFarmerEarnings(ctx context.Context,
 			var products []ProductQuantity
 			err := json.Unmarshal(r.Products, &products)
 			if err != nil {
-				return nil, status.Errorf(codes.Internal, "failed to parse product group: %w", err)
+				return nil, status.Errorf(codes.Internal, "failed to parse product group: %v", err)
 			}
 			rawResults[i] = Group{
 				GroupDate: pgtype.Timestamptz{Valid: true, Time: r.GroupDate},

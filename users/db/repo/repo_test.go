@@ -139,6 +139,7 @@ func TestUserLifecycle(t *testing.T) {
 	require.NoErrorf(t, err, "failed to create user: %v", err)
 	assert.NotEmptyf(t, createdUser.ID, "user ID should not be empty")
 	assert.Equalf(t, user.PhoneNumber, createdUser.PhoneNumber, "phone number should be equal")
+	assert.NotEmptyf(t, createdUser.ReferralCode, "referal code must exist")
 
 	// Get the user
 	fetchedUser, err := userRepo.Do().GetUser(ctx, createdUser.ID)

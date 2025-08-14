@@ -1336,6 +1336,9 @@
         },
         "locationCoordinates": {
           "$ref": "#/definitions/typesPoint"
+        },
+        "referalCode": {
+          "type": "string"
         }
       },
       "title": "Request message for UpdateUser"
