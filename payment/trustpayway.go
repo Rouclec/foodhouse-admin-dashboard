@@ -38,7 +38,7 @@ type LoginResponse struct {
 }
 
 type InitiatePaymentRequest struct {
-	Amount           float64 `json:"amount"`
+	Amount           string `json:"amount"`
 	Currency         string  `json:"currency"`
 	SubscriberMsisdn string  `json:"subscriberMsisdn"`
 	Descrtiption     string  `json:"description"`
@@ -119,7 +119,7 @@ func (tp *TrustPayWayProvider) RequestPayment(ctx context.Context, from string, 
 	tp.Logger.Debug().Msgf("login response %v", loginResponse)
 
 	requestBody := InitiatePaymentRequest{
-		Amount:           amount,
+		Amount:           fmt.Sprintf("%.2f", amount),
 		Currency:         currency,
 		SubscriberMsisdn: RemovePlusPrefix(from),
 		Descrtiption:     description,

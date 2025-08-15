@@ -222,6 +222,18 @@
               "PaymentEntity_COMMISSION"
             ],
             "default": "PaymentEntity_UNSPECIFIED"
+          },
+          {
+            "name": "paymentType",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "PaymentType_UNSPECIFIED",
+              "PaymentType_CREDIT",
+              "PaymentType_DEBIT"
+            ],
+            "default": "PaymentType_UNSPECIFIED"
           }
         ],
         "tags": [

@@ -275,6 +275,7 @@ export type OrdersListPaymentsData = {
         count?: number;
         paymentEntity?: 'PaymentEntity_UNSPECIFIED' | 'PaymentEntity_ORDER' | 'PaymentEntity_SUBSCRIPTION' | 'PaymentEntity_COMMISSION';
         paymentStatus?: 'PaymentStatus_UNSPECIFIED' | 'PaymentStatus_INITIATED' | 'PaymentStatus_COMPLETED' | 'PaymentStatus_FAILED' | 'PaymentStatus_CANCELED';
+        paymentType?: 'PaymentType_UNSPECIFIED' | 'PaymentType_CREDIT' | 'PaymentType_DEBIT';
         searchKey?: string;
         startKey?: string;
     };
