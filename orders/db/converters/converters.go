@@ -184,6 +184,9 @@ func SqlcPaymentToProto(payment sqlc.Payment) *ordersgrpc.Payment {
 	case ordersgrpc.PaymentEntity_PaymentEntity_SUBSCRIPTION.String():
 		entityEnum = ordersgrpc.PaymentEntity_PaymentEntity_SUBSCRIPTION
 		break
+	case ordersgrpc.PaymentEntity_PaymentEntity_COMMISSION.String():
+		entityEnum = ordersgrpc.PaymentEntity_PaymentEntity_COMMISSION
+		break
 	default:
 		entityEnum = ordersgrpc.PaymentEntity_PaymentEntity_UNSPECIFIED
 	}
@@ -203,6 +206,19 @@ func SqlcPaymentToProto(payment sqlc.Payment) *ordersgrpc.Payment {
 		paymentMethodEnum = ordersgrpc.PaymentMethodType_PaymentMethodType_UNSPECIFIED
 	}
 
+	var paymentTypeEmun ordersgrpc.PaymentType
+
+	switch payment.Type {
+	case ordersgrpc.PaymentType_PaymentType_CREDIT.String():
+		paymentTypeEmun = ordersgrpc.PaymentType_PaymentType_CREDIT
+		break
+	case ordersgrpc.PaymentType_PaymentType_DEBIT.String():
+		paymentTypeEmun = ordersgrpc.PaymentType_PaymentType_DEBIT
+		break
+	default:
+		paymentTypeEmun = ordersgrpc.PaymentType_PaymentType_UNSPECIFIED
+	}
+
 	return &ordersgrpc.Payment{
 		Id:            payment.ID,
 		EntityId:      payment.EntityID,
@@ -213,6 +229,7 @@ func SqlcPaymentToProto(payment sqlc.Payment) *ordersgrpc.Payment {
 		CreatedAt:     timestamppb.New(payment.CreatedAt.Time),
 		ExpiresAt:     timestamppb.New(payment.ExpiresAt.Time),
 		UpdatedAt:     timestamppb.New(payment.UpdatedAt.Time),
+		Type:          paymentTypeEmun,
 		Account: &ordersgrpc.Account{
 			PaymentMethod: paymentMethodEnum,
 			AccountNumber: payment.AccountNumber,

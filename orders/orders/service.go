@@ -653,7 +653,7 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 }
 
 func (i *Impl) getReferral(ctx context.Context, referredID string) (*usersgrpc.Referral, error) {
-	resp, err := i.userService.GetReferralByReferredId(ctx, &usersgrpc.GetReferralByReferredIdRequest{
+	resp, err := i.userService.GetReferralByReferredID(ctx, &usersgrpc.GetReferralByReferredIdRequest{
 		ReferredId: referredID,
 	})
 	if err != nil {

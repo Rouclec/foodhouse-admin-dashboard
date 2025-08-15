@@ -484,13 +484,9 @@ message Referral {
   google.protobuf.Timestamp created_at = 4;
 }
 
-message GetReferralByReferredIdRequest {
-  string referred_id = 1;
-}
+message GetReferralByReferredIdRequest { string referred_id = 1; }
 
-message GetReferralByReferredIdResponse {
-  Referral referral = 1;
-}
+message GetReferralByReferredIdResponse { Referral referral = 1; }
 
 service Users {
 
@@ -750,6 +746,6 @@ service Users {
     };
   }
 
-  rpc GetReferralByReferredId(GetReferralByReferredIdRequest)
+  rpc GetReferralByReferredID(GetReferralByReferredIdRequest)
       returns (GetReferralByReferredIdResponse) {}
 }

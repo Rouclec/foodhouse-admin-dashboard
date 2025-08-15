@@ -36,6 +36,7 @@ import {
   LucideProps,
   Tractor,
   Users,
+  TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -89,6 +90,7 @@ const menuItems: Array<{
     title: "Account",
     items: [
       { title: "Field Agents", url: "/dashboard/agents", icon: Truck },
+      {title: "Marketing Agents", url: "/dashboard/marketing-agents", icon: TrendingUp},
       { title: "Profile", url: "/dashboard/profile", icon: User },
       // { title: "Settings", url: "/dashboard/settings", icon: Settings },
     ],

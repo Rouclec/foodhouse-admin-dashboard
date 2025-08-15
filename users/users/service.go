@@ -1898,7 +1898,10 @@ func (i *Impl) OAuth(ctx context.Context, req *usersgrpc.OAuthRequest) (*usersgr
 }
 
 // GetReferralByReferredId implements usersgrpc.UsersServer.
-func (i *Impl) GetReferralByReferredId(ctx context.Context, req *usersgrpc.GetReferralByReferredIdRequest) (*usersgrpc.GetReferralByReferredIdResponse, error) {
+func (i *Impl) GetReferralByReferredID(
+	ctx context.Context,
+	req *usersgrpc.GetReferralByReferredIdRequest) (
+	*usersgrpc.GetReferralByReferredIdResponse, error) {
 	referral, err := i.repo.Do().GetReferralByReferredID(ctx, req.GetReferredId())
 	if err != nil {
 		// if it is a not found error
