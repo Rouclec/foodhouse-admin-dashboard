@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 	"strings"
 
@@ -39,11 +40,11 @@ type LoginResponse struct {
 
 type InitiatePaymentRequest struct {
 	Amount           string `json:"amount"`
-	Currency         string  `json:"currency"`
-	SubscriberMsisdn string  `json:"subscriberMsisdn"`
-	Descrtiption     string  `json:"description"`
-	OrderId          string  `json:"orderId"`
-	NotifUrl         string  `json:"notifUrl"`
+	Currency         string `json:"currency"`
+	SubscriberMsisdn string `json:"subscriberMsisdn"`
+	Descrtiption     string `json:"description"`
+	OrderId          string `json:"orderId"`
+	NotifUrl         string `json:"notifUrl"`
 }
 
 type InitiatePaymentResponse struct {
@@ -55,7 +56,7 @@ type InitiatePaymentResponse struct {
 }
 
 type InitiateWithdrawalRequest struct {
-	Amount           float64 `json:"amount"`
+	Amount           string `json:"amount"`
 	Currency         string  `json:"currency"`
 	SubscriberMsisdn string  `json:"subscriberMsisdn"`
 	Descrtiption     string  `json:"description"`
@@ -119,7 +120,7 @@ func (tp *TrustPayWayProvider) RequestPayment(ctx context.Context, from string, 
 	tp.Logger.Debug().Msgf("login response %v", loginResponse)
 
 	requestBody := InitiatePaymentRequest{
-		Amount:           fmt.Sprintf("%.2f", amount),
+		Amount:           fmt.Sprintf("%.0f", math.Ceil(amount)),
 		Currency:         currency,
 		SubscriberMsisdn: RemovePlusPrefix(from),
 		Descrtiption:     description,
@@ -178,7 +179,7 @@ func (tp *TrustPayWayProvider) WithdrawFunds(ctx context.Context, to string, amo
 	}
 
 	requestBody := InitiateWithdrawalRequest{
-		Amount:           amount,
+		Amount:           fmt.Sprintf("%.0f", math.Floor(amount)),
 		Currency:         currency,
 		SubscriberMsisdn: RemovePlusPrefix(to),
 		Descrtiption:     description,
