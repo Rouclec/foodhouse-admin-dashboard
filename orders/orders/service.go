@@ -1769,7 +1769,7 @@ func (i *Impl) ListPayments(ctx context.Context,
 
 	count := int(req.GetCount())
 	if count == 0 {
-		count = 10 // or whatever default you want
+		count = 10 
 	}
 
 	sqlcPayments, err := i.repo.Do().ListPayments(ctx, sqlc.ListPaymentsParams{
