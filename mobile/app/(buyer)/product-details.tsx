@@ -191,6 +191,11 @@ export default function ProductDetails() {
                     size={18}
                   />
                 </View>
+                {farmer?.user?.locationCoordinates?.address && (
+                  <Text variant="bodyLarge" style={styles.greyText}>
+                    {farmer.user.locationCoordinates.address}
+                  </Text>
+                )}
               </View>
             </View>
           </View>
