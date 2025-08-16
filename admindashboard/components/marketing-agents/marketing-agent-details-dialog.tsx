@@ -22,6 +22,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { DollarSign, TrendingUp, History } from "lucide-react";
+import { formatCurrency } from "@/utils";
 
 interface MarketingAgentDetails {
   id: string;
@@ -173,11 +174,15 @@ export function MarketingAgentDetailsDialog({
   const agent = mockAgentDetails[agentId];
   const paymentHistory = mockPaymentHistory[agentId] || [];
 
-  const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currency,
-    }).format(amount);
+  const getStatusColor = (status: string | undefined) => {
+    switch (status) {
+      case "active":
+        return "bg-green-100 text-green-800";
+      case "inactive":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
   };
 
   const handlePayCommission = async (currency: string, amount: number) => {
@@ -267,11 +272,7 @@ export function MarketingAgentDetailsDialog({
                   <p className="text-sm font-medium text-muted-foreground">
                     Status
                   </p>
-                  <Badge
-                    variant={
-                      agent.status === "active" ? "default" : "secondary"
-                    }
-                  >
+                  <Badge className={getStatusColor(agent.status)}>
                     {agent.status}
                   </Badge>
                 </div>

@@ -1687,7 +1687,7 @@ func (i *Impl) GrantAgent(ctx context.Context,
 
 		arg := sqlc.UpdateUserRoleParams{
 			ID:   foundUser.ID,
-			Role: usersgrpc.UserRole_USER_ROLE_AGENT.String(),
+			Role: req.GetRole().String(),
 		}
 
 		err = i.repo.Do().UpdateUserRole(ctx, arg)

@@ -25,11 +25,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, CreditCard, Calendar, ShoppingCart } from "lucide-react";
+import {
+  Search,
+  CreditCard,
+  Calendar,
+  ShoppingCart,
+  Percent,
+} from "lucide-react";
 import {
   ordersgrpcPayment,
   ordersgrpcPaymentEntity,
   ordersgrpcPaymentStatus,
+  ordersgrpcPaymentType,
 } from "@/client/orders.swagger";
 import { Context, ContextType } from "@/app/contexts/QueryProvider";
 import { useCursorPagination } from "@/hooks/use-cursor-pagination";
@@ -68,12 +75,12 @@ const STATUS_FILTERS: Array<{
   },
 ];
 
-const TYPE_FILTERS: Array<{
+const ENTITY_FILTERS: Array<{
   label: string;
   value: ordersgrpcPaymentEntity;
 }> = [
   {
-    label: "All Types",
+    label: "All Entities",
     value: "PaymentEntity_UNSPECIFIED",
   },
   {
@@ -83,6 +90,28 @@ const TYPE_FILTERS: Array<{
   {
     label: "Subscriptions",
     value: "PaymentEntity_SUBSCRIPTION",
+  },
+  {
+    label: "Commissions",
+    value: "PaymentEntity_COMMISSION",
+  },
+];
+
+const TYPE_FILTERS: Array<{
+  label: string;
+  value: ordersgrpcPaymentType;
+}> = [
+  {
+    label: "All Types",
+    value: "PaymentType_UNSPECIFIED",
+  },
+  {
+    label: "Debits",
+    value: "PaymentType_DEBIT",
+  },
+  {
+    label: "Credits",
+    value: "PaymentType_CREDIT",
   },
 ];
 
@@ -115,6 +144,17 @@ const PaymentItem: FC<PaymentItemProps> = ({ payment }) => {
     }
   };
 
+  const getAmountColor = (type: ordersgrpcPaymentType | undefined) => {
+    switch (type) {
+      case "PaymentType_CREDIT":
+        return "text-green-700";
+      case "PaymentType_DEBIT":
+        return "text-red-700";
+      case "PaymentType_UNSPECIFIED":
+        return "text-grey-700";
+    }
+  };
+
   const getTypeIcon = (type: ordersgrpcPaymentEntity | undefined) => {
     switch (type) {
       case "PaymentEntity_ORDER":
@@ -122,7 +162,7 @@ const PaymentItem: FC<PaymentItemProps> = ({ payment }) => {
       case "PaymentEntity_SUBSCRIPTION":
         return <Calendar className="h-4 w-4" />;
       default:
-        return <CreditCard className="h-4 w-4" />;
+        return <Percent className="h-4 w-4" />;
     }
   };
   if (isUserDataLoading) {
@@ -160,7 +200,12 @@ const PaymentItem: FC<PaymentItemProps> = ({ payment }) => {
       <TableCell className="hidden md:table-cell">
         {payment?.account?.accountNumber}
       </TableCell>
-      <TableCell>
+      <TableCell className={`${getAmountColor(payment?.type)}`}>
+        {payment?.type === "PaymentType_CREDIT"
+          ? "+"
+          : payment?.type === "PaymentType_DEBIT"
+          ? "-"
+          : "~"}
         {formatCurrency(
           payment?.amount?.value ?? 0,
           payment?.amount?.currencyIsoCode ?? ""
@@ -200,8 +245,12 @@ export default function PaymentsPage() {
     "PaymentStatus_UNSPECIFIED"
   );
 
-  const [typeFilter, setTypeFilter] = useState<ordersgrpcPaymentEntity>(
+  const [entityFilter, setEntityFilter] = useState<ordersgrpcPaymentEntity>(
     "PaymentEntity_UNSPECIFIED"
+  );
+
+  const [typeFilter, setTypeFilter] = useState<ordersgrpcPaymentType>(
+    "PaymentType_UNSPECIFIED"
   );
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -214,8 +263,9 @@ export default function PaymentsPage() {
       query: {
         searchKey: searchTerm,
         startKey: pagination.startKey,
-        paymentEntity: typeFilter,
+        paymentEntity: entityFilter,
         paymentStatus: statusFilter,
+        paymentType: typeFilter,
         count: pagination.pageSize,
       },
     }),
@@ -230,6 +280,8 @@ export default function PaymentsPage() {
       pagination.goToNextPage(paymentsData.nextKey);
     }
   };
+
+  console.log({ entityFilter, statusFilter, typeFilter });
 
   return (
     <div className="space-y-6">
@@ -249,7 +301,7 @@ export default function PaymentsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div className="sm:col-span-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -279,9 +331,26 @@ export default function PaymentsPage() {
               </SelectContent>
             </Select>
             <Select
+              value={entityFilter as string}
+              onValueChange={(value) =>
+                setEntityFilter(value as ordersgrpcPaymentEntity)
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Filter by entity" />
+              </SelectTrigger>
+              <SelectContent>
+                {ENTITY_FILTERS.map((filter, index) => (
+                  <SelectItem value={filter.value as string} key={index}>
+                    {filter.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
               value={typeFilter as string}
               onValueChange={(value) =>
-                setTypeFilter(value as ordersgrpcPaymentEntity)
+                setTypeFilter(value as ordersgrpcPaymentType)
               }
             >
               <SelectTrigger>

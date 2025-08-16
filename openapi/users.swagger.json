@@ -278,7 +278,8 @@
               "USER_ROLE_FARMER",
               "USER_ROLE_BUYER",
               "USER_ROLE_ADMIN",
-              "USER_ROLE_AGENT"
+              "USER_ROLE_AGENT",
+              "USER_ROLE_MARKETING_AGENT"
             ],
             "default": "USER_ROLE_UNSPECIFIED"
           }
@@ -1397,6 +1398,9 @@
         },
         "password": {
           "type": "string"
+        },
+        "role": {
+          "$ref": "#/definitions/usersgrpcUserRole"
         }
       }
     },
@@ -2232,7 +2236,8 @@
         "USER_ROLE_FARMER",
         "USER_ROLE_BUYER",
         "USER_ROLE_ADMIN",
-        "USER_ROLE_AGENT"
+        "USER_ROLE_AGENT",
+        "USER_ROLE_MARKETING_AGENT"
       ],
       "default": "USER_ROLE_UNSPECIFIED"
     },
@@ -2280,7 +2285,8 @@
         "USER_TYPE_UNSPECIFIED",
         "USER_TYPE_FARMER",
         "USER_TYPE_BUYER",
-        "USER_TYPE_AGENT"
+        "USER_TYPE_AGENT",
+        "USER_TYPE_MARKETING_AGENT"
       ],
       "default": "USER_TYPE_UNSPECIFIED"
     },
