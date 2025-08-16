@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useRef } from 'react';
 import {
   KeyboardAvoidingView,
   ScrollView,
@@ -28,35 +28,46 @@ import i18n from '@/i18n';
 import { ImagePicker } from '@/components';
 import { Chase } from 'react-native-animated-spinkit';
 import { Colors, emailRegex } from '@/constants';
+import {
+  GooglePlacesAutocomplete,
+  GooglePlacesAutocompleteRef,
+  GooglePlaceData, 
+  GooglePlaceDetail, 
+} from 'react-native-google-places-autocomplete';
+import { typesPoint } from '@/client/orders.swagger';
+
+
 
 const ProfilePage = () => {
   const { user, setUser } = useContext(Context) as ContextType;
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [address, setAddress] = useState('');
+  const [address, setAddress] = useState(''); 
+  const [locationCoordinates, setLocationCoordinates] = useState<typesPoint | null>(null);
   const [loading, setLoading] = useState(false);
   const [profileImage, setProfileImage] =
-    useState<ExpoImagePicker.ImagePickerAsset>();
+    useState<ExpoImagePicker.ImagePickerAsset | undefined>(undefined);
   const [errorMessage, setErrorMessage] = useState<string>();
   const [error, setError] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
   const { role } = useContext(Context) as ContextType;
+  const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
 
   const { mutateAsync: updateUserRegistration } = useMutation({
     ...usersCompleteRegistrationMutation(),
     onError: async error => {
+
       setErrorMessage(
         error?.response?.data?.message ?? i18n.t('(auth).profile.unknownError'),
       );
       setError(true);
-      await delay(5000);
+      await delay(5000); 
       setError(false);
     },
     onSuccess: async () => {
       setSuccessModalVisible(true);
-
       setTimeout(() => {
         if (role === 'USER_TYPE_FARMER') {
           router.replace('/(farmer)/(index)');
@@ -70,7 +81,7 @@ const ProfilePage = () => {
   const handleComplete = async () => {
     try {
       setLoading(true);
-      let imageUrl = null;
+      let imageUrl = user?.profileImage || null;
 
       if (profileImage) {
         imageUrl = await uploadImage({
@@ -79,19 +90,19 @@ const ProfilePage = () => {
           directory: 'profile_images',
         });
       }
-
       const data = {
         firstName,
         lastName,
         email,
-        address,
-        profileImage: imageUrl || undefined,
+        address, 
+        profileImage: imageUrl || undefined, 
+        locationCoordinates: locationCoordinates ?? undefined,
       };
 
       await updateUserRegistration({
         body: data,
         path: {
-          userId: user?.userId ?? '',
+          userId: user?.userId ?? '', 
         },
       });
       setUser({ ...data });
@@ -105,6 +116,20 @@ const ProfilePage = () => {
       setLoading(false);
     }
   };
+
+  const handleAddressSelect = (data: GooglePlaceData, details: GooglePlaceDetail | null = null) => {
+    setAddress(data.description);
+    if (details?.geometry?.location) {
+      setLocationCoordinates({
+        lat: details.geometry.location.lat,
+        lon: details.geometry.location.lng, 
+        address: data.description, 
+      });
+    } else {
+      setLocationCoordinates(null); 
+    }
+  };
+
   return (
     <>
       <KeyboardAvoidingView
@@ -127,7 +152,8 @@ const ProfilePage = () => {
             <TouchableOpacity
               onPress={() => setIsImagePickerVisible(true)}
               style={signupStyles.imageUpload}>
-              {profileImage ? (
+              
+              {profileImage?.uri ? (
                 <Image
                   source={{ uri: profileImage.uri }}
                   style={signupStyles.profileImage}
@@ -209,22 +235,42 @@ const ProfilePage = () => {
                 }}
               />
 
-              <TextInput
-                label={i18n.t('(auth).profile.address')}
-                value={address}
-                onChangeText={setAddress}
-                mode="outlined"
-                style={defaultStyles.input}
-                theme={{
-                  colors: {
-                    primary: Colors.primary[500],
-                    background: Colors.grey['fa'],
-                    error: Colors.error,
+              <GooglePlacesAutocomplete
+                ref={googlePlacesAutoCompleteRef}
+                placeholder={i18n.t(
+                  '(farmer).(profile-flow).(personal-info).address',
+                )}
+                styles={{
+                  textInput: {
+                    ...defaultStyles.input,
+                    backgroundColor: Colors.light[10],
+                    height: 56,
+                    borderRadius: 15,
+                    borderColor: Colors.grey['bg'],
+                    borderWidth: 1,
                   },
-                  roundness: 10,
+                  listView: {
+                    backgroundColor: Colors.light[10],
+                    borderRadius: 15,
+                    marginTop: 5,
+                    elevation: 3,
+                  },
                 }}
-                outlineColor={Colors.grey['bg']}
+                textInputProps={{
+                  placeholderTextColor: Colors.grey['3c'],
+                  value: address, 
+                }}
+                onPress={handleAddressSelect} 
+                fetchDetails={true}
+                predefinedPlaces={[]}
+                query={{
+                  key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_AUTOCOMPLETE_KEY,
+                  language: 'en',
+                }}
+                enablePoweredByContainer={false}
+                debounce={200}
               />
+
             </View>
           </ScrollView>
         </View>
@@ -270,7 +316,7 @@ const ProfilePage = () => {
       <Portal>
         <Dialog
           visible={successModalVisible}
-          onDismiss={() => {}}
+          onDismiss={() => {}} 
           style={defaultStyles.dialogSuccessContainer}>
           <Dialog.Content>
             <Image
@@ -296,7 +342,7 @@ const ProfilePage = () => {
 
       <Snackbar
         visible={!!error}
-        onDismiss={() => {}}
+        onDismiss={() => {}} 
         duration={3000}
         style={defaultStyles.snackbar}>
         <Text style={defaultStyles.errorText}>{errorMessage}</Text>

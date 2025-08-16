@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import {
   View,
   ScrollView,
@@ -29,11 +29,12 @@ import { usersCompleteRegistrationMutation } from '@/client/users.swagger/@tanst
 import { delay, uploadImage } from '@/utils';
 import { useMutation } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { GooglePlacesAutocompleteRef, GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
 export default function PersonalInfo() {
   const router = useRouter();
   const { user, setUser } = useContext(Context) as ContextType;
-
+const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
   const [originalProfileImage, setOriginalProfileImage] = useState(
     user?.profileImage || '',
   );
@@ -43,6 +44,7 @@ export default function PersonalInfo() {
     fullName: `${user?.firstName || ''} ${user?.lastName || ''}`.trim(),
     address: user?.address || '',
     email: user?.email || '',
+    locationCoordinates: user?.locationCoordinates || null,
   });
 
   const [loading, setLoading] = useState(false);
@@ -58,6 +60,8 @@ export default function PersonalInfo() {
       user?.address !== formData.address ||
       user?.email !== formData.email ||
       profileImage !== originalProfileImage;
+      JSON.stringify(user?.locationCoordinates) !==
+        JSON.stringify(formData.locationCoordinates);
 
     setHasChanges(changesDetected);
   }, [formData, profileImage]);
@@ -217,23 +221,55 @@ export default function PersonalInfo() {
                   style={loginstyles.input}
                 />
 
-                <TextInput
-                  mode="outlined"
-                  value={formData.address}
-                  onChangeText={text => handleInputChange('address', text)}
-                  label={i18n.t(
-                    '(farmer).(profile-flow).(personal-info).address',
-                  )}
-                  theme={{
-                    roundness: 15,
-                    colors: {
-                      onSurfaceVariant: Colors.grey['e8'],
-                      primary: Colors.primary[500],
-                    },
-                  }}
-                  outlineColor={Colors.grey['bg']}
-                  style={loginstyles.input}
-                />
+                <View style={loginstyles.input}>
+                  <GooglePlacesAutocomplete
+                    ref={googlePlacesAutoCompleteRef}
+                    placeholder={i18n.t(
+                      '(farmer).(profile-flow).(personal-info).address',
+                    )}
+                    styles={{
+                      textInput: {
+                        ...loginstyles.input,
+                        backgroundColor: Colors.light[10],
+                        height: 56,
+                        borderRadius: 15,
+                        borderColor: Colors.grey['bg'],
+                        borderWidth: 1,
+                      },
+                      listView: {
+                        backgroundColor: Colors.light[10],
+                        borderRadius: 15,
+                        marginTop: 5,
+                        elevation: 3,
+                      },
+                    }}
+                    textInputProps={{
+                      placeholderTextColor: Colors.grey['3c'],
+                      value: formData.address,
+                    }}
+                    onPress={(data, details = null) => {
+                      handleInputChange('address', data.description);
+                      if (details?.geometry?.location) {
+                        setFormData(prev => ({
+                          ...prev,
+                          locationCoordinates: {
+                            lat: details.geometry.location.lat,
+                            long: details.geometry.location.lng,
+                            address: data.description,
+                          },
+                        }));
+                      }
+                    }}
+                    fetchDetails={true}
+                    predefinedPlaces={[]}
+                    query={{
+                  key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_AUTOCOMPLETE_KEY,
+                  language: 'en',
+                }}
+                    enablePoweredByContainer={false}
+                    debounce={200}
+                  />
+                </View>
               </View>
             </View>
           </ScrollView>
