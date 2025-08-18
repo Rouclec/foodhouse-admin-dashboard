@@ -1,9 +1,9 @@
-import React, { Dispatch, FC, SetStateAction } from "react";
-import { Alert, TouchableOpacity } from "react-native";
-import { Dialog, Portal, Text } from "react-native-paper";
-import * as ExpoImagePicker from "expo-image-picker";
-import { imagePickerStyles as styles } from "@/styles";
-import i18n from "@/i18n";
+import React, { Dispatch, FC, SetStateAction } from 'react';
+import { Alert, TouchableOpacity } from 'react-native';
+import { Dialog, Portal, Text } from 'react-native-paper';
+import * as ExpoImagePicker from 'expo-image-picker';
+import { imagePickerStyles as styles } from '@/styles';
+import i18n from '@/i18n';
 
 interface Props {
   visible: boolean;
@@ -25,17 +25,17 @@ export const ImagePicker: FC<Props> = ({
     const { status } =
       await ExpoImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (status !== "granted") {
+    if (status !== 'granted') {
       Alert.alert(
-        i18n.t("components.ImagePicker.permissionDenied"),
-        i18n.t("components.ImagePicker.allowAccessToGallery")
+        i18n.t('components.ImagePicker.permissionDenied'),
+        i18n.t('components.ImagePicker.allowAccessToGallery'),
       );
       return;
     }
 
     // Open image picker
     const result = await ExpoImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect,
       quality: 1,
@@ -51,10 +51,10 @@ export const ImagePicker: FC<Props> = ({
     // Request camera permission
     const { status } = await ExpoImagePicker.requestCameraPermissionsAsync();
 
-    if (status !== "granted") {
+    if (status !== 'granted') {
       Alert.alert(
-        i18n.t("components.ImagePicker.permissionDenied"),
-        i18n.t("components.ImagePicker.allowAccessToCamera")
+        i18n.t('components.ImagePicker.permissionDenied'),
+        i18n.t('components.ImagePicker.allowAccessToCamera'),
       );
       return;
     }
@@ -77,28 +77,25 @@ export const ImagePicker: FC<Props> = ({
         <Dialog.Content style={styles.content}>
           <TouchableOpacity
             style={[styles.innerContent, styles.button, styles.bottomBorder]}
-            onPress={pickImage}
-          >
+            onPress={pickImage}>
             <Text style={styles.buttonText} variant="titleMedium">
-              {i18n.t("components.ImagePicker.photoGalery")}
+              {i18n.t('components.ImagePicker.photoGalery')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.innerContent, styles.button]}
-            onPress={takePhoto}
-          >
+            onPress={takePhoto}>
             <Text style={styles.buttonText} variant="titleMedium">
-              {i18n.t("components.ImagePicker.camera")}
+              {i18n.t('components.ImagePicker.camera')}
             </Text>
           </TouchableOpacity>
         </Dialog.Content>
         <Dialog.Content style={styles.content}>
           <TouchableOpacity
             style={[styles.innerContent, styles.button]}
-            onPress={onClose}
-          >
+            onPress={onClose}>
             <Text style={styles.buttonText} variant="titleMedium">
-              {i18n.t("components.ImagePicker.cancel")}
+              {i18n.t('components.ImagePicker.cancel')}
             </Text>
           </TouchableOpacity>
         </Dialog.Content>

@@ -16,7 +16,7 @@ import (
 const aggregateCommissionByReferrer = `-- name: AggregateCommissionByReferrer :many
 SELECT 
     currency_code,
-    SUM(commission_amount) AS total_amount
+    SUM(commission_amount)::float8 AS total_amount
 FROM commissions
 WHERE referrer_id = $1
   AND ($2::boolean IS NULL OR (paid_at IS NOT NULL) = $2::boolean)
@@ -30,8 +30,8 @@ type AggregateCommissionByReferrerParams struct {
 }
 
 type AggregateCommissionByReferrerRow struct {
-	CurrencyCode string `json:"currency_code"`
-	TotalAmount  int64  `json:"total_amount"`
+	CurrencyCode string  `json:"currency_code"`
+	TotalAmount  float64 `json:"total_amount"`
 }
 
 func (q *Queries) AggregateCommissionByReferrer(ctx context.Context, arg AggregateCommissionByReferrerParams) ([]AggregateCommissionByReferrerRow, error) {

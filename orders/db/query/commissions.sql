@@ -13,7 +13,7 @@ RETURNING *;
 -- name: AggregateCommissionByReferrer :many
 SELECT 
     currency_code,
-    SUM(commission_amount) AS total_amount
+    SUM(commission_amount)::float8 AS total_amount
 FROM commissions
 WHERE referrer_id = sqlc.arg(referrer_id)
   AND (sqlc.arg(is_paid)::boolean IS NULL OR (paid_at IS NOT NULL) = sqlc.arg(is_paid)::boolean)

@@ -28,6 +28,7 @@ import i18n from '@/i18n';
 import { ImagePicker } from '@/components';
 import { Chase } from 'react-native-animated-spinkit';
 import { Colors, emailRegex } from '@/constants';
+import { UsersCompleteRegistrationBody } from '@/client/users.swagger';
 
 const ProfilePage = () => {
   const { user, setUser } = useContext(Context) as ContextType;
@@ -81,13 +82,13 @@ const ProfilePage = () => {
         });
       }
 
-      const data = {
+      const data: UsersCompleteRegistrationBody = {
         firstName,
         lastName,
         email,
         address,
         profileImage: imageUrl || undefined,
-        referralCode,
+        referredBy: referralCode,
       };
 
       await updateUserRegistration({

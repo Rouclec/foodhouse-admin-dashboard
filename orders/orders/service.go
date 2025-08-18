@@ -57,7 +57,7 @@ const (
 
 	FarmersPercentage = 0.95
 
-	ReferralCommissionPercentage = 0.0225
+	ReferralCommissionPercentage = 0.045
 
 	CENT = 100
 )

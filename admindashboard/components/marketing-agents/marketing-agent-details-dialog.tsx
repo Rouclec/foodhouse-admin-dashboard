@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -41,114 +41,16 @@ import {
 } from "@/client/orders.swagger/@tanstack/react-query.gen";
 import { Button } from "../ui/button";
 
-interface MarketingAgentDetails {
-  id: string;
-  name: string;
-  email: string;
-  phoneNumber: string;
-  city: string;
-  referralCode: string;
-  status: "active" | "inactive";
-  createdAt: string;
-  commissions: {
-    currency: string;
-    unpaidAmount: number;
-    totalEarned: number;
-    lastTransactionDate?: string;
-  }[];
-}
-
-interface CommissionPayment {
-  id: string;
+type AggregatedCommission = {
   currency: string;
-  amount: number;
-  paidAt: string;
-  transactionReference?: string;
-}
-
+  totalValue: number;
+  ids: string[];
+};
 interface MarketingAgentDetailsDialogProps {
   isOpen: boolean;
   onClose: () => void;
   agentId: string;
 }
-
-const mockPaymentHistory: Record<string, CommissionPayment[]> = {
-  "1": [
-    {
-      id: "1",
-      currency: "USD",
-      amount: 500.0,
-      paidAt: "2024-01-10T10:00:00Z",
-      transactionReference: "PAY-1704873600000",
-    },
-    {
-      id: "2",
-      currency: "EUR",
-      amount: 300.0,
-      paidAt: "2024-01-12T14:30:00Z",
-      transactionReference: "PAY-1705060200000",
-    },
-  ],
-  "2": [
-    {
-      id: "3",
-      currency: "USD",
-      amount: 1200.0,
-      paidAt: "2024-01-15T09:15:00Z",
-      transactionReference: "PAY-1705309300000",
-    },
-    {
-      id: "4",
-      currency: "USD",
-      amount: 1000.0,
-      paidAt: "2024-01-22T11:45:00Z",
-      transactionReference: "PAY-1705914300000",
-    },
-  ],
-  "3": [
-    {
-      id: "5",
-      currency: "USD",
-      amount: 150.5,
-      paidAt: "2024-01-28T16:20:00Z",
-      transactionReference: "PAY-1706459200000",
-    },
-  ],
-};
-
-// Mock commission data for demonstration - remove when real data is available
-const mockCommissions: Record<string, MarketingAgentDetails["commissions"]> = {
-  "1": [
-    {
-      currency: "USD",
-      unpaidAmount: 250.0,
-      totalEarned: 1500.0,
-      lastTransactionDate: "2024-01-20T10:00:00Z",
-    },
-    {
-      currency: "EUR",
-      unpaidAmount: 180.5,
-      totalEarned: 890.5,
-      lastTransactionDate: "2024-01-18T14:30:00Z",
-    },
-  ],
-  "2": [
-    {
-      currency: "USD",
-      unpaidAmount: 0,
-      totalEarned: 2200.0,
-      lastTransactionDate: "2024-01-25T09:15:00Z",
-    },
-  ],
-  "3": [
-    {
-      currency: "USD",
-      unpaidAmount: 75.25,
-      totalEarned: 325.75,
-      lastTransactionDate: "2024-02-05T16:45:00Z",
-    },
-  ],
-};
 
 export function MarketingAgentDetailsDialog({
   isOpen,
@@ -161,6 +63,9 @@ export function MarketingAgentDetailsDialog({
   const [activeTab, setActiveTab] = useState<"commissions" | "payments">(
     "commissions"
   );
+  const [aggregatedCommissions, setAggregatedCommissions] =
+    useState<Array<AggregatedCommission>>();
+
   const { toast } = useToast();
 
   const { data: userData, isLoading: isUserDataLoading } = useQuery({
@@ -177,6 +82,7 @@ export function MarketingAgentDetailsDialog({
         userId: user?.userId ?? "",
       },
       query: {
+        paymentEntity: "PaymentEntity_COMMISSION",
         searchKey: userData?.user?.phoneNumber,
         startKey: "",
         count: 5,
@@ -203,7 +109,33 @@ export function MarketingAgentDetailsDialog({
     isUserDataLoading || isCommissionsDataLoading || isPaymentsDataLoading
   );
 
-  const paymentHistory = mockPaymentHistory[agentId] || [];
+  useEffect(() => {
+    const result: AggregatedCommission[] =
+      commissionsData?.commissions?.reduce(
+        (acc: AggregatedCommission[], curr) => {
+          const currency = curr?.commissionAmount?.currencyIsoCode ?? "";
+          const value = Number(curr?.commissionAmount?.value ?? 0);
+
+          let existing = acc.find((item) => item.currency === currency);
+          if (existing) {
+            existing.totalValue += value;
+            existing.ids.push(curr.id ?? "");
+          } else {
+            acc.push({
+              currency,
+              totalValue: value,
+              ids: [curr.id ?? ""],
+            });
+          }
+          return acc;
+        },
+        []
+      ) ?? [];
+
+    setAggregatedCommissions(result);
+  }, [commissionsData]);
+
+  // const paymentHistory = mockPaymentHistory[agentId] || [];
   // const commissions = mockCommissions[agentId] || [] // Remove when real data is available
 
   const getStatusColor = (status: usersgrpcUserStatus | undefined) => {
@@ -217,8 +149,14 @@ export function MarketingAgentDetailsDialog({
     }
   };
 
-  const handlePayCommission = async (currency: string, amount: number) => {
+  const handlePayCommission = async (
+    amount: number,
+    currency: string,
+    ids: string[]
+  ) => {
     setPayingCommission(currency);
+
+    console.log({ ids });
 
     try {
       // Mock API call
@@ -257,8 +195,6 @@ export function MarketingAgentDetailsDialog({
       </Dialog>
     );
   }
-
-  console.log({ activeTab });
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -387,12 +323,12 @@ export function MarketingAgentDetailsDialog({
 
             <TabsContent value="commissions" className="space-y-4 mt-4">
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {commissionsData?.commissions?.map((commission) => (
-                  <Card key={commission?.commissionAmount?.currencyIsoCode}>
+                {aggregatedCommissions?.map((commission) => (
+                  <Card key={commission?.currency}>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium flex items-center gap-2">
                         <DollarSign className="h-4 w-4" />
-                        {commission?.commissionAmount?.currencyIsoCode}
+                        {commission?.currency}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -400,15 +336,15 @@ export function MarketingAgentDetailsDialog({
                         <div>
                           <p className="text-xl sm:text-2xl font-bold text-green-600">
                             {formatCurrency(
-                              commission.commissionAmount?.value ?? "",
-                              commission.commissionAmount?.currencyIsoCode ?? ""
+                              commission?.totalValue ?? "",
+                              commission?.currency ?? ""
                             )}
                           </p>
                           <p className="text-xs text-muted-foreground">
                             Unpaid Commission
                           </p>
                         </div>
-                        <div>
+                        {/* <div>
                           <p className="text-sm font-medium">
                             {formatCurrency(
                               0,
@@ -420,174 +356,21 @@ export function MarketingAgentDetailsDialog({
                           <p className="text-xs text-muted-foreground">
                             Total Earned
                           </p>
-                        </div>
-                        {!!commission?.commissionAmount?.value && (
+                        </div> */}
+                        {!!commission?.totalValue && (
                           <Button
                             size="sm"
                             className="w-full mt-2"
                             onClick={() =>
-                              // handlePayCommission(
-                              //   commission.commissionAmount?.value ?? "",
-                              //   commission.commissionAmount?.currencyIsoCode
-                              // )
-                              console.log("hey")
+                              handlePayCommission(
+                                commission?.totalValue ?? 0,
+                                commission?.currency ?? "",
+                                commission?.ids ?? []
+                              )
                             }
-                            disabled={
-                              payingCommission ===
-                              commission.commissionAmount?.currencyIsoCode
-                            }
+                            disabled={payingCommission === commission?.currency}
                           >
-                            {payingCommission ===
-                            commission.commissionAmount?.currencyIsoCode
-                              ? "Processing..."
-                              : "Pay Commission"}
-                          </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-
-              {/* Mobile: Commission cards stacked layout */}
-              <div className="block sm:hidden space-y-3">
-                {commissionsData?.commissions?.map((commission) => (
-                  <Card
-                    key={commission?.commissionAmount?.currencyIsoCode}
-                    className="p-4"
-                  >
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <DollarSign className="h-4 w-4 text-gray-500" />
-                          <Badge
-                            variant="outline"
-                            className="text-xs font-mono"
-                          >
-                            {commission?.commissionAmount?.currencyIsoCode}
-                          </Badge>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-lg font-bold text-green-600">
-                            {formatCurrency(
-                              commission.commissionAmount?.value ?? "",
-                              commission.commissionAmount?.currencyIsoCode ?? ""
-                            )}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Unpaid
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">
-                          Total Earned:
-                        </span>
-                        <span className="font-medium">
-                          {/* {formatCurrency(commission.totalEarned, commission.currency)} */}
-                          {formatCurrency(0, "XAF")}
-                        </span>
-                      </div>
-
-                      {/* {commission.lastTransactionDate && (
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Calendar className="h-3 w-3" />
-                          Last: {new Date(commission.lastTransactionDate).toLocaleDateString()}
-                        </div>
-                      )} */}
-
-                      {!!commission?.commissionAmount?.value && (
-                        <Button
-                          size="sm"
-                          className="w-full"
-                          onClick={() =>
-                            // handlePayCommission(commission.currency, commission.unpaidAmount)
-                            {
-                              console.log("hey");
-                            }
-                          }
-                          disabled={
-                            payingCommission ===
-                            commission.commissionAmount?.currencyIsoCode
-                          }
-                        >
-                          {payingCommission ===
-                          commission.commissionAmount.currencyIsoCode
-                            ? "Processing..."
-                            : "Pay Commission"}
-                        </Button>
-                      )}
-                    </div>
-                  </Card>
-                ))}
-              </div>
-
-              {/* Desktop: Commission cards grid layout */}
-
-              <div className="hidden sm:grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {commissionsData?.commissions?.map((commission) => (
-                  <Card key={commission?.commissionAmount?.currencyIsoCode}>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium flex items-center gap-2">
-                        <DollarSign className="h-4 w-4" />
-                        {commission?.commissionAmount?.currencyIsoCode}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        <div>
-                          <p className="text-2xl font-bold text-green-600">
-                            {formatCurrency(
-                              commission?.commissionAmount?.value ?? "",
-                              commission?.commissionAmount?.currencyIsoCode ??
-                                ""
-                            )}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Unpaid Commission
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">
-                            {formatCurrency(
-                              commission?.commissionAmount?.value ?? "",
-                              commission?.commissionAmount?.currencyIsoCode ??
-                                ""
-                            )}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Total Earned
-                          </p>
-                        </div>
-                        {/* {commission.lastTransactionDate && (
-                          <div>
-                            <p className="text-xs text-muted-foreground">
-                              Last transaction:{" "}
-                              {new Date(
-                                commission.lastTransactionDate
-                              ).toLocaleDateString()}
-                            </p>
-                          </div>
-                        )} */}
-                        {!!commission?.commissionAmount?.currencyIsoCode && (
-                          <Button
-                            size="sm"
-                            className="w-full mt-2"
-                            onClick={() =>
-                              // handlePayCommission(
-                              //   commission.currency,
-                              //   commission.unpaidAmount
-                              // )
-                              console.log("hey")
-                            }
-                            disabled={
-                              payingCommission ===
-                              commission?.commissionAmount?.currencyIsoCode
-                            }
-                          >
-                            {payingCommission ===
-                            commission?.commissionAmount?.currencyIsoCode
+                            {payingCommission === commission.currency
                               ? "Processing..."
                               : "Pay Commission"}
                           </Button>
@@ -619,30 +402,33 @@ export function MarketingAgentDetailsDialog({
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {paymentHistory && paymentHistory.length > 0 ? (
+                  {paymentsData?.payments &&
+                  paymentsData?.payments.length > 0 ? (
                     <>
                       {/* Mobile: Card layout */}
                       <div className="block sm:hidden space-y-3">
-                        {paymentHistory.map((payment: CommissionPayment) => (
+                        {paymentsData?.payments?.map((payment) => (
                           <Card key={payment.id} className="p-4">
                             <div className="space-y-2">
                               <div className="flex items-center justify-between">
                                 <Badge variant="outline" className="text-xs">
-                                  {payment.currency}
+                                  {payment?.amount?.currencyIsoCode}
                                 </Badge>
                                 <span className="text-sm font-medium">
                                   {formatCurrency(
-                                    payment.amount,
-                                    payment.currency
+                                    payment?.amount?.value ?? "",
+                                    payment?.amount?.currencyIsoCode ?? ""
                                   )}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <Calendar className="h-3 w-3" />
-                                {new Date(payment.paidAt).toLocaleDateString()}
+                                {new Date(
+                                  payment?.updatedAt ?? ""
+                                ).toLocaleDateString()}
                               </div>
                               <div className="text-xs font-mono text-muted-foreground">
-                                Ref: {payment.transactionReference || "—"}
+                                Ref: {payment?.id || "—"}
                               </div>
                             </div>
                           </Card>
