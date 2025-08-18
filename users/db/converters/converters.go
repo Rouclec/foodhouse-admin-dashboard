@@ -92,34 +92,36 @@ func SqlcToProtoFarmers(sqlcFarmers []sqlc.ListFarmersByRatingRow) ([]*usersgrpc
 	return protoFarmers, nil
 }
 
+func SqlcToProtoUser(sqlcUser sqlc.User) *usersgrpc.User {
+	var status usersgrpc.UserStatus
+
+	switch sqlcUser.UserStatus {
+	case usersgrpc.UserStatus_UserStatus_ACTIVE.String():
+		status = usersgrpc.UserStatus_UserStatus_ACTIVE
+	case usersgrpc.UserStatus_UserStatus_SUSPENDED.String():
+		status = usersgrpc.UserStatus_UserStatus_SUSPENDED
+	default:
+		status = usersgrpc.UserStatus_UserStatus_UNSPECIFIED
+	}
+
+	return &usersgrpc.User{
+		UserId:       sqlcUser.ID,
+		FirstName:    derefString(sqlcUser.FirstName),
+		LastName:     derefString(sqlcUser.LastName),
+		ProfileImage: derefString(&sqlcUser.ProfileImage),
+		Address:      derefString(sqlcUser.Address),
+		CreatedAt:    timestamppb.New(sqlcUser.CreatedAt.Time),
+		Email:        derefString(sqlcUser.Email),
+		PhoneNumber:  derefString(&sqlcUser.PhoneNumber),
+		Status:       status,
+		ReferralCode: sqlcUser.ReferralCode,
+	}
+}
 func SqlcToProtoUsers(sqlcUsers []sqlc.User) ([]*usersgrpc.User, error) {
 	protoUsers := make([]*usersgrpc.User, 0, len(sqlcUsers))
 
 	for _, su := range sqlcUsers {
-		var status usersgrpc.UserStatus
-
-		switch su.UserStatus {
-		case usersgrpc.UserStatus_UserStatus_ACTIVE.String():
-			status = usersgrpc.UserStatus_UserStatus_ACTIVE
-		case usersgrpc.UserStatus_UserStatus_SUSPENDED.String():
-			status = usersgrpc.UserStatus_UserStatus_SUSPENDED
-		default:
-			status = usersgrpc.UserStatus_UserStatus_UNSPECIFIED
-		}
-
-		protoUsers = append(protoUsers,
-			&usersgrpc.User{
-				UserId:       su.ID,
-				FirstName:    derefString(su.FirstName),
-				LastName:     derefString(su.LastName),
-				ProfileImage: derefString(&su.ProfileImage),
-				Address:      derefString(su.Address),
-				CreatedAt:    timestamppb.New(su.CreatedAt.Time),
-				Email:        derefString(su.Email),
-				PhoneNumber:  derefString(&su.PhoneNumber),
-				Status:       status,
-				ReferralCode: su.ReferralCode,
-			})
+		protoUsers = append(protoUsers, SqlcToProtoUser(su))
 	}
 
 	return protoUsers, nil

@@ -40,50 +40,6 @@ interface MarketingAgent {
   }[];
 }
 
-// Mock data for demonstration
-const mockMarketingAgents: MarketingAgent[] = [
-  {
-    id: "1",
-    name: "John Smith",
-    email: "john.smith@example.com",
-    phoneNumber: "+1234567890",
-    city: "New York",
-    referralCode: "ABC1234",
-    status: "active",
-    createdAt: "2024-01-15T10:00:00Z",
-    totalCommissions: [
-      { currency: "USD", unpaidAmount: 250.0, totalEarned: 1500.0 },
-      { currency: "EUR", unpaidAmount: 180.5, totalEarned: 890.5 },
-    ],
-  },
-  {
-    id: "2",
-    name: "Sarah Johnson",
-    email: "sarah.johnson@example.com",
-    phoneNumber: "+1234567891",
-    city: "Los Angeles",
-    referralCode: "DEF5678",
-    status: "active",
-    createdAt: "2024-01-20T14:30:00Z",
-    totalCommissions: [
-      { currency: "USD", unpaidAmount: 0, totalEarned: 2200.0 },
-    ],
-  },
-  {
-    id: "3",
-    name: "Mike Wilson",
-    email: "mike.wilson@example.com",
-    phoneNumber: "+1234567892",
-    city: "Chicago",
-    referralCode: "GHI9012",
-    status: "inactive",
-    createdAt: "2024-02-01T09:15:00Z",
-    totalCommissions: [
-      { currency: "USD", unpaidAmount: 75.25, totalEarned: 325.75 },
-    ],
-  },
-];
-
 const formatCurrency = (amount: number, currency: string) => {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -151,7 +107,7 @@ export default function MarketingAgentsPage() {
     setEditingAgent(undefined);
     setDialogMode("create");
     setIsCreateEditOpen(false);
-    refetch()
+    refetch();
   };
 
   const getTotalUnpaidCommission = (
@@ -222,7 +178,7 @@ export default function MarketingAgentsPage() {
                         <Badge
                           className={`${getStatusColor(agent.status)} mt-1`}
                         >
-                          {agent.status}
+                          {agent.status?.replace("UserStatus_", "")}
                         </Badge>
                       </div>
                       <Badge variant="outline" className="font-mono text-xs">
@@ -326,7 +282,7 @@ export default function MarketingAgentsPage() {
                       </TableCell>
                       <TableCell>
                         <Badge className={getStatusColor(agent.status)}>
-                          {agent.status}
+                          {agent.status?.replace("UserStatus_", "")}
                         </Badge>
                       </TableCell>
                       <TableCell>

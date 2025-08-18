@@ -366,21 +366,10 @@ func (i *Impl) GetUserByID(
 
 	i.logger.Debug().Interface("User found", foundUser).Msg("User from DB")
 
+	protoUser := converters.SqlcToProtoUser(foundUser)
+
 	return &usersgrpc.GetUserByIDResponse{
-		User: &usersgrpc.User{
-			UserId:                  foundUser.ID,
-			PhoneNumber:             foundUser.PhoneNumber,
-			Email:                   safeString(foundUser.Email),
-			Role:                    getUserRole(foundUser.Role),
-			FirstName:               safeString(foundUser.FirstName),
-			LastName:                safeString(foundUser.LastName),
-			ResidenceCountryIsoCode: foundUser.ResidenceCountryIsoCode,
-			ProfileImage:            safeString(&foundUser.ProfileImage),
-			LocationCoordinates:     getLocationPoint(foundUser.LocationCoordinates),
-			Address:                 safeString(foundUser.Address),
-			CreatedAt:               timestamppb.New(foundUser.CreatedAt.Time),
-			UpdatedAt:               timestamppb.New(foundUser.UpdatedAt.Time),
-		},
+		User: protoUser,
 	}, nil
 }
 

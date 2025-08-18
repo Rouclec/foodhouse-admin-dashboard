@@ -23,6 +23,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { DollarSign, TrendingUp, History } from "lucide-react";
 import { formatCurrency } from "@/utils";
+import { useQuery } from "@tanstack/react-query";
+import { usersGetUserByIdOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
+import { useQueryLoading } from "@/hooks/use-query-loading";
+import { usersgrpcUserStatus } from "@/client/users.swagger";
 
 interface MarketingAgentDetails {
   id: string;
@@ -54,70 +58,6 @@ interface MarketingAgentDetailsDialogProps {
   onClose: () => void;
   agentId: string;
 }
-
-// Mock data
-const mockAgentDetails: Record<string, MarketingAgentDetails> = {
-  "1": {
-    id: "1",
-    name: "John Smith",
-    email: "john.smith@example.com",
-    phoneNumber: "+1234567890",
-    city: "New York",
-    referralCode: "ABC1234",
-    status: "active",
-    createdAt: "2024-01-15T10:00:00Z",
-    commissions: [
-      {
-        currency: "USD",
-        unpaidAmount: 250.0,
-        totalEarned: 1500.0,
-        lastTransactionDate: "2024-01-20T10:00:00Z",
-      },
-      {
-        currency: "EUR",
-        unpaidAmount: 180.5,
-        totalEarned: 890.5,
-        lastTransactionDate: "2024-01-18T14:30:00Z",
-      },
-    ],
-  },
-  "2": {
-    id: "2",
-    name: "Sarah Johnson",
-    email: "sarah.johnson@example.com",
-    phoneNumber: "+1234567891",
-    city: "Los Angeles",
-    referralCode: "DEF5678",
-    status: "active",
-    createdAt: "2024-01-20T14:30:00Z",
-    commissions: [
-      {
-        currency: "USD",
-        unpaidAmount: 0,
-        totalEarned: 2200.0,
-        lastTransactionDate: "2024-01-25T09:15:00Z",
-      },
-    ],
-  },
-  "3": {
-    id: "3",
-    name: "Mike Wilson",
-    email: "mike.wilson@example.com",
-    phoneNumber: "+1234567892",
-    city: "Chicago",
-    referralCode: "GHI9012",
-    status: "inactive",
-    createdAt: "2024-02-01T09:15:00Z",
-    commissions: [
-      {
-        currency: "USD",
-        unpaidAmount: 75.25,
-        totalEarned: 325.75,
-        lastTransactionDate: "2024-02-05T16:45:00Z",
-      },
-    ],
-  },
-};
 
 const mockPaymentHistory: Record<string, CommissionPayment[]> = {
   "1": [
@@ -171,14 +111,23 @@ export function MarketingAgentDetailsDialog({
   const [payingCommission, setPayingCommission] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const agent = mockAgentDetails[agentId];
+  const { data: userData, isLoading: isUserDataLoading } = useQuery({
+    ...usersGetUserByIdOptions({
+      path: {
+        userId: agentId,
+      },
+    }),
+  });
+
+  useQueryLoading(isUserDataLoading);
+
   const paymentHistory = mockPaymentHistory[agentId] || [];
 
-  const getStatusColor = (status: string | undefined) => {
+  const getStatusColor = (status: usersgrpcUserStatus | undefined) => {
     switch (status) {
-      case "active":
+      case "UserStatus_ACTIVE":
         return "bg-green-100 text-green-800";
-      case "inactive":
+      case "UserStatus_SUSPENDED":
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -214,7 +163,7 @@ export function MarketingAgentDetailsDialog({
     }
   };
 
-  if (!agent) {
+  if (!userData?.user) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-[800px]">
@@ -232,12 +181,12 @@ export function MarketingAgentDetailsDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
-            {agent.name} - Marketing Agent Details
+            {userData?.user.firstName} - Marketing Agent Details
           </DialogTitle>
           <DialogDescription>
             Referral Code:{" "}
             <Badge variant="outline" className="font-mono">
-              {agent.referralCode}
+              {userData?.user.referralCode}
             </Badge>
           </DialogDescription>
         </DialogHeader>
@@ -254,26 +203,26 @@ export function MarketingAgentDetailsDialog({
                   <p className="text-sm font-medium text-muted-foreground">
                     Email
                   </p>
-                  <p>{agent.email}</p>
+                  <p>{userData?.user.email}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
                     Phone
                   </p>
-                  <p>{agent.phoneNumber}</p>
+                  <p>{userData?.user.phoneNumber}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
                     City
                   </p>
-                  <p>{agent.city}</p>
+                  <p>{userData?.user?.address}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
                     Status
                   </p>
-                  <Badge className={getStatusColor(agent.status)}>
-                    {agent.status}
+                  <Badge className={getStatusColor(userData?.user.status)}>
+                    {userData?.user?.status?.replace("UserStatus_", "")}
                   </Badge>
                 </div>
               </div>
@@ -287,7 +236,7 @@ export function MarketingAgentDetailsDialog({
             </TabsList>
 
             <TabsContent value="commissions" className="space-y-4">
-              {/* Commission Summary */}
+              {/* Commission Summary
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {agent.commissions?.map((commission) => (
                   <Card key={commission.currency}>
@@ -362,7 +311,7 @@ export function MarketingAgentDetailsDialog({
                     </p>
                   </CardContent>
                 </Card>
-              )}
+              )} */}
             </TabsContent>
 
             <TabsContent value="history" className="space-y-4">
