@@ -418,6 +418,8 @@ func (i *Impl) CompleteRegistration(
 		return nil, status.Errorf(codes.Internal, "Error rolling back transaction: %v", err)
 	}
 
+	i.logger.Debug().Msgf("raw request body: %v", req)
+
 	user, err := querier.GetUserForUpdate(ctx, userID)
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "User not found: %v", err)
