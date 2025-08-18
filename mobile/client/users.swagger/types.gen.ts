@@ -343,7 +343,7 @@ export type usersgrpcUserSubscription = {
     expiresAt?: string;
 };
 
-export type usersgrpcUserType = 'USER_TYPE_UNSPECIFIED' | 'USER_TYPE_FARMER' | 'USER_TYPE_BUYER' | 'USER_TYPE_AGENT' | 'USER_TYPE_MARKETING_AGENT';
+export type usersgrpcUserType = 'USER_TYPE_UNSPECIFIED' | 'USER_TYPE_FARMER' | 'USER_TYPE_BUYER';
 
 export type usersgrpcVerifyOtpRequest = {
     authFactor?: usersgrpcAuthFactor;

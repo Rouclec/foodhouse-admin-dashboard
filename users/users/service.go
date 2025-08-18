@@ -445,10 +445,9 @@ func (i *Impl) CompleteRegistration(
 
 	phoneNumber := user.PhoneNumber
 	if req.GetPhoneNumber() != "" {
-
-		formattedNumber, err := formatPhoneNumber(req.GetPhoneNumber())
-		if err != nil {
-			return nil, status.Errorf(codes.InvalidArgument, "Invalid phone number: %v", err)
+		formattedNumber, newErr := formatPhoneNumber(req.GetPhoneNumber())
+		if newErr != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "Invalid phone number: %v", newErr)
 		}
 
 		phoneNumber = formattedNumber
@@ -1678,8 +1677,8 @@ func (i *Impl) GrantAgent(ctx context.Context,
 	req *usersgrpc.GrantAgentRequest) (
 	*usersgrpc.GrantAgentResponse, error) {
 	newAgentPhoneNumber := req.GetPhoneNumber()
-
-	if req.GetRole() != usersgrpc.UserRole_USER_ROLE_AGENT && req.GetRole() != usersgrpc.UserRole_USER_ROLE_MARKETING_AGENT {
+	if req.GetRole() != usersgrpc.UserRole_USER_ROLE_AGENT &&
+		req.GetRole() != usersgrpc.UserRole_USER_ROLE_MARKETING_AGENT {
 		return nil, status.Errorf(codes.PermissionDenied, "cannot create user with role %v", req.GetRole())
 	}
 

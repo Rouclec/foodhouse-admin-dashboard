@@ -2290,9 +2290,7 @@
       "enum": [
         "USER_TYPE_UNSPECIFIED",
         "USER_TYPE_FARMER",
-        "USER_TYPE_BUYER",
-        "USER_TYPE_AGENT",
-        "USER_TYPE_MARKETING_AGENT"
+        "USER_TYPE_BUYER"
       ],
       "default": "USER_TYPE_UNSPECIFIED"
     },
