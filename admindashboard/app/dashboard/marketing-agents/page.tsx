@@ -48,6 +48,7 @@ const MarketingAgentRow: FC<MarketingAgentRowProp> = ({
   handleDelete,
   handleDisableAgent,
 }) => {
+  const { toast } = useToast();
   const { user } = useContext(Context) as ContextType;
 
   const getStatusColor = (status: usersgrpcUserStatus | undefined) => {
@@ -70,6 +71,14 @@ const MarketingAgentRow: FC<MarketingAgentRowProp> = ({
     }),
   });
 
+  const copyToClipboard = async () => {
+    await navigator.clipboard.writeText(agent?.referralCode ?? "");
+    toast({
+      title: "Referral Code Copied",
+      description: "The referral code has been copied to your clipboard.",
+    });
+  };
+
   return (
     <TableRow key={agent?.userId}>
       <TableCell className="font-medium">
@@ -89,7 +98,11 @@ const MarketingAgentRow: FC<MarketingAgentRowProp> = ({
       </TableCell>
       <TableCell>{agent.address}</TableCell>
       <TableCell>
-        <Badge variant="outline" className="font-mono">
+        <Badge
+          variant="outline"
+          className="font-mono cursor-copy"
+          onClick={copyToClipboard}
+        >
           {agent.referralCode}
         </Badge>
       </TableCell>
@@ -168,7 +181,16 @@ const MarketingAgentCard: FC<MarketingAgentRowProp> = ({
   // handleDelete,
   // handleDisableAgent,
 }) => {
+  const { toast } = useToast();
   const { user } = useContext(Context) as ContextType;
+
+  const copyToClipboard = async () => {
+    await navigator.clipboard.writeText(agent?.referralCode ?? "");
+    toast({
+      title: "Referral Code Copied",
+      description: "The referral code has been copied to your clipboard.",
+    });
+  };
 
   const getStatusColor = (status: usersgrpcUserStatus | undefined) => {
     switch (status) {
@@ -204,7 +226,11 @@ const MarketingAgentCard: FC<MarketingAgentRowProp> = ({
               {agent.status?.replace("UserStatus_", "")}
             </Badge>
           </div>
-          <Badge variant="outline" className="font-mono text-xs">
+          <Badge
+            variant="outline"
+            className="font-mono text-xs cursor-copy"
+            onClick={copyToClipboard}
+          >
             {agent.referralCode}
           </Badge>
         </div>

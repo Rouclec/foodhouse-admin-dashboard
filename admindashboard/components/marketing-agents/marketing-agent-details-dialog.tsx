@@ -112,6 +112,14 @@ export function MarketingAgentDetailsDialog({
     isUserDataLoading || isCommissionsDataLoading || isPaymentsDataLoading
   );
 
+  const copyToClipboard = async () => {
+    await navigator.clipboard.writeText(userData?.user?.referralCode ?? "");
+    toast({
+      title: "Referral Code Copied",
+      description: "The referral code has been copied to your clipboard.",
+    });
+  };
+
   useEffect(() => {
     const result: AggregatedCommission[] =
       commissionsData?.commissions?.reduce(
@@ -218,7 +226,11 @@ export function MarketingAgentDetailsDialog({
           </DialogTitle>
           <DialogDescription className="flex flex-col sm:flex-row sm:items-center gap-2">
             <span>Referral Code:</span>
-            <Badge variant="outline" className="font-mono w-fit">
+            <Badge
+              variant="outline"
+              className="font-mono w-fit cursor-copy"
+              onClick={copyToClipboard}
+            >
               {userData?.user.referralCode}
             </Badge>
           </DialogDescription>
