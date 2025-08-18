@@ -1,6 +1,11 @@
 "use client";
 
-import { type Dispatch, type SetStateAction, useEffect } from "react";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useContext,
+  useEffect,
+} from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -22,6 +27,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import {
+  usersCompleteRegistrationMutation,
+  usersGrantAgentMutation,
+} from "@/client/users.swagger/@tanstack/react-query.gen";
+import { Context, ContextType } from "@/app/contexts/QueryProvider";
 
 const marketingAgentSchema = z.object({
   id: z.string().optional(),
@@ -62,6 +73,8 @@ export function CreateMarketingAgentDialog({
   onClose,
   mode = "create",
 }: CreateMarketingAgentProps) {
+  const { user } = useContext(Context) as ContextType;
+
   const { toast } = useToast();
   const isEditMode = mode === "edit" || !!defaultValues?.id;
 
@@ -99,30 +112,38 @@ export function CreateMarketingAgentDialog({
   const onSubmit = async (data: MarketingAgentFormData) => {
     try {
       if (isEditMode) {
-        // Update existing agent
-        console.log("Updating marketing agent:", data);
-
-        toast({
-          title: "Success",
-          description: "Marketing agent updated successfully.",
+        await updateAgent({
+          body: {
+            phoneNumber: data.phoneNumber,
+            address: data.city,
+            email: data.email,
+            firstName: data.name.split(" ")[0],
+            lastName: data?.name?.split(" ")[1],
+          },
+          path: {
+            userId: data?.id ?? "",
+          },
         });
       } else {
         // Create new agent
-        const referralCode = "1234";
-        console.log("Creating marketing agent:", {
-          ...data,
-          referralCode,
-          status: "active",
+        const newAgent = await createAgent({
+          body: {
+            phoneNumber: data.phoneNumber,
+            address: data.city,
+            email: data.email,
+            residenceCountryIsoCode: "CM",
+            role: "USER_ROLE_MARKETING_AGENT",
+          },
+          path: {
+            adminUserId: user?.userId ?? "",
+          },
         });
 
         toast({
           title: "Success",
-          description: `Marketing agent created successfully with referral code: ${referralCode}`,
+          description: `Marketing agent created successfully`,
         });
       }
-
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       handleDialogClose();
     } catch (error) {
@@ -145,6 +166,40 @@ export function CreateMarketingAgentDialog({
     onClose();
     setIsOpen(false);
   };
+
+  const { mutateAsync: createAgent } = useMutation({
+    ...usersGrantAgentMutation(),
+    onSuccess: () => {
+      form.reset(emptyFormValues);
+      onClose();
+      setIsOpen(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to create agent",
+        description:
+          error?.response?.data?.message ?? "An unkonwn error occured",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const { mutateAsync: updateAgent } = useMutation({
+    ...usersCompleteRegistrationMutation(),
+    onSuccess: () => {
+      form.reset(emptyFormValues);
+      onClose();
+      setIsOpen(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to update agent",
+        description:
+          error?.response?.data?.message ?? "An unkonwn error occured",
+        variant: "destructive",
+      });
+    },
+  });
 
   return (
     <Dialog

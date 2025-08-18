@@ -1338,7 +1338,10 @@
         "locationCoordinates": {
           "$ref": "#/definitions/typesPoint"
         },
-        "referralCode": {
+        "referredBy": {
+          "type": "string"
+        },
+        "phoneNumber": {
           "type": "string"
         }
       },
@@ -2205,6 +2208,9 @@
         },
         "status": {
           "$ref": "#/definitions/usersgrpcUserStatus"
+        },
+        "referralCode": {
+          "type": "string"
         }
       }
     },

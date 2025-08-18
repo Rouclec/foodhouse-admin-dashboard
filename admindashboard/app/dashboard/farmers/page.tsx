@@ -192,7 +192,6 @@ export default function FarmersPage() {
   const handleNextPage = () => {
     // Only proceed if nextKey exists and is not empty
     if (farmersData?.nextKey && farmersData.nextKey !== "") {
-      console.log("going to next page: ", farmersData.nextKey);
       pagination.goToNextPage(farmersData.nextKey.toString());
     }
   };

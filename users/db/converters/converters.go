@@ -118,6 +118,7 @@ func SqlcToProtoUsers(sqlcUsers []sqlc.User) ([]*usersgrpc.User, error) {
 				Email:        derefString(su.Email),
 				PhoneNumber:  derefString(&su.PhoneNumber),
 				Status:       status,
+				ReferralCode: su.ReferralCode,
 			})
 	}
 

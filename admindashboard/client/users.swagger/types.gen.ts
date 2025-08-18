@@ -28,7 +28,8 @@ export type UsersCompleteRegistrationBody = {
     address?: string;
     profileImage?: string;
     locationCoordinates?: typesPoint;
-    referralCode?: string;
+    referredBy?: string;
+    phoneNumber?: string;
 };
 
 export type UsersCreateSubscriptionBody = {
@@ -318,6 +319,7 @@ export type usersgrpcUser = {
     createdAt?: string;
     updatedAt?: string;
     status?: usersgrpcUserStatus;
+    referralCode?: string;
 };
 
 export type usersgrpcUserPaymentMethod = {

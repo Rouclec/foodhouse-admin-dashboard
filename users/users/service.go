@@ -110,7 +110,7 @@ func (i *Impl) SendSignupSmsOtp(ctx context.Context, req *usersgrpc.SendSignupSm
 	// Proper rollback handling
 	formattedNumber, err := formatPhoneNumber(req.GetPhoneNumber())
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "Invalid phone number: %v", err)
+		return nil, status.Errorf(codes.InvalidArgument, "invalid phone number: %v", err)
 	}
 
 	i.logger.Debug().Interface("formarted phone number from helper function",
@@ -429,7 +429,7 @@ func (i *Impl) CompleteRegistration(
 		return nil, status.Errorf(codes.Internal, "Error rolling back transaction: %v", err)
 	}
 
-	_, err = querier.GetUserForUpdate(ctx, userID)
+	user, err := querier.GetUserForUpdate(ctx, userID)
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "User not found: %v", err)
 	}
@@ -443,6 +443,17 @@ func (i *Impl) CompleteRegistration(
 		email = &e
 	}
 
+	phoneNumber := user.PhoneNumber
+	if req.GetPhoneNumber() != "" {
+
+		formattedNumber, err := formatPhoneNumber(req.GetPhoneNumber())
+		if err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "Invalid phone number: %v", err)
+		}
+
+		phoneNumber = formattedNumber
+	}
+
 	arg := sqlc.UpdateUserParams{
 		ID:        userID,
 		FirstName: &req.FirstName,
@@ -453,11 +464,12 @@ func (i *Impl) CompleteRegistration(
 				Y: float64(req.GetLocationCoordinates().GetLat())}, Valid: true},
 		ProfileImage: req.GetProfileImage(),
 		Address:      &req.Address,
+		PhoneNumber:  phoneNumber,
 	}
 
 	i.logger.Debug().Interface("update user params: ", arg)
 
-	err = i.CreateReferral(ctx, querier, req.GetReferralCode(), userID)
+	err = i.CreateReferral(ctx, querier, req.GetReferredBy(), userID)
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error creating referral %v", err)
