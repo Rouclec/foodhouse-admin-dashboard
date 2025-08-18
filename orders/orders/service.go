@@ -22,7 +22,6 @@ import (
 	"github.com/foodhouse/foodhouseapp/orders/db/repo"
 	"github.com/foodhouse/foodhouseapp/orders/db/sqlc"
 	"github.com/foodhouse/foodhouseapp/payment"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/nyaruka/phonenumbers"
 	"github.com/rs/zerolog"
@@ -1801,28 +1800,10 @@ func (i *Impl) ListPayments(ctx context.Context,
 	}, nil
 }
 
-// ConvertStringsToUUIDs converts a slice of strings to a slice of UUIDs.
-// Returns an error if any string is not a valid UUID.
-func ConvertStringsToUUIDs(ids []string) ([]uuid.UUID, error) {
-	uuids := make([]uuid.UUID, len(ids))
-	for i, s := range ids {
-		id, err := uuid.Parse(s)
-		if err != nil {
-			return nil, fmt.Errorf("invalid UUID at index %d: %q (%w)", i, s, err)
-		}
-		uuids[i] = id
-	}
-	return uuids, nil
-}
-
 // BulkSettleCommissions implements ordersgrpc.OrdersServer.
 func (i *Impl) BulkSettleCommissions(ctx context.Context,
 	req *ordersgrpc.BulkSettleCommissionsRequest) (
 	*ordersgrpc.BulkSettleCommissionsResponse, error) {
-	commissionIDs, err := ConvertStringsToUUIDs(req.GetCommissionIds())
-	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid commission IDs: %v", err)
-	}
 
 	querier, tx, err := i.repo.Begin(ctx)
 	if err != nil {
@@ -1836,7 +1817,7 @@ func (i *Impl) BulkSettleCommissions(ctx context.Context,
 	}()
 
 	// 1. Fetch commissions with FOR UPDATE.
-	commissions, err := querier.GetCommissionsByIDsForUpdate(ctx, commissionIDs)
+	commissions, err := querier.GetCommissionsByIDsForUpdate(ctx, req.GetCommissionIds())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to fetch commissions: %v", err)
 	}
@@ -1893,7 +1874,7 @@ func (i *Impl) BulkSettleCommissions(ctx context.Context,
 	// 6. Bulk update commissions.
 	err = querier.BulkUpdateCommissionsPaymentReference(ctx, sqlc.BulkUpdateCommissionsPaymentReferenceParams{
 		PaymentReference: &payment.ID,
-		CommissionIds:    commissionIDs,
+		CommissionIds:    req.GetCommissionIds(),
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to update commissions: %v", err)

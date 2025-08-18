@@ -59,12 +59,12 @@ UPDATE commissions
 SET
     paid_at = CURRENT_TIMESTAMP,
     payment_reference = $1::uuid
-WHERE id = ANY($2::uuid[])
+WHERE id = ANY($2::text[])
 `
 
 type BulkSettleCommissionsParams struct {
-	PaymentReference uuid.UUID   `json:"payment_reference"`
-	CommissionIds    []uuid.UUID `json:"commission_ids"`
+	PaymentReference uuid.UUID `json:"payment_reference"`
+	CommissionIds    []string  `json:"commission_ids"`
 }
 
 func (q *Queries) BulkSettleCommissions(ctx context.Context, arg BulkSettleCommissionsParams) error {
@@ -77,12 +77,12 @@ UPDATE commissions
 SET 
     payment_reference = $1,
     paid_at = now()
-WHERE id = ANY($2::uuid[])
+WHERE id = ANY($2::text[])
 `
 
 type BulkUpdateCommissionsPaymentReferenceParams struct {
-	PaymentReference *string     `json:"payment_reference"`
-	CommissionIds    []uuid.UUID `json:"commission_ids"`
+	PaymentReference *string  `json:"payment_reference"`
+	CommissionIds    []string `json:"commission_ids"`
 }
 
 func (q *Queries) BulkUpdateCommissionsPaymentReference(ctx context.Context, arg BulkUpdateCommissionsPaymentReferenceParams) error {
@@ -162,11 +162,11 @@ func (q *Queries) CreateCommission(ctx context.Context, arg CreateCommissionPara
 const getCommissionsByIDsForUpdate = `-- name: GetCommissionsByIDsForUpdate :many
 SELECT id, referrer_id, referred_id, order_number, currency_code, commission_amount, paid_at, payment_reference, created_at 
 FROM commissions
-WHERE id = ANY($1::uuid[])
+WHERE id = ANY($1::text[])
 FOR UPDATE
 `
 
-func (q *Queries) GetCommissionsByIDsForUpdate(ctx context.Context, commissionIds []uuid.UUID) ([]Commission, error) {
+func (q *Queries) GetCommissionsByIDsForUpdate(ctx context.Context, commissionIds []string) ([]Commission, error) {
 	rows, err := q.db.Query(ctx, getCommissionsByIDsForUpdate, commissionIds)
 	if err != nil {
 		return nil, err

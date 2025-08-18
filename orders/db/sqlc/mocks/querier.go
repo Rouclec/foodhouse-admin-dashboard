@@ -14,7 +14,6 @@ import (
 	reflect "reflect"
 
 	sqlc "github.com/foodhouse/foodhouseapp/orders/db/sqlc"
-	uuid "github.com/google/uuid"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -189,7 +188,7 @@ func (mr *MockQuerierMockRecorder) DeleteDeliveryPoint(ctx, id any) *gomock.Call
 }
 
 // GetCommissionsByIDsForUpdate mocks base method.
-func (m *MockQuerier) GetCommissionsByIDsForUpdate(ctx context.Context, commissionIds []uuid.UUID) ([]sqlc.Commission, error) {
+func (m *MockQuerier) GetCommissionsByIDsForUpdate(ctx context.Context, commissionIds []string) ([]sqlc.Commission, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCommissionsByIDsForUpdate", ctx, commissionIds)
 	ret0, _ := ret[0].([]sqlc.Commission)

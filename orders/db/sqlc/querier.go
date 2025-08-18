@@ -6,8 +6,6 @@ package sqlc
 
 import (
 	"context"
-
-	"github.com/google/uuid"
 )
 
 type Querier interface {
@@ -21,7 +19,7 @@ type Querier interface {
 	CreateOrderAuditLog(ctx context.Context, arg CreateOrderAuditLogParams) error
 	CreatePayment(ctx context.Context, arg CreatePaymentParams) (Payment, error)
 	DeleteDeliveryPoint(ctx context.Context, id string) error
-	GetCommissionsByIDsForUpdate(ctx context.Context, commissionIds []uuid.UUID) ([]Commission, error)
+	GetCommissionsByIDsForUpdate(ctx context.Context, commissionIds []string) ([]Commission, error)
 	GetOrderByOrderNumber(ctx context.Context, orderNumber int64) (Order, error)
 	GetOrderStatsBetweenDates(ctx context.Context, arg GetOrderStatsBetweenDatesParams) (int64, error)
 	GetOrdersGroupedByDay(ctx context.Context, arg GetOrdersGroupedByDayParams) ([]GetOrdersGroupedByDayRow, error)

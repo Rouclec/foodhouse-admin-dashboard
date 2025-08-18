@@ -30,16 +30,18 @@ import {
   DollarSign,
 } from "lucide-react";
 import { formatCurrency } from "@/utils";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { usersGetUserByIdOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { useQueryLoading } from "@/hooks/use-query-loading";
 import type { usersgrpcUserStatus } from "@/client/users.swagger";
 import { Context, ContextType } from "@/app/contexts/QueryProvider";
 import {
+  ordersBulkSettleCommissionsMutation,
   ordersListCommissionsByReferrerOptions,
   ordersListPaymentsOptions,
 } from "@/client/orders.swagger/@tanstack/react-query.gen";
 import { Button } from "../ui/button";
+import { typesAmount } from "@/client/products.swagger";
 
 type AggregatedCommission = {
   currency: string;
@@ -59,7 +61,8 @@ export function MarketingAgentDetailsDialog({
 }: MarketingAgentDetailsDialogProps) {
   const { user } = useContext(Context) as ContextType;
 
-  const [payingCommission, setPayingCommission] = useState<string | null>(null);
+  const [payingCommission, setPayingCommission] = useState<typesAmount>();
+  // const [payingCommisso]
   const [activeTab, setActiveTab] = useState<"commissions" | "payments">(
     "commissions"
   );
@@ -135,9 +138,6 @@ export function MarketingAgentDetailsDialog({
     setAggregatedCommissions(result);
   }, [commissionsData]);
 
-  // const paymentHistory = mockPaymentHistory[agentId] || [];
-  // const commissions = mockCommissions[agentId] || [] // Remove when real data is available
-
   const getStatusColor = (status: usersgrpcUserStatus | undefined) => {
     switch (status) {
       case "UserStatus_ACTIVE":
@@ -154,35 +154,45 @@ export function MarketingAgentDetailsDialog({
     currency: string,
     ids: string[]
   ) => {
-    setPayingCommission(currency);
-
-    console.log({ ids });
+    setPayingCommission({
+      value: amount,
+      currencyIsoCode: currency,
+    });
 
     try {
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await mutateAsync({
+        body: {
+          commissionIds: ids,
+        },
+        path: { adminUserId: user?.userId ?? "" },
+      });
+    } catch (error) {
+      console.error("Pay commission error:", error);
+    } finally {
+      setPayingCommission(undefined);
+    }
+  };
 
+  const { mutateAsync } = useMutation({
+    ...ordersBulkSettleCommissionsMutation(),
+    onSuccess: () => {
       toast({
         title: "Commission Paid",
         description: `Successfully paid ${formatCurrency(
-          amount,
-          currency
+          payingCommission?.value ?? "",
+          payingCommission?.currencyIsoCode ?? ""
         )} commission.`,
       });
-
-      // In a real app, you would update the data here
-      console.log(`Paid ${amount} ${currency} to agent ${agentId}`);
-    } catch (error) {
+    },
+    onError: (error) => {
       toast({
-        title: "Payment Failed",
-        description: "Failed to process commission payment. Please try again.",
+        title: `Payment failed`,
+        description:
+          error?.response?.data?.message ?? "An unknown error occured",
         variant: "destructive",
       });
-      console.error("Pay commission error:", error);
-    } finally {
-      setPayingCommission(null);
-    }
-  };
+    },
+  });
 
   if (!userData?.user) {
     return (
@@ -368,9 +378,13 @@ export function MarketingAgentDetailsDialog({
                                 commission?.ids ?? []
                               )
                             }
-                            disabled={payingCommission === commission?.currency}
+                            disabled={
+                              payingCommission?.currencyIsoCode ===
+                              commission?.currency
+                            }
                           >
-                            {payingCommission === commission.currency
+                            {payingCommission?.currencyIsoCode ===
+                            commission.currency
                               ? "Processing..."
                               : "Pay Commission"}
                           </Button>

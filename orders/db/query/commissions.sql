@@ -40,12 +40,12 @@ UPDATE commissions
 SET
     paid_at = CURRENT_TIMESTAMP,
     payment_reference = sqlc.arg(payment_reference)::uuid
-WHERE id = ANY(sqlc.arg(commission_ids)::uuid[]);
+WHERE id = ANY(sqlc.arg(commission_ids)::text[]);
 
 -- name: GetCommissionsByIDsForUpdate :many
 SELECT * 
 FROM commissions
-WHERE id = ANY(sqlc.arg(commission_ids)::uuid[])
+WHERE id = ANY(sqlc.arg(commission_ids)::text[])
 FOR UPDATE;
 
 -- name: BulkUpdateCommissionsPaymentReference :exec
@@ -53,4 +53,4 @@ UPDATE commissions
 SET 
     payment_reference = sqlc.arg(payment_reference),
     paid_at = now()
-WHERE id = ANY(sqlc.arg(commission_ids)::uuid[]);
+WHERE id = ANY(sqlc.arg(commission_ids)::text[]);
