@@ -95,6 +95,22 @@ func SqlcToProtoFarmers(sqlcFarmers []sqlc.ListFarmersByRatingRow) ([]*usersgrpc
 func SqlcToProtoUser(sqlcUser sqlc.User) *usersgrpc.User {
 	var status usersgrpc.UserStatus
 
+	var role usersgrpc.UserRole
+	switch sqlcUser.Role {
+	case usersgrpc.UserRole_USER_ROLE_ADMIN.String():
+		role = usersgrpc.UserRole_USER_ROLE_ADMIN
+	case usersgrpc.UserRole_USER_ROLE_AGENT.String():
+		role = usersgrpc.UserRole_USER_ROLE_AGENT
+	case usersgrpc.UserRole_USER_ROLE_FARMER.String():
+		role = usersgrpc.UserRole_USER_ROLE_FARMER
+	case usersgrpc.UserRole_USER_ROLE_MARKETING_AGENT.String():
+		role = usersgrpc.UserRole_USER_ROLE_MARKETING_AGENT
+	case usersgrpc.UserRole_USER_ROLE_BUYER.String():
+		role = usersgrpc.UserRole_USER_ROLE_BUYER
+	default:
+		role = usersgrpc.UserRole_USER_ROLE_UNSPECIFIED
+	}
+
 	switch sqlcUser.UserStatus {
 	case usersgrpc.UserStatus_UserStatus_ACTIVE.String():
 		status = usersgrpc.UserStatus_UserStatus_ACTIVE
@@ -115,6 +131,7 @@ func SqlcToProtoUser(sqlcUser sqlc.User) *usersgrpc.User {
 		PhoneNumber:  derefString(&sqlcUser.PhoneNumber),
 		Status:       status,
 		ReferralCode: sqlcUser.ReferralCode,
+		Role:         role,
 	}
 }
 func SqlcToProtoUsers(sqlcUsers []sqlc.User) ([]*usersgrpc.User, error) {
