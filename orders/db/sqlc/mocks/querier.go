@@ -14,6 +14,7 @@ import (
 	reflect "reflect"
 
 	sqlc "github.com/foodhouse/foodhouseapp/orders/db/sqlc"
+	uuid "github.com/google/uuid"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -68,6 +69,20 @@ func (m *MockQuerier) BulkSettleCommissions(ctx context.Context, arg sqlc.BulkSe
 func (mr *MockQuerierMockRecorder) BulkSettleCommissions(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BulkSettleCommissions", reflect.TypeOf((*MockQuerier)(nil).BulkSettleCommissions), ctx, arg)
+}
+
+// BulkUpdateCommissionsPaymentReference mocks base method.
+func (m *MockQuerier) BulkUpdateCommissionsPaymentReference(ctx context.Context, arg sqlc.BulkUpdateCommissionsPaymentReferenceParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BulkUpdateCommissionsPaymentReference", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// BulkUpdateCommissionsPaymentReference indicates an expected call of BulkUpdateCommissionsPaymentReference.
+func (mr *MockQuerierMockRecorder) BulkUpdateCommissionsPaymentReference(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BulkUpdateCommissionsPaymentReference", reflect.TypeOf((*MockQuerier)(nil).BulkUpdateCommissionsPaymentReference), ctx, arg)
 }
 
 // CountUniqueOrdersByReferrer mocks base method.
@@ -171,6 +186,21 @@ func (m *MockQuerier) DeleteDeliveryPoint(ctx context.Context, id string) error 
 func (mr *MockQuerierMockRecorder) DeleteDeliveryPoint(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteDeliveryPoint", reflect.TypeOf((*MockQuerier)(nil).DeleteDeliveryPoint), ctx, id)
+}
+
+// GetCommissionsByIDsForUpdate mocks base method.
+func (m *MockQuerier) GetCommissionsByIDsForUpdate(ctx context.Context, commissionIds []uuid.UUID) ([]sqlc.Commission, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCommissionsByIDsForUpdate", ctx, commissionIds)
+	ret0, _ := ret[0].([]sqlc.Commission)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCommissionsByIDsForUpdate indicates an expected call of GetCommissionsByIDsForUpdate.
+func (mr *MockQuerierMockRecorder) GetCommissionsByIDsForUpdate(ctx, commissionIds any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCommissionsByIDsForUpdate", reflect.TypeOf((*MockQuerier)(nil).GetCommissionsByIDsForUpdate), ctx, commissionIds)
 }
 
 // GetOrderByOrderNumber mocks base method.
@@ -306,6 +336,21 @@ func (m *MockQuerier) GetUserOrderBySecretKey(ctx context.Context, arg sqlc.GetU
 func (mr *MockQuerierMockRecorder) GetUserOrderBySecretKey(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserOrderBySecretKey", reflect.TypeOf((*MockQuerier)(nil).GetUserOrderBySecretKey), ctx, arg)
+}
+
+// ListCommissionsByReferrer mocks base method.
+func (m *MockQuerier) ListCommissionsByReferrer(ctx context.Context, arg sqlc.ListCommissionsByReferrerParams) ([]sqlc.Commission, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListCommissionsByReferrer", ctx, arg)
+	ret0, _ := ret[0].([]sqlc.Commission)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListCommissionsByReferrer indicates an expected call of ListCommissionsByReferrer.
+func (mr *MockQuerierMockRecorder) ListCommissionsByReferrer(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListCommissionsByReferrer", reflect.TypeOf((*MockQuerier)(nil).ListCommissionsByReferrer), ctx, arg)
 }
 
 // ListDeliveryPoints mocks base method.

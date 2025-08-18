@@ -202,6 +202,8 @@ func SqlcPaymentToProto(payment sqlc.Payment) *ordersgrpc.Payment {
 		break
 	case ordersgrpc.PaymentMethodType_PaymentMethodType_ORANGE_MONEY.String():
 		paymentMethodEnum = ordersgrpc.PaymentMethodType_PaymentMethodType_ORANGE_MONEY
+	case ordersgrpc.PaymentMethodType_PaymentMethodType_ACCOUNT_BALANCE.String():
+		paymentMethodEnum = ordersgrpc.PaymentMethodType_PaymentMethodType_ACCOUNT_BALANCE
 	default:
 		paymentMethodEnum = ordersgrpc.PaymentMethodType_PaymentMethodType_UNSPECIFIED
 	}
@@ -241,6 +243,37 @@ func SqlcPaymentsToProto(payments []sqlc.Payment) []*ordersgrpc.Payment {
 	result := make([]*ordersgrpc.Payment, 0, len(payments))
 	for _, payment := range payments {
 		result = append(result, SqlcPaymentToProto(payment))
+	}
+	return result
+}
+
+func SqlcCommissionToProto(commission sqlc.Commission) *ordersgrpc.Commission {
+
+	var paidAt *timestamppb.Timestamp
+
+	if &commission.PaidAt != nil {
+		paidAt = timestamppb.New(commission.PaidAt.Time)
+	}
+
+	return &ordersgrpc.Commission{
+		Id:               commission.ID,
+		ReferrerId:       derefString(&commission.ReferrerID),
+		RefferedId:       derefString(&commission.ReferredID),
+		OrderNumber:      commission.OrderNumber,
+		PaymentReference: derefString(commission.PaymentReference),
+		PaidAt:           paidAt,
+		CommissionAmount: &types.Amount{
+			Value:           commission.CommissionAmount,
+			CurrencyIsoCode: commission.CurrencyCode,
+		},
+		CreatedAt: timestamppb.New(commission.CreatedAt.Time),
+	}
+}
+
+func SqlcCommissionsToProtoCommissions(commissions []sqlc.Commission) []*ordersgrpc.Commission {
+	result := make([]*ordersgrpc.Commission, 0, len(commissions))
+	for _, commission := range commissions {
+		result = append(result, SqlcCommissionToProto(commission))
 	}
 	return result
 }
