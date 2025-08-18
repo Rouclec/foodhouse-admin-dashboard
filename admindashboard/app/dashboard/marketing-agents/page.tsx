@@ -16,13 +16,20 @@ import { Edit, Trash2, Eye, UserX, Mail, Phone, Plus } from "lucide-react";
 import { MarketingAgentDetailsDialog } from "@/components/marketing-agents/marketing-agent-details-dialog";
 import { CreateMarketingAgentDialog } from "@/components/marketing-agents/create-marketing-agent-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { usersListUsersOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
+import {
+  usersDeleteAgentMutation,
+  usersListUsersOptions,
+  usersReactivateUserMutation,
+  usersSuspendUserMutation,
+} from "@/client/users.swagger/@tanstack/react-query.gen";
 import { Context, ContextType } from "@/app/contexts/QueryProvider";
 import { useCursorPagination } from "@/hooks/use-cursor-pagination";
 import { useQueryLoading } from "@/hooks/use-query-loading";
 import { usersgrpcUser, usersgrpcUserStatus } from "@/client/users.swagger";
 import { CursorPagination } from "@/components/ui/cursor-pagination";
+import { useConfirmDelete } from "@/hooks/use-confirm-delete";
+import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 
 interface MarketingAgent {
   id: string;
@@ -55,6 +62,10 @@ export default function MarketingAgentsPage() {
   const [editingAgent, setEditingAgent] = useState<usersgrpcUser | undefined>();
   const [isCreateEditOpen, setIsCreateEditOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<"create" | "edit">("create");
+  const [suspendingAgent, setSuspendingAgent] = useState<string>();
+  const [loading, setLoading] = useState(false);
+  const [deletingAgentId, setDeletingAgentId] = useState<string>();
+  const [deletingAgentName, setDeletingAgentName] = useState<string>();
 
   const { toast } = useToast();
 
@@ -140,6 +151,119 @@ export default function MarketingAgentsPage() {
       pagination.goToNextPage(agentsData.nextKey.toString());
     }
   };
+
+  const handleDisableAgent = async (agent: usersgrpcUser | undefined) => {
+    try {
+      setSuspendingAgent(agent?.userId);
+      setLoading(true);
+      // const user = users.find((f) => f.id === userId);
+      const newStatus =
+        agent?.status === "UserStatus_SUSPENDED" ? "active" : "suspended";
+
+      if (newStatus === "active") {
+        await reactivateAccount({
+          body: {},
+          path: {
+            userId: agent?.userId ?? "",
+            adminUserId: user?.userId ?? "",
+          },
+        });
+      } else {
+        await suspendAccount({
+          body: {},
+          path: {
+            userId: agent?.userId ?? "",
+            adminUserId: user?.userId ?? "",
+          },
+        });
+      }
+
+      toast({
+        title: `User account ${
+          newStatus === "suspended" ? "disabled" : "enabled"
+        }`,
+        description: `${
+          agent?.firstName ?? agent?.lastName ?? ""
+        }'s account has been ${
+          newStatus === "suspended" ? "suspended" : "reactivated"
+        }.`,
+      });
+
+      refetch();
+    } catch (error) {
+      console.error({ error }, "changing account status");
+    } finally {
+      setSuspendingAgent(undefined);
+      setLoading(false);
+    }
+  };
+
+  const { mutateAsync: suspendAccount } = useMutation({
+    ...usersSuspendUserMutation(),
+    onError: (error) => {
+      toast({
+        title: `Error suspending account`,
+        description:
+          error?.response?.data?.message ?? "An unknown error occured",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const { mutateAsync: reactivateAccount } = useMutation({
+    ...usersReactivateUserMutation(),
+    onError: (error) => {
+      toast({
+        title: `Error reactivating account`,
+        description:
+          error?.response?.data?.message ?? "An unknown error occured",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDelete = (agent: usersgrpcUser) => {
+    setDeletingAgentId(agent?.userId ?? "");
+    setDeletingAgentName(agent?.firstName ?? agent?.lastName ?? "");
+    confirmDelete?.openDialog();
+  };
+
+  // Confirm delete hook
+  const confirmDelete = useConfirmDelete({
+    onDelete: async () => {
+      setLoading(true);
+      if (deletingAgentId) {
+        await deleteAgent({
+          path: {
+            adminUserId: user?.userId ?? "",
+            userId: deletingAgentId ?? "",
+          },
+        });
+      }
+      setLoading(false);
+    },
+    itemType: deletingAgentName,
+    description: "Are you sure you want to delete this agent?",
+  });
+
+  const { mutateAsync: deleteAgent } = useMutation({
+    ...usersDeleteAgentMutation(),
+    onSuccess: () => {
+      toast({
+        title: "Agent deleted",
+        description: "Agent has been deleted successfully",
+      });
+      refetch();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error deleting agent",
+        description:
+          error?.response?.data?.message ?? "An unkonwn error occured",
+        variant: "destructive",
+      });
+    },
+  });
 
   return (
     <div className="space-y-6">
@@ -312,10 +436,16 @@ export default function MarketingAgentsPage() {
                           <Button
                             variant="outline"
                             size="sm"
+                            onClick={() => handleDisableAgent(agent)}
                             title={
                               agent.status === "UserStatus_ACTIVE"
                                 ? "Deactivate"
                                 : "Activate"
+                            }
+                            className={
+                              agent?.status === "UserStatus_ACTIVE"
+                                ? "text-yellow-600"
+                                : "text-green-600"
                             }
                           >
                             <UserX className="h-4 w-4" />
@@ -324,6 +454,8 @@ export default function MarketingAgentsPage() {
                             variant="outline"
                             size="sm"
                             title="Delete Agent"
+                            className="text-red-600"
+                            onClick={() => handleDelete(agent)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -387,6 +519,12 @@ export default function MarketingAgentsPage() {
           agentId={selectedAgentId}
         />
       )}
+
+      <ConfirmDeleteDialog
+        {...confirmDelete.dialogProps}
+        itemName={deletingAgentName}
+        isLoading={loading}
+      />
     </div>
   );
 }

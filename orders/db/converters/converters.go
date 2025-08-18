@@ -277,3 +277,16 @@ func SqlcCommissionsToProtoCommissions(commissions []sqlc.Commission) []*ordersg
 	}
 	return result
 }
+
+func SqlcToProtoAggregatedCommissions(commissions []sqlc.AggregateCommissionByReferrerRow) []*types.Amount {
+	result := make([]*types.Amount, 0, len(commissions))
+
+	for _, commission := range commissions {
+		result = append(result, &types.Amount{
+			Value:           float64(commission.TotalAmount),
+			CurrencyIsoCode: commission.CurrencyCode,
+		})
+	}
+
+	return result
+}

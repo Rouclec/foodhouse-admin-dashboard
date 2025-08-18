@@ -147,6 +147,10 @@ export type ordersgrpcListPaymentsResponse = {
     nextKey?: string;
 };
 
+export type ordersgrpcListTotalCommissionAmountByReferrerResponse = {
+    commissions?: Array<typesAmount>;
+};
+
 export type ordersgrpcListUserOrdersResponse = {
     orders?: Array<ordersgrpcOrder>;
     nextKey?: string;
@@ -277,6 +281,20 @@ export type OrdersListCommissionsByReferrerData = {
 export type OrdersListCommissionsByReferrerResponse = (ordersgrpcListCommissionsByReferrerResponse);
 
 export type OrdersListCommissionsByReferrerError = (rpcStatus);
+
+export type OrdersListTotalComissionAmountByReferrerData = {
+    path: {
+        adminUserId: string;
+        referrerId: string;
+    };
+    query?: {
+        isPaid?: boolean;
+    };
+};
+
+export type OrdersListTotalComissionAmountByReferrerResponse = (ordersgrpcListTotalCommissionAmountByReferrerResponse);
+
+export type OrdersListTotalComissionAmountByReferrerError = (rpcStatus);
 
 export type OrdersCreateDeliveryPointData = {
     body: OrdersCreateDeliveryPointBody;

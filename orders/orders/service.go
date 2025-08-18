@@ -1928,3 +1928,22 @@ func (i *Impl) ListCommissionsByReferrer(ctx context.Context,
 		Commissions: protoCommissions,
 	}, nil
 }
+
+// ListTotalComissionAmountByReferrer implements ordersgrpc.OrdersServer.
+func (i *Impl) ListTotalComissionAmountByReferrer(ctx context.Context,
+	req *ordersgrpc.ListTotalComissionAmountByReferrerRequest) (
+	*ordersgrpc.ListTotalCommissionAmountByReferrerResponse, error) {
+	commissions, err := i.repo.Do().AggregateCommissionByReferrer(ctx,
+		sqlc.AggregateCommissionByReferrerParams{
+			ReferrerID: req.GetReferrerId(),
+			IsPaid:     req.GetIsPaid(),
+		})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting commissions %v", err)
+	}
+
+	protoCommissions := converters.SqlcToProtoAggregatedCommissions(commissions)
+	return &ordersgrpc.ListTotalCommissionAmountByReferrerResponse{
+		Commissions: protoCommissions,
+	}, nil
+}

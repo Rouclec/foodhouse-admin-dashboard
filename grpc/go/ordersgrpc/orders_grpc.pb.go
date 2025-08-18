@@ -19,29 +19,30 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Orders_CreateOrder_FullMethodName               = "/ordersgrpc.Orders/CreateOrder"
-	Orders_GetOrderDetails_FullMethodName           = "/ordersgrpc.Orders/GetOrderDetails"
-	Orders_ConfirmPayment_FullMethodName            = "/ordersgrpc.Orders/ConfirmPayment"
-	Orders_DispatchOrder_FullMethodName             = "/ordersgrpc.Orders/DispatchOrder"
-	Orders_ConfirmDelivery_FullMethodName           = "/ordersgrpc.Orders/ConfirmDelivery"
-	Orders_ApproveOrder_FullMethodName              = "/ordersgrpc.Orders/ApproveOrder"
-	Orders_RejectOrder_FullMethodName               = "/ordersgrpc.Orders/RejectOrder"
-	Orders_HealthCheck_FullMethodName               = "/ordersgrpc.Orders/HealthCheck"
-	Orders_ListUserOrders_FullMethodName            = "/ordersgrpc.Orders/ListUserOrders"
-	Orders_ListFarmerOrders_FullMethodName          = "/ordersgrpc.Orders/ListFarmerOrders"
-	Orders_ListOrders_FullMethodName                = "/ordersgrpc.Orders/ListOrders"
-	Orders_InitiatePayment_FullMethodName           = "/ordersgrpc.Orders/InitiatePayment"
-	Orders_CreateDeliveryPoint_FullMethodName       = "/ordersgrpc.Orders/CreateDeliveryPoint"
-	Orders_UpdateDeliveryPoint_FullMethodName       = "/ordersgrpc.Orders/UpdateDeliveryPoint"
-	Orders_DeleteDeliveryPoint_FullMethodName       = "/ordersgrpc.Orders/DeleteDeliveryPoint"
-	Orders_ListDeliveryPoints_FullMethodName        = "/ordersgrpc.Orders/ListDeliveryPoints"
-	Orders_GetAdminStats_FullMethodName             = "/ordersgrpc.Orders/GetAdminStats"
-	Orders_ListDeliveryCities_FullMethodName        = "/ordersgrpc.Orders/ListDeliveryCities"
-	Orders_CheckPaymentStatus_FullMethodName        = "/ordersgrpc.Orders/CheckPaymentStatus"
-	Orders_GetFarmerEarnings_FullMethodName         = "/ordersgrpc.Orders/GetFarmerEarnings"
-	Orders_ListPayments_FullMethodName              = "/ordersgrpc.Orders/ListPayments"
-	Orders_ListCommissionsByReferrer_FullMethodName = "/ordersgrpc.Orders/ListCommissionsByReferrer"
-	Orders_BulkSettleCommissions_FullMethodName     = "/ordersgrpc.Orders/BulkSettleCommissions"
+	Orders_CreateOrder_FullMethodName                        = "/ordersgrpc.Orders/CreateOrder"
+	Orders_GetOrderDetails_FullMethodName                    = "/ordersgrpc.Orders/GetOrderDetails"
+	Orders_ConfirmPayment_FullMethodName                     = "/ordersgrpc.Orders/ConfirmPayment"
+	Orders_DispatchOrder_FullMethodName                      = "/ordersgrpc.Orders/DispatchOrder"
+	Orders_ConfirmDelivery_FullMethodName                    = "/ordersgrpc.Orders/ConfirmDelivery"
+	Orders_ApproveOrder_FullMethodName                       = "/ordersgrpc.Orders/ApproveOrder"
+	Orders_RejectOrder_FullMethodName                        = "/ordersgrpc.Orders/RejectOrder"
+	Orders_HealthCheck_FullMethodName                        = "/ordersgrpc.Orders/HealthCheck"
+	Orders_ListUserOrders_FullMethodName                     = "/ordersgrpc.Orders/ListUserOrders"
+	Orders_ListFarmerOrders_FullMethodName                   = "/ordersgrpc.Orders/ListFarmerOrders"
+	Orders_ListOrders_FullMethodName                         = "/ordersgrpc.Orders/ListOrders"
+	Orders_InitiatePayment_FullMethodName                    = "/ordersgrpc.Orders/InitiatePayment"
+	Orders_CreateDeliveryPoint_FullMethodName                = "/ordersgrpc.Orders/CreateDeliveryPoint"
+	Orders_UpdateDeliveryPoint_FullMethodName                = "/ordersgrpc.Orders/UpdateDeliveryPoint"
+	Orders_DeleteDeliveryPoint_FullMethodName                = "/ordersgrpc.Orders/DeleteDeliveryPoint"
+	Orders_ListDeliveryPoints_FullMethodName                 = "/ordersgrpc.Orders/ListDeliveryPoints"
+	Orders_GetAdminStats_FullMethodName                      = "/ordersgrpc.Orders/GetAdminStats"
+	Orders_ListDeliveryCities_FullMethodName                 = "/ordersgrpc.Orders/ListDeliveryCities"
+	Orders_CheckPaymentStatus_FullMethodName                 = "/ordersgrpc.Orders/CheckPaymentStatus"
+	Orders_GetFarmerEarnings_FullMethodName                  = "/ordersgrpc.Orders/GetFarmerEarnings"
+	Orders_ListPayments_FullMethodName                       = "/ordersgrpc.Orders/ListPayments"
+	Orders_ListCommissionsByReferrer_FullMethodName          = "/ordersgrpc.Orders/ListCommissionsByReferrer"
+	Orders_ListTotalComissionAmountByReferrer_FullMethodName = "/ordersgrpc.Orders/ListTotalComissionAmountByReferrer"
+	Orders_BulkSettleCommissions_FullMethodName              = "/ordersgrpc.Orders/BulkSettleCommissions"
 )
 
 // OrdersClient is the client API for Orders service.
@@ -70,6 +71,7 @@ type OrdersClient interface {
 	GetFarmerEarnings(ctx context.Context, in *GetFarmerEarningsRequest, opts ...grpc.CallOption) (*GetFarmerEarningsResponse, error)
 	ListPayments(ctx context.Context, in *ListPaymentsRequest, opts ...grpc.CallOption) (*ListPaymentsResponse, error)
 	ListCommissionsByReferrer(ctx context.Context, in *ListCommissionsByReferrerRequest, opts ...grpc.CallOption) (*ListCommissionsByReferrerResponse, error)
+	ListTotalComissionAmountByReferrer(ctx context.Context, in *ListTotalComissionAmountByReferrerRequest, opts ...grpc.CallOption) (*ListTotalCommissionAmountByReferrerResponse, error)
 	BulkSettleCommissions(ctx context.Context, in *BulkSettleCommissionsRequest, opts ...grpc.CallOption) (*BulkSettleCommissionsResponse, error)
 }
 
@@ -301,6 +303,16 @@ func (c *ordersClient) ListCommissionsByReferrer(ctx context.Context, in *ListCo
 	return out, nil
 }
 
+func (c *ordersClient) ListTotalComissionAmountByReferrer(ctx context.Context, in *ListTotalComissionAmountByReferrerRequest, opts ...grpc.CallOption) (*ListTotalCommissionAmountByReferrerResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListTotalCommissionAmountByReferrerResponse)
+	err := c.cc.Invoke(ctx, Orders_ListTotalComissionAmountByReferrer_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *ordersClient) BulkSettleCommissions(ctx context.Context, in *BulkSettleCommissionsRequest, opts ...grpc.CallOption) (*BulkSettleCommissionsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(BulkSettleCommissionsResponse)
@@ -337,6 +349,7 @@ type OrdersServer interface {
 	GetFarmerEarnings(context.Context, *GetFarmerEarningsRequest) (*GetFarmerEarningsResponse, error)
 	ListPayments(context.Context, *ListPaymentsRequest) (*ListPaymentsResponse, error)
 	ListCommissionsByReferrer(context.Context, *ListCommissionsByReferrerRequest) (*ListCommissionsByReferrerResponse, error)
+	ListTotalComissionAmountByReferrer(context.Context, *ListTotalComissionAmountByReferrerRequest) (*ListTotalCommissionAmountByReferrerResponse, error)
 	BulkSettleCommissions(context.Context, *BulkSettleCommissionsRequest) (*BulkSettleCommissionsResponse, error)
 	mustEmbedUnimplementedOrdersServer()
 }
@@ -413,6 +426,9 @@ func (UnimplementedOrdersServer) ListPayments(context.Context, *ListPaymentsRequ
 }
 func (UnimplementedOrdersServer) ListCommissionsByReferrer(context.Context, *ListCommissionsByReferrerRequest) (*ListCommissionsByReferrerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListCommissionsByReferrer not implemented")
+}
+func (UnimplementedOrdersServer) ListTotalComissionAmountByReferrer(context.Context, *ListTotalComissionAmountByReferrerRequest) (*ListTotalCommissionAmountByReferrerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListTotalComissionAmountByReferrer not implemented")
 }
 func (UnimplementedOrdersServer) BulkSettleCommissions(context.Context, *BulkSettleCommissionsRequest) (*BulkSettleCommissionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BulkSettleCommissions not implemented")
@@ -834,6 +850,24 @@ func _Orders_ListCommissionsByReferrer_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Orders_ListTotalComissionAmountByReferrer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTotalComissionAmountByReferrerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).ListTotalComissionAmountByReferrer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_ListTotalComissionAmountByReferrer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).ListTotalComissionAmountByReferrer(ctx, req.(*ListTotalComissionAmountByReferrerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Orders_BulkSettleCommissions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(BulkSettleCommissionsRequest)
 	if err := dec(in); err != nil {
@@ -946,6 +980,10 @@ var Orders_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListCommissionsByReferrer",
 			Handler:    _Orders_ListCommissionsByReferrer_Handler,
+		},
+		{
+			MethodName: "ListTotalComissionAmountByReferrer",
+			Handler:    _Orders_ListTotalComissionAmountByReferrer_Handler,
 		},
 		{
 			MethodName: "BulkSettleCommissions",

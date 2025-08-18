@@ -367,6 +367,16 @@ message BulkSettleCommissionsRequest {
 
 message BulkSettleCommissionsResponse { string message = 1; }
 
+message ListTotalComissionAmountByReferrerRequest {
+  string admin_user_id = 1;
+  string referrer_id = 2;
+  bool isPaid = 3;
+}
+
+message ListTotalCommissionAmountByReferrerResponse {
+  repeated types.Amount commissions = 1;
+}
+
 service Orders {
 
   rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {
@@ -520,6 +530,15 @@ service Orders {
     option (google.api.http) = {
       get : "/v1/admin/{admin_user_id}/orders/commission/{referrer_id}/"
             "list-commissions-by-referrer"
+    };
+  }
+
+  rpc ListTotalComissionAmountByReferrer(
+      ListTotalComissionAmountByReferrerRequest)
+      returns (ListTotalCommissionAmountByReferrerResponse) {
+    option (google.api.http) = {
+      get : "/v1/admin/{admin_user_id}/orders/commission/{referrer_id}/"
+            "list-total-commission-amount-by-referrer"
     };
   }
 

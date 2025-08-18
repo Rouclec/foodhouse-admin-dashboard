@@ -96,6 +96,48 @@
         ]
       }
     },
+    "/v1/admin/{adminUserId}/orders/commission/{referrerId}/list-total-commission-amount-by-referrer": {
+      "get": {
+        "operationId": "Orders_ListTotalComissionAmountByReferrer",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcListTotalCommissionAmountByReferrerResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "referrerId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "isPaid",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/admin/{userId}/orders/create-delivery-point": {
       "post": {
         "operationId": "Orders_CreateDeliveryPoint",
@@ -1471,6 +1513,18 @@
         },
         "nextKey": {
           "type": "string"
+        }
+      }
+    },
+    "ordersgrpcListTotalCommissionAmountByReferrerResponse": {
+      "type": "object",
+      "properties": {
+        "commissions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/typesAmount"
+          }
         }
       }
     },

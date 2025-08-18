@@ -380,19 +380,19 @@ func safeString(s *string) string {
 	return *s
 }
 
-func getUserRole(role string) usersgrpc.UserRole {
-	if val, ok := usersgrpc.UserRole_value[role]; ok {
-		return usersgrpc.UserRole(val)
-	}
-	return usersgrpc.UserRole_USER_ROLE_UNSPECIFIED
-}
+// func getUserRole(role string) usersgrpc.UserRole {
+// 	if val, ok := usersgrpc.UserRole_value[role]; ok {
+// 		return usersgrpc.UserRole(val)
+// 	}
+// 	return usersgrpc.UserRole_USER_ROLE_UNSPECIFIED
+// }
 
-func getLocationPoint(loc pgtype.Point) *types.Point {
-	if !loc.Valid {
-		return nil
-	}
-	return &types.Point{Lon: loc.P.X, Lat: loc.P.Y}
-}
+// func getLocationPoint(loc pgtype.Point) *types.Point {
+// 	if !loc.Valid {
+// 		return nil
+// 	}
+// 	return &types.Point{Lon: loc.P.X, Lat: loc.P.Y}
+// }
 
 // UpdateRegistrationData implements usersgrpc.UsersServer.
 func (i *Impl) CompleteRegistration(

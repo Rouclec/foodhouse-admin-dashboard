@@ -117,8 +117,8 @@ export function CreateMarketingAgentDialog({
             phoneNumber: data.phoneNumber,
             address: data.city,
             email: data.email,
-            firstName: data.name.split(" ")[0],
-            lastName: data?.name?.split(" ")[1],
+            firstName: data.name.trim().split(" ")[0],
+            lastName: data?.name.trim().split(" ")[1],
           },
           path: {
             userId: data?.id ?? "",
