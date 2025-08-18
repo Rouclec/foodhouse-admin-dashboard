@@ -1679,6 +1679,10 @@ func (i *Impl) GrantAgent(ctx context.Context,
 	*usersgrpc.GrantAgentResponse, error) {
 	newAgentPhoneNumber := req.GetPhoneNumber()
 
+	if req.GetRole() != usersgrpc.UserRole_USER_ROLE_AGENT && req.GetRole() != usersgrpc.UserRole_USER_ROLE_MARKETING_AGENT {
+		return nil, status.Errorf(codes.PermissionDenied, "cannot create user with role %v", req.GetRole())
+	}
+
 	// fetch the user via email from the db.
 	// If there is no user then we want to create one.
 	// We shall generate a random password and hash it too.
@@ -1750,7 +1754,7 @@ func (i *Impl) GrantAgent(ctx context.Context,
 		Password:                password,
 		ResidenceCountryIsoCode: req.GetResidenceCountryIsoCode(),
 		Email:                   email,
-		Role:                    usersgrpc.UserRole_USER_ROLE_AGENT.String(),
+		Role:                    req.GetRole().String(),
 	}
 
 	_, err = i.repo.Do().CreateUser(ctx, arg)

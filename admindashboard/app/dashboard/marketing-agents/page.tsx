@@ -151,6 +151,7 @@ export default function MarketingAgentsPage() {
     setEditingAgent(undefined);
     setDialogMode("create");
     setIsCreateEditOpen(false);
+    refetch()
   };
 
   const getTotalUnpaidCommission = (
