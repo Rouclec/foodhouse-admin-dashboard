@@ -59,7 +59,8 @@
       "address": "Address",
       "unknownError": "An unknown error occured",
       "congratulations": "Congratulations",
-      "registrationCompleteMessage": "Your account is ready to use, you will be redirected to the home page in a few seconds"
+      "registrationCompleteMessage": "Your account is ready to use, you will be redirected to the home page in a few seconds",
+      "referralCode": "Referral Code"
     },
     "variety": {
       "description": "Welcome to Food House app! Choose Your Variety and explore a wide range of products tailored to your preferences.",

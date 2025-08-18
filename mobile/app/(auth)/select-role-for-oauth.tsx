@@ -75,13 +75,7 @@ const SelectRoleForOAuth = () => {
   useEffect(() => {
     if (userData?.user) {
       setUser(userData.user);
-      const role = userData?.user?.role;
-
-      if (role === 'USER_ROLE_FARMER') {
-        router.replace('/(farmer)/(index)');
-      } else {
-        router.replace('/(buyer)/(index)');
-      }
+      router.replace('/(auth)/profile-page');
     }
   }, [userData]);
 

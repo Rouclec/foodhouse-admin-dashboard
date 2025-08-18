@@ -478,11 +478,14 @@ func (i *Impl) CompleteRegistration(
 }
 
 func (i *Impl) CreateReferral(ctx context.Context, querrier sqlc.Querier, referralCode string, userID string) error {
+	i.logger.Debug().Msgf("referal code %v", referralCode)
 	if referralCode == "" {
 		return nil
 	}
 
 	referrer, err := querrier.GetUserByReferralCode(ctx, referralCode)
+
+	i.logger.Debug().Msgf("referrer %v", referrer)
 
 	if err != nil {
 		return err

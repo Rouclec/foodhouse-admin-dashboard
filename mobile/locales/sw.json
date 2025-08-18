@@ -58,7 +58,8 @@
       "address": "Anuani",
       "unknownError": "Hitilafu isiyojulikana imetokea",
       "congratulations": "Hongera",
-      "registrationCompleteMessage": "Akaunti yako iko tayari kutumika, utapelekwa kwenye ukurasa wa nyumbani baada ya sekunde chache"
+      "registrationCompleteMessage": "Akaunti yako iko tayari kutumika, utapelekwa kwenye ukurasa wa nyumbani baada ya sekunde chache",
+      "referralCode": "Nambari ya Rufaa"
     },
     "variety": {
       "description": "Karibu kwenye programu ya Food House! Chagua Aina Yako na gundua aina mbalimbali za bidhaa zinazolingana na mapendeleo yako.",

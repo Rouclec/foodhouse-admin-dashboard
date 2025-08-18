@@ -58,7 +58,8 @@
       "address": "Adresse",
       "unknownError": "Une erreur inconnue s'est produite",
       "congratulations": "Félicitations",
-      "registrationCompleteMessage": "Votre compte est prêt à être utilisé, vous serez redirigé vers la page d'accueil dans quelques secondes"
+      "registrationCompleteMessage": "Votre compte est prêt à être utilisé, vous serez redirigé vers la page d'accueil dans quelques secondes",
+      "referralCode": "Code de parrainage"
     },
     "variety": {
       "description": "Bienvenue sur l'application Food House ! Choisissez votre variété et explorez une large gamme de produits adaptés à vos préférences.",

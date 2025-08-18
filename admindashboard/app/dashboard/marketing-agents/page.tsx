@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useState } from "react";
+import { FC, useContext, useState } from "react";
 import {
   Table,
   TableBody,
@@ -30,28 +30,247 @@ import { usersgrpcUser, usersgrpcUserStatus } from "@/client/users.swagger";
 import { CursorPagination } from "@/components/ui/cursor-pagination";
 import { useConfirmDelete } from "@/hooks/use-confirm-delete";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
+import { ordersListTotalComissionAmountByReferrerOptions } from "@/client/orders.swagger/@tanstack/react-query.gen";
+import { formatAmount, formatCurrency } from "@/utils";
 
-interface MarketingAgent {
-  id: string;
-  name: string;
-  email: string;
-  phoneNumber: string;
-  city: string;
-  referralCode: string;
-  status: "active" | "inactive";
-  createdAt: string;
-  totalCommissions: {
-    currency: string;
-    unpaidAmount: number;
-    totalEarned: number;
-  }[];
+interface MarketingAgentRowProp {
+  agent: usersgrpcUser;
+  handleViewDetails: (agentId: string | undefined) => void;
+  handleEditAgent: (agent: usersgrpcUser) => void;
+  handleDisableAgent: (agent: usersgrpcUser) => void;
+  handleDelete: (agent: usersgrpcUser) => void;
 }
 
-const formatCurrency = (amount: number, currency: string) => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: currency,
-  }).format(amount);
+const MarketingAgentRow: FC<MarketingAgentRowProp> = ({
+  agent,
+  handleViewDetails,
+  handleEditAgent,
+  handleDelete,
+  handleDisableAgent,
+}) => {
+  const { user } = useContext(Context) as ContextType;
+
+  const getStatusColor = (status: usersgrpcUserStatus | undefined) => {
+    switch (status) {
+      case "UserStatus_ACTIVE":
+        return "bg-green-100 text-green-800";
+      case "UserStatus_SUSPENDED":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const { data: commissions } = useQuery({
+    ...ordersListTotalComissionAmountByReferrerOptions({
+      path: {
+        adminUserId: user?.userId ?? "",
+        referrerId: agent?.userId ?? "",
+      },
+    }),
+  });
+
+  return (
+    <TableRow key={agent?.userId}>
+      <TableCell className="font-medium">
+        {agent?.firstName} {agent?.lastName}
+      </TableCell>
+      <TableCell>
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-sm">
+            <Mail className="h-4 w-4 text-gray-400" />
+            <span className="truncate max-w-[200px]">{agent?.email}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Phone className="h-4 w-4 text-gray-400" />
+            {agent?.phoneNumber}
+          </div>
+        </div>
+      </TableCell>
+      <TableCell>{agent.address}</TableCell>
+      <TableCell>
+        <Badge variant="outline" className="font-mono">
+          {agent.referralCode}
+        </Badge>
+      </TableCell>
+      <TableCell>
+        <Badge className={getStatusColor(agent.status)}>
+          {agent.status?.replace("UserStatus_", "")}
+        </Badge>
+      </TableCell>
+      <TableCell>
+        <div className="text-sm font-medium">
+          {commissions?.commissions?.length === 0 ? (
+            <p>No due</p>
+          ) : (
+            <p>
+              {commissions?.commissions
+                ?.map((item) =>
+                  formatCurrency(item.value ?? "0", item?.currencyIsoCode ?? "")
+                )
+                .join(" + ")}
+            </p>
+          )}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleViewDetails(agent.userId)}
+            title="View Details"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            title="Edit Agent"
+            onClick={() => handleEditAgent(agent)}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleDisableAgent(agent)}
+            title={
+              agent.status === "UserStatus_ACTIVE" ? "Deactivate" : "Activate"
+            }
+            className={
+              agent?.status === "UserStatus_ACTIVE"
+                ? "text-yellow-600"
+                : "text-green-600"
+            }
+          >
+            <UserX className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            title="Delete Agent"
+            className="text-red-600"
+            onClick={() => handleDelete(agent)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+};
+
+const MarketingAgentCard: FC<MarketingAgentRowProp> = ({
+  agent,
+  handleViewDetails,
+  handleEditAgent,
+  // handleDelete,
+  // handleDisableAgent,
+}) => {
+  const { user } = useContext(Context) as ContextType;
+
+  const getStatusColor = (status: usersgrpcUserStatus | undefined) => {
+    switch (status) {
+      case "UserStatus_ACTIVE":
+        return "bg-green-100 text-green-800";
+      case "UserStatus_SUSPENDED":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const { data: commissions } = useQuery({
+    ...ordersListTotalComissionAmountByReferrerOptions({
+      path: {
+        adminUserId: user?.userId ?? "",
+        referrerId: agent?.userId ?? "",
+      },
+      query: {
+        isPaid: false,
+      },
+    }),
+  });
+  return (
+    <Card key={agent.userId} className="p-4">
+      <div className="space-y-3">
+        <div className="flex items-start justify-between">
+          <div>
+            <h3 className="font-medium">
+              {agent.firstName} {agent.lastName}
+            </h3>
+            <Badge className={`${getStatusColor(agent.status)} mt-1`}>
+              {agent.status?.replace("UserStatus_", "")}
+            </Badge>
+          </div>
+          <Badge variant="outline" className="font-mono text-xs">
+            {agent.referralCode}
+          </Badge>
+        </div>
+
+        <div className="space-y-2 text-sm">
+          <div className="flex items-center gap-2">
+            <Mail className="h-4 w-4 text-gray-400 flex-shrink-0" />
+            <span className="truncate">{agent.email}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
+            <span>{agent.phoneNumber}</span>
+          </div>
+          <div className="text-muted-foreground">
+            <strong>City:</strong> {agent.address}
+          </div>
+          <div className="text-muted-foreground">
+            <strong>Unpaid:</strong>
+            {commissions?.commissions?.length === 0 ? (
+              <p>No due</p>
+            ) : (
+              <p>
+                {commissions?.commissions
+                  ?.map((item) =>
+                    formatCurrency(
+                      item.value ?? "0",
+                      item?.currencyIsoCode ?? ""
+                    )
+                  )
+                  .join(" + ")}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2 pt-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleViewDetails(agent.userId)}
+            className="flex-1 min-w-0"
+          >
+            <Eye className="h-4 w-4 mr-1" />
+            View
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleEditAgent(agent)}
+            className="flex-1 min-w-0"
+          >
+            <Edit className="h-4 w-4 mr-1" />
+            Edit
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 min-w-0 bg-transparent"
+          >
+            <UserX className="h-4 w-4 mr-1" />
+            {agent.status === "UserStatus_ACTIVE" ? "Deactivate" : "Activate"}
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
 };
 
 export default function MarketingAgentsPage() {
@@ -119,19 +338,6 @@ export default function MarketingAgentsPage() {
     setDialogMode("create");
     setIsCreateEditOpen(false);
     refetch();
-  };
-
-  const getTotalUnpaidCommission = (
-    commissions: MarketingAgent["totalCommissions"]
-  ) => {
-    if (!commissions || commissions.length === 0) return "No commissions";
-
-    const unpaidCommissions = commissions.filter((c) => c.unpaidAmount > 0);
-    if (unpaidCommissions.length === 0) return "All paid";
-
-    return unpaidCommissions
-      .map((c) => formatCurrency(c.unpaidAmount, c.currency))
-      .join(" + ");
   };
 
   const getStatusColor = (status: usersgrpcUserStatus | undefined) => {
@@ -292,75 +498,14 @@ export default function MarketingAgentsPage() {
             {/* Mobile/Tablet Card View */}
             <div className="block lg:hidden space-y-4">
               {agentsData?.users?.map((agent: usersgrpcUser) => (
-                <Card key={agent.userId} className="p-4">
-                  <div className="space-y-3">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-medium">
-                          {agent.firstName} {agent.lastName}
-                        </h3>
-                        <Badge
-                          className={`${getStatusColor(agent.status)} mt-1`}
-                        >
-                          {agent.status?.replace("UserStatus_", "")}
-                        </Badge>
-                      </div>
-                      <Badge variant="outline" className="font-mono text-xs">
-                        {agent.referralCode}
-                      </Badge>
-                    </div>
-
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        <span className="truncate">{agent.email}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        <span>{agent.phoneNumber}</span>
-                      </div>
-                      <div className="text-muted-foreground">
-                        <strong>City:</strong> {agent.address}
-                      </div>
-                      <div className="text-muted-foreground">
-                        <strong>Unpaid:</strong>{" "}
-                        {/* {getTotalUnpaidCommission(agent.totalCommissions)} */}
-                        0
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 pt-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleViewDetails(agent.userId)}
-                        className="flex-1 min-w-0"
-                      >
-                        <Eye className="h-4 w-4 mr-1" />
-                        View
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEditAgent(agent)}
-                        className="flex-1 min-w-0"
-                      >
-                        <Edit className="h-4 w-4 mr-1" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 min-w-0 bg-transparent"
-                      >
-                        <UserX className="h-4 w-4 mr-1" />
-                        {agent.status === "UserStatus_ACTIVE"
-                          ? "Deactivate"
-                          : "Activate"}
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
+                <MarketingAgentCard
+                  agent={agent}
+                  key={agent?.userId}
+                  handleDelete={() => handleDelete}
+                  handleEditAgent={() => handleEditAgent(agent)}
+                  handleDisableAgent={() => handleDisableAgent(agent)}
+                  handleViewDetails={() => handleViewDetails(agent?.userId)}
+                />
               ))}
             </div>
 
@@ -380,88 +525,14 @@ export default function MarketingAgentsPage() {
                 </TableHeader>
                 <TableBody>
                   {agentsData?.users?.map((agent: usersgrpcUser) => (
-                    <TableRow key={agent?.userId}>
-                      <TableCell className="font-medium">
-                        {agent?.firstName} {agent?.lastName}
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Mail className="h-4 w-4 text-gray-400" />
-                            <span className="truncate max-w-[200px]">
-                              {agent?.email}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Phone className="h-4 w-4 text-gray-400" />
-                            {agent?.phoneNumber}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{agent.address}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="font-mono">
-                          {agent.referralCode}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={getStatusColor(agent.status)}>
-                          {agent.status?.replace("UserStatus_", "")}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm font-medium">
-                          {/* {getTotalUnpaidCommission(agent.totalCommissions)} */}
-                          0
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleViewDetails(agent.userId)}
-                            title="View Details"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            title="Edit Agent"
-                            onClick={() => handleEditAgent(agent)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDisableAgent(agent)}
-                            title={
-                              agent.status === "UserStatus_ACTIVE"
-                                ? "Deactivate"
-                                : "Activate"
-                            }
-                            className={
-                              agent?.status === "UserStatus_ACTIVE"
-                                ? "text-yellow-600"
-                                : "text-green-600"
-                            }
-                          >
-                            <UserX className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            title="Delete Agent"
-                            className="text-red-600"
-                            onClick={() => handleDelete(agent)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                    <MarketingAgentRow
+                      agent={agent}
+                      key={agent?.userId}
+                      handleDelete={() => handleDelete}
+                      handleEditAgent={() => handleEditAgent(agent)}
+                      handleDisableAgent={() => handleDisableAgent(agent)}
+                      handleViewDetails={() => handleViewDetails(agent?.userId)}
+                    />
                   ))}
                 </TableBody>
               </Table>

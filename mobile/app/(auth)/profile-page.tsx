@@ -43,6 +43,7 @@ const ProfilePage = () => {
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
   const { role } = useContext(Context) as ContextType;
+  const [referralCode, setReferralCode] = useState<string>();
 
   const { mutateAsync: updateUserRegistration } = useMutation({
     ...usersCompleteRegistrationMutation(),
@@ -86,6 +87,7 @@ const ProfilePage = () => {
         email,
         address,
         profileImage: imageUrl || undefined,
+        referralCode,
       };
 
       await updateUserRegistration({
@@ -225,6 +227,25 @@ const ProfilePage = () => {
                 }}
                 outlineColor={Colors.grey['bg']}
               />
+
+              {role === 'USER_TYPE_BUYER' && (
+                <TextInput
+                  label={i18n.t('(auth).profile.referralCode')}
+                  value={referralCode}
+                  onChangeText={setReferralCode}
+                  mode="outlined"
+                  style={defaultStyles.input}
+                  theme={{
+                    colors: {
+                      primary: Colors.primary[500],
+                      background: Colors.grey['fa'],
+                      error: Colors.error,
+                    },
+                    roundness: 10,
+                  }}
+                  outlineColor={Colors.grey['bg']}
+                />
+              )}
             </View>
           </ScrollView>
         </View>
