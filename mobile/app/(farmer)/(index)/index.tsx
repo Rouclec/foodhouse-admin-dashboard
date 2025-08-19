@@ -72,7 +72,7 @@ export default function Orders() {
         (!user.locationCoordinates ||
           !user.locationCoordinates.lat ||
           !user.locationCoordinates.lon ||
-          !user.locationCoordinates.address);
+          !user.locationCoordinates.address) && user.firstName && user.lastName && user.profileImage && user.phoneNumber;
 
       if (isFarmerMissingLocation) {
         setErrorMessage(i18n.t('(auth).profile.locationRequiredForFarmer')); 
