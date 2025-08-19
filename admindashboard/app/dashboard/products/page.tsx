@@ -48,7 +48,6 @@ import {
 } from "@/client/products.swagger/@tanstack/react-query.gen";
 import ProductDetailsModal from "@/components/productsDetailsModal";
 import moment from "moment";
-// import ProductDetailsModal from "./ProductDetailsModal";
 
 export default function ProductsPage() {
   const { user: adminUser } = useContext(Context) as ContextType;

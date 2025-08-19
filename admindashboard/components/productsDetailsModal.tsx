@@ -49,7 +49,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Form validation schema
+
 const productFormSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   description: z.string().optional(),
@@ -84,7 +84,7 @@ export default function ProductDetailsModal({
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  // Fetch farmer details
+ 
   const { data: farmerData, isLoading: isFarmerLoading } = useQuery({
     ...usersGetFarmerByIdOptions({
       path: {
@@ -107,7 +107,7 @@ export default function ProductDetailsModal({
     },
   });
 
-  // Form setup
+
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
@@ -120,7 +120,7 @@ export default function ProductDetailsModal({
     },
   });
 
-  // Update form values when product changes
+  
   useEffect(() => {
     if (product) {
       form.reset({
@@ -182,7 +182,6 @@ export default function ProductDetailsModal({
 
   const handleCancelEdit = () => {
     setIsEditing(false);
-    // Reset form with original product data
     form.reset({
       name: product?.name || "",
       description: product?.description || "",
@@ -298,7 +297,7 @@ export default function ProductDetailsModal({
                           onChange={(e) =>
                             field.onChange(parseFloat(e.target.value))
                           }
-                          disabled // Make price field non-editable
+                          disabled 
                         />
                       </FormControl>
                       <FormMessage />
@@ -315,7 +314,7 @@ export default function ProductDetailsModal({
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
-                        disabled // Make currency field non-editable
+                        disabled 
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -538,7 +537,7 @@ export default function ProductDetailsModal({
   );
 }
 
-// Helper component for displaying detail items
+
 const DetailItem = ({
   label,
   value,
