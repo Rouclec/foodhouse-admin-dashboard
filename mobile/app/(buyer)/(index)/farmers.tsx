@@ -5,7 +5,7 @@ import i18n from '@/i18n';
 import { defaultStyles, farmersStyles as styles } from '@/styles';
 import { formatAmount } from '@/utils/amountFormater';
 import { Feather } from '@expo/vector-icons';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
@@ -74,6 +74,7 @@ export default function Farmers() {
         searchKey: debounceQuery,
       },
     }),
+    placeholderData: keepPreviousData,
   });
 
   return (

@@ -30,7 +30,7 @@ import {
   DollarSign,
 } from "lucide-react";
 import { formatCurrency } from "@/utils";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { usersGetUserByIdOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { useQueryLoading } from "@/hooks/use-query-loading";
 import type { usersgrpcUserStatus } from "@/client/users.swagger";
@@ -106,6 +106,7 @@ export function MarketingAgentDetailsDialog({
         },
       }),
       enabled: activeTab == "commissions",
+      placeholderData: keepPreviousData,
     });
 
   useQueryLoading(

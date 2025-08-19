@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { defaultStyles, buyerProductsStyles as styles } from '@/styles';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
   productsListCategoriesOptions,
   productsListProductsOptions,
@@ -63,6 +63,7 @@ export default function BuyerProducts() {
 
   const { data: categories, isLoading: isCategoriesLoading } = useQuery({
     ...productsListCategoriesOptions(),
+    placeholderData: keepPreviousData,
   });
   const {
     isLoading: isProductsLoading,
@@ -84,6 +85,7 @@ export default function BuyerProducts() {
         startKey: '',
       },
     }),
+    placeholderData: keepPreviousData,
   });
 
   const isFocused = useIsFocused();
@@ -214,7 +216,7 @@ export default function BuyerProducts() {
             style={[styles.title, styles.marginHorizontal24]}>
             {i18n.t('(buyer).(index).products.categories')}
           </Text>
-          {isCategoriesLoading ? (
+          {isCategoriesLoading && !categories ? (
             <View style={defaultStyles.center}>
               <Chase size={24} color={Colors.primary[500]} />
             </View>
