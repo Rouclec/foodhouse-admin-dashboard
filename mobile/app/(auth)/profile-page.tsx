@@ -31,23 +31,23 @@ import { Colors, emailRegex } from '@/constants';
 import {
   GooglePlacesAutocomplete,
   GooglePlacesAutocompleteRef,
-  GooglePlaceData, 
-  GooglePlaceDetail, 
+  GooglePlaceData,
+  GooglePlaceDetail,
 } from 'react-native-google-places-autocomplete';
 import { typesPoint } from '@/client/orders.swagger';
-
-
 
 const ProfilePage = () => {
   const { user, setUser } = useContext(Context) as ContextType;
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [address, setAddress] = useState(''); 
-  const [locationCoordinates, setLocationCoordinates] = useState<typesPoint | null>(null);
+  const [address, setAddress] = useState('');
+  const [locationCoordinates, setLocationCoordinates] =
+    useState<typesPoint | null>(null);
   const [loading, setLoading] = useState(false);
-  const [profileImage, setProfileImage] =
-    useState<ExpoImagePicker.ImagePickerAsset | undefined>(undefined);
+  const [profileImage, setProfileImage] = useState<
+    ExpoImagePicker.ImagePickerAsset | undefined
+  >(undefined);
   const [errorMessage, setErrorMessage] = useState<string>();
   const [error, setError] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
@@ -58,12 +58,11 @@ const ProfilePage = () => {
   const { mutateAsync: updateUserRegistration } = useMutation({
     ...usersCompleteRegistrationMutation(),
     onError: async error => {
-
       setErrorMessage(
         error?.response?.data?.message ?? i18n.t('(auth).profile.unknownError'),
       );
       setError(true);
-      await delay(5000); 
+      await delay(5000);
       setError(false);
     },
     onSuccess: async () => {
@@ -94,15 +93,15 @@ const ProfilePage = () => {
         firstName,
         lastName,
         email,
-        address, 
-        profileImage: imageUrl || undefined, 
+        address,
+        profileImage: imageUrl || undefined,
         locationCoordinates: locationCoordinates ?? undefined,
       };
 
       await updateUserRegistration({
         body: data,
         path: {
-          userId: user?.userId ?? '', 
+          userId: user?.userId ?? '',
         },
       });
       setUser({ ...data });
@@ -117,16 +116,19 @@ const ProfilePage = () => {
     }
   };
 
-  const handleAddressSelect = (data: GooglePlaceData, details: GooglePlaceDetail | null = null) => {
+  const handleAddressSelect = (
+    data: GooglePlaceData,
+    details: GooglePlaceDetail | null = null,
+  ) => {
     setAddress(data.description);
     if (details?.geometry?.location) {
       setLocationCoordinates({
         lat: details.geometry.location.lat,
-        lon: details.geometry.location.lng, 
-        address: data.description, 
+        lon: details.geometry.location.lng,
+        address: data.description,
       });
     } else {
-      setLocationCoordinates(null); 
+      setLocationCoordinates(null);
     }
   };
 
@@ -152,7 +154,6 @@ const ProfilePage = () => {
             <TouchableOpacity
               onPress={() => setIsImagePickerVisible(true)}
               style={signupStyles.imageUpload}>
-              
               {profileImage?.uri ? (
                 <Image
                   source={{ uri: profileImage.uri }}
@@ -258,19 +259,22 @@ const ProfilePage = () => {
                 }}
                 textInputProps={{
                   placeholderTextColor: Colors.grey['3c'],
-                  value: address, 
+                  value: address,
+                  onChangeText: setAddress, 
                 }}
-                onPress={handleAddressSelect} 
+                onPress={(data, details) => handleAddressSelect(data, details)} 
                 fetchDetails={true}
-                predefinedPlaces={[]}
                 query={{
                   key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_AUTOCOMPLETE_KEY,
                   language: 'en',
                 }}
-                enablePoweredByContainer={false}
+                nearbyPlacesAPI="GooglePlacesSearch"
                 debounce={200}
+                timeout={20000}
+                minLength={3}
+                enablePoweredByContainer={false}
+                predefinedPlaces={[]}
               />
-
             </View>
           </ScrollView>
         </View>
@@ -316,7 +320,7 @@ const ProfilePage = () => {
       <Portal>
         <Dialog
           visible={successModalVisible}
-          onDismiss={() => {}} 
+          onDismiss={() => {}}
           style={defaultStyles.dialogSuccessContainer}>
           <Dialog.Content>
             <Image
@@ -342,7 +346,7 @@ const ProfilePage = () => {
 
       <Snackbar
         visible={!!error}
-        onDismiss={() => {}} 
+        onDismiss={() => {}}
         duration={3000}
         style={defaultStyles.snackbar}>
         <Text style={defaultStyles.errorText}>{errorMessage}</Text>

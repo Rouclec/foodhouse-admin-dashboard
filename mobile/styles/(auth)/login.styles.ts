@@ -54,6 +54,10 @@ export const loginstyles = StyleSheet.create({
     marginBottom: 5,
     backgroundColor: Colors.grey["fa"],
   },
+  inputs: {
+    zIndex: 999, flex: 1,
+    marginBottom: 5,
+  },
   errorText: {
     color: "#FF0000",
     marginBottom: 15,

@@ -29,7 +29,7 @@ import { usersCompleteRegistrationMutation } from '@/client/users.swagger/@tanst
 import { delay, uploadImage } from '@/utils';
 import { useMutation } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { GooglePlacesAutocompleteRef, GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { GooglePlacesAutocompleteRef, GooglePlacesAutocomplete, GooglePlaceData, GooglePlaceDetail } from 'react-native-google-places-autocomplete';
 
 export default function PersonalInfo() {
   const router = useRouter();
@@ -39,6 +39,7 @@ const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
     user?.profileImage || '',
   );
   const [profileImage, setProfileImage] = useState(originalProfileImage);
+   const [showAutocomplete, setShowAutocomplete] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: `${user?.firstName || ''} ${user?.lastName || ''}`.trim(),
@@ -64,10 +65,27 @@ const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
         JSON.stringify(formData.locationCoordinates);
 
     setHasChanges(changesDetected);
-  }, [formData, profileImage]);
+  }, [
+    formData.fullName,
+    formData.address,
+    formData.email,
+    formData.locationCoordinates,
+    profileImage,
+    originalProfileImage,
+    user?.firstName,
+    user?.lastName,
+    user?.address,
+    user?.email,
+    user?.locationCoordinates,
+  ]);
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+ const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => {
+      if (prev[field] === value) {   
+        return prev; 
+      }
+      return { ...prev, [field]: value };
+    });
   };
 
   const handleImageSelect = (asset: any) => {
@@ -77,6 +95,31 @@ const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
     }
     setIsImagePickerVisible(false);
   };
+
+ const handleAddressSelect = (
+    data: GooglePlaceData,
+    details: GooglePlaceDetail | null = null,
+  ) => {
+    if (!data?.description) {
+      return;
+    }
+
+    const newFormData = { ...formData, address: data.description };
+    let newLocation = null;
+
+    if (details?.geometry?.location) {
+      newLocation = {
+        lat: details.geometry.location.lat,
+        lon: details.geometry.location.lng,
+        address: data.description,
+      };
+      newFormData.locationCoordinates = newLocation;
+    } else {
+      newFormData.locationCoordinates = null;
+    }
+    setFormData(newFormData);
+  };
+
 
   const { mutateAsync: updateProfile } = useMutation({
     ...usersCompleteRegistrationMutation(),
@@ -112,6 +155,7 @@ const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
         email: formData.email,
         address: formData.address,
         profileImage: imageUrl,
+         locationCoordinates: formData.locationCoordinates ?? undefined,
       };
 
       await updateProfile({ body: data, path: { userId: user?.userId || '' } });
@@ -155,7 +199,7 @@ const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
             <View />
           </Appbar.Header>
 
-          <ScrollView contentContainerStyle={defaultStyles.scrollContainer}>
+          <ScrollView contentContainerStyle={defaultStyles.scrollContainer} nestedScrollEnabled={true}>
             <View style={profileFlowStyles.navigateSection}>
               <View style={signupStyles.imageContainer}>
                 <TouchableOpacity
@@ -221,16 +265,22 @@ const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
                   style={loginstyles.input}
                 />
 
-                <View style={loginstyles.input}>
+                <View style={loginstyles.inputs}>
                   <GooglePlacesAutocomplete
                     ref={googlePlacesAutoCompleteRef}
                     placeholder={i18n.t(
                       '(farmer).(profile-flow).(personal-info).address',
                     )}
+                    
+                    fetchDetails={true}
+                    onPress={handleAddressSelect}
+                    query={{
+                      key: 'AIzaSyAfSUTaD7Vxyk8CcVrTQne19TyL2XX1YRA',
+                      language: 'en',
+                    }}
                     styles={{
                       textInput: {
                         ...loginstyles.input,
-                        backgroundColor: Colors.light[10],
                         height: 56,
                         borderRadius: 15,
                         borderColor: Colors.grey['bg'],
@@ -246,28 +296,22 @@ const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
                     textInputProps={{
                       placeholderTextColor: Colors.grey['3c'],
                       value: formData.address,
+                      onChangeText: text => {
+                        handleInputChange('address', text);
+                      },
+                      onFocus: () => {
+                        setShowAutocomplete(true);
+                      },
+                      onBlur: () => {
+                        setShowAutocomplete(false);
+                      },
                     }}
-                    onPress={(data, details = null) => {
-                      handleInputChange('address', data.description);
-                      if (details?.geometry?.location) {
-                        setFormData(prev => ({
-                          ...prev,
-                          locationCoordinates: {
-                            lat: details.geometry.location.lat,
-                            long: details.geometry.location.lng,
-                            address: data.description,
-                          },
-                        }));
-                      }
-                    }}
-                    fetchDetails={true}
-                    predefinedPlaces={[]}
-                    query={{
-                  key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_AUTOCOMPLETE_KEY,
-                  language: 'en',
-                }}
-                    enablePoweredByContainer={false}
+                    nearbyPlacesAPI="GooglePlacesSearch"
                     debounce={200}
+                    timeout={20000}
+                    minLength={3}
+                    enablePoweredByContainer={false}
+                    predefinedPlaces={[]}
                   />
                 </View>
               </View>

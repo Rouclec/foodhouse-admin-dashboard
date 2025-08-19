@@ -7,14 +7,7 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import {
-  Appbar,
-  Text,
-  Button,
-  TextInput,
-  Avatar,
-  Icon,
-} from 'react-native-paper';
+import { Appbar, Text, Button, TextInput, Icon } from 'react-native-paper';
 import { Colors } from '@/constants';
 import {
   defaultStyles,
@@ -29,12 +22,27 @@ import { usersCompleteRegistrationMutation } from '@/client/users.swagger/@tanst
 import { delay, uploadImage } from '@/utils';
 import { useMutation } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { GooglePlacesAutocompleteRef, GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import {
+  GooglePlaceData,
+  GooglePlaceDetail,
+  GooglePlacesAutocomplete,
+  GooglePlacesAutocompleteRef,
+} from 'react-native-google-places-autocomplete';
+import { typesPoint } from '@/client/orders.swagger';
 
 export default function PersonalInfo() {
   const router = useRouter();
-  const { user, setUser } = useContext(Context) as ContextType;
+  const context = useContext(Context);
+
+  if (!context) {
+    throw new Error('PersonalInfo must be used within a ContextProvider');
+  }
+
+  const { user, setUser } = context as ContextType;
   const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
+
+
   const [originalProfileImage, setOriginalProfileImage] = useState(
     user?.profileImage || '',
   );
@@ -63,14 +71,32 @@ export default function PersonalInfo() {
       JSON.stringify(user?.locationCoordinates) !==
         JSON.stringify(formData.locationCoordinates);
 
-    setHasChanges(changesDetected);
-  }, [formData, profileImage]);
+    setHasChanges(prev => (prev === changesDetected ? prev : changesDetected));
+  }, [
+    formData.fullName,
+    formData.address,
+    formData.email,
+    formData.locationCoordinates,
+    profileImage,
+    originalProfileImage,
+    user?.firstName,
+    user?.lastName,
+    user?.address,
+    user?.email,
+    user?.locationCoordinates,
+  ]);
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      if (prev[field] === value) {
+        return prev;
+      }
+      return { ...prev, [field]: value };
+    });
   };
 
   const handleImageSelect = (asset: any) => {
+    console.log('handleImageSelect: Asset received:', asset?.uri);
     if (asset && asset.uri !== originalProfileImage) {
       setProfileImage(asset.uri);
       setHasChanges(true);
@@ -78,9 +104,34 @@ export default function PersonalInfo() {
     setIsImagePickerVisible(false);
   };
 
+   const handleAddressSelect = (
+    data: GooglePlaceData,
+    details: GooglePlaceDetail | null = null,
+  ) => {
+    if (!data?.description) {
+      return;
+    }
+
+    const newFormData = { ...formData, address: data.description };
+    let newLocation = null;
+
+    if (details?.geometry?.location) {
+      newLocation = {
+        lat: details.geometry.location.lat,
+        lon: details.geometry.location.lng,
+        address: data.description,
+      };
+      newFormData.locationCoordinates = newLocation;
+    } else {
+      newFormData.locationCoordinates = null;
+    }
+    setFormData(newFormData);
+  };
+
   const { mutateAsync: updateProfile } = useMutation({
     ...usersCompleteRegistrationMutation(),
     onError: async error => {
+      console.error('updateProfile onError:', error);
       setErrorMessage(
         error?.response?.data?.message ?? i18n.t('(auth).profile.unknownError'),
       );
@@ -91,16 +142,19 @@ export default function PersonalInfo() {
   });
 
   const handleSave = async () => {
+
     try {
       setLoading(true);
       let imageUrl = originalProfileImage;
 
       if (profileImage !== originalProfileImage) {
+        console.log('handleSave: Uploading new profile image.');
         imageUrl = await uploadImage({
           uri: profileImage,
           filename: `profile_${user?.userId}_${Date.now()}.jpg`,
           directory: 'profile_images',
         });
+        console.log('handleSave: Image uploaded, new URL:', imageUrl);
       }
 
       const firstNameSplit = formData.fullName.split(' ')[0];
@@ -112,14 +166,15 @@ export default function PersonalInfo() {
         email: formData.email,
         address: formData.address,
         profileImage: imageUrl,
+        locationCoordinates: formData.locationCoordinates ?? undefined,
       };
-
+      console.log(data)
       await updateProfile({ body: data, path: { userId: user?.userId || '' } });
 
       setUser({ ...data });
       setOriginalProfileImage(imageUrl);
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error('handleSave: Error updating profile:', error);
       setErrorMessage('Failed to update profile');
       setError(true);
       await delay(5000);
@@ -155,12 +210,17 @@ export default function PersonalInfo() {
             <View />
           </Appbar.Header>
 
-          <ScrollView contentContainerStyle={defaultStyles.scrollContainer}>
+          <ScrollView
+            contentContainerStyle={defaultStyles.scrollContainer}
+            horizontal={true}
+            nestedScrollEnabled={true}>
             <View style={profileFlowStyles.navigateSection}>
               <View style={signupStyles.imageContainer}>
                 <TouchableOpacity
                   style={signupStyles.imageUpload}
-                  onPress={() => setIsImagePickerVisible(true)}>
+                  onPress={() => {
+                    setIsImagePickerVisible(true);
+                  }}>
                   <View style={signupStyles.addImageContainer}>
                     {profileImage || user?.profileImage ? (
                       <Image
@@ -221,16 +281,22 @@ export default function PersonalInfo() {
                   style={loginstyles.input}
                 />
 
-                <View style={loginstyles.input}>
+                <View style={loginstyles.inputs}>
                   <GooglePlacesAutocomplete
                     ref={googlePlacesAutoCompleteRef}
                     placeholder={i18n.t(
                       '(farmer).(profile-flow).(personal-info).address',
                     )}
+                    fetchDetails={true}
+                    onPress={handleAddressSelect}
+                    query={{
+                      key: process.env
+                        .EXPO_PUBLIC_GOOGLE_PLACES_AUTOCOMPLETE_KEY,
+                      language: 'en',
+                    }}
                     styles={{
                       textInput: {
                         ...loginstyles.input,
-                        backgroundColor: Colors.light[10],
                         height: 56,
                         borderRadius: 15,
                         borderColor: Colors.grey['bg'],
@@ -246,28 +312,22 @@ export default function PersonalInfo() {
                     textInputProps={{
                       placeholderTextColor: Colors.grey['3c'],
                       value: formData.address,
+                      onChangeText: text => {
+                        handleInputChange('address', text);
+                      },
+                      onFocus: () => {
+                        setShowAutocomplete(true);
+                      },
+                      onBlur: () => {
+                        setShowAutocomplete(false);
+                      },
                     }}
-                    onPress={(data, details = null) => {
-                      handleInputChange('address', data.description);
-                      if (details?.geometry?.location) {
-                        setFormData(prev => ({
-                          ...prev,
-                          locationCoordinates: {
-                            lat: details.geometry.location.lat,
-                            long: details.geometry.location.lng,
-                            address: data.description,
-                          },
-                        }));
-                      }
-                    }}
-                    fetchDetails={true}
-                    predefinedPlaces={[]}
-                    query={{
-                  key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_AUTOCOMPLETE_KEY,
-                  language: 'en',
-                }}
-                    enablePoweredByContainer={false}
+                    nearbyPlacesAPI="GooglePlacesSearch"
                     debounce={200}
+                    timeout={20000}
+                    minLength={3}
+                    enablePoweredByContainer={false}
+                    predefinedPlaces={[]}
                   />
                 </View>
               </View>
@@ -293,7 +353,9 @@ export default function PersonalInfo() {
       <ImagePicker
         visible={isImagePickerVisible}
         setImage={handleImageSelect}
-        onClose={() => setIsImagePickerVisible(false)}
+        onClose={() => {
+          setIsImagePickerVisible(false);
+        }}
         aspect={[1, 1]}
       />
     </>
