@@ -84,7 +84,7 @@ const menuItems: Array<{
         url: "/dashboard/subscriptions",
         icon: CreditCard,
       },
-      { title: "Products", url: "/dashboard/products", icon: Users },
+      { title: "Products", url: "/dashboard/products", icon: Package },
     ],
   },
   {
