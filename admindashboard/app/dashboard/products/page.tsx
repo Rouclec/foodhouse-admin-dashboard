@@ -33,7 +33,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Search, Edit, Trash2, Package } from "lucide-react";
+import { Search, Package, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryLoading } from "@/hooks/use-query-loading";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
@@ -46,12 +46,20 @@ import {
   productsDeleteProductMutation,
   productsListCategoriesOptions,
 } from "@/client/products.swagger/@tanstack/react-query.gen";
+import ProductDetailsModal from "@/components/productsDetailsModal";
 import moment from "moment";
+// import ProductDetailsModal from "./ProductDetailsModal";
 
 export default function ProductsPage() {
-  const { user } = useContext(Context) as ContextType;
+  const { user: adminUser } = useContext(Context) as ContextType;
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [productToDelete, setProductToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<{
+    id: string;
+    name: string;
+    createdBy: string;
+  } | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   const pagination = useCursorPagination({
     initialStartKey: "",
@@ -74,7 +82,7 @@ export default function ProductsPage() {
   } = useQuery({
     ...productsListProductsOptions({
       path: {
-        userId: user?.userId ?? "",
+        userId: adminUser?.userId ?? "",
       },
       query: {
         search: searchTerm,
@@ -100,8 +108,22 @@ export default function ProductsPage() {
 
   useQueryLoading(isProductsLoading || isCategoriesLoading);
 
-  const handleOpenDeleteDialog = (productId: string, productName: string) => {
-    setProductToDelete({ id: productId, name: productName });
+  const handleOpenDetailsDialog = (product: any) => {
+    setSelectedProduct(product);
+    setDetailsDialogOpen(true);
+  };
+
+  const handleCloseDetailsDialog = () => {
+    setDetailsDialogOpen(false);
+    setSelectedProduct(null);
+  };
+
+  const handleOpenDeleteDialog = (
+    productId: string,
+    productName: string,
+    createdBy: string
+  ) => {
+    setProductToDelete({ id: productId, name: productName, createdBy });
     setDeleteDialogOpen(true);
   };
 
@@ -119,7 +141,7 @@ export default function ProductsPage() {
       await deleteProduct({
         path: {
           productId: productToDelete.id,
-          userId: user?.userId ?? "",
+          userId: productToDelete.createdBy,
         },
       });
 
@@ -130,15 +152,12 @@ export default function ProductsPage() {
 
       refetchProducts();
       handleCloseDeleteDialog();
+      handleCloseDetailsDialog();
     } catch (error) {
       console.error({ error }, "deleting product");
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleEditProduct = (productId: string) => {
-    console.log("Edit product:", productId);
   };
 
   const handleNextPage = () => {
@@ -149,7 +168,7 @@ export default function ProductsPage() {
 
   const categoryMap = useMemo(() => {
     const map: Record<string, string> = {};
-    categoriesData?.categories?.forEach(category => {
+    categoriesData?.categories?.forEach((category) => {
       if (category.id && category.name) {
         map[category.id] = category.name;
       }
@@ -231,7 +250,11 @@ export default function ProductsPage() {
               </TableHeader>
               <TableBody>
                 {productsData?.products?.map((product) => (
-                  <TableRow key={product?.id}>
+                  <TableRow
+                    key={product?.id}
+                    className="cursor-pointer hover:bg-gray-50"
+                    onClick={() => handleOpenDetailsDialog(product)}
+                  >
                     <TableCell>
                       <div>
                         <p className="font-medium">{product?.name}</p>
@@ -247,23 +270,29 @@ export default function ProductsPage() {
                     <TableCell className="hidden md:table-cell">
                       {moment(product?.createdAt).format("DD-MM-YYYY")}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell
+                      className="text-right"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <div className="flex justify-end space-x-2">
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleEditProduct(product?.id ?? "")}
-                          title="Edit product"
+                          onClick={() => handleOpenDetailsDialog(product)}
+                          title="View details"
                         >
-                          <Edit className="h-4 w-4" />
+                          <Package className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleOpenDeleteDialog(
-                            product?.id ?? "", 
-                            product?.name ?? "this product"
-                          )}
+                          onClick={() =>
+                            handleOpenDeleteDialog(
+                              product?.id ?? "",
+                              product?.name ?? "this product",
+                              product?.createdBy ?? ""
+                            )
+                          }
                           title="Delete product"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -294,15 +323,28 @@ export default function ProductsPage() {
         </CardContent>
       </Card>
 
+      {/* Product Details Modal */}
+      <ProductDetailsModal
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
+        product={selectedProduct}
+        onDelete={handleOpenDeleteDialog}
+        onRefetch={refetchProducts}
+        adminUserId={adminUser?.userId ?? ""}
+        categoriesData={categoriesData}
+      />
+
+      {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogTitle>Confirm Product Deletion</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{productToDelete?.name}"? This action cannot be undone.
+              Are you sure you want to delete "{productToDelete?.name}"? This
+              action cannot be undone.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className="flex flex-col sm:flex-row gap-2">
             <Button
               type="button"
               variant="outline"
@@ -324,7 +366,7 @@ export default function ProductsPage() {
                   Deleting...
                 </>
               ) : (
-                "Delete"
+                "Delete Anyway"
               )}
             </Button>
           </DialogFooter>
