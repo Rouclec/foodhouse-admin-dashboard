@@ -333,7 +333,6 @@ export default function ProductsPage() {
         categoriesData={categoriesData}
       />
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
