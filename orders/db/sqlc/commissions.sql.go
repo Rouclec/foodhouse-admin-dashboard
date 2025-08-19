@@ -16,7 +16,7 @@ import (
 const aggregateCommissionByReferrer = `-- name: AggregateCommissionByReferrer :many
 SELECT 
     currency_code,
-    SUM(commission_amount) AS total_amount
+    SUM(commission_amount)::float8 AS total_amount
 FROM commissions
 WHERE referrer_id = $1
   AND ($2::boolean IS NULL OR (paid_at IS NOT NULL) = $2::boolean)
@@ -30,8 +30,8 @@ type AggregateCommissionByReferrerParams struct {
 }
 
 type AggregateCommissionByReferrerRow struct {
-	CurrencyCode string `json:"currency_code"`
-	TotalAmount  int64  `json:"total_amount"`
+	CurrencyCode string  `json:"currency_code"`
+	TotalAmount  float64 `json:"total_amount"`
 }
 
 func (q *Queries) AggregateCommissionByReferrer(ctx context.Context, arg AggregateCommissionByReferrerParams) ([]AggregateCommissionByReferrerRow, error) {
@@ -59,16 +59,34 @@ UPDATE commissions
 SET
     paid_at = CURRENT_TIMESTAMP,
     payment_reference = $1::uuid
-WHERE id = ANY($2::uuid[])
+WHERE id = ANY($2::text[])
 `
 
 type BulkSettleCommissionsParams struct {
-	PaymentReference uuid.UUID   `json:"payment_reference"`
-	CommissionIds    []uuid.UUID `json:"commission_ids"`
+	PaymentReference uuid.UUID `json:"payment_reference"`
+	CommissionIds    []string  `json:"commission_ids"`
 }
 
 func (q *Queries) BulkSettleCommissions(ctx context.Context, arg BulkSettleCommissionsParams) error {
 	_, err := q.db.Exec(ctx, bulkSettleCommissions, arg.PaymentReference, arg.CommissionIds)
+	return err
+}
+
+const bulkUpdateCommissionsPaymentReference = `-- name: BulkUpdateCommissionsPaymentReference :exec
+UPDATE commissions
+SET 
+    payment_reference = $1,
+    paid_at = now()
+WHERE id = ANY($2::text[])
+`
+
+type BulkUpdateCommissionsPaymentReferenceParams struct {
+	PaymentReference *string  `json:"payment_reference"`
+	CommissionIds    []string `json:"commission_ids"`
+}
+
+func (q *Queries) BulkUpdateCommissionsPaymentReference(ctx context.Context, arg BulkUpdateCommissionsPaymentReferenceParams) error {
+	_, err := q.db.Exec(ctx, bulkUpdateCommissionsPaymentReference, arg.PaymentReference, arg.CommissionIds)
 	return err
 }
 
@@ -103,7 +121,7 @@ INSERT INTO commissions (
     paid_at,
     payment_reference
 ) VALUES ($1, $2, $3, $4, $5, $6, $7)
-RETURNING iid, referrer_id, referred_id, order_number, currency_code, commission_amount, paid_at, payment_reference, created_at
+RETURNING id, referrer_id, referred_id, order_number, currency_code, commission_amount, paid_at, payment_reference, created_at
 `
 
 type CreateCommissionParams struct {
@@ -128,7 +146,7 @@ func (q *Queries) CreateCommission(ctx context.Context, arg CreateCommissionPara
 	)
 	var i Commission
 	err := row.Scan(
-		&i.Iid,
+		&i.ID,
 		&i.ReferrerID,
 		&i.ReferredID,
 		&i.OrderNumber,
@@ -139,4 +157,84 @@ func (q *Queries) CreateCommission(ctx context.Context, arg CreateCommissionPara
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+const getCommissionsByIDsForUpdate = `-- name: GetCommissionsByIDsForUpdate :many
+SELECT id, referrer_id, referred_id, order_number, currency_code, commission_amount, paid_at, payment_reference, created_at 
+FROM commissions
+WHERE id = ANY($1::text[])
+FOR UPDATE
+`
+
+func (q *Queries) GetCommissionsByIDsForUpdate(ctx context.Context, commissionIds []string) ([]Commission, error) {
+	rows, err := q.db.Query(ctx, getCommissionsByIDsForUpdate, commissionIds)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Commission{}
+	for rows.Next() {
+		var i Commission
+		if err := rows.Scan(
+			&i.ID,
+			&i.ReferrerID,
+			&i.ReferredID,
+			&i.OrderNumber,
+			&i.CurrencyCode,
+			&i.CommissionAmount,
+			&i.PaidAt,
+			&i.PaymentReference,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listCommissionsByReferrer = `-- name: ListCommissionsByReferrer :many
+SELECT id, referrer_id, referred_id, order_number, currency_code, commission_amount, paid_at, payment_reference, created_at
+FROM commissions
+WHERE referrer_id = $1
+  AND ($2::boolean IS NULL OR (paid_at IS NOT NULL) = $2::boolean)
+ORDER BY created_at
+`
+
+type ListCommissionsByReferrerParams struct {
+	ReferrerID string `json:"referrer_id"`
+	IsPaid     bool   `json:"is_paid"`
+}
+
+func (q *Queries) ListCommissionsByReferrer(ctx context.Context, arg ListCommissionsByReferrerParams) ([]Commission, error) {
+	rows, err := q.db.Query(ctx, listCommissionsByReferrer, arg.ReferrerID, arg.IsPaid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Commission{}
+	for rows.Next() {
+		var i Commission
+		if err := rows.Scan(
+			&i.ID,
+			&i.ReferrerID,
+			&i.ReferredID,
+			&i.OrderNumber,
+			&i.CurrencyCode,
+			&i.CommissionAmount,
+			&i.PaidAt,
+			&i.PaymentReference,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

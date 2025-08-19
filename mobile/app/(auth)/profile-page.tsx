@@ -28,6 +28,7 @@ import i18n from '@/i18n';
 import { ImagePicker } from '@/components';
 import { Chase } from 'react-native-animated-spinkit';
 import { Colors, emailRegex } from '@/constants';
+
 import {
   GooglePlacesAutocomplete,
   GooglePlacesAutocompleteRef,
@@ -35,6 +36,9 @@ import {
   GooglePlaceDetail,
 } from 'react-native-google-places-autocomplete';
 import { typesPoint } from '@/client/orders.swagger';
+
+import { UsersCompleteRegistrationBody } from '@/client/users.swagger';
+
 
 const ProfilePage = () => {
   const { user, setUser } = useContext(Context) as ContextType;
@@ -53,7 +57,11 @@ const ProfilePage = () => {
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
   const { role } = useContext(Context) as ContextType;
+
   const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
+
+  const [referralCode, setReferralCode] = useState<string>();
+
 
   const { mutateAsync: updateUserRegistration } = useMutation({
     ...usersCompleteRegistrationMutation(),
@@ -89,13 +97,17 @@ const ProfilePage = () => {
           directory: 'profile_images',
         });
       }
-      const data = {
+
+
+      const data: UsersCompleteRegistrationBody = {
         firstName,
         lastName,
         email,
         address,
         profileImage: imageUrl || undefined,
+
         locationCoordinates: locationCoordinates ?? undefined,
+        referredBy: referralCode,
       };
 
       await updateUserRegistration({
@@ -275,6 +287,25 @@ const ProfilePage = () => {
                 enablePoweredByContainer={false}
                 predefinedPlaces={[]}
               />
+
+              {role === 'USER_TYPE_BUYER' && (
+                <TextInput
+                  label={i18n.t('(auth).profile.referralCode')}
+                  value={referralCode}
+                  onChangeText={setReferralCode}
+                  mode="outlined"
+                  style={defaultStyles.input}
+                  theme={{
+                    colors: {
+                      primary: Colors.primary[500],
+                      background: Colors.grey['fa'],
+                      error: Colors.error,
+                    },
+                    roundness: 10,
+                  }}
+                  outlineColor={Colors.grey['bg']}
+                />
+              )}
             </View>
           </ScrollView>
         </View>

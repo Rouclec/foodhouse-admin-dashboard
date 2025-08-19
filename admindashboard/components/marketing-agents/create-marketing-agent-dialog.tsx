@@ -1,6 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useContext,
+  useEffect,
+} from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -10,7 +15,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,77 +27,200 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Plus } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import {
+  usersCompleteRegistrationMutation,
+  usersGrantAgentMutation,
+} from "@/client/users.swagger/@tanstack/react-query.gen";
+import { Context, ContextType } from "@/app/contexts/QueryProvider";
 
-const createMarketingAgentSchema = z.object({
+const marketingAgentSchema = z.object({
+  id: z.string().optional(),
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
   phoneNumber: z.string().min(10, "Phone number must be at least 10 digits"),
   city: z.string().min(2, "City must be at least 2 characters"),
 });
 
-type CreateMarketingAgentFormData = z.infer<typeof createMarketingAgentSchema>;
+type MarketingAgentFormData = z.infer<typeof marketingAgentSchema>;
 
-export function CreateMarketingAgentDialog() {
-  const [isOpen, setIsOpen] = useState(false);
+type CreateMarketingAgentProps = {
+  defaultValues?: {
+    id?: string;
+    name?: string;
+    email?: string;
+    phoneNumber?: string;
+    city?: string;
+  };
+  isOpen: boolean;
+  setIsOpen: Dispatch<SetStateAction<boolean>>;
+  onClose: () => void;
+  mode?: "create" | "edit";
+};
+
+const emptyFormValues = {
+  id: "",
+  name: "",
+  email: "",
+  phoneNumber: "",
+  city: "",
+};
+
+export function CreateMarketingAgentDialog({
+  defaultValues,
+  isOpen,
+  setIsOpen,
+  onClose,
+  mode = "create",
+}: CreateMarketingAgentProps) {
+  const { user } = useContext(Context) as ContextType;
+
   const { toast } = useToast();
+  const isEditMode = mode === "edit" || !!defaultValues?.id;
 
-  const form = useForm<CreateMarketingAgentFormData>({
-    resolver: zodResolver(createMarketingAgentSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      phoneNumber: "",
-      city: "",
-    },
+  const form = useForm<MarketingAgentFormData>({
+    resolver: zodResolver(marketingAgentSchema),
+    defaultValues: emptyFormValues,
   });
 
-  const onSubmit = async (data: CreateMarketingAgentFormData) => {
+  // Reset form when dialog opens or mode changes
+  useEffect(() => {
+    if (isOpen) {
+      if (isEditMode && defaultValues) {
+        // Edit mode - populate with existing data
+        form.reset({
+          id: defaultValues.id ?? "",
+          name: defaultValues.name ?? "",
+          email: defaultValues.email ?? "",
+          phoneNumber: defaultValues.phoneNumber ?? "",
+          city: defaultValues.city ?? "",
+        });
+      } else {
+        // Create mode - reset to empty values
+        form.reset(emptyFormValues);
+      }
+    }
+  }, [isOpen, isEditMode, defaultValues, form]);
+
+  // Also reset when dialog closes
+  useEffect(() => {
+    if (!isOpen) {
+      form.reset(emptyFormValues);
+    }
+  }, [isOpen, form]);
+
+  const onSubmit = async (data: MarketingAgentFormData) => {
     try {
-      // Mock API call - replace with actual API call
-      console.log("Creating marketing agent:", {
-        ...data,
-        status: "active",
-      });
+      if (isEditMode) {
+        await updateAgent({
+          body: {
+            phoneNumber: data.phoneNumber,
+            address: data.city,
+            email: data.email,
+            firstName: data.name.trim().split(" ")[0],
+            lastName: data?.name.trim().split(" ")[1],
+          },
+          path: {
+            userId: data?.id ?? "",
+          },
+        });
+      } else {
+        // Create new agent
+        const newAgent = await createAgent({
+          body: {
+            phoneNumber: data.phoneNumber,
+            address: data.city,
+            email: data.email,
+            residenceCountryIsoCode: "CM",
+            role: "USER_ROLE_MARKETING_AGENT",
+          },
+          path: {
+            adminUserId: user?.userId ?? "",
+          },
+        });
 
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      toast({
-        title: "Success",
-        description: `Marketing agent created successfully with referral code: 1234`,
-      });
+        toast({
+          title: "Success",
+          description: `Marketing agent created successfully`,
+        });
+      }
 
       handleDialogClose();
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to create marketing agent. Please try again.",
+        description: `Failed to ${
+          isEditMode ? "update" : "create"
+        } marketing agent. Please try again.`,
         variant: "destructive",
       });
-      console.error("Create marketing agent error:", error);
+      console.error(
+        `${isEditMode ? "Update" : "Create"} marketing agent error:`,
+        error
+      );
     }
   };
 
   const handleDialogClose = () => {
+    form.reset(emptyFormValues);
+    onClose();
     setIsOpen(false);
-    form.reset();
   };
 
+  const { mutateAsync: createAgent } = useMutation({
+    ...usersGrantAgentMutation(),
+    onSuccess: () => {
+      form.reset(emptyFormValues);
+      onClose();
+      setIsOpen(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to create agent",
+        description:
+          error?.response?.data?.message ?? "An unkonwn error occured",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const { mutateAsync: updateAgent } = useMutation({
+    ...usersCompleteRegistrationMutation(),
+    onSuccess: () => {
+      form.reset(emptyFormValues);
+      onClose();
+      setIsOpen(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to update agent",
+        description:
+          error?.response?.data?.message ?? "An unkonwn error occured",
+        variant: "destructive",
+      });
+    },
+  });
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Marketing Agent
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          handleDialogClose();
+        } else {
+          setIsOpen(open);
+        }
+      }}
+    >
+      <DialogContent className="sm:max-w-[425px] max-w-[95vw] mx-auto">
         <DialogHeader>
-          <DialogTitle>Create New Marketing Agent</DialogTitle>
+          <DialogTitle>
+            {isEditMode ? "Edit Marketing Agent" : "Create New Marketing Agent"}
+          </DialogTitle>
           <DialogDescription>
-            Add a new marketing agent to the system. A unique referral code will
-            be generated automatically.
+            {isEditMode
+              ? "Update the marketing agent information below."
+              : "Add a new marketing agent to the system. A unique referral code will be generated automatically."}
           </DialogDescription>
         </DialogHeader>
 
@@ -159,16 +286,23 @@ export function CreateMarketingAgentDialog() {
               )}
             />
 
-            <div className="flex justify-end space-x-2 pt-4">
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end space-y-2 space-y-reverse sm:space-y-0 sm:space-x-2 pt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleDialogClose}
+                className="w-full sm:w-auto bg-transparent"
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? "Creating..." : "Create Agent"}
+              <Button
+                type="submit"
+                disabled={form.formState.isSubmitting}
+                className="w-full sm:w-auto"
+              >
+                {form.formState.isSubmitting
+                  ? `${isEditMode ? "Updating" : "Creating"}...`
+                  : `${isEditMode ? "Update" : "Create"} Agent`}
               </Button>
             </div>
           </form>

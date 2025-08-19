@@ -16,6 +16,128 @@
     "application/json"
   ],
   "paths": {
+    "/v1/admin/{adminUserId}/orders/commission/bulk-settle-commissions": {
+      "post": {
+        "operationId": "Orders_BulkSettleCommissions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcBulkSettleCommissionsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/OrdersBulkSettleCommissionsBody"
+            }
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/v1/admin/{adminUserId}/orders/commission/{referrerId}/list-commissions-by-referrer": {
+      "get": {
+        "operationId": "Orders_ListCommissionsByReferrer",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcListCommissionsByReferrerResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "referrerId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "isPaid",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/v1/admin/{adminUserId}/orders/commission/{referrerId}/list-total-commission-amount-by-referrer": {
+      "get": {
+        "operationId": "Orders_ListTotalComissionAmountByReferrer",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcListTotalCommissionAmountByReferrerResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "referrerId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "isPaid",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/admin/{userId}/orders/create-delivery-point": {
       "post": {
         "operationId": "Orders_CreateDeliveryPoint",
@@ -981,6 +1103,17 @@
     "OrdersApproveOrderBody": {
       "type": "object"
     },
+    "OrdersBulkSettleCommissionsBody": {
+      "type": "object",
+      "properties": {
+        "commissionIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "OrdersConfirmDeliveryBody": {
       "type": "object"
     },
@@ -1074,11 +1207,51 @@
     "ordersgrpcApproveOrderResponse": {
       "type": "object"
     },
+    "ordersgrpcBulkSettleCommissionsResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
     "ordersgrpcCheckPaymentStatusResponse": {
       "type": "object",
       "properties": {
         "status": {
           "$ref": "#/definitions/ordersgrpcPaymentStatus"
+        }
+      }
+    },
+    "ordersgrpcCommission": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "referrerId": {
+          "type": "string"
+        },
+        "refferedId": {
+          "type": "string"
+        },
+        "orderNumber": {
+          "type": "string",
+          "format": "int64"
+        },
+        "commissionAmount": {
+          "$ref": "#/definitions/typesAmount"
+        },
+        "paidAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "paymentReference": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
@@ -1257,6 +1430,18 @@
         }
       }
     },
+    "ordersgrpcListCommissionsByReferrerResponse": {
+      "type": "object",
+      "properties": {
+        "commissions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ordersgrpcCommission"
+          }
+        }
+      }
+    },
     "ordersgrpcListDeliveryCitiesResponse": {
       "type": "object",
       "properties": {
@@ -1328,6 +1513,18 @@
         },
         "nextKey": {
           "type": "string"
+        }
+      }
+    },
+    "ordersgrpcListTotalCommissionAmountByReferrerResponse": {
+      "type": "object",
+      "properties": {
+        "commissions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/typesAmount"
+          }
         }
       }
     },
@@ -1495,7 +1692,8 @@
         "PaymentMethodType_UNSPECIFIED",
         "PaymentMethodType_MOBILE_MONEY",
         "PaymentMethodType_ORANGE_MONEY",
-        "PaymentMethodType_CREDIT_CARD"
+        "PaymentMethodType_CREDIT_CARD",
+        "PaymentMethodType_ACCOUNT_BALANCE"
       ],
       "default": "PaymentMethodType_UNSPECIFIED"
     },

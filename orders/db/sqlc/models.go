@@ -9,7 +9,7 @@ import (
 )
 
 type Commission struct {
-	Iid              string             `json:"iid"`
+	ID               string             `json:"id"`
 	ReferrerID       string             `json:"referrer_id"`
 	ReferredID       string             `json:"referred_id"`
 	OrderNumber      int64              `json:"order_number"`

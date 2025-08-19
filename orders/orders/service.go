@@ -56,7 +56,7 @@ const (
 
 	FarmersPercentage = 0.95
 
-	ReferralCommissionPercentage = 0.0225
+	ReferralCommissionPercentage = 0.045
 
 	CENT = 100
 )
@@ -627,7 +627,7 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 		AmountValue:    &payoutAmount,
 		AmountCurrency: order.PriceCurrency,
 		AccountNumber:  req.GetPayoutPhoneNumber(),
-		Method:         ordersgrpc.PaymentMethodType_PaymentMethodType_MOBILE_MONEY.String(),
+		Method:         ordersgrpc.PaymentMethodType_PaymentMethodType_ACCOUNT_BALANCE.String(),
 		Status:         ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED.String(),
 		ExpiresAt:      pgtype.Timestamptz{Time: time.Now().Add(5 * time.Minute), Valid: true},
 		CreatedBy:      *order.ProductOwner,
@@ -1769,7 +1769,7 @@ func (i *Impl) ListPayments(ctx context.Context,
 
 	count := int(req.GetCount())
 	if count == 0 {
-		count = 10 
+		count = 10
 	}
 
 	sqlcPayments, err := i.repo.Do().ListPayments(ctx, sqlc.ListPaymentsParams{
@@ -1797,5 +1797,134 @@ func (i *Impl) ListPayments(ctx context.Context,
 	return &ordersgrpc.ListPaymentsResponse{
 		Payments: protoPayments,
 		NextKey:  nextKey,
+	}, nil
+}
+
+// BulkSettleCommissions implements ordersgrpc.OrdersServer.
+func (i *Impl) BulkSettleCommissions(ctx context.Context,
+	req *ordersgrpc.BulkSettleCommissionsRequest) (
+	*ordersgrpc.BulkSettleCommissionsResponse, error) {
+
+	querier, tx, err := i.repo.Begin(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)
+	}
+	defer func() {
+		err := tx.Rollback(ctx)
+		if err != nil && !errors.Is(err, sql.ErrTxDone) {
+			i.logger.Err(err).Msgf("Failed to rollback transaction")
+		}
+	}()
+
+	// 1. Fetch commissions with FOR UPDATE.
+	commissions, err := querier.GetCommissionsByIDsForUpdate(ctx, req.GetCommissionIds())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to fetch commissions: %v", err)
+	}
+
+	// 2. Validate same currency, same referrer and aggregate.
+	var total float64
+	currency := commissions[0].CurrencyCode
+	refferrer := commissions[0].ReferrerID
+	for _, c := range commissions {
+		if c.CurrencyCode != currency {
+			return nil, status.Errorf(codes.InvalidArgument, "commissions must have the same currency")
+		}
+		if c.ReferrerID != refferrer {
+			return nil, status.Errorf(codes.InvalidArgument, "can only make bulk payment to the same user")
+		}
+		total += c.CommissionAmount
+	}
+
+	// 3. Fetch the user.
+	user, err := i.userService.GetUserByID(ctx, &usersgrpc.GetUserByIDRequest{UserId: commissions[0].ReferrerID})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error fetching user %v", err)
+	}
+
+	// 4. Create payment.
+	payment, err := querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
+		PaymentEntity:  ordersgrpc.PaymentEntity_PaymentEntity_COMMISSION.String(),
+		EntityID:       fmt.Sprintf("%v-%v", commissions[0].ID, commissions[len(commissions)-1].ID),
+		AmountValue:    &total,
+		AmountCurrency: &commissions[0].CurrencyCode,
+		CreatedBy:      user.GetUser().GetUserId(),
+		Status:         ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED.String(),
+		Type:           ordersgrpc.PaymentType_PaymentType_DEBIT.String(),
+		ExpiresAt:      pgtype.Timestamptz{Time: time.Now().Add(5 * time.Minute), Valid: true},
+		Method:         ordersgrpc.PaymentMethodType_PaymentMethodType_ACCOUNT_BALANCE.String(),
+		AccountNumber:  user.GetUser().GetPhoneNumber(),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to create payment: %v", err)
+	}
+
+	// 5. Make the payout.
+	_, err = i.paymentService.WithdrawFunds(ctx,
+		user.GetUser().GetPhoneNumber(), total,
+		commissions[0].CurrencyCode, fmt.Sprintf("payment for commissions %v-%v", commissions[0].ID, commissions[len(commissions)-1].ID),
+		&payment.ID)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error making payout %v", err)
+	}
+
+	// 6. Bulk update commissions.
+	err = querier.BulkUpdateCommissionsPaymentReference(ctx, sqlc.BulkUpdateCommissionsPaymentReferenceParams{
+		PaymentReference: &payment.ID,
+		CommissionIds:    req.GetCommissionIds(),
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to update commissions: %v", err)
+	}
+
+	// 6. Commit transaction
+	if err := tx.Commit(ctx); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
+	}
+
+	return &ordersgrpc.BulkSettleCommissionsResponse{
+		Message: "Completed",
+	}, nil
+}
+
+// ListCommissionsByReferrer implements ordersgrpc.OrdersServer.
+func (i *Impl) ListCommissionsByReferrer(ctx context.Context,
+	req *ordersgrpc.ListCommissionsByReferrerRequest) (
+	*ordersgrpc.ListCommissionsByReferrerResponse, error) {
+	commissions, err := i.repo.Do().ListCommissionsByReferrer(ctx, sqlc.ListCommissionsByReferrerParams{
+		ReferrerID: req.GetReferrerId(),
+		IsPaid:     req.GetIsPaid(),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error listing commissions %v", err)
+	}
+
+	protoCommissions := converters.SqlcCommissionsToProtoCommissions(commissions)
+
+	return &ordersgrpc.ListCommissionsByReferrerResponse{
+		Commissions: protoCommissions,
+	}, nil
+}
+
+// ListTotalComissionAmountByReferrer implements ordersgrpc.OrdersServer.
+func (i *Impl) ListTotalComissionAmountByReferrer(ctx context.Context,
+	req *ordersgrpc.ListTotalComissionAmountByReferrerRequest) (
+	*ordersgrpc.ListTotalCommissionAmountByReferrerResponse, error) {
+	commissions, err := i.repo.Do().AggregateCommissionByReferrer(ctx,
+		sqlc.AggregateCommissionByReferrerParams{
+			ReferrerID: req.GetReferrerId(),
+			IsPaid:     req.GetIsPaid(),
+		})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting commissions %v", err)
+	}
+
+	protoCommissions := converters.SqlcToProtoAggregatedCommissions(commissions)
+	return &ordersgrpc.ListTotalCommissionAmountByReferrerResponse{
+		Commissions: protoCommissions,
 	}, nil
 }

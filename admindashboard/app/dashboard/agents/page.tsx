@@ -226,6 +226,7 @@ export default function AgentsPage() {
           address: formData?.address ?? "",
           email: formData?.email ?? "",
           password: generatedPassowrd,
+          role: "USER_ROLE_AGENT",
         },
         path: {
           adminUserId: user?.userId ?? "",

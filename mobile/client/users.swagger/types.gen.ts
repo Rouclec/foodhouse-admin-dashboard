@@ -28,7 +28,8 @@ export type UsersCompleteRegistrationBody = {
     address?: string;
     profileImage?: string;
     locationCoordinates?: typesPoint;
-    referralCode?: string;
+    referredBy?: string;
+    phoneNumber?: string;
 };
 
 export type UsersCreateSubscriptionBody = {
@@ -51,6 +52,7 @@ export type UsersGrantAgentBody = {
     address?: string;
     email?: string;
     password?: string;
+    role?: usersgrpcUserRole;
 };
 
 export type usersgrpcActivateUserSubscriptionResponse = unknown;
@@ -317,6 +319,7 @@ export type usersgrpcUser = {
     createdAt?: string;
     updatedAt?: string;
     status?: usersgrpcUserStatus;
+    referralCode?: string;
 };
 
 export type usersgrpcUserPaymentMethod = {
@@ -326,7 +329,7 @@ export type usersgrpcUserPaymentMethod = {
     createdAt?: string;
 };
 
-export type usersgrpcUserRole = 'USER_ROLE_UNSPECIFIED' | 'USER_ROLE_FARMER' | 'USER_ROLE_BUYER' | 'USER_ROLE_ADMIN' | 'USER_ROLE_AGENT';
+export type usersgrpcUserRole = 'USER_ROLE_UNSPECIFIED' | 'USER_ROLE_FARMER' | 'USER_ROLE_BUYER' | 'USER_ROLE_ADMIN' | 'USER_ROLE_AGENT' | 'USER_ROLE_MARKETING_AGENT';
 
 export type usersgrpcUserStatus = 'UserStatus_UNSPECIFIED' | 'UserStatus_SUSPENDED' | 'UserStatus_ACTIVE';
 
@@ -340,7 +343,7 @@ export type usersgrpcUserSubscription = {
     expiresAt?: string;
 };
 
-export type usersgrpcUserType = 'USER_TYPE_UNSPECIFIED' | 'USER_TYPE_FARMER' | 'USER_TYPE_BUYER' | 'USER_TYPE_AGENT';
+export type usersgrpcUserType = 'USER_TYPE_UNSPECIFIED' | 'USER_TYPE_FARMER' | 'USER_TYPE_BUYER';
 
 export type usersgrpcVerifyOtpRequest = {
     authFactor?: usersgrpcAuthFactor;
@@ -459,7 +462,7 @@ export type UsersListUsersData = {
          * Key for pagination, indicating where to start the list
          */
         startKey?: string;
-        userRole?: 'USER_ROLE_UNSPECIFIED' | 'USER_ROLE_FARMER' | 'USER_ROLE_BUYER' | 'USER_ROLE_ADMIN' | 'USER_ROLE_AGENT';
+        userRole?: 'USER_ROLE_UNSPECIFIED' | 'USER_ROLE_FARMER' | 'USER_ROLE_BUYER' | 'USER_ROLE_ADMIN' | 'USER_ROLE_AGENT' | 'USER_ROLE_MARKETING_AGENT';
         userStatus?: 'UserStatus_UNSPECIFIED' | 'UserStatus_SUSPENDED' | 'UserStatus_ACTIVE';
     };
 };

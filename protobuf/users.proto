@@ -15,6 +15,7 @@ enum UserRole {
   USER_ROLE_BUYER = 2;
   USER_ROLE_ADMIN = 3;
   USER_ROLE_AGENT = 4;
+  USER_ROLE_MARKETING_AGENT = 5;
 }
 
 enum UserStatus {
@@ -37,6 +38,7 @@ message User {
   google.protobuf.Timestamp created_at = 12; // Using a timestamp for date
   google.protobuf.Timestamp updated_at = 13;
   UserStatus status = 14;
+  string referral_code = 15;
 }
 
 message AuthFactor {
@@ -169,7 +171,6 @@ enum UserType {
   USER_TYPE_UNSPECIFIED = 0;
   USER_TYPE_FARMER = 1;
   USER_TYPE_BUYER = 2;
-  USER_TYPE_AGENT = 3;
 }
 
 message SignupRequest {
@@ -216,7 +217,8 @@ message CompleteRegistrationRequest {
   string address = 5;
   string profile_image = 6;
   types.Point location_coordinates = 7;
-  string referral_code = 8;
+  string referred_by = 8;
+  string phone_number = 9;
 }
 
 // Response message for UpdateUser
@@ -274,6 +276,7 @@ message GrantAgentRequest {
   string address = 4;
   string email = 5;
   string password = 6;
+  UserRole role = 7;
 }
 
 message GrantAgentResponse { string message = 1; }

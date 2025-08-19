@@ -533,10 +533,10 @@ func (q *Queries) SuspendUser(ctx context.Context, id string) error {
 const updateUser = `-- name: UpdateUser :one
 UPDATE users
 SET
-    (first_name, last_name, email, "address", location_coordinates, profile_image, updated_at) =
-    ($1,         $2,        $3,    $4,        $5,                   $6,            now())
+    (first_name, last_name, email, "address", location_coordinates, profile_image, phone_number, updated_at) =
+    ($1,         $2,        $3,    $4,        $5,                   $6,            $7,           now())
 WHERE
-    id = $7
+    id = $8
 RETURNING
     id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code
 `
@@ -548,6 +548,7 @@ type UpdateUserParams struct {
 	Address             *string      `json:"address"`
 	LocationCoordinates pgtype.Point `json:"location_coordinates"`
 	ProfileImage        string       `json:"profile_image"`
+	PhoneNumber         string       `json:"phone_number"`
 	ID                  string       `json:"id"`
 }
 
@@ -559,6 +560,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		arg.Address,
 		arg.LocationCoordinates,
 		arg.ProfileImage,
+		arg.PhoneNumber,
 		arg.ID,
 	)
 	var i User

@@ -2,6 +2,10 @@
 
 export type OrdersApproveOrderBody = unknown;
 
+export type OrdersBulkSettleCommissionsBody = {
+    commissionIds?: Array<(string)>;
+};
+
 export type OrdersConfirmDeliveryBody = unknown;
 
 export type OrdersCreateDeliveryPointBody = {
@@ -27,8 +31,23 @@ export type ordersgrpcAccount = {
 
 export type ordersgrpcApproveOrderResponse = unknown;
 
+export type ordersgrpcBulkSettleCommissionsResponse = {
+    message?: string;
+};
+
 export type ordersgrpcCheckPaymentStatusResponse = {
     status?: ordersgrpcPaymentStatus;
+};
+
+export type ordersgrpcCommission = {
+    id?: string;
+    referrerId?: string;
+    refferedId?: string;
+    orderNumber?: string;
+    commissionAmount?: typesAmount;
+    paidAt?: string;
+    paymentReference?: string;
+    createdAt?: string;
 };
 
 export type ordersgrpcConfirmDeliveryResponse = unknown;
@@ -99,6 +118,10 @@ export type ordersgrpcInitiatePaymentResponse = {
     payment?: ordersgrpcPayment;
 };
 
+export type ordersgrpcListCommissionsByReferrerResponse = {
+    commissions?: Array<ordersgrpcCommission>;
+};
+
 export type ordersgrpcListDeliveryCitiesResponse = {
     cities?: Array<(string)>;
     nextKey?: string;
@@ -122,6 +145,10 @@ export type ordersgrpcListOrdersResponse = {
 export type ordersgrpcListPaymentsResponse = {
     payments?: Array<ordersgrpcPayment>;
     nextKey?: string;
+};
+
+export type ordersgrpcListTotalCommissionAmountByReferrerResponse = {
+    commissions?: Array<typesAmount>;
 };
 
 export type ordersgrpcListUserOrdersResponse = {
@@ -174,7 +201,7 @@ export type ordersgrpcPayment = {
 
 export type ordersgrpcPaymentEntity = 'PaymentEntity_UNSPECIFIED' | 'PaymentEntity_ORDER' | 'PaymentEntity_SUBSCRIPTION' | 'PaymentEntity_COMMISSION';
 
-export type ordersgrpcPaymentMethodType = 'PaymentMethodType_UNSPECIFIED' | 'PaymentMethodType_MOBILE_MONEY' | 'PaymentMethodType_ORANGE_MONEY' | 'PaymentMethodType_CREDIT_CARD';
+export type ordersgrpcPaymentMethodType = 'PaymentMethodType_UNSPECIFIED' | 'PaymentMethodType_MOBILE_MONEY' | 'PaymentMethodType_ORANGE_MONEY' | 'PaymentMethodType_CREDIT_CARD' | 'PaymentMethodType_ACCOUNT_BALANCE';
 
 export type ordersgrpcPaymentStatus = 'PaymentStatus_UNSPECIFIED' | 'PaymentStatus_INITIATED' | 'PaymentStatus_COMPLETED' | 'PaymentStatus_FAILED' | 'PaymentStatus_CANCELED';
 
@@ -229,6 +256,45 @@ export type typesPoint = {
     lat?: number;
     address?: string;
 };
+
+export type OrdersBulkSettleCommissionsData = {
+    body: OrdersBulkSettleCommissionsBody;
+    path: {
+        adminUserId: string;
+    };
+};
+
+export type OrdersBulkSettleCommissionsResponse = (ordersgrpcBulkSettleCommissionsResponse);
+
+export type OrdersBulkSettleCommissionsError = (rpcStatus);
+
+export type OrdersListCommissionsByReferrerData = {
+    path: {
+        adminUserId: string;
+        referrerId: string;
+    };
+    query?: {
+        isPaid?: boolean;
+    };
+};
+
+export type OrdersListCommissionsByReferrerResponse = (ordersgrpcListCommissionsByReferrerResponse);
+
+export type OrdersListCommissionsByReferrerError = (rpcStatus);
+
+export type OrdersListTotalComissionAmountByReferrerData = {
+    path: {
+        adminUserId: string;
+        referrerId: string;
+    };
+    query?: {
+        isPaid?: boolean;
+    };
+};
+
+export type OrdersListTotalComissionAmountByReferrerResponse = (ordersgrpcListTotalCommissionAmountByReferrerResponse);
+
+export type OrdersListTotalComissionAmountByReferrerError = (rpcStatus);
 
 export type OrdersCreateDeliveryPointData = {
     body: OrdersCreateDeliveryPointBody;

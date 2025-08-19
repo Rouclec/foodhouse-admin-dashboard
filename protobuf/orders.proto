@@ -86,6 +86,7 @@ enum PaymentMethodType {
   PaymentMethodType_MOBILE_MONEY = 1;
   PaymentMethodType_ORANGE_MONEY = 2;
   PaymentMethodType_CREDIT_CARD = 3;
+  PaymentMethodType_ACCOUNT_BALANCE = 4;
 }
 
 enum PaymentType {
@@ -338,6 +339,44 @@ message StatItem {
 message GetAdminStatsRequest { string user_id = 1; }
 message GetAdminStatsResponse { repeated StatItem data = 1; }
 
+message Commission {
+  string id = 1;
+  string referrer_id = 2;
+  string reffered_id = 3;
+  int64 order_number = 4;
+  types.Amount commission_amount = 5;
+  google.protobuf.Timestamp paid_at = 6;
+  string payment_reference = 7;
+  google.protobuf.Timestamp created_at = 8;
+}
+
+message ListCommissionsByReferrerRequest {
+  string admin_user_id = 1;
+  string referrer_id = 2;
+  bool isPaid = 3;
+}
+
+message ListCommissionsByReferrerResponse {
+  repeated Commission commissions = 1;
+}
+
+message BulkSettleCommissionsRequest {
+  string admin_user_id = 1;
+  repeated string commission_ids = 2;
+}
+
+message BulkSettleCommissionsResponse { string message = 1; }
+
+message ListTotalComissionAmountByReferrerRequest {
+  string admin_user_id = 1;
+  string referrer_id = 2;
+  bool isPaid = 3;
+}
+
+message ListTotalCommissionAmountByReferrerResponse {
+  repeated types.Amount commissions = 1;
+}
+
 service Orders {
 
   rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {
@@ -483,6 +522,32 @@ service Orders {
   rpc ListPayments(ListPaymentsRequest) returns (ListPaymentsResponse) {
     option (google.api.http) = {
       get : "/v1/admin/{user_id}/orders/list-payments"
+    };
+  }
+
+  rpc ListCommissionsByReferrer(ListCommissionsByReferrerRequest)
+      returns (ListCommissionsByReferrerResponse) {
+    option (google.api.http) = {
+      get : "/v1/admin/{admin_user_id}/orders/commission/{referrer_id}/"
+            "list-commissions-by-referrer"
+    };
+  }
+
+  rpc ListTotalComissionAmountByReferrer(
+      ListTotalComissionAmountByReferrerRequest)
+      returns (ListTotalCommissionAmountByReferrerResponse) {
+    option (google.api.http) = {
+      get : "/v1/admin/{admin_user_id}/orders/commission/{referrer_id}/"
+            "list-total-commission-amount-by-referrer"
+    };
+  }
+
+  rpc BulkSettleCommissions(BulkSettleCommissionsRequest)
+      returns (BulkSettleCommissionsResponse) {
+    option (google.api.http) = {
+      post : "/v1/admin/{admin_user_id}/orders/commission/"
+             "bulk-settle-commissions"
+      body : "*"
     };
   }
 }

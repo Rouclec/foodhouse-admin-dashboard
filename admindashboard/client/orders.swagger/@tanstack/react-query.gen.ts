@@ -2,9 +2,9 @@
 
 import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
-import type { OrdersCreateDeliveryPointData, OrdersCreateDeliveryPointError, OrdersCreateDeliveryPointResponse, OrdersGetAdminStatsData, OrdersListOrdersData, OrdersListPaymentsData, OrdersDeleteDeliveryPointData, OrdersDeleteDeliveryPointError, OrdersDeleteDeliveryPointResponse, OrdersUpdateDeliveryPointData, OrdersUpdateDeliveryPointError, OrdersUpdateDeliveryPointResponse, OrdersConfirmPaymentData, OrdersConfirmPaymentError, OrdersConfirmPaymentResponse, OrdersGetFarmerEarningsData, OrdersListFarmerOrdersData, OrdersCreateOrderData, OrdersCreateOrderError, OrdersCreateOrderResponse, OrdersInitiatePaymentData, OrdersInitiatePaymentError, OrdersInitiatePaymentResponse, OrdersListDeliveryCitiesData, OrdersListDeliveryPointsData, OrdersListUserOrdersData, OrdersApproveOrderData, OrdersApproveOrderError, OrdersApproveOrderResponse, OrdersRejectOrderData, OrdersRejectOrderError, OrdersRejectOrderResponse, OrdersDispatchOrderData, OrdersDispatchOrderError, OrdersDispatchOrderResponse, OrdersGetOrderDetailsData, OrdersCheckPaymentStatusData, OrdersConfirmDeliveryData, OrdersConfirmDeliveryError, OrdersConfirmDeliveryResponse } from '../types.gen';
+import type { OrdersBulkSettleCommissionsData, OrdersBulkSettleCommissionsError, OrdersBulkSettleCommissionsResponse, OrdersListCommissionsByReferrerData, OrdersListTotalComissionAmountByReferrerData, OrdersCreateDeliveryPointData, OrdersCreateDeliveryPointError, OrdersCreateDeliveryPointResponse, OrdersGetAdminStatsData, OrdersListOrdersData, OrdersListPaymentsData, OrdersDeleteDeliveryPointData, OrdersDeleteDeliveryPointError, OrdersDeleteDeliveryPointResponse, OrdersUpdateDeliveryPointData, OrdersUpdateDeliveryPointError, OrdersUpdateDeliveryPointResponse, OrdersConfirmPaymentData, OrdersConfirmPaymentError, OrdersConfirmPaymentResponse, OrdersGetFarmerEarningsData, OrdersListFarmerOrdersData, OrdersCreateOrderData, OrdersCreateOrderError, OrdersCreateOrderResponse, OrdersInitiatePaymentData, OrdersInitiatePaymentError, OrdersInitiatePaymentResponse, OrdersListDeliveryCitiesData, OrdersListDeliveryPointsData, OrdersListUserOrdersData, OrdersApproveOrderData, OrdersApproveOrderError, OrdersApproveOrderResponse, OrdersRejectOrderData, OrdersRejectOrderError, OrdersRejectOrderResponse, OrdersDispatchOrderData, OrdersDispatchOrderError, OrdersDispatchOrderResponse, OrdersGetOrderDetailsData, OrdersCheckPaymentStatusData, OrdersConfirmDeliveryData, OrdersConfirmDeliveryError, OrdersConfirmDeliveryResponse } from '../types.gen';
 import type { AxiosError } from 'axios';
-import { client, ordersCreateDeliveryPoint, ordersGetAdminStats, ordersListOrders, ordersListPayments, ordersDeleteDeliveryPoint, ordersUpdateDeliveryPoint, ordersConfirmPayment, ordersHealthCheck, ordersGetFarmerEarnings, ordersListFarmerOrders, ordersCreateOrder, ordersInitiatePayment, ordersListDeliveryCities, ordersListDeliveryPoints, ordersListUserOrders, ordersApproveOrder, ordersRejectOrder, ordersDispatchOrder, ordersGetOrderDetails, ordersCheckPaymentStatus, ordersConfirmDelivery } from '../sdk.gen';
+import { client, ordersBulkSettleCommissions, ordersListCommissionsByReferrer, ordersListTotalComissionAmountByReferrer, ordersCreateDeliveryPoint, ordersGetAdminStats, ordersListOrders, ordersListPayments, ordersDeleteDeliveryPoint, ordersUpdateDeliveryPoint, ordersConfirmPayment, ordersHealthCheck, ordersGetFarmerEarnings, ordersListFarmerOrders, ordersCreateOrder, ordersInitiatePayment, ordersListDeliveryCities, ordersListDeliveryPoints, ordersListUserOrders, ordersApproveOrder, ordersRejectOrder, ordersDispatchOrder, ordersGetOrderDetails, ordersCheckPaymentStatus, ordersConfirmDelivery } from '../sdk.gen';
 
 type QueryKey<TOptions extends OptionsLegacyParser> = [
     Pick<TOptions, 'baseURL' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -31,6 +31,77 @@ const createQueryKey = <TOptions extends OptionsLegacyParser>(id: string, option
         params.query = options.query;
     }
     return params;
+};
+
+export const ordersBulkSettleCommissionsQueryKey = (options: OptionsLegacyParser<OrdersBulkSettleCommissionsData>) => [
+    createQueryKey('ordersBulkSettleCommissions', options)
+];
+
+export const ordersBulkSettleCommissionsOptions = (options: OptionsLegacyParser<OrdersBulkSettleCommissionsData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await ordersBulkSettleCommissions({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: ordersBulkSettleCommissionsQueryKey(options)
+    });
+};
+
+export const ordersBulkSettleCommissionsMutation = (options?: Partial<OptionsLegacyParser<OrdersBulkSettleCommissionsData>>) => {
+    const mutationOptions: UseMutationOptions<OrdersBulkSettleCommissionsResponse, AxiosError<OrdersBulkSettleCommissionsError>, OptionsLegacyParser<OrdersBulkSettleCommissionsData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await ordersBulkSettleCommissions({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const ordersListCommissionsByReferrerQueryKey = (options: OptionsLegacyParser<OrdersListCommissionsByReferrerData>) => [
+    createQueryKey('ordersListCommissionsByReferrer', options)
+];
+
+export const ordersListCommissionsByReferrerOptions = (options: OptionsLegacyParser<OrdersListCommissionsByReferrerData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await ordersListCommissionsByReferrer({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: ordersListCommissionsByReferrerQueryKey(options)
+    });
+};
+
+export const ordersListTotalComissionAmountByReferrerQueryKey = (options: OptionsLegacyParser<OrdersListTotalComissionAmountByReferrerData>) => [
+    createQueryKey('ordersListTotalComissionAmountByReferrer', options)
+];
+
+export const ordersListTotalComissionAmountByReferrerOptions = (options: OptionsLegacyParser<OrdersListTotalComissionAmountByReferrerData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await ordersListTotalComissionAmountByReferrer({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: ordersListTotalComissionAmountByReferrerQueryKey(options)
+    });
 };
 
 export const ordersCreateDeliveryPointQueryKey = (options: OptionsLegacyParser<OrdersCreateDeliveryPointData>) => [

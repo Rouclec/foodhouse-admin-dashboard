@@ -11,6 +11,7 @@ import (
 type Querier interface {
 	AggregateCommissionByReferrer(ctx context.Context, arg AggregateCommissionByReferrerParams) ([]AggregateCommissionByReferrerRow, error)
 	BulkSettleCommissions(ctx context.Context, arg BulkSettleCommissionsParams) error
+	BulkUpdateCommissionsPaymentReference(ctx context.Context, arg BulkUpdateCommissionsPaymentReferenceParams) error
 	CountUniqueOrdersByReferrer(ctx context.Context, arg CountUniqueOrdersByReferrerParams) (int64, error)
 	CreateCommission(ctx context.Context, arg CreateCommissionParams) (Commission, error)
 	CreateDeliveryPoint(ctx context.Context, arg CreateDeliveryPointParams) (DeliveryPoint, error)
@@ -18,6 +19,7 @@ type Querier interface {
 	CreateOrderAuditLog(ctx context.Context, arg CreateOrderAuditLogParams) error
 	CreatePayment(ctx context.Context, arg CreatePaymentParams) (Payment, error)
 	DeleteDeliveryPoint(ctx context.Context, id string) error
+	GetCommissionsByIDsForUpdate(ctx context.Context, commissionIds []string) ([]Commission, error)
 	GetOrderByOrderNumber(ctx context.Context, orderNumber int64) (Order, error)
 	GetOrderStatsBetweenDates(ctx context.Context, arg GetOrderStatsBetweenDatesParams) (int64, error)
 	GetOrdersGroupedByDay(ctx context.Context, arg GetOrdersGroupedByDayParams) ([]GetOrdersGroupedByDayRow, error)
@@ -27,6 +29,7 @@ type Querier interface {
 	GetPaymentById(ctx context.Context, id string) (Payment, error)
 	GetPaymentStatsBetweenDates(ctx context.Context, arg GetPaymentStatsBetweenDatesParams) (float64, error)
 	GetUserOrderBySecretKey(ctx context.Context, arg GetUserOrderBySecretKeyParams) (Order, error)
+	ListCommissionsByReferrer(ctx context.Context, arg ListCommissionsByReferrerParams) ([]Commission, error)
 	ListDeliveryPoints(ctx context.Context, arg ListDeliveryPointsParams) ([]DeliveryPoint, error)
 	ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersParams) ([]Order, error)
 	ListOrderAuditLogs(ctx context.Context, orderNumber int64) ([]OrdersAudit, error)

@@ -110,7 +110,7 @@ func (i *Impl) SendSignupSmsOtp(ctx context.Context, req *usersgrpc.SendSignupSm
 	// Proper rollback handling
 	formattedNumber, err := formatPhoneNumber(req.GetPhoneNumber())
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "Invalid phone number: %v", err)
+		return nil, status.Errorf(codes.InvalidArgument, "invalid phone number: %v", err)
 	}
 
 	i.logger.Debug().Interface("formarted phone number from helper function",
@@ -366,21 +366,10 @@ func (i *Impl) GetUserByID(
 
 	i.logger.Debug().Interface("User found", foundUser).Msg("User from DB")
 
+	protoUser := converters.SqlcToProtoUser(foundUser)
+
 	return &usersgrpc.GetUserByIDResponse{
-		User: &usersgrpc.User{
-			UserId:                  foundUser.ID,
-			PhoneNumber:             foundUser.PhoneNumber,
-			Email:                   safeString(foundUser.Email),
-			Role:                    getUserRole(foundUser.Role),
-			FirstName:               safeString(foundUser.FirstName),
-			LastName:                safeString(foundUser.LastName),
-			ResidenceCountryIsoCode: foundUser.ResidenceCountryIsoCode,
-			ProfileImage:            safeString(&foundUser.ProfileImage),
-			LocationCoordinates:     getLocationPoint(foundUser.LocationCoordinates),
-			Address:                 safeString(foundUser.Address),
-			CreatedAt:               timestamppb.New(foundUser.CreatedAt.Time),
-			UpdatedAt:               timestamppb.New(foundUser.UpdatedAt.Time),
-		},
+		User: protoUser,
 	}, nil
 }
 
@@ -391,19 +380,19 @@ func safeString(s *string) string {
 	return *s
 }
 
-func getUserRole(role string) usersgrpc.UserRole {
-	if val, ok := usersgrpc.UserRole_value[role]; ok {
-		return usersgrpc.UserRole(val)
-	}
-	return usersgrpc.UserRole_USER_ROLE_UNSPECIFIED
-}
+// func getUserRole(role string) usersgrpc.UserRole {
+// 	if val, ok := usersgrpc.UserRole_value[role]; ok {
+// 		return usersgrpc.UserRole(val)
+// 	}
+// 	return usersgrpc.UserRole_USER_ROLE_UNSPECIFIED
+// }
 
-func getLocationPoint(loc pgtype.Point) *types.Point {
-	if !loc.Valid {
-		return nil
-	}
-	return &types.Point{Lon: loc.P.X, Lat: loc.P.Y}
-}
+// func getLocationPoint(loc pgtype.Point) *types.Point {
+// 	if !loc.Valid {
+// 		return nil
+// 	}
+// 	return &types.Point{Lon: loc.P.X, Lat: loc.P.Y}
+// }
 
 // UpdateRegistrationData implements usersgrpc.UsersServer.
 func (i *Impl) CompleteRegistration(
@@ -429,7 +418,9 @@ func (i *Impl) CompleteRegistration(
 		return nil, status.Errorf(codes.Internal, "Error rolling back transaction: %v", err)
 	}
 
-	_, err = querier.GetUserForUpdate(ctx, userID)
+	i.logger.Debug().Msgf("raw request body: %v", req)
+
+	user, err := querier.GetUserForUpdate(ctx, userID)
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "User not found: %v", err)
 	}
@@ -443,6 +434,16 @@ func (i *Impl) CompleteRegistration(
 		email = &e
 	}
 
+	phoneNumber := user.PhoneNumber
+	if req.GetPhoneNumber() != "" {
+		formattedNumber, newErr := formatPhoneNumber(req.GetPhoneNumber())
+		if newErr != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "Invalid phone number: %v", newErr)
+		}
+
+		phoneNumber = formattedNumber
+	}
+
 	arg := sqlc.UpdateUserParams{
 		ID:        userID,
 		FirstName: &req.FirstName,
@@ -453,11 +454,12 @@ func (i *Impl) CompleteRegistration(
 				Y: float64(req.GetLocationCoordinates().GetLat())}, Valid: true},
 		ProfileImage: req.GetProfileImage(),
 		Address:      &req.Address,
+		PhoneNumber:  phoneNumber,
 	}
 
 	i.logger.Debug().Interface("update user params: ", arg)
 
-	err = i.CreateReferral(ctx, querier, req.GetReferralCode(), userID)
+	err = i.CreateReferral(ctx, querier, req.GetReferredBy(), userID)
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error creating referral %v", err)
@@ -478,11 +480,14 @@ func (i *Impl) CompleteRegistration(
 }
 
 func (i *Impl) CreateReferral(ctx context.Context, querrier sqlc.Querier, referralCode string, userID string) error {
+	i.logger.Debug().Msgf("referal code %v", referralCode)
 	if referralCode == "" {
 		return nil
 	}
 
 	referrer, err := querrier.GetUserByReferralCode(ctx, referralCode)
+
+	i.logger.Debug().Msgf("referrer %v", referrer)
 
 	if err != nil {
 		return err
@@ -1666,6 +1671,10 @@ func (i *Impl) GrantAgent(ctx context.Context,
 	req *usersgrpc.GrantAgentRequest) (
 	*usersgrpc.GrantAgentResponse, error) {
 	newAgentPhoneNumber := req.GetPhoneNumber()
+	if req.GetRole() != usersgrpc.UserRole_USER_ROLE_AGENT &&
+		req.GetRole() != usersgrpc.UserRole_USER_ROLE_MARKETING_AGENT {
+		return nil, status.Errorf(codes.PermissionDenied, "cannot create user with role %v", req.GetRole())
+	}
 
 	// fetch the user via email from the db.
 	// If there is no user then we want to create one.
@@ -1687,7 +1696,7 @@ func (i *Impl) GrantAgent(ctx context.Context,
 
 		arg := sqlc.UpdateUserRoleParams{
 			ID:   foundUser.ID,
-			Role: usersgrpc.UserRole_USER_ROLE_AGENT.String(),
+			Role: req.GetRole().String(),
 		}
 
 		err = i.repo.Do().UpdateUserRole(ctx, arg)
@@ -1738,7 +1747,7 @@ func (i *Impl) GrantAgent(ctx context.Context,
 		Password:                password,
 		ResidenceCountryIsoCode: req.GetResidenceCountryIsoCode(),
 		Email:                   email,
-		Role:                    usersgrpc.UserRole_USER_ROLE_AGENT.String(),
+		Role:                    req.GetRole().String(),
 	}
 
 	_, err = i.repo.Do().CreateUser(ctx, arg)

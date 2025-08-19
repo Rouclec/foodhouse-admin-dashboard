@@ -6,10 +6,10 @@ RETURNING *;
 -- name: UpdateUser :one
 UPDATE users
 SET
-    (first_name, last_name, email, "address", location_coordinates, profile_image, updated_at) =
-    ($1,         $2,        $3,    $4,        $5,                   $6,            now())
+    (first_name, last_name, email, "address", location_coordinates, profile_image, phone_number, updated_at) =
+    ($1,         $2,        $3,    $4,        $5,                   $6,            $7,           now())
 WHERE
-    id = $7
+    id = $8
 RETURNING
     *;
 

@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useRef,
   useState,
-} from "react";
+} from 'react';
 import {
   StyleProp,
   TouchableOpacity,
@@ -16,13 +16,13 @@ import {
   LayoutChangeEvent,
   Easing,
   TextStyle,
-} from "react-native";
+} from 'react-native';
 
-import { Colors, countries as allCountries } from "@/constants";
-import { Country } from "@/interface";
-import { phoneNumberInputStyles as styles } from "@/styles";
-import { Icon } from "react-native-paper";
-import { CountryList } from "./CountryList";
+import { Colors, countries as allCountries } from '@/constants';
+import { Country } from '@/interface';
+import { phoneNumberInputStyles as styles } from '@/styles';
+import { Icon } from 'react-native-paper';
+import { CountryList } from './CountryList';
 
 interface Props {
   containerStyle?: StyleProp<ViewStyle>;
@@ -43,7 +43,7 @@ export const CountrySelect: FC<Props> = ({
   countries = allCountries,
   activeColor = Colors.primary[500],
   iconColor = Colors.dark[0],
-  labelColor = Colors.grey["61"],
+  labelColor = Colors.grey['61'],
   country,
   valueTextStyle,
   labelTextStyle,
@@ -92,25 +92,12 @@ export const CountrySelect: FC<Props> = ({
 
   const rotate = rotateAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ["0deg", "180deg"],
+    outputRange: ['0deg', '180deg'],
   });
 
   return (
     <View style={containerStyle} testID="country-select-component">
       <View style={styles.mainContainer}>
-        {/* <TouchableOpacity
-          onPress={() => setShowCountries(true)}
-          activeOpacity={0.7}
-        >
-          <View style={styles.countryContainer}>
-            <View style={styles.flexContainer}>
-              <Text style={styles.countryCodeText}>{country?.emoji}</Text>
-              <Text style={styles.countryCodeText}>{country?.name}</Text>
-            </View>
-
-            <Icon color={Colors.dark[0]} size={24} source={"chevron-down"} />
-          </View>
-        </TouchableOpacity> */}
         <TouchableOpacity
           activeOpacity={0.7}
           onLayout={onInputLayout}
@@ -119,8 +106,7 @@ export const CountrySelect: FC<Props> = ({
             styles.inputContainer,
             containerStyle,
             isFocused && { borderColor: activeColor, borderWidth: 2 },
-          ]}
-        >
+          ]}>
           {/* <Animated.Text
             style={[
               styles.label,
@@ -137,7 +123,7 @@ export const CountrySelect: FC<Props> = ({
           >
             Country
           </Animated.Text> */}
-          <View style={styles.flexSmallContainer}>
+          <View style={[styles.flexSmallContainer, styles.fullContainer]}>
             <Text style={[styles.countryCodeText, valueTextStyle]}>
               {country?.emoji}
             </Text>
@@ -146,7 +132,7 @@ export const CountrySelect: FC<Props> = ({
             </Text>
           </View>
           <Animated.View style={{ transform: [{ rotate }] }}>
-            <Icon color={iconColor} size={24} source={"chevron-down"} />
+            <Icon color={iconColor} size={24} source={'chevron-down'} />
           </Animated.View>
         </TouchableOpacity>
       </View>

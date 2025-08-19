@@ -278,7 +278,8 @@
               "USER_ROLE_FARMER",
               "USER_ROLE_BUYER",
               "USER_ROLE_ADMIN",
-              "USER_ROLE_AGENT"
+              "USER_ROLE_AGENT",
+              "USER_ROLE_MARKETING_AGENT"
             ],
             "default": "USER_ROLE_UNSPECIFIED"
           }
@@ -1337,7 +1338,10 @@
         "locationCoordinates": {
           "$ref": "#/definitions/typesPoint"
         },
-        "referralCode": {
+        "referredBy": {
+          "type": "string"
+        },
+        "phoneNumber": {
           "type": "string"
         }
       },
@@ -1397,6 +1401,9 @@
         },
         "password": {
           "type": "string"
+        },
+        "role": {
+          "$ref": "#/definitions/usersgrpcUserRole"
         }
       }
     },
@@ -2201,6 +2208,9 @@
         },
         "status": {
           "$ref": "#/definitions/usersgrpcUserStatus"
+        },
+        "referralCode": {
+          "type": "string"
         }
       }
     },
@@ -2232,7 +2242,8 @@
         "USER_ROLE_FARMER",
         "USER_ROLE_BUYER",
         "USER_ROLE_ADMIN",
-        "USER_ROLE_AGENT"
+        "USER_ROLE_AGENT",
+        "USER_ROLE_MARKETING_AGENT"
       ],
       "default": "USER_ROLE_UNSPECIFIED"
     },
@@ -2279,8 +2290,7 @@
       "enum": [
         "USER_TYPE_UNSPECIFIED",
         "USER_TYPE_FARMER",
-        "USER_TYPE_BUYER",
-        "USER_TYPE_AGENT"
+        "USER_TYPE_BUYER"
       ],
       "default": "USER_TYPE_UNSPECIFIED"
     },

@@ -13,12 +13,19 @@ RETURNING *;
 -- name: AggregateCommissionByReferrer :many
 SELECT 
     currency_code,
-    SUM(commission_amount) AS total_amount
+    SUM(commission_amount)::float8 AS total_amount
 FROM commissions
 WHERE referrer_id = sqlc.arg(referrer_id)
   AND (sqlc.arg(is_paid)::boolean IS NULL OR (paid_at IS NOT NULL) = sqlc.arg(is_paid)::boolean)
 GROUP BY currency_code
 ORDER BY currency_code;
+
+-- name: ListCommissionsByReferrer :many
+SELECT *
+FROM commissions
+WHERE referrer_id = sqlc.arg(referrer_id)
+  AND (sqlc.arg(is_paid)::boolean IS NULL OR (paid_at IS NOT NULL) = sqlc.arg(is_paid)::boolean)
+ORDER BY created_at;
 
 -- name: CountUniqueOrdersByReferrer :one
 SELECT COUNT(DISTINCT order_number) AS total_orders
@@ -33,4 +40,17 @@ UPDATE commissions
 SET
     paid_at = CURRENT_TIMESTAMP,
     payment_reference = sqlc.arg(payment_reference)::uuid
-WHERE id = ANY(sqlc.arg(commission_ids)::uuid[]);
+WHERE id = ANY(sqlc.arg(commission_ids)::text[]);
+
+-- name: GetCommissionsByIDsForUpdate :many
+SELECT * 
+FROM commissions
+WHERE id = ANY(sqlc.arg(commission_ids)::text[])
+FOR UPDATE;
+
+-- name: BulkUpdateCommissionsPaymentReference :exec
+UPDATE commissions
+SET 
+    payment_reference = sqlc.arg(payment_reference),
+    paid_at = now()
+WHERE id = ANY(sqlc.arg(commission_ids)::text[]);

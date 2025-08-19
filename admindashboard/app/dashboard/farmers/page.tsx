@@ -108,9 +108,9 @@ export default function FarmersPage() {
       default:
         return "bg-gray-100 text-gray-800";
     }
-  };
+  }
 
-  const handleDisableFarmer = async (farmer: usersgrpcUser | undefined) => {
+  const handleDisableFarmer = async (farmer: usersgrpcUser | undefined): Promise<void> => {
     try {
       setSuspendingFarmer(farmer?.userId);
       setLoading(true);
@@ -192,11 +192,8 @@ export default function FarmersPage() {
   const handleNextPage = () => {
     // Only proceed if nextKey exists and is not empty
     if (farmersData?.nextKey && farmersData.nextKey !== "") {
-      console.log("going to next page: ", farmersData.nextKey);
       pagination.goToNextPage(farmersData.nextKey.toString());
     }
-
-    console.log({ pagination });
   };
 
   return (
