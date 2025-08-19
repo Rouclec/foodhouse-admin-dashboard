@@ -25,6 +25,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Search, Edit, Trash2, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryLoading } from "@/hooks/use-query-loading";
@@ -42,7 +50,8 @@ import moment from "moment";
 
 export default function ProductsPage() {
   const { user } = useContext(Context) as ContextType;
-  const [deletingProduct, setDeletingProduct] = useState<string>();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<{ id: string; name: string } | null>(null);
 
   const pagination = useCursorPagination({
     initialStartKey: "",
@@ -53,7 +62,6 @@ export default function ProductsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const { toast } = useToast();
-
 
   const { data: categoriesData, isLoading: isCategoriesLoading } = useQuery({
     ...productsListCategoriesOptions({}),
@@ -78,7 +86,6 @@ export default function ProductsPage() {
     placeholderData: keepPreviousData,
   });
 
- 
   const { mutateAsync: deleteProduct } = useMutation({
     ...productsDeleteProductMutation(),
     onError: (error) => {
@@ -93,14 +100,25 @@ export default function ProductsPage() {
 
   useQueryLoading(isProductsLoading || isCategoriesLoading);
 
-  const handleDeleteProduct = async (productId: string): Promise<void> => {
+  const handleOpenDeleteDialog = (productId: string, productName: string) => {
+    setProductToDelete({ id: productId, name: productName });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setProductToDelete(null);
+  };
+
+  const handleConfirmDelete = async (): Promise<void> => {
+    if (!productToDelete) return;
+
     try {
-      setDeletingProduct(productId);
       setLoading(true);
 
       await deleteProduct({
         path: {
-          productId: productId,
+          productId: productToDelete.id,
           userId: user?.userId ?? "",
         },
       });
@@ -111,10 +129,10 @@ export default function ProductsPage() {
       });
 
       refetchProducts();
+      handleCloseDeleteDialog();
     } catch (error) {
       console.error({ error }, "deleting product");
     } finally {
-      setDeletingProduct(undefined);
       setLoading(false);
     }
   };
@@ -129,15 +147,15 @@ export default function ProductsPage() {
     }
   };
 
-  const categoryMap = categoriesData?.categories?.reduce(
-    (acc: Record<string, string>, category) => {
+  const categoryMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    categoriesData?.categories?.forEach(category => {
       if (category.id && category.name) {
-        acc[category.id] = category.name;
+        map[category.id] = category.name;
       }
-      return acc;
-    },
-    {}
-  );
+    });
+    return map;
+  }, [categoriesData]);
 
   return (
     <div className="space-y-6">
@@ -220,9 +238,8 @@ export default function ProductsPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      {categoryMap?.[product?.category?.id || ""] || "N/A"}
+                      {categoryMap[product?.category?.id || ""] || "N/A"}
                     </TableCell>
-
                     <TableCell>
                       {product?.amount?.value}{" "}
                       {product?.amount?.currencyIsoCode}
@@ -243,18 +260,13 @@ export default function ProductsPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => {
-                            handleDeleteProduct(product?.id ?? "");
-                          }}
-                          disabled={loading}
-                          className={`${loading && "cursor-not-allowed"}`}
+                          onClick={() => handleOpenDeleteDialog(
+                            product?.id ?? "", 
+                            product?.name ?? "this product"
+                          )}
                           title="Delete product"
                         >
-                          {loading && deletingProduct === product?.id ? (
-                            <LoadingSpinner size="sm" />
-                          ) : (
-                            <Trash2 className="h-4 w-4" />
-                          )}
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>
@@ -281,6 +293,43 @@ export default function ProductsPage() {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{productToDelete?.name}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCloseDeleteDialog}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              disabled={loading}
+              className={loading ? "cursor-not-allowed opacity-80" : ""}
+            >
+              {loading ? (
+                <>
+                  <LoadingSpinner size="sm" className="mr-2" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
