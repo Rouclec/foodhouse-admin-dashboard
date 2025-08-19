@@ -43,7 +43,7 @@ const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
 
   const [formData, setFormData] = useState({
     fullName: `${user?.firstName || ''} ${user?.lastName || ''}`.trim(),
-    address: user?.address || '',
+    address: user?.locationCoordinates?.address || '',
     email: user?.email || '',
     locationCoordinates: user?.locationCoordinates || null,
   });
@@ -58,7 +58,7 @@ const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
     const changesDetected =
       `${user?.firstName || ''} ${user?.lastName || ''}`.trim() !==
         formData.fullName ||
-      user?.address !== formData.address ||
+      user?.locationCoordinates?.address !== formData.address ||
       user?.email !== formData.email ||
       profileImage !== originalProfileImage;
       JSON.stringify(user?.locationCoordinates) !==
@@ -74,7 +74,7 @@ const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
     originalProfileImage,
     user?.firstName,
     user?.lastName,
-    user?.address,
+    user?.locationCoordinates?.address,
     user?.email,
     user?.locationCoordinates,
   ]);

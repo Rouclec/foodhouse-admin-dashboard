@@ -50,7 +50,7 @@ export default function PersonalInfo() {
 
   const [formData, setFormData] = useState({
     fullName: `${user?.firstName || ''} ${user?.lastName || ''}`.trim(),
-    address: user?.address || '',
+    address: user?.locationCoordinates?.address || '',
     email: user?.email || '',
     locationCoordinates: user?.locationCoordinates || null,
   });
@@ -65,7 +65,7 @@ export default function PersonalInfo() {
     const changesDetected =
       `${user?.firstName || ''} ${user?.lastName || ''}`.trim() !==
         formData.fullName ||
-      user?.address !== formData.address ||
+      user?.locationCoordinates?.address !== formData.address ||
       user?.email !== formData.email ||
       profileImage !== originalProfileImage ||
       JSON.stringify(user?.locationCoordinates) !==
@@ -148,13 +148,13 @@ export default function PersonalInfo() {
       let imageUrl = originalProfileImage;
 
       if (profileImage !== originalProfileImage) {
-        console.log('handleSave: Uploading new profile image.');
+        
         imageUrl = await uploadImage({
           uri: profileImage,
           filename: `profile_${user?.userId}_${Date.now()}.jpg`,
           directory: 'profile_images',
         });
-        console.log('handleSave: Image uploaded, new URL:', imageUrl);
+       
       }
 
       const firstNameSplit = formData.fullName.split(' ')[0];
@@ -168,7 +168,7 @@ export default function PersonalInfo() {
         profileImage: imageUrl,
         locationCoordinates: formData.locationCoordinates ?? undefined,
       };
-      console.log(data)
+     
       await updateProfile({ body: data, path: { userId: user?.userId || '' } });
 
       setUser({ ...data });

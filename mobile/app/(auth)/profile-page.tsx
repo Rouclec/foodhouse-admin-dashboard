@@ -39,7 +39,6 @@ import { typesPoint } from '@/client/orders.swagger';
 
 import { UsersCompleteRegistrationBody } from '@/client/users.swagger';
 
-
 const ProfilePage = () => {
   const { user, setUser } = useContext(Context) as ContextType;
   const [firstName, setFirstName] = useState('');
@@ -61,7 +60,6 @@ const ProfilePage = () => {
   const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
 
   const [referralCode, setReferralCode] = useState<string>();
-
 
   const { mutateAsync: updateUserRegistration } = useMutation({
     ...usersCompleteRegistrationMutation(),
@@ -97,7 +95,6 @@ const ProfilePage = () => {
           directory: 'profile_images',
         });
       }
-
 
       const data: UsersCompleteRegistrationBody = {
         firstName,
@@ -272,9 +269,9 @@ const ProfilePage = () => {
                 textInputProps={{
                   placeholderTextColor: Colors.grey['3c'],
                   value: address,
-                  onChangeText: setAddress, 
+                  onChangeText: setAddress,
                 }}
-                onPress={(data, details) => handleAddressSelect(data, details)} 
+                onPress={(data, details) => handleAddressSelect(data, details)}
                 fetchDetails={true}
                 query={{
                   key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_AUTOCOMPLETE_KEY,
@@ -311,21 +308,19 @@ const ProfilePage = () => {
         </View>
         <View style={defaultStyles.bottomButtonContainer}>
           <View style={signupStyles.flexButtonContainer}>
-            <Button
-              mode="contained"
-              textColor={Colors.primary['500']}
-              buttonColor={Colors.primary['50']}
-              onPress={() => {
-                if (role === 'USER_TYPE_FARMER') {
-                  router.replace('/(farmer)/(index)');
-                } else {
+            {role === 'USER_TYPE_BUYER' && (
+              <Button
+                mode="contained"
+                textColor={Colors.primary['500']}
+                buttonColor={Colors.primary['50']}
+                onPress={() => {
                   router.replace('/(buyer)/(index)');
-                }
-              }}
-              style={[defaultStyles.button, signupStyles.button]}
-              disabled={loading}>
-              <Text style={defaultStyles.secondaryButtonText}>Skip</Text>
-            </Button>
+                }}
+                style={[defaultStyles.button, signupStyles.button]}
+                disabled={loading}>
+                <Text style={defaultStyles.secondaryButtonText}>Skip</Text>
+              </Button>
+            )}
 
             <Button
               mode="contained"
