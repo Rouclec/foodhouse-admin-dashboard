@@ -68,11 +68,17 @@ export default function Orders() {
   useEffect(() => {
     if (user && role) {
       const isFarmerMissingLocation =
-        role === 'USER_TYPE_FARMER' &&
-        (!user.locationCoordinates ||
+         role === 'USER_TYPE_FARMER' &&
+        (
+          !user.firstName ||
+          !user.lastName ||
+          !user.profileImage ||
+          !user.phoneNumber || 
+          !user.locationCoordinates ||
           !user.locationCoordinates.lat ||
           !user.locationCoordinates.lon ||
-          !user.locationCoordinates.address) && user.firstName && user.lastName && user.profileImage && user.phoneNumber;
+          !user.locationCoordinates.address
+        );
 
       if (isFarmerMissingLocation) {
         setErrorMessage(i18n.t('(auth).profile.locationRequiredForFarmer')); 
