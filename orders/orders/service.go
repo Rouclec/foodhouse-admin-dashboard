@@ -1880,7 +1880,7 @@ func (i *Impl) BulkSettleCommissions(ctx context.Context,
 		return nil, status.Errorf(codes.Internal, "failed to update commissions: %v", err)
 	}
 
-	// 7. Commit transaction
+	// 7. Commit transaction.
 	if err := tx.Commit(ctx); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
 	}
