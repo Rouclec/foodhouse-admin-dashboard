@@ -326,7 +326,11 @@ const ProfilePage = () => {
               mode="contained"
               textColor={Colors.light['0']}
               buttonColor={Colors.primary['500']}
-              style={[defaultStyles.button, signupStyles.button]}
+              style={[
+                defaultStyles.button,
+                signupStyles.button,
+                role === 'USER_TYPE_FARMER' && signupStyles.fullWidth,
+              ]}
               loading={loading}
               disabled={!firstName || !lastName || !address || loading}
               onPress={handleComplete}>
