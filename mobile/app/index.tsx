@@ -1,19 +1,19 @@
-import { FontAwesome } from "@expo/vector-icons";
-import { useFonts } from "expo-font";
-import { useRouter } from "expo-router";
-import React, { useContext, useEffect, useState } from "react";
-import { View } from "react-native";
-import { Context, ContextType } from "./_layout";
-import { readData, updateAuthHeader } from "@/utils";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { FontAwesome } from '@expo/vector-icons';
+import { useFonts } from 'expo-font';
+import { useRouter } from 'expo-router';
+import React, { useContext, useEffect, useState } from 'react';
+import { View } from 'react-native';
+import { Context, ContextType } from './_layout';
+import { readData, updateAuthHeader } from '@/utils';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   usersGetUserByIdOptions,
   usersRefreshAccessTokenMutation,
-} from "@/client/users.swagger/@tanstack/react-query.gen";
-import { indexStyles as styles } from "@/styles";
-import { Text } from "react-native-paper";
-import { Chase } from "react-native-animated-spinkit";
-import { Colors } from "@/constants";
+} from '@/client/users.swagger/@tanstack/react-query.gen';
+import { indexStyles as styles } from '@/styles';
+import { Text } from 'react-native-paper';
+import { Chase } from 'react-native-animated-spinkit';
+import { Colors } from '@/constants';
 
 export default function Index() {
   const router = useRouter();
@@ -25,13 +25,13 @@ export default function Index() {
   const [userId, setUserId] = useState<string>();
 
   const [loaded, error] = useFonts({
-    "urbanist-black": require("../assets/fonts/Urbanist-Black.ttf"),
-    "urbanist-bold": require("../assets/fonts/Urbanist-Bold.ttf"),
-    "urbanist-extraBold": require("../assets/fonts/Urbanist-ExtraBold.ttf"),
-    "urbanist-semiBold": require("../assets/fonts/Urbanist-SemiBold.ttf"),
-    "urbanist-medium": require("../assets/fonts/Urbanist-Medium.ttf"),
-    "urbanist-regular": require("../assets/fonts/Urbanist-Regular.ttf"),
-    "urbanist-thin": require("../assets/fonts/Urbanist-Thin.ttf"),
+    'urbanist-black': require('../assets/fonts/Urbanist-Black.ttf'),
+    'urbanist-bold': require('../assets/fonts/Urbanist-Bold.ttf'),
+    'urbanist-extraBold': require('../assets/fonts/Urbanist-ExtraBold.ttf'),
+    'urbanist-semiBold': require('../assets/fonts/Urbanist-SemiBold.ttf'),
+    'urbanist-medium': require('../assets/fonts/Urbanist-Medium.ttf'),
+    'urbanist-regular': require('../assets/fonts/Urbanist-Regular.ttf'),
+    'urbanist-thin': require('../assets/fonts/Urbanist-Thin.ttf'),
     ...FontAwesome.font,
   });
 
@@ -44,7 +44,7 @@ export default function Index() {
   useEffect(() => {
     if (delay > 0) {
       const interval = setInterval(() => {
-        setDelay((prev) => Math.max(prev - 1000, 0));
+        setDelay(prev => Math.max(prev - 1000, 0));
       }, 1000);
 
       return () => clearInterval(interval);
@@ -57,16 +57,27 @@ export default function Index() {
     const timeLeft = Math.max(delay, 0);
     const timeout = setTimeout(() => {
       if (user) {
-        if (user?.role === "USER_ROLE_FARMER") {
-          return router.replace("/(farmer)/(index)");
+        if (user?.role === 'USER_ROLE_FARMER') {
+          const isProfileComplete =
+            (!!user?.firstName || !!user?.lastName) &&
+            !!user.profileImage &&
+            !!user.phoneNumber &&
+            !!user.locationCoordinates &&
+            !!user.locationCoordinates.lat &&
+            !!user.locationCoordinates.lon &&
+            !user.locationCoordinates.address;
+          if (!isProfileComplete) {
+            return router.replace('/(auth)/profile-page');
+          }
+          return router.replace('/(farmer)/(index)');
         } else {
-          return router.replace("/(buyer)/(index)");
+          return router.replace('/(buyer)/(index)');
         }
       }
       if (hasOnboarded) {
-        return router.replace("/(auth)/login");
+        return router.replace('/(auth)/login');
       }
-      return router.replace("/(auth)");
+      return router.replace('/(auth)');
     }, timeLeft);
 
     return () => clearTimeout(timeout);
@@ -78,9 +89,9 @@ export default function Index() {
   */
   useEffect(() => {
     const getUserIdAndRefreshTokenFromStorage = async () => {
-      const refreshTokenFromStorage = await readData("@refreshToken");
-      const userIdFromStorage = await readData("@userId");
-      const hasOnboardedFromStorage = await readData("@hasOnboarded");
+      const refreshTokenFromStorage = await readData('@refreshToken');
+      const userIdFromStorage = await readData('@userId');
+      const hasOnboardedFromStorage = await readData('@hasOnboarded');
       setHasOnboarded(!!hasOnboardedFromStorage);
 
       // Only attempt to refresh the token if both the refreshToken and userId are found in the storage
@@ -103,7 +114,7 @@ export default function Index() {
   const { data: userData, isError } = useQuery({
     ...usersGetUserByIdOptions({
       path: {
-        userId: userId ?? "",
+        userId: userId ?? '',
       },
     }),
     enabled: !!userId,
@@ -111,13 +122,13 @@ export default function Index() {
 
   const { mutateAsync: refreshAccessToken } = useMutation({
     ...usersRefreshAccessTokenMutation(),
-    onSuccess: async (data) => {
+    onSuccess: async data => {
       // After getting the accessToken,
       // 1. Update the auth header
-      updateAuthHeader(data?.accessToken ?? "");
+      updateAuthHeader(data?.accessToken ?? '');
 
       // 2. Read the userId from the storage again
-      const userIdFromStorage = await readData("@userId");
+      const userIdFromStorage = await readData('@userId');
 
       // 3. set the userId in the state
       // (This will avoid you trying to fetch the user by the userId when the access token is not yet available)

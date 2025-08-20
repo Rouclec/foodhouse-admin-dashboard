@@ -132,6 +132,12 @@ func SqlcToProtoUser(sqlcUser sqlc.User) *usersgrpc.User {
 		Status:       status,
 		ReferralCode: sqlcUser.ReferralCode,
 		Role:         role,
+		LocationCoordinates: &types.Point{
+			Lon:     sqlcUser.LocationCoordinates.P.X,
+			Lat:     sqlcUser.LocationCoordinates.P.Y,
+			Address: derefString(sqlcUser.Address),
+		},
+		ResidenceCountryIsoCode: sqlcUser.ResidenceCountryIsoCode,
 	}
 }
 func SqlcToProtoUsers(sqlcUsers []sqlc.User) ([]*usersgrpc.User, error) {

@@ -1,4 +1,4 @@
-import React, { useContext, useState, useRef } from 'react';
+import React, { useContext, useState, useRef, useEffect } from 'react';
 import {
   KeyboardAvoidingView,
   ScrollView,
@@ -41,12 +41,13 @@ import { UsersCompleteRegistrationBody } from '@/client/users.swagger';
 
 const ProfilePage = () => {
   const { user, setUser } = useContext(Context) as ContextType;
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [address, setAddress] = useState('');
-  const [locationCoordinates, setLocationCoordinates] =
-    useState<typesPoint | null>(null);
+  const [firstName, setFirstName] = useState(user?.firstName);
+  const [lastName, setLastName] = useState(user?.lastName);
+  const [email, setEmail] = useState(user?.email);
+  const [address, setAddress] = useState(user?.address);
+  const [locationCoordinates, setLocationCoordinates] = useState(
+    user?.locationCoordinates,
+  );
   const [loading, setLoading] = useState(false);
   const [profileImage, setProfileImage] = useState<
     ExpoImagePicker.ImagePickerAsset | undefined
@@ -55,7 +56,6 @@ const ProfilePage = () => {
   const [error, setError] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
-  const { role } = useContext(Context) as ContextType;
 
   const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
 
@@ -74,7 +74,7 @@ const ProfilePage = () => {
     onSuccess: async () => {
       setSuccessModalVisible(true);
       setTimeout(() => {
-        if (role === 'USER_TYPE_FARMER') {
+        if (user?.role === 'USER_ROLE_FARMER') {
           router.replace('/(farmer)/(index)');
         } else {
           router.replace('/(buyer)/(index)');
@@ -127,7 +127,7 @@ const ProfilePage = () => {
 
   const handleAddressSelect = (
     data: GooglePlaceData,
-    details: GooglePlaceDetail | null = null,
+    details: GooglePlaceDetail | null,
   ) => {
     setAddress(data.description);
     if (details?.geometry?.location) {
@@ -137,9 +137,20 @@ const ProfilePage = () => {
         address: data.description,
       });
     } else {
-      setLocationCoordinates(null);
+      setLocationCoordinates(undefined);
     }
   };
+
+  useEffect(() => {
+    if (
+      user?.locationCoordinates?.address &&
+      googlePlacesAutoCompleteRef?.current
+    ) {
+      googlePlacesAutoCompleteRef.current.setAddressText(
+        user?.locationCoordinates?.address,
+      );
+    }
+  }, [user, googlePlacesAutoCompleteRef]);
 
   return (
     <>
@@ -188,8 +199,8 @@ const ProfilePage = () => {
           <ScrollView
             contentContainerStyle={defaultStyles.scrollContainer}
             showsVerticalScrollIndicator={false}
-            nestedScrollEnabled={true}
-            keyboardShouldPersistTaps="handled">
+            keyboardShouldPersistTaps="handled"
+            nestedScrollEnabled>
             <View style={signupStyles.allInput}>
               <TextInput
                 label={i18n.t('(auth).profile.firstName')}
@@ -232,7 +243,7 @@ const ProfilePage = () => {
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
-                error={email?.length > 0 && !emailRegex.test(email)}
+                error={!!email && email?.length > 0 && !emailRegex.test(email)}
                 outlineColor={Colors.grey['bg']}
                 style={defaultStyles.input}
                 theme={{
@@ -245,47 +256,58 @@ const ProfilePage = () => {
                 }}
               />
 
-              <GooglePlacesAutocomplete
-                ref={googlePlacesAutoCompleteRef}
-                placeholder={i18n.t(
-                  '(farmer).(profile-flow).(personal-info).address',
-                )}
-                styles={{
-                  textInput: {
-                    ...defaultStyles.input,
-                    backgroundColor: Colors.light[10],
-                    height: 56,
-                    borderRadius: 15,
-                    borderColor: Colors.grey['bg'],
-                    borderWidth: 1,
-                  },
-                  listView: {
-                    backgroundColor: Colors.light[10],
-                    borderRadius: 15,
-                    marginTop: 5,
-                    elevation: 3,
-                  },
-                }}
-                textInputProps={{
-                  placeholderTextColor: Colors.grey['3c'],
-                  value: address,
-                  onChangeText: setAddress,
-                }}
-                onPress={(data, details) => handleAddressSelect(data, details)}
-                fetchDetails={true}
-                query={{
-                  key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_AUTOCOMPLETE_KEY,
-                  language: 'en',
-                }}
-                nearbyPlacesAPI="GooglePlacesSearch"
-                debounce={200}
-                timeout={20000}
-                minLength={3}
-                enablePoweredByContainer={false}
-                predefinedPlaces={[]}
-              />
+              <View style={defaultStyles.flex}>
+                <GooglePlacesAutocomplete
+                  ref={googlePlacesAutoCompleteRef}
+                  placeholder={i18n.t(
+                    '(farmer).(profile-flow).(personal-info).address',
+                  )}
+                  styles={{
+                    textInput: {
+                      ...defaultStyles.input,
+                      backgroundColor: Colors.light[10],
+                      height: 56,
+                      borderRadius: 15,
+                      borderColor: Colors.grey['bg'],
+                      borderWidth: 1,
+                      paddingLeft: 28,
+                      fontWeight: '500',
+                    },
 
-              {role === 'USER_TYPE_BUYER' && (
+                    listView: {
+                      backgroundColor: Colors.light[10],
+                      borderRadius: 15,
+                      marginTop: 5,
+                      elevation: 3,
+                      height: 200,
+                      // top: '100%',
+                      top: -272,
+                      zIndex: 99999,
+                    },
+                  }}
+                  textInputProps={{
+                    placeholderTextColor: Colors.grey['3c'],
+                    value: address,
+                    onChangeText: setAddress,
+                  }}
+                  onPress={(data, details) =>
+                    handleAddressSelect(data, details)
+                  }
+                  fetchDetails={true}
+                  query={{
+                    key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_AUTOCOMPLETE_KEY,
+                    language: 'en',
+                  }}
+                  nearbyPlacesAPI="GooglePlacesSearch"
+                  debounce={200}
+                  timeout={20000}
+                  minLength={3}
+                  enablePoweredByContainer={false}
+                  predefinedPlaces={[]}
+                />
+              </View>
+
+              {user?.role === 'USER_ROLE_BUYER' && (
                 <TextInput
                   label={i18n.t('(auth).profile.referralCode')}
                   value={referralCode}
@@ -308,7 +330,7 @@ const ProfilePage = () => {
         </View>
         <View style={defaultStyles.bottomButtonContainer}>
           <View style={signupStyles.flexButtonContainer}>
-            {role === 'USER_TYPE_BUYER' && (
+            {user?.role === 'USER_ROLE_BUYER' && (
               <Button
                 mode="contained"
                 textColor={Colors.primary['500']}
@@ -329,10 +351,12 @@ const ProfilePage = () => {
               style={[
                 defaultStyles.button,
                 signupStyles.button,
-                role === 'USER_TYPE_FARMER' && signupStyles.fullWidth,
+                user?.role === 'USER_ROLE_FARMER' && signupStyles.fullWidth,
               ]}
               loading={loading}
-              disabled={!firstName || !lastName || !address || loading}
+              disabled={
+                !firstName || !lastName || !locationCoordinates || loading
+              }
               onPress={handleComplete}>
               <Text style={defaultStyles.buttonText}>Complete</Text>
             </Button>
