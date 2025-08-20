@@ -173,7 +173,7 @@ export default function Orders() {
                   onPress={() => setTabItem(item)}
                   style={[
                     styles.tabItemContainer,
-                    tabItem.value === item?.value &&
+                    tabItem.value.join() === item?.value?.join() &&
                       styles.tabItemActiveContainer,
                   ]}>
                   <Text

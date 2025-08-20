@@ -65,7 +65,7 @@ export default function Index() {
             !!user.locationCoordinates &&
             !!user.locationCoordinates.lat &&
             !!user.locationCoordinates.lon &&
-            !user.locationCoordinates.address;
+            !!user.locationCoordinates.address;
           if (!isProfileComplete) {
             return router.replace('/(auth)/profile-page');
           }
