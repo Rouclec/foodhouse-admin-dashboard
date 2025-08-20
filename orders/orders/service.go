@@ -56,6 +56,7 @@ const (
 
 	FarmersPercentage = 0.95
 
+	// agent commission 30% * 15%
 	ReferralCommissionPercentage = 0.045
 
 	CENT = 100
