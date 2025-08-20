@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useRef } from 'react';
 import {
   KeyboardAvoidingView,
   ScrollView,
@@ -28,6 +28,15 @@ import i18n from '@/i18n';
 import { ImagePicker } from '@/components';
 import { Chase } from 'react-native-animated-spinkit';
 import { Colors, emailRegex } from '@/constants';
+
+import {
+  GooglePlacesAutocomplete,
+  GooglePlacesAutocompleteRef,
+  GooglePlaceData,
+  GooglePlaceDetail,
+} from 'react-native-google-places-autocomplete';
+import { typesPoint } from '@/client/orders.swagger';
+
 import { UsersCompleteRegistrationBody } from '@/client/users.swagger';
 
 const ProfilePage = () => {
@@ -36,14 +45,20 @@ const ProfilePage = () => {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
+  const [locationCoordinates, setLocationCoordinates] =
+    useState<typesPoint | null>(null);
   const [loading, setLoading] = useState(false);
-  const [profileImage, setProfileImage] =
-    useState<ExpoImagePicker.ImagePickerAsset>();
+  const [profileImage, setProfileImage] = useState<
+    ExpoImagePicker.ImagePickerAsset | undefined
+  >(undefined);
   const [errorMessage, setErrorMessage] = useState<string>();
   const [error, setError] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
   const { role } = useContext(Context) as ContextType;
+
+  const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
+
   const [referralCode, setReferralCode] = useState<string>();
 
   const { mutateAsync: updateUserRegistration } = useMutation({
@@ -58,7 +73,6 @@ const ProfilePage = () => {
     },
     onSuccess: async () => {
       setSuccessModalVisible(true);
-
       setTimeout(() => {
         if (role === 'USER_TYPE_FARMER') {
           router.replace('/(farmer)/(index)');
@@ -72,7 +86,7 @@ const ProfilePage = () => {
   const handleComplete = async () => {
     try {
       setLoading(true);
-      let imageUrl = null;
+      let imageUrl = user?.profileImage || null;
 
       if (profileImage) {
         imageUrl = await uploadImage({
@@ -88,6 +102,8 @@ const ProfilePage = () => {
         email,
         address,
         profileImage: imageUrl || undefined,
+
+        locationCoordinates: locationCoordinates ?? undefined,
         referredBy: referralCode,
       };
 
@@ -108,6 +124,23 @@ const ProfilePage = () => {
       setLoading(false);
     }
   };
+
+  const handleAddressSelect = (
+    data: GooglePlaceData,
+    details: GooglePlaceDetail | null = null,
+  ) => {
+    setAddress(data.description);
+    if (details?.geometry?.location) {
+      setLocationCoordinates({
+        lat: details.geometry.location.lat,
+        lon: details.geometry.location.lng,
+        address: data.description,
+      });
+    } else {
+      setLocationCoordinates(null);
+    }
+  };
+
   return (
     <>
       <KeyboardAvoidingView
@@ -130,7 +163,7 @@ const ProfilePage = () => {
             <TouchableOpacity
               onPress={() => setIsImagePickerVisible(true)}
               style={signupStyles.imageUpload}>
-              {profileImage ? (
+              {profileImage?.uri ? (
                 <Image
                   source={{ uri: profileImage.uri }}
                   style={signupStyles.profileImage}
@@ -212,21 +245,44 @@ const ProfilePage = () => {
                 }}
               />
 
-              <TextInput
-                label={i18n.t('(auth).profile.address')}
-                value={address}
-                onChangeText={setAddress}
-                mode="outlined"
-                style={defaultStyles.input}
-                theme={{
-                  colors: {
-                    primary: Colors.primary[500],
-                    background: Colors.grey['fa'],
-                    error: Colors.error,
+              <GooglePlacesAutocomplete
+                ref={googlePlacesAutoCompleteRef}
+                placeholder={i18n.t(
+                  '(farmer).(profile-flow).(personal-info).address',
+                )}
+                styles={{
+                  textInput: {
+                    ...defaultStyles.input,
+                    backgroundColor: Colors.light[10],
+                    height: 56,
+                    borderRadius: 15,
+                    borderColor: Colors.grey['bg'],
+                    borderWidth: 1,
                   },
-                  roundness: 10,
+                  listView: {
+                    backgroundColor: Colors.light[10],
+                    borderRadius: 15,
+                    marginTop: 5,
+                    elevation: 3,
+                  },
                 }}
-                outlineColor={Colors.grey['bg']}
+                textInputProps={{
+                  placeholderTextColor: Colors.grey['3c'],
+                  value: address,
+                  onChangeText: setAddress,
+                }}
+                onPress={(data, details) => handleAddressSelect(data, details)}
+                fetchDetails={true}
+                query={{
+                  key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_AUTOCOMPLETE_KEY,
+                  language: 'en',
+                }}
+                nearbyPlacesAPI="GooglePlacesSearch"
+                debounce={200}
+                timeout={20000}
+                minLength={3}
+                enablePoweredByContainer={false}
+                predefinedPlaces={[]}
               />
 
               {role === 'USER_TYPE_BUYER' && (
@@ -252,21 +308,19 @@ const ProfilePage = () => {
         </View>
         <View style={defaultStyles.bottomButtonContainer}>
           <View style={signupStyles.flexButtonContainer}>
-            <Button
-              mode="contained"
-              textColor={Colors.primary['500']}
-              buttonColor={Colors.primary['50']}
-              onPress={() => {
-                if (role === 'USER_TYPE_FARMER') {
-                  router.replace('/(farmer)/(index)');
-                } else {
+            {role === 'USER_TYPE_BUYER' && (
+              <Button
+                mode="contained"
+                textColor={Colors.primary['500']}
+                buttonColor={Colors.primary['50']}
+                onPress={() => {
                   router.replace('/(buyer)/(index)');
-                }
-              }}
-              style={[defaultStyles.button, signupStyles.button]}
-              disabled={loading}>
-              <Text style={defaultStyles.secondaryButtonText}>Skip</Text>
-            </Button>
+                }}
+                style={[defaultStyles.button, signupStyles.button]}
+                disabled={loading}>
+                <Text style={defaultStyles.secondaryButtonText}>Skip</Text>
+              </Button>
+            )}
 
             <Button
               mode="contained"

@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import {
   View,
   ScrollView,
@@ -29,20 +29,23 @@ import { usersCompleteRegistrationMutation } from '@/client/users.swagger/@tanst
 import { delay, uploadImage } from '@/utils';
 import { useMutation } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { GooglePlacesAutocompleteRef, GooglePlacesAutocomplete, GooglePlaceData, GooglePlaceDetail } from 'react-native-google-places-autocomplete';
 
 export default function PersonalInfo() {
   const router = useRouter();
   const { user, setUser } = useContext(Context) as ContextType;
-
+const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
   const [originalProfileImage, setOriginalProfileImage] = useState(
     user?.profileImage || '',
   );
   const [profileImage, setProfileImage] = useState(originalProfileImage);
+   const [showAutocomplete, setShowAutocomplete] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: `${user?.firstName || ''} ${user?.lastName || ''}`.trim(),
-    address: user?.address || '',
+    address: user?.locationCoordinates?.address || '',
     email: user?.email || '',
+    locationCoordinates: user?.locationCoordinates || null,
   });
 
   const [loading, setLoading] = useState(false);
@@ -55,15 +58,34 @@ export default function PersonalInfo() {
     const changesDetected =
       `${user?.firstName || ''} ${user?.lastName || ''}`.trim() !==
         formData.fullName ||
-      user?.address !== formData.address ||
+      user?.locationCoordinates?.address !== formData.address ||
       user?.email !== formData.email ||
       profileImage !== originalProfileImage;
+      JSON.stringify(user?.locationCoordinates) !==
+        JSON.stringify(formData.locationCoordinates);
 
     setHasChanges(changesDetected);
-  }, [formData, profileImage]);
+  }, [
+    formData.fullName,
+    formData.address,
+    formData.email,
+    formData.locationCoordinates,
+    profileImage,
+    originalProfileImage,
+    user?.firstName,
+    user?.lastName,
+    user?.locationCoordinates?.address,
+    user?.email,
+    user?.locationCoordinates,
+  ]);
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+ const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => {
+      if (prev[field] === value) {   
+        return prev; 
+      }
+      return { ...prev, [field]: value };
+    });
   };
 
   const handleImageSelect = (asset: any) => {
@@ -73,6 +95,31 @@ export default function PersonalInfo() {
     }
     setIsImagePickerVisible(false);
   };
+
+ const handleAddressSelect = (
+    data: GooglePlaceData,
+    details: GooglePlaceDetail | null = null,
+  ) => {
+    if (!data?.description) {
+      return;
+    }
+
+    const newFormData = { ...formData, address: data.description };
+    let newLocation = null;
+
+    if (details?.geometry?.location) {
+      newLocation = {
+        lat: details.geometry.location.lat,
+        lon: details.geometry.location.lng,
+        address: data.description,
+      };
+      newFormData.locationCoordinates = newLocation;
+    } else {
+      newFormData.locationCoordinates = null;
+    }
+    setFormData(newFormData);
+  };
+
 
   const { mutateAsync: updateProfile } = useMutation({
     ...usersCompleteRegistrationMutation(),
@@ -108,6 +155,7 @@ export default function PersonalInfo() {
         email: formData.email,
         address: formData.address,
         profileImage: imageUrl,
+         locationCoordinates: formData.locationCoordinates ?? undefined,
       };
 
       await updateProfile({ body: data, path: { userId: user?.userId || '' } });
@@ -151,7 +199,7 @@ export default function PersonalInfo() {
             <View />
           </Appbar.Header>
 
-          <ScrollView contentContainerStyle={defaultStyles.scrollContainer}>
+          <ScrollView contentContainerStyle={defaultStyles.scrollContainer} nestedScrollEnabled={true}>
             <View style={profileFlowStyles.navigateSection}>
               <View style={signupStyles.imageContainer}>
                 <TouchableOpacity
@@ -217,23 +265,55 @@ export default function PersonalInfo() {
                   style={loginstyles.input}
                 />
 
-                <TextInput
-                  mode="outlined"
-                  value={formData.address}
-                  onChangeText={text => handleInputChange('address', text)}
-                  label={i18n.t(
-                    '(farmer).(profile-flow).(personal-info).address',
-                  )}
-                  theme={{
-                    roundness: 15,
-                    colors: {
-                      onSurfaceVariant: Colors.grey['e8'],
-                      primary: Colors.primary[500],
-                    },
-                  }}
-                  outlineColor={Colors.grey['bg']}
-                  style={loginstyles.input}
-                />
+                <View style={loginstyles.inputs}>
+                  <GooglePlacesAutocomplete
+                    ref={googlePlacesAutoCompleteRef}
+                    placeholder={i18n.t(
+                      '(farmer).(profile-flow).(personal-info).address',
+                    )}
+                    
+                    fetchDetails={true}
+                    onPress={handleAddressSelect}
+                    query={{
+                      key: 'AIzaSyAfSUTaD7Vxyk8CcVrTQne19TyL2XX1YRA',
+                      language: 'en',
+                    }}
+                    styles={{
+                      textInput: {
+                        ...loginstyles.input,
+                        height: 56,
+                        borderRadius: 15,
+                        borderColor: Colors.grey['bg'],
+                        borderWidth: 1,
+                      },
+                      listView: {
+                        backgroundColor: Colors.light[10],
+                        borderRadius: 15,
+                        marginTop: 5,
+                        elevation: 3,
+                      },
+                    }}
+                    textInputProps={{
+                      placeholderTextColor: Colors.grey['3c'],
+                      value: formData.address,
+                      onChangeText: text => {
+                        handleInputChange('address', text);
+                      },
+                      onFocus: () => {
+                        setShowAutocomplete(true);
+                      },
+                      onBlur: () => {
+                        setShowAutocomplete(false);
+                      },
+                    }}
+                    nearbyPlacesAPI="GooglePlacesSearch"
+                    debounce={200}
+                    timeout={20000}
+                    minLength={3}
+                    enablePoweredByContainer={false}
+                    predefinedPlaces={[]}
+                  />
+                </View>
               </View>
             </View>
           </ScrollView>

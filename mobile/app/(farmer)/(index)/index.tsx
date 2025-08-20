@@ -44,11 +44,14 @@ export default function Orders() {
   ];
 
   const { user } = useContext(Context) as ContextType;
-
+  const { role } = useContext(Context) as ContextType;
   const [hasReachedEnd, setHasReachedEnd] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [debounceQuery, setDebounceQuery] = useState('');
   const [count, setCount] = useState(10);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorVisible, setErrorVisible] = useState(false);
+  const router = useRouter();
   const [tabItem, setTabItem] = useState<{
     name: string;
     value: Array<ordersgrpcOrderStatus>;
@@ -61,6 +64,29 @@ export default function Orders() {
 
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
+
+  useEffect(() => {
+    if (user && role) {
+      const isFarmerMissingLocation =
+         role === 'USER_TYPE_FARMER' &&
+        (
+          !user.firstName ||
+          !user.lastName ||
+          !user.profileImage ||
+          !user.phoneNumber || 
+          !user.locationCoordinates ||
+          !user.locationCoordinates.lat ||
+          !user.locationCoordinates.lon ||
+          !user.locationCoordinates.address
+        );
+
+      if (isFarmerMissingLocation) {
+        setErrorMessage(i18n.t('(auth).profile.locationRequiredForFarmer')); 
+        setErrorVisible(true);
+        router.replace('/(auth)/profile-page'); 
+      }
+    }
+  }, [user, role, router]);
 
   const { data: ordersData, isLoading: isOrdersLoading } = useQuery({
     ...ordersListFarmerOrdersOptions({
@@ -75,7 +101,7 @@ export default function Orders() {
     }),
   });
 
-  const router = useRouter();
+ 
 
   return (
     <>
