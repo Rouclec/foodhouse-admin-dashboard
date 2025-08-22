@@ -1,3 +1,5 @@
+import 'react-native-get-random-values';
+
 import { FontAwesome } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { useRouter } from 'expo-router';
