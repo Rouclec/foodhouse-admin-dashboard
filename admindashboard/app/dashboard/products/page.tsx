@@ -46,21 +46,24 @@ import {
   productsDeleteProductMutation,
   productsListCategoriesOptions,
 } from "@/client/products.swagger/@tanstack/react-query.gen";
-import ProductDetailsModal from "@/components/productsDetailsModal";
 import moment from "moment";
 import { usersGetFarmerByIdOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
 import Image from "next/image";
+import { ProductDetailsDialog } from "@/components/products/product-details-dialog";
+import { productsgrpcProduct } from "@/client/products.swagger";
+import { EditProductDialog } from "@/components/products/edit-product-dialog";
 
 export default function ProductsPage() {
   const { user: adminUser } = useContext(Context) as ContextType;
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<{
     id: string;
     name: string;
     createdBy: string;
   } | null>(null);
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [selectedProduct, setSelectedProduct] = useState<productsgrpcProduct>();
 
   const pagination = useCursorPagination({
     initialStartKey: "",
@@ -133,14 +136,21 @@ export default function ProductsPage() {
     );
   };
 
-  const handleOpenDetailsDialog = (product: any) => {
+  const handleOpenDetailsDialog = (
+    product: productsgrpcProduct | undefined
+  ) => {
     setSelectedProduct(product);
     setDetailsDialogOpen(true);
   };
 
   const handleCloseDetailsDialog = () => {
     setDetailsDialogOpen(false);
-    setSelectedProduct(null);
+    setSelectedProduct(undefined);
+  };
+
+  const handleEditProduct = (product: productsgrpcProduct) => {
+    setSelectedProduct(product);
+    setShowEditDialog(true);
   };
 
   const handleOpenDeleteDialog = (
@@ -322,7 +332,7 @@ export default function ProductsPage() {
                         title="View details"
                         className="h-8 w-8 p-0"
                       >
-                        <Package className="h-4 w-4" />
+                        <Eye className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="outline"
@@ -336,7 +346,7 @@ export default function ProductsPage() {
                           );
                         }}
                         title="Delete product"
-                        className="h-8 w-8 p-0"
+                        className="h-8 w-8 p-0 text-red-600"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -464,16 +474,37 @@ export default function ProductsPage() {
       </Card>
 
       {/* Product Details Modal */}
-      <ProductDetailsModal
-        open={detailsDialogOpen}
-        onOpenChange={setDetailsDialogOpen}
+      <ProductDetailsDialog
+        isOpen={detailsDialogOpen}
+        onClose={() => {
+          setDetailsDialogOpen(false);
+        }}
+        onEdit={(product) => handleEditProduct(product)}
         product={selectedProduct}
-        onDelete={handleOpenDeleteDialog}
-        onRefetch={refetchProducts}
-        adminUserId={adminUser?.userId ?? ""}
-        categoriesData={categoriesData}
+        category={categoriesData?.categories?.find(
+          (cat) => cat.id === selectedProduct?.category?.id
+        )}
+        onDelete={() =>
+          handleOpenDeleteDialog(
+            selectedProduct?.id ?? "",
+            selectedProduct?.name ?? "this product",
+            selectedProduct?.createdBy ?? ""
+          )
+        }
       />
 
+      {/* Edit Product Dialog */}
+      <EditProductDialog
+        isOpen={showEditDialog}
+        onClose={() => setShowEditDialog(false)}
+        product={selectedProduct}
+        onSave={() => refetchProducts()}
+        category={categoriesData?.categories?.find(
+          (cat) => cat.id === selectedProduct?.category?.id
+        )}
+      />
+
+      {/* confirm delete dialog  */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
