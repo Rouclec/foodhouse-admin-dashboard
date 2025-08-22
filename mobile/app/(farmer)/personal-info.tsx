@@ -30,6 +30,13 @@ import {
 } from 'react-native-google-places-autocomplete';
 import { typesPoint } from '@/client/orders.swagger';
 
+type FormData = {
+  fullName: string;
+  address: string;
+  email: string;
+  locationCoordinates: typesPoint | null;
+};
+
 export default function PersonalInfo() {
   const router = useRouter();
   const context = useContext(Context);
@@ -40,15 +47,13 @@ export default function PersonalInfo() {
 
   const { user, setUser } = context as ContextType;
   const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
-  const [showAutocomplete, setShowAutocomplete] = useState(false);
-
 
   const [originalProfileImage, setOriginalProfileImage] = useState(
     user?.profileImage || '',
   );
   const [profileImage, setProfileImage] = useState(originalProfileImage);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     fullName: `${user?.firstName || ''} ${user?.lastName || ''}`.trim(),
     address: user?.locationCoordinates?.address || '',
     email: user?.email || '',
@@ -86,8 +91,11 @@ export default function PersonalInfo() {
     user?.locationCoordinates,
   ]);
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => {
+  const handleInputChange = <K extends keyof FormData>(
+    field: K,
+    value: FormData[K],
+  ) => {
+    setFormData((prev: FormData) => {
       if (prev[field] === value) {
         return prev;
       }
@@ -104,7 +112,7 @@ export default function PersonalInfo() {
     setIsImagePickerVisible(false);
   };
 
-   const handleAddressSelect = (
+  const handleAddressSelect = (
     data: GooglePlaceData,
     details: GooglePlaceDetail | null = null,
   ) => {
@@ -142,19 +150,16 @@ export default function PersonalInfo() {
   });
 
   const handleSave = async () => {
-
     try {
       setLoading(true);
       let imageUrl = originalProfileImage;
 
       if (profileImage !== originalProfileImage) {
-        
         imageUrl = await uploadImage({
           uri: profileImage,
           filename: `profile_${user?.userId}_${Date.now()}.jpg`,
           directory: 'profile_images',
         });
-       
       }
 
       const firstNameSplit = formData.fullName.split(' ')[0];
@@ -168,7 +173,7 @@ export default function PersonalInfo() {
         profileImage: imageUrl,
         locationCoordinates: formData.locationCoordinates ?? undefined,
       };
-     
+
       await updateProfile({ body: data, path: { userId: user?.userId || '' } });
 
       setUser({ ...data });
@@ -296,31 +301,70 @@ export default function PersonalInfo() {
                     }}
                     styles={{
                       textInput: {
-                        ...loginstyles.input,
+                        ...defaultStyles.input,
+                        backgroundColor: Colors.light[10],
                         height: 56,
                         borderRadius: 15,
                         borderColor: Colors.grey['bg'],
                         borderWidth: 1,
+                        paddingLeft: 28,
+                        fontWeight: '500',
                       },
+
                       listView: {
                         backgroundColor: Colors.light[10],
                         borderRadius: 15,
                         marginTop: 5,
                         elevation: 3,
+                        height: 200,
+                        // top: '100%',
+                        top: -224,
+                        zIndex: 99999,
+                        overflowX: 'hidden',
+                      },
+                      row: {
+                        flexWrap: 'wrap', // <- allow wrapping
+                        paddingHorizontal: 10,
+                        paddingVertical: 12,
+                      },
+                      description: {
+                        flexWrap: 'wrap', // <- wrap text
+                        fontSize: 14,
+                        lineHeight: 18,
                       },
                     }}
+                    renderRow={data => (
+                      <View
+                        style={{
+                          flex: 1,
+                          paddingVertical: 8,
+                          paddingHorizontal: 12,
+                          overflowX: 'hidden',
+                          width: 20,
+                        }}>
+                        <Text
+                          style={{
+                            flexShrink: 1,
+                            flex: 1,
+                            fontSize: 14,
+                            lineHeight: 18,
+                            color: Colors.grey['3c'],
+                            flexWrap: 'wrap', // allow wrapping
+                          }}
+                          numberOfLines={0} // allow unlimited lines
+                        >
+                          {data.description}
+                        </Text>
+                      </View>
+                    )}
                     textInputProps={{
                       placeholderTextColor: Colors.grey['3c'],
                       value: formData.address,
                       onChangeText: text => {
                         handleInputChange('address', text);
                       },
-                      onFocus: () => {
-                        setShowAutocomplete(true);
-                      },
-                      onBlur: () => {
-                        setShowAutocomplete(false);
-                      },
+                      onFocus: () => {},
+                      onBlur: () => {},
                     }}
                     nearbyPlacesAPI="GooglePlacesSearch"
                     debounce={200}

@@ -35,7 +35,6 @@ import {
   GooglePlaceData,
   GooglePlaceDetail,
 } from 'react-native-google-places-autocomplete';
-import { typesPoint } from '@/client/orders.swagger';
 
 import { UsersCompleteRegistrationBody } from '@/client/users.swagger';
 
@@ -262,6 +261,10 @@ const ProfilePage = () => {
                   placeholder={i18n.t(
                     '(farmer).(profile-flow).(personal-info).address',
                   )}
+                  query={{
+                    key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_AUTOCOMPLETE_KEY,
+                    language: 'en',
+                  }}
                   styles={{
                     textInput: {
                       ...defaultStyles.input,
@@ -273,18 +276,37 @@ const ProfilePage = () => {
                       paddingLeft: 28,
                       fontWeight: '500',
                     },
-
                     listView: {
                       backgroundColor: Colors.light[10],
                       borderRadius: 15,
                       marginTop: 5,
                       elevation: 3,
-                      height: 200,
-                      // top: '100%',
-                      top: -272,
-                      zIndex: 99999,
+                      maxHeight: 200, // scroll instead of pushing UI
+                      zIndex: 9999,
+                    },
+                    row: {
+                      flexDirection: 'row',
+                      alignItems: 'flex-start',
+                      paddingHorizontal: 12,
+                      paddingVertical: 10,
                     },
                   }}
+                  renderRow={data => (
+                    <View style={{ flexDirection: 'row', flex: 1 }}>
+                      <Text
+                        style={{
+                          flexShrink: 1, // critical for wrapping
+                          flexGrow: 1,
+                          fontSize: 14,
+                          lineHeight: 18,
+                          color: Colors.grey['3c'],
+                        }}
+                        numberOfLines={0} // unlimited wrapping
+                      >
+                        {data.description}
+                      </Text>
+                    </View>
+                  )}
                   textInputProps={{
                     placeholderTextColor: Colors.grey['3c'],
                     value: address,
@@ -294,10 +316,6 @@ const ProfilePage = () => {
                     handleAddressSelect(data, details)
                   }
                   fetchDetails={true}
-                  query={{
-                    key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_AUTOCOMPLETE_KEY,
-                    language: 'en',
-                  }}
                   nearbyPlacesAPI="GooglePlacesSearch"
                   debounce={200}
                   timeout={20000}

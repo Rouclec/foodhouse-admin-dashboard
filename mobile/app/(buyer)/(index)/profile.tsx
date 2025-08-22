@@ -42,18 +42,21 @@ export default function Profile() {
   const handleLogout = async () => {
     try {
       setLoading(true);
-      const refreshToken = await readData('@refreshToken');
 
-      await revokeRefreshToken({
-        body: {
-          refreshToken,
-        },
+      readData('@refreshToken').then(refreshToken => {
+        revokeRefreshToken({
+          body: {
+            refreshToken,
+          },
+        });
+
+        clearStorage();
+        updateAuthHeader('');
+        setUser(undefined);
       });
 
-      await clearStorage();
-      updateAuthHeader('');
-      setUser(undefined);
       router.replace('/(auth)/login');
+      sheetRef?.current?.close();
     } catch (error) {
       console.error({ error }, 'logging out');
     } finally {
@@ -61,12 +64,13 @@ export default function Profile() {
     }
   };
 
-  const { mutateAsync: revokeRefreshToken } = useMutation({
+  const { mutate: revokeRefreshToken } = useMutation({
     ...usersRevokeRefreshTokenMutation(),
     onError: async error => {
       console.error('error logging out: ', error);
     },
   });
+
   const handleBecomeVIP = () => {
     router.push('/(auth)/subscribe');
   };
@@ -255,7 +259,7 @@ export default function Profile() {
             </Button>
             <Button
               onPress={() => {
-                handleLogout(), sheetRef?.current?.close();
+                handleLogout();
               }}
               style={[
                 defaultStyles.button,

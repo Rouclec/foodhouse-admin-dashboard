@@ -1,6 +1,6 @@
-import { Colors } from "@/constants";
-import { StyleSheet } from "react-native";
-import { defaultStyles } from "../default.styles";
+import { Colors } from '@/constants';
+import { StyleSheet } from 'react-native';
+import { defaultStyles } from '../default.styles';
 
 export const profileFlowStyles = StyleSheet.create({
   container: {
@@ -9,58 +9,59 @@ export const profileFlowStyles = StyleSheet.create({
   },
   vip: {
     flex: 1,
-    justifyContent: "space-between",
+    justifyContent: 'space-between',
   },
   heading: {
-    textAlign: "center",
-    color: "#ff0000",
+    textAlign: 'center',
+    color: '#ff0000',
   },
   shrinkHeading: {
     flexShrink: 1,
   },
   navigateSection: {
     flex: 1,
-    flexDirection: "column",
+    flexDirection: 'column',
     paddingTop: 32,
+    overflowX: 'hidden',
   },
 
   sectionCard: {
-    flexDirection: "row",
+    flexDirection: 'row',
     backgroundColor: Colors.primary[500],
     borderRadius: 32,
-    alignItems: "center",
+    alignItems: 'center',
     padding: 16,
     paddingTop: 24,
     paddingBottom: 24,
   },
   vipButton: {
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     width: 120,
   },
 
   navigation: {
-    flexDirection: "row",
+    flexDirection: 'row',
   },
   buttonLabel: {
     color: Colors.primary[500],
   },
   logout: {
-    color: "#ff0000",
+    color: '#ff0000',
   },
 
   navButton: {
-    justifyContent: "flex-start",
+    justifyContent: 'flex-start',
     paddingVertical: 12,
   },
   navigationItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingVertical: 24,
   },
   navigationContent: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   navigationIcon: {
     width: 24,
@@ -76,7 +77,7 @@ export const profileFlowStyles = StyleSheet.create({
 
   dialog: {
     bottom: 0,
-    position: "absolute",
+    position: 'absolute',
     left: 0,
     right: 0,
     rowGap: 4,
@@ -87,13 +88,13 @@ export const profileFlowStyles = StyleSheet.create({
   },
 
   shareOptionsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   shareOption: {
-    width: "30%",
-    alignItems: "center",
+    width: '30%',
+    alignItems: 'center',
   },
   shareOptionText: {
     marginTop: 5,
@@ -122,7 +123,7 @@ export const profileFlowStyles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 8,
     paddingVertical: 18,
-    backgroundColor: Colors.grey["border"],
+    backgroundColor: Colors.grey['border'],
     borderRadius: 8,
     paddingHorizontal: 16,
   },
@@ -131,18 +132,18 @@ export const profileFlowStyles = StyleSheet.create({
     padding: 20,
   },
   row: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 25,
   },
   iconContainer: {
-    backgroundColor: Colors.grey["e00"],
+    backgroundColor: Colors.grey['e00'],
     borderRadius: 30,
     marginRight: 15,
     height: 38,
     width: 38,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   dangerContainer: {
@@ -154,14 +155,14 @@ export const profileFlowStyles = StyleSheet.create({
     width: 38,
   },
   errorContainer: {
-    backgroundColor: "#ffebee",
+    backgroundColor: '#ffebee',
     padding: 15,
     borderRadius: 5,
     marginBottom: 20,
   },
   errorText: {
-    color: "#d32f2f",
-    textAlign: "center",
+    color: '#d32f2f',
+    textAlign: 'center',
   },
 
   icons: {
@@ -172,6 +173,6 @@ export const profileFlowStyles = StyleSheet.create({
   },
   content: {
     margin: 8,
-    alignItems: "center",
+    alignItems: 'center',
   },
 });

@@ -7,14 +7,7 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import {
-  Appbar,
-  Text,
-  Button,
-  TextInput,
-  Avatar,
-  Icon,
-} from 'react-native-paper';
+import { Appbar, Text, Button, TextInput, Icon } from 'react-native-paper';
 import { Colors } from '@/constants';
 import {
   defaultStyles,
@@ -29,19 +22,38 @@ import { usersCompleteRegistrationMutation } from '@/client/users.swagger/@tanst
 import { delay, uploadImage } from '@/utils';
 import { useMutation } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { GooglePlacesAutocompleteRef, GooglePlacesAutocomplete, GooglePlaceData, GooglePlaceDetail } from 'react-native-google-places-autocomplete';
+import {
+  GooglePlaceData,
+  GooglePlaceDetail,
+  GooglePlacesAutocomplete,
+  GooglePlacesAutocompleteRef,
+} from 'react-native-google-places-autocomplete';
+import { typesPoint } from '@/client/orders.swagger';
+
+type FormData = {
+  fullName: string;
+  address: string;
+  email: string;
+  locationCoordinates: typesPoint | null;
+};
 
 export default function PersonalInfo() {
   const router = useRouter();
-  const { user, setUser } = useContext(Context) as ContextType;
-const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
+  const context = useContext(Context);
+
+  if (!context) {
+    throw new Error('PersonalInfo must be used within a ContextProvider');
+  }
+
+  const { user, setUser } = context as ContextType;
+  const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
+
   const [originalProfileImage, setOriginalProfileImage] = useState(
     user?.profileImage || '',
   );
   const [profileImage, setProfileImage] = useState(originalProfileImage);
-   const [showAutocomplete, setShowAutocomplete] = useState(false);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     fullName: `${user?.firstName || ''} ${user?.lastName || ''}`.trim(),
     address: user?.locationCoordinates?.address || '',
     email: user?.email || '',
@@ -60,11 +72,11 @@ const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
         formData.fullName ||
       user?.locationCoordinates?.address !== formData.address ||
       user?.email !== formData.email ||
-      profileImage !== originalProfileImage;
+      profileImage !== originalProfileImage ||
       JSON.stringify(user?.locationCoordinates) !==
         JSON.stringify(formData.locationCoordinates);
 
-    setHasChanges(changesDetected);
+    setHasChanges(prev => (prev === changesDetected ? prev : changesDetected));
   }, [
     formData.fullName,
     formData.address,
@@ -74,21 +86,25 @@ const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
     originalProfileImage,
     user?.firstName,
     user?.lastName,
-    user?.locationCoordinates?.address,
+    user?.address,
     user?.email,
     user?.locationCoordinates,
   ]);
 
- const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => {
-      if (prev[field] === value) {   
-        return prev; 
+  const handleInputChange = <K extends keyof FormData>(
+    field: K,
+    value: FormData[K],
+  ) => {
+    setFormData((prev: FormData) => {
+      if (prev[field] === value) {
+        return prev;
       }
       return { ...prev, [field]: value };
     });
   };
 
   const handleImageSelect = (asset: any) => {
+    console.log('handleImageSelect: Asset received:', asset?.uri);
     if (asset && asset.uri !== originalProfileImage) {
       setProfileImage(asset.uri);
       setHasChanges(true);
@@ -96,7 +112,7 @@ const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
     setIsImagePickerVisible(false);
   };
 
- const handleAddressSelect = (
+  const handleAddressSelect = (
     data: GooglePlaceData,
     details: GooglePlaceDetail | null = null,
   ) => {
@@ -120,10 +136,10 @@ const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
     setFormData(newFormData);
   };
 
-
   const { mutateAsync: updateProfile } = useMutation({
     ...usersCompleteRegistrationMutation(),
     onError: async error => {
+      console.error('updateProfile onError:', error);
       setErrorMessage(
         error?.response?.data?.message ?? i18n.t('(auth).profile.unknownError'),
       );
@@ -155,7 +171,7 @@ const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
         email: formData.email,
         address: formData.address,
         profileImage: imageUrl,
-         locationCoordinates: formData.locationCoordinates ?? undefined,
+        locationCoordinates: formData.locationCoordinates ?? undefined,
       };
 
       await updateProfile({ body: data, path: { userId: user?.userId || '' } });
@@ -163,7 +179,7 @@ const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
       setUser({ ...data });
       setOriginalProfileImage(imageUrl);
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error('handleSave: Error updating profile:', error);
       setErrorMessage('Failed to update profile');
       setError(true);
       await delay(5000);
@@ -199,12 +215,17 @@ const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
             <View />
           </Appbar.Header>
 
-          <ScrollView contentContainerStyle={defaultStyles.scrollContainer} nestedScrollEnabled={true}>
+          <ScrollView
+            contentContainerStyle={defaultStyles.scrollContainer}
+            horizontal={true}
+            nestedScrollEnabled={true}>
             <View style={profileFlowStyles.navigateSection}>
               <View style={signupStyles.imageContainer}>
                 <TouchableOpacity
                   style={signupStyles.imageUpload}
-                  onPress={() => setIsImagePickerVisible(true)}>
+                  onPress={() => {
+                    setIsImagePickerVisible(true);
+                  }}>
                   <View style={signupStyles.addImageContainer}>
                     {profileImage || user?.profileImage ? (
                       <Image
@@ -271,40 +292,79 @@ const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
                     placeholder={i18n.t(
                       '(farmer).(profile-flow).(personal-info).address',
                     )}
-                    
                     fetchDetails={true}
                     onPress={handleAddressSelect}
                     query={{
-                      key: 'AIzaSyAfSUTaD7Vxyk8CcVrTQne19TyL2XX1YRA',
+                      key: process.env
+                        .EXPO_PUBLIC_GOOGLE_PLACES_AUTOCOMPLETE_KEY,
                       language: 'en',
                     }}
                     styles={{
                       textInput: {
-                        ...loginstyles.input,
+                        ...defaultStyles.input,
+                        backgroundColor: Colors.light[10],
                         height: 56,
                         borderRadius: 15,
                         borderColor: Colors.grey['bg'],
                         borderWidth: 1,
+                        paddingLeft: 28,
+                        fontWeight: '500',
                       },
+
                       listView: {
                         backgroundColor: Colors.light[10],
                         borderRadius: 15,
                         marginTop: 5,
                         elevation: 3,
+                        height: 200,
+                        // top: '100%',
+                        top: -224,
+                        zIndex: 99999,
+                        overflowX: 'hidden',
+                      },
+                      row: {
+                        flexWrap: 'wrap', // <- allow wrapping
+                        paddingHorizontal: 10,
+                        paddingVertical: 12,
+                      },
+                      description: {
+                        flexWrap: 'wrap', // <- wrap text
+                        fontSize: 14,
+                        lineHeight: 18,
                       },
                     }}
+                    renderRow={data => (
+                      <View
+                        style={{
+                          flex: 1,
+                          paddingVertical: 8,
+                          paddingHorizontal: 12,
+                          overflowX: 'hidden',
+                          width: 20,
+                        }}>
+                        <Text
+                          style={{
+                            flexShrink: 1,
+                            flex: 1,
+                            fontSize: 14,
+                            lineHeight: 18,
+                            color: Colors.grey['3c'],
+                            flexWrap: 'wrap', // allow wrapping
+                          }}
+                          numberOfLines={0} // allow unlimited lines
+                        >
+                          {data.description}
+                        </Text>
+                      </View>
+                    )}
                     textInputProps={{
                       placeholderTextColor: Colors.grey['3c'],
                       value: formData.address,
                       onChangeText: text => {
                         handleInputChange('address', text);
                       },
-                      onFocus: () => {
-                        setShowAutocomplete(true);
-                      },
-                      onBlur: () => {
-                        setShowAutocomplete(false);
-                      },
+                      onFocus: () => {},
+                      onBlur: () => {},
                     }}
                     nearbyPlacesAPI="GooglePlacesSearch"
                     debounce={200}
@@ -337,7 +397,9 @@ const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
       <ImagePicker
         visible={isImagePickerVisible}
         setImage={handleImageSelect}
-        onClose={() => setIsImagePickerVisible(false)}
+        onClose={() => {
+          setIsImagePickerVisible(false);
+        }}
         aspect={[1, 1]}
       />
     </>
