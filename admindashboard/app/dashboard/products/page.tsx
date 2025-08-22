@@ -33,7 +33,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Search, Package, Trash2, Image as ImageIcon } from "lucide-react";
+import { Search, Package, Trash2, Image as ImageIcon, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryLoading } from "@/hooks/use-query-loading";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
@@ -416,11 +416,13 @@ export default function ProductsPage() {
                             onClick={() => handleOpenDetailsDialog(product)}
                             title="View details"
                           >
-                            <Package className="h-4 w-4" />
+                            <Eye className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
+                            title="Delete Product"
+                            className="text-red-600"
                             onClick={() =>
                               handleOpenDeleteDialog(
                                 product?.id ?? "",
@@ -428,7 +430,6 @@ export default function ProductsPage() {
                                 product?.createdBy ?? ""
                               )
                             }
-                            title="Delete product"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
