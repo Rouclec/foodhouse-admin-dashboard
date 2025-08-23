@@ -234,8 +234,8 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 
 	payment, err := querier.GetPaymentByEntity(ctx, sqlc.GetPaymentByEntityParams{
 		// req.GetReference(),
-		ordersgrpc.PaymentEntity_PaymentEntity_ORDER.String(), // TODO: assuming that we only need this webhook for orders.
-		req.GetOrderId(),
+		PaymentEntity: ordersgrpc.PaymentEntity_PaymentEntity_ORDER.String(), // TODO: assuming that we only need this webhook for orders.
+		EntityID:      req.GetOrderId(),
 	})
 
 	if err != nil {
@@ -258,8 +258,8 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 		order, err := querier.GetOrderByOrderNumber(ctx, orderId)
 
 		if err != nil {
-			i.logger.Debug().Msgf("error getting order for payment with ref %v, why: %v", req.GetOrderId(), err)
-			return nil, status.Errorf(codes.Internal, "error getting order for payment with ref %v, why: %v", req.GetOrderId(), err)
+			i.logger.Debug().Msgf("error getting order for payment with ref %v, why: %v", payment.ID, err)
+			return nil, status.Errorf(codes.Internal, "error getting order for payment with ref %v, why: %v", payment.ID, err)
 		}
 
 		beforeBytes, err := protojson.Marshal(converters.SqlcOrderToProto(order))
@@ -282,7 +282,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 		}
 
 		err = querier.UpdatePaymentStatus(ctx, sqlc.UpdatePaymentStatusParams{
-			ID:     req.GetOrderId(),
+			ID:     payment.ID,
 			Status: updatedPaymentStatus.String(),
 		})
 
@@ -409,7 +409,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 			}
 
 			err = querier.UpdatePaymentStatus(ctx, sqlc.UpdatePaymentStatusParams{
-				ID:     req.GetOrderId(),
+				ID:     payment.ID,
 				Status: ordersgrpc.PaymentStatus_PaymentStatus_FAILED.String(),
 			})
 
@@ -426,7 +426,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 		}
 
 		err = querier.UpdatePaymentStatus(ctx, sqlc.UpdatePaymentStatusParams{
-			ID:     req.GetOrderId(),
+			ID:     payment.ID,
 			Status: ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED.String(),
 		})
 
