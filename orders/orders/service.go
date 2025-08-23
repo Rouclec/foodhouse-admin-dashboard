@@ -220,6 +220,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 		return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)
 	}
 
+	i.logger.Debug().Msgf("TPW request body: %v", req)
 	i.logger.Debug().Msgf("payment id %v", req.GetOrderId())
 	i.logger.Debug().Msgf("payment status %v", req.GetStatus())
 
