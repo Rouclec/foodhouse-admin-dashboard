@@ -24,7 +24,7 @@ type TrustPayWayProvider struct {
 type TPWStatus string
 
 const (
-	TPWStatusCompleted TPWStatus = "COMPLTED"
+	TPWStatusCompleted TPWStatus = "COMPLETED"
 	TPWStatusPending   TPWStatus = "PENDING"
 	TPWStatusFailed    TPWStatus = "FAILED"
 )

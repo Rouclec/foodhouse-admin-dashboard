@@ -232,7 +232,11 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 		}
 	}()
 
-	payment, err := querier.GetPaymentById(ctx, req.GetOrderId())
+	payment, err := querier.GetPaymentByEntity(ctx, sqlc.GetPaymentByEntityParams{
+		// req.GetReference(),
+		ordersgrpc.PaymentEntity_PaymentEntity_ORDER.String(), // TODO: assuming that we only need this webhook for orders.
+		req.GetOrderId(),
+	})
 
 	if err != nil {
 		i.logger.Debug().Msgf("error getting payment %v", err)
@@ -318,6 +322,10 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 			Before:         beforeBytes,
 			After:          afterBytes,
 		})
+
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error creating audit log")
+		}
 
 		if shouldSendReceipt {
 			i.logger.Debug().Msgf("should send receipt")
@@ -599,7 +607,7 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 		return nil, status.Errorf(codes.Internal, "error dispatching order %v", err)
 	}
 
-	paymentReference := fmt.Sprintf("payount-%s-%s", strconv.FormatInt(order.OrderNumber, 10), time.Now().Format("20060102150405"))
+	paymentReference := fmt.Sprintf("payout-%s", strconv.FormatInt(order.OrderNumber, 10))
 
 	product, err := i.productService.GetProduct(ctx, &productsgrpc.GetProductRequest{
 		ProductId: *order.Product,
@@ -967,7 +975,7 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 
 	// testAmount := float64(10)
 
-	_, err = i.paymentService.RequestPayment(ctx, formattedNumber, req.GetAmount().GetValue(), req.GetAmount().GetCurrencyIsoCode(), fmt.Sprintf("payment for entity: %s  with id: %s", req.GetPaymentEntity(), req.GetEntityId()), &payment.ID)
+	_, err = i.paymentService.RequestPayment(ctx, formattedNumber, req.GetAmount().GetValue(), req.GetAmount().GetCurrencyIsoCode(), req.GetPaymentEntity().String(), &req.EntityId)
 
 	if err != nil {
 		i.logger.Debug().Msgf("payment error %v", err)
@@ -1867,7 +1875,7 @@ func (i *Impl) BulkSettleCommissions(ctx context.Context,
 	_, err = i.paymentService.WithdrawFunds(ctx,
 		user.GetUser().GetPhoneNumber(), total,
 		commissions[0].CurrencyCode, fmt.Sprintf("payment for commissions %v-%v", commissions[0].ID, commissions[len(commissions)-1].ID),
-		&payment.ID)
+		&commissions[0].ID)
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error making payout %v", err)
