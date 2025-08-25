@@ -400,7 +400,7 @@ export default function Login() {
               <View style={loginstyles.dividerLine} />
             </View>
 
-            <View style={loginstyles.socialIconsContainer}>
+            {/* <View style={loginstyles.socialIconsContainer}>
               <TouchableOpacity
                 style={[
                   loginstyles.socialIcon,
@@ -425,7 +425,7 @@ export default function Login() {
                 <MaterialCommunityIcons name="apple" size={24} />
                 <Text>{i18n.t('(auth).login.continueWith')} Apple</Text>
               </TouchableOpacity>
-            </View>
+            </View> */}
 
             <View style={loginstyles.registerContainer}>
               <Text style={loginstyles.registerText}>

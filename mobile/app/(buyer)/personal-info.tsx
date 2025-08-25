@@ -7,7 +7,7 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Appbar, Text, Button, TextInput, Icon } from 'react-native-paper';
+import { Appbar, Text, Button, TextInput, Icon, Snackbar } from 'react-native-paper';
 import { Colors } from '@/constants';
 import {
   defaultStyles,
@@ -275,6 +275,8 @@ export default function PersonalInfo() {
                   label={i18n.t(
                     '(farmer).(profile-flow).(personal-info).email',
                   )}
+                  inputMode="email"
+                  autoCapitalize="none"
                   theme={{
                     roundness: 15,
                     colors: {
@@ -402,6 +404,13 @@ export default function PersonalInfo() {
         }}
         aspect={[1, 1]}
       />
+       <Snackbar
+        visible={!!error}
+        onDismiss={() => {}}
+        duration={3000}
+        style={defaultStyles.snackbar}>
+        <Text style={defaultStyles.errorText}>{errorMessage}</Text>
+      </Snackbar>
     </>
   );
 }
