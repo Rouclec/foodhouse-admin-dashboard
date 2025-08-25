@@ -32,6 +32,7 @@ export default function ChangePasswordScreen() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
   const { user } = useContext(Context) as ContextType;
 
   const { mutateAsync: updatePassword } = useMutation({
@@ -75,6 +76,7 @@ export default function ChangePasswordScreen() {
     }
 
     try {
+      setLoading(true);
       await updatePassword({
         body: {
           newPassword,
@@ -85,7 +87,10 @@ export default function ChangePasswordScreen() {
           },
         },
       });
-    } catch (err) {}
+    } catch (err) {
+    } finally {
+      setLoading(false);
+    }
   };
 
   const insets = useSafeAreaInsets();
@@ -132,7 +137,7 @@ export default function ChangePasswordScreen() {
                   value={currentPassword}
                   onChangeText={setCurrentPassword}
                   label={i18n.t(
-                    '(farmer).(profile-flow).(change-password).enterCurrentPassword',
+                    '(farmer).(profile-flow).(change-password).currentPassword',
                   )}
                   autoCapitalize="none"
                   style={loginstyles.input}
@@ -142,8 +147,10 @@ export default function ChangePasswordScreen() {
                     colors: {
                       onSurfaceVariant: Colors.grey['e8'],
                       primary: Colors.primary[500],
+                      error: Colors.error,
                     },
                   }}
+                  error={!!currentPassword && currentPassword.length < 3}
                   right={
                     <TextInput.Icon
                       icon={showCurrent ? 'eye-off' : 'eye'}
@@ -162,7 +169,7 @@ export default function ChangePasswordScreen() {
                   value={newPassword}
                   onChangeText={setNewPassword}
                   label={i18n.t(
-                    '(farmer).(profile-flow).(change-password).currentPassword',
+                    '(farmer).(profile-flow).(change-password).newPassword',
                   )}
                   autoCapitalize="none"
                   style={loginstyles.input}
@@ -172,8 +179,10 @@ export default function ChangePasswordScreen() {
                     colors: {
                       onSurfaceVariant: Colors.grey['e8'],
                       primary: Colors.primary[500],
+                      error: Colors.error,
                     },
                   }}
+                  error={!!newPassword && newPassword.length < 3}
                   right={
                     <TextInput.Icon
                       icon={showNew ? 'eye-off' : 'eye'}
@@ -192,19 +201,20 @@ export default function ChangePasswordScreen() {
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
                   label={i18n.t(
-                    '(farmer).(profile-flow).(change-password).placeholder',
+                    '(farmer).(profile-flow).(change-password).confirmPassword',
                   )}
                   autoCapitalize="none"
                   style={loginstyles.input}
+                  outlineColor={Colors.grey['bg']}
                   theme={{
+                    roundness: 15,
                     colors: {
+                      onSurfaceVariant: Colors.grey['e8'],
                       primary: Colors.primary[500],
-                      background: '#FAFAFA',
                       error: Colors.error,
                     },
-                    roundness: 10,
                   }}
-                  outlineColor={Colors.grey['bg']}
+                  error={!!confirmPassword && confirmPassword != newPassword}
                   right={
                     <TextInput.Icon
                       icon={showConfirm ? 'eye-off' : 'eye'}
@@ -215,7 +225,7 @@ export default function ChangePasswordScreen() {
                   }
                 />
               </View>
-              <Link
+              {/* <Link
                 style={loginstyles.forgotPassword}
                 href={'/(auth)/(forgot-password)'}>
                 <Text style={loginstyles.forgotPasswordText}>
@@ -223,7 +233,7 @@ export default function ChangePasswordScreen() {
                     '(farmer).(profile-flow).(change-password).forgotPassword',
                   )}
                 </Text>
-              </Link>
+              </Link> */}
             </View>
           </ScrollView>
           <View style={defaultStyles.bottomButtonContainer}>
@@ -231,7 +241,17 @@ export default function ChangePasswordScreen() {
               mode="contained"
               onPress={handleSaveChanges}
               style={defaultStyles.button}
-              buttonColor={Colors.primary['500']}>
+              buttonColor={Colors.primary['500']}
+              loading={loading}
+              disabled={
+                loading ||
+                !currentPassword ||
+                !newPassword ||
+                !confirmPassword ||
+                (!!currentPassword && currentPassword.length < 3) ||
+                (!!newPassword && newPassword.length < 3) ||
+                (!!confirmPassword && confirmPassword != newPassword)
+              }>
               Save changes
             </Button>
           </View>

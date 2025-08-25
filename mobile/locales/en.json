@@ -218,13 +218,14 @@
         "button2": "Logout"
       },
       "(change-password)": {
-        "currentPassword": "Current Password",
-        "enterCurrentPassword": "Enter your Current Password",
-        "newPassword": "New Password",
+        "currentPassword": "Current password",
+        "enterCurrentPassword": "Enter your current password",
+        "newPassword": "New password",
         "enterNewPassword": "Enter new password",
-        "confirmPassword": "Confirm New Password",
+        "confirmPassword": "Confirm new password",
+        "forgotPassword": "Forgot password?",
         "placeholder": "Confirm new password",
-        "forgotPassword": "Forgot Password",
+        "changePassword": "Change Password",
         "save": "Save changes"
       },
       "(settings)": {

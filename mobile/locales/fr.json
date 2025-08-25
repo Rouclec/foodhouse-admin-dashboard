@@ -219,11 +219,12 @@
         "currentPassword": "Mot de passe actuel",
         "enterCurrentPassword": "Entrez votre mot de passe actuel",
         "newPassword": "Nouveau mot de passe",
-        "enterNewPassword": "Entrez le nouveau mot de passe",
+        "enterNewPassword": "Entrez un nouveau mot de passe",
         "confirmPassword": "Confirmez le nouveau mot de passe",
         "placeholder": "Confirmez le nouveau mot de passe",
-        "forgotPassword": "Mot de passe oublié",
-        "save": "Enregistrer les modifications"
+        "changePassword": "Changer le mot de passe",
+        "save": "Enregistrer les modifications",
+        "forgotPassword": "Mot de passe oublié ?"
       },
       "(settings)": {
         "heading": "Paramètres",

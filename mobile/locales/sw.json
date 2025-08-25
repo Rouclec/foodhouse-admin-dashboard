@@ -213,13 +213,14 @@
       },
       "(change-password)": {
         "currentPassword": "Nenosiri la sasa",
-        "enterCurrentPassword": "Weka nenosiri la sasa",
+        "enterCurrentPassword": "Weka nenosiri lako la sasa",
         "newPassword": "Nenosiri jipya",
         "enterNewPassword": "Weka nenosiri jipya",
         "confirmPassword": "Thibitisha nenosiri jipya",
         "placeholder": "Thibitisha nenosiri jipya",
-        "forgotPassword": "Umesahau nenosiri",
-        "save": "Hifadhi mabadiliko"
+        "changePassword": "Badilisha nenosiri",
+        "save": "Hifadhi mabadiliko",
+        "forgotPassword": "Umesahau nenosiri?"
       },
       "(settings)": {
         "heading": "Mipangilio",
