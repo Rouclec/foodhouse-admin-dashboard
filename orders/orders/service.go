@@ -935,10 +935,27 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 		return nil, status.Errorf(codes.Internal, "currency %s is not supported", req.GetAmount().GetCurrencyIsoCode())
 	}
 
+	totalPrice := &req.GetAmount().Value
+
+	if req.GetPaymentEntity() == ordersgrpc.PaymentEntity_PaymentEntity_ORDER {
+		// req.GetEntityId() returns a string, but GetOrderByOrderNumber expects int64
+		orderNumber, convErr := strconv.ParseInt(req.GetEntityId(), 10, 64)
+		if convErr != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "invalid order number: %v", convErr)
+		}
+		order, newErr := querier.GetOrderByOrderNumber(ctx, orderNumber)
+		if newErr != nil {
+			return nil, status.Errorf(codes.Internal, "error getting order for payment %v", newErr)
+		}
+
+		totalPrice = order.PriceValue
+
+	}
+
 	payment, err := querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
 		PaymentEntity:  req.GetPaymentEntity().String(),
 		EntityID:       req.GetEntityId(),
-		AmountValue:    &req.GetAmount().Value,
+		AmountValue:    totalPrice,
 		AmountCurrency: &req.GetAmount().CurrencyIsoCode,
 		AccountNumber:  req.GetAccount().GetAccountNumber(),
 		Method:         req.GetAccount().GetPaymentMethod().String(),
@@ -975,7 +992,7 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 
 	// testAmount := float64(10)
 
-	_, err = i.paymentService.RequestPayment(ctx, formattedNumber, req.GetAmount().GetValue(), req.GetAmount().GetCurrencyIsoCode(), req.GetPaymentEntity().String(), &req.EntityId)
+	_, err = i.paymentService.RequestPayment(ctx, formattedNumber, *totalPrice, req.GetAmount().GetCurrencyIsoCode(), req.GetPaymentEntity().String(), &req.EntityId)
 
 	if err != nil {
 		i.logger.Debug().Msgf("payment error %v", err)
