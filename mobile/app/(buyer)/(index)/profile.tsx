@@ -21,9 +21,11 @@ import {
 import i18n from '@/i18n';
 import { Context, ContextType } from '@/app/_layout';
 
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, 
+  // useQuery 
+} from '@tanstack/react-query';
 import {
-  usersGetUserActiveSubscriptionOptions,
+  // usersGetUserActiveSubscriptionOptions,
   usersRevokeRefreshTokenMutation,
 } from '@/client/users.swagger/@tanstack/react-query.gen';
 import { FontAwesome } from '@expo/vector-icons';
@@ -71,17 +73,17 @@ export default function Profile() {
     },
   });
 
-  const handleBecomeVIP = () => {
-    router.push('/(auth)/subscribe');
-  };
+  // const handleBecomeVIP = () => {
+  //   router.push('/(auth)/subscribe');
+  // };
 
-  const { data: userActiveSubscription } = useQuery({
-    ...usersGetUserActiveSubscriptionOptions({
-      path: {
-        userId: user?.userId ?? '',
-      },
-    }),
-  });
+  // const { data: userActiveSubscription } = useQuery({
+  //   ...usersGetUserActiveSubscriptionOptions({
+  //     path: {
+  //       userId: user?.userId ?? '',
+  //     },
+  //   }),
+  // });
 
   const shareApp = async () => {
     const shareMessage = `Check out Foodhouse - your trusted source for fresh, farm-to-home food items!\n
@@ -138,7 +140,7 @@ export default function Profile() {
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled">
             <View style={signupStyles.allInput}>
-              {!userActiveSubscription?.userSubscription && (
+              {/* {!userActiveSubscription?.userSubscription && (
                 <View style={styles.sectionCard}>
                   <View style={styles.vip}>
                     <Text
@@ -166,7 +168,7 @@ export default function Profile() {
                     />
                   </View>
                 </View>
-              )}
+              )} */}
 
               <View style={styles.navigateSection}>
                 <TouchableOpacity
