@@ -1,12 +1,12 @@
 - envId: dev
   name: Development
-  gitRefName: main
-  awsAccountId: 844670296881
-  domainName: dev.foodhousetesting.xyz
-  
-- envId: testing
-  name: Testing
   gitRefName: release/sprint5
   awsAccountId: 694364706342
   domainName: foodhousetesting.xyz
+  
+- envId: testing
+  name: Testing
+  gitRefName: main
+  awsAccountId: 844670296881
+  domainName: dev.foodhousetesting.xyz
 
