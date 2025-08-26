@@ -2,7 +2,7 @@
   name: Development
   gitRefName: main
   awsAccountId: 844670296881
-  domainName: foodhousetesting.xyz
+  domainName: dev.foodhousetesting.xyz
   
 - envId: testing
   name: Testing
