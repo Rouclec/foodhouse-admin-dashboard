@@ -73,17 +73,6 @@ export default function Profile() {
     },
   });
 
-  // const handleBecomeVIP = () => {
-  //   router.push('/(auth)/subscribe');
-  // };
-
-  // const { data: userActiveSubscription } = useQuery({
-  //   ...usersGetUserActiveSubscriptionOptions({
-  //     path: {
-  //       userId: user?.userId ?? '',
-  //     },
-  //   }),
-  // });
 
   const shareApp = async () => {
     const shareMessage = `Check out Foodhouse - your trusted source for fresh, farm-to-home food items!\n
