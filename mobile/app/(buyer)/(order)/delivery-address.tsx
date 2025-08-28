@@ -8,7 +8,6 @@ import { useRouter } from 'expo-router';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   View,
-  KeyboardAvoidingView,
   TouchableOpacity,
   ActivityIndicator,
   LayoutChangeEvent,
@@ -29,6 +28,7 @@ import {
   GooglePlacesAutocomplete,
   GooglePlacesAutocompleteRef,
 } from 'react-native-google-places-autocomplete';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const INITIAL_REGION = {
@@ -121,10 +121,15 @@ export default function DeliveryAddress() {
 
   return (
     <>
-      <KeyboardAvoidingView
-        style={[defaultStyles.flex]}
-        behavior={'padding'}
-        keyboardVerticalOffset={256}>
+      <KeyboardAwareScrollView
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        enableOnAndroid
+        enableAutomaticScroll
+        extraScrollHeight={24}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={defaultStyles.flex} // keep your padding/margins
+      >
         <View style={defaultStyles.flex}>
           <Appbar.Header
             dark={false}
@@ -319,7 +324,7 @@ export default function DeliveryAddress() {
             </Button>
           </View>
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
     </>
   );
 }

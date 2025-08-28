@@ -72,7 +72,7 @@ export default function OrderDetails() {
       params: {
         orderNumber: orderNumber as string,
         amount: orderDetails?.order?.price?.value,
-        currency: orderDetails?.order?.price?.currencyIsocode,
+        currency: orderDetails?.order?.price?.currencyIsoCode,
         quantity: orderDetails?.order?.quantity,
         deliveryAddress: orderDetails?.order?.deliveryLocation?.address,
         productName: productData?.product?.name,

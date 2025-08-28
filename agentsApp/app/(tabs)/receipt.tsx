@@ -19,13 +19,19 @@ import {
 } from "@/client/orders.swagger/@tanstack/react-query.gen";
 import { usersGetUserByIdOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
-import { defaultStyles, loginstyles, receiptStyles as styles } from "@/styles";
+import {
+  defaultStyles,
+  loginstyles,
+  signupStyles,
+  receiptStyles as styles,
+} from "@/styles";
 import { Chase } from "react-native-animated-spinkit";
 import { formatAmount } from "@/utils/amountFormater";
 import { generateDispatchFormPdf } from "@/components";
 import i18n from "@/i18n";
-import { Colors } from "@/constants";
+import { CAMEROON, Colors, countries } from "@/constants";
 import parsePhoneNumberFromString from "libphonenumber-js";
+import PhoneNumberInput from "@/components/general/PhoneNumberInput";
 
 export default function Receipt() {
   const router = useRouter();
@@ -61,16 +67,25 @@ export default function Receipt() {
 
   // Safe string values
   const orderNumberStr = asString(orderNumber);
-  const productNameStr = asString(productName);
   const sellerphoneNumberStr = asString(sellerphoneNumber);
   const sellerNameStr = asString(sellerName);
   const buyerNameStr = asString(buyerName);
-  const amountStr = asString(amount);
-  const currencyStr = asString(currency);
   const quantityStr = asString(quantity);
   const deliveryAddressStr = asString(deliveryAddress);
   const [messageModalVisible, setMessageModalVisible] = useState(false);
   const [messageModalText, setMessageModalText] = useState("");
+  const country =
+    countries?.find(
+      (country) =>
+        parsePhoneNumberFromString((sellerphoneNumber ?? "") as string)
+          ?.countryCallingCode === country?.dial_code
+    ) || CAMEROON;
+
+  const [callingCode, setCallingCode] = useState(country?.dial_code);
+  const [mobile, setMobile] = useState(
+    parsePhoneNumberFromString((sellerphoneNumber ?? "") as string)
+      ?.nationalNumber ?? ""
+  );
 
   const {
     data: orderDetails,
@@ -189,7 +204,7 @@ export default function Receipt() {
           userId: user.userId,
         },
         body: {
-          payoutPhoneNumber: editablePhone,
+          payoutPhoneNumber: `${callingCode}${mobile}`,
         },
       });
     } catch (e) {
@@ -213,7 +228,6 @@ export default function Receipt() {
             ? `${seller.user.firstName} ${seller.user.lastName}`
             : sellerNameStr || "Unknown Farmer",
         farmerAddress: seller?.user?.address || "Unknown Address",
-        farmerPhone: seller?.user?.phoneNumber || sellerphoneNumberStr || "",
         buyerName:
           buyer?.user?.firstName && buyer?.user?.lastName
             ? `${buyer.user.firstName} ${buyer.user.lastName}`
@@ -228,6 +242,7 @@ export default function Receipt() {
           parseInt(quantityStr) > 1 ? "s" : ""
         }`,
       });
+      router.replace("/(tabs)/(index)");
     } catch (error) {
       console.error("Error generating receipt PDF:", error);
       alert("Failed to generate receipt PDF.");
@@ -338,19 +353,6 @@ export default function Receipt() {
                 </Text>
               </Text>
             </View>
-            <View style={styles.infoRow}>
-              <Text>
-                <Text style={styles.infoLabel}>Phone: </Text>
-                <Text style={styles.infoValue}>
-                  {parsePhoneNumberFromString(
-                    editablePhone ||
-                      seller?.user?.phoneNumber ||
-                      sellerphoneNumberStr ||
-                      " "
-                  )?.formatInternational()}
-                </Text>
-              </Text>
-            </View>
           </View>
 
           <View style={styles.section}>
@@ -411,18 +413,17 @@ export default function Receipt() {
             <Text style={styles.footerText}>✉️ {FOODHOUSE_EMAIL}</Text>
           </View>
         </View>
-
-        <View style={defaultStyles.bottomButtonContainer}>
-          <Button
-            mode="contained"
-            onPress={handleContinue}
-            style={[defaultStyles.button, defaultStyles.primaryButton]}
-            labelStyle={styles.uploadButtonText}
-          >
-            Continue
-          </Button>
-        </View>
       </ScrollView>
+      <View style={defaultStyles.bottomButtonContainer}>
+        <Button
+          mode="contained"
+          onPress={handleContinue}
+          style={[defaultStyles.button, defaultStyles.primaryButton]}
+          labelStyle={styles.uploadButtonText}
+        >
+          Continue
+        </Button>
+      </View>
 
       <Portal>
         <Dialog
@@ -467,22 +468,15 @@ export default function Receipt() {
             </Dialog.Content>
           </Dialog.Content>
           <Dialog.Content>
-            <TextInput
-              mode="outlined"
-              value={editablePhone}
-              onChangeText={setEditablePhone}
-              keyboardType="phone-pad"
-              theme={{
-                roundness: 15,
-                colors: {
-                  onSurfaceVariant: Colors.grey["e8"],
-                  primary: Colors.primary[500],
-                },
-              }}
-              outlineColor={Colors.grey["bg"]}
-              style={[loginstyles.input, styles.inputMargin]}
+            <PhoneNumberInput
+              setCountryCode={setCallingCode}
+              countryCode={callingCode}
+              setPhoneNumber={setMobile}
+              phoneNumber={mobile}
+              containerStyle={signupStyles.phoneNumberInputContainerStyle}
             />
-
+          </Dialog.Content>
+          <Dialog.Actions style={styles.dialogActions}>
             <Button
               onPress={handleConfirmDispatch}
               mode="contained"
@@ -491,7 +485,7 @@ export default function Receipt() {
             >
               Confirm Phone Number
             </Button>
-          </Dialog.Content>
+          </Dialog.Actions>
         </Dialog>
       </Portal>
       <Portal>

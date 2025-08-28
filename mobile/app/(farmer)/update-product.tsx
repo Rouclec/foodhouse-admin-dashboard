@@ -24,7 +24,7 @@ import i18n from '@/i18n';
 import { CurrencySelect, Dropdown, ImagePicker } from '@/components';
 import { CAMEROON } from '@/constants';
 import { Country } from '@/interface';
-import { delay, uploadImage } from '@/utils';
+import { delay, uploadImage, useCompressImage } from '@/utils';
 import moment from 'moment';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
@@ -116,6 +116,12 @@ export default function UpdateProduct() {
     setIsImagePickerVisible(false);
   };
 
+  const {
+    compressImage,
+    // loading: isCompressing,
+    // error: compressionError,
+  } = useCompressImage(image?.uri ?? '');
+
   const handleUpdateProduct = async () => {
     try {
       if (!productCategory) {
@@ -174,10 +180,11 @@ export default function UpdateProduct() {
       }
 
       setLoading(true);
-      let downloadURL = image.uri;
-      if (image.uri !== productData?.product?.image) {
+      let downloadURL = productData?.product?.image;
+      if (image.uri !== downloadURL) {
+        const imageUri = await compressImage();
         downloadURL = await uploadImage({
-          uri: image.uri,
+          uri: imageUri,
           directory: '/products',
           filename: `${image?.fileName ?? 'product'}-${moment()}`,
         });

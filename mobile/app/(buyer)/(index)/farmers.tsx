@@ -3,7 +3,6 @@ import { usersListFarmersOptions } from '@/client/users.swagger/@tanstack/react-
 import { Colors } from '@/constants';
 import i18n from '@/i18n';
 import { defaultStyles, farmersStyles as styles } from '@/styles';
-import { formatAmount } from '@/utils/amountFormater';
 import { Feather } from '@expo/vector-icons';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
@@ -178,7 +177,7 @@ export default function Farmers() {
                             : 'Anonymous'}{' '}
                           {item?.user?.lastName}
                         </Text>
-                        <View style={styles.ratingsContainer}>
+                        {/* <View style={styles.ratingsContainer}>
                           {Math.floor(item?.rating ?? 0) >= 5.0 ? (
                             <Icon
                               source={'star'}
@@ -203,7 +202,7 @@ export default function Farmers() {
                               decimalPlaces: item?.rating ?? 0 > 0 ? 1 : 0,
                             })}
                           </Text>
-                        </View>
+                        </View> */}
                       </View>
                     </View>
                     <Button

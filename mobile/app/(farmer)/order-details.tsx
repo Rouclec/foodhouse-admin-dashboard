@@ -270,15 +270,12 @@ export default function OrderDetails() {
                 <Text variant="titleSmall" style={styles.primaryText}>
                   {orderDetails?.order?.price?.currencyIsoCode}{' '}
                   {formatAmount(
-                    formatAmount(
-                      (
-                        (productData?.product?.amount?.value ?? 0) *
-                        parseInt(orderDetails?.order?.quantity ?? '0', 10) *
-                        0.95
-                      ) 
-                        .toString(),
-                      { decimalPlaces: 2 },
-                    ),
+                    (
+                      (productData?.product?.amount?.value ?? 0) *
+                      parseInt(orderDetails?.order?.quantity ?? '0', 10) *
+                      0.95
+                    ).toString(),
+                    { decimalPlaces: 2 },
                   )}
                 </Text>
               </View>

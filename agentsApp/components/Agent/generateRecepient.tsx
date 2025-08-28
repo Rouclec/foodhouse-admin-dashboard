@@ -9,7 +9,6 @@ interface DispatchFormProps {
   deliveryLocation: string;
   farmerName: string;
   farmerAddress: string;
-  farmerPhone: string;
   buyerName: string;
   buyerPhone: string;
   agentName: string;
@@ -24,7 +23,6 @@ export const generateDispatchFormPdf = async (props: DispatchFormProps) => {
     deliveryLocation,
     farmerName,
     farmerAddress,
-    farmerPhone,
     buyerName,
     buyerPhone,
     agentName,
@@ -152,9 +150,6 @@ export const generateDispatchFormPdf = async (props: DispatchFormProps) => {
               <div class="section-title">Farmer</div>
               <div class="info-row"><span><strong>Name:</strong> ${farmerName}</span></div>
               <div class="info-row"><span><strong>Address:</strong> ${farmerAddress}</span></div>
-              <div class="info-row"><span><strong>Phone:</strong> ${parsePhoneNumberFromString(
-                farmerPhone
-              )?.formatInternational()}</span></div>
             </div>
 
             <div class="section">

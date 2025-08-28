@@ -1,7 +1,10 @@
-import { ordersGetOrderDetailsOptions } from '@/client/orders.swagger/@tanstack/react-query.gen';
+import {
+  ordersConfirmDeliveryMutation,
+  ordersGetOrderDetailsOptions,
+} from '@/client/orders.swagger/@tanstack/react-query.gen';
 import i18n from '@/i18n';
 import { defaultStyles } from '@/styles';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useContext, useEffect, useState } from 'react';
 import {
@@ -12,7 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Appbar, Icon, Text } from 'react-native-paper';
+import { Appbar, Button, Icon, Snackbar, Text } from 'react-native-paper';
 import { Context, ContextType } from '../_layout';
 import { productsGetProductOptions } from '@/client/products.swagger/@tanstack/react-query.gen';
 import { Chase } from 'react-native-animated-spinkit';
@@ -23,11 +26,14 @@ import { ordersgrpcOrderAuditLog } from '@/client/orders.swagger';
 import { MaterialIcons } from '@expo/vector-icons';
 import moment from 'moment';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { delay } from '@/utils';
 
 export default function TrackOrder() {
   const router = useRouter();
   const { user } = useContext(Context) as ContextType;
   const [filteredLogs, setFilterdLogs] = useState<ordersgrpcOrderAuditLog[]>();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>();
 
   const { orderNumber } = useLocalSearchParams();
 
@@ -35,6 +41,7 @@ export default function TrackOrder() {
     data: orderDetails,
     isLoading: isOrderDetailsLoading,
     isError: errorLoadingOrder,
+    refetch,
   } = useQuery({
     ...ordersGetOrderDetailsOptions({
       path: {
@@ -56,6 +63,38 @@ export default function TrackOrder() {
       },
     }),
     enabled: !!orderDetails?.order,
+  });
+
+  const handleConfirmDelivery = async () => {
+    try {
+      setLoading(true);
+      await mutateAsync({
+        body: {},
+        path: {
+          secretKey: orderDetails?.order?.secretKey ?? '',
+          userId: user?.userId ?? '',
+        },
+      });
+    } catch (error) {
+      console.error({ error }, 'confirming delivery');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const { mutateAsync } = useMutation({
+    ...ordersConfirmDeliveryMutation(),
+    onSuccess: () => {
+      refetch();
+    },
+    onError: async error => {
+      setError(
+        error?.response?.data?.message ??
+          i18n.t('(buyer).(order).checkout.unknownError'),
+      );
+      await delay(5000);
+      setError(undefined);
+    },
   });
 
   useEffect(() => {
@@ -353,7 +392,31 @@ export default function TrackOrder() {
             </View>
           </ScrollView>
         </View>
+        {orderDetails?.order?.status === 'OrderStatus_IN_TRANSIT' && (
+          <View style={defaultStyles.bottomButtonContainer}>
+            <Button
+              style={[
+                defaultStyles.button,
+                defaultStyles.primaryButton,
+                loading && defaultStyles.greyButton,
+              ]}
+              onPress={handleConfirmDelivery}
+              loading={loading}
+              disabled={loading}>
+              <Text style={[defaultStyles.buttonText]}>
+                {i18n.t('(buyer).track-order.confirmDelivery')}
+              </Text>
+            </Button>
+          </View>
+        )}
       </KeyboardAvoidingView>
+      <Snackbar
+        visible={!!error}
+        onDismiss={() => {}}
+        duration={3000}
+        style={defaultStyles.snackbar}>
+        <Text style={defaultStyles.errorText}>{error}</Text>
+      </Snackbar>
     </>
   );
 }

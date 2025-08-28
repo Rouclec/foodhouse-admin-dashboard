@@ -354,9 +354,12 @@ export const defaultStyles = StyleSheet.create({
     borderColor: Colors.primary[500],
   },
   blueChecked: {
+    borderRadius: 48,
     backgroundColor: Colors.blue,
   },
   primaryChecked: {
+    borderRadius: 48,
     backgroundColor: Colors.primary[500],
   },
+  flexShrink: { flexShrink: 1 },
 });

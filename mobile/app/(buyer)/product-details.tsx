@@ -185,15 +185,22 @@ export default function ProductDetails() {
                   <Text variant="titleMedium" style={styles.farmerName}>
                     {farmer?.user?.firstName} {farmer?.user?.lastName}
                   </Text>
-                  <Icon
+                  {/* <Icon
                     source={'check-decagram'}
                     color={Colors.blue}
                     size={18}
-                  />
+                  /> */}
                 </View>
-                {farmer?.user?.locationCoordinates?.address && (
-                  <Text variant="bodyLarge" style={styles.greyText}>
-                    {farmer.user.locationCoordinates.address}
+              </View>
+              <View style={styles.locationContainer}>
+                <Icon
+                  size={18}
+                  color={Colors.dark['0']}
+                  source={'map-marker-radius-outline'}
+                />
+                {farmer?.user?.address && (
+                  <Text variant="titleMedium" style={styles.locationText}>
+                    {farmer?.user?.address}
                   </Text>
                 )}
               </View>
@@ -203,7 +210,7 @@ export default function ProductDetails() {
         <SafeAreaView>
           <View
             style={[defaultStyles.bottomContainerWithContent, styles.flexRow]}>
-            <View>
+            <View style={defaultStyles.flexShrink}>
               <Text style={styles.priceLabel}>
                 {i18n.t('(buyer).product-details.price')}
               </Text>

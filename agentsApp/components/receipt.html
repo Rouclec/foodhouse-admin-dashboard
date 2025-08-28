@@ -1,140 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Foodhouse Dispatch Receipt</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f4f4f4;
-      padding: 2rem;
-      margin: 0;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Foodhouse Dispatch Receipt</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        background: #f4f4f4;
+        padding: 2rem;
+        margin: 0;
+      }
 
-    .receipt {
-      max-width: 600px;
-      margin: 0 auto;
-      background: #fff;
-      border: 1px solid #e0e0e0;
-      border-radius: 10px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
+      .receipt {
+        max-width: 600px;
+        margin: 0 auto;
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
 
-    .receipt-inner {
-      padding: 2rem;
-    }
+      .receipt-inner {
+        padding: 2rem;
+      }
 
-    .header {
-      text-align: center;
-    }
+      .header {
+        text-align: center;
+      }
 
-    .logocircle {
-      width: 80px;
-      height: 80px;
-      background-color: #2e7d32;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 0.75rem;
-    }
+      .logocircle {
+        width: 80px;
+        height: 80px;
+        background-color: #2e7d32;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.75rem;
+      }
 
-    .logotext {
-      color: #fff;
-      font-weight: bold;
-      font-size: 0.9rem;
-      text-align: center;
-      line-height: 1.2;
-    }
+      .logotext {
+        color: #fff;
+        font-weight: bold;
+        font-size: 0.9rem;
+        text-align: center;
+        line-height: 1.2;
+      }
 
-    .header h2 {
-      margin: 0.25rem 0;
-      font-size: 1.4rem;
-    }
+      .header h2 {
+        margin: 0.25rem 0;
+        font-size: 1.4rem;
+      }
 
-    .section {
-      margin-top: 2rem;
-    }
+      .section {
+        margin-top: 2rem;
+      }
 
-    .section-title {
-      font-weight: bold;
-      color: #6dcd47;
-      margin-bottom: 0.5rem;
-    }
+      .section-title {
+        font-weight: bold;
+        color: #6dcd47;
+        margin-bottom: 0.5rem;
+      }
 
-    .info-row {
-      margin-bottom: 0.5rem;
-    }
+      .info-row {
+        margin-bottom: 0.5rem;
+      }
 
-    .info-row span {
-      display: block;
-      color: #555;
-    }
+      .info-row span {
+        display: block;
+        color: #555;
+      }
 
-    .info-row strong {
-      color: #222;
-    }
+      .info-row strong {
+        color: #222;
+      }
 
-    .footer {
-      background-color: #6dcd47;
-      color: #fff;
-      display: flex;
-      justify-content: space-between;
-      padding: 1rem 2rem;
-      font-size: 14px;
-    }
+      .footer {
+        background-color: #6dcd47;
+        color: #fff;
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem 2rem;
+        font-size: 14px;
+      }
 
-    .footer div {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-  </style>
-</head>
-<body>
-  <div class="receipt">
-    <div class="receipt-inner">
-      <div class="header">
-        <div class="logocircle">
-          <p class="logotext">Food<br />House</p>
+      .footer div {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="receipt">
+      <div class="receipt-inner">
+        <div class="header">
+          <div class="logocircle">
+            <p class="logotext">Food<br />House</p>
+          </div>
+          <h2>Foodhouse Dispatched Form</h2>
         </div>
-        <h2>Foodhouse Dispatched Form</h2>
+
+        <div class="section">
+          <div class="section-title">Order Details</div>
+          <div class="info-row">
+            <span><strong>Order Number:</strong> #123456</span>
+          </div>
+          <div class="info-row">
+            <span><strong>Quantity:</strong> 25</span>
+          </div>
+          <div class="info-row">
+            <span
+              ><strong>Delivery Location:</strong> 123 Transport Rd,
+              Yaoundé</span
+            >
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Farmer</div>
+          <div class="info-row">
+            <span><strong>Name:</strong> Ngong Denis</span>
+          </div>
+          <div class="info-row">
+            <span><strong>Address:</strong> 45 Market St, Douala</span>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Buyer</div>
+          <div class="info-row">
+            <span><strong>Name:</strong> Mbella Florence</span>
+          </div>
+          <div class="info-row">
+            <span><strong>Phone:</strong> +237 678 000 111</span>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Agent</div>
+          <div class="info-row">
+            <span><strong>Name:</strong> John Doe</span>
+          </div>
+          <div class="info-row">
+            <span><strong>Phone:</strong> +237 699 888 777</span>
+          </div>
+        </div>
       </div>
 
-      <div class="section">
-        <div class="section-title">Order Details</div>
-        <div class="info-row"><span><strong>Order Number:</strong> #123456</span></div>
-        <div class="info-row"><span><strong>Quantity:</strong> 25</span></div>
-        <div class="info-row"><span><strong>Delivery Location:</strong> 123 Transport Rd, Yaoundé</span></div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">Farmer</div>
-        <div class="info-row"><span><strong>Name:</strong> Ngong Denis</span></div>
-        <div class="info-row"><span><strong>Address:</strong> 45 Market St, Douala</span></div>
-        <div class="info-row"><span><strong>Phone:</strong> +237 654 123 456</span></div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">Buyer</div>
-        <div class="info-row"><span><strong>Name:</strong> Mbella Florence</span></div>
-        <div class="info-row"><span><strong>Phone:</strong> +237 678 000 111</span></div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">Agent</div>
-        <div class="info-row"><span><strong>Name:</strong> John Doe</span></div>
-        <div class="info-row"><span><strong>Phone:</strong> +237 699 888 777</span></div>
+      <div class="footer">
+        <div>📞 +237 654 456 789</div>
+        <div>✉️ info@foodhouse.com</div>
       </div>
     </div>
-
-    <div class="footer">
-      <div>📞 +237 654 456 789</div>
-      <div>✉️ info@foodhouse.com</div>
-    </div>
-  </div>
-</body>
+  </body>
 </html>

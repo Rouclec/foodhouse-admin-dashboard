@@ -59,7 +59,13 @@
       "unknownError": "Hitilafu isiyojulikana imetokea",
       "congratulations": "Hongera",
       "registrationCompleteMessage": "Akaunti yako iko tayari kutumika, utapelekwa kwenye ukurasa wa nyumbani baada ya sekunde chache",
-      "referralCode": "Nambari ya Rufaa"
+      "referralCode": "Nambari ya Rufaa",
+      "profileImageRequired": "Picha ya wasifu inahitajika",
+      "selectAValidAddress": "Tafadhali chagua anwani halali",
+      "firstNameRequired": "Jina la kwanza linahitajika",
+      "enterValidEmail": "Tafadhali ingiza barua pepe halali",
+      "doYouHaveAReferralCode": "Je, una nambari ya rufaa?",
+      "pleaseSelectThisOption": "Tafadhali chagua chaguo hili"
     },
     "variety": {
       "description": "Karibu kwenye programu ya Food House! Chagua Aina Yako na gundua aina mbalimbali za bidhaa zinazolingana na mapendeleo yako.",
@@ -398,7 +404,9 @@
       "orderInTransit": "Agizo lako liko njiani",
       "orderCompleted": "Agizo limewasilishwa mahali pa utoaji",
       "unknownState": "Hali ya agizo hili haijulikani, wasiliana na msimamizi kwa maelezo zaidi",
-      "orderNumber": "Nambari ya agizo"
+      "orderNumber": "Nambari ya agizo",
+      "confirmDelivery": "Thibitisha usafirishaji",
+      "unknownError": "Hitilafu isiyojulikana imetokea"
     },
     "farmer-details": {
       "farmerInformation": "Taarifa za mkulima",

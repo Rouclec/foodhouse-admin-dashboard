@@ -23,9 +23,9 @@ import * as ExpoImagePicker from 'expo-image-picker';
 import { defaultStyles, createProductStyles as styles } from '@/styles';
 import i18n from '@/i18n';
 import { CurrencySelect, Dropdown, ImagePicker } from '@/components';
-import { CAMEROON } from '@/constants';
+import { CAMEROON, countries } from '@/constants';
 import { Country } from '@/interface';
-import { delay, uploadImage } from '@/utils';
+import { delay, uploadImage, useCompressImage } from '@/utils';
 import moment from 'moment';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
@@ -46,7 +46,15 @@ export default function CreateProduct() {
   const [priceType, setPriceType] = useState<string>();
   const [productName, setProductName] = useState<string>();
   const [price, setPrice] = useState<string>();
-  const [currencyCountry, setCurrencyCountry] = useState<Country>(CAMEROON);
+  // const [currencyCountry, setCurrencyCountry] = useState<Country>(
+  //   countries?.find(
+  //     country => country.code === user?.residenceCountryIsoCode,
+  //   ) || CAMEROON,
+  // );
+  const currencyCountry: Country =
+    countries?.find(
+      country => country.code === user?.residenceCountryIsoCode,
+    ) || CAMEROON;
   const [description, setDescription] = useState<string>();
   const [image, setImage] = useState<ExpoImagePicker.ImagePickerAsset>();
   const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
@@ -62,6 +70,12 @@ export default function CreateProduct() {
   const onImagePickerClose = () => {
     setIsImagePickerVisible(false);
   };
+
+  const {
+    compressImage,
+    // loading: isCompressing,
+    // error: compressionError,
+  } = useCompressImage(image?.uri ?? '');
 
   const handleCreateProduct = async () => {
     try {
@@ -129,8 +143,9 @@ export default function CreateProduct() {
         return;
 
       setLoading(true);
+      const imageUri = await compressImage();
       const downloadURL = await uploadImage({
-        uri: image.uri,
+        uri: imageUri,
         directory: '/products',
         filename: `${image?.fileName ?? 'product'}-${moment()}`,
       });
@@ -158,7 +173,6 @@ export default function CreateProduct() {
     }
   };
 
-
   const resetInputs = () => {
     setValidationError({
       productCategory: '',
@@ -167,7 +181,7 @@ export default function CreateProduct() {
       price: '',
       description: '',
     });
-    setProductCateogry('undefined');
+    setProductCateogry(undefined);
     setProductName('');
     setPrice('');
     setImage(undefined);
@@ -310,10 +324,10 @@ export default function CreateProduct() {
                 }}
                 error={validationError.priceType}
               />
-              <CurrencySelect
+              {/* <CurrencySelect
                 setCountry={setCurrencyCountry}
                 country={currencyCountry}
-              />
+              /> */}
               <View>
                 <TextInput
                   label={i18n.t('(farmer).create-product.price')}

@@ -262,4 +262,7 @@ export const signupStyles = StyleSheet.create({
     width: 56,
     height: 56,
   },
+  inputGap: {
+    rowGap: 8,
+  },
 });

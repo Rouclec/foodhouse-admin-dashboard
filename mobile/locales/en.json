@@ -60,7 +60,13 @@
       "unknownError": "An unknown error occured",
       "congratulations": "Congratulations",
       "registrationCompleteMessage": "Your account is ready to use, you will be redirected to the home page in a few seconds",
-      "referralCode": "Referral Code"
+      "referralCode": "Referral Code",
+      "profileImageRequired": "Profile image is required",
+      "selectAValidAddress": "Please select a valid address",
+      "firstNameRequired": "First name is required",
+      "enterValidEmail": "Please enter a valid email",
+      "doYouHaveAReferralCode": "Do you have a referral code?",
+      "pleaseSelectThisOption": "Please select this option"
     },
     "variety": {
       "description": "Welcome to Food House app! Choose Your Variety and explore a wide range of products tailored to your preferences.",
@@ -408,7 +414,9 @@
       "orderInTransit": "Your order is now in transit",
       "orderCompleted": "Order has been deliverd to the delivery location",
       "unknownState": "The state of this order is unknonw, contact admin for more info",
-      "orderNumber": "Order number"
+      "orderNumber": "Order number",
+      "confirmDelivery": "Confirm delivery",
+      "unknownError": "An unknown error occured"
     },
     "farmer-details": {
       "farmerInformation": "Farmer Information",

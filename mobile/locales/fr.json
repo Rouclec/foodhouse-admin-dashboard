@@ -59,7 +59,13 @@
       "unknownError": "Une erreur inconnue s'est produite",
       "congratulations": "Félicitations",
       "registrationCompleteMessage": "Votre compte est prêt à être utilisé, vous serez redirigé vers la page d'accueil dans quelques secondes",
-      "referralCode": "Code de parrainage"
+      "referralCode": "Code de parrainage",
+      "profileImageRequired": "L'image de profil est requise",
+      "selectAValidAddress": "Veuillez sélectionner une adresse valide",
+      "firstNameRequired": "Le prénom est requis",
+      "enterValidEmail": "Veuillez entrer un e-mail valide",
+      "doYouHaveAReferralCode": "Avez-vous un code de parrainage ?",
+      "pleaseSelectThisOption": "Veuillez sélectionner cette option"
     },
     "variety": {
       "description": "Bienvenue sur l'application Food House ! Choisissez votre variété et explorez une large gamme de produits adaptés à vos préférences.",
@@ -406,7 +412,9 @@
       "orderInTransit": "Votre commande est en transit",
       "orderCompleted": "La commande a été livrée à l'adresse de livraison",
       "unknownState": "L'état de cette commande est inconnu, contactez l'administrateur pour plus d'informations",
-      "orderNumber": "Numéro de commande"
+      "orderNumber": "Numéro de commande",
+      "confirmDelivery": "Confirmer la livraison",
+      "unknownError": "Une erreur inconnue est survenue"
     },
     "farmer-details": {
       "farmerInformation": "Informations sur l'agriculteur",

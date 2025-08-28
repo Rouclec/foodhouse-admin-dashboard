@@ -1,15 +1,15 @@
-import { ordersgrpcOrder } from "@/client/orders.swagger";
-import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
-import { Colors } from "@/constants";
-import i18n from "@/i18n";
-import { defaultStyles, orderItemStyles as styles } from "@/styles";
-import { formatAmount } from "@/utils/amountFormater";
-import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
-import React, { FC } from "react";
-import { Image, View } from "react-native";
-import { Chase } from "react-native-animated-spinkit";
-import { Button, Text } from "react-native-paper";
+import { ordersgrpcOrder } from '@/client/orders.swagger';
+import { productsGetProductOptions } from '@/client/products.swagger/@tanstack/react-query.gen';
+import { Colors } from '@/constants';
+import i18n from '@/i18n';
+import { defaultStyles, orderItemStyles as styles } from '@/styles';
+import { formatAmount } from '@/utils/amountFormater';
+import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
+import React, { FC } from 'react';
+import { Image, View } from 'react-native';
+import { Chase } from 'react-native-animated-spinkit';
+import { Button, Text } from 'react-native-paper';
 
 interface OrderItemProps {
   item: ordersgrpcOrder;
@@ -24,7 +24,7 @@ export const OrderItem: FC<OrderItemProps> = ({ item }) => {
   } = useQuery({
     ...productsGetProductOptions({
       path: {
-        productId: item?.product ?? "",
+        productId: item?.product ?? '',
       },
     }),
   });
@@ -39,7 +39,7 @@ export const OrderItem: FC<OrderItemProps> = ({ item }) => {
   if (isError) {
     return (
       <View style={defaultStyles.center}>
-        <Text>{i18n.t("(farmer).(index).index.couldNotLoadProduct")}</Text>
+        <Text>{i18n.t('(farmer).(index).index.couldNotLoadProduct')}</Text>
       </View>
     );
   }
@@ -54,13 +54,14 @@ export const OrderItem: FC<OrderItemProps> = ({ item }) => {
         <Text variant="titleMedium">{productData?.product?.name}</Text>
         <View style={styles.centerRow}>
           <Text variant="titleSmall" style={styles.primaryText}>
-            {item?.price?.currencyIsoCode}{" "}
+            {item?.price?.currencyIsoCode}{' '}
             {formatAmount(
               (
                 (productData?.product?.amount?.value ?? 0) *
-                parseInt(item?.quantity ?? "")
-              ).toString() ?? "",
-              { decimalPlaces: 2 }
+                parseInt(item?.quantity ?? '0', 10) *
+                0.95
+              ).toString(),
+              { decimalPlaces: 2 },
             )}
           </Text>
         </View>
@@ -68,15 +69,14 @@ export const OrderItem: FC<OrderItemProps> = ({ item }) => {
           style={defaultStyles.primaryButton}
           onPress={() =>
             router.push({
-              pathname: "/(farmer)/order-details",
+              pathname: '/(farmer)/order-details',
               params: {
                 orderNumber: item?.orderNumber,
               },
             })
-          }
-        >
+          }>
           <Text style={defaultStyles.buttonText}>
-            {i18n.t("(farmer).(index).index.details")}
+            {i18n.t('(farmer).(index).index.details')}
           </Text>
         </Button>
       </View>

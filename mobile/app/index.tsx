@@ -59,22 +59,27 @@ export default function Index() {
     const timeLeft = Math.max(delay, 0);
     const timeout = setTimeout(() => {
       if (user) {
-        if (user?.role === 'USER_ROLE_FARMER') {
-          const isProfileComplete =
-            (!!user?.firstName || !!user?.lastName) &&
-            !!user.profileImage &&
-            !!user.phoneNumber &&
-            !!user.locationCoordinates &&
-            !!user.locationCoordinates.lat &&
-            !!user.locationCoordinates.lon &&
-            !!user.locationCoordinates.address;
-          if (!isProfileComplete) {
-            return router.replace('/(auth)/profile-page');
+        let isProfileComplete = true;
+        switch (user.role) {
+          case 'USER_ROLE_BUYER': {
+            isProfileComplete = !!user?.firstName;
           }
-          return router.replace('/(farmer)/(index)');
-        } else {
-          return router.replace('/(buyer)/(index)');
+          default: {
+            isProfileComplete =
+              !!user?.firstName &&
+              !!user.profileImage &&
+              !!user.locationCoordinates &&
+              !!user.locationCoordinates.lat &&
+              !!user.locationCoordinates.lon &&
+              !!user.locationCoordinates.address;
+          }
         }
+        if (!isProfileComplete) {
+          return router.replace('/(auth)/profile-page');
+        }
+        if (user?.role === 'USER_ROLE_FARMER')
+          return router.replace('/(farmer)/(index)');
+        return router.replace('/(buyer)/(index)');
       }
       if (hasOnboarded) {
         return router.replace('/(auth)/login');

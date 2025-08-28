@@ -7,7 +7,14 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Appbar, Text, Button, TextInput, Icon, Snackbar } from 'react-native-paper';
+import {
+  Appbar,
+  Text,
+  Button,
+  TextInput,
+  Icon,
+  Snackbar,
+} from 'react-native-paper';
 import { Colors } from '@/constants';
 import {
   defaultStyles,
@@ -19,7 +26,7 @@ import i18n from '@/i18n';
 import { Context, ContextType } from '../_layout';
 import { ImagePicker } from '@/components';
 import { usersCompleteRegistrationMutation } from '@/client/users.swagger/@tanstack/react-query.gen';
-import { delay, uploadImage } from '@/utils';
+import { delay, uploadImage, useCompressImage } from '@/utils';
 import { useMutation } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -149,14 +156,21 @@ export default function PersonalInfo() {
     },
   });
 
+  const {
+    compressImage,
+    // loading: isCompressing,
+    // error: compressionError,
+  } = useCompressImage(profileImage ?? '');
+
   const handleSave = async () => {
     try {
       setLoading(true);
       let imageUrl = originalProfileImage;
 
       if (profileImage !== originalProfileImage) {
+        const imageUri = await compressImage();
         imageUrl = await uploadImage({
-          uri: profileImage,
+          uri: imageUri,
           filename: `profile_${user?.userId}_${Date.now()}.jpg`,
           directory: 'profile_images',
         });
@@ -404,7 +418,7 @@ export default function PersonalInfo() {
         }}
         aspect={[1, 1]}
       />
-       <Snackbar
+      <Snackbar
         visible={!!error}
         onDismiss={() => {}}
         duration={3000}
