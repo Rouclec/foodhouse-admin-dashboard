@@ -45,9 +45,7 @@
       "env": {
         "KOTLIN_VERSION": "1.9.25"
       },
-      "ios": {
-        "simulator": true
-      }
+      "autoIncrement": true
     },
     "production": {
       "channel": "production",

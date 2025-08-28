@@ -3,7 +3,7 @@ name: Build and submit to beta testing
 on:
   push:
     branches:
-      - preview/*
+      - release/testing/*
   workflow_dispatch:
 
 jobs:
@@ -57,7 +57,7 @@ jobs:
       # The app will not be released without manual action
       - name: Build and Submit
         working-directory: mobile
-        run: eas build --platform android --profile preview --auto-submit --non-interactive --no-wait
+        run: eas build --platform android --profile production --auto-submit --non-interactive --no-wait
 
   build-and-submit-agent-app:
     name: Build and submit agent app
@@ -109,4 +109,4 @@ jobs:
       # The app will not be released without manual action
       - name: Build and Submit
         working-directory: agentsApp
-        run: eas build --platform android --profile preview --auto-submit --non-interactive --no-wait
+        run: eas build --platform android --profile production --auto-submit --non-interactive --no-wait
