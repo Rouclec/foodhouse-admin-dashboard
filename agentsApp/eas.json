@@ -94,6 +94,17 @@
         "ascAppId": "6747902709",
         "appleTeamId": "J6CVT33367"
       }
+    },
+    "preview": {
+      "android": {
+        "track": "internal",
+        "releaseStatus": "draft"
+      },
+      "ios": {
+        "appleId": "anyahasonganyi97@gmail.com",
+        "ascAppId": "6747902709",
+        "appleTeamId": "J6CVT33367"
+      }
     }
   }
 }
