@@ -19,6 +19,9 @@
       "bundleIdentifier": "com.foodhousecmr.foodhouse",
       "config": {
         "googleMapsApiKey": "AIzaSyCm3xPkE00Y0QEkgVTjAaKkS0pyevGZ1uU"
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
