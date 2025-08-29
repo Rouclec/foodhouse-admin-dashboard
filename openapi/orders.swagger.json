@@ -1097,6 +1097,44 @@
           "Orders"
         ]
       }
+    },
+    "/v1/{userId}/orders/estimate-delivery-fee": {
+      "post": {
+        "operationId": "Orders_EstimateDeliveryFee",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcEstimateDeliveryFeeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/OrdersEstimateDeliveryFeeBody"
+            }
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
     }
   },
   "definitions": {
@@ -1151,6 +1189,21 @@
       "properties": {
         "payoutPhoneNumber": {
           "type": "string"
+        }
+      }
+    },
+    "OrdersEstimateDeliveryFeeBody": {
+      "type": "object",
+      "properties": {
+        "productId": {
+          "type": "string"
+        },
+        "deliveryLocation": {
+          "$ref": "#/definitions/typesPoint"
+        },
+        "quantity": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -1356,6 +1409,14 @@
     },
     "ordersgrpcDispatchOrderResponse": {
       "type": "object"
+    },
+    "ordersgrpcEstimateDeliveryFeeResponse": {
+      "type": "object",
+      "properties": {
+        "estimatedDeliveryFee": {
+          "$ref": "#/definitions/typesAmount"
+        }
+      }
     },
     "ordersgrpcFarmerEarningsData": {
       "type": "object",
@@ -1594,6 +1655,9 @@
         },
         "dispatchedBy": {
           "type": "string"
+        },
+        "deliveryFee": {
+          "$ref": "#/definitions/typesAmount"
         }
       }
     },

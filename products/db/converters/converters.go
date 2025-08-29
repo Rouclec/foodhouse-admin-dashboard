@@ -14,6 +14,13 @@ func derefString(s *string) string {
 	return ""
 }
 
+func derefFloat(f *float64) float64 {
+	if f != nil {
+		return *f
+	}
+	return 0.00
+}
+
 func SqlcToProtoProducts(sqlcProducts []sqlc.Product) ([]*productsgrpc.Product, error) {
 	protoProducts := make([]*productsgrpc.Product, 0, len(sqlcProducts))
 
@@ -99,6 +106,10 @@ func SqlcToProtoPriceTypes(sqlcPriceTypes []sqlc.PriceType) ([]*productsgrpc.Pri
 			Name:       pt.Name,
 			Slug:       pt.Slug,
 			CategoryId: derefString(pt.CategoryID),
+			DeliveryFeePerUnit: &types.Amount{
+				Value:           derefFloat(pt.DeliveryFeeAmount),
+				CurrencyIsoCode: derefString(pt.DeliveryFeeCurrency),
+			},
 		}
 		protoPriceTypes = append(protoPriceTypes, protoPriceType)
 	}

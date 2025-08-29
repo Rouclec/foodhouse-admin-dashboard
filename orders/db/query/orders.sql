@@ -12,7 +12,9 @@ INSERT INTO orders (
     rating, 
     review,
     delivery_address,
-    quantity
+    quantity,
+    delivery_fee_amount,
+    delivery_fee_currency
 )
 VALUES (
     sqlc.arg(delivery_location)::point,    -- Enforcing as POINT (casting delivery_location)
@@ -27,7 +29,9 @@ VALUES (
     1, -- Default rating
     '', -- Default review
     sqlc.arg(delivery_address)::text,
-    sqlc.arg(quantity)::bigint
+    sqlc.arg(quantity)::bigint,
+    sqlc.arg(delivery_fee_amount)::float,
+    sqlc.arg(delivery_fee_currency)::varchar(3)
 )
 RETURNING *;
 
@@ -189,7 +193,15 @@ WHERE status = ANY(sqlc.arg(included_statuses)::TEXT[])
 
 -- name: GetPaymentStatsBetweenDates :one
 SELECT 
-  COALESCE(SUM(amount_value), 0)::float AS total_value
+  COALESCE(
+    SUM(
+      CASE 
+        WHEN type = 'PaymentType_CREDIT' THEN amount_value
+        WHEN type = 'PaymentType_DEBIT'  THEN -amount_value
+        ELSE 0
+      END
+    ), 0
+  )::float AS total_value
 FROM payments
 WHERE status = 'PaymentStatus_COMPLETED'
   AND created_at >= sqlc.arg(start_date)::timestamptz

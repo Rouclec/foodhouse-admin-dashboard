@@ -16,26 +16,30 @@ type Category struct {
 }
 
 type PriceType struct {
-	ID         string  `json:"id"`
-	Name       string  `json:"name"`
-	Slug       string  `json:"slug"`
-	CategoryID *string `json:"category_id"`
+	ID                  string   `json:"id"`
+	Name                string   `json:"name"`
+	Slug                string   `json:"slug"`
+	CategoryID          *string  `json:"category_id"`
+	DeliveryFeeAmount   *float64 `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency *string  `json:"delivery_fee_currency"`
 }
 
 type Product struct {
-	ID              string             `json:"id"`
-	CategoryID      *string            `json:"category_id"`
-	Name            string             `json:"name"`
-	UnitType        string             `json:"unit_type"`
-	Value           float64            `json:"value"`
-	CurrencyIsoCode string             `json:"currency_iso_code"`
-	Description     string             `json:"description"`
-	Image           string             `json:"image"`
-	CreatedBy       *string            `json:"created_by"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
-	WholeSale       bool               `json:"whole_sale"`
-	DeletedAt       pgtype.Timestamptz `json:"deleted_at"`
+	ID                  string             `json:"id"`
+	CategoryID          *string            `json:"category_id"`
+	Name                string             `json:"name"`
+	UnitType            string             `json:"unit_type"`
+	Value               float64            `json:"value"`
+	CurrencyIsoCode     string             `json:"currency_iso_code"`
+	Description         string             `json:"description"`
+	Image               string             `json:"image"`
+	CreatedBy           *string            `json:"created_by"`
+	CreatedAt           pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
+	WholeSale           bool               `json:"whole_sale"`
+	DeletedAt           pgtype.Timestamptz `json:"deleted_at"`
+	DeliveryFeeAmount   *float64           `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency *string            `json:"delivery_fee_currency"`
 }
 
 type ProductName struct {

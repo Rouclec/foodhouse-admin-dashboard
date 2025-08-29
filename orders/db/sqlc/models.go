@@ -30,23 +30,25 @@ type DeliveryPoint struct {
 }
 
 type Order struct {
-	OrderNumber       int64              `json:"order_number"`
-	DeliveryLocation  pgtype.Point       `json:"delivery_location"`
-	PriceValue        *float64           `json:"price_value"`
-	PriceCurrency     *string            `json:"price_currency"`
-	Status            string             `json:"status"`
-	Rating            pgtype.Numeric     `json:"rating"`
-	Review            string             `json:"review"`
-	Product           *string            `json:"product"`
-	CreatedBy         *string            `json:"created_by"`
-	CreatedAt         pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
-	SecretKey         *string            `json:"secret_key"`
-	ProductOwner      *string            `json:"product_owner"`
-	PayoutPhoneNumber *string            `json:"payout_phone_number"`
-	DeliveryAddress   string             `json:"delivery_address"`
-	Quantity          *int64             `json:"quantity"`
-	DispatchedBy      *string            `json:"dispatched_by"`
+	OrderNumber         int64              `json:"order_number"`
+	DeliveryLocation    pgtype.Point       `json:"delivery_location"`
+	PriceValue          *float64           `json:"price_value"`
+	PriceCurrency       *string            `json:"price_currency"`
+	Status              string             `json:"status"`
+	Rating              pgtype.Numeric     `json:"rating"`
+	Review              string             `json:"review"`
+	Product             *string            `json:"product"`
+	CreatedBy           *string            `json:"created_by"`
+	CreatedAt           pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
+	SecretKey           *string            `json:"secret_key"`
+	ProductOwner        *string            `json:"product_owner"`
+	PayoutPhoneNumber   *string            `json:"payout_phone_number"`
+	DeliveryAddress     string             `json:"delivery_address"`
+	Quantity            *int64             `json:"quantity"`
+	DispatchedBy        *string            `json:"dispatched_by"`
+	DeliveryFeeAmount   *float64           `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency *string            `json:"delivery_fee_currency"`
 }
 
 type OrdersAudit struct {

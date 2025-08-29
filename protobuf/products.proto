@@ -26,6 +26,7 @@ message Product {
   string created_by = 8;
   google.protobuf.Timestamp created_at = 9;
   google.protobuf.Timestamp updated_at = 10;
+  types.Amount delivery_fee_per_unit = 11;
 }
 
 message ProductName {
@@ -39,6 +40,7 @@ message PriceType {
   string name = 2;
   string slug = 3;
   string category_id = 4;
+  types.Amount delivery_fee_per_unit = 5;
 }
 
 message CreateCategoryRequest {
@@ -72,6 +74,7 @@ message CreateProductRequest {
   string description = 6;
   string image = 7;
   bool whole_sale = 8;
+  types.Amount delivery_fee_per_unit = 9;
 }
 
 message CreateProductResponse { Product product = 1; }
@@ -170,6 +173,7 @@ message CreatePriceTypeRequest {
   string name = 1;
   string category_id = 2;
   string user_id = 3;
+  types.Amount delivery_fee_per_unit = 5;
 }
 
 message CreatePriceTypeResponse { PriceType price_type = 1; }

@@ -750,6 +750,9 @@
         },
         "categoryId": {
           "type": "string"
+        },
+        "deliveryFeePerUnit": {
+          "$ref": "#/definitions/typesAmount"
         }
       }
     },
@@ -776,6 +779,9 @@
         },
         "wholeSale": {
           "type": "boolean"
+        },
+        "deliveryFeePerUnit": {
+          "$ref": "#/definitions/typesAmount"
         }
       }
     },
@@ -1001,6 +1007,9 @@
         },
         "categoryId": {
           "type": "string"
+        },
+        "deliveryFeePerUnit": {
+          "$ref": "#/definitions/typesAmount"
         }
       }
     },
@@ -1038,6 +1047,9 @@
         "updatedAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "deliveryFeePerUnit": {
+          "$ref": "#/definitions/typesAmount"
         }
       }
     },

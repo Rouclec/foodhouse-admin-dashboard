@@ -22,10 +22,10 @@ SELECT * FROM categories where id = $1;
 -- name: CreateProduct :one
 INSERT INTO products (
   category_id, name, unit_type, value, currency_iso_code,
-  description, image, created_by, whole_sale
+  description, image, created_by, whole_sale, delivery_fee_amount, delivery_fee_currency
 ) VALUES (
   $1, $2, $3, $4, $5,
-  $6, $7, $8, $9
+  $6, $7, $8, $9, $10, $11
 )
 RETURNING *;
 
@@ -61,7 +61,7 @@ WHERE
     description ILIKE '%' || sqlc.arg(search)::text || '%'
   ) AND
   (sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at < sqlc.arg(created_before)::timestamptz)
-ORDER BY created_at DESC
+ORDER BY created_at ASC
 LIMIT sqlc.arg(count)::int;
 
 -- name: GetProductForUpdate :one
@@ -78,8 +78,8 @@ VALUES ($1, $2, $3)
 RETURNING *;
 
 -- name: CreatePriceType :one
-INSERT INTO price_types (name, slug, category_id)
-VALUES ($1, $2, $3)
+INSERT INTO price_types (name, slug, category_id, delivery_fee_amount, delivery_fee_currency)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING *; 
 
 

@@ -7,6 +7,7 @@ export type ProductsCreateCategoryBody = {
 export type ProductsCreatePriceTypeBody = {
     name?: string;
     categoryId?: string;
+    deliveryFeePerUnit?: typesAmount;
 };
 
 export type ProductsCreateProductBody = {
@@ -17,6 +18,7 @@ export type ProductsCreateProductBody = {
     description?: string;
     image?: string;
     wholeSale?: boolean;
+    deliveryFeePerUnit?: typesAmount;
 };
 
 export type ProductsCreateProductNameBody = {
@@ -98,6 +100,7 @@ export type productsgrpcPriceType = {
     name?: string;
     slug?: string;
     categoryId?: string;
+    deliveryFeePerUnit?: typesAmount;
 };
 
 export type productsgrpcProduct = {
@@ -111,6 +114,7 @@ export type productsgrpcProduct = {
     createdBy?: string;
     createdAt?: string;
     updatedAt?: string;
+    deliveryFeePerUnit?: typesAmount;
 };
 
 export type productsgrpcProductName = {

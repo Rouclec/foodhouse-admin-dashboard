@@ -43,6 +43,7 @@ const (
 	Orders_ListCommissionsByReferrer_FullMethodName          = "/ordersgrpc.Orders/ListCommissionsByReferrer"
 	Orders_ListTotalComissionAmountByReferrer_FullMethodName = "/ordersgrpc.Orders/ListTotalComissionAmountByReferrer"
 	Orders_BulkSettleCommissions_FullMethodName              = "/ordersgrpc.Orders/BulkSettleCommissions"
+	Orders_EstimateDeliveryFee_FullMethodName                = "/ordersgrpc.Orders/EstimateDeliveryFee"
 )
 
 // OrdersClient is the client API for Orders service.
@@ -73,6 +74,7 @@ type OrdersClient interface {
 	ListCommissionsByReferrer(ctx context.Context, in *ListCommissionsByReferrerRequest, opts ...grpc.CallOption) (*ListCommissionsByReferrerResponse, error)
 	ListTotalComissionAmountByReferrer(ctx context.Context, in *ListTotalComissionAmountByReferrerRequest, opts ...grpc.CallOption) (*ListTotalCommissionAmountByReferrerResponse, error)
 	BulkSettleCommissions(ctx context.Context, in *BulkSettleCommissionsRequest, opts ...grpc.CallOption) (*BulkSettleCommissionsResponse, error)
+	EstimateDeliveryFee(ctx context.Context, in *EstimateDeliveryFeeRequest, opts ...grpc.CallOption) (*EstimateDeliveryFeeResponse, error)
 }
 
 type ordersClient struct {
@@ -323,6 +325,16 @@ func (c *ordersClient) BulkSettleCommissions(ctx context.Context, in *BulkSettle
 	return out, nil
 }
 
+func (c *ordersClient) EstimateDeliveryFee(ctx context.Context, in *EstimateDeliveryFeeRequest, opts ...grpc.CallOption) (*EstimateDeliveryFeeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(EstimateDeliveryFeeResponse)
+	err := c.cc.Invoke(ctx, Orders_EstimateDeliveryFee_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrdersServer is the server API for Orders service.
 // All implementations must embed UnimplementedOrdersServer
 // for forward compatibility.
@@ -351,6 +363,7 @@ type OrdersServer interface {
 	ListCommissionsByReferrer(context.Context, *ListCommissionsByReferrerRequest) (*ListCommissionsByReferrerResponse, error)
 	ListTotalComissionAmountByReferrer(context.Context, *ListTotalComissionAmountByReferrerRequest) (*ListTotalCommissionAmountByReferrerResponse, error)
 	BulkSettleCommissions(context.Context, *BulkSettleCommissionsRequest) (*BulkSettleCommissionsResponse, error)
+	EstimateDeliveryFee(context.Context, *EstimateDeliveryFeeRequest) (*EstimateDeliveryFeeResponse, error)
 	mustEmbedUnimplementedOrdersServer()
 }
 
@@ -432,6 +445,9 @@ func (UnimplementedOrdersServer) ListTotalComissionAmountByReferrer(context.Cont
 }
 func (UnimplementedOrdersServer) BulkSettleCommissions(context.Context, *BulkSettleCommissionsRequest) (*BulkSettleCommissionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BulkSettleCommissions not implemented")
+}
+func (UnimplementedOrdersServer) EstimateDeliveryFee(context.Context, *EstimateDeliveryFeeRequest) (*EstimateDeliveryFeeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EstimateDeliveryFee not implemented")
 }
 func (UnimplementedOrdersServer) mustEmbedUnimplementedOrdersServer() {}
 func (UnimplementedOrdersServer) testEmbeddedByValue()                {}
@@ -886,6 +902,24 @@ func _Orders_BulkSettleCommissions_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Orders_EstimateDeliveryFee_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EstimateDeliveryFeeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).EstimateDeliveryFee(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_EstimateDeliveryFee_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).EstimateDeliveryFee(ctx, req.(*EstimateDeliveryFeeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Orders_ServiceDesc is the grpc.ServiceDesc for Orders service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -988,6 +1022,10 @@ var Orders_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "BulkSettleCommissions",
 			Handler:    _Orders_BulkSettleCommissions_Handler,
+		},
+		{
+			MethodName: "EstimateDeliveryFee",
+			Handler:    _Orders_EstimateDeliveryFee_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

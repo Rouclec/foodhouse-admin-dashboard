@@ -487,19 +487,33 @@ func (i *Impl) CreateOrder(ctx context.Context, req *ordersgrpc.CreateOrderReque
 	// Calculate totalAmount as float64 to avoid type mismatch
 	totalAmount := float64(product.GetProduct().GetAmount().GetValue()) * float64(req.GetQuantity()) * TotalPercentage
 
+	// Calculate the devliery fee
+	deliver_fee, err := i.EstimateDeliveryFee(ctx, &ordersgrpc.EstimateDeliveryFeeRequest{
+		UserId:           req.GetUserId(),
+		ProductId:        req.GetProductId(),
+		DeliveryLocation: req.GetDeliveryLocation(),
+		Quantity:         req.GetQuantity(),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error calculating delivery fee: %v", err)
+	}
+
 	args := sqlc.CreateOrderParams{
 		DeliveryLocation: pgtype.Point{P: pgtype.Vec2{X: float64(req.GetDeliveryLocation().GetLon()),
 			Y: float64(req.GetDeliveryLocation().GetLat())},
 			Valid: true},
-		PriceValue:      totalAmount,
-		PriceCurrency:   product.GetProduct().GetAmount().GetCurrencyIsoCode(),
-		Status:          ordersgrpc.OrderStatus_OrderStatus_CREATED.String(),
-		Product:         req.GetProductId(),
-		CreatedBy:       req.UserId,
-		SecretKey:       secretKey,
-		ProductOwner:    product.GetProduct().GetCreatedBy(),
-		DeliveryAddress: req.GetDeliveryLocation().GetAddress(),
-		Quantity:        req.GetQuantity(),
+		PriceValue:          totalAmount,
+		PriceCurrency:       product.GetProduct().GetAmount().GetCurrencyIsoCode(),
+		Status:              ordersgrpc.OrderStatus_OrderStatus_CREATED.String(),
+		Product:             req.GetProductId(),
+		CreatedBy:           req.UserId,
+		SecretKey:           secretKey,
+		ProductOwner:        product.GetProduct().GetCreatedBy(),
+		DeliveryAddress:     req.GetDeliveryLocation().GetAddress(),
+		Quantity:            req.GetQuantity(),
+		DeliveryFeeAmount:   deliver_fee.EstimatedDeliveryFee.Value,
+		DeliveryFeeCurrency: deliver_fee.EstimatedDeliveryFee.CurrencyIsoCode,
 	}
 
 	i.logger.Debug().Msgf("argurments %v", args)
@@ -1954,4 +1968,63 @@ func (i *Impl) ListTotalComissionAmountByReferrer(ctx context.Context,
 	return &ordersgrpc.ListTotalCommissionAmountByReferrerResponse{
 		Commissions: protoCommissions,
 	}, nil
+}
+
+func Distance(p1, p2 *types.Point) float64 {
+	// Special case: if either point is (0,0), treat as "no location" and return 1
+	if (p1.Lat == 0 && p1.Lon == 0) || (p2.Lat == 0 && p2.Lon == 0) {
+		return 1.0
+	}
+
+	const R = 6371.0 // Earth radius in KM
+
+	lat1 := p1.Lat * math.Pi / 180
+	lon1 := p1.Lon * math.Pi / 180
+	lat2 := p2.Lat * math.Pi / 180
+	lon2 := p2.Lon * math.Pi / 180
+
+	dlat := lat2 - lat1
+	dlon := lon2 - lon1
+
+	a := math.Sin(dlat/2)*math.Sin(dlat/2) +
+		math.Cos(lat1)*math.Cos(lat2)*
+			math.Sin(dlon/2)*math.Sin(dlon/2)
+
+	c := 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
+
+	return R * c
+}
+
+// EstimateDeliveryFee implements ordersgrpc.OrdersServer.
+func (i *Impl) EstimateDeliveryFee(ctx context.Context,
+	req *ordersgrpc.EstimateDeliveryFeeRequest) (
+	*ordersgrpc.EstimateDeliveryFeeResponse, error) {
+
+	product, err := i.productService.GetProduct(ctx, &productsgrpc.GetProductRequest{
+		ProductId: req.GetProductId(),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting product with id %v: reason: %v", req.GetProductId(), err)
+	}
+
+	// farmer, err := i.userService.GetUserByID(ctx, &usersgrpc.GetUserByIDRequest{UserId: product.Product.CreatedBy})
+
+	// if err != nil {
+	// 	return nil, status.Errorf(codes.Internal, "error getting farmer with id %v: reason: %v", product.Product.CreatedBy, err)
+	// }
+
+	// distance := Distance(req.DeliveryLocation, farmer.User.LocationCoordinates)
+
+	// delivery_fee_amount := distance * product.Product.DeliveryFeePerUnit.Value
+
+	delivery_fee_amount := 1.0 * product.Product.DeliveryFeePerUnit.Value * float64(req.GetQuantity())
+
+	return &ordersgrpc.EstimateDeliveryFeeResponse{
+		EstimatedDeliveryFee: &types.Amount{
+			Value:           delivery_fee_amount,
+			CurrencyIsoCode: product.Product.DeliveryFeePerUnit.CurrencyIsoCode,
+		},
+	}, nil
+
 }

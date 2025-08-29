@@ -24,6 +24,12 @@ export type OrdersDispatchOrderBody = {
     payoutPhoneNumber?: string;
 };
 
+export type OrdersEstimateDeliveryFeeBody = {
+    productId?: string;
+    deliveryLocation?: typesPoint;
+    quantity?: string;
+};
+
 export type ordersgrpcAccount = {
     paymentMethod?: ordersgrpcPaymentMethodType;
     accountNumber?: string;
@@ -91,6 +97,10 @@ export type ordersgrpcDeliveryPoint = {
 };
 
 export type ordersgrpcDispatchOrderResponse = unknown;
+
+export type ordersgrpcEstimateDeliveryFeeResponse = {
+    estimatedDeliveryFee?: typesAmount;
+};
 
 export type ordersgrpcFarmerEarningsData = {
     date?: string;
@@ -172,6 +182,7 @@ export type ordersgrpcOrder = {
     payoutPhoneNumber?: string;
     quantity?: string;
     dispatchedBy?: string;
+    deliveryFee?: typesAmount;
 };
 
 export type ordersgrpcOrderAuditLog = {
@@ -554,3 +565,14 @@ export type OrdersConfirmDeliveryData = {
 export type OrdersConfirmDeliveryResponse = (ordersgrpcConfirmDeliveryResponse);
 
 export type OrdersConfirmDeliveryError = (rpcStatus);
+
+export type OrdersEstimateDeliveryFeeData = {
+    body: OrdersEstimateDeliveryFeeBody;
+    path: {
+        userId: string;
+    };
+};
+
+export type OrdersEstimateDeliveryFeeResponse = (ordersgrpcEstimateDeliveryFeeResponse);
+
+export type OrdersEstimateDeliveryFeeError = (rpcStatus);

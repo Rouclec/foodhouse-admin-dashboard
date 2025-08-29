@@ -122,14 +122,16 @@ func (i *Impl) CreateProduct(ctx context.Context, req *productsgrpc.CreateProduc
 	}
 
 	product, err := i.repo.Do().CreateProduct(ctx, sqlc.CreateProductParams{
-		CategoryID:      &req.CategoryId,
-		Name:            req.GetName(),
-		UnitType:        req.GetUnitType(),
-		Value:           req.GetAmount().GetValue(),
-		CurrencyIsoCode: req.GetAmount().GetCurrencyIsoCode(),
-		Description:     req.GetDescription(),
-		Image:           req.GetImage(),
-		CreatedBy:       &req.UserId,
+		CategoryID:          &req.CategoryId,
+		Name:                req.GetName(),
+		UnitType:            req.GetUnitType(),
+		Value:               req.GetAmount().GetValue(),
+		CurrencyIsoCode:     req.GetAmount().GetCurrencyIsoCode(),
+		Description:         req.GetDescription(),
+		Image:               req.GetImage(),
+		CreatedBy:           &req.UserId,
+		DeliveryFeeAmount:   &req.GetAmount().Value,
+		DeliveryFeeCurrency: &req.GetAmount().CurrencyIsoCode,
 	})
 
 	if err != nil {
@@ -418,9 +420,11 @@ func (i *Impl) CreatePriceType(ctx context.Context, req *productsgrpc.CreatePric
 	}
 
 	args := sqlc.CreatePriceTypeParams{
-		Name:       req.GetName(),
-		Slug:       slug.Make(req.GetName()),
-		CategoryID: &req.CategoryId,
+		Name:                req.GetName(),
+		Slug:                slug.Make(req.GetName()),
+		CategoryID:          &req.CategoryId,
+		DeliveryFeeAmount:   &req.GetDeliveryFeePerUnit().Value,
+		DeliveryFeeCurrency: &req.GetDeliveryFeePerUnit().CurrencyIsoCode,
 	}
 
 	priceType, err := i.repo.Do().CreatePriceType(ctx, args)

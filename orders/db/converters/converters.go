@@ -10,6 +10,13 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+func derefFloat(f *float64) float64 {
+	if f != nil {
+		return *f
+	}
+	return 0.00
+}
+
 func SqlcOrderToProto(order sqlc.Order) *ordersgrpc.Order {
 
 	// Convert price
@@ -60,6 +67,10 @@ func SqlcOrderToProto(order sqlc.Order) *ordersgrpc.Order {
 		PayoutPhoneNumber: derefString(order.PayoutPhoneNumber),
 		Quantity:          int64(*order.Quantity),
 		DispatchedBy:      derefString(order.DispatchedBy),
+		DeliveryFee: &types.Amount{
+			Value:           derefFloat(order.DeliveryFeeAmount),
+			CurrencyIsoCode: derefString(order.DeliveryFeeCurrency),
+		},
 	}
 }
 

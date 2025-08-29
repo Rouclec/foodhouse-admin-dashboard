@@ -35,25 +35,35 @@ func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) 
 }
 
 const createPriceType = `-- name: CreatePriceType :one
-INSERT INTO price_types (name, slug, category_id)
-VALUES ($1, $2, $3)
-RETURNING id, name, slug, category_id
+INSERT INTO price_types (name, slug, category_id, delivery_fee_amount, delivery_fee_currency)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING id, name, slug, category_id, delivery_fee_amount, delivery_fee_currency
 `
 
 type CreatePriceTypeParams struct {
-	Name       string  `json:"name"`
-	Slug       string  `json:"slug"`
-	CategoryID *string `json:"category_id"`
+	Name                string   `json:"name"`
+	Slug                string   `json:"slug"`
+	CategoryID          *string  `json:"category_id"`
+	DeliveryFeeAmount   *float64 `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency *string  `json:"delivery_fee_currency"`
 }
 
 func (q *Queries) CreatePriceType(ctx context.Context, arg CreatePriceTypeParams) (PriceType, error) {
-	row := q.db.QueryRow(ctx, createPriceType, arg.Name, arg.Slug, arg.CategoryID)
+	row := q.db.QueryRow(ctx, createPriceType,
+		arg.Name,
+		arg.Slug,
+		arg.CategoryID,
+		arg.DeliveryFeeAmount,
+		arg.DeliveryFeeCurrency,
+	)
 	var i PriceType
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Slug,
 		&i.CategoryID,
+		&i.DeliveryFeeAmount,
+		&i.DeliveryFeeCurrency,
 	)
 	return i, err
 }
@@ -61,24 +71,26 @@ func (q *Queries) CreatePriceType(ctx context.Context, arg CreatePriceTypeParams
 const createProduct = `-- name: CreateProduct :one
 INSERT INTO products (
   category_id, name, unit_type, value, currency_iso_code,
-  description, image, created_by, whole_sale
+  description, image, created_by, whole_sale, delivery_fee_amount, delivery_fee_currency
 ) VALUES (
   $1, $2, $3, $4, $5,
-  $6, $7, $8, $9
+  $6, $7, $8, $9, $10, $11
 )
-RETURNING id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at
+RETURNING id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency
 `
 
 type CreateProductParams struct {
-	CategoryID      *string `json:"category_id"`
-	Name            string  `json:"name"`
-	UnitType        string  `json:"unit_type"`
-	Value           float64 `json:"value"`
-	CurrencyIsoCode string  `json:"currency_iso_code"`
-	Description     string  `json:"description"`
-	Image           string  `json:"image"`
-	CreatedBy       *string `json:"created_by"`
-	WholeSale       bool    `json:"whole_sale"`
+	CategoryID          *string  `json:"category_id"`
+	Name                string   `json:"name"`
+	UnitType            string   `json:"unit_type"`
+	Value               float64  `json:"value"`
+	CurrencyIsoCode     string   `json:"currency_iso_code"`
+	Description         string   `json:"description"`
+	Image               string   `json:"image"`
+	CreatedBy           *string  `json:"created_by"`
+	WholeSale           bool     `json:"whole_sale"`
+	DeliveryFeeAmount   *float64 `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency *string  `json:"delivery_fee_currency"`
 }
 
 func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error) {
@@ -92,6 +104,8 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 		arg.Image,
 		arg.CreatedBy,
 		arg.WholeSale,
+		arg.DeliveryFeeAmount,
+		arg.DeliveryFeeCurrency,
 	)
 	var i Product
 	err := row.Scan(
@@ -108,6 +122,8 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 		&i.UpdatedAt,
 		&i.WholeSale,
 		&i.DeletedAt,
+		&i.DeliveryFeeAmount,
+		&i.DeliveryFeeCurrency,
 	)
 	return i, err
 }
@@ -185,7 +201,7 @@ func (q *Queries) GetCategory(ctx context.Context, id string) (Category, error) 
 }
 
 const getProduct = `-- name: GetProduct :one
-SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at FROM products where id = $1
+SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency FROM products where id = $1
 `
 
 func (q *Queries) GetProduct(ctx context.Context, id string) (Product, error) {
@@ -205,12 +221,14 @@ func (q *Queries) GetProduct(ctx context.Context, id string) (Product, error) {
 		&i.UpdatedAt,
 		&i.WholeSale,
 		&i.DeletedAt,
+		&i.DeliveryFeeAmount,
+		&i.DeliveryFeeCurrency,
 	)
 	return i, err
 }
 
 const getProductForUpdate = `-- name: GetProductForUpdate :one
-SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at FROM products WHERE   
+SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency FROM products WHERE   
 deleted_at IS NULL AND  
 id = $1 FOR UPDATE
 `
@@ -232,6 +250,8 @@ func (q *Queries) GetProductForUpdate(ctx context.Context, id string) (Product, 
 		&i.UpdatedAt,
 		&i.WholeSale,
 		&i.DeletedAt,
+		&i.DeliveryFeeAmount,
+		&i.DeliveryFeeCurrency,
 	)
 	return i, err
 }
@@ -286,7 +306,7 @@ func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
 }
 
 const listPriceTypes = `-- name: ListPriceTypes :many
-SELECT id, name, slug, category_id FROM price_types
+SELECT id, name, slug, category_id, delivery_fee_amount, delivery_fee_currency FROM price_types
 WHERE ($1::text = '' OR category_id = $1)
 ORDER BY slug ASC
 `
@@ -305,6 +325,8 @@ func (q *Queries) ListPriceTypes(ctx context.Context, categoryID string) ([]Pric
 			&i.Name,
 			&i.Slug,
 			&i.CategoryID,
+			&i.DeliveryFeeAmount,
+			&i.DeliveryFeeCurrency,
 		); err != nil {
 			return nil, err
 		}
@@ -343,7 +365,7 @@ func (q *Queries) ListProductNames(ctx context.Context, categoryID string) ([]Pr
 }
 
 const listProducts = `-- name: ListProducts :many
-SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at FROM products
+SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency FROM products
 WHERE
   deleted_at IS NULL AND
   ($1::varchar = '' OR created_by = $1::varchar) AND
@@ -358,7 +380,7 @@ WHERE
     description ILIKE '%' || $5::text || '%'
   ) AND
   ($6::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at < $6::timestamptz)
-ORDER BY created_at DESC
+ORDER BY created_at ASC
 LIMIT $7::int
 `
 
@@ -403,6 +425,8 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]P
 			&i.UpdatedAt,
 			&i.WholeSale,
 			&i.DeletedAt,
+			&i.DeliveryFeeAmount,
+			&i.DeliveryFeeCurrency,
 		); err != nil {
 			return nil, err
 		}

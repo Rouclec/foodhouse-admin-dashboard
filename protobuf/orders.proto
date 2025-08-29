@@ -44,6 +44,7 @@ message Order {
   string payout_phone_number = 13;
   int64 quantity = 14;
   string dispatched_by = 15;
+  types.Amount delivery_fee = 16;
 }
 
 message OrderAuditLog {
@@ -377,6 +378,15 @@ message ListTotalCommissionAmountByReferrerResponse {
   repeated types.Amount commissions = 1;
 }
 
+message EstimateDeliveryFeeRequest {
+  string user_id = 1;
+  string product_id = 2;
+  types.Point delivery_location = 3;
+  int64 quantity = 4;
+}
+
+message EstimateDeliveryFeeResponse { types.Amount estimated_delivery_fee = 1; }
+
 service Orders {
 
   rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {
@@ -547,6 +557,14 @@ service Orders {
     option (google.api.http) = {
       post : "/v1/admin/{admin_user_id}/orders/commission/"
              "bulk-settle-commissions"
+      body : "*"
+    };
+  }
+
+  rpc EstimateDeliveryFee(EstimateDeliveryFeeRequest)
+      returns (EstimateDeliveryFeeResponse) {
+    option (google.api.http) = {
+      post : "/v1/{user_id}/orders/estimate-delivery-fee"
       body : "*"
     };
   }
