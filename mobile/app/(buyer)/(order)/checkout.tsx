@@ -23,7 +23,10 @@ import {
 } from 'react-native-paper';
 import { checkoutStyles as styles } from '@/styles';
 import { formatAmount } from '@/utils/amountFormater';
-import { ordersCreateOrderMutation } from '@/client/orders.swagger/@tanstack/react-query.gen';
+import {
+  ordersCreateOrderMutation,
+  ordersEstimateDeliveryFeeOptions,
+} from '@/client/orders.swagger/@tanstack/react-query.gen';
 import { Context, ContextType } from '@/app/_layout';
 import { delay } from '@/utils';
 
@@ -52,6 +55,23 @@ export default function Checkout() {
     enabled: !!productId,
   });
 
+  const { data: estiamtedDeliverFee } = useQuery({
+    ...ordersEstimateDeliveryFeeOptions({
+      path: {
+        userId: user?.userId ?? '',
+      },
+      query: {
+        'deliveryLocation.address': '',
+        'deliveryLocation.lat': deliveryLocation?.region.latitude,
+        'deliveryLocation.lon': deliveryLocation?.region?.longitude,
+        productId: productId,
+        quantity: quantity,
+      },
+    }),
+    enabled: !!productId,
+  });
+
+  console.log({ deliveryLocation });
 
   useEffect(() => {
     setTotalPrice(
@@ -68,7 +88,9 @@ export default function Checkout() {
         entityId: data?.order?.orderNumber ?? '',
         nextScreen: '/(buyer)/(index)' as RelativePathString,
         amount: {
-          value: (totalPrice ?? 0) * 1.10,
+          value:
+            (totalPrice ?? 0) * 1.1 +
+            (estiamtedDeliverFee?.estimatedDeliveryFee?.value ?? 0),
           currencyIsoCode: productData?.product?.amount?.currencyIsoCode,
         },
       });
@@ -304,10 +326,13 @@ export default function Checkout() {
                     {i18n.t('(buyer).(order).checkout.delivery')}
                   </Text>
                   <Text style={styles.textAlignRight} variant="titleMedium">
-                    {productData?.product?.amount?.currencyIsoCode}{' '}
-                    {formatAmount('0', {
-                      decimalPlaces: 2,
-                    })}
+                    {estiamtedDeliverFee?.estimatedDeliveryFee?.currencyIsoCode}{' '}
+                    {formatAmount(
+                      estiamtedDeliverFee?.estimatedDeliveryFee?.value ?? '0',
+                      {
+                        decimalPlaces: 2,
+                      },
+                    )}
                   </Text>
                 </View>
                 <View style={styles.rowItem}>
@@ -316,12 +341,9 @@ export default function Checkout() {
                   </Text>
                   <Text style={styles.textAlignRight} variant="titleMedium">
                     {productData?.product?.amount?.currencyIsoCode}{' '}
-                    {formatAmount(
-                      ((totalPrice ?? 0) * 0.10)?.toString() ?? '',
-                      {
-                        decimalPlaces: 2,
-                      },
-                    )}
+                    {formatAmount(((totalPrice ?? 0) * 0.1)?.toString() ?? '', {
+                      decimalPlaces: 2,
+                    })}
                   </Text>
                 </View>
                 <View style={[styles.rowItem, styles.lastRowItem]}>
@@ -331,7 +353,10 @@ export default function Checkout() {
                   <Text style={styles.textAlignRight} variant="titleMedium">
                     {productData?.product?.amount?.currencyIsoCode}{' '}
                     {formatAmount(
-                      ((totalPrice ?? 0) * 1.10)?.toString() ?? '',
+                      (
+                        (totalPrice ?? 0) * 1.1 +
+                        (estiamtedDeliverFee?.estimatedDeliveryFee?.value ?? 0)
+                      )?.toString() ?? '',
                       {
                         decimalPlaces: 2,
                       },
@@ -356,9 +381,15 @@ export default function Checkout() {
           <Text variant="titleMedium" style={defaultStyles?.buttonText}>
             {i18n.t('(buyer).(order).checkout.confirmPayment')}{' '}
             {productData?.product?.amount?.currencyIsoCode}{' '}
-            {formatAmount(((totalPrice ?? 0) * 1.10)?.toString() ?? '', {
-              decimalPlaces: 2,
-            })}
+            {formatAmount(
+              (
+                (totalPrice ?? 0) * 1.1 +
+                (estiamtedDeliverFee?.estimatedDeliveryFee?.value ?? 0)
+              )?.toString() ?? '',
+              {
+                decimalPlaces: 2,
+              },
+            )}
           </Text>
         </Button>
       </View>
