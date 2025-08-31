@@ -78,6 +78,10 @@ func SqlcToProtoProduct(sqlcProduct sqlc.Product) (*productsgrpc.Product, error)
 		CreatedBy:   derefString(sqlcProduct.CreatedBy),
 		CreatedAt:   timestamppb.New(sqlcProduct.CreatedAt.Time),
 		UpdatedAt:   timestamppb.New(sqlcProduct.UpdatedAt.Time),
+		DeliveryFeePerUnit: &types.Amount{
+			Value:           derefFloat(sqlcProduct.DeliveryFeeAmount),
+			CurrencyIsoCode: derefString(sqlcProduct.DeliveryFeeCurrency),
+		},
 	}, nil
 }
 
