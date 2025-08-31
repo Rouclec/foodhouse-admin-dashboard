@@ -63,11 +63,31 @@ export default function Login() {
     if (userData?.user) {
       setUser(userData.user);
       const role = userData?.user?.role;
+      let isProfileComplete = false;
 
+      switch (role) {
+        case 'USER_ROLE_BUYER': {
+          isProfileComplete = !!userData?.user?.firstName;
+          break;
+        }
+        default: {
+          isProfileComplete =
+            !!userData?.user?.firstName &&
+            !!userData?.user.profileImage &&
+            !!userData?.user.locationCoordinates &&
+            !!userData?.user.locationCoordinates.lat &&
+            !!userData?.user.locationCoordinates.lon &&
+            !!userData?.user.locationCoordinates.address;
+        }
+      }
+
+      if (!isProfileComplete) {
+        return router.replace('/(auth)/profile-page');
+      }
       if (role === 'USER_ROLE_FARMER') {
-        router.replace('/(farmer)/(index)');
+        return router.replace('/(farmer)/(index)');
       } else {
-        router.replace('/(buyer)/(index)');
+        return router.replace('/(buyer)/(index)');
       }
     }
   }, [userData]);

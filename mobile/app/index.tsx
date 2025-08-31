@@ -59,10 +59,11 @@ export default function Index() {
     const timeLeft = Math.max(delay, 0);
     const timeout = setTimeout(() => {
       if (user) {
-        let isProfileComplete = true;
+        let isProfileComplete = false;
         switch (user.role) {
           case 'USER_ROLE_BUYER': {
             isProfileComplete = !!user?.firstName;
+            break;
           }
           default: {
             isProfileComplete =

@@ -54,10 +54,12 @@ const (
 
 	TotalPercentage = 1.10
 
-	FarmersPercentage = 0.95
+	RefundPercentage = 0.95
 
-	// agent commission 30% * 15%
-	ReferralCommissionPercentage = 0.045
+	FarmersPercentage = 0.9
+
+	// agent commission 30% * 20%
+	ReferralCommissionPercentage = 0.06
 
 	CENT = 100
 )
@@ -638,7 +640,7 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 
 	_, err = i.paymentService.WithdrawFunds(ctx,
 		req.GetPayoutPhoneNumber(), payoutAmount,
-		*order.PriceCurrency, fmt.Sprintf("payment for order %v", order.OrderNumber),
+		*order.PriceCurrency, fmt.Sprintf("payment to farmer for order %v", order.OrderNumber),
 		&paymentReference)
 
 	if err != nil {
@@ -1556,7 +1558,20 @@ func (i *Impl) RejectOrder(ctx context.Context,
 		return nil, status.Errorf(codes.InvalidArgument, "invalid order number %s", req.GetOrderId())
 	}
 
-	order, err := i.repo.Do().GetOrderByOrderNumber(ctx, orderNumber)
+	querier, tx, err := i.repo.Begin(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)
+	}
+
+	// Proper rollback handling
+	defer func() {
+		err = tx.Rollback(ctx)
+		if err != nil && !errors.Is(err, sql.ErrTxDone) {
+			i.logger.Err(err).Msgf("Failed to rollback transaction: %v", req)
+		}
+	}()
+
+	order, err := querier.GetOrderByOrderNumber(ctx, orderNumber)
 
 	if err != nil {
 		i.logger.Debug().Msgf("error getting order with id %s why: %v", req.GetOrderId(), err)
@@ -1570,6 +1585,49 @@ func (i *Impl) RejectOrder(ctx context.Context,
 	beforeBytes, err := protojson.Marshal(converters.SqlcOrderToProto(order))
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
+	}
+
+	// calculate the refund amount
+	payoutAmount := *order.PriceValue * RefundPercentage
+
+	// get the payment made for this order
+	payment, err := querier.GetPaymentByEntity(ctx,
+		sqlc.GetPaymentByEntityParams{
+			PaymentEntity: ordersgrpc.PaymentEntity_PaymentEntity_ORDER.String(),
+			EntityID:      strconv.FormatInt(order.OrderNumber, 10)})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting payment for order with number %v, reason: %v", order.OrderNumber, err)
+	}
+
+	i.logger.Debug().Msgf("payout phone number %v", payment.AccountNumber)
+
+	paymentReference := fmt.Sprintf("refund-%s", strconv.FormatInt(order.OrderNumber, 10))
+
+	_, err = i.paymentService.WithdrawFunds(ctx,
+		payment.AccountNumber, payoutAmount,
+		*order.PriceCurrency, fmt.Sprintf("refund for order %v", order.OrderNumber),
+		&paymentReference)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error making refund %v", err)
+	}
+
+	_, err = querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
+		PaymentEntity:  ordersgrpc.PaymentEntity_PaymentEntity_ORDER.String(),
+		EntityID:       strconv.FormatInt(orderNumber, 10),
+		AmountValue:    &payoutAmount,
+		AmountCurrency: order.PriceCurrency,
+		AccountNumber:  payment.AccountNumber,
+		Method:         ordersgrpc.PaymentMethodType_PaymentMethodType_ACCOUNT_BALANCE.String(),
+		Status:         ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED.String(),
+		ExpiresAt:      pgtype.Timestamptz{Time: time.Now().Add(5 * time.Minute), Valid: true},
+		CreatedBy:      *order.CreatedBy,
+		Type:           ordersgrpc.PaymentType_PaymentType_DEBIT.String(),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error creating payment entity %v", err)
 	}
 
 	err = i.repo.Do().UpdateOrderStatus(ctx, sqlc.UpdateOrderStatusParams{
