@@ -2058,7 +2058,6 @@ func Distance(p1, p2 *types.Point) float64 {
 	return R * c
 }
 
-
 // EstimateDeliveryFee implements ordersgrpc.OrdersServer.
 func (i *Impl) EstimateDeliveryFee(ctx context.Context,
 	req *ordersgrpc.EstimateDeliveryFeeRequest,
@@ -2095,8 +2094,8 @@ func (i *Impl) EstimateDeliveryFee(ctx context.Context,
 	distance := Distance(req.DeliveryLocation, farmer.User.LocationCoordinates)
 	i.logger.Debug().Msgf("delivery distance in km: %v", distance)
 
-	// Example: apply distance in calculation (if needed)
-	deliveryFeeAmount := distance * product.Product.DeliveryFeePerUnit.Value * float64(req.GetQuantity())
+	// deliveryFeeAmount := distance * product.Product.DeliveryFeePerUnit.Value * float64(req.GetQuantity())
+	deliveryFeeAmount := 1 * product.Product.DeliveryFeePerUnit.Value * float64(req.GetQuantity())
 
 	return &ordersgrpc.EstimateDeliveryFeeResponse{
 		EstimatedDeliveryFee: &types.Amount{
@@ -2105,4 +2104,3 @@ func (i *Impl) EstimateDeliveryFee(ctx context.Context,
 		},
 	}, nil
 }
-
