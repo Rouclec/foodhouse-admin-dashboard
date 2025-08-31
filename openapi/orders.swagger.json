@@ -649,6 +649,69 @@
         ]
       }
     },
+    "/v1/users/{userId}/orders/estimate-delivery-fee": {
+      "get": {
+        "operationId": "Orders_EstimateDeliveryFee",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcEstimateDeliveryFeeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "productId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "deliveryLocation.lon",
+            "in": "query",
+            "required": false,
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "name": "deliveryLocation.lat",
+            "in": "query",
+            "required": false,
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "name": "deliveryLocation.address",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "quantity",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/users/{userId}/orders/initiate-payment": {
       "post": {
         "operationId": "Orders_InitiatePayment",
@@ -1091,69 +1154,6 @@
             "schema": {
               "$ref": "#/definitions/OrdersConfirmDeliveryBody"
             }
-          }
-        ],
-        "tags": [
-          "Orders"
-        ]
-      }
-    },
-    "/v1/{userId}/orders/estimate-delivery-fee": {
-      "get": {
-        "operationId": "Orders_EstimateDeliveryFee",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/ordersgrpcEstimateDeliveryFeeResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "productId",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "deliveryLocation.lon",
-            "in": "query",
-            "required": false,
-            "type": "number",
-            "format": "double"
-          },
-          {
-            "name": "deliveryLocation.lat",
-            "in": "query",
-            "required": false,
-            "type": "number",
-            "format": "double"
-          },
-          {
-            "name": "deliveryLocation.address",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "quantity",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
           }
         ],
         "tags": [

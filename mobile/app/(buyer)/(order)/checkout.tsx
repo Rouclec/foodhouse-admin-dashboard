@@ -61,7 +61,6 @@ export default function Checkout() {
         userId: user?.userId ?? '',
       },
       query: {
-        'deliveryLocation.address': '',
         'deliveryLocation.lat': deliveryLocation?.region.latitude,
         'deliveryLocation.lon': deliveryLocation?.region?.longitude,
         productId: productId,

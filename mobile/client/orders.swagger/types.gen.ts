@@ -434,6 +434,23 @@ export type OrdersCreateOrderResponse = (ordersgrpcCreateOrderResponse);
 
 export type OrdersCreateOrderError = (rpcStatus);
 
+export type OrdersEstimateDeliveryFeeData = {
+    path: {
+        userId: string;
+    };
+    query?: {
+        'deliveryLocation.address'?: string;
+        'deliveryLocation.lat'?: number;
+        'deliveryLocation.lon'?: number;
+        productId?: string;
+        quantity?: string;
+    };
+};
+
+export type OrdersEstimateDeliveryFeeResponse = (ordersgrpcEstimateDeliveryFeeResponse);
+
+export type OrdersEstimateDeliveryFeeError = (rpcStatus);
+
 export type OrdersInitiatePaymentData = {
     body: OrdersInitiatePaymentBody;
     path: {
@@ -559,20 +576,3 @@ export type OrdersConfirmDeliveryData = {
 export type OrdersConfirmDeliveryResponse = (ordersgrpcConfirmDeliveryResponse);
 
 export type OrdersConfirmDeliveryError = (rpcStatus);
-
-export type OrdersEstimateDeliveryFeeData = {
-    path: {
-        userId: string;
-    };
-    query?: {
-        'deliveryLocation.address'?: string;
-        'deliveryLocation.lat'?: number;
-        'deliveryLocation.lon'?: number;
-        productId?: string;
-        quantity?: string;
-    };
-};
-
-export type OrdersEstimateDeliveryFeeResponse = (ordersgrpcEstimateDeliveryFeeResponse);
-
-export type OrdersEstimateDeliveryFeeError = (rpcStatus);
