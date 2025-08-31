@@ -52,6 +52,7 @@ export default function Checkout() {
     enabled: !!productId,
   });
 
+
   useEffect(() => {
     setTotalPrice(
       (productData?.product?.amount?.value ?? 0) *

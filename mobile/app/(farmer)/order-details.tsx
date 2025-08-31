@@ -273,7 +273,7 @@ export default function OrderDetails() {
                     (
                       (productData?.product?.amount?.value ?? 0) *
                       parseInt(orderDetails?.order?.quantity ?? '0', 10) *
-                      0.95
+                      0.9
                     ).toString(),
                     { decimalPlaces: 2 },
                   )}

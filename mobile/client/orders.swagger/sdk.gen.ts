@@ -174,7 +174,7 @@ export const ordersConfirmDelivery = <ThrowOnError extends boolean = false>(opti
 };
 
 export const ordersEstimateDeliveryFee = <ThrowOnError extends boolean = false>(options: OptionsLegacyParser<OrdersEstimateDeliveryFeeData, ThrowOnError>) => {
-    return (options?.client ?? client).post<OrdersEstimateDeliveryFeeResponse, OrdersEstimateDeliveryFeeError, ThrowOnError>({
+    return (options?.client ?? client).get<OrdersEstimateDeliveryFeeResponse, OrdersEstimateDeliveryFeeError, ThrowOnError>({
         ...options,
         url: '/v1/{userId}/orders/estimate-delivery-fee'
     });

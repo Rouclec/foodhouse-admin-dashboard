@@ -24,12 +24,6 @@ export type OrdersDispatchOrderBody = {
     payoutPhoneNumber?: string;
 };
 
-export type OrdersEstimateDeliveryFeeBody = {
-    productId?: string;
-    deliveryLocation?: typesPoint;
-    quantity?: string;
-};
-
 export type ordersgrpcAccount = {
     paymentMethod?: ordersgrpcPaymentMethodType;
     accountNumber?: string;
@@ -567,9 +561,15 @@ export type OrdersConfirmDeliveryResponse = (ordersgrpcConfirmDeliveryResponse);
 export type OrdersConfirmDeliveryError = (rpcStatus);
 
 export type OrdersEstimateDeliveryFeeData = {
-    body: OrdersEstimateDeliveryFeeBody;
     path: {
         userId: string;
+    };
+    query?: {
+        'deliveryLocation.address'?: string;
+        'deliveryLocation.lat'?: number;
+        'deliveryLocation.lon'?: number;
+        productId?: string;
+        quantity?: string;
     };
 };
 

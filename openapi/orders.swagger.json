@@ -1099,7 +1099,7 @@
       }
     },
     "/v1/{userId}/orders/estimate-delivery-fee": {
-      "post": {
+      "get": {
         "operationId": "Orders_EstimateDeliveryFee",
         "responses": {
           "200": {
@@ -1123,12 +1123,37 @@
             "type": "string"
           },
           {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/OrdersEstimateDeliveryFeeBody"
-            }
+            "name": "productId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "deliveryLocation.lon",
+            "in": "query",
+            "required": false,
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "name": "deliveryLocation.lat",
+            "in": "query",
+            "required": false,
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "name": "deliveryLocation.address",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "quantity",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
           }
         ],
         "tags": [
@@ -1189,21 +1214,6 @@
       "properties": {
         "payoutPhoneNumber": {
           "type": "string"
-        }
-      }
-    },
-    "OrdersEstimateDeliveryFeeBody": {
-      "type": "object",
-      "properties": {
-        "productId": {
-          "type": "string"
-        },
-        "deliveryLocation": {
-          "$ref": "#/definitions/typesPoint"
-        },
-        "quantity": {
-          "type": "string",
-          "format": "int64"
         }
       }
     },
