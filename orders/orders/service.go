@@ -2066,13 +2066,15 @@ func (i *Impl) EstimateDeliveryFee(ctx context.Context,
 		return nil, status.Errorf(codes.Internal, "error getting product with id %v: reason: %v", req.GetProductId(), err)
 	}
 
-	// farmer, err := i.userService.GetUserByID(ctx, &usersgrpc.GetUserByIDRequest{UserId: product.Product.CreatedBy})
+	farmer, err := i.userService.GetUserByID(ctx, &usersgrpc.GetUserByIDRequest{UserId: product.Product.CreatedBy})
 
-	// if err != nil {
-	// 	return nil, status.Errorf(codes.Internal, "error getting farmer with id %v: reason: %v", product.Product.CreatedBy, err)
-	// }
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting farmer with id %v: reason: %v", product.Product.CreatedBy, err)
+	}
 
-	// distance := Distance(req.DeliveryLocation, farmer.User.LocationCoordinates)
+	distance := Distance(req.DeliveryLocation, farmer.User.LocationCoordinates)
+
+	i.logger.Debug().Msgf("delivery distance in km: %v", distance)
 
 	// delivery_fee_amount := distance * product.Product.DeliveryFeePerUnit.Value
 
