@@ -2029,7 +2029,12 @@ func (i *Impl) ListTotalComissionAmountByReferrer(ctx context.Context,
 }
 
 func Distance(p1, p2 *types.Point) float64 {
-	// Special case: if either point is (0,0), treat as "no location" and return 1
+	// If either pointer itself is nil → treat as "no location"
+	if p1 == nil || p2 == nil {
+		return 1.0
+	}
+
+	// If either point is (0,0), treat as "no location"
 	if (p1.Lat == 0 && p1.Lon == 0) || (p2.Lat == 0 && p2.Lon == 0) {
 		return 1.0
 	}
@@ -2053,38 +2058,51 @@ func Distance(p1, p2 *types.Point) float64 {
 	return R * c
 }
 
+
 // EstimateDeliveryFee implements ordersgrpc.OrdersServer.
 func (i *Impl) EstimateDeliveryFee(ctx context.Context,
-	req *ordersgrpc.EstimateDeliveryFeeRequest) (
-	*ordersgrpc.EstimateDeliveryFeeResponse, error) {
+	req *ordersgrpc.EstimateDeliveryFeeRequest,
+) (*ordersgrpc.EstimateDeliveryFeeResponse, error) {
 
 	product, err := i.productService.GetProduct(ctx, &productsgrpc.GetProductRequest{
 		ProductId: req.GetProductId(),
 	})
-
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error getting product with id %v: reason: %v", req.GetProductId(), err)
 	}
 
-	farmer, err := i.userService.GetUserByID(ctx, &usersgrpc.GetUserByIDRequest{UserId: product.Product.CreatedBy})
+	// Defensive check: product.Product and nested fields
+	if product == nil || product.Product == nil {
+		return nil, status.Errorf(codes.Internal, "product data missing for id %v", req.GetProductId())
+	}
+	if product.Product.DeliveryFeePerUnit == nil {
+		return nil, status.Errorf(codes.Internal, "delivery fee per unit missing for product id %v", req.GetProductId())
+	}
 
+	farmer, err := i.userService.GetUserByID(ctx, &usersgrpc.GetUserByIDRequest{
+		UserId: product.Product.CreatedBy,
+	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error getting farmer with id %v: reason: %v", product.Product.CreatedBy, err)
 	}
 
-	distance := Distance(req.DeliveryLocation, farmer.User.LocationCoordinates)
+	// Defensive check: farmer and nested fields
+	if farmer == nil || farmer.User == nil {
+		return nil, status.Errorf(codes.Internal, "farmer user data missing for id %v", product.Product.CreatedBy)
+	}
 
+	// Safe distance calculation
+	distance := Distance(req.DeliveryLocation, farmer.User.LocationCoordinates)
 	i.logger.Debug().Msgf("delivery distance in km: %v", distance)
 
-	// delivery_fee_amount := distance * product.Product.DeliveryFeePerUnit.Value
-
-	delivery_fee_amount := 1.0 * product.Product.DeliveryFeePerUnit.Value * float64(req.GetQuantity())
+	// Example: apply distance in calculation (if needed)
+	deliveryFeeAmount := distance * product.Product.DeliveryFeePerUnit.Value * float64(req.GetQuantity())
 
 	return &ordersgrpc.EstimateDeliveryFeeResponse{
 		EstimatedDeliveryFee: &types.Amount{
-			Value:           delivery_fee_amount,
+			Value:           deliveryFeeAmount,
 			CurrencyIsoCode: product.Product.DeliveryFeePerUnit.CurrencyIsoCode,
 		},
 	}, nil
-
 }
+
