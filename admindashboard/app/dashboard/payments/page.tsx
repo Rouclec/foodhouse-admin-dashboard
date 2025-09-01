@@ -31,6 +31,7 @@ import {
   Calendar,
   ShoppingCart,
   Percent,
+  Undo2,
 } from "lucide-react";
 import {
   ordersgrpcPayment,
@@ -94,6 +95,10 @@ const ENTITY_FILTERS: Array<{
   {
     label: "Commissions",
     value: "PaymentEntity_COMMISSION",
+  },
+  {
+    label: "Refunds",
+    value: "PaymentEntity_REFUND",
   },
 ];
 
@@ -161,6 +166,8 @@ const PaymentItem: FC<PaymentItemProps> = ({ payment }) => {
         return <ShoppingCart className="h-4 w-4" />;
       case "PaymentEntity_SUBSCRIPTION":
         return <Calendar className="h-4 w-4" />;
+      case "PaymentEntity_REFUND":
+        return <Undo2 className="h-4 w-4" />;
       default:
         return <Percent className="h-4 w-4" />;
     }

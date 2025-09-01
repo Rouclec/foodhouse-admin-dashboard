@@ -198,6 +198,9 @@ func SqlcPaymentToProto(payment sqlc.Payment) *ordersgrpc.Payment {
 	case ordersgrpc.PaymentEntity_PaymentEntity_COMMISSION.String():
 		entityEnum = ordersgrpc.PaymentEntity_PaymentEntity_COMMISSION
 		break
+	case ordersgrpc.PaymentEntity_PaymentEntity_REFUND.String():
+		entityEnum = ordersgrpc.PaymentEntity_PaymentEntity_REFUND
+		break
 	default:
 		entityEnum = ordersgrpc.PaymentEntity_PaymentEntity_UNSPECIFIED
 	}
