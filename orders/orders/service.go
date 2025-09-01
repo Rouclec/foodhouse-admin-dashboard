@@ -1634,7 +1634,7 @@ func (i *Impl) RejectOrder(ctx context.Context,
 		return nil, status.Errorf(codes.Internal, "error creating payment entity %v", err)
 	}
 
-	err = i.repo.Do().UpdateOrderStatus(ctx, sqlc.UpdateOrderStatusParams{
+	err = querier.UpdateOrderStatus(ctx, sqlc.UpdateOrderStatusParams{
 		OrderNumber: order.OrderNumber,
 		Status:      ordersgrpc.OrderStatus_OrderStatus_REJECTED.String(),
 	})
@@ -1643,7 +1643,7 @@ func (i *Impl) RejectOrder(ctx context.Context,
 		return nil, status.Errorf(codes.Internal, "error updating order status %v", err)
 	}
 
-	updatedOrder, err := i.repo.Do().GetOrderByOrderNumber(ctx, order.OrderNumber)
+	updatedOrder, err := querier.GetOrderByOrderNumber(ctx, order.OrderNumber)
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error getting updated order %v", err)
@@ -1655,7 +1655,7 @@ func (i *Impl) RejectOrder(ctx context.Context,
 		return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
 	}
 
-	err = i.repo.Do().CreateOrderAuditLog(ctx, sqlc.CreateOrderAuditLogParams{
+	err = querier.CreateOrderAuditLog(ctx, sqlc.CreateOrderAuditLogParams{
 		OrderNumber:    order.OrderNumber,
 		EventTimestamp: pgtype.Timestamptz{Time: time.Now(), Valid: true},
 		Actor:          req.GetUserId(),
@@ -1668,6 +1668,10 @@ func (i *Impl) RejectOrder(ctx context.Context,
 	if err != nil {
 		i.logger.Debug().Msgf("Error creating order logs %v", err)
 		return nil, status.Errorf(codes.Internal, "error creating order logs %v", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
 	}
 
 	return &ordersgrpc.RejectOrderResponse{}, nil
