@@ -1617,7 +1617,7 @@ func (i *Impl) RejectOrder(ctx context.Context,
 	}
 
 	_, err = querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
-		PaymentEntity:  ordersgrpc.PaymentEntity_PaymentEntity_ORDER.String(),
+		PaymentEntity:  ordersgrpc.PaymentEntity_PaymentEntity_REFUND.String(),
 		EntityID:       strconv.FormatInt(orderNumber, 10),
 		AmountValue:    &payoutAmount,
 		AmountCurrency: order.PriceCurrency,
@@ -1630,6 +1630,7 @@ func (i *Impl) RejectOrder(ctx context.Context,
 	})
 
 	if err != nil {
+		i.logger.Error().Msgf("error creating payment entity %v", err)
 		return nil, status.Errorf(codes.Internal, "error creating payment entity %v", err)
 	}
 

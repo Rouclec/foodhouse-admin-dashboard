@@ -415,7 +415,7 @@ export default function OrderDetails() {
                 label={i18n.t('(farmer).order-details.reason')}
                 mode="outlined"
                 value={rejectReason}
-                onChangeText={setRejectReason}
+                onChangeText={text => setRejectReason(text)}
                 style={defaultStyles.input}
                 theme={{
                   colors: {

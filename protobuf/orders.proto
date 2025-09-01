@@ -80,6 +80,7 @@ enum PaymentEntity {
   PaymentEntity_ORDER = 1;
   PaymentEntity_SUBSCRIPTION = 2;
   PaymentEntity_COMMISSION = 3;
+  PaymentEntity_REFUND = 4;
 }
 
 enum PaymentMethodType {

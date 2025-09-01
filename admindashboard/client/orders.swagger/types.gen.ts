@@ -204,7 +204,7 @@ export type ordersgrpcPayment = {
     type?: ordersgrpcPaymentType;
 };
 
-export type ordersgrpcPaymentEntity = 'PaymentEntity_UNSPECIFIED' | 'PaymentEntity_ORDER' | 'PaymentEntity_SUBSCRIPTION' | 'PaymentEntity_COMMISSION';
+export type ordersgrpcPaymentEntity = 'PaymentEntity_UNSPECIFIED' | 'PaymentEntity_ORDER' | 'PaymentEntity_SUBSCRIPTION' | 'PaymentEntity_COMMISSION' | 'PaymentEntity_REFUND';
 
 export type ordersgrpcPaymentMethodType = 'PaymentMethodType_UNSPECIFIED' | 'PaymentMethodType_MOBILE_MONEY' | 'PaymentMethodType_ORANGE_MONEY' | 'PaymentMethodType_CREDIT_CARD' | 'PaymentMethodType_ACCOUNT_BALANCE';
 
@@ -344,7 +344,7 @@ export type OrdersListPaymentsData = {
     };
     query?: {
         count?: number;
-        paymentEntity?: 'PaymentEntity_UNSPECIFIED' | 'PaymentEntity_ORDER' | 'PaymentEntity_SUBSCRIPTION' | 'PaymentEntity_COMMISSION';
+        paymentEntity?: 'PaymentEntity_UNSPECIFIED' | 'PaymentEntity_ORDER' | 'PaymentEntity_SUBSCRIPTION' | 'PaymentEntity_COMMISSION' | 'PaymentEntity_REFUND';
         paymentStatus?: 'PaymentStatus_UNSPECIFIED' | 'PaymentStatus_INITIATED' | 'PaymentStatus_COMPLETED' | 'PaymentStatus_FAILED' | 'PaymentStatus_CANCELED';
         paymentType?: 'PaymentType_UNSPECIFIED' | 'PaymentType_CREDIT' | 'PaymentType_DEBIT';
         searchKey?: string;

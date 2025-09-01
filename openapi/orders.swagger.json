@@ -341,7 +341,8 @@
               "PaymentEntity_UNSPECIFIED",
               "PaymentEntity_ORDER",
               "PaymentEntity_SUBSCRIPTION",
-              "PaymentEntity_COMMISSION"
+              "PaymentEntity_COMMISSION",
+              "PaymentEntity_REFUND"
             ],
             "default": "PaymentEntity_UNSPECIFIED"
           },
@@ -1756,7 +1757,8 @@
         "PaymentEntity_UNSPECIFIED",
         "PaymentEntity_ORDER",
         "PaymentEntity_SUBSCRIPTION",
-        "PaymentEntity_COMMISSION"
+        "PaymentEntity_COMMISSION",
+        "PaymentEntity_REFUND"
       ],
       "default": "PaymentEntity_UNSPECIFIED"
     },
