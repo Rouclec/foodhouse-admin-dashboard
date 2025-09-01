@@ -1605,13 +1605,15 @@ func (i *Impl) RejectOrder(ctx context.Context,
 
 	paymentReference := fmt.Sprintf("refund-%s", strconv.FormatInt(order.OrderNumber, 10))
 
+	// ignore refunds error too
 	_, err = i.paymentService.WithdrawFunds(ctx,
 		payment.AccountNumber, payoutAmount,
 		*order.PriceCurrency, fmt.Sprintf("refund for order %v", order.OrderNumber),
 		&paymentReference)
 
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error making refund %v", err)
+		i.logger.Error().Msgf("error making refund %v", err)
+		// return nil, status.Errorf(codes.Internal, "error making refund %v", err)
 	}
 
 	_, err = querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
