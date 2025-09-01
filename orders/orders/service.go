@@ -333,12 +333,13 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 			i.logger.Debug().Msgf("should send receipt")
 
 			// fetch the user and get their email
-			user, err := i.userService.GetUserByID(ctx, &usersgrpc.GetUserByIDRequest{
+			// NB: don't fail if receipt can't be sent.
+			user, _ := i.userService.GetUserByID(ctx, &usersgrpc.GetUserByIDRequest{
 				UserId: *order.CreatedBy,
 			})
 
 			if err != nil {
-				return nil, status.Errorf(codes.Internal, "error getting user for payment receipt %v", err)
+				i.logger.Error().Msgf("error getting user for payment receipt %v", err)
 			}
 
 			i.logger.Debug().Msgf("should send receipt to user %v", user.GetUser().GetEmail())
@@ -346,7 +347,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 			product, err := i.productService.GetProduct(ctx, &productsgrpc.GetProductRequest{ProductId: *order.Product})
 
 			if err != nil {
-				return nil, status.Errorf(codes.Internal, "error getting product for payment receipt %v", err)
+				i.logger.Error().Msgf("error getting product for payment receipt %v", err)
 			}
 
 			i.logger.Debug().Msgf("product %v", product.GetProduct())
@@ -385,7 +386,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 				})
 
 			if err != nil {
-				return nil, status.Errorf(codes.Internal, "error sending email receipt %v", err)
+				i.logger.Error().Msgf("error sending email receipt %v", err)
 			}
 		}
 

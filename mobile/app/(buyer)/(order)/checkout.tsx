@@ -70,8 +70,6 @@ export default function Checkout() {
     enabled: !!productId,
   });
 
-  console.log({ deliveryLocation });
-
   useEffect(() => {
     setTotalPrice(
       (productData?.product?.amount?.value ?? 0) *

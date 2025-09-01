@@ -60,10 +60,12 @@ const updateAuthHeader = (newToken: string) => {
 const handleResponseError = async (error: any) => {
   const originalRequest = error.config;
   if (
-    error.response.status === 401 &&
-    !originalRequest._retry &&
-    !!error?.response?.data?.message &&
-    (error?.response?.data?.message ?? "").includes("ID token has expired")
+    error?.response?.status === 401 &&
+    !originalRequest?._retry &&
+    (!!error?.response?.data || !!error?.response?.data?.message) &&
+    (error?.response?.data ?? error?.response?.data?.message ?? '').includes(
+      'ID token has expired',
+    )
   ) {
     originalRequest._retry = true; // Mark the request as retried to avoid infinite loops.
     try {

@@ -1,9 +1,9 @@
-import axios from "axios";
-import { client as orderClient } from "../client/orders.swagger";
-import { client as productClient } from "../client/products.swagger";
-import { client as userClient } from "../client/users.swagger";
-import { deleteData, readData } from "./storage";
-import { router } from "expo-router";
+import axios from 'axios';
+import { client as orderClient } from '../client/orders.swagger';
+import { client as productClient } from '../client/products.swagger';
+import { client as userClient } from '../client/users.swagger';
+import { deleteData, readData } from './storage';
+import { router } from 'expo-router';
 
 userClient.setConfig({
   // set default base url for requests
@@ -21,18 +21,18 @@ productClient.setConfig({
 });
 
 userClient.instance.interceptors.response.use(
-  (response) => response, // Directly return successful responses.
-  async (error) => handleResponseError(error)
+  response => response, // Directly return successful responses.
+  async error => handleResponseError(error),
 );
 
 orderClient.instance.interceptors.response.use(
-  (response) => response, // Directly return successful responses.
-  async (error) => handleResponseError(error)
+  response => response, // Directly return successful responses.
+  async error => handleResponseError(error),
 );
 
 productClient.instance.interceptors.response.use(
-  (response) => response, // Directly return successful responses.
-  async (error) => handleResponseError(error)
+  response => response, // Directly return successful responses.
+  async error => handleResponseError(error),
 );
 
 const updateAuthHeader = (newToken: string) => {
@@ -64,18 +64,20 @@ const handleResponseError = async (error: any) => {
   if (
     error?.response?.status === 401 &&
     !originalRequest?._retry &&
-    !!error?.response?.data?.message &&
-    (error?.response?.data?.message ?? "").includes("ID token has expired")
+    (!!error?.response?.data || !!error?.response?.data?.message) &&
+    (error?.response?.data ?? error?.response?.data?.message ?? '').includes(
+      'ID token has expired',
+    )
   ) {
     originalRequest._retry = true; // Mark the request as retried to avoid infinite loops.
     try {
-      const refreshToken = await readData("@refreshToken"); // Retrieve the stored refresh token.
+      const refreshToken = await readData('@refreshToken'); // Retrieve the stored refresh token.
       // Make a request to your auth server to refresh the token.
       const response = await axios.post(
         `${process.env.EXPO_PUBLIC_BASE_URL}/v1/public/users/refresh-access-token`,
         {
           refreshToken,
-        }
+        },
       );
 
       const { accessToken } = response?.data;
@@ -84,10 +86,10 @@ const handleResponseError = async (error: any) => {
       // TODO Find a way to update the access token in the session
     } catch (refreshError) {
       // Handle refresh token errors by clearing stored tokens and redirecting to the login page.
-      console.error("Token refresh failed:", refreshError);
-      await deleteData("@refreshToken");
+      console.error('Token refresh failed:', refreshError);
+      await deleteData('@refreshToken');
 
-      router.replace("/(auth)/login");
+      router.replace('/(auth)/login');
       return Promise.reject(refreshError);
     }
   }
