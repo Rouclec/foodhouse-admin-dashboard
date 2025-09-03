@@ -61,11 +61,13 @@ const updateAuthHeader = (newToken: string) => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handleResponseError = async (error: any) => {
   const originalRequest = error?.config;
+  console.log({ error }, 'from interceptor');
+
   if (
     error?.response?.status === 401 &&
     !originalRequest?._retry &&
-    (!!error?.response?.data || !!error?.response?.data?.message) &&
-    (error?.response?.data ?? error?.response?.data?.message ?? '').includes(
+    (!!error?.response?.data?.message || !!error?.response?.data) &&
+    (error?.response?.data?.message ?? error?.response?.data ?? '').includes(
       'ID token has expired',
     )
   ) {

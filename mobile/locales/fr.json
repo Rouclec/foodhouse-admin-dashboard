@@ -48,7 +48,8 @@
       "phoneNumberVerified": "Numéro de téléphone vérifié !",
       "setupProfile": "Vous pouvez maintenant configurer le profil de votre agriculteur",
       "continue": "continuer",
-      "resendCode": "Renvoyer le code dans"
+      "resendCode": "Renvoyer le code",
+      "in": "dans"
     },
     "profile": {
       "completeRegistration": "Compléter l'inscription",

@@ -82,7 +82,7 @@ export default function Login() {
       }
 
       if (!isProfileComplete) {
-        return router.replace('/(auth)/profile-page');
+        return router.push('/(auth)/profile-page');
       }
       if (role === 'USER_ROLE_FARMER') {
         return router.replace('/(farmer)/(index)');
@@ -394,33 +394,32 @@ export default function Login() {
               </Link>
             </View>
           </ScrollView>
-          <View style={defaultStyles.bottomButtonContainer}>
-            <TouchableOpacity
-              style={[
-                loginstyles.loginButton,
-                loading && defaultStyles.greyButton,
-              ]}
-              onPress={handleLogIn}
-              disabled={loading}
-              activeOpacity={0.8}>
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={loginstyles.loginButtonText}>
-                  {i18n.t('(auth).login.login')}
-                </Text>
-              )}
-            </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+      <View style={defaultStyles.bottomButtonContainer}>
+        <TouchableOpacity
+          style={[loginstyles.loginButton, loading && defaultStyles.greyButton]}
+          onPress={handleLogIn}
+          disabled={loading}
+          activeOpacity={0.8}>
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={loginstyles.loginButtonText}>
+              {i18n.t('(auth).login.login')}
+            </Text>
+          )}
+        </TouchableOpacity>
 
-            <View style={loginstyles.dividerContainer}>
-              <View style={loginstyles.dividerLine} />
-              <Text style={loginstyles.dividerText}>
-                {i18n.t('(auth).login.or')}
-              </Text>
-              <View style={loginstyles.dividerLine} />
-            </View>
+        <View style={loginstyles.dividerContainer}>
+          <View style={loginstyles.dividerLine} />
+          <Text style={loginstyles.dividerText}>
+            {i18n.t('(auth).login.or')}
+          </Text>
+          <View style={loginstyles.dividerLine} />
+        </View>
 
-            {/* <View style={loginstyles.socialIconsContainer}>
+        {/* <View style={loginstyles.socialIconsContainer}>
               <TouchableOpacity
                 style={[
                   loginstyles.socialIcon,
@@ -447,19 +446,17 @@ export default function Login() {
               </TouchableOpacity>
             </View> */}
 
-            <View style={loginstyles.registerContainer}>
-              <Text style={loginstyles.registerText}>
-                {i18n.t('(auth).login.dontHaveAnAccount')}{' '}
-              </Text>
-              <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
-                <Text style={loginstyles.registerLink}>
-                  {i18n.t('(auth).login.registerNow')}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+        <View style={loginstyles.registerContainer}>
+          <Text style={loginstyles.registerText}>
+            {i18n.t('(auth).login.dontHaveAnAccount')}{' '}
+          </Text>
+          <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
+            <Text style={loginstyles.registerLink}>
+              {i18n.t('(auth).login.registerNow')}
+            </Text>
+          </TouchableOpacity>
         </View>
-      </KeyboardAvoidingView>
+      </View>
       <Snackbar
         visible={!!error}
         onDismiss={() => {}}

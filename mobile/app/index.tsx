@@ -75,8 +75,9 @@ export default function Index() {
               !!user.locationCoordinates.address;
           }
         }
+
         if (!isProfileComplete) {
-          return router.replace('/(auth)/profile-page');
+          return router.push('/(auth)/profile-page');
         }
         if (user?.role === 'USER_ROLE_FARMER')
           return router.replace('/(farmer)/(index)');

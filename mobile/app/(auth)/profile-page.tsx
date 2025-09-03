@@ -442,28 +442,28 @@ const ProfilePage = () => {
             </View>
           </ScrollView>
         </View>
-        <View style={defaultStyles.bottomButtonContainer}>
-          <Button
-            mode="contained"
-            textColor={Colors.light['0']}
-            buttonColor={Colors.primary['500']}
-            style={[
-              defaultStyles.button,
-              signupStyles.button,
-              signupStyles.fullWidth,
-            ]}
-            loading={loading}
-            disabled={
-              // !firstName ||
-              // (user?.role === 'USER_ROLE_FARMER' &&
-              //   (!locationCoordinates || !profileImage)) ||
-              loading
-            }
-            onPress={handleComplete}>
-            <Text style={defaultStyles.buttonText}>Complete</Text>
-          </Button>
-        </View>
       </KeyboardAvoidingView>
+      <View style={defaultStyles.bottomButtonContainer}>
+        <Button
+          mode="contained"
+          textColor={Colors.light['0']}
+          buttonColor={Colors.primary['500']}
+          style={[
+            defaultStyles.button,
+            signupStyles.button,
+            signupStyles.fullWidth,
+          ]}
+          loading={loading}
+          disabled={
+            // !firstName ||
+            // (user?.role === 'USER_ROLE_FARMER' &&
+            //   (!locationCoordinates || !profileImage)) ||
+            loading
+          }
+          onPress={handleComplete}>
+          <Text style={defaultStyles.buttonText}>Complete</Text>
+        </Button>
+      </View>
 
       <ImagePicker
         visible={isImagePickerVisible}

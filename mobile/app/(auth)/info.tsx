@@ -3,10 +3,10 @@ import {
   ScrollView,
   TouchableOpacity,
   View,
-} from "react-native";
-import React, { useContext, useState } from "react";
-import { CountrySelect } from "@/components/general/CountrySelect";
-import { CAMEROON, Colors, countries } from "@/constants";
+} from 'react-native';
+import React, { useContext, useState } from 'react';
+import { CountrySelect } from '@/components/general/CountrySelect';
+import { CAMEROON, Colors, countries } from '@/constants';
 import {
   Appbar,
   Button,
@@ -14,26 +14,26 @@ import {
   TextInput,
   Text,
   Snackbar,
-} from "react-native-paper";
-import PhoneNumberInput from "@/components/general/PhoneNumberInput";
-import { useRouter } from "expo-router";
-import { usersSendSignupSmsOtpMutation } from "@/client/users.swagger/@tanstack/react-query.gen";
-import { useMutation } from "@tanstack/react-query";
-import { defaultStyles } from "@/styles";
-import { signupStyles } from "@/styles";
-import i18n from "@/i18n";
-import { Context, ContextType } from "../_layout";
-import { delay } from "@/utils";
-
+  HelperText,
+} from 'react-native-paper';
+import PhoneNumberInput from '@/components/general/PhoneNumberInput';
+import { useRouter } from 'expo-router';
+import { usersSendSignupSmsOtpMutation } from '@/client/users.swagger/@tanstack/react-query.gen';
+import { useMutation } from '@tanstack/react-query';
+import { defaultStyles } from '@/styles';
+import { signupStyles } from '@/styles';
+import i18n from '@/i18n';
+import { Context, ContextType } from '../_layout';
+import { delay } from '@/utils';
 
 const Info = () => {
   const [country, setCountry] = useState(CAMEROON);
   const [callingCode, setCallingCode] = useState(
-    country?.dial_code || CAMEROON.dial_code
+    country?.dial_code || CAMEROON.dial_code,
   );
-  const [mobile, setMobile] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [mobile, setMobile] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -52,7 +52,7 @@ const Info = () => {
         },
       });
     } catch (error) {
-      console.error("Error signing up: ", error);
+      console.error('Error signing up: ', error);
     } finally {
       setLoading(false);
     }
@@ -60,23 +60,23 @@ const Info = () => {
 
   const { mutateAsync } = useMutation({
     ...usersSendSignupSmsOtpMutation(),
-    onError: async (error) => {
+    onError: async error => {
       setErrorMessage(
-        error?.response?.data?.message ?? i18n.t("(auth).login.anUnknownError")
+        error?.response?.data?.message ?? i18n.t('(auth).login.anUnknownError'),
       );
       setError(true);
       await delay(5000);
       setError(false);
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       router.push({
-        pathname: "/verify-otp",
+        pathname: '/verify-otp',
         params: {
           requestId: data.requestId,
           phoneNumber: `${callingCode}${mobile}`,
           password,
           residenceCountryIsoCode: country?.code,
-          role: role || "USER_ROLE_UNSPECIFIED",
+          role: role || 'USER_ROLE_UNSPECIFIED',
         },
       });
     },
@@ -86,22 +86,20 @@ const Info = () => {
     <>
       <KeyboardAvoidingView
         style={defaultStyles.container}
-        behavior={"padding"}
-        keyboardVerticalOffset={0}
-      >
+        behavior={'padding'}
+        keyboardVerticalOffset={0}>
         <View style={defaultStyles.flex}>
           <Appbar.Header dark={false} style={defaultStyles.appHeader}>
             <TouchableOpacity
               onPress={() => router.back()}
-              style={defaultStyles.backButtonContainer}
-            >
-              <Icon source={"arrow-left"} size={24} />
+              style={defaultStyles.backButtonContainer}>
+              <Icon source={'arrow-left'} size={24} />
             </TouchableOpacity>
             <Text variant="titleMedium" style={defaultStyles.heading}>
               {i18n.t(
                 `(auth).createAccount.${
-                  role === "USER_TYPE_FARMER" ? "farmerAccount" : "buyerAccount"
-                }`
+                  role === 'USER_TYPE_FARMER' ? 'farmerAccount' : 'buyerAccount'
+                }`,
               )}
             </Text>
             <View />
@@ -111,8 +109,7 @@ const Info = () => {
             contentContainerStyle={defaultStyles.scrollContainer}
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
-            keyboardShouldPersistTaps="handled"
-          >
+            keyboardShouldPersistTaps="handled">
             <View style={signupStyles.allInput}>
               <CountrySelect
                 setCountry={setCountry}
@@ -127,116 +124,114 @@ const Info = () => {
                 phoneNumber={mobile}
                 containerStyle={signupStyles.phoneNumberInputContainerStyle}
               />
-
-              <TextInput
-                label={i18n.t("(auth).createAccount.createPassword")}
-                value={password}
-                onChangeText={setPassword}
-                autoCapitalize="none"
-                secureTextEntry={!showPassword}
-                mode="outlined"
-                placeholder={i18n.t("(auth).createAccount.placeholder")}
-                outlineColor={Colors.grey["bg"]}
-                style={defaultStyles.input}
-                theme={{
-                  colors: {
-                    primary: Colors.primary[500],
-                    background: Colors.grey["fa"],
-                    error: Colors.error,
-                  },
-                  roundness: 10,
-                }}
-                error={password.length > 0 && password.length < 12}
-                right={
-                  <TextInput.Icon
-                    icon={showPassword ? "eye-off" : "eye"}
-                    onPress={() => setShowPassword(!showPassword)}
-                    size={16}
-                    color={Colors.grey["e7"]}
-                  />
-                }
-              />
-              {password.length > 0 && password.length < 12 && (
-                <Text
-                  style={[signupStyles.errorTextDark, signupStyles.margin20]}
-                >
-                  {i18n.t("(auth).createAccount.passwordMustBe")}
-                </Text>
-              )}
-              <TextInput
-                label={i18n.t("(auth).createAccount.reEnterPassword")}
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                autoCapitalize="none"
-                secureTextEntry={!showConfirmPassword}
-                mode="outlined"
-                outlineColor={Colors.grey["bg"]}
-                style={defaultStyles.input}
-                theme={{
-                  colors: {
-                    primary: Colors.primary[500],
-                    background: Colors.grey["fa"],
-                    error: Colors.error,
-                  },
-                  roundness: 10,
-                }}
-                error={
-                  password?.length > 0 &&
-                  confirmPassword?.length > 0 &&
-                  confirmPassword != password
-                }
-                right={
-                  <TextInput.Icon
-                    icon={showConfirmPassword ? "eye-off" : "eye"}
-                    onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                    size={16}
-                    color={Colors.grey["e7"]}
-                  />
-                }
-              />
-              {confirmPassword.length > 0 && confirmPassword !== password && (
-                <Text
-                  style={[signupStyles.errorTextDark, signupStyles.margin20]}
-                >
-                  {i18n.t(
-                    "(auth).(forgot-password).create-new-password.passwordsDoNot"
-                  )}
-                </Text>
-              )}
+              <View style={signupStyles.inputGap}>
+                <TextInput
+                  label={i18n.t('(auth).createAccount.createPassword')}
+                  value={password}
+                  onChangeText={setPassword}
+                  autoCapitalize="none"
+                  secureTextEntry={!showPassword}
+                  mode="outlined"
+                  placeholder={i18n.t('(auth).createAccount.placeholder')}
+                  outlineColor={Colors.grey['bg']}
+                  style={defaultStyles.input}
+                  theme={{
+                    colors: {
+                      primary: Colors.primary[500],
+                      background: Colors.grey['fa'],
+                      error: Colors.error,
+                    },
+                    roundness: 10,
+                  }}
+                  error={password.length > 0 && password.length < 12}
+                  right={
+                    <TextInput.Icon
+                      icon={showPassword ? 'eye-off' : 'eye'}
+                      onPress={() => setShowPassword(!showPassword)}
+                      size={16}
+                      color={Colors.grey['e7']}
+                    />
+                  }
+                />
+                {password.length > 0 && password.length < 12 && (
+                  <HelperText style={defaultStyles.errorText} type="error">
+                    {i18n.t('(auth).createAccount.passwordMustBe')}
+                  </HelperText>
+                )}
+              </View>
+              <View style={signupStyles.inputGap}>
+                <TextInput
+                  label={i18n.t('(auth).createAccount.reEnterPassword')}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  autoCapitalize="none"
+                  secureTextEntry={!showConfirmPassword}
+                  mode="outlined"
+                  outlineColor={Colors.grey['bg']}
+                  style={defaultStyles.input}
+                  theme={{
+                    colors: {
+                      primary: Colors.primary[500],
+                      background: Colors.grey['fa'],
+                      error: Colors.error,
+                    },
+                    roundness: 10,
+                  }}
+                  error={
+                    password?.length > 0 &&
+                    confirmPassword?.length > 0 &&
+                    confirmPassword != password
+                  }
+                  right={
+                    <TextInput.Icon
+                      icon={showConfirmPassword ? 'eye-off' : 'eye'}
+                      onPress={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      size={16}
+                      color={Colors.grey['e7']}
+                    />
+                  }
+                />
+                {confirmPassword.length > 0 && confirmPassword !== password && (
+                  <HelperText style={defaultStyles.errorText} type="error">
+                    {i18n.t(
+                      '(auth).(forgot-password).create-new-password.passwordsDoNot',
+                    )}
+                  </HelperText>
+                )}
+              </View>
             </View>
           </ScrollView>
-
-          <View style={defaultStyles.bottomButtonContainer}>
-            <Button
-              mode="contained"
-              onPress={handleSignUp}
-              textColor={Colors.light["10"]}
-              buttonColor={Colors.primary["500"]}
-              style={defaultStyles.button}
-              loading={loading}
-              disabled={
-                loading ||
-                !country ||
-                !mobile ||
-                // !email ||
-                !password ||
-                password.length < 12 ||
-                password !== confirmPassword
-              }
-            >
-              {i18n.t("(auth).createAccount.createAccount")}
-            </Button>
-          </View>
         </View>
       </KeyboardAvoidingView>
+      <View style={defaultStyles.bottomButtonContainer}>
+        <Button
+          mode="contained"
+          onPress={handleSignUp}
+          textColor={Colors.light['10']}
+          buttonColor={Colors.primary['500']}
+          style={defaultStyles.button}
+          loading={loading}
+          disabled={
+            loading ||
+            !country ||
+            !mobile ||
+            // !email ||
+            !password ||
+            password.length < 12 ||
+            password !== confirmPassword
+          }>
+          {i18n.t('(auth).createAccount.createAccount')}
+        </Button>
+      </View>
 
       <Snackbar
         visible={error}
         testID="signup_error_toast"
         onDismiss={() => {}}
         duration={3000}
-        style={defaultStyles.snackbar}
-      >
+        style={defaultStyles.snackbar}>
         <Text style={defaultStyles.errorText}>{errorMessage}</Text>
       </Snackbar>
     </>

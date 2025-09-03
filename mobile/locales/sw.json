@@ -48,7 +48,8 @@
       "phoneNumberVerified": "Nambari ya simu imethibitishwa!",
       "setupProfile": "Sasa unaweza kuendelea kuweka Wasifu wako wa Mkulima",
       "continue": "endelea",
-      "resendCode": "Tuma tena nambari ndani ya"
+      "resendCode": "Tuma tena msimbo",
+      "in": "katika"
     },
     "profile": {
       "completeRegistration": "Kamilisha Usajili",
