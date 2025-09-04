@@ -342,7 +342,7 @@ export default function OrderDetailsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Reject Modal (only this modal remains as it's needed for input) */}
+      
       {showRejectModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
@@ -407,7 +407,6 @@ export default function OrderDetailsPage() {
             <>
               <Button
                 variant="default"
-                className="bg-green-600 hover:bg-green-700"
                 onClick={handleApproveOrder}
                 disabled={loading}
               >
