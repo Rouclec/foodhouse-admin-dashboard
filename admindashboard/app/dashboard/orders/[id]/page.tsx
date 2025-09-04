@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,7 +26,7 @@ import {
   Tractor,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { ordersGetOrderDetailsOptions } from "@/client/orders.swagger/@tanstack/react-query.gen";
 import { Context, ContextType } from "@/app/contexts/QueryProvider";
 import {
@@ -36,9 +36,18 @@ import {
 import { ordersgrpcOrderStatus } from "@/client/orders.swagger";
 import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
 import { formatCurrency } from "@/utils";
+import {
+  ordersApproveOrderMutation,
+  ordersRejectOrderMutation,
+  ordersConfirmDeliveryMutation,
+} from "@/client/orders.swagger/@tanstack/react-query.gen";
 
 export default function OrderDetailsPage() {
   const { user } = useContext(Context) as ContextType;
+  const [loading, setLoading] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [error, setError] = useState<string | undefined>();
 
   const params = useParams();
   const router = useRouter();
@@ -102,7 +111,7 @@ export default function OrderDetailsPage() {
     }).format(date);
   };
 
-  const { data: orderDetailsData, isLoading: isOrderDetailsLoading } = useQuery(
+  const { data: orderDetailsData, isLoading: isOrderDetailsLoading, refetch } = useQuery(
     {
       ...ordersGetOrderDetailsOptions({
         path: {
@@ -149,6 +158,121 @@ export default function OrderDetailsPage() {
     }),
     enabled: !!orderDetailsData?.order?.product,
   });
+
+  const { mutateAsync: approveOrder } = useMutation({
+    ...ordersApproveOrderMutation(),
+    onSuccess: async () => {
+      refetch();
+      toast({
+        title: "Order Approved Successfully",
+        description: "The order has been approved and is now being processed.",
+      });
+    },
+    onError: async (error: any) => {
+      const errorMessage = error?.response?.data?.message ?? "Unknown error occurred";
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const { mutateAsync: rejectOrder } = useMutation({
+    ...ordersRejectOrderMutation(),
+    onSuccess: async () => {
+      refetch();
+      setShowRejectModal(false);
+      toast({
+        title: "Order Rejected",
+        description: "The order has been rejected successfully.",
+      });
+    },
+    onError: async (error: any) => {
+      const errorMessage = error?.response?.data?.message ?? "Unknown error occurred";
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const { mutateAsync: confirmDelivery } = useMutation({
+    ...ordersConfirmDeliveryMutation(),
+    onSuccess: async () => {
+      refetch();
+      toast({
+        title: "Delivery Confirmed",
+        description: "The order delivery has been confirmed successfully.",
+      });
+    },
+    onError: async (error: any) => {
+      const errorMessage = error?.response?.data?.message ?? "Unknown error occurred";
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleApproveOrder = async () => {
+    try {
+      setLoading(true);
+      await approveOrder({
+        body: {},
+        path: {
+          orderId: orderDetailsData?.order?.orderNumber ?? '',
+          userId: user?.userId ?? '',
+        },
+      });
+    } catch (error) {
+      console.error({ error }, 'approving order');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRejectOrder = async () => {
+    try {
+      setLoading(true);
+      await rejectOrder({
+        body: {
+          reason: rejectReason,
+        },
+        path: {
+          orderId: orderDetailsData?.order?.orderNumber ?? '',
+          userId: user?.userId ?? '',
+        },
+      });
+      setRejectReason("");
+    } catch (error) {
+      console.error({ error }, 'rejecting order');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConfirmDelivery = async () => {
+    try {
+      setLoading(true);
+      await confirmDelivery({
+        body: {},
+        path: {
+          secretKey: orderDetailsData?.order?.secretKey ?? '',
+          userId: user?.userId ?? '',
+        },
+      });
+    } catch (error) {
+      console.error({ error }, 'confirming delivery');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (
     isOrderDetailsLoading ||
@@ -218,6 +342,36 @@ export default function OrderDetailsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Reject Modal (only this modal remains as it's needed for input) */}
+      {showRejectModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h3 className="text-lg font-semibold mb-4">Reject Order</h3>
+            <textarea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="Enter reason for rejection"
+              className="w-full p-2 border rounded mb-4"
+              rows={4}
+            />
+            <div className="flex gap-2">
+              <Button onClick={handleRejectOrder} disabled={!rejectReason || loading}>
+                {loading ? "Processing..." : "Confirm Rejection"}
+              </Button>
+              <Button variant="outline" onClick={() => setShowRejectModal(false)} disabled={loading}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {error && (
+        <div className="fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50">
+          {error}
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center">
           <Button
@@ -247,7 +401,45 @@ export default function OrderDetailsPage() {
             </div>
           </div>
         </div>
+        
+        <div className="flex gap-2">
+          {orderDetailsData?.order.status === "OrderStatus_PAYMENT_SUCCESSFUL" && (
+            <>
+              <Button
+                variant="default"
+                className="bg-green-600 hover:bg-green-700"
+                onClick={handleApproveOrder}
+                disabled={loading}
+              >
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                {loading ? "Processing..." : "Approve Order"}
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => setShowRejectModal(true)}
+                disabled={loading}
+              >
+                <AlertCircle className="h-4 w-4 mr-2" />
+                Reject Order
+              </Button>
+            </>
+          )}
+
+          {orderDetailsData?.order.status === "OrderStatus_IN_TRANSIT" && (
+            <Button
+              variant="default"
+              className="bg-blue-600 hover:bg-blue-700"
+              onClick={handleConfirmDelivery}
+              disabled={loading}
+            >
+              <Truck className="h-4 w-4 mr-2" />
+              {loading ? "Processing..." : "Confirm Delivery"}
+            </Button>
+          )}
+        </div>
       </div>
+      
+      
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Order Summary */}
