@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -10,11 +10,11 @@ import {
   LayoutChangeEvent,
   ScrollView,
   ActivityIndicator,
-} from "react-native";
-import { Colors } from "@/constants";
-import { defaultStyles, dropdownStyles as styles } from "@/styles";
-import { HelperText, Icon } from "react-native-paper";
-import i18n from "@/i18n";
+} from 'react-native';
+import { Colors } from '@/constants';
+import { defaultStyles, dropdownStyles as styles } from '@/styles';
+import { HelperText, Icon, Portal } from 'react-native-paper';
+import i18n from '@/i18n';
 
 interface DropdownItem {
   label: string;
@@ -49,7 +49,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
   inputContainerStyle,
   activeColor = Colors.primary[500],
   iconColor = Colors.dark[0],
-  labelColor = Colors.grey["61"],
+  labelColor = Colors.grey['61'],
   valueTextStyle,
   labelTextStyle,
   loading = false,
@@ -64,10 +64,25 @@ export const Dropdown: React.FC<DropdownProps> = ({
   const [inputHeight, setInputHeight] = useState(0);
   const [selectedValue, setSelectedValue] = useState<DropdownItem>();
 
-  const onInputLayout = (event: LayoutChangeEvent) => {
-    const { height } = event.nativeEvent.layout;
-    setInputHeight(height);
+  const inputRef = useRef<View>(null);
+  const [dropdownPosition, setDropdownPosition] = useState({
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  });
+  const DROPDOWN_OFFSET = 4;
+
+  const onInputLayout = () => {
+    inputRef.current?.measureInWindow((x, y, width, height) => {
+      setDropdownPosition({ x, y, width, height });
+    });
   };
+
+  // const onInputLayout = (event: LayoutChangeEvent) => {
+  //   const { height } = event.nativeEvent.layout;
+  //   setInputHeight(height);
+  // };
 
   useEffect(() => {
     Animated.timing(animation, {
@@ -101,10 +116,10 @@ export const Dropdown: React.FC<DropdownProps> = ({
 
   const rotate = rotateAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ["0deg", "180deg"],
+    outputRange: ['0deg', '180deg'],
   });
 
-  const toggleDropdown = () => setIsFocused((prev) => !prev);
+  const toggleDropdown = () => setIsFocused(prev => !prev);
 
   useEffect(() => {
     isFocused ? onFocus?.() : onBlur?.();
@@ -121,6 +136,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
     // style={{ marginTop: 30 }}
     >
       <TouchableOpacity
+        ref={inputRef}
         activeOpacity={0.7}
         onPress={toggleDropdown}
         onLayout={onInputLayout}
@@ -129,8 +145,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
           inputContainerStyle,
           isFocused && { borderColor: activeColor, borderWidth: 2 },
           !!error && { borderColor: Colors.error },
-        ]}
-      >
+        ]}>
         {!!label && (
           <Animated.Text
             style={[
@@ -148,19 +163,18 @@ export const Dropdown: React.FC<DropdownProps> = ({
                   : labelColor,
               },
               labelTextStyle,
-            ]}
-          >
+            ]}>
             {label}
           </Animated.Text>
         )}
         <Text style={[styles.valueText, valueTextStyle]}>
-          {selectedValue?.label ?? defaultSelected?.label ?? ""}
+          {selectedValue?.label ?? defaultSelected?.label ?? ''}
         </Text>
         <Animated.View style={{ transform: [{ rotate }] }}>
           <Icon
             color={error ? Colors.error : iconColor}
             size={24}
-            source={"chevron-down"}
+            source={'chevron-down'}
           />
         </Animated.View>
       </TouchableOpacity>
@@ -171,37 +185,48 @@ export const Dropdown: React.FC<DropdownProps> = ({
       )}
 
       {isFocused && (
-        <View style={[styles.dropdown, dropdownStyle]}>
-          <ScrollView>
-            {loading ? (
-              <ActivityIndicator />
-            ) : data.length === 0 ? (
-              <>
-                <TouchableOpacity
-                  style={[styles.item, { borderBottomWidth: 0 }]}
-                  disabled
-                >
-                  <Text style={styles.noDataText}>
-                    {i18n.t("components.Dropdown.noData")}
-                  </Text>
-                </TouchableOpacity>
-              </>
-            ) : (
-              data.map((item, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[
-                    styles.item,
-                    index === data?.length - 1 && { borderBottomWidth: 0 },
-                  ]}
-                  onPress={() => handleSelect(item)}
-                >
-                  <Text style={styles.itemText}>{item.label}</Text>
-                </TouchableOpacity>
-              ))
-            )}
-          </ScrollView>
-        </View>
+        <Portal>
+          <View style={[
+        styles.dropdown,
+        dropdownStyle,
+        {
+          position: 'absolute',
+          top: dropdownPosition.y + dropdownPosition.height + DROPDOWN_OFFSET,
+          left: dropdownPosition.x,
+          width: dropdownPosition.width,
+          maxHeight: 200, 
+          zIndex: 1000, 
+        },
+      ]}>
+            <ScrollView>
+              {loading ? (
+                <ActivityIndicator />
+              ) : data.length === 0 ? (
+                <>
+                  <TouchableOpacity
+                    style={[styles.item, { borderBottomWidth: 0 }]}
+                    disabled>
+                    <Text style={styles.noDataText}>
+                      {i18n.t('components.Dropdown.noData')}
+                    </Text>
+                  </TouchableOpacity>
+                </>
+              ) : (
+                data.map((item, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={[
+                      styles.item,
+                      index === data?.length - 1 && { borderBottomWidth: 0 },
+                    ]}
+                    onPress={() => handleSelect(item)}>
+                    <Text style={styles.itemText}>{item.label}</Text>
+                  </TouchableOpacity>
+                ))
+              )}
+            </ScrollView>
+          </View>
+        </Portal>
       )}
     </View>
   );
