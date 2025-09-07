@@ -66,6 +66,7 @@ export default function CreateProduct() {
     price: '',
     description: '',
   });
+ 
 
   const onImagePickerClose = () => {
     setIsImagePickerVisible(false);
