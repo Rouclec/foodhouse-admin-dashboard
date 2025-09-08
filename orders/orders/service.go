@@ -969,6 +969,12 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 
 	}
 
+	var paymentStatus = ordersgrpc.PaymentStatus_PaymentStatus_INITIATED
+
+	if i.devMethodsEndabled {
+		paymentStatus = ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED
+	}
+
 	payment, err := querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
 		PaymentEntity:  req.GetPaymentEntity().String(),
 		EntityID:       req.GetEntityId(),
@@ -976,7 +982,7 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 		AmountCurrency: &req.GetAmount().CurrencyIsoCode,
 		AccountNumber:  req.GetAccount().GetAccountNumber(),
 		Method:         req.GetAccount().GetPaymentMethod().String(),
-		Status:         ordersgrpc.PaymentStatus_PaymentStatus_INITIATED.String(),
+		Status:         paymentStatus.String(),
 		ExpiresAt:      pgtype.Timestamptz{Time: time.Now().Add(5 * time.Minute), Valid: true},
 		CreatedBy:      req.GetUserId(),
 		Type:           ordersgrpc.PaymentType_PaymentType_CREDIT.String(),
@@ -1009,11 +1015,14 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 
 	// testAmount := float64(10)
 
-	_, err = i.paymentService.RequestPayment(ctx, formattedNumber, *totalPrice, req.GetAmount().GetCurrencyIsoCode(), req.GetPaymentEntity().String(), &req.EntityId)
+	// only call TPW in production
+	if !i.devMethodsEndabled {
+		_, payErr := i.paymentService.RequestPayment(ctx, formattedNumber, *totalPrice, req.GetAmount().GetCurrencyIsoCode(), req.GetPaymentEntity().String(), &req.EntityId)
 
-	if err != nil {
-		i.logger.Debug().Msgf("payment error %v", err)
-		return nil, status.Errorf(codes.Internal, "error initiating payment %v", err)
+		if payErr != nil {
+			i.logger.Debug().Msgf("payment error %v", err)
+			return nil, status.Errorf(codes.Internal, "error initiating payment %v", err)
+		}
 	}
 
 	err = tx.Commit(ctx)
