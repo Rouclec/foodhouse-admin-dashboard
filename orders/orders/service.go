@@ -1066,9 +1066,9 @@ func (i *Impl) ApproveOrder(ctx context.Context, req *ordersgrpc.ApproveOrderReq
 		return nil, status.Errorf(codes.Internal, "error getting order with id %s why: %v", req.GetOrderId(), err)
 	}
 
-	if req.GetUserId() != *order.ProductOwner {
-		return nil, status.Error(codes.PermissionDenied, "user does not have permission to approve this order")
-	}
+	// if req.GetUserId() != *order.ProductOwner {
+	// 	return nil, status.Error(codes.PermissionDenied, "user does not have permission to approve this order")
+	// }
 
 	beforeBytes, err := protojson.Marshal(converters.SqlcOrderToProto(order))
 	if err != nil {
@@ -1595,9 +1595,9 @@ func (i *Impl) RejectOrder(ctx context.Context,
 		return nil, status.Errorf(codes.Internal, "error getting order with id %s why: %v", req.GetOrderId(), err)
 	}
 
-	if req.GetUserId() != *order.ProductOwner {
-		return nil, status.Error(codes.PermissionDenied, "user does not have permission to approve this order")
-	}
+	// if req.GetUserId() != *order.ProductOwner {
+	// 	return nil, status.Error(codes.PermissionDenied, "user does not have permission to approve this order")
+	// }
 
 	beforeBytes, err := protojson.Marshal(converters.SqlcOrderToProto(order))
 	if err != nil {
