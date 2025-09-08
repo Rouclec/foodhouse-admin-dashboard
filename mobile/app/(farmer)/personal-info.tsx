@@ -49,6 +49,8 @@ export default function PersonalInfo() {
 
   const { user, setUser } = useContext(Context) as ContextType;
   const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
+  const [addressInitialized, setAddressInitialized] = useState(false);
+  
 
   const [originalProfileImage, setOriginalProfileImage] = useState(
     user?.profileImage || '',
@@ -92,6 +94,20 @@ export default function PersonalInfo() {
     user?.email,
     user?.locationCoordinates,
   ]);
+
+  useEffect(() => {
+    if (user?.locationCoordinates?.address && !addressInitialized) {
+      const timer = setTimeout(() => {
+        if (googlePlacesAutoCompleteRef.current && user.locationCoordinates?.address) {
+          googlePlacesAutoCompleteRef.current.setAddressText(user.locationCoordinates.address);
+          handleInputChange('address', user.locationCoordinates.address);
+          setAddressInitialized(true);
+        }
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [user?.locationCoordinates?.address, addressInitialized]);
 
   const handleInputChange = <K extends keyof FormData>(
     field: K,
