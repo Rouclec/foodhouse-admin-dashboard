@@ -163,7 +163,7 @@ Resources:
             - Name: COMPANY_PHONE
               ValueFrom: !Sub "${CompanyInfoArn}:phone::"
             - Name: ENABLE_DEV_METHODS
-              Value: !Sub "${CampaySecretArn}:enable_dev_methods::"
+              ValueFrom: !Sub "${CampaySecretArn}:enable_dev_methods::"
 
 
   # We create a data in the RDS instance for the application.
