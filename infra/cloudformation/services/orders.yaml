@@ -118,8 +118,6 @@ Resources:
               Value: "/app/migrations"
             - Name: EMAIL_TEMPLATE_PATH
               Value: "/app/email/templates"
-            - Name: ENABLE_DEV_METHODS
-              Value: "true"
             - Name: CAMPAY_WEBHOOK
               Value: !Sub "https://api.${DomainName}/v1/public/confirm-order-payment"
             - Name: USERS_HOST_PORT
@@ -164,6 +162,8 @@ Resources:
               ValueFrom: !Sub "${CompanyInfoArn}:email::"
             - Name: COMPANY_PHONE
               ValueFrom: !Sub "${CompanyInfoArn}:phone::"
+            - Name: ENABLE_DEV_METHODS
+              Value: !Sub "${CampaySecretArn}:enable_dev_methods::"
 
 
   # We create a data in the RDS instance for the application.
