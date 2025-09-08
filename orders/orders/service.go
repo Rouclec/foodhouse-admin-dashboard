@@ -969,8 +969,6 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 
 	}
 
-	var paymentStatus = ordersgrpc.PaymentStatus_PaymentStatus_INITIATED
-
 	payment, err := querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
 		PaymentEntity:  req.GetPaymentEntity().String(),
 		EntityID:       req.GetEntityId(),
@@ -978,7 +976,7 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 		AmountCurrency: &req.GetAmount().CurrencyIsoCode,
 		AccountNumber:  req.GetAccount().GetAccountNumber(),
 		Method:         req.GetAccount().GetPaymentMethod().String(),
-		Status:         paymentStatus.String(),
+		Status:         ordersgrpc.PaymentStatus_PaymentStatus_INITIATED.String(),
 		ExpiresAt:      pgtype.Timestamptz{Time: time.Now().Add(5 * time.Minute), Valid: true},
 		CreatedBy:      req.GetUserId(),
 		Type:           ordersgrpc.PaymentType_PaymentType_CREDIT.String(),
