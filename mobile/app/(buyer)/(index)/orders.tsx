@@ -53,6 +53,7 @@ interface OrderItemProps {
   onPress?: () => void;
 }
 const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
+  console.log({ item });
   const {
     isLoading: isProductLoading,
     data: productData,

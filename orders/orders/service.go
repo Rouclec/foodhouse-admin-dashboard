@@ -971,10 +971,6 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 
 	var paymentStatus = ordersgrpc.PaymentStatus_PaymentStatus_INITIATED
 
-	if i.devMethodsEndabled {
-		paymentStatus = ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED
-	}
-
 	payment, err := querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
 		PaymentEntity:  req.GetPaymentEntity().String(),
 		EntityID:       req.GetEntityId(),
@@ -1015,13 +1011,23 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 
 	// testAmount := float64(10)
 
-	// only call TPW in production
-	if !i.devMethodsEndabled {
+	// call confirm payment immediately, if dev methods is enabled
+	if i.devMethodsEndabled {
+		_, confirmErr := i.ConfirmPayment(ctx, &ordersgrpc.ConfirmPaymentRequest{
+			Status:  TPWPaymentStatusCompleted,
+			OrderId: req.EntityId,
+		})
+
+		if confirmErr != nil {
+			i.logger.Debug().Msgf("error processing payment: ", confirmErr)
+			return nil, status.Errorf(codes.Internal, "error processing payment: ", confirmErr)
+		}
+	} else {
 		_, payErr := i.paymentService.RequestPayment(ctx, formattedNumber, *totalPrice, req.GetAmount().GetCurrencyIsoCode(), req.GetPaymentEntity().String(), &req.EntityId)
 
 		if payErr != nil {
-			i.logger.Debug().Msgf("payment error %v", err)
-			return nil, status.Errorf(codes.Internal, "error initiating payment %v", err)
+			i.logger.Debug().Msgf("payment error %v", payErr)
+			return nil, status.Errorf(codes.Internal, "error initiating payment %v", payErr)
 		}
 	}
 
