@@ -93,7 +93,7 @@ const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
             {formatCurrency(
               (
                 Number(item?.price?.value ?? 0) +
-                Number(productData?.product?.deliveryFeePerUnit?.value ?? 0)
+                Number(item?.deliveryFee?.value ?? 0)
               ).toFixed(2),
               item?.price?.currencyIsoCode ?? '',
             )}
