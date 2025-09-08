@@ -1009,18 +1009,8 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 
 	// testAmount := float64(10)
 
-	// call confirm payment immediately, if dev methods is enabled
-	if i.devMethodsEndabled {
-		_, confirmErr := i.ConfirmPayment(ctx, &ordersgrpc.ConfirmPaymentRequest{
-			Status:  TPWPaymentStatusCompleted,
-			OrderId: req.EntityId,
-		})
-
-		if confirmErr != nil {
-			i.logger.Debug().Msgf("error processing payment: ", confirmErr)
-			return nil, status.Errorf(codes.Internal, "error processing payment: ", confirmErr)
-		}
-	} else {
+	// make request to TPW to initiate actual payment only when dev methods is not enabled
+	if !i.devMethodsEndabled {
 		_, payErr := i.paymentService.RequestPayment(ctx, formattedNumber, *totalPrice, req.GetAmount().GetCurrencyIsoCode(), req.GetPaymentEntity().String(), &req.EntityId)
 
 		if payErr != nil {
@@ -1032,6 +1022,19 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 	err = tx.Commit(ctx)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
+	}
+
+	// after committing the transaction, make call the confirm order immediately, if devMethods is enabled
+	if i.devMethodsEndabled {
+		_, confirmErr := i.ConfirmPayment(ctx, &ordersgrpc.ConfirmPaymentRequest{
+			Status:  TPWPaymentStatusCompleted,
+			OrderId: req.EntityId,
+		})
+
+		if confirmErr != nil {
+			i.logger.Debug().Msgf("error processing payment: ", confirmErr)
+			return nil, status.Errorf(codes.Internal, "error processing payment: ", confirmErr)
+		}
 	}
 
 	return &ordersgrpc.InitiatePaymentResponse{
