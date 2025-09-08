@@ -104,8 +104,7 @@ export default function PersonalInfo() {
           setAddressInitialized(true);
         }
       }, 100);
-      
-      return () => clearTimeout(timer);
+    
     }
   }, [user?.locationCoordinates?.address, addressInitialized]);
 
@@ -206,7 +205,7 @@ export default function PersonalInfo() {
           userId: user?.userId ?? '',
         },
       });
-      setUser({ ...data });
+      setUser({ ...user, ...data });
       setOriginalProfileImage(imageUrl);
        
     } catch (error) {
@@ -219,8 +218,7 @@ export default function PersonalInfo() {
       setLoading(false);
     }
   };
-  console.log("new user", user);
-
+  
   const insets = useSafeAreaInsets();
 
   return (

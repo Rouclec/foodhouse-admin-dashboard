@@ -116,7 +116,6 @@ export default function PersonalInfo() {
       }
     }, 100);
     
-    return () => clearTimeout(timer);
   }
 }, [user?.locationCoordinates?.address, addressInitialized]);
 
@@ -200,7 +199,7 @@ export default function PersonalInfo() {
 
       await updateProfile({ body: data, path: { userId: user?.userId || '' } });
 
-      setUser({ ...data });
+      setUser({...user,  ...data });
       setOriginalProfileImage(imageUrl);
     } catch (error) {
       console.error('handleSave: Error updating profile:', error);
