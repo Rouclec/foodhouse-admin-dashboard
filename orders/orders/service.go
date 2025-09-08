@@ -491,7 +491,7 @@ func (i *Impl) CreateOrder(ctx context.Context, req *ordersgrpc.CreateOrderReque
 	totalAmount := float64(product.GetProduct().GetAmount().GetValue()) * float64(req.GetQuantity()) * TotalPercentage
 
 	// Calculate the devliery fee
-	deliver_fee, err := i.EstimateDeliveryFee(ctx, &ordersgrpc.EstimateDeliveryFeeRequest{
+	deliveryFee, err := i.EstimateDeliveryFee(ctx, &ordersgrpc.EstimateDeliveryFeeRequest{
 		UserId:           req.GetUserId(),
 		ProductId:        req.GetProductId(),
 		DeliveryLocation: req.GetDeliveryLocation(),
@@ -515,8 +515,8 @@ func (i *Impl) CreateOrder(ctx context.Context, req *ordersgrpc.CreateOrderReque
 		ProductOwner:        product.GetProduct().GetCreatedBy(),
 		DeliveryAddress:     req.GetDeliveryLocation().GetAddress(),
 		Quantity:            req.GetQuantity(),
-		DeliveryFeeAmount:   deliver_fee.EstimatedDeliveryFee.Value,
-		DeliveryFeeCurrency: deliver_fee.EstimatedDeliveryFee.CurrencyIsoCode,
+		DeliveryFeeAmount:   deliveryFee.EstimatedDeliveryFee.Value,
+		DeliveryFeeCurrency: deliveryFee.EstimatedDeliveryFee.CurrencyIsoCode,
 	}
 
 	i.logger.Debug().Msgf("argurments %v", args)
@@ -965,7 +965,10 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 			return nil, status.Errorf(codes.Internal, "error getting order for payment %v", newErr)
 		}
 
-		totalPrice = order.PriceValue
+		// Fix: totalPrice is a *float64, but *order.PriceValue + *order.DeliveryFeeAmount is a float64.
+		// So, create a new variable to hold the sum and take its address.
+		sum := *order.PriceValue + *order.DeliveryFeeAmount
+		totalPrice = &sum
 
 	}
 
