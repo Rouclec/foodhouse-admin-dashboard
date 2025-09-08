@@ -46,13 +46,7 @@ type FormData = {
 
 export default function PersonalInfo() {
   const router = useRouter();
-  const context = useContext(Context);
-
-  if (!context) {
-    throw new Error('PersonalInfo must be used within a ContextProvider');
-  }
-
-  const { user, setUser } = context as ContextType;
+  const { user, setUser } = useContext(Context) as ContextType;
   const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
 
   const [originalProfileImage, setOriginalProfileImage] = useState(
@@ -333,8 +327,8 @@ export default function PersonalInfo() {
                         marginTop: 5,
                         elevation: 3,
                         height: 200,
-                        // top: '100%',
-                        top: -224,
+                        position: 'absolute',
+                        top: -216,
                         zIndex: 99999,
                         overflowX: 'hidden',
                       },

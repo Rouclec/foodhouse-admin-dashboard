@@ -239,9 +239,12 @@ export default function TrackOrder() {
               <View style={styles.centerRow}>
                 <Text variant="titleSmall" style={styles.primaryText}>
                   {orderDetails?.order?.price?.currencyIsoCode}{' '}
-                  {formatAmount(orderDetails?.order?.price?.value ?? '', {
-                    decimalPlaces: 2,
-                  })}
+                  {formatAmount(
+                    (
+                      Number(orderDetails?.order?.price?.value ?? 0) +
+                      Number(orderDetails?.order?.deliveryFee?.value ?? 0)
+                    ).toFixed(2),
+                  )}
                 </Text>
               </View>
             </View>

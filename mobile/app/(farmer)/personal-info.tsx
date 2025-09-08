@@ -46,13 +46,8 @@ type FormData = {
 
 export default function PersonalInfo() {
   const router = useRouter();
-  const context = useContext(Context);
 
-  if (!context) {
-    throw new Error('PersonalInfo must be used within a ContextProvider');
-  }
-
-  const { user, setUser } = context as ContextType;
+  const { user, setUser } = useContext(Context) as ContextType;
   const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
 
   const [originalProfileImage, setOriginalProfileImage] = useState(
@@ -93,7 +88,7 @@ export default function PersonalInfo() {
     originalProfileImage,
     user?.firstName,
     user?.lastName,
-    user?.address,
+    user?.locationCoordinates?.address,
     user?.email,
     user?.locationCoordinates,
   ]);
@@ -109,7 +104,7 @@ export default function PersonalInfo() {
       return { ...prev, [field]: value };
     });
   };
-
+ 
   const handleImageSelect = (asset: any) => {
     console.log('handleImageSelect: Asset received:', asset?.uri);
     if (asset && asset.uri !== originalProfileImage) {
@@ -156,6 +151,7 @@ export default function PersonalInfo() {
     },
   });
 
+
   const {
     compressImage,
     // loading: isCompressing,
@@ -188,10 +184,15 @@ export default function PersonalInfo() {
         locationCoordinates: formData.locationCoordinates ?? undefined,
       };
 
-      await updateProfile({ body: data, path: { userId: user?.userId || '' } });
-
+      await updateProfile({
+        body: data,
+        path: {
+          userId: user?.userId ?? '',
+        },
+      });
       setUser({ ...data });
       setOriginalProfileImage(imageUrl);
+       
     } catch (error) {
       console.error('handleSave: Error updating profile:', error);
       setErrorMessage('Failed to update profile');
@@ -202,6 +203,7 @@ export default function PersonalInfo() {
       setLoading(false);
     }
   };
+  console.log("new user", user);
 
   const insets = useSafeAreaInsets();
 
@@ -333,8 +335,10 @@ export default function PersonalInfo() {
                         marginTop: 5,
                         elevation: 3,
                         height: 200,
-                        // top: '100%',
-                        top: -224,
+                        position: 'absolute',
+                        top: -216,
+                        //left: 0,
+                        // right: 0,
                         zIndex: 99999,
                         overflowX: 'hidden',
                       },

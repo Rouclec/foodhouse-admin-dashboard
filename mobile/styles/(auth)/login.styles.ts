@@ -59,6 +59,7 @@ export const loginstyles = StyleSheet.create({
     zIndex: 999,
     flex: 1,
     marginBottom: 5,
+    position: "relative"
   },
   errorText: {
     color: '#FF0000',

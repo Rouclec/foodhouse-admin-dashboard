@@ -342,6 +342,8 @@ const ProfilePage = () => {
                       borderRadius: 15,
                       marginTop: 5,
                       elevation: 3,
+                      position: 'absolute',
+                      top: -216,
                       maxHeight: 200, // scroll instead of pushing UI
                       zIndex: 9999,
                     },

@@ -90,7 +90,12 @@ const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
         <View style={styles.centerRow}>
           <Text variant="titleSmall" style={styles.primaryText}>
             {item?.price?.currencyIsoCode} {item?.price?.currencyIsoCode}{' '}
-            {formatAmount(item?.price?.value ?? '', { decimalPlaces: 2 })}
+            {formatAmount(
+              (
+                Number(item?.price?.value ?? 0) +
+                Number(productData?.product?.deliveryFeePerUnit?.value ?? 0)
+              ).toFixed(2),
+            )}
           </Text>
         </View>
         {!!onPress && (

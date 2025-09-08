@@ -71,7 +71,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
     width: 0,
     height: 0,
   });
-  const DROPDOWN_OFFSET = 4;
+  const DROPDOWN_OFFSET = 24;
 
   const onInputLayout = () => {
     inputRef.current?.measureInWindow((x, y, width, height) => {
@@ -133,7 +133,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
 
   return (
     <View
-    // style={{ marginTop: 30 }}
+     style={{ position: "relative" }}
     >
       <TouchableOpacity
         ref={inputRef}

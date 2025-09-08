@@ -94,6 +94,7 @@ export default function ChangePasswordScreen() {
   };
 
   const insets = useSafeAreaInsets();
+  console.log("user info", user);
 
   return (
     <>
