@@ -1,3 +1,32 @@
+function getCurrencySymbol(isoCode: string): [string | null, boolean] {
+  // Define a map for ISO codes to symbols (all symbols are before the amount)
+  const currencyData: { [key: string]: string } = {
+    USD: "$",
+    EUR: "€",
+    GBP: "£",
+  };
+
+  // Check if the ISO code exists in the map
+  if (currencyData[isoCode]) {
+    return [currencyData[isoCode], true];
+  } else {
+    return [null, false];
+  }
+}
+
+// Example usage
+export function formatCurrency(
+  amount: number | string,
+  isoCode: string
+): string {
+  const [symbol, hasSymbol] = getCurrencySymbol(isoCode);
+  if (hasSymbol) {
+    return `${symbol}${formatAmount(amount, { decimalPlaces: 2 })}`;
+  } else {
+    return `${formatAmount(amount)} ${isoCode}`; // If no symbol, show the ISO code
+  }
+}
+
 /**
  * Formats a number with custom thousands separator, digit grouping, and decimal places.
  *

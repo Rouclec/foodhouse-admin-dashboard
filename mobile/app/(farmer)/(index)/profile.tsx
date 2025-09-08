@@ -67,6 +67,7 @@ export default function Profile() {
       console.error('error logging out: ', error);
     },
   });
+  
 
   const shareApp = async () => {
     const shareMessage = `Check out Foodhouse - your trusted source for fresh, farm-to-home food items!\n

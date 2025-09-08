@@ -21,7 +21,7 @@ import { productsGetProductOptions } from '@/client/products.swagger/@tanstack/r
 import { Chase } from 'react-native-animated-spinkit';
 import { Colors } from '@/constants';
 import { trackOrderStyles as styles } from '@/styles';
-import { formatAmount } from '@/utils/amountFormater';
+import { formatCurrency } from '@/utils/amountFormater';
 import { ordersgrpcOrderAuditLog } from '@/client/orders.swagger';
 import { MaterialIcons } from '@expo/vector-icons';
 import moment from 'moment';
@@ -239,9 +239,13 @@ export default function TrackOrder() {
               <View style={styles.centerRow}>
                 <Text variant="titleSmall" style={styles.primaryText}>
                   {orderDetails?.order?.price?.currencyIsoCode}{' '}
-                  {formatAmount(orderDetails?.order?.price?.value ?? '', {
-                    decimalPlaces: 2,
-                  })}
+                  {formatCurrency(
+                    (
+                      Number(orderDetails?.order?.price?.value ?? 0) +
+                      Number(orderDetails?.order?.deliveryFee?.value ?? 0)
+                    ).toFixed(2),
+                    orderDetails?.order?.price?.currencyIsoCode ?? '', 
+                  )}
                 </Text>
               </View>
             </View>

@@ -46,14 +46,11 @@ type FormData = {
 
 export default function PersonalInfo() {
   const router = useRouter();
-  const context = useContext(Context);
 
-  if (!context) {
-    throw new Error('PersonalInfo must be used within a ContextProvider');
-  }
-
-  const { user, setUser } = context as ContextType;
+  const { user, setUser } = useContext(Context) as ContextType;
   const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
+  const [addressInitialized, setAddressInitialized] = useState(false);
+  
 
   const [originalProfileImage, setOriginalProfileImage] = useState(
     user?.profileImage || '',
@@ -93,10 +90,23 @@ export default function PersonalInfo() {
     originalProfileImage,
     user?.firstName,
     user?.lastName,
-    user?.address,
+    user?.locationCoordinates?.address,
     user?.email,
     user?.locationCoordinates,
   ]);
+
+  useEffect(() => {
+    if (user?.locationCoordinates?.address && !addressInitialized) {
+      const timer = setTimeout(() => {
+        if (googlePlacesAutoCompleteRef.current && user.locationCoordinates?.address) {
+          googlePlacesAutoCompleteRef.current.setAddressText(user.locationCoordinates.address);
+          handleInputChange('address', user.locationCoordinates.address);
+          setAddressInitialized(true);
+        }
+      }, 100);
+    
+    }
+  }, [user?.locationCoordinates?.address, addressInitialized]);
 
   const handleInputChange = <K extends keyof FormData>(
     field: K,
@@ -109,7 +119,7 @@ export default function PersonalInfo() {
       return { ...prev, [field]: value };
     });
   };
-
+ 
   const handleImageSelect = (asset: any) => {
     console.log('handleImageSelect: Asset received:', asset?.uri);
     if (asset && asset.uri !== originalProfileImage) {
@@ -156,6 +166,7 @@ export default function PersonalInfo() {
     },
   });
 
+
   const {
     compressImage,
     // loading: isCompressing,
@@ -188,10 +199,15 @@ export default function PersonalInfo() {
         locationCoordinates: formData.locationCoordinates ?? undefined,
       };
 
-      await updateProfile({ body: data, path: { userId: user?.userId || '' } });
-
-      setUser({ ...data });
+      await updateProfile({
+        body: data,
+        path: {
+          userId: user?.userId ?? '',
+        },
+      });
+      setUser({ ...user, ...data });
       setOriginalProfileImage(imageUrl);
+       
     } catch (error) {
       console.error('handleSave: Error updating profile:', error);
       setErrorMessage('Failed to update profile');
@@ -202,7 +218,7 @@ export default function PersonalInfo() {
       setLoading(false);
     }
   };
-
+  
   const insets = useSafeAreaInsets();
 
   return (
@@ -333,8 +349,10 @@ export default function PersonalInfo() {
                         marginTop: 5,
                         elevation: 3,
                         height: 200,
-                        // top: '100%',
-                        top: -224,
+                        position: 'absolute',
+                        top: -216,
+                        //left: 0,
+                        // right: 0,
                         zIndex: 99999,
                         overflowX: 'hidden',
                       },

@@ -14,7 +14,7 @@ import { Colors } from '@/constants';
 import i18n from '@/i18n';
 import { defaultStyles, ordersStyles as styles } from '@/styles';
 import { delay } from '@/utils';
-import { formatAmount } from '@/utils/amountFormater';
+import {  formatCurrency } from '@/utils/amountFormater';
 import { Feather } from '@expo/vector-icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
@@ -92,7 +92,13 @@ const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
         <View style={styles.centerRow}>
           <Text variant="titleSmall" style={styles.primaryText}>
             {item?.price?.currencyIsoCode} {item?.price?.currencyIsoCode}{' '}
-            {formatAmount(item?.price?.value ?? '', { decimalPlaces: 2 })}
+            {formatCurrency(
+              (
+                Number(item?.price?.value ?? 0) +
+                Number(item?.deliveryFee?.value ?? 0)
+              ).toFixed(2),
+              item?.price?.currencyIsoCode ?? '',
+            )}
           </Text>
         </View>
         {!!onPress && (

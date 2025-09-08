@@ -23,6 +23,7 @@ import { delay, storeData, updateAuthHeader } from '@/utils';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Context, ContextType } from '../_layout';
 import i18n from '@/i18n';
+import { usersGetUserById } from '@/client/users.swagger';
 
 const VerifyOtpScreen: FC = () => {
   const { requestId, email, password, phoneNumber, residenceCountryIsoCode } =
@@ -137,6 +138,10 @@ const VerifyOtpScreen: FC = () => {
       await storeData('@userId', data?.userId);
       await storeData('@refreshToken', data?.tokens?.refreshToken);
       setUserId(data?.userId);
+      setUser({
+        userId: data.userId,
+        phoneNumber: phoneNumber as string,
+      });
       router.push('/profile-page');
     },
   });
