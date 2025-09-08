@@ -176,7 +176,7 @@ const OrderItem: FC<OrderItemProps> = ({ order }) => {
         </Badge>
         <p className="font-medium text-gray-900">
           {formatCurrency(
-            order?.price?.value ?? 0,
+            (order?.price?.value ?? 0) + (order?.deliveryFee?.value ?? 0),
             order?.price?.currencyIsoCode ?? ""
           )}
         </p>

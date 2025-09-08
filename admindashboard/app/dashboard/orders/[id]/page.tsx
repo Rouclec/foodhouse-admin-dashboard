@@ -111,16 +111,18 @@ export default function OrderDetailsPage() {
     }).format(date);
   };
 
-  const { data: orderDetailsData, isLoading: isOrderDetailsLoading, refetch } = useQuery(
-    {
-      ...ordersGetOrderDetailsOptions({
-        path: {
-          userId: user?.userId ?? "",
-          orderNumber: (params.id as string) ?? "",
-        },
-      }),
-    }
-  );
+  const {
+    data: orderDetailsData,
+    isLoading: isOrderDetailsLoading,
+    refetch,
+  } = useQuery({
+    ...ordersGetOrderDetailsOptions({
+      path: {
+        userId: user?.userId ?? "",
+        orderNumber: (params.id as string) ?? "",
+      },
+    }),
+  });
 
   const { data: userData, isLoading: isUserDataLoading } = useQuery({
     ...usersGetUserByIdOptions({
@@ -150,6 +152,25 @@ export default function OrderDetailsPage() {
     enabled: !!orderDetailsData?.order?.dispatchedBy,
   });
 
+  const { data: approver, isLoading: isApproverLoading } = useQuery({
+    ...usersGetUserByIdOptions({
+      path: {
+        userId:
+          orderDetailsData?.auditLog?.find(
+            (log) =>
+              log.after?.status === "OrderStatus_APPROVED" ||
+              log.after?.status === "OrderStatus_REJECTED"
+          )?.actor ?? "",
+      },
+    }),
+    enabled:
+      orderDetailsData?.auditLog?.findIndex(
+        (log) =>
+          log.after?.status === "OrderStatus_APPROVED" ||
+          log.after?.status === "OrderStatus_REJECTED"
+      ) != -1, // only enable this query when the order has been approved or rejected, else, avoid unneccesary call
+  });
+
   const { data: productData, isLoading: isProductDataLoading } = useQuery({
     ...productsGetProductOptions({
       path: {
@@ -169,7 +190,8 @@ export default function OrderDetailsPage() {
       });
     },
     onError: async (error: any) => {
-      const errorMessage = error?.response?.data?.message ?? "Unknown error occurred";
+      const errorMessage =
+        error?.response?.data?.message ?? "Unknown error occurred";
       setError(errorMessage);
       toast({
         title: "Error",
@@ -190,7 +212,8 @@ export default function OrderDetailsPage() {
       });
     },
     onError: async (error: any) => {
-      const errorMessage = error?.response?.data?.message ?? "Unknown error occurred";
+      const errorMessage =
+        error?.response?.data?.message ?? "Unknown error occurred";
       setError(errorMessage);
       toast({
         title: "Error",
@@ -210,7 +233,8 @@ export default function OrderDetailsPage() {
       });
     },
     onError: async (error: any) => {
-      const errorMessage = error?.response?.data?.message ?? "Unknown error occurred";
+      const errorMessage =
+        error?.response?.data?.message ?? "Unknown error occurred";
       setError(errorMessage);
       toast({
         title: "Error",
@@ -226,12 +250,12 @@ export default function OrderDetailsPage() {
       await approveOrder({
         body: {},
         path: {
-          orderId: orderDetailsData?.order?.orderNumber ?? '',
-          userId: user?.userId ?? '',
+          orderId: orderDetailsData?.order?.orderNumber ?? "",
+          userId: user?.userId ?? "",
         },
       });
     } catch (error) {
-      console.error({ error }, 'approving order');
+      console.error({ error }, "approving order");
     } finally {
       setLoading(false);
     }
@@ -245,13 +269,13 @@ export default function OrderDetailsPage() {
           reason: rejectReason,
         },
         path: {
-          orderId: orderDetailsData?.order?.orderNumber ?? '',
-          userId: user?.userId ?? '',
+          orderId: orderDetailsData?.order?.orderNumber ?? "",
+          userId: user?.userId ?? "",
         },
       });
       setRejectReason("");
     } catch (error) {
-      console.error({ error }, 'rejecting order');
+      console.error({ error }, "rejecting order");
     } finally {
       setLoading(false);
     }
@@ -263,12 +287,12 @@ export default function OrderDetailsPage() {
       await confirmDelivery({
         body: {},
         path: {
-          secretKey: orderDetailsData?.order?.secretKey ?? '',
-          userId: user?.userId ?? '',
+          secretKey: orderDetailsData?.order?.secretKey ?? "",
+          userId: user?.userId ?? "",
         },
       });
     } catch (error) {
-      console.error({ error }, 'confirming delivery');
+      console.error({ error }, "confirming delivery");
     } finally {
       setLoading(false);
     }
@@ -279,7 +303,8 @@ export default function OrderDetailsPage() {
     isFarmerDataLoading ||
     isUserDataLoading ||
     isAgentDataLoading ||
-    isProductDataLoading
+    isProductDataLoading ||
+    isApproverLoading
   ) {
     return (
       <div className="space-y-6">
@@ -342,7 +367,6 @@ export default function OrderDetailsPage() {
 
   return (
     <div className="space-y-6">
-      
       {showRejectModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
@@ -355,17 +379,24 @@ export default function OrderDetailsPage() {
               rows={4}
             />
             <div className="flex gap-2">
-              <Button onClick={handleRejectOrder} disabled={!rejectReason || loading}>
+              <Button
+                onClick={handleRejectOrder}
+                disabled={!rejectReason || loading}
+              >
                 {loading ? "Processing..." : "Confirm Rejection"}
               </Button>
-              <Button variant="outline" onClick={() => setShowRejectModal(false)} disabled={loading}>
+              <Button
+                variant="outline"
+                onClick={() => setShowRejectModal(false)}
+                disabled={loading}
+              >
                 Cancel
               </Button>
             </div>
           </div>
         </div>
       )}
-      
+
       {error && (
         <div className="fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50">
           {error}
@@ -401,9 +432,10 @@ export default function OrderDetailsPage() {
             </div>
           </div>
         </div>
-        
+
         <div className="flex gap-2">
-          {orderDetailsData?.order.status === "OrderStatus_PAYMENT_SUCCESSFUL" && (
+          {orderDetailsData?.order.status ===
+            "OrderStatus_PAYMENT_SUCCESSFUL" && (
             <>
               <Button
                 variant="default"
@@ -437,8 +469,6 @@ export default function OrderDetailsPage() {
           )}
         </div>
       </div>
-      
-      
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Order Summary */}
@@ -519,7 +549,22 @@ export default function OrderDetailsPage() {
                           colSpan={3}
                           className="px-4 py-3 text-sm font-medium text-gray-900 text-right"
                         >
-                          Fees
+                          Delivery Fee
+                        </td>
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right">
+                          {formatCurrency(
+                            orderDetailsData?.order?.deliveryFee?.value ?? "0",
+                            orderDetailsData?.order.deliveryFee
+                              ?.currencyIsoCode ?? ""
+                          )}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td
+                          colSpan={3}
+                          className="px-4 py-3 text-sm font-medium text-gray-900 text-right"
+                        >
+                          Service Fee
                         </td>
                         <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right">
                           {formatCurrency(
@@ -532,16 +577,19 @@ export default function OrderDetailsPage() {
                           )}
                         </td>
                       </tr>
+
                       <tr>
                         <td
                           colSpan={3}
                           className="px-4 py-3 text-sm font-bold text-gray-900 text-right"
                         >
-                          Total
+                          Grand Total
                         </td>
                         <td className="px-4 py-3 text-sm font-bold text-gray-900 text-right">
                           {formatCurrency(
-                            orderDetailsData?.order?.price?.value ?? 0,
+                            (orderDetailsData?.order?.price?.value ?? 0) +
+                              (orderDetailsData?.order?.deliveryFee?.value ??
+                                0),
                             orderDetailsData?.order.price?.currencyIsoCode ?? ""
                           )}
                         </td>
@@ -611,7 +659,17 @@ export default function OrderDetailsPage() {
                           ? `${userData?.user?.firstName} ${userData?.user?.lastName}`
                           : log.after?.status === "OrderStatus_APPROVED" ||
                             log.after?.status === "OrderStatus_REJECTED"
-                          ? `${farmerData?.user?.firstName} ${farmerData?.user?.lastName}`
+                          ? `${approver?.user?.firstName} ${
+                              approver?.user?.lastName
+                            } ${
+                              approver?.user?.userId !==
+                              farmerData?.user?.userId
+                                ? `(${approver?.user?.role?.replace(
+                                    "USER_ROLE_",
+                                    ""
+                                  )})`
+                                : ""
+                            } `
                           : log.after?.status === "OrderStatus_IN_TRANSIT"
                           ? `${agentData?.user?.firstName} ${agentData?.user?.lastName}`
                           : log.actor}

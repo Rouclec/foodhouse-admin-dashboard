@@ -1619,17 +1619,20 @@ func (i *Impl) RejectOrder(ctx context.Context,
 
 	i.logger.Debug().Msgf("payout phone number %v", payment.AccountNumber)
 
-	paymentReference := fmt.Sprintf("refund-%s", strconv.FormatInt(order.OrderNumber, 10))
+	// only make refunds when devMethodsEnabled is false
+	if !i.devMethodsEndabled {
+		paymentReference := fmt.Sprintf("refund-%s", strconv.FormatInt(order.OrderNumber, 10))
 
-	// ignore refunds error too
-	_, err = i.paymentService.WithdrawFunds(ctx,
-		payment.AccountNumber, payoutAmount,
-		*order.PriceCurrency, fmt.Sprintf("refund for order %v", order.OrderNumber),
-		&paymentReference)
+		// ignore refunds error too
+		_, err = i.paymentService.WithdrawFunds(ctx,
+			payment.AccountNumber, payoutAmount,
+			*order.PriceCurrency, fmt.Sprintf("refund for order %v", order.OrderNumber),
+			&paymentReference)
 
-	if err != nil {
-		i.logger.Error().Msgf("error making refund %v", err)
-		// return nil, status.Errorf(codes.Internal, "error making refund %v", err)
+		if err != nil {
+			i.logger.Error().Msgf("error making refund %v", err)
+			// return nil, status.Errorf(codes.Internal, "error making refund %v", err)
+		}
 	}
 
 	_, err = querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
