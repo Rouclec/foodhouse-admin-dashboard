@@ -74,6 +74,8 @@ const quantityUnits = [
   "others",
 ];
 
+const supportedCurrencies = ["XAF"];
+
 export default function PriceTypesPage() {
   const { user } = useContext(Context) as ContextType;
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -82,6 +84,8 @@ export default function PriceTypesPage() {
   const [loading, setLoading] = useState(false);
   const [deletingPriceType, setDeletingPriceType] =
     useState<productsgrpcPriceType>();
+  const [deliveryFeeCurrency, setDeliveryFeeCurrency] = useState("XAF");
+  const [deliveryFeeAmount, setDeliveryFeeAmount] = useState<string>();
 
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const { toast } = useToast();
@@ -109,6 +113,10 @@ export default function PriceTypesPage() {
               : customUnit?.toLowerCase()?.trim()
           }`,
           categoryId: selectedCategoryId,
+          deliveryFeePerUnit: {
+            value: parseFloat(deliveryFeeAmount ?? ""),
+            currencyIsoCode: deliveryFeeCurrency,
+          },
         },
         path: {
           userId: user?.userId ?? "",
@@ -289,6 +297,38 @@ export default function PriceTypesPage() {
                       </div>
                     </div>
                   )}
+
+                  <div className="space-y-2">
+                    <Label htmlFor="unit">Delivery fee per Unit</Label>
+                    <div className="space-x-4 flex flex-row items-center">
+                      <div className="w-[40%]">
+                        <Select
+                          value={deliveryFeeCurrency}
+                          onValueChange={setDeliveryFeeCurrency}
+                          required
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Currency" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {supportedCurrencies.map((curr) => (
+                              <SelectItem key={curr} value={curr}>
+                                {curr}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Input
+                        value={deliveryFeeAmount}
+                        inputMode="numeric"
+                        onChange={(e) => setDeliveryFeeAmount(e.target.value)}
+                        placeholder="1000"
+                        className="pl-10"
+                        required
+                      />
+                    </div>
+                  </div>
 
                   {selectedUnit && (
                     <div className="p-3 bg-green-50 rounded-lg">
