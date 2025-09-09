@@ -23,6 +23,10 @@ export default function () {
       code: "fr",
       name: i18n.t("(farmer).(profile-flow).(settings).french"),
     },
+    {
+      code: "sw",
+      name: i18n.t("(farmer).(profile-flow).(settings).swahili"),
+    },
     // Add this when ready:
     // { code: "ar", name: i18n.t("(farmer).(profile-flow).(settings).arabic") }
   ];
