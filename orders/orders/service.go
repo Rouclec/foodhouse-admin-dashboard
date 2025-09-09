@@ -1993,14 +1993,16 @@ func (i *Impl) BulkSettleCommissions(ctx context.Context,
 		return nil, status.Errorf(codes.Internal, "failed to create payment: %v", err)
 	}
 
-	// 5. Make the payout.
-	_, err = i.paymentService.WithdrawFunds(ctx,
-		user.GetUser().GetPhoneNumber(), total,
-		commissions[0].CurrencyCode, fmt.Sprintf("payment for commissions %v-%v", commissions[0].ID, commissions[len(commissions)-1].ID),
-		&commissions[0].ID)
+	// 5. Make the payout. (Only when dev methods is not enabled, i.e. only in production)
+	if !i.devMethodsEndabled {
+		_, payErr := i.paymentService.WithdrawFunds(ctx,
+			user.GetUser().GetPhoneNumber(), total,
+			commissions[0].CurrencyCode, fmt.Sprintf("payment for commissions %v-%v", commissions[0].ID, commissions[len(commissions)-1].ID),
+			&commissions[0].ID)
 
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error making payout %v", err)
+		if payErr != nil {
+			return nil, status.Errorf(codes.Internal, "error making payout %v", payErr)
+		}
 	}
 
 	// 6. Bulk update commissions.
