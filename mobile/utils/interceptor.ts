@@ -61,7 +61,6 @@ const updateAuthHeader = (newToken: string) => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handleResponseError = async (error: any) => {
   const originalRequest = error?.config;
-  console.log({ error }, 'from interceptor');
 
   if (
     error?.response?.status === 401 &&

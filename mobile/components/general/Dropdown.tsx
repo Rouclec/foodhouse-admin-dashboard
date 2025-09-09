@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Colors } from '@/constants';
 import { defaultStyles, dropdownStyles as styles } from '@/styles';
-import { HelperText, Icon, Portal } from 'react-native-paper';
+import { HelperText, Icon } from 'react-native-paper';
 import i18n from '@/i18n';
 
 interface DropdownItem {
@@ -64,25 +64,10 @@ export const Dropdown: React.FC<DropdownProps> = ({
   const [inputHeight, setInputHeight] = useState(0);
   const [selectedValue, setSelectedValue] = useState<DropdownItem>();
 
-  const inputRef = useRef<View>(null);
-  const [dropdownPosition, setDropdownPosition] = useState({
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0,
-  });
-  const DROPDOWN_OFFSET = 24;
-
-  const onInputLayout = () => {
-    inputRef.current?.measureInWindow((x, y, width, height) => {
-      setDropdownPosition({ x, y, width, height });
-    });
+  const onInputLayout = (event: LayoutChangeEvent) => {
+    const { height } = event.nativeEvent.layout;
+    setInputHeight(height);
   };
-
-  // const onInputLayout = (event: LayoutChangeEvent) => {
-  //   const { height } = event.nativeEvent.layout;
-  //   setInputHeight(height);
-  // };
 
   useEffect(() => {
     Animated.timing(animation, {
@@ -133,10 +118,9 @@ export const Dropdown: React.FC<DropdownProps> = ({
 
   return (
     <View
-     style={{ position: "relative" }}
+    // style={{ marginTop: 30 }}
     >
       <TouchableOpacity
-        ref={inputRef}
         activeOpacity={0.7}
         onPress={toggleDropdown}
         onLayout={onInputLayout}
@@ -185,48 +169,35 @@ export const Dropdown: React.FC<DropdownProps> = ({
       )}
 
       {isFocused && (
-        <Portal>
-          <View style={[
-        styles.dropdown,
-        dropdownStyle,
-        {
-          position: 'absolute',
-          top: dropdownPosition.y + dropdownPosition.height + DROPDOWN_OFFSET,
-          left: dropdownPosition.x,
-          width: dropdownPosition.width,
-          maxHeight: 200, 
-          zIndex: 1000, 
-        },
-      ]}>
-            <ScrollView>
-              {loading ? (
-                <ActivityIndicator />
-              ) : data.length === 0 ? (
-                <>
-                  <TouchableOpacity
-                    style={[styles.item, { borderBottomWidth: 0 }]}
-                    disabled>
-                    <Text style={styles.noDataText}>
-                      {i18n.t('components.Dropdown.noData')}
-                    </Text>
-                  </TouchableOpacity>
-                </>
-              ) : (
-                data.map((item, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={[
-                      styles.item,
-                      index === data?.length - 1 && { borderBottomWidth: 0 },
-                    ]}
-                    onPress={() => handleSelect(item)}>
-                    <Text style={styles.itemText}>{item.label}</Text>
-                  </TouchableOpacity>
-                ))
-              )}
-            </ScrollView>
-          </View>
-        </Portal>
+        <View style={[styles.dropdown, dropdownStyle]}>
+          <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="always">
+            {loading ? (
+              <ActivityIndicator />
+            ) : data.length === 0 ? (
+              <>
+                <TouchableOpacity
+                  style={[styles.item, { borderBottomWidth: 0 }]}
+                  disabled>
+                  <Text style={styles.noDataText}>
+                    {i18n.t('components.Dropdown.noData')}
+                  </Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              data.map((item, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.item,
+                    index === data?.length - 1 && { borderBottomWidth: 0 },
+                  ]}
+                  onPress={() => handleSelect(item)}>
+                  <Text style={styles.itemText}>{item.label}</Text>
+                </TouchableOpacity>
+              ))
+            )}
+          </ScrollView>
+        </View>
       )}
     </View>
   );

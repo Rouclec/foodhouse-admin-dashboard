@@ -1,10 +1,10 @@
 import React, { useContext, useState, useRef, useEffect } from 'react';
 import {
   KeyboardAvoidingView,
-  ScrollView,
   TouchableOpacity,
   View,
   Image,
+  ScrollView,
 } from 'react-native';
 import {
   Appbar,
@@ -38,6 +38,8 @@ import {
 } from 'react-native-google-places-autocomplete';
 
 import { UsersCompleteRegistrationBody } from '@/client/users.swagger';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+// import { ScrollView } from 'react-native-virtualized-view';
 
 const ProfilePage = () => {
   const { user, setUser } = useContext(Context) as ContextType;
@@ -153,7 +155,7 @@ const ProfilePage = () => {
           userId: user?.userId ?? '',
         },
       });
-      setUser({ ...data });
+      setUser({ ...user, ...data });
     } catch (error) {
       console.error('Error completing registration:', error);
       // setErrorMessage(i18n.t('(auth).profile.uploadError'));
@@ -194,87 +196,55 @@ const ProfilePage = () => {
 
   return (
     <>
-      <KeyboardAvoidingView
-        style={defaultStyles.container}
-        behavior={'padding'}
-        keyboardVerticalOffset={0}>
-        <View style={defaultStyles.flex}>
-          <Appbar.Header dark={false} style={defaultStyles.appHeader}>
-            <TouchableOpacity
-              onPress={() => router.back()}
-              style={defaultStyles.backButtonContainer}>
-              <Icon source={'arrow-left'} size={24} />
-            </TouchableOpacity>
-            <Text variant="titleMedium" style={defaultStyles.heading}>
-              {i18n.t('(auth).profile.completeRegistration')}
-            </Text>
-            <View />
-          </Appbar.Header>
-          <View style={signupStyles.imageContainer}>
-            <TouchableOpacity
-              onPress={() => setIsImagePickerVisible(true)}
-              style={signupStyles.imageUpload}>
-              {profileImage?.uri ? (
-                <Image
-                  source={{ uri: profileImage.uri }}
-                  style={signupStyles.profileImage}
+      <View style={[defaultStyles.flex, defaultStyles.container]}>
+        <Appbar.Header dark={false} style={defaultStyles.appHeader}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={defaultStyles.backButtonContainer}>
+            <Icon source={'arrow-left'} size={24} />
+          </TouchableOpacity>
+          <Text variant="titleMedium" style={defaultStyles.heading}>
+            {i18n.t('(auth).profile.completeRegistration')}
+          </Text>
+          <View />
+        </Appbar.Header>
+        <View style={signupStyles.imageContainer}>
+          <TouchableOpacity
+            onPress={() => setIsImagePickerVisible(true)}
+            style={signupStyles.imageUpload}>
+            {profileImage?.uri ? (
+              <Image
+                source={{ uri: profileImage.uri }}
+                style={signupStyles.profileImage}
+              />
+            ) : (
+              <View style={signupStyles.addImageContainer}>
+                <Avatar.Icon
+                  size={120}
+                  icon="account"
+                  style={signupStyles.account}
                 />
-              ) : (
-                <View style={signupStyles.addImageContainer}>
-                  <Avatar.Icon
-                    size={120}
-                    icon="account"
-                    style={signupStyles.account}
-                  />
-                  <Avatar.Icon
-                    size={24}
-                    icon="camera"
-                    color="#fff"
-                    style={signupStyles.cameraIcon}
-                  />
-                </View>
-              )}
-            </TouchableOpacity>
-          </View>
-          <ScrollView
-            contentContainerStyle={defaultStyles.scrollContainer}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            nestedScrollEnabled>
-            <View style={signupStyles.allInput}>
-              <View style={signupStyles.inputGap}>
-                <TextInput
-                  label={i18n.t('(auth).profile.firstName')}
-                  value={firstName}
-                  onChangeText={setFirstName}
-                  mode="outlined"
-                  style={defaultStyles.input}
-                  theme={{
-                    colors: {
-                      primary: Colors.primary[500],
-                      background: Colors.grey['fa'],
-                      error: Colors.error,
-                    },
-                    roundness: 10,
-                  }}
-                  error={
-                    (checkError && !firstName) ||
-                    (!!firstName && firstName.length < 3)
-                  }
-                  outlineColor={Colors.grey['bg']}
+                <Avatar.Icon
+                  size={24}
+                  icon="camera"
+                  color="#fff"
+                  style={signupStyles.cameraIcon}
                 />
-                {((checkError && !firstName) ||
-                  (!!firstName && firstName.length < 3)) && (
-                  <HelperText style={defaultStyles.errorText} type="error">
-                    {i18n.t('(auth).profile.firstNameRequired')}
-                  </HelperText>
-                )}
               </View>
-
+            )}
+          </TouchableOpacity>
+        </View>
+        <KeyboardAwareScrollView
+          contentContainerStyle={defaultStyles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="always"
+          nestedScrollEnabled>
+          <View style={signupStyles.allInput}>
+            <View style={signupStyles.inputGap}>
               <TextInput
-                label={i18n.t('(auth).profile.lastName')}
-                value={lastName}
-                onChangeText={setLastName}
+                label={i18n.t('(auth).profile.firstName')}
+                value={firstName}
+                onChangeText={setFirstName}
                 mode="outlined"
                 style={defaultStyles.input}
                 theme={{
@@ -285,166 +255,189 @@ const ProfilePage = () => {
                   },
                   roundness: 10,
                 }}
+                error={
+                  (checkError && !firstName) ||
+                  (!!firstName && firstName.length < 3)
+                }
                 outlineColor={Colors.grey['bg']}
               />
+              {((checkError && !firstName) ||
+                (!!firstName && firstName.length < 3)) && (
+                <HelperText style={defaultStyles.errorText} type="error">
+                  {i18n.t('(auth).profile.firstNameRequired')}
+                </HelperText>
+              )}
+            </View>
 
-              <View style={signupStyles.inputGap}>
-                <TextInput
-                  mode="outlined"
-                  label={i18n.t('(auth).profile.email')}
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  error={
-                    !!email && email?.length > 0 && !emailRegex.test(email)
-                  }
-                  outlineColor={Colors.grey['bg']}
-                  style={defaultStyles.input}
-                  theme={{
-                    colors: {
-                      primary: Colors.primary[500],
-                      background: Colors.grey['fa'],
-                      error: Colors.error,
-                    },
-                    roundness: 10,
-                  }}
-                />
-                {!!email && email?.length > 0 && !emailRegex.test(email) && (
+            <TextInput
+              label={i18n.t('(auth).profile.lastName')}
+              value={lastName}
+              onChangeText={setLastName}
+              mode="outlined"
+              style={defaultStyles.input}
+              theme={{
+                colors: {
+                  primary: Colors.primary[500],
+                  background: Colors.grey['fa'],
+                  error: Colors.error,
+                },
+                roundness: 10,
+              }}
+              outlineColor={Colors.grey['bg']}
+            />
+
+            <View style={signupStyles.inputGap}>
+              <TextInput
+                mode="outlined"
+                label={i18n.t('(auth).profile.email')}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                error={!!email && email?.length > 0 && !emailRegex.test(email)}
+                outlineColor={Colors.grey['bg']}
+                style={defaultStyles.input}
+                theme={{
+                  colors: {
+                    primary: Colors.primary[500],
+                    background: Colors.grey['fa'],
+                    error: Colors.error,
+                  },
+                  roundness: 10,
+                }}
+              />
+              {!!email && email?.length > 0 && !emailRegex.test(email) && (
+                <HelperText style={defaultStyles.errorText} type="error">
+                  {i18n.t('(auth).profile.enterValidEmail')}
+                </HelperText>
+              )}
+            </View>
+            <View style={defaultStyles.flex}>
+              <GooglePlacesAutocomplete
+                keyboardShouldPersistTaps="always"
+                disableScroll
+                ref={googlePlacesAutoCompleteRef}
+                placeholder={i18n.t(
+                  '(farmer).(profile-flow).(personal-info).address',
+                )}
+                query={{
+                  key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_AUTOCOMPLETE_KEY,
+                  language: 'en',
+                }}
+                styles={{
+                  textInput: {
+                    ...defaultStyles.input,
+                    backgroundColor: Colors.light[10],
+                    height: 56,
+                    borderRadius: 15,
+                    borderColor: Colors.grey['bg'],
+                    borderWidth: 1,
+                    paddingLeft: 28,
+                    fontWeight: '500',
+                  },
+                  listView: {
+                    backgroundColor: Colors.light[10],
+                    borderRadius: 15,
+                    marginTop: 5,
+                    elevation: 3,
+                    position: 'absolute',
+                    top: -216,
+                    height: 200, // scroll instead of pushing UI
+                    zIndex: 9999,
+                  },
+                  row: {
+                    flexDirection: 'row',
+                    alignItems: 'flex-start',
+                    paddingHorizontal: 12,
+                    paddingVertical: 10,
+                  },
+                }}
+                renderRow={data => (
+                  <View style={{ flexDirection: 'row', flex: 1 }}>
+                    <Text
+                      style={{
+                        flexShrink: 1, // critical for wrapping
+                        flexGrow: 1,
+                        fontSize: 14,
+                        lineHeight: 18,
+                        color: Colors.grey['3c'],
+                      }}
+                      numberOfLines={0} // unlimited wrapping
+                    >
+                      {data.description}
+                    </Text>
+                  </View>
+                )}
+                textInputProps={{
+                  placeholderTextColor: Colors.grey['3c'],
+                  value: address,
+                  onChangeText: text => setAddress(text),
+                }}
+                onPress={(data, details) => handleAddressSelect(data, details)}
+                fetchDetails={true}
+                nearbyPlacesAPI="GooglePlacesSearch"
+                debounce={200}
+                timeout={20000}
+                minLength={3}
+                enablePoweredByContainer={false}
+                predefinedPlaces={[]}
+              />
+              {checkError &&
+                user?.role === 'USER_ROLE_FARMER' &&
+                !locationCoordinates && (
                   <HelperText style={defaultStyles.errorText} type="error">
-                    {i18n.t('(auth).profile.enterValidEmail')}
+                    {i18n.t('(auth).profile.selectAValidAddress')}
                   </HelperText>
                 )}
-              </View>
-              <View style={defaultStyles.flex}>
-                <GooglePlacesAutocomplete
-                  ref={googlePlacesAutoCompleteRef}
-                  placeholder={i18n.t(
-                    '(farmer).(profile-flow).(personal-info).address',
-                  )}
-                  query={{
-                    key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_AUTOCOMPLETE_KEY,
-                    language: 'en',
-                  }}
-                  styles={{
-                    textInput: {
-                      ...defaultStyles.input,
-                      backgroundColor: Colors.light[10],
-                      height: 56,
-                      borderRadius: 15,
-                      borderColor: Colors.grey['bg'],
-                      borderWidth: 1,
-                      paddingLeft: 28,
-                      fontWeight: '500',
-                    },
-                    listView: {
-                      backgroundColor: Colors.light[10],
-                      borderRadius: 15,
-                      marginTop: 5,
-                      elevation: 3,
-                      position: 'absolute',
-                      top: -216,
-                      maxHeight: 200, // scroll instead of pushing UI
-                      zIndex: 9999,
-                    },
-                    row: {
-                      flexDirection: 'row',
-                      alignItems: 'flex-start',
-                      paddingHorizontal: 12,
-                      paddingVertical: 10,
-                    },
-                  }}
-                  renderRow={data => (
-                    <View style={{ flexDirection: 'row', flex: 1 }}>
-                      <Text
-                        style={{
-                          flexShrink: 1, // critical for wrapping
-                          flexGrow: 1,
-                          fontSize: 14,
-                          lineHeight: 18,
-                          color: Colors.grey['3c'],
-                        }}
-                        numberOfLines={0} // unlimited wrapping
-                      >
-                        {data.description}
-                      </Text>
-                    </View>
-                  )}
-                  textInputProps={{
-                    placeholderTextColor: Colors.grey['3c'],
-                    value: address,
-                    onChangeText: setAddress,
-                  }}
-                  onPress={(data, details) =>
-                    handleAddressSelect(data, details)
-                  }
-                  fetchDetails={true}
-                  nearbyPlacesAPI="GooglePlacesSearch"
-                  debounce={200}
-                  timeout={20000}
-                  minLength={3}
-                  enablePoweredByContainer={false}
-                  predefinedPlaces={[]}
-                />
-                {checkError &&
-                  user?.role === 'USER_ROLE_FARMER' &&
-                  !locationCoordinates && (
-                    <HelperText style={defaultStyles.errorText} type="error">
-                      {i18n.t('(auth).profile.selectAValidAddress')}
-                    </HelperText>
-                  )}
-              </View>
-              {user?.role === 'USER_ROLE_BUYER' && (
-                <Dropdown
-                  label={i18n.t('(auth).profile.doYouHaveAReferralCode')}
-                  value={enteringReferal}
-                  onSelect={value => setEnteringReferal(value as 'yes' | 'no')}
-                  data={[
-                    {
-                      label: 'Yes',
-                      value: 'yes',
-                    },
-                    {
-                      label: 'No',
-                      value: 'no',
-                    },
-                  ]}
-                  error={
-                    checkError && !enteringReferal
-                      ? i18n.t('(auth).profile.pleaseSelectThisOption')
-                      : undefined
-                  }
-                />
-              )}
-              {user?.role === 'USER_ROLE_BUYER' &&
-                enteringReferal === 'yes' && (
-                  <TextInput
-                    label={i18n.t('(auth).profile.referralCode')}
-                    value={referralCode}
-                    onChangeText={setReferralCode}
-                    mode="outlined"
-                    style={defaultStyles.input}
-                    theme={{
-                      colors: {
-                        primary: Colors.primary[500],
-                        background: Colors.grey['fa'],
-                        error: Colors.error,
-                      },
-                      roundness: 10,
-                    }}
-                    autoCapitalize="characters"
-                    outlineColor={Colors.grey['bg']}
-                    error={
-                      enteringReferal === 'yes' &&
-                      (!referralCode ||
-                        (!!referralCode && referralCode.length < 7))
-                    }
-                  />
-                )}
             </View>
-          </ScrollView>
-        </View>
-      </KeyboardAvoidingView>
+            {user?.role === 'USER_ROLE_BUYER' && (
+              <Dropdown
+                label={i18n.t('(auth).profile.doYouHaveAReferralCode')}
+                value={enteringReferal}
+                onSelect={value => setEnteringReferal(value as 'yes' | 'no')}
+                data={[
+                  {
+                    label: 'Yes',
+                    value: 'yes',
+                  },
+                  {
+                    label: 'No',
+                    value: 'no',
+                  },
+                ]}
+                error={
+                  checkError && !enteringReferal
+                    ? i18n.t('(auth).profile.pleaseSelectThisOption')
+                    : undefined
+                }
+              />
+            )}
+            {user?.role === 'USER_ROLE_BUYER' && enteringReferal === 'yes' && (
+              <TextInput
+                label={i18n.t('(auth).profile.referralCode')}
+                value={referralCode}
+                onChangeText={setReferralCode}
+                mode="outlined"
+                style={defaultStyles.input}
+                theme={{
+                  colors: {
+                    primary: Colors.primary[500],
+                    background: Colors.grey['fa'],
+                    error: Colors.error,
+                  },
+                  roundness: 10,
+                }}
+                autoCapitalize="characters"
+                outlineColor={Colors.grey['bg']}
+                error={
+                  enteringReferal === 'yes' &&
+                  (!referralCode || (!!referralCode && referralCode.length < 7))
+                }
+              />
+            )}
+          </View>
+        </KeyboardAwareScrollView>
+      </View>
       <View style={defaultStyles.bottomButtonContainer}>
         <Button
           mode="contained"

@@ -42,7 +42,7 @@ export const signupStyles = StyleSheet.create({
   },
   allInput: {
     top: 10,
-    gap: 34,
+    gap: 24,
     paddingBottom: Platform.OS === 'ios' ? 0 : 120,
   },
   subheading: {
