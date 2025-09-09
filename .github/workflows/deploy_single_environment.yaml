@@ -68,42 +68,42 @@ jobs:
                 envId="${{ inputs.envId }}"
                 ARTIFACTS_STACK_NAME='artifact-account-setup'
 
-                  target_ref=$(yq e '.[] | select(.envId == "'$envId'")| .gitRefName' ./cd/environments.yaml)
-                  domain_name=$(yq e '.[] | select(.envId == "'$envId'")| .domainName' ./cd/environments.yaml)
-                  environment_aws_account_id=$(yq e '.[] | select(.envId == "'$envId'")| .awsAccountId' ./cd/environments.yaml)
-                  release_infra_hash=$(aws ssm get-parameter --name "/build-artifact/infra/$target_ref" --query "Parameter.Value" --output text)
-                  users_image_tag=$(aws ssm get-parameter --name "/build-artifact/users/$target_ref" --query "Parameter.Value" --output text)
-                  products_image_tag=$(aws ssm get-parameter --name "/build-artifact/products/$target_ref" --query "Parameter.Value" --output text)
-                  orders_image_tag=$(aws ssm get-parameter --name "/build-artifact/orders/$target_ref" --query "Parameter.Value" --output text)
-                  jsonproxy_image_tag=$(aws ssm get-parameter --name "/build-artifact/jsonproxy/$target_ref" --query "Parameter.Value" --output text)
-                  infra_bucket_name=$(aws cloudformation describe-stacks --stack-name "$ARTIFACTS_STACK_NAME" --query "Stacks[0].Outputs[?OutputKey=='InfraArtifactsBucket'].OutputValue" --output text )
+                target_ref=$(yq e '.[] | select(.envId == "'$envId'")| .gitRefName' ./cd/environments.yaml)
+                domain_name=$(yq e '.[] | select(.envId == "'$envId'")| .domainName' ./cd/environments.yaml)
+                environment_aws_account_id=$(yq e '.[] | select(.envId == "'$envId'")| .awsAccountId' ./cd/environments.yaml)
+                release_infra_hash=$(aws ssm get-parameter --name "/build-artifact/infra/$target_ref" --query "Parameter.Value" --output text)
+                users_image_tag=$(aws ssm get-parameter --name "/build-artifact/users/$target_ref" --query "Parameter.Value" --output text)
+                products_image_tag=$(aws ssm get-parameter --name "/build-artifact/products/$target_ref" --query "Parameter.Value" --output text)
+                orders_image_tag=$(aws ssm get-parameter --name "/build-artifact/orders/$target_ref" --query "Parameter.Value" --output text)
+                jsonproxy_image_tag=$(aws ssm get-parameter --name "/build-artifact/jsonproxy/$target_ref" --query "Parameter.Value" --output text)
+                infra_bucket_name=$(aws cloudformation describe-stacks --stack-name "$ARTIFACTS_STACK_NAME" --query "Stacks[0].Outputs[?OutputKey=='InfraArtifactsBucket'].OutputValue" --output text )
 
-                   echo "======================================="
-                    echo "DEBUG INFO - Release Configuration"
-                    echo "envId:                    $envId"
-                    echo "target_ref:               $target_ref"
-                    echo "domain_name:              $domain_name"
-                    echo "environment_aws_account_id: $environment_aws_account_id"
-                    echo "release_infra_hash:       $release_infra_hash"
-                    echo "users_image_tag:          $users_image_tag"
-                    echo "products_image_tag:       $products_image_tag"
-                    echo "orders_image_tag:         $orders_image_tag"
-                    echo "jsonproxy_image_tag:      $jsonproxy_image_tag"
-                    echo "infra_bucket_name:        $infra_bucket_name"
-                    echo "======================================="
+                echo "======================================="
+                echo "DEBUG INFO - Release Configuration"
+                echo "envId:                    $envId"
+                echo "target_ref:               $target_ref"
+                echo "domain_name:              $domain_name"
+                echo "environment_aws_account_id: $environment_aws_account_id"
+                echo "release_infra_hash:       $release_infra_hash"
+                echo "users_image_tag:          $users_image_tag"
+                echo "products_image_tag:       $products_image_tag"
+                echo "orders_image_tag:         $orders_image_tag"
+                echo "jsonproxy_image_tag:      $jsonproxy_image_tag"
+                echo "infra_bucket_name:        $infra_bucket_name"
+                echo "======================================="
                   
-                  echo aws ssm get-parameter --name "/build-artifact/infra/$target_ref" --query "Parameter.Value" --output text 
-                  aws ssm get-parameter --name "/build-artifact/infra/$target_ref" --query "Parameter.Value" --output text
+                echo aws ssm get-parameter --name "/build-artifact/infra/$target_ref" --query "Parameter.Value" --output text 
+                aws ssm get-parameter --name "/build-artifact/infra/$target_ref" --query "Parameter.Value" --output text
 
-                    echo "target_ref=$target_ref" >> $GITHUB_OUTPUT
-                    echo "domain_name=$domain_name" >> $GITHUB_OUTPUT
-                    echo "environment_aws_account_id=$environment_aws_account_id" >> $GITHUB_OUTPUT
-                    echo "release_infra_hash=$release_infra_hash" >> $GITHUB_OUTPUT
-                      echo "users_image_tag=$users_image_tag" >> $GITHUB_OUTPUT
-                      echo "products_image_tag=$products_image_tag" >> $GITHUB_OUTPUT
-                      echo "orders_image_tag=$orders_image_tag" >> $GITHUB_OUTPUT
-                      echo "jsonproxy_image_tag=$jsonproxy_image_tag" >> $GITHUB_OUTPUT
-                      echo "infra_bucket_name=$infra_bucket_name" >> $GITHUB_OUTPUT
+                  echo "target_ref=$target_ref" >> $GITHUB_OUTPUT
+                  echo "domain_name=$domain_name" >> $GITHUB_OUTPUT
+                  echo "environment_aws_account_id=$environment_aws_account_id" >> $GITHUB_OUTPUT
+                  echo "release_infra_hash=$release_infra_hash" >> $GITHUB_OUTPUT
+                  echo "users_image_tag=$users_image_tag" >> $GITHUB_OUTPUT
+                  echo "products_image_tag=$products_image_tag" >> $GITHUB_OUTPUT
+                  echo "orders_image_tag=$orders_image_tag" >> $GITHUB_OUTPUT
+                  echo "jsonproxy_image_tag=$jsonproxy_image_tag" >> $GITHUB_OUTPUT
+                  echo "infra_bucket_name=$infra_bucket_name" >> $GITHUB_OUTPUT
 
 
             # Assume the OIDC Role to get temporary credentials 
