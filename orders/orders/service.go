@@ -1011,10 +1011,6 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 		return nil, status.Errorf(codes.Internal, "currency %s is not supported", req.GetAmount().GetCurrencyIsoCode())
 	}
 
-	// Using test amount while in sandbox mode
-
-	// testAmount := float64(10)
-
 	// make request to TPW to initiate actual payment only when dev methods is not enabled
 	if !i.devMethodsEndabled {
 		_, payErr := i.paymentService.RequestPayment(ctx, formattedNumber, *totalPrice, req.GetAmount().GetCurrencyIsoCode(), req.GetPaymentEntity().String(), &req.EntityId)
