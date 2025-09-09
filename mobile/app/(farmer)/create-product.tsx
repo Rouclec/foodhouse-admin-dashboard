@@ -66,7 +66,6 @@ export default function CreateProduct() {
     price: '',
     description: '',
   });
- 
 
   const onImagePickerClose = () => {
     setIsImagePickerVisible(false);
@@ -155,7 +154,7 @@ export default function CreateProduct() {
         body: {
           categoryId: productCategory,
           name: productName,
-          unitType: priceType,
+          unitTypeId: priceType,
           amount: {
             value: parseFloat(price ?? ''),
             currencyIsoCode: currencyCountry.currency_code,
@@ -311,7 +310,7 @@ export default function CreateProduct() {
                 data={(priceTypes?.priceTypes ?? [])?.map(priceType => {
                   return {
                     label: `Per ${priceType.slug?.replace('per_', '') ?? ''}`,
-                    value: priceType.slug ?? '',
+                    value: priceType.id ?? '',
                   };
                 })}
                 loading={isPriceTypesLoading}
