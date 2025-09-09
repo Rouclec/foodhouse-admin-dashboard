@@ -62,7 +62,6 @@ func Newproducts(
 
 // CreateCategory implements productsgrpc.ProductsServer.
 func (i *Impl) CreateCategory(ctx context.Context, req *productsgrpc.CreateCategoryRequest) (*productsgrpc.CreateCategoryResponse, error) {
-	i.logger.Debug().Msgf("name %v and slug %v", req.GetName(), slug.Make(req.GetName()))
 
 	category, err := i.repo.Do().CreateCategory(ctx, sqlc.CreateCategoryParams{
 		Name:      req.GetName(),
@@ -96,7 +95,6 @@ func (i *Impl) DeleteCategory(ctx context.Context, req *productsgrpc.DeleteCateg
 
 // UpdateCategory implements productsgrpc.ProductsServer.
 func (i *Impl) UpdateCategory(ctx context.Context, req *productsgrpc.UpdateCategoryRequest) (*productsgrpc.UpdateCategoryResponse, error) {
-	i.logger.Debug().Msgf("name %v and slug %v", req.GetName(), slug.Make(req.GetName()))
 
 	err := i.repo.Do().UpdateCategory(ctx, sqlc.UpdateCategoryParams{
 		ID:   req.GetCategoryId(),
@@ -113,7 +111,6 @@ func (i *Impl) UpdateCategory(ctx context.Context, req *productsgrpc.UpdateCateg
 
 // CreateProduct implements productsgrpc.ProductsServer.
 func (i *Impl) CreateProduct(ctx context.Context, req *productsgrpc.CreateProductRequest) (*productsgrpc.CreateProductResponse, error) {
-	i.logger.Debug().Msgf("name %v and slug %v", req.GetName(), slug.Make(req.GetName()))
 
 	category, err := i.repo.Do().GetCategory(ctx, req.GetCategoryId())
 
@@ -177,8 +174,6 @@ func (i *Impl) DeleteProduct(ctx context.Context, req *productsgrpc.DeleteProduc
 		return nil, status.Errorf(codes.Internal, "error deleting product %v", err)
 	}
 
-	i.logger.Debug().Msgf("conditions: %v, %v, %v", *product.CreatedBy, req.UserId, *product.CreatedBy != req.UserId)
-
 	if *product.CreatedBy != req.UserId {
 		return nil, status.Errorf(codes.PermissionDenied, "you don't have permission to delete this product")
 	}
@@ -216,8 +211,6 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 		}
 	}
 
-	i.logger.Debug().Msgf("Start key %v", startKey)
-
 	args := sqlc.ListProductsParams{
 		CategoryID:    req.GetCategoryId(),
 		CreatedBy:     req.GetCreatedBy(),
@@ -234,15 +227,11 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 		return nil, status.Errorf(codes.Internal, "error getting products %v", err)
 	}
 
-	i.logger.Debug().Msgf("sqlc products %v", products)
-
 	protoProducts, err := converters.SqlcToProtoProducts(products)
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to convert sqlc products to proto: %v", err)
 	}
-
-	i.logger.Debug().Msgf("proto products %v", protoProducts)
 
 	nextKey := ""
 
@@ -294,8 +283,6 @@ func (i *Impl) ListFarmerProducts(ctx context.Context, req *productsgrpc.ListFar
 
 	nextKey := ""
 
-	i.logger.Debug().Msgf("Count %v, product length %v", count, len(protoProducts))
-
 	if len(protoProducts) >= count {
 		nextKey = protoProducts[len(protoProducts)-1].GetCreatedAt().AsTime().Format(time.RFC3339)
 	}
@@ -344,8 +331,6 @@ func (i *Impl) UpdateProduct(ctx context.Context, req *productsgrpc.UpdateProduc
 		WholeSale:       req.GetWholeSale(),
 	}
 
-	i.logger.Debug().Msgf("update product params: %v", arg)
-	i.logger.Debug().Msgf("product id: %v", arg.ID)
 	err = querier.UpdateProduct(ctx, arg)
 
 	if err != nil {
