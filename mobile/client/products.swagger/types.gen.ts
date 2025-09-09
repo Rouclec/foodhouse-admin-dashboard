@@ -13,7 +13,7 @@ export type ProductsCreatePriceTypeBody = {
 export type ProductsCreateProductBody = {
     categoryId?: string;
     name?: string;
-    unitType?: string;
+    unitTypeId?: string;
     amount?: typesAmount;
     description?: string;
     image?: string;

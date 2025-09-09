@@ -18,6 +18,7 @@ type Querier interface {
 	DeleteProduct(ctx context.Context, id string) error
 	DeleteProductName(ctx context.Context, name string) error
 	GetCategory(ctx context.Context, id string) (Category, error)
+	GetPriceTypeById(ctx context.Context, id string) (PriceType, error)
 	GetProduct(ctx context.Context, id string) (Product, error)
 	GetProductForUpdate(ctx context.Context, id string) (Product, error)
 	GetProductStatsBetweenDates(ctx context.Context, arg GetProductStatsBetweenDatesParams) (int64, error)

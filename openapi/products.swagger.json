@@ -765,7 +765,7 @@
         "name": {
           "type": "string"
         },
-        "unitType": {
+        "unitTypeId": {
           "type": "string"
         },
         "amount": {

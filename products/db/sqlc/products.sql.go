@@ -200,6 +200,24 @@ func (q *Queries) GetCategory(ctx context.Context, id string) (Category, error) 
 	return i, err
 }
 
+const getPriceTypeById = `-- name: GetPriceTypeById :one
+SELECT id, name, slug, category_id, delivery_fee_amount, delivery_fee_currency FROM price_types where id = $1
+`
+
+func (q *Queries) GetPriceTypeById(ctx context.Context, id string) (PriceType, error) {
+	row := q.db.QueryRow(ctx, getPriceTypeById, id)
+	var i PriceType
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Slug,
+		&i.CategoryID,
+		&i.DeliveryFeeAmount,
+		&i.DeliveryFeeCurrency,
+	)
+	return i, err
+}
+
 const getProduct = `-- name: GetProduct :one
 SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency FROM products where id = $1
 `

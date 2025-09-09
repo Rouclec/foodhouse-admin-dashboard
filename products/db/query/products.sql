@@ -99,6 +99,9 @@ SELECT * FROM price_types
 WHERE (sqlc.arg(category_id)::text = '' OR category_id = sqlc.arg(category_id))
 ORDER BY slug ASC;
 
+-- name: GetPriceTypeById :one
+SELECT * FROM price_types where id = $1;
+
 -- name: SumProductAmounts :one
 SELECT 
   COALESCE(SUM(p.value * t.quantity), 0)::double precision AS total

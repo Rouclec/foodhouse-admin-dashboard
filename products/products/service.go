@@ -121,17 +121,23 @@ func (i *Impl) CreateProduct(ctx context.Context, req *productsgrpc.CreateProduc
 		return nil, status.Errorf(codes.InvalidArgument, "error getting category %v", err)
 	}
 
+	unitType, err := i.repo.Do().GetPriceTypeById(ctx, req.GetUnitTypeId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting price type. Why: %v", err)
+	}
+
 	product, err := i.repo.Do().CreateProduct(ctx, sqlc.CreateProductParams{
 		CategoryID:          &req.CategoryId,
 		Name:                req.GetName(),
-		UnitType:            req.GetUnitType(),
+		UnitType:            unitType.Slug,
 		Value:               req.GetAmount().GetValue(),
 		CurrencyIsoCode:     req.GetAmount().GetCurrencyIsoCode(),
 		Description:         req.GetDescription(),
 		Image:               req.GetImage(),
 		CreatedBy:           &req.UserId,
-		DeliveryFeeAmount:   &req.GetAmount().Value,
-		DeliveryFeeCurrency: &req.GetAmount().CurrencyIsoCode,
+		DeliveryFeeAmount:   unitType.DeliveryFeeAmount,
+		DeliveryFeeCurrency: unitType.DeliveryFeeCurrency,
 	})
 
 	if err != nil {

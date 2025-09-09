@@ -453,7 +453,7 @@ func (i *Impl) CompleteRegistration(
 			P: pgtype.Vec2{X: float64(req.GetLocationCoordinates().GetLon()),
 				Y: float64(req.GetLocationCoordinates().GetLat())}, Valid: true},
 		ProfileImage: req.GetProfileImage(),
-		Address:      req.Address,
+		Address:      req.GetAddress(),
 		PhoneNumber:  phoneNumber,
 	}
 
