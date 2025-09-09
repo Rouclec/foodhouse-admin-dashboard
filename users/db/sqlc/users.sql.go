@@ -174,8 +174,13 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email *string) (User, erro
 const getUserByNationalNumber = `-- name: GetUserByNationalNumber :one
 SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code
 FROM users
-WHERE RIGHT(phone_number, CHAR_LENGTH($1::TEXT)) = $1::TEXT
-  AND CHAR_LENGTH(phone_number) - CHAR_LENGTH($1::TEXT) BETWEEN 1 AND 5
+WHERE 
+  phone_number = $1::TEXT
+  OR
+  (
+    RIGHT(phone_number, CHAR_LENGTH($1::TEXT)) = $1::TEXT
+    AND CHAR_LENGTH(phone_number) - CHAR_LENGTH($1::TEXT) BETWEEN 1 AND 5 -- ensures a valid country code
+  )
 `
 
 func (q *Queries) GetUserByNationalNumber(ctx context.Context, nationalNumber string) (User, error) {
@@ -585,7 +590,6 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 }
 
 const updateUserPassword = `-- name: UpdateUserPassword :exec
-
 UPDATE users SET password = $1 WHERE id = $2
 `
 
@@ -594,7 +598,6 @@ type UpdateUserPasswordParams struct {
 	ID       string `json:"id"`
 }
 
-// ensures a valid country code
 func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error {
 	_, err := q.db.Exec(ctx, updateUserPassword, arg.Password, arg.ID)
 	return err

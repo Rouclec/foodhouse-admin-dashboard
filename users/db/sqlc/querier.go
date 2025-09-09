@@ -54,7 +54,6 @@ type Querier interface {
 	UpdateSentOtp(ctx context.Context, arg UpdateSentOtpParams) error
 	UpdateSubscription(ctx context.Context, arg UpdateSubscriptionParams) (Subscription, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
-	// ensures a valid country code
 	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error
 	UpdateUserRole(ctx context.Context, arg UpdateUserRoleParams) error
 }
