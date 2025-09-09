@@ -78,6 +78,20 @@ jobs:
                   jsonproxy_image_tag=$(aws ssm get-parameter --name "/build-artifact/jsonproxy/$target_ref" --query "Parameter.Value" --output text)
                   infra_bucket_name=$(aws cloudformation describe-stacks --stack-name "$ARTIFACTS_STACK_NAME" --query "Stacks[0].Outputs[?OutputKey=='InfraArtifactsBucket'].OutputValue" --output text )
 
+                   echo "======================================="
+                    echo "DEBUG INFO - Release Configuration"
+                    echo "envId:                    $envId"
+                    echo "target_ref:               $target_ref"
+                    echo "domain_name:              $domain_name"
+                    echo "environment_aws_account_id: $environment_aws_account_id"
+                    echo "release_infra_hash:       $release_infra_hash"
+                    echo "users_image_tag:          $users_image_tag"
+                    echo "products_image_tag:       $products_image_tag"
+                    echo "orders_image_tag:         $orders_image_tag"
+                    echo "jsonproxy_image_tag:      $jsonproxy_image_tag"
+                    echo "infra_bucket_name:        $infra_bucket_name"
+                    echo "======================================="
+                  
                   echo aws ssm get-parameter --name "/build-artifact/infra/$target_ref" --query "Parameter.Value" --output text 
                   aws ssm get-parameter --name "/build-artifact/infra/$target_ref" --query "Parameter.Value" --output text
 
