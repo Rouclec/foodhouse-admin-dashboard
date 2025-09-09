@@ -490,16 +490,11 @@ func (q *Queries) GetPaymentStatsBetweenDates(ctx context.Context, arg GetPaymen
 }
 
 const getUserOrderBySecretKey = `-- name: GetUserOrderBySecretKey :one
-SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity, dispatched_by, delivery_fee_amount, delivery_fee_currency FROM orders WHERE secret_key = $1 AND created_by = $2
+SELECT order_number, delivery_location, price_value, price_currency, status, rating, review, product, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, quantity, dispatched_by, delivery_fee_amount, delivery_fee_currency FROM orders WHERE secret_key = $1
 `
 
-type GetUserOrderBySecretKeyParams struct {
-	SecretKey *string `json:"secret_key"`
-	CreatedBy *string `json:"created_by"`
-}
-
-func (q *Queries) GetUserOrderBySecretKey(ctx context.Context, arg GetUserOrderBySecretKeyParams) (Order, error) {
-	row := q.db.QueryRow(ctx, getUserOrderBySecretKey, arg.SecretKey, arg.CreatedBy)
+func (q *Queries) GetUserOrderBySecretKey(ctx context.Context, secretKey *string) (Order, error) {
+	row := q.db.QueryRow(ctx, getUserOrderBySecretKey, secretKey)
 	var i Order
 	err := row.Scan(
 		&i.OrderNumber,

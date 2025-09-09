@@ -453,7 +453,7 @@ func (i *Impl) CompleteRegistration(
 			P: pgtype.Vec2{X: float64(req.GetLocationCoordinates().GetLon()),
 				Y: float64(req.GetLocationCoordinates().GetLat())}, Valid: true},
 		ProfileImage: req.GetProfileImage(),
-		Address:      &req.Address,
+		Address:      req.Address,
 		PhoneNumber:  phoneNumber,
 	}
 
@@ -1290,7 +1290,7 @@ func (i *Impl) GetFarmerByID(
 			LastName:                safeString(foundUser.LastName),
 			ResidenceCountryIsoCode: foundUser.ResidenceCountryIsoCode,
 			ProfileImage:            safeString(&foundUser.ProfileImage),
-			Address:                 safeString(foundUser.Address),
+			Address:                 foundUser.Address,
 			CreatedAt:               timestamppb.New(foundUser.CreatedAt.Time),
 			UpdatedAt:               timestamppb.New(foundUser.UpdatedAt.Time),
 		},

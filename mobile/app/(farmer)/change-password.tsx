@@ -81,8 +81,8 @@ export default function ChangePasswordScreen() {
         body: {
           newPassword,
           emailFactor: {
-            id: user?.email,
-            type: 'FACTOR_TYPE_EMAIL_PASSWORD',
+            id: user?.phoneNumber,
+            type: 'FACTOR_TYPE_EMAIL_PHONE_PASSWORD',
             secretValue: currentPassword,
           },
         },

@@ -48,7 +48,7 @@ WHERE order_number = $1;
 SELECT * FROM orders WHERE order_number = $1;
 
 -- name: GetUserOrderBySecretKey :one
-SELECT * FROM orders WHERE secret_key = $1 AND created_by = $2;
+SELECT * FROM orders WHERE secret_key = $1;
 
 -- name: ListUserOrders :many
 SELECT * FROM orders 

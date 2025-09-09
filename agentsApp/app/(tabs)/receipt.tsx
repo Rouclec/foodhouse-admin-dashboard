@@ -19,12 +19,7 @@ import {
 } from "@/client/orders.swagger/@tanstack/react-query.gen";
 import { usersGetUserByIdOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { productsGetProductOptions } from "@/client/products.swagger/@tanstack/react-query.gen";
-import {
-  defaultStyles,
-  loginstyles,
-  signupStyles,
-  receiptStyles as styles,
-} from "@/styles";
+import { defaultStyles, signupStyles, receiptStyles as styles } from "@/styles";
 import { Chase } from "react-native-animated-spinkit";
 import { formatAmount } from "@/utils/amountFormater";
 import { generateDispatchFormPdf } from "@/components";
@@ -198,6 +193,7 @@ export default function Receipt() {
     }
 
     try {
+      setLoading(true);
       await dispatchOrder({
         path: {
           orderNumber: orderDetails.order.orderNumber,
@@ -209,6 +205,8 @@ export default function Receipt() {
       });
     } catch (e) {
       console.error("Dispatch failed (caught in try/catch):", e);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -481,6 +479,7 @@ export default function Receipt() {
               onPress={handleConfirmDispatch}
               mode="contained"
               style={[defaultStyles.button, defaultStyles.primaryButton]}
+              loading={loading}
               labelStyle={styles.uploadButtonText}
             >
               Confirm Phone Number

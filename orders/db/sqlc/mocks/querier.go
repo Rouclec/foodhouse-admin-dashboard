@@ -323,18 +323,18 @@ func (mr *MockQuerierMockRecorder) GetPaymentStatsBetweenDates(ctx, arg any) *go
 }
 
 // GetUserOrderBySecretKey mocks base method.
-func (m *MockQuerier) GetUserOrderBySecretKey(ctx context.Context, arg sqlc.GetUserOrderBySecretKeyParams) (sqlc.Order, error) {
+func (m *MockQuerier) GetUserOrderBySecretKey(ctx context.Context, secretKey *string) (sqlc.Order, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserOrderBySecretKey", ctx, arg)
+	ret := m.ctrl.Call(m, "GetUserOrderBySecretKey", ctx, secretKey)
 	ret0, _ := ret[0].(sqlc.Order)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetUserOrderBySecretKey indicates an expected call of GetUserOrderBySecretKey.
-func (mr *MockQuerierMockRecorder) GetUserOrderBySecretKey(ctx, arg any) *gomock.Call {
+func (mr *MockQuerierMockRecorder) GetUserOrderBySecretKey(ctx, secretKey any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserOrderBySecretKey", reflect.TypeOf((*MockQuerier)(nil).GetUserOrderBySecretKey), ctx, arg)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserOrderBySecretKey", reflect.TypeOf((*MockQuerier)(nil).GetUserOrderBySecretKey), ctx, secretKey)
 }
 
 // ListCommissionsByReferrer mocks base method.

@@ -126,10 +126,9 @@ func (i *Impl) ConfirmDelivery(ctx context.Context, req *ordersgrpc.ConfirmDeliv
 		}
 	}()
 
-	order, err := querier.GetUserOrderBySecretKey(ctx, sqlc.GetUserOrderBySecretKeyParams{
-		CreatedBy: &req.UserId,
-		SecretKey: &req.SecretKey,
-	})
+	order, err := querier.GetUserOrderBySecretKey(ctx,
+		&req.SecretKey,
+	)
 
 	if err != nil {
 		i.logger.Debug().Msgf("error getting order with secret key %v why: %v", req.GetSecretKey(), err)

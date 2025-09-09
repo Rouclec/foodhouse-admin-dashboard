@@ -6,13 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import {
-  Appbar,
-  Button,
-  Icon,
-  Snackbar,
-  Text,
-} from "react-native-paper";
+import { Appbar, Button, Icon, Snackbar, Text } from "react-native-paper";
 import { defaultStyles, orderDetailsStyles as styles } from "@/styles";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Context, ContextType } from "../_layout";
@@ -123,7 +117,9 @@ export default function OrderDetails() {
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={[defaultStyles.center, defaultStyles.notFoundContainer]}>
+            <View
+              style={[defaultStyles.center, defaultStyles.notFoundContainer]}
+            >
               <Chase size={56} color={Colors.primary[500]} />
             </View>
           </ScrollView>
@@ -158,7 +154,9 @@ export default function OrderDetails() {
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={[defaultStyles.center, defaultStyles.notFoundContainer]}>
+            <View
+              style={[defaultStyles.center, defaultStyles.notFoundContainer]}
+            >
               <Text>{i18n.t("(farmer).order-details.couldNotLoad")}</Text>
             </View>
           </ScrollView>
@@ -199,14 +197,14 @@ export default function OrderDetails() {
             />
             <View style={styles.orderDetailsContainer}>
               <Text style={styles.leftText}>
-                {i18n.t("(farmer).order-details.orderNumber")}: {" "}
+                {i18n.t("(farmer).order-details.orderNumber")}:{" "}
                 <Text variant="titleMedium" style={styles.rightText}>
                   {orderDetails?.order?.orderNumber}
                 </Text>
               </Text>
               <Text variant="titleMedium">{productData?.product?.name}</Text>
               <View style={styles.centerRow}>
-               <Text variant="titleSmall" style={styles.primaryText}>
+                <Text variant="titleSmall" style={styles.primaryText}>
                   {orderDetails?.order?.price?.currencyIsoCode}{" "}
                   {formatAmount(
                     (
@@ -256,7 +254,9 @@ export default function OrderDetails() {
                   Created Date
                 </Text>
                 <Text variant="titleMedium" style={styles.rightText}>
-                  {new Date(orderDetails?.order?.createdAt ?? "").toLocaleDateString()}
+                  {new Date(
+                    orderDetails?.order?.createdAt ?? ""
+                  ).toLocaleDateString()}
                 </Text>
               </View>
               <View style={styles.listItem}>

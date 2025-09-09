@@ -28,7 +28,7 @@ type Querier interface {
 	GetPaymentByEntity(ctx context.Context, arg GetPaymentByEntityParams) (Payment, error)
 	GetPaymentById(ctx context.Context, id string) (Payment, error)
 	GetPaymentStatsBetweenDates(ctx context.Context, arg GetPaymentStatsBetweenDatesParams) (float64, error)
-	GetUserOrderBySecretKey(ctx context.Context, arg GetUserOrderBySecretKeyParams) (Order, error)
+	GetUserOrderBySecretKey(ctx context.Context, secretKey *string) (Order, error)
 	ListCommissionsByReferrer(ctx context.Context, arg ListCommissionsByReferrerParams) ([]Commission, error)
 	ListDeliveryPoints(ctx context.Context, arg ListDeliveryPointsParams) ([]DeliveryPoint, error)
 	ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersParams) ([]Order, error)
