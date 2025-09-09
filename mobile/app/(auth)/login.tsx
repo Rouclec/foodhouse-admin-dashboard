@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { Appbar, Icon, Snackbar, TextInput } from 'react-native-paper';
 import { Link, router } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   usersAuthenticateMutation,
@@ -26,8 +25,10 @@ import { auth } from '@/firebase';
 import {
   AuthCredential,
   GoogleAuthProvider,
+  OAuthProvider,
   signInWithCredential,
 } from 'firebase/auth';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Google from 'expo-auth-session/providers/google';
 import { Prompt } from 'expo-auth-session';
 
@@ -290,6 +291,84 @@ export default function Login() {
     await promptAsync();
   };
 
+//   const handleAppleSignIn = async () => {
+//   try {
+//     setLoading(true);
+
+//     // Request Apple credentials
+//     const appleCredential = await AppleAuthentication.signInAsync({
+//       requestedScopes: [
+//         AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+//         AppleAuthentication.AppleAuthenticationScope.EMAIL,
+//       ],
+//     });
+
+//     const { identityToken, fullName, email } = appleCredential;
+//     if (!identityToken) {
+//       throw new Error('Apple Sign-In failed: no identity token returned');
+//     }
+
+//     // Firebase credential
+//     const provider = new OAuthProvider('apple.com');
+//     const credential = provider.credential({ idToken: identityToken });
+
+//     // Sign in to Firebase
+//     const userCredential = await signInWithCredential(auth, credential);
+//     const firebaseUser = userCredential.user;
+//     const firebaseIdToken = await firebaseUser.getIdToken(true);
+
+//     setFirebaseUserId(firebaseUser.uid);
+
+//     // Update auth header
+//     updateAuthHeader(firebaseIdToken);
+
+//     // Set user context
+//     setUser({
+//       email: firebaseUser.email ?? email ?? '',
+//       phoneNumber: firebaseUser.phoneNumber ?? '',
+//       firstName:
+//         firebaseUser.displayName?.split(' ')[0] ??
+//         fullName?.givenName ??
+//         '',
+//       lastName:
+//         firebaseUser.displayName?.split(' ')[1] ??
+//         fullName?.familyName ??
+//         '',
+//     });
+
+//     // Call existing oAuth mutation
+//     await oAuth({
+//       body: {
+//         user: {
+//           email: firebaseUser.email ?? email ?? '',
+//           phoneNumber: firebaseUser.phoneNumber ?? '',
+//           firstName:
+//             firebaseUser.displayName?.split(' ')[0] ??
+//             fullName?.givenName ??
+//             '',
+//           lastName:
+//             firebaseUser.displayName?.split(' ')[1] ??
+//             fullName?.familyName ??
+//             '',
+//         },
+//         factor: {
+//           type: 'FACTOR_TYPE_APPLE',
+//         },
+//       },
+//       path: {
+//         'factor.id': firebaseUser.uid,
+//       },
+//     });
+//   } catch (error: any) {
+//     console.error('Apple Sign-In Error:', error);
+//     setErrorMessage(error.message || i18n.t('(auth).login.appleSignInFailed'));
+//     setError(true);
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+
+
   return (
     <>
       <KeyboardAvoidingView
@@ -298,11 +377,11 @@ export default function Login() {
         keyboardVerticalOffset={0}>
         <View style={defaultStyles.flex}>
           <Appbar.Header dark={false} style={defaultStyles.appHeader}>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={() => router.back()}
               style={defaultStyles.backButtonContainer}>
               <Icon source={'arrow-left'} size={24} />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <View />
             <View />
           </Appbar.Header>
@@ -444,6 +523,17 @@ export default function Login() {
                 <MaterialCommunityIcons name="apple" size={24} />
                 <Text>{i18n.t('(auth).login.continueWith')} Apple</Text>
               </TouchableOpacity>
+
+              {AppleAuthentication.isAvailableAsync() && (
+  <AppleAuthentication.AppleAuthenticationButton
+    buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+    buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+    cornerRadius={5}
+    style={{ width: 200, height: 44, marginTop: 10 }}
+    onPress={handleAppleSignIn}
+  />
+)}
+
             </View> */}
 
         <View style={loginstyles.registerContainer}>
