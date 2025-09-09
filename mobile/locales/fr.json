@@ -261,7 +261,8 @@
         "addressPlaceholder": "Entrez votre adresse",
         "cancel": "Annuler",
         "save": "Enregistrer les modifications",
-        "edit": "Modifier"
+        "edit": "Modifier",
+        "success": "Profil mis à jour avec succès"
       }
     },
     "order-details": {

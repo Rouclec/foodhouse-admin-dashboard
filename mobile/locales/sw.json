@@ -257,7 +257,8 @@
         "addressPlaceholder": "Ingiza anwani yako",
         "cancel": "Ghairi",
         "save": "Hifadhi mabadiliko",
-        "edit": "Hariri"
+        "edit": "Hariri",
+        "success": "Wasifu umesasishwa kwa mafanikio"
       }
     },
     "order-details": {

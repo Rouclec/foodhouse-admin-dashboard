@@ -65,6 +65,11 @@ export const defaultStyles = StyleSheet.create({
     borderColor: Colors.error,
     backgroundColor: Colors.light['0'],
   },
+  successSnackBar: {
+    borderWidth: 1,
+    borderColor: Colors.primary[500],
+    backgroundColor: Colors.light['0'],
+  },
   snackbarSuccess: {
     borderWidth: 1,
     borderColor: Colors.primary[500],

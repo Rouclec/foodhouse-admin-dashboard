@@ -48,7 +48,6 @@ export default function PersonalInfo() {
   const router = useRouter();
   const { user, setUser } = useContext(Context) as ContextType;
   const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
-  const [addressInitialized, setAddressInitialized] = useState(false);
 
   const [originalProfileImage, setOriginalProfileImage] = useState(
     user?.profileImage || '',
@@ -67,6 +66,7 @@ export default function PersonalInfo() {
   const [hasChanges, setHasChanges] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
   const [error, setError] = useState(false);
+  const [isSuccess, setIsSucess] = useState(false);
 
   useEffect(() => {
     const changesDetected =
@@ -92,8 +92,6 @@ export default function PersonalInfo() {
     user?.email,
     user?.locationCoordinates,
   ]);
-  
-
 
   const handleInputChange = <K extends keyof FormData>(
     field: K,
@@ -106,18 +104,6 @@ export default function PersonalInfo() {
       return { ...prev, [field]: value };
     });
   };
-  useEffect(() => {
-  if (user?.locationCoordinates?.address && !addressInitialized) {
-    const timer = setTimeout(() => {
-      if (googlePlacesAutoCompleteRef.current && user.locationCoordinates?.address) {
-        googlePlacesAutoCompleteRef.current.setAddressText(user.locationCoordinates.address);
-        handleInputChange('address', user.locationCoordinates.address);
-        setAddressInitialized(true);
-      }
-    }, 100);
-    
-  }
-}, [user?.locationCoordinates?.address, addressInitialized]);
 
   const handleImageSelect = (asset: any) => {
     console.log('handleImageSelect: Asset received:', asset?.uri);
@@ -154,6 +140,11 @@ export default function PersonalInfo() {
 
   const { mutateAsync: updateProfile } = useMutation({
     ...usersCompleteRegistrationMutation(),
+    onSuccess: async () => {
+      setIsSucess(true);
+      await delay(5000);
+      setIsSucess(false);
+    },
     onError: async error => {
       console.error('updateProfile onError:', error);
       setErrorMessage(
@@ -199,7 +190,7 @@ export default function PersonalInfo() {
 
       await updateProfile({ body: data, path: { userId: user?.userId || '' } });
 
-      setUser({...user,  ...data });
+      setUser({ ...user, ...data });
       setOriginalProfileImage(imageUrl);
     } catch (error) {
       console.error('handleSave: Error updating profile:', error);
@@ -213,6 +204,17 @@ export default function PersonalInfo() {
   };
 
   const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    if (
+      user?.locationCoordinates?.address &&
+      googlePlacesAutoCompleteRef?.current
+    ) {
+      googlePlacesAutoCompleteRef.current.setAddressText(
+        user?.locationCoordinates?.address,
+      );
+    }
+  }, [user, googlePlacesAutoCompleteRef]);
 
   return (
     <>
@@ -313,6 +315,8 @@ export default function PersonalInfo() {
 
                 <View style={loginstyles.inputs}>
                   <GooglePlacesAutocomplete
+                    keyboardShouldPersistTaps="always"
+                    disableScroll
                     ref={googlePlacesAutoCompleteRef}
                     placeholder={i18n.t(
                       '(farmer).(profile-flow).(personal-info).address',
@@ -413,9 +417,7 @@ export default function PersonalInfo() {
           disabled={!hasChanges || loading}
           buttonColor={Colors.primary['500']}
           style={defaultStyles.button}>
-          {hasChanges
-            ? i18n.t('(farmer).(profile-flow).(personal-info).save')
-            : i18n.t('(farmer).(profile-flow).(personal-info).edit')}
+          {i18n.t('(farmer).(profile-flow).(personal-info).save')}
         </Button>
       </View>
 
@@ -433,6 +435,15 @@ export default function PersonalInfo() {
         duration={3000}
         style={defaultStyles.snackbar}>
         <Text style={defaultStyles.errorText}>{errorMessage}</Text>
+      </Snackbar>
+      <Snackbar
+        visible={isSuccess}
+        onDismiss={() => {}}
+        duration={3000}
+        style={defaultStyles.successSnackBar}>
+        <Text style={defaultStyles.primaryText}>
+          {i18n.t('(farmer).(profile-flow).(personal-info).success')}
+        </Text>
       </Snackbar>
     </>
   );

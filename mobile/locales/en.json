@@ -263,7 +263,8 @@
         "addressPlaceholder": "Enter your Address",
         "cancel": "Cancel",
         "save": "Save Changes",
-        "edit": "Edit"
+        "edit": "Edit",
+        "success": "Profile updated successfully"
       }
     },
     "order-details": {
