@@ -171,6 +171,21 @@ export default function OrderDetailsPage() {
       ) != -1, // only enable this query when the order has been approved or rejected, else, avoid unneccesary call
   });
 
+  const { data: confirmer, isLoading: isConfirmerLoading } = useQuery({
+    ...usersGetUserByIdOptions({
+      path: {
+        userId:
+          orderDetailsData?.auditLog?.find(
+            (log) => log.after?.status === "OrderStatus_DELIVERED"
+          )?.actor ?? "",
+      },
+    }),
+    enabled:
+      orderDetailsData?.auditLog?.findIndex(
+        (log) => log.after?.status === "OrderStatus_DELIVERED"
+      ) != -1, // only enable this query when the order has been confirmed, else, avoid unneccesary call
+  });
+
   const { data: productData, isLoading: isProductDataLoading } = useQuery({
     ...productsGetProductOptions({
       path: {
@@ -304,7 +319,8 @@ export default function OrderDetailsPage() {
     isUserDataLoading ||
     isAgentDataLoading ||
     isProductDataLoading ||
-    isApproverLoading
+    isApproverLoading ||
+    isConfirmerLoading
   ) {
     return (
       <div className="space-y-6">
@@ -671,7 +687,20 @@ export default function OrderDetailsPage() {
                                 : ""
                             } `
                           : log.after?.status === "OrderStatus_IN_TRANSIT"
-                          ? `${agentData?.user?.firstName} ${agentData?.user?.lastName}`
+                          ? `${agentData?.user?.firstName ?? "-"} ${
+                              agentData?.user?.lastName ?? "-"
+                            }`
+                          : log.after?.status === "OrderStatus_DELIVERED"
+                          ? `${confirmer?.user?.firstName} ${
+                              confirmer?.user?.lastName
+                            } ${
+                              confirmer?.user?.userId !== userData?.user?.userId
+                                ? `(${approver?.user?.role?.replace(
+                                    "USER_ROLE_",
+                                    ""
+                                  )})`
+                                : ""
+                            } `
                           : log.actor}
                       </p>
                     </div>
