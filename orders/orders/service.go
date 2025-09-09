@@ -639,13 +639,16 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 
 	i.logger.Debug().Msgf("payout phone number %v", req.GetPayoutPhoneNumber())
 
-	_, err = i.paymentService.WithdrawFunds(ctx,
-		req.GetPayoutPhoneNumber(), payoutAmount,
-		*order.PriceCurrency, fmt.Sprintf("payment to farmer for order %v", order.OrderNumber),
-		&paymentReference)
+	// only make real payout when dev methods is not enabled
+	if !i.devMethodsEndabled {
+		_, payErr := i.paymentService.WithdrawFunds(ctx,
+			req.GetPayoutPhoneNumber(), payoutAmount,
+			*order.PriceCurrency, fmt.Sprintf("payment to farmer for order %v", order.OrderNumber),
+			&paymentReference)
 
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error making payout %v", err)
+		if payErr != nil {
+			return nil, status.Errorf(codes.Internal, "error making payout %v", payErr)
+		}
 	}
 
 	_, err = querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
