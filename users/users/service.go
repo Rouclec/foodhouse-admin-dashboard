@@ -1290,7 +1290,7 @@ func (i *Impl) GetFarmerByID(
 			LastName:                safeString(foundUser.LastName),
 			ResidenceCountryIsoCode: foundUser.ResidenceCountryIsoCode,
 			ProfileImage:            safeString(&foundUser.ProfileImage),
-			Address:                 foundUser.Address,
+			Address:                 safeString(&foundUser.Address),
 			CreatedAt:               timestamppb.New(foundUser.CreatedAt.Time),
 			UpdatedAt:               timestamppb.New(foundUser.UpdatedAt.Time),
 		},

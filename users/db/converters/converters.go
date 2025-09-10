@@ -125,7 +125,7 @@ func SqlcToProtoUser(sqlcUser sqlc.User) *usersgrpc.User {
 		FirstName:    derefString(sqlcUser.FirstName),
 		LastName:     derefString(sqlcUser.LastName),
 		ProfileImage: derefString(&sqlcUser.ProfileImage),
-		Address:      sqlcUser.Address,
+		Address:      derefString(&sqlcUser.Address),
 		CreatedAt:    timestamppb.New(sqlcUser.CreatedAt.Time),
 		Email:        derefString(sqlcUser.Email),
 		PhoneNumber:  derefString(&sqlcUser.PhoneNumber),
