@@ -79,7 +79,7 @@ func SqlcToProtoFarmers(sqlcFarmers []sqlc.ListFarmersByRatingRow) ([]*usersgrpc
 				FirstName:    derefString(sf.FirstName),
 				LastName:     derefString(sf.LastName),
 				ProfileImage: derefString(&sf.ProfileImage),
-				Address:      sf.Address,
+				Address:      derefString(sf.Address),
 				Email:        derefString(sf.Email),
 				PhoneNumber:  derefString(&sf.PhoneNumber),
 				CreatedAt:    timestamppb.New(sf.CreatedAt.Time),
@@ -125,7 +125,7 @@ func SqlcToProtoUser(sqlcUser sqlc.User) *usersgrpc.User {
 		FirstName:    derefString(sqlcUser.FirstName),
 		LastName:     derefString(sqlcUser.LastName),
 		ProfileImage: derefString(&sqlcUser.ProfileImage),
-		Address:      derefString(&sqlcUser.Address),
+		Address:      derefString(sqlcUser.Address),
 		CreatedAt:    timestamppb.New(sqlcUser.CreatedAt.Time),
 		Email:        derefString(sqlcUser.Email),
 		PhoneNumber:  derefString(&sqlcUser.PhoneNumber),
@@ -135,7 +135,7 @@ func SqlcToProtoUser(sqlcUser sqlc.User) *usersgrpc.User {
 		LocationCoordinates: &types.Point{
 			Lon:     sqlcUser.LocationCoordinates.P.X,
 			Lat:     sqlcUser.LocationCoordinates.P.Y,
-			Address: sqlcUser.Address,
+			Address: derefString(sqlcUser.Address),
 		},
 		ResidenceCountryIsoCode: sqlcUser.ResidenceCountryIsoCode,
 	}

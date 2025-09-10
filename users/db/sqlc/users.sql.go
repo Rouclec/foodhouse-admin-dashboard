@@ -41,7 +41,7 @@ type CreateUserParams struct {
 	FirstName               *string      `json:"first_name"`
 	LastName                *string      `json:"last_name"`
 	ResidenceCountryIsoCode string       `json:"residence_country_iso_code"`
-	Address                 string       `json:"address"`
+	Address                 *string      `json:"address"`
 	LocationCoordinates     pgtype.Point `json:"location_coordinates"`
 	ProfileImage            string       `json:"profile_image"`
 	Role                    string       `json:"role"`
@@ -400,7 +400,7 @@ type ListFarmersByRatingRow struct {
 	ProfileImage  string             `json:"profile_image"`
 	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 	UserStatus    string             `json:"user_status"`
-	Address       string             `json:"address"`
+	Address       *string            `json:"address"`
 	PhoneNumber   string             `json:"phone_number"`
 	Email         *string            `json:"email"`
 	AverageRating float64            `json:"average_rating"`
@@ -550,7 +550,7 @@ type UpdateUserParams struct {
 	FirstName           *string      `json:"first_name"`
 	LastName            *string      `json:"last_name"`
 	Email               *string      `json:"email"`
-	Address             string       `json:"address"`
+	Address             *string      `json:"address"`
 	LocationCoordinates pgtype.Point `json:"location_coordinates"`
 	ProfileImage        string       `json:"profile_image"`
 	PhoneNumber         string       `json:"phone_number"`

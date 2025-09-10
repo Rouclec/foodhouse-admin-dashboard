@@ -63,7 +63,7 @@ type User struct {
 	FirstName               *string            `json:"first_name"`
 	LastName                *string            `json:"last_name"`
 	ResidenceCountryIsoCode string             `json:"residence_country_iso_code"`
-	Address                 string             `json:"address"`
+	Address                 *string            `json:"address"`
 	LocationCoordinates     pgtype.Point       `json:"location_coordinates"`
 	ProfileImage            string             `json:"profile_image"`
 	Password                string             `json:"password"`
