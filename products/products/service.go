@@ -217,7 +217,7 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 		MinValue:      req.GetMinAmount().GetValue(),
 		MaxValue:      req.GetMaxAmount().GetValue(),
 		Search:        req.GetSearch(),
-		CreatedBefore: startKey,
+		CreatedAfter: startKey,
 		Count:         int32(count), // Convert count to int32
 	}
 
@@ -267,7 +267,7 @@ func (i *Impl) ListFarmerProducts(ctx context.Context, req *productsgrpc.ListFar
 		MinValue:      req.GetMinAmount().GetValue(),
 		MaxValue:      req.GetMaxAmount().GetValue(),
 		Search:        req.GetSearch(),
-		CreatedBefore: startKey,
+		CreatedAfter: startKey,
 		Count:         int32(count), // Convert count to int32
 	})
 
