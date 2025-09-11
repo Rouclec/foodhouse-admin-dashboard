@@ -397,19 +397,19 @@ WHERE
     name ILIKE '%' || $5::text || '%' OR
     description ILIKE '%' || $5::text || '%'
   ) AND
-  ($6::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at < $6::timestamptz)
+  ($6::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at > $6::timestamptz)
 ORDER BY created_at ASC
 LIMIT $7::int
 `
 
 type ListProductsParams struct {
-	CreatedBy     string    `json:"created_by"`
-	CategoryID    string    `json:"category_id"`
-	MinValue      float64   `json:"min_value"`
-	MaxValue      float64   `json:"max_value"`
-	Search        string    `json:"search"`
-	CreatedBefore time.Time `json:"created_before"`
-	Count         int32     `json:"count"`
+	CreatedBy    string    `json:"created_by"`
+	CategoryID   string    `json:"category_id"`
+	MinValue     float64   `json:"min_value"`
+	MaxValue     float64   `json:"max_value"`
+	Search       string    `json:"search"`
+	CreatedAfter time.Time `json:"created_after"`
+	Count        int32     `json:"count"`
 }
 
 func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]Product, error) {
@@ -419,7 +419,7 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]P
 		arg.MinValue,
 		arg.MaxValue,
 		arg.Search,
-		arg.CreatedBefore,
+		arg.CreatedAfter,
 		arg.Count,
 	)
 	if err != nil {
