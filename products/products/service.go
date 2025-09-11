@@ -197,7 +197,7 @@ func (i *Impl) HealthCheck(context.Context, *productsgrpc.HealthCheckRequest) (*
 // ListProducts implements productsgrpc.ProductsServer.
 func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsRequest) (*productsgrpc.ListProductsResponse, error) {
 	var err error
-	startKey := time.Now().Add(time.Hour)
+	startKey := time.Time{}
 
 	count := int(req.GetCount())
 	if count == 0 {
@@ -212,13 +212,13 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 	}
 
 	args := sqlc.ListProductsParams{
-		CategoryID:    req.GetCategoryId(),
-		CreatedBy:     req.GetCreatedBy(),
-		MinValue:      req.GetMinAmount().GetValue(),
-		MaxValue:      req.GetMaxAmount().GetValue(),
-		Search:        req.GetSearch(),
+		CategoryID:   req.GetCategoryId(),
+		CreatedBy:    req.GetCreatedBy(),
+		MinValue:     req.GetMinAmount().GetValue(),
+		MaxValue:     req.GetMaxAmount().GetValue(),
+		Search:       req.GetSearch(),
 		CreatedAfter: startKey,
-		Count:         int32(count), // Convert count to int32
+		Count:        int32(count), // Convert count to int32
 	}
 
 	products, err := i.repo.Do().ListProducts(ctx, args)
@@ -247,7 +247,7 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 // ListFarmerProducts implements productsgrpc.ProductsServer.
 func (i *Impl) ListFarmerProducts(ctx context.Context, req *productsgrpc.ListFarmerProductsRequest) (*productsgrpc.ListFarmerProductsResponse, error) {
 	var err error
-	startKey := time.Now().Add(time.Hour)
+	startKey := time.Time{}
 
 	if req.GetStartKey() != "" {
 		startKey, err = time.Parse(time.RFC3339, req.GetStartKey())
@@ -262,13 +262,13 @@ func (i *Impl) ListFarmerProducts(ctx context.Context, req *productsgrpc.ListFar
 	}
 
 	products, err := i.repo.Do().ListProducts(ctx, sqlc.ListProductsParams{
-		CreatedBy:     req.GetUserId(),
-		CategoryID:    req.GetCategoryId(),
-		MinValue:      req.GetMinAmount().GetValue(),
-		MaxValue:      req.GetMaxAmount().GetValue(),
-		Search:        req.GetSearch(),
+		CreatedBy:    req.GetUserId(),
+		CategoryID:   req.GetCategoryId(),
+		MinValue:     req.GetMinAmount().GetValue(),
+		MaxValue:     req.GetMaxAmount().GetValue(),
+		Search:       req.GetSearch(),
 		CreatedAfter: startKey,
-		Count:         int32(count), // Convert count to int32
+		Count:        int32(count), // Convert count to int32
 	})
 
 	if err != nil {
