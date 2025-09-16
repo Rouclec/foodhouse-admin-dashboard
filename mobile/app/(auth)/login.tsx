@@ -42,15 +42,12 @@ export default function Login() {
     country?.dial_code || CAMEROON.dial_code,
   );
   const [mobile, setMobile] = useState('');
-  const [fields, setFields] = useState({ phoneNumber: '', password: '' });
-  const [errors, setErrors] = useState({ phoneNumber: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [userId, setUserId] = useState<string>();
   const [firebaseUserId, setFirebaseUserId] = useState<string>();
   const { user, setUser } = useContext(Context) as ContextType;
-  const { requestId } = useLocalSearchParams();
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
@@ -117,27 +114,7 @@ export default function Login() {
     }
   };
 
-  const { mutateAsync: authenticate } = useMutation({
-    ...usersAuthenticateMutation(),
-    onError: async error => {
-      setErrorMessage(
-        error?.response?.data?.message ?? i18n.t('(auth).login.anUnknownError'),
-      );
-      setError(true);
-      await delay(5000);
-      setError(false);
-    },
-    onSuccess: async data => {
-      try {
-        updateAuthHeader(data?.tokens?.accessToken ?? '');
-        await storeData('@refreshToken', data?.tokens?.refreshToken);
-        storeData('@userId', data?.userId);
-        setUserId(data?.userId ?? '');
-      } catch (err) {
-        console.error('Error handling login success:', err);
-      }
-    },
-  });
+
 
   const { mutateAsync: oAuth } = useMutation({
     ...usersOAuthMutation(),
@@ -293,8 +270,7 @@ export default function Login() {
   const handleAppleSignIn = async () => {
     try {
       setLoading(true);
-
-      // Request Apple credentials
+      
       const appleCredential = await AppleAuthentication.signInAsync({
         requestedScopes: [
           AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
@@ -307,21 +283,21 @@ export default function Login() {
         throw new Error('Apple Sign-In failed: no identity token returned');
       }
 
-      // Firebase credential
+     
       const provider = new OAuthProvider('apple.com');
       const credential = provider.credential({ idToken: identityToken });
 
-      // Sign in to Firebase
+     
       const userCredential = await signInWithCredential(auth, credential);
       const firebaseUser = userCredential.user;
       const firebaseIdToken = await firebaseUser.getIdToken(true);
 
       setFirebaseUserId(firebaseUser.uid);
 
-      // Update auth header
+      
       updateAuthHeader(firebaseIdToken);
 
-      // Set user context
+   
       setUser({
         email: firebaseUser.email ?? email ?? '',
         phoneNumber: firebaseUser.phoneNumber ?? '',
@@ -331,7 +307,7 @@ export default function Login() {
           firebaseUser.displayName?.split(' ')[1] ?? fullName?.familyName ?? '',
       });
 
-      // Call existing oAuth mutation
+   
       await oAuth({
         body: {
           user: {
@@ -401,9 +377,7 @@ export default function Login() {
                 phoneNumber={mobile}
                 containerStyle={signupStyles.phoneNumberInputContainerStyle}
               />
-              {errors.phoneNumber ? (
-                <Text style={loginstyles.errorText}>{errors.phoneNumber}</Text>
-              ) : null}
+             
             </View>
           </ScrollView>
         </View>

@@ -25,7 +25,7 @@ import { Context, ContextType } from '../_layout';
 import i18n from '@/i18n';
 
 const SignInVerifyOtpScreen: FC = () => {
-  const { requestId, email, password, phoneNumber, residenceCountryIsoCode } =
+  const { requestId, phoneNumber } =
     useLocalSearchParams();
   const [requestIdState, setRequestIdState] = useState<string>(
     (requestId as string) ?? '',

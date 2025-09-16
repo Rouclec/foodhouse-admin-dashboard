@@ -26,7 +26,7 @@ import i18n from '@/i18n';
 import { usersGetUserById } from '@/client/users.swagger';
 
 const VerifyOtpScreen: FC = () => {
-  const { requestId, email, password, phoneNumber, residenceCountryIsoCode } =
+  const { requestId, email, phoneNumber, residenceCountryIsoCode } =
     useLocalSearchParams();
   const [requestIdState, setRequestIdState] = useState<string>(
     (requestId as string) ?? '',
@@ -58,7 +58,6 @@ const VerifyOtpScreen: FC = () => {
             id: requestIdState as string,
           },
           email: email as string,
-          password: password as string,
           residenceCountryIsoCode: residenceCountryIsoCode as string,
           userType: role,
         },
