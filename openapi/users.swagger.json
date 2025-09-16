@@ -1691,7 +1691,7 @@
         "FACTOR_TYPE_EMAIL_OTP",
         "FACTOR_TYPE_EMAIL_PHONE_PASSWORD",
         "FACTOR_TYPE_GOOGLE",
-        "FACTOR_TYPE_FACEBOOK"
+        "FACTOR_TYPE_APPLE"
       ],
       "default": "FACTOR_TYPE_UNSPECIFIED"
     },

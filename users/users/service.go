@@ -217,14 +217,26 @@ func (i *Impl) Signup(ctx context.Context, req *usersgrpc.SignupRequest) (*users
 		}
 	}
 
+	var password = userPassword
+
+	if password == "" {
+		var genErr error
+		password, genErr = RandomString(32)
+
+		if genErr != nil {
+			i.logger.Debug().Msgf("generate password error : %v", genErr)
+			return nil, status.Errorf(codes.Internal, "error signing up")
+		}
+	}
+
 	// Check password for minimum length
-	if len(userPassword) < MinimumPasswordLength {
+	if len(password) < MinimumPasswordLength {
 		return nil, status.Errorf(codes.InvalidArgument, "Password should be at least %v characters long",
 			MinimumPasswordLength)
 	}
 
 	// Hash password using bcrypt
-	hashedPassword, err := HashPassword(userPassword)
+	hashedPassword, err := HashPassword(password)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Failed to hash password: %v", err)
 	}
@@ -1765,7 +1777,7 @@ func checkIsOAuth(authFactor *usersgrpc.AuthFactor) bool {
 	switch authFactor.GetType() {
 	case usersgrpc.FactorType_FACTOR_TYPE_GOOGLE:
 		return true
-	case usersgrpc.FactorType_FACTOR_TYPE_FACEBOOK:
+	case usersgrpc.FactorType_FACTOR_TYPE_APPLE:
 		return true
 	default:
 		return false

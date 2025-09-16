@@ -112,7 +112,7 @@ export type usersgrpcDeleteUserPaymentMethodResponse = {
 
 export type usersgrpcDeleteUserSubscriptionResponse = unknown;
 
-export type usersgrpcFactorType = 'FACTOR_TYPE_UNSPECIFIED' | 'FACTOR_TYPE_EMAIL_PASSWORD' | 'FACTOR_TYPE_SMS_OTP' | 'FACTOR_TYPE_EMAIL_OTP' | 'FACTOR_TYPE_EMAIL_PHONE_PASSWORD' | 'FACTOR_TYPE_GOOGLE' | 'FACTOR_TYPE_FACEBOOK';
+export type usersgrpcFactorType = 'FACTOR_TYPE_UNSPECIFIED' | 'FACTOR_TYPE_EMAIL_PASSWORD' | 'FACTOR_TYPE_SMS_OTP' | 'FACTOR_TYPE_EMAIL_OTP' | 'FACTOR_TYPE_EMAIL_PHONE_PASSWORD' | 'FACTOR_TYPE_GOOGLE' | 'FACTOR_TYPE_APPLE';
 
 export type usersgrpcFarmerWithRating = {
     user?: usersgrpcUser;
