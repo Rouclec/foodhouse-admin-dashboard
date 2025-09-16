@@ -17,7 +17,7 @@ import {
   usersOAuthMutation,
 } from '@/client/users.swagger/@tanstack/react-query.gen';
 import { Context, ContextType } from '../_layout';
-import { defaultStyles, loginstyles } from '@/styles';
+import { defaultStyles, loginstyles, signupStyles } from '@/styles';
 import { Colors } from '@/constants';
 import i18n from '@/i18n';
 import { delay, storeData, updateAuthHeader } from '@/utils';
@@ -31,11 +31,14 @@ import {
 import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Google from 'expo-auth-session/providers/google';
 import { Prompt } from 'expo-auth-session';
+import PhoneNumberInput from '@/components/general/PhoneNumberInput';
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
-  const [fields, setFields] = useState({ email: '', password: '' });
-  const [errors, setErrors] = useState({ email: '', password: '' });
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [countryCode, setCountryCode] = useState('+237');
+  const [fields, setFields] = useState({ phoneNumber: '', password: '' });
+  const [errors, setErrors] = useState({ phoneNumber: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -240,13 +243,16 @@ export default function Login() {
   };
 
   const validateFields = () => {
-    const newErrors = { email: '', password: '' };
-    let isValid = true;
+     const newErrors = { phoneNumber: '', password: '' };
+  let isValid = true;
 
-    if (!fields.email.trim()) {
-      newErrors.email = i18n.t('(auth).login.emailRequired');
-      isValid = false;
-    }
+  // Use the combined phone number (country code + phone number)
+  const fullPhoneNumber = countryCode + phoneNumber;
+  
+  if (!fullPhoneNumber.trim()) {
+    newErrors.phoneNumber = i18n.t('(auth).login.phoneNumberRequired');
+    isValid = false;
+  }
 
     if (!fields.password.trim()) {
       newErrors.password = i18n.t('(auth).login.passwordRequired');
@@ -266,9 +272,9 @@ export default function Login() {
         body: {
           factors: [
             {
-              type: 'FACTOR_TYPE_EMAIL_PHONE_PASSWORD',
-              id: fields.email.trim(),
-              secretValue: fields.password,
+              type: 'FACTOR_TYPE_SMS_OTP',
+              id: countryCode + phoneNumber, 
+              secretValue: otp,
             },
           ],
         },
@@ -291,83 +297,82 @@ export default function Login() {
     await promptAsync();
   };
 
-//   const handleAppleSignIn = async () => {
-//   try {
-//     setLoading(true);
+  //   const handleAppleSignIn = async () => {
+  //   try {
+  //     setLoading(true);
 
-//     // Request Apple credentials
-//     const appleCredential = await AppleAuthentication.signInAsync({
-//       requestedScopes: [
-//         AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-//         AppleAuthentication.AppleAuthenticationScope.EMAIL,
-//       ],
-//     });
+  //     // Request Apple credentials
+  //     const appleCredential = await AppleAuthentication.signInAsync({
+  //       requestedScopes: [
+  //         AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+  //         AppleAuthentication.AppleAuthenticationScope.EMAIL,
+  //       ],
+  //     });
 
-//     const { identityToken, fullName, email } = appleCredential;
-//     if (!identityToken) {
-//       throw new Error('Apple Sign-In failed: no identity token returned');
-//     }
+  //     const { identityToken, fullName, email } = appleCredential;
+  //     if (!identityToken) {
+  //       throw new Error('Apple Sign-In failed: no identity token returned');
+  //     }
 
-//     // Firebase credential
-//     const provider = new OAuthProvider('apple.com');
-//     const credential = provider.credential({ idToken: identityToken });
+  //     // Firebase credential
+  //     const provider = new OAuthProvider('apple.com');
+  //     const credential = provider.credential({ idToken: identityToken });
 
-//     // Sign in to Firebase
-//     const userCredential = await signInWithCredential(auth, credential);
-//     const firebaseUser = userCredential.user;
-//     const firebaseIdToken = await firebaseUser.getIdToken(true);
+  //     // Sign in to Firebase
+  //     const userCredential = await signInWithCredential(auth, credential);
+  //     const firebaseUser = userCredential.user;
+  //     const firebaseIdToken = await firebaseUser.getIdToken(true);
 
-//     setFirebaseUserId(firebaseUser.uid);
+  //     setFirebaseUserId(firebaseUser.uid);
 
-//     // Update auth header
-//     updateAuthHeader(firebaseIdToken);
+  //     // Update auth header
+  //     updateAuthHeader(firebaseIdToken);
 
-//     // Set user context
-//     setUser({
-//       email: firebaseUser.email ?? email ?? '',
-//       phoneNumber: firebaseUser.phoneNumber ?? '',
-//       firstName:
-//         firebaseUser.displayName?.split(' ')[0] ??
-//         fullName?.givenName ??
-//         '',
-//       lastName:
-//         firebaseUser.displayName?.split(' ')[1] ??
-//         fullName?.familyName ??
-//         '',
-//     });
+  //     // Set user context
+  //     setUser({
+  //       email: firebaseUser.email ?? email ?? '',
+  //       phoneNumber: firebaseUser.phoneNumber ?? '',
+  //       firstName:
+  //         firebaseUser.displayName?.split(' ')[0] ??
+  //         fullName?.givenName ??
+  //         '',
+  //       lastName:
+  //         firebaseUser.displayName?.split(' ')[1] ??
+  //         fullName?.familyName ??
+  //         '',
+  //     });
 
-//     // Call existing oAuth mutation
-//     await oAuth({
-//       body: {
-//         user: {
-//           email: firebaseUser.email ?? email ?? '',
-//           phoneNumber: firebaseUser.phoneNumber ?? '',
-//           firstName:
-//             firebaseUser.displayName?.split(' ')[0] ??
-//             fullName?.givenName ??
-//             '',
-//           lastName:
-//             firebaseUser.displayName?.split(' ')[1] ??
-//             fullName?.familyName ??
-//             '',
-//         },
-//         factor: {
-//           type: 'FACTOR_TYPE_APPLE',
-//         },
-//       },
-//       path: {
-//         'factor.id': firebaseUser.uid,
-//       },
-//     });
-//   } catch (error: any) {
-//     console.error('Apple Sign-In Error:', error);
-//     setErrorMessage(error.message || i18n.t('(auth).login.appleSignInFailed'));
-//     setError(true);
-//   } finally {
-//     setLoading(false);
-//   }
-// };
-
+  //     // Call existing oAuth mutation
+  //     await oAuth({
+  //       body: {
+  //         user: {
+  //           email: firebaseUser.email ?? email ?? '',
+  //           phoneNumber: firebaseUser.phoneNumber ?? '',
+  //           firstName:
+  //             firebaseUser.displayName?.split(' ')[0] ??
+  //             fullName?.givenName ??
+  //             '',
+  //           lastName:
+  //             firebaseUser.displayName?.split(' ')[1] ??
+  //             fullName?.familyName ??
+  //             '',
+  //         },
+  //         factor: {
+  //           type: 'FACTOR_TYPE_APPLE',
+  //         },
+  //       },
+  //       path: {
+  //         'factor.id': firebaseUser.uid,
+  //       },
+  //     });
+  //   } catch (error: any) {
+  //     console.error('Apple Sign-In Error:', error);
+  //     setErrorMessage(error.message || i18n.t('(auth).login.appleSignInFailed'));
+  //     setError(true);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   return (
     <>
@@ -398,33 +403,16 @@ export default function Login() {
                 {i18n.t('(auth).login.loginTo')}
               </Text>
 
-              <TextInput
-                mode="outlined"
-                label={i18n.t('(auth).login.email')}
-                value={fields.email}
-                autoCapitalize="none"
-                onChangeText={text => handleInputChange('email', text)}
-                error={!!errors.email}
-                style={loginstyles.input}
-                theme={{
-                  colors: {
-                    primary: Colors.primary[500],
-                    background: Colors.grey['fa'],
-                    error: Colors.error,
-                  },
-                  roundness: 10,
-                }}
-                outlineColor={Colors.grey['bg']}
-                left={
-                  <TextInput.Icon
-                    icon="account-outline"
-                    color={Colors.grey['61']}
-                    size={20}
-                  />
-                }
+              <PhoneNumberInput
+                setCountryCode={setCountryCode}
+                setPhoneNumber={setPhoneNumber}
+                countryCode={countryCode}
+                phoneNumber={phoneNumber}
+                containerStyle={signupStyles.phoneNumberInputContainerStyle}
+                // label={i18n.t('(auth).login.phoneNumber')}
               />
-              {errors.email ? (
-                <Text style={loginstyles.errorText}>{errors.email}</Text>
+              {errors.phoneNumber ? (
+                <Text style={loginstyles.errorText}>{errors.phoneNumber}</Text>
               ) : null}
 
               <TextInput
