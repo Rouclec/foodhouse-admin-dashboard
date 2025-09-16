@@ -27,6 +27,10 @@ export default function AuthLayout() {
         name="select-role-for-oauth"
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="signin-verify-otp"
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }
