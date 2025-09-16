@@ -17,6 +17,7 @@ import {
   usersAuthenticateMutation,
   usersGetUserByIdOptions,
   usersSendSignupSmsOtpMutation,
+  usersSendSmsOtpMutation,
 } from '@/client/users.swagger/@tanstack/react-query.gen';
 import { defaultStyles, verifyOtpStyles as styles } from '@/styles';
 import { delay, storeData, updateAuthHeader } from '@/utils';
@@ -152,7 +153,7 @@ const SignInVerifyOtpScreen: FC = () => {
   }, [currentTimeLeft]);
 
   const { mutateAsync: resendOtp } = useMutation({
-    ...usersSendSignupSmsOtpMutation(),
+    ...usersSendSmsOtpMutation(),
     onError: async error => {
       setErrorMessage(() => {
         const errorData = error?.response?.data;
