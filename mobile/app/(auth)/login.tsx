@@ -7,34 +7,41 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Alert,
+  Platform,
 } from 'react-native';
 import { Appbar, Icon, Snackbar, TextInput } from 'react-native-paper';
-import { Link, router } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Link, router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   usersAuthenticateMutation,
   usersGetUserByIdOptions,
   usersOAuthMutation,
+  usersSendSmsOtpMutation,
 } from '@/client/users.swagger/@tanstack/react-query.gen';
 import { Context, ContextType } from '../_layout';
-import { defaultStyles, loginstyles } from '@/styles';
-import { Colors } from '@/constants';
+import { defaultStyles, loginstyles, signupStyles } from '@/styles';
+import { CAMEROON, Colors } from '@/constants';
 import i18n from '@/i18n';
 import { delay, storeData, updateAuthHeader } from '@/utils';
 import { auth } from '@/firebase';
 import {
   AuthCredential,
   GoogleAuthProvider,
+  OAuthProvider,
   signInWithCredential,
 } from 'firebase/auth';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Google from 'expo-auth-session/providers/google';
 import { Prompt } from 'expo-auth-session';
+import PhoneNumberInput from '@/components/general/PhoneNumberInput';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function Login() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [fields, setFields] = useState({ email: '', password: '' });
-  const [errors, setErrors] = useState({ email: '', password: '' });
+  const [country, setCountry] = useState(CAMEROON);
+  const [callingCode, setCallingCode] = useState(
+    country?.dial_code || CAMEROON.dial_code,
+  );
+  const [mobile, setMobile] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -92,27 +99,22 @@ export default function Login() {
     }
   }, [userData]);
 
-  const { mutateAsync: authenticate } = useMutation({
-    ...usersAuthenticateMutation(),
-    onError: async error => {
-      setErrorMessage(
-        error?.response?.data?.message ?? i18n.t('(auth).login.anUnknownError'),
-      );
-      setError(true);
-      await delay(5000);
-      setError(false);
-    },
-    onSuccess: async data => {
-      try {
-        updateAuthHeader(data?.tokens?.accessToken ?? '');
-        await storeData('@refreshToken', data?.tokens?.refreshToken);
-        storeData('@userId', data?.userId);
-        setUserId(data?.userId ?? '');
-      } catch (err) {
-        console.error('Error handling login success:', err);
-      }
-    },
-  });
+  const handleSendOtp = async () => {
+    try {
+      setLoading(true);
+      await mutateAsync({
+        body: {
+          phoneNumber: `${callingCode}${mobile}`,
+        },
+      });
+    } catch (error) {
+      console.error('Error signing up: ', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
 
   const { mutateAsync: oAuth } = useMutation({
     ...usersOAuthMutation(),
@@ -141,6 +143,27 @@ export default function Login() {
       } catch (err) {
         console.error('Error handling login success:', err);
       }
+    },
+  });
+
+  const { mutateAsync } = useMutation({
+    ...usersSendSmsOtpMutation(),
+    onError: async error => {
+      setErrorMessage(
+        error?.response?.data?.message ?? i18n.t('(auth).login.anUnknownError'),
+      );
+      setError(true);
+      await delay(5000);
+      setError(false);
+    },
+    onSuccess: data => {
+      router.push({
+        pathname: '/signin-verify-otp',
+        params: {
+          requestId: data.requestId,
+          phoneNumber: `${callingCode}${mobile}`,
+        },
+      });
     },
   });
 
@@ -233,52 +256,6 @@ export default function Login() {
     }
   };
 
-  const handleInputChange = (name: string, value: string) => {
-    setFields({ ...fields, [name]: value });
-    setErrors({ ...errors, [name]: '' });
-  };
-
-  const validateFields = () => {
-    const newErrors = { email: '', password: '' };
-    let isValid = true;
-
-    if (!fields.email.trim()) {
-      newErrors.email = i18n.t('(auth).login.emailRequired');
-      isValid = false;
-    }
-
-    if (!fields.password.trim()) {
-      newErrors.password = i18n.t('(auth).login.passwordRequired');
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
-  };
-
-  const handleLogIn = async () => {
-    if (!validateFields()) return;
-
-    try {
-      setLoading(true);
-      await authenticate({
-        body: {
-          factors: [
-            {
-              type: 'FACTOR_TYPE_EMAIL_PHONE_PASSWORD',
-              id: fields.email.trim(),
-              secretValue: fields.password,
-            },
-          ],
-        },
-      });
-    } catch (err) {
-      console.warn(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleGoogleSignInPress = async () => {
     if (!request) {
       Alert.alert(
@@ -290,6 +267,80 @@ export default function Login() {
     await promptAsync();
   };
 
+  const handleAppleSignIn = async () => {
+    try {
+      setLoading(true);
+      
+      const appleCredential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      const { identityToken, fullName, email } = appleCredential;
+      if (!identityToken) {
+        throw new Error('Apple Sign-In failed: no identity token returned');
+      }
+
+     
+      const provider = new OAuthProvider('apple.com');
+      const credential = provider.credential({ idToken: identityToken });
+
+     
+      const userCredential = await signInWithCredential(auth, credential);
+      const firebaseUser = userCredential.user;
+      const firebaseIdToken = await firebaseUser.getIdToken(true);
+
+      setFirebaseUserId(firebaseUser.uid);
+
+      
+      updateAuthHeader(firebaseIdToken);
+
+   
+      setUser({
+        email: firebaseUser.email ?? email ?? '',
+        phoneNumber: firebaseUser.phoneNumber ?? '',
+        firstName:
+          firebaseUser.displayName?.split(' ')[0] ?? fullName?.givenName ?? '',
+        lastName:
+          firebaseUser.displayName?.split(' ')[1] ?? fullName?.familyName ?? '',
+      });
+
+   
+      await oAuth({
+        body: {
+          user: {
+            email: firebaseUser.email ?? email ?? '',
+            phoneNumber: firebaseUser.phoneNumber ?? '',
+            firstName:
+              firebaseUser.displayName?.split(' ')[0] ??
+              fullName?.givenName ??
+              '',
+            lastName:
+              firebaseUser.displayName?.split(' ')[1] ??
+              fullName?.familyName ??
+              '',
+          },
+          factor: {
+            type: 'FACTOR_TYPE_APPLE',
+          },
+        },
+        path: {
+          'factor.id': firebaseUser.uid,
+        },
+      });
+    } catch (error: any) {
+      console.error('Apple Sign-In Error:', error);
+      setErrorMessage(
+        error.message || i18n.t('(auth).login.appleSignInFailed'),
+      );
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <KeyboardAvoidingView
@@ -298,11 +349,11 @@ export default function Login() {
         keyboardVerticalOffset={0}>
         <View style={defaultStyles.flex}>
           <Appbar.Header dark={false} style={defaultStyles.appHeader}>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={() => router.back()}
               style={defaultStyles.backButtonContainer}>
               <Icon source={'arrow-left'} size={24} />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <View />
             <View />
           </Appbar.Header>
@@ -319,79 +370,14 @@ export default function Login() {
                 {i18n.t('(auth).login.loginTo')}
               </Text>
 
-              <TextInput
-                mode="outlined"
-                label={i18n.t('(auth).login.email')}
-                value={fields.email}
-                autoCapitalize="none"
-                onChangeText={text => handleInputChange('email', text)}
-                error={!!errors.email}
-                style={loginstyles.input}
-                theme={{
-                  colors: {
-                    primary: Colors.primary[500],
-                    background: Colors.grey['fa'],
-                    error: Colors.error,
-                  },
-                  roundness: 10,
-                }}
-                outlineColor={Colors.grey['bg']}
-                left={
-                  <TextInput.Icon
-                    icon="account-outline"
-                    color={Colors.grey['61']}
-                    size={20}
-                  />
-                }
+              <PhoneNumberInput
+                setCountryCode={setCallingCode}
+                countryCode={callingCode}
+                setPhoneNumber={setMobile}
+                phoneNumber={mobile}
+                containerStyle={signupStyles.phoneNumberInputContainerStyle}
               />
-              {errors.email ? (
-                <Text style={loginstyles.errorText}>{errors.email}</Text>
-              ) : null}
-
-              <TextInput
-                mode="outlined"
-                label={i18n.t('(auth).login.password')}
-                secureTextEntry={!showPassword}
-                value={fields.password}
-                onChangeText={text => handleInputChange('password', text)}
-                error={!!errors.password}
-                style={loginstyles.input}
-                theme={{
-                  colors: {
-                    primary: Colors.primary[500],
-                    background: '#FAFAFA',
-                    error: Colors.error,
-                  },
-                  roundness: 10,
-                }}
-                outlineColor={Colors.grey['bg']}
-                left={
-                  <TextInput.Icon
-                    icon="lock-outline"
-                    color={Colors.grey['61']}
-                    size={20}
-                  />
-                }
-                right={
-                  <TextInput.Icon
-                    icon={showPassword ? 'eye-off' : 'eye'}
-                    onPress={() => setShowPassword(!showPassword)}
-                    color={Colors.grey[61]}
-                    size={20}
-                  />
-                }
-              />
-              {errors.password ? (
-                <Text style={loginstyles.errorText}>{errors.password}</Text>
-              ) : null}
-
-              <Link
-                style={loginstyles.forgotPassword}
-                href={'/(auth)/(forgot-password)'}>
-                <Text style={loginstyles.forgotPasswordText}>
-                  {i18n.t('(auth).login.forgotPassword')}
-                </Text>
-              </Link>
+             
             </View>
           </ScrollView>
         </View>
@@ -399,7 +385,7 @@ export default function Login() {
       <View style={defaultStyles.bottomButtonContainer}>
         <TouchableOpacity
           style={[loginstyles.loginButton, loading && defaultStyles.greyButton]}
-          onPress={handleLogIn}
+          onPress={handleSendOtp}
           disabled={loading}
           activeOpacity={0.8}>
           {loading ? (
@@ -419,32 +405,48 @@ export default function Login() {
           <View style={loginstyles.dividerLine} />
         </View>
 
-        {/* <View style={loginstyles.socialIconsContainer}>
-              <TouchableOpacity
-                style={[
-                  loginstyles.socialIcon,
-                  loading && defaultStyles.greyButton,
-                ]}
-                onPress={handleGoogleSignInPress}
-                disabled={loading || !request}>
-                {loading ? (
-                  <ActivityIndicator color={Colors.primary[200]} />
-                ) : (
-                  <>
-                    <MaterialCommunityIcons
-                      name="google"
-                      size={24}
-                      color={Colors.primary[200]}
-                    />
-                    <Text>{i18n.t('(auth).login.continueWith')} Google</Text>
-                  </>
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity style={loginstyles.socialIcon}>
-                <MaterialCommunityIcons name="apple" size={24} />
-                <Text>{i18n.t('(auth).login.continueWith')} Apple</Text>
-              </TouchableOpacity>
-            </View> */}
+        <View style={loginstyles.socialIconsContainer}>
+          <TouchableOpacity
+            style={[
+              loginstyles.socialIcon,
+              loading && defaultStyles.greyButton,
+            ]}
+            onPress={handleGoogleSignInPress}
+            disabled={loading || !request}>
+            {loading ? (
+              <ActivityIndicator color={Colors.primary[200]} />
+            ) : (
+              <>
+                <MaterialCommunityIcons
+                  name="google"
+                  size={24}
+                  color={Colors.primary[200]}
+                />
+                <Text>{i18n.t('(auth).login.continueWith')} Google</Text>
+              </>
+            )}
+          </TouchableOpacity>
+          
+
+          {Platform.OS === 'ios' ? (
+            <AppleAuthentication.AppleAuthenticationButton
+              buttonType={
+                AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN
+              }
+              buttonStyle={
+                AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+              }
+              cornerRadius={5}
+              style={{ width: 200, height: 44, marginTop: 10 }}
+              onPress={handleAppleSignIn}
+            />
+          ) : (
+            <TouchableOpacity style={loginstyles.socialIcon}>
+              <MaterialCommunityIcons name="apple" size={24} />
+              <Text>{i18n.t('(auth).login.continueWith')} Apple</Text>
+            </TouchableOpacity>
+          )}
+        </View>
 
         <View style={loginstyles.registerContainer}>
           <Text style={loginstyles.registerText}>

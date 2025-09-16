@@ -14,19 +14,19 @@ import { Appbar, Button, Icon, Snackbar, Text } from 'react-native-paper';
 import { PaperOtpInput } from 'react-native-paper-otp-input';
 
 import {
+  usersAuthenticateMutation,
   usersGetUserByIdOptions,
   usersSendSignupSmsOtpMutation,
-  usersSignupMutation,
+  usersSendSmsOtpMutation,
 } from '@/client/users.swagger/@tanstack/react-query.gen';
 import { defaultStyles, verifyOtpStyles as styles } from '@/styles';
 import { delay, storeData, updateAuthHeader } from '@/utils';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Context, ContextType } from '../_layout';
 import i18n from '@/i18n';
-import { usersGetUserById } from '@/client/users.swagger';
 
-const VerifyOtpScreen: FC = () => {
-  const { requestId, email, phoneNumber, residenceCountryIsoCode } =
+const SignInVerifyOtpScreen: FC = () => {
+  const { requestId, phoneNumber } =
     useLocalSearchParams();
   const [requestIdState, setRequestIdState] = useState<string>(
     (requestId as string) ?? '',
@@ -39,6 +39,11 @@ const VerifyOtpScreen: FC = () => {
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
+  const [shouldNavigate, setShouldNavigate] = useState(false);
+  const [navigationData, setNavigationData] = useState<{
+    role?: string;
+    isProfileComplete: boolean;
+  }>({ isProfileComplete: false });
 
   const [errorMessage, setErrorMessage] = useState<string>();
   const [error, setError] = useState(false);
@@ -52,14 +57,13 @@ const VerifyOtpScreen: FC = () => {
       setLoading(true);
       await mutateAsync({
         body: {
-          phoneFactor: {
-            type: 'FACTOR_TYPE_SMS_OTP',
-            secretValue: otp,
-            id: requestIdState as string,
-          },
-          email: email as string,
-          residenceCountryIsoCode: residenceCountryIsoCode as string,
-          userType: role,
+          factors: [
+            {
+              type: 'FACTOR_TYPE_SMS_OTP',
+              secretValue: otp,
+              id: requestIdState as string,
+            },
+          ],
         },
       });
     } catch (error) {
@@ -103,7 +107,7 @@ const VerifyOtpScreen: FC = () => {
   }, [timeLeft]);
 
   const { mutateAsync } = useMutation({
-    ...usersSignupMutation(),
+    ...usersAuthenticateMutation(),
     onError: async error => {
       setErrorMessage(() => {
         const errorData = error?.response?.data;
@@ -141,7 +145,6 @@ const VerifyOtpScreen: FC = () => {
         userId: data.userId,
         phoneNumber: phoneNumber as string,
       });
-      router.push('/profile-page');
     },
   });
 
@@ -150,7 +153,7 @@ const VerifyOtpScreen: FC = () => {
   }, [currentTimeLeft]);
 
   const { mutateAsync: resendOtp } = useMutation({
-    ...usersSendSignupSmsOtpMutation(),
+    ...usersSendSmsOtpMutation(),
     onError: async error => {
       setErrorMessage(() => {
         const errorData = error?.response?.data;
@@ -163,7 +166,6 @@ const VerifyOtpScreen: FC = () => {
 
         if (typeof errorData === 'string') {
           try {
-            // Extract only the first JSON object
             const firstObject = JSON.parse(
               (errorData as string).match(/\{.*?\}/s)?.[0] || '{}',
             );
@@ -194,10 +196,45 @@ const VerifyOtpScreen: FC = () => {
   });
 
   useEffect(() => {
-    if (userData) {
+    if (userData?.user) {
       setUser(userData.user);
+      
+      const role = userData?.user?.role;
+      let isProfileComplete = false;
+
+      switch (role) {
+        case 'USER_ROLE_BUYER': {
+          isProfileComplete = !!userData?.user?.firstName;
+          break;
+        }
+        default: {
+          isProfileComplete =
+            !!userData?.user?.firstName &&
+            !!userData?.user.profileImage &&
+            !!userData?.user.locationCoordinates &&
+            !!userData?.user.locationCoordinates.lat &&
+            !!userData?.user.locationCoordinates.lon &&
+            !!userData?.user.locationCoordinates.address;
+        }
+      }
+
+      setNavigationData({ role, isProfileComplete });
+      setShouldNavigate(true);
     }
-  }, [userData]);
+  }, [userData, setUser]);
+
+  useEffect(() => {
+    if (shouldNavigate && navigationData.role) {
+      if (!navigationData.isProfileComplete) {
+        router.push('/(auth)/profile-page');
+      } else if (navigationData.role === 'USER_ROLE_FARMER') {
+        router.replace('/(farmer)/(index)');
+      } else {
+        router.replace('/(buyer)/(index)');
+      }
+      setShouldNavigate(false);
+    }
+  }, [shouldNavigate, navigationData, router]);
 
   return (
     <>
@@ -290,4 +327,4 @@ const VerifyOtpScreen: FC = () => {
   );
 };
 
-export default VerifyOtpScreen;
+export default SignInVerifyOtpScreen;
