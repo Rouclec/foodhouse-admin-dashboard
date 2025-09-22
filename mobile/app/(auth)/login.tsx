@@ -10,10 +10,9 @@ import {
   Platform,
 } from 'react-native';
 import { Appbar, Icon, Snackbar, TextInput } from 'react-native-paper';
-import { Link, router, useLocalSearchParams } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
-  usersAuthenticateMutation,
   usersGetUserByIdOptions,
   usersOAuthMutation,
   usersSendSmsOtpMutation,
@@ -23,16 +22,7 @@ import { defaultStyles, loginstyles, signupStyles } from '@/styles';
 import { CAMEROON, Colors } from '@/constants';
 import i18n from '@/i18n';
 import { delay, storeData, updateAuthHeader } from '@/utils';
-import { auth } from '@/firebase';
-import {
-  AuthCredential,
-  GoogleAuthProvider,
-  OAuthProvider,
-  signInWithCredential,
-} from 'firebase/auth';
-import * as AppleAuthentication from 'expo-apple-authentication';
-import * as Google from 'expo-auth-session/providers/google';
-import { Prompt } from 'expo-auth-session';
+
 import PhoneNumberInput from '@/components/general/PhoneNumberInput';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -49,13 +39,7 @@ export default function Login() {
   const [firebaseUserId, setFirebaseUserId] = useState<string>();
   const { user, setUser } = useContext(Context) as ContextType;
 
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
-    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-    scopes: ['profile', 'email'],
-    prompt: Prompt.SelectAccount,
-  });
+ 
 
   const { data: userData } = useQuery({
     ...usersGetUserByIdOptions({
@@ -167,179 +151,7 @@ export default function Login() {
     },
   });
 
-  useEffect(() => {
-    if (!response) {
-      return;
-    }
-
-    switch (response.type) {
-      case 'success':
-        if (response.authentication) {
-          const { idToken } = response.authentication;
-
-          if (idToken) {
-            setLoading(true);
-            const credential = GoogleAuthProvider.credential(idToken);
-            signInWithFirebase(credential);
-          }
-        }
-        break;
-
-      case 'error':
-        console.error('Expo Google Auth Error:', response.error);
-        setErrorMessage(
-          response.error?.message || i18n.t('(auth).login.googleSignInFailed'),
-        );
-        setError(true);
-        setLoading(false);
-        break;
-
-      case 'cancel':
-        console.log('Google Sign-In cancelled by user.');
-        setLoading(false);
-        break;
-    }
-  }, [response]);
-
-  const signInWithFirebase = async (credential: AuthCredential) => {
-    try {
-      const userCredential = await signInWithCredential(auth, credential);
-      const firebaseUser = userCredential.user;
-      const firebaseIdToken = await firebaseUser.getIdToken(true);
-
-      if (!firebaseUser) {
-        setErrorMessage(i18n.t('(auth).login.invalidUser'));
-        setError(true);
-        await delay(5000);
-        setError(false);
-        return;
-      }
-
-      // update the auth header with the firebase token
-      updateAuthHeader(firebaseIdToken);
-
-      setFirebaseUserId(firebaseUser.uid);
-
-      // set the user data with the response from firebase
-      setUser({
-        email: firebaseUser?.email ?? '',
-        phoneNumber: firebaseUser?.phoneNumber ?? '',
-        firstName: firebaseUser?.displayName?.split(' ')[0],
-        lastName: firebaseUser?.displayName?.split(' ')[1],
-      });
-
-      // call the oAuth endpoint
-      await oAuth({
-        body: {
-          user: {
-            email: firebaseUser?.email ?? '',
-            phoneNumber: firebaseUser?.phoneNumber ?? '',
-            firstName: firebaseUser?.displayName?.split(' ')[0],
-            lastName: firebaseUser?.displayName?.split(' ')[1],
-          },
-          factor: {
-            type: 'FACTOR_TYPE_GOOGLE',
-          },
-        },
-        path: {
-          'factor.id': firebaseUser.uid,
-        },
-      });
-    } catch (firebaseError: any) {
-      console.error(' Firebase Google Sign-In Error:', firebaseError);
-      setErrorMessage(
-        firebaseError.message || i18n.t('(auth).login.googleSignInFailed'),
-      );
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleSignInPress = async () => {
-    if (!request) {
-      Alert.alert(
-        i18n.t('(auth).login.configurationError'),
-        i18n.t('(auth).login.googleConfigMissing'),
-      );
-      return;
-    }
-    await promptAsync();
-  };
-
-  const handleAppleSignIn = async () => {
-    try {
-      setLoading(true);
-      
-      const appleCredential = await AppleAuthentication.signInAsync({
-        requestedScopes: [
-          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-          AppleAuthentication.AppleAuthenticationScope.EMAIL,
-        ],
-      });
-
-      const { identityToken, fullName, email } = appleCredential;
-      if (!identityToken) {
-        throw new Error('Apple Sign-In failed: no identity token returned');
-      }
-
-     
-      const provider = new OAuthProvider('apple.com');
-      const credential = provider.credential({ idToken: identityToken });
-
-     
-      const userCredential = await signInWithCredential(auth, credential);
-      const firebaseUser = userCredential.user;
-      const firebaseIdToken = await firebaseUser.getIdToken(true);
-
-      setFirebaseUserId(firebaseUser.uid);
-
-      
-      updateAuthHeader(firebaseIdToken);
-
-   
-      setUser({
-        email: firebaseUser.email ?? email ?? '',
-        phoneNumber: firebaseUser.phoneNumber ?? '',
-        firstName:
-          firebaseUser.displayName?.split(' ')[0] ?? fullName?.givenName ?? '',
-        lastName:
-          firebaseUser.displayName?.split(' ')[1] ?? fullName?.familyName ?? '',
-      });
-
-   
-      await oAuth({
-        body: {
-          user: {
-            email: firebaseUser.email ?? email ?? '',
-            phoneNumber: firebaseUser.phoneNumber ?? '',
-            firstName:
-              firebaseUser.displayName?.split(' ')[0] ??
-              fullName?.givenName ??
-              '',
-            lastName:
-              firebaseUser.displayName?.split(' ')[1] ??
-              fullName?.familyName ??
-              '',
-          },
-          factor: {
-            type: 'FACTOR_TYPE_APPLE',
-          },
-        },
-        path: {
-          'factor.id': firebaseUser.uid,
-        },
-      });
-    } catch (error: any) {
-      console.error('Apple Sign-In Error:', error);
-      setErrorMessage(
-        error.message || i18n.t('(auth).login.appleSignInFailed'),
-      );
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  };
+ 
 
   return (
     <>
@@ -403,49 +215,6 @@ export default function Login() {
             {i18n.t('(auth).login.or')}
           </Text>
           <View style={loginstyles.dividerLine} />
-        </View>
-
-        <View style={loginstyles.socialIconsContainer}>
-          <TouchableOpacity
-            style={[
-              loginstyles.socialIcon,
-              loading && defaultStyles.greyButton,
-            ]}
-            onPress={handleGoogleSignInPress}
-            disabled={loading || !request}>
-            {loading ? (
-              <ActivityIndicator color={Colors.primary[200]} />
-            ) : (
-              <>
-                <MaterialCommunityIcons
-                  name="google"
-                  size={24}
-                  color={Colors.primary[200]}
-                />
-                <Text>{i18n.t('(auth).login.continueWith')} Google</Text>
-              </>
-            )}
-          </TouchableOpacity>
-          
-
-          {Platform.OS === 'ios' ? (
-            <AppleAuthentication.AppleAuthenticationButton
-              buttonType={
-                AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN
-              }
-              buttonStyle={
-                AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
-              }
-              cornerRadius={5}
-              style={{ width: 200, height: 44, marginTop: 10 }}
-              onPress={handleAppleSignIn}
-            />
-          ) : (
-            <TouchableOpacity style={loginstyles.socialIcon}>
-              <MaterialCommunityIcons name="apple" size={24} />
-              <Text>{i18n.t('(auth).login.continueWith')} Apple</Text>
-            </TouchableOpacity>
-          )}
         </View>
 
         <View style={loginstyles.registerContainer}>
