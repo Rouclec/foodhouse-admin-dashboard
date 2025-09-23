@@ -137,6 +137,7 @@ const ProfilePage = () => {
           setErrorMessage(undefined);
           return;
         }
+      }
       
 
       const data: UsersCompleteRegistrationBody = {
