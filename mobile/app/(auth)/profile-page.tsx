@@ -64,6 +64,7 @@ const ProfilePage = () => {
 
   const [referralCode, setReferralCode] = useState<string>();
   const [checkError, setCheckError] = useState(false);
+  
 
   const { mutateAsync: updateUserRegistration } = useMutation({
     ...usersCompleteRegistrationMutation(),
@@ -137,6 +138,7 @@ const ProfilePage = () => {
           return;
         }
       }
+      
 
       const data: UsersCompleteRegistrationBody = {
         firstName,
@@ -148,6 +150,7 @@ const ProfilePage = () => {
         locationCoordinates: locationCoordinates ?? undefined,
         referredBy: referralCode,
       };
+      
 
       await updateUserRegistration({
         body: data,
