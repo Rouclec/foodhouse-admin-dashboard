@@ -64,7 +64,7 @@ const ProfilePage = () => {
 
   const [referralCode, setReferralCode] = useState<string>();
   const [checkError, setCheckError] = useState(false);
-  console.log("users profile", user);
+  
 
   const { mutateAsync: updateUserRegistration } = useMutation({
     ...usersCompleteRegistrationMutation(),
@@ -137,8 +137,7 @@ const ProfilePage = () => {
           setErrorMessage(undefined);
           return;
         }
-      }
-      console.log(user);
+      
 
       const data: UsersCompleteRegistrationBody = {
         firstName,
