@@ -115,6 +115,7 @@ export type productsgrpcProduct = {
     createdAt?: string;
     updatedAt?: string;
     deliveryFeePerUnit?: typesAmount;
+    isApproved?: boolean;
 };
 
 export type productsgrpcProductName = {

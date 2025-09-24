@@ -27,6 +27,7 @@ message Product {
   google.protobuf.Timestamp created_at = 9;
   google.protobuf.Timestamp updated_at = 10;
   types.Amount delivery_fee_per_unit = 11;
+  bool is_approved = 12;
 }
 
 message ProductName {

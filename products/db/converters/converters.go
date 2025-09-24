@@ -59,6 +59,7 @@ func SqlcToProtoProductRow(sqlcProduct sqlc.Product, sqlcCategory *sqlc.Category
 		CreatedBy:   derefString(sqlcProduct.CreatedBy),
 		CreatedAt:   timestamppb.New(sqlcProduct.CreatedAt.Time),
 		UpdatedAt:   timestamppb.New(sqlcProduct.UpdatedAt.Time),
+		IsApproved:  *sqlcProduct.IsApproved,
 	}, nil
 }
 

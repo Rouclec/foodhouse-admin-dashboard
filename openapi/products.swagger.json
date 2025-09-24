@@ -1056,6 +1056,9 @@
         },
         "deliveryFeePerUnit": {
           "$ref": "#/definitions/typesAmount"
+        },
+        "isApproved": {
+          "type": "boolean"
         }
       }
     },
