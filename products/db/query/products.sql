@@ -49,7 +49,6 @@ UPDATE products SET deleted_at = now() WHERE id = $1;
 SELECT * FROM products
 WHERE
   deleted_at IS NULL AND
-  is_approved IS TRUE AND
   (sqlc.arg(is_approved)::boolean IS NULL OR is_approved = sqlc.arg(is_approved)::boolean) AND
   (sqlc.arg(created_by)::varchar = '' OR created_by = sqlc.arg(created_by)::varchar) AND
   (sqlc.arg(category_id)::varchar = '' OR category_id = sqlc.arg(category_id)::varchar) AND
