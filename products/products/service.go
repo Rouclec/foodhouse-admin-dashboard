@@ -197,7 +197,6 @@ func (i *Impl) HealthCheck(context.Context, *productsgrpc.HealthCheckRequest) (*
 // ListProducts implements productsgrpc.ProductsServer.
 func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsRequest) (*productsgrpc.ListProductsResponse, error) {
 	var err error
-	var isApproved = req.IsApproved
 
 	startKey := time.Time{}
 
@@ -213,14 +212,9 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 		}
 	}
 
-	if isApproved == nil {
-		truth_var := true
-		isApproved = &truth_var
-	}
-
 	args := sqlc.ListProductsParams{
 		CategoryID:   req.GetCategoryId(),
-		IsApproved:   *isApproved,
+		IsApproved:  *req.IsApproved,
 		CreatedBy:    req.GetCreatedBy(),
 		MinValue:     req.GetMinAmount().GetValue(),
 		MaxValue:     req.GetMaxAmount().GetValue(),
