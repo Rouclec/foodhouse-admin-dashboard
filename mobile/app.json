@@ -49,6 +49,7 @@
     },
     "plugins": [
       "expo-router",
+      ["expo-apple-authentication"],
       [
         "expo-camera",
         {

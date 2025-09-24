@@ -280,6 +280,7 @@ export type ProductsListProductsData = {
         categoryId?: string;
         count?: number;
         createdBy?: string;
+        isApproved?: boolean;
         'maxAmount.currencyIsoCode'?: string;
         'maxAmount.value'?: number;
         'minAmount.currencyIsoCode'?: string;

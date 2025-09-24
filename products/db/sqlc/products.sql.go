@@ -76,7 +76,7 @@ INSERT INTO products (
   $1, $2, $3, $4, $5,
   $6, $7, $8, $9, $10, $11
 )
-RETURNING id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency
+RETURNING id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency, is_approved
 `
 
 type CreateProductParams struct {
@@ -124,6 +124,7 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 		&i.DeletedAt,
 		&i.DeliveryFeeAmount,
 		&i.DeliveryFeeCurrency,
+		&i.IsApproved,
 	)
 	return i, err
 }
@@ -219,7 +220,7 @@ func (q *Queries) GetPriceTypeById(ctx context.Context, id string) (PriceType, e
 }
 
 const getProduct = `-- name: GetProduct :one
-SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency FROM products where id = $1
+SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency, is_approved FROM products where id = $1
 `
 
 func (q *Queries) GetProduct(ctx context.Context, id string) (Product, error) {
@@ -241,12 +242,13 @@ func (q *Queries) GetProduct(ctx context.Context, id string) (Product, error) {
 		&i.DeletedAt,
 		&i.DeliveryFeeAmount,
 		&i.DeliveryFeeCurrency,
+		&i.IsApproved,
 	)
 	return i, err
 }
 
 const getProductForUpdate = `-- name: GetProductForUpdate :one
-SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency FROM products WHERE   
+SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency, is_approved FROM products WHERE   
 deleted_at IS NULL AND  
 id = $1 FOR UPDATE
 `
@@ -270,6 +272,7 @@ func (q *Queries) GetProductForUpdate(ctx context.Context, id string) (Product, 
 		&i.DeletedAt,
 		&i.DeliveryFeeAmount,
 		&i.DeliveryFeeCurrency,
+		&i.IsApproved,
 	)
 	return i, err
 }
@@ -383,26 +386,29 @@ func (q *Queries) ListProductNames(ctx context.Context, categoryID string) ([]Pr
 }
 
 const listProducts = `-- name: ListProducts :many
-SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency FROM products
+SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency, is_approved FROM products
 WHERE
   deleted_at IS NULL AND
-  ($1::varchar = '' OR created_by = $1::varchar) AND
-  ($2::varchar = '' OR category_id = $2::varchar) AND
-  ($3::float = 0 OR value >= $3::float) AND
+  is_approved IS TRUE AND
+  ($1::boolean IS NULL OR is_approved = $1::boolean) AND
+  ($2::varchar = '' OR created_by = $2::varchar) AND
+  ($3::varchar = '' OR category_id = $3::varchar) AND
+  ($4::float = 0 OR value >= $4::float) AND
   (
-    $4::float = 0 OR value <= COALESCE($4::float, 9223372036854775807)
+    $5::float = 0 OR value <= COALESCE($5::float, 9223372036854775807)
   ) AND
   (
-    $5::text = '' OR
-    name ILIKE '%' || $5::text || '%' OR
-    description ILIKE '%' || $5::text || '%'
+    $6::text = '' OR
+    name ILIKE '%' || $6::text || '%' OR
+    description ILIKE '%' || $6::text || '%'
   ) AND
-  ($6::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at > $6::timestamptz)
+  ($7::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at > $7::timestamptz)
 ORDER BY created_at ASC
-LIMIT $7::int
+LIMIT $8::int
 `
 
 type ListProductsParams struct {
+	IsApproved   bool      `json:"is_approved"`
 	CreatedBy    string    `json:"created_by"`
 	CategoryID   string    `json:"category_id"`
 	MinValue     float64   `json:"min_value"`
@@ -414,6 +420,7 @@ type ListProductsParams struct {
 
 func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]Product, error) {
 	rows, err := q.db.Query(ctx, listProducts,
+		arg.IsApproved,
 		arg.CreatedBy,
 		arg.CategoryID,
 		arg.MinValue,
@@ -445,6 +452,7 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]P
 			&i.DeletedAt,
 			&i.DeliveryFeeAmount,
 			&i.DeliveryFeeCurrency,
+			&i.IsApproved,
 		); err != nil {
 			return nil, err
 		}

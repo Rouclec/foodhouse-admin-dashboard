@@ -40,6 +40,7 @@ type Product struct {
 	DeletedAt           pgtype.Timestamptz `json:"deleted_at"`
 	DeliveryFeeAmount   *float64           `json:"delivery_fee_amount"`
 	DeliveryFeeCurrency *string            `json:"delivery_fee_currency"`
+	IsApproved          *bool              `json:"is_approved"`
 }
 
 type ProductName struct {

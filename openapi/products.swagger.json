@@ -460,6 +460,12 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "isApproved",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "tags": [
