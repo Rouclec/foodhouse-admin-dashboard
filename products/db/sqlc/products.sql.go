@@ -389,37 +389,41 @@ const listProducts = `-- name: ListProducts :many
 SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency, is_approved FROM products
 WHERE
   deleted_at IS NULL AND
-  is_approved IS TRUE AND
-  ($1::boolean IS NULL OR is_approved = $1::boolean) AND
-  ($2::varchar = '' OR created_by = $2::varchar) AND
-  ($3::varchar = '' OR category_id = $3::varchar) AND
-  ($4::float = 0 OR value >= $4::float) AND
   (
-    $5::float = 0 OR value <= COALESCE($5::float, 9223372036854775807)
+  $1::boolean = false
+  OR is_approved = $2::boolean
+  ) AND
+  ($3::varchar = '' OR created_by = $3::varchar) AND
+  ($4::varchar = '' OR category_id = $4::varchar) AND
+  ($5::float = 0 OR value >= $5::float) AND
+  (
+    $6::float = 0 OR value <= COALESCE($6::float, 9223372036854775807)
   ) AND
   (
-    $6::text = '' OR
-    name ILIKE '%' || $6::text || '%' OR
-    description ILIKE '%' || $6::text || '%'
+    $7::text = '' OR
+    name ILIKE '%' || $7::text || '%' OR
+    description ILIKE '%' || $7::text || '%'
   ) AND
-  ($7::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at > $7::timestamptz)
+  ($8::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at > $8::timestamptz)
 ORDER BY created_at ASC
-LIMIT $8::int
+LIMIT $9::int
 `
 
 type ListProductsParams struct {
-	IsApproved   bool      `json:"is_approved"`
-	CreatedBy    string    `json:"created_by"`
-	CategoryID   string    `json:"category_id"`
-	MinValue     float64   `json:"min_value"`
-	MaxValue     float64   `json:"max_value"`
-	Search       string    `json:"search"`
-	CreatedAfter time.Time `json:"created_after"`
-	Count        int32     `json:"count"`
+	IsApprovedProvided bool      `json:"is_approved_provided"`
+	IsApproved         bool      `json:"is_approved"`
+	CreatedBy          string    `json:"created_by"`
+	CategoryID         string    `json:"category_id"`
+	MinValue           float64   `json:"min_value"`
+	MaxValue           float64   `json:"max_value"`
+	Search             string    `json:"search"`
+	CreatedAfter       time.Time `json:"created_after"`
+	Count              int32     `json:"count"`
 }
 
 func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]Product, error) {
 	rows, err := q.db.Query(ctx, listProducts,
+		arg.IsApprovedProvided,
 		arg.IsApproved,
 		arg.CreatedBy,
 		arg.CategoryID,
