@@ -319,15 +319,14 @@ service Products {
     };
   }
 
-   rpc PublishProduct(PublishProductRequest)
-      returns (PublishProductResponse) {
+  rpc PublishProduct(PublishProductRequest) returns (PublishProductResponse) {
     option (google.api.http) = {
       put : "/v1/admin/{user_id}/products/{product_id}/publish-product"
       body : "*"
     };
   }
 
-    rpc UnPublishProduct(UnPublishProductRequest)
+  rpc UnPublishProduct(UnPublishProductRequest)
       returns (UnPublishProductResponse) {
     option (google.api.http) = {
       put : "/v1/admin/{user_id}/products/{product_id}/unpublish-product"

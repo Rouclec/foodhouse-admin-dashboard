@@ -53,6 +53,8 @@ import {
   productsListProductsOptions,
   productsDeleteProductMutation,
   productsListCategoriesOptions,
+  productsPublishProductMutation,
+  productsUnPublishProductMutation,
 } from "@/client/products.swagger/@tanstack/react-query.gen";
 import moment from "moment";
 import { usersGetFarmerByIdOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
@@ -141,6 +143,30 @@ export default function ProductsPage() {
     onError: (error) => {
       toast({
         title: "Error deleting product",
+        description:
+          error?.response?.data?.message ?? "An unknown error occurred",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const { mutateAsync: publishProduct } = useMutation({
+    ...productsPublishProductMutation(),
+    onError: (error) => {
+      toast({
+        title: "Error publishing product",
+        description:
+          error?.response?.data?.message ?? "An unknown error occurred",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const { mutateAsync: unPublishProduct } = useMutation({
+    ...productsUnPublishProductMutation(),
+    onError: (error) => {
+      toast({
+        title: "Error publishing product",
         description:
           error?.response?.data?.message ?? "An unknown error occurred",
         variant: "destructive",
@@ -244,11 +270,24 @@ export default function ProductsPage() {
       setLoading(true);
       if (product?.isApproved) {
         // unpublish
-        console.log("unpublishing");
+        await unPublishProduct({
+          body: {},
+          path: {
+            userId: adminUser?.userId ?? "",
+            productId: product?.id ?? "",
+          },
+        });
       } else {
         // publish
-        console.log("publishing");
+        await publishProduct({
+          body: {},
+          path: {
+            userId: adminUser?.userId ?? "",
+            productId: product?.id ?? "",
+          },
+        });
       }
+      refetchProducts();
     } catch (error) {
       console.error({ error }, "toogling product");
     } finally {
