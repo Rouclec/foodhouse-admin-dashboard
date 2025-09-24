@@ -212,6 +212,8 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 		}
 	}
 
+	i.logger.Debug().Msgf("is approved variable: %v", req.IsApproved)
+
 	args := sqlc.ListProductsParams{
 		CategoryID:   req.GetCategoryId(),
 		CreatedBy:    req.GetCreatedBy(),
@@ -221,6 +223,8 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 		CreatedAfter: startKey,
 		Count:        int32(count), // Convert count to int32
 	}
+
+	i.logger.Debug().Msgf("argurements : %v", args)
 
 	if req.IsApproved != nil {
 		args.IsApproved = *req.IsApproved
