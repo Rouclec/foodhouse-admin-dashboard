@@ -215,19 +215,21 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 	i.logger.Debug().Msgf("is approved variable: %v", req.IsApproved)
 
 	args := sqlc.ListProductsParams{
-		CategoryID:   req.GetCategoryId(),
-		CreatedBy:    req.GetCreatedBy(),
-		MinValue:     req.GetMinAmount().GetValue(),
-		MaxValue:     req.GetMaxAmount().GetValue(),
-		Search:       req.GetSearch(),
-		CreatedAfter: startKey,
-		Count:        int32(count), // Convert count to int32
+		CategoryID:         req.GetCategoryId(),
+		CreatedBy:          req.GetCreatedBy(),
+		MinValue:           req.GetMinAmount().GetValue(),
+		MaxValue:           req.GetMaxAmount().GetValue(),
+		Search:             req.GetSearch(),
+		CreatedAfter:       startKey,
+		Count:              int32(count), // Convert count to int32
+		IsApprovedProvided: false,
 	}
 
 	i.logger.Debug().Msgf("argurements : %v", args)
 
 	if req.IsApproved != nil {
 		args.IsApproved = *req.IsApproved
+		args.IsApprovedProvided = true
 	}
 
 	products, err := i.repo.Do().ListProducts(ctx, args)
@@ -271,13 +273,14 @@ func (i *Impl) ListFarmerProducts(ctx context.Context, req *productsgrpc.ListFar
 	}
 
 	products, err := i.repo.Do().ListProducts(ctx, sqlc.ListProductsParams{
-		CreatedBy:    req.GetUserId(),
-		CategoryID:   req.GetCategoryId(),
-		MinValue:     req.GetMinAmount().GetValue(),
-		MaxValue:     req.GetMaxAmount().GetValue(),
-		Search:       req.GetSearch(),
-		CreatedAfter: startKey,
-		Count:        int32(count), // Convert count to int32
+		CreatedBy:          req.GetUserId(),
+		CategoryID:         req.GetCategoryId(),
+		MinValue:           req.GetMinAmount().GetValue(),
+		MaxValue:           req.GetMaxAmount().GetValue(),
+		Search:             req.GetSearch(),
+		CreatedAfter:       startKey,
+		Count:              int32(count), // Convert count to int32
+		IsApprovedProvided: false,
 	})
 
 	if err != nil {
