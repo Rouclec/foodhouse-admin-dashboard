@@ -49,7 +49,7 @@ const (
 
 	TWO = 2
 
-	THIRTY_TWO = 32
+	ThirtyTwo = 32
 )
 
 // Impl is the implementation of the Users service.
@@ -223,7 +223,7 @@ func (i *Impl) Signup(ctx context.Context, req *usersgrpc.SignupRequest) (*users
 
 	if password == "" {
 		var genErr error
-		password, genErr = RandomString(THIRTY_TWO)
+		password, genErr = RandomString(ThirtyTwo)
 
 		if genErr != nil {
 			i.logger.Debug().Msgf("generate password error : %v", genErr)
