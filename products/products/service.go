@@ -609,3 +609,73 @@ func (i *Impl) GetProductStats(ctx context.Context,
 		Data: stats,
 	}, nil
 }
+
+// PublishProduct implements productsgrpc.ProductsServer.
+func (i *Impl) PublishProduct(ctx context.Context, req *productsgrpc.PublishProductRequest) (*productsgrpc.PublishProductResponse, error) {
+	querier, tx, err := i.repo.Begin(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)
+	}
+
+	// Proper rollback handling
+	defer func() {
+		err = tx.Rollback(ctx)
+		if err != nil && !errors.Is(err, sql.ErrTxDone) {
+			i.logger.Err(err).Msgf("Failed to rollback transaction: %v", req)
+		}
+	}()
+
+	product, err := querier.GetProductForUpdate(ctx, req.GetProductId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting product %v", err)
+	}
+
+	err = querier.PublishProduct(ctx, product.ID)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error publishing product %v", err)
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
+	}
+
+	return &productsgrpc.PublishProductResponse{}, nil
+}
+
+// UnPublishProduct implements productsgrpc.ProductsServer.
+func (i *Impl) UnPublishProduct(ctx context.Context, req *productsgrpc.UnPublishProductRequest) (*productsgrpc.UnPublishProductResponse, error) {
+	querier, tx, err := i.repo.Begin(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)
+	}
+
+	// Proper rollback handling
+	defer func() {
+		err = tx.Rollback(ctx)
+		if err != nil && !errors.Is(err, sql.ErrTxDone) {
+			i.logger.Err(err).Msgf("Failed to rollback transaction: %v", req)
+		}
+	}()
+
+	product, err := querier.GetProductForUpdate(ctx, req.GetProductId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting product %v", err)
+	}
+
+	err = querier.UnPublishProduct(ctx, product.ID)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error unpublishing product %v", err)
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
+	}
+
+	return &productsgrpc.UnPublishProductResponse{}, nil
+}

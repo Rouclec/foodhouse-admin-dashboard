@@ -292,6 +292,20 @@ func (mr *MockQuerierMockRecorder) ListProducts(ctx, arg any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListProducts", reflect.TypeOf((*MockQuerier)(nil).ListProducts), ctx, arg)
 }
 
+// PublishProduct mocks base method.
+func (m *MockQuerier) PublishProduct(ctx context.Context, id string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PublishProduct", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// PublishProduct indicates an expected call of PublishProduct.
+func (mr *MockQuerierMockRecorder) PublishProduct(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PublishProduct", reflect.TypeOf((*MockQuerier)(nil).PublishProduct), ctx, id)
+}
+
 // SumProductAmounts mocks base method.
 func (m *MockQuerier) SumProductAmounts(ctx context.Context, arg sqlc.SumProductAmountsParams) (float64, error) {
 	m.ctrl.T.Helper()
@@ -305,6 +319,20 @@ func (m *MockQuerier) SumProductAmounts(ctx context.Context, arg sqlc.SumProduct
 func (mr *MockQuerierMockRecorder) SumProductAmounts(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SumProductAmounts", reflect.TypeOf((*MockQuerier)(nil).SumProductAmounts), ctx, arg)
+}
+
+// UnPublishProduct mocks base method.
+func (m *MockQuerier) UnPublishProduct(ctx context.Context, id string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UnPublishProduct", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UnPublishProduct indicates an expected call of UnPublishProduct.
+func (mr *MockQuerierMockRecorder) UnPublishProduct(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UnPublishProduct", reflect.TypeOf((*MockQuerier)(nil).UnPublishProduct), ctx, id)
 }
 
 // UpdateCategory mocks base method.

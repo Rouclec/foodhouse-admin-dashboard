@@ -282,6 +282,94 @@
         ]
       }
     },
+    "/v1/admin/{userId}/products/{productId}/publish-product": {
+      "put": {
+        "operationId": "Products_PublishProduct",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/productsgrpcPublishProductResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ProductsPublishProductBody"
+            }
+          }
+        ],
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/v1/admin/{userId}/products/{productId}/unpublish-product": {
+      "put": {
+        "operationId": "Products_UnPublishProduct",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/productsgrpcUnPublishProductResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ProductsUnPublishProductBody"
+            }
+          }
+        ],
+        "tags": [
+          "Products"
+        ]
+      }
+    },
     "/v1/public/products/get-categories": {
       "get": {
         "operationId": "Products_ListCategories",
@@ -802,6 +890,12 @@
         }
       }
     },
+    "ProductsPublishProductBody": {
+      "type": "object"
+    },
+    "ProductsUnPublishProductBody": {
+      "type": "object"
+    },
     "ProductsUpdateCategoryBody": {
       "type": "object",
       "properties": {
@@ -1076,6 +1170,9 @@
         }
       }
     },
+    "productsgrpcPublishProductResponse": {
+      "type": "object"
+    },
     "productsgrpcStatItem": {
       "type": "object",
       "properties": {
@@ -1103,6 +1200,9 @@
           "format": "double"
         }
       }
+    },
+    "productsgrpcUnPublishProductResponse": {
+      "type": "object"
     },
     "productsgrpcUpdateCategoryResponse": {
       "type": "object"

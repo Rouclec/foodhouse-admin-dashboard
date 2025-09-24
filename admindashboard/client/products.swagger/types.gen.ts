@@ -124,6 +124,8 @@ export type productsgrpcProductName = {
     categoryId?: string;
 };
 
+export type productsgrpcPublishProductResponse = unknown;
+
 export type productsgrpcStatItem = {
     title?: string;
     value?: number;
@@ -135,11 +137,17 @@ export type productsgrpcSumProductAmountsResponse = {
     total?: number;
 };
 
+export type productsgrpcUnPublishProductResponse = unknown;
+
 export type productsgrpcUpdateCategoryResponse = unknown;
 
 export type productsgrpcUpdateProductResponse = {
     message?: string;
 };
+
+export type ProductsPublishProductBody = unknown;
+
+export type ProductsUnPublishProductBody = unknown;
 
 export type ProductsUpdateCategoryBody = {
     name?: string;
@@ -247,6 +255,30 @@ export type ProductsDeletePriceTypeData = {
 export type ProductsDeletePriceTypeResponse = (productsgrpcDeletePriceTypeResponse);
 
 export type ProductsDeletePriceTypeError = (rpcStatus);
+
+export type ProductsPublishProductData = {
+    body: ProductsPublishProductBody;
+    path: {
+        productId: string;
+        userId: string;
+    };
+};
+
+export type ProductsPublishProductResponse = (productsgrpcPublishProductResponse);
+
+export type ProductsPublishProductError = (rpcStatus);
+
+export type ProductsUnPublishProductData = {
+    body: ProductsUnPublishProductBody;
+    path: {
+        productId: string;
+        userId: string;
+    };
+};
+
+export type ProductsUnPublishProductResponse = (productsgrpcUnPublishProductResponse);
+
+export type ProductsUnPublishProductError = (rpcStatus);
 
 export type ProductsListCategoriesResponse = (productsgrpcListCategoriesResponse);
 

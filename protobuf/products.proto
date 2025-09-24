@@ -202,6 +202,20 @@ message StatItem {
 message GetProductStatsRequest {}
 message GetProductStatsResponse { repeated StatItem data = 1; }
 
+message PublishProductRequest {
+  string user_id = 1;
+  string product_id = 2;
+}
+
+message PublishProductResponse {}
+
+message UnPublishProductRequest {
+  string user_id = 1;
+  string product_id = 2;
+}
+
+message UnPublishProductResponse {}
+
 service Products {
 
   rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryResponse) {
@@ -301,6 +315,22 @@ service Products {
       returns (CreatePriceTypeResponse) {
     option (google.api.http) = {
       post : "/v1/admin/{user_id}/products/create-price-type"
+      body : "*"
+    };
+  }
+
+   rpc PublishProduct(PublishProductRequest)
+      returns (PublishProductResponse) {
+    option (google.api.http) = {
+      put : "/v1/admin/{user_id}/products/{product_id}/publish-product"
+      body : "*"
+    };
+  }
+
+    rpc UnPublishProduct(UnPublishProductRequest)
+      returns (UnPublishProductResponse) {
+    option (google.api.http) = {
+      put : "/v1/admin/{user_id}/products/{product_id}/unpublish-product"
       body : "*"
     };
   }

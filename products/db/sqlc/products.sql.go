@@ -468,6 +468,15 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]P
 	return items, nil
 }
 
+const publishProduct = `-- name: PublishProduct :exec
+UPDATE products SET is_approved = true where id = $1
+`
+
+func (q *Queries) PublishProduct(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, publishProduct, id)
+	return err
+}
+
 const sumProductAmounts = `-- name: SumProductAmounts :one
 SELECT 
   COALESCE(SUM(p.value * t.quantity), 0)::double precision AS total
@@ -489,6 +498,15 @@ func (q *Queries) SumProductAmounts(ctx context.Context, arg SumProductAmountsPa
 	var total float64
 	err := row.Scan(&total)
 	return total, err
+}
+
+const unPublishProduct = `-- name: UnPublishProduct :exec
+UPDATE products SET is_approved = false where id = $1
+`
+
+func (q *Queries) UnPublishProduct(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, unPublishProduct, id)
+	return err
 }
 
 const updateCategory = `-- name: UpdateCategory :exec

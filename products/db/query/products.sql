@@ -123,3 +123,10 @@ SELECT
 FROM products
 WHERE created_at >= sqlc.arg(start_date)::timestamptz
   AND created_at <= sqlc.arg(end_date)::timestamptz;
+
+
+-- name: PublishProduct :exec
+UPDATE products SET is_approved = true where id = $1;
+
+-- name: UnPublishProduct :exec
+UPDATE products SET is_approved = false where id = $1;

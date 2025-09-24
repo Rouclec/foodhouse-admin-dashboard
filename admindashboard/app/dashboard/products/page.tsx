@@ -33,7 +33,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Search, Package, Trash2, Image as ImageIcon, Eye } from "lucide-react";
+import {
+  Search,
+  Package,
+  Trash2,
+  Image as ImageIcon,
+  Globe,
+  EyeClosed,
+  ExternalLink,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryLoading } from "@/hooks/use-query-loading";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
@@ -53,6 +61,23 @@ import { ProductDetailsDialog } from "@/components/products/product-details-dial
 import { productsgrpcProduct } from "@/client/products.swagger";
 import { EditProductDialog } from "@/components/products/edit-product-dialog";
 
+const STATUS_FILTERS: Array<{
+  label: string;
+  value: string;
+}> = [
+  {
+    label: "All Products",
+    value: "null",
+  },
+  {
+    label: "Published",
+    value: "true",
+  },
+  {
+    label: "Unpublished",
+    value: "false",
+  },
+];
 export default function ProductsPage() {
   const { user: adminUser } = useContext(Context) as ContextType;
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -73,6 +98,13 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<
+    | {
+        label: string;
+        value: string;
+      }
+    | undefined
+  >(STATUS_FILTERS[0]);
   const { toast } = useToast();
 
   const { data: categoriesData, isLoading: isCategoriesLoading } = useQuery({
@@ -93,6 +125,12 @@ export default function ProductsPage() {
         startKey: pagination.startKey,
         categoryId: categoryFilter === "all" ? undefined : categoryFilter,
         count: pagination.pageSize,
+        isApproved:
+          statusFilter?.value === "true"
+            ? true
+            : statusFilter?.value === "false"
+            ? false
+            : undefined,
       },
     }),
     placeholderData: keepPreviousData,
@@ -201,6 +239,23 @@ export default function ProductsPage() {
     }
   };
 
+  const handleToogleStatus = async (product: productsgrpcProduct) => {
+    try {
+      setLoading(true);
+      if (product?.isApproved) {
+        // unpublish
+        console.log("unpublishing");
+      } else {
+        // publish
+        console.log("publishing");
+      }
+    } catch (error) {
+      console.error({ error }, "toogling product");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const categoryMap = useMemo(() => {
     const map: Record<string, string> = {};
     categoriesData?.categories?.forEach((category) => {
@@ -260,6 +315,26 @@ export default function ProductsPage() {
                 ))}
               </SelectContent>
             </Select>
+
+            <Select
+              value={statusFilter?.value}
+              onValueChange={(value) =>
+                setStatusFilter(
+                  STATUS_FILTERS.find((item) => item?.value === value)
+                )
+              }
+            >
+              <SelectTrigger className="w-full md:w-48">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUS_FILTERS?.map((status) => (
+                  <SelectItem value={status.value} key={status.value}>
+                    {status.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -300,9 +375,35 @@ export default function ProductsPage() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-gray-900 truncate">
-                          {product?.name}
-                        </h3>
+                        <div className="flex flex-row items-center justify-between">
+                          <h3 className="font-medium text-gray-900 truncate">
+                            {product?.name}
+                          </h3>
+                          <div
+                            className={`flex flex-row w-fit items-center gap-x-1 px-2 py-1 rounded-full ${
+                              product?.isApproved
+                                ? "bg-green-100"
+                                : "bg-yellow-100"
+                            }`}
+                          >
+                            {product?.isApproved ? (
+                              <Globe className="w-4 h-4 text-green-700" />
+                            ) : (
+                              <EyeClosed className="w-4 h-4 text-yellow-700" />
+                            )}
+                            <p
+                              className={`text-xs font-medium ${
+                                product?.isApproved
+                                  ? "text-green-700"
+                                  : "text-yellow-700"
+                              }`}
+                            >
+                              {product?.isApproved
+                                ? "Published"
+                                : "UnPublished"}
+                            </p>
+                          </div>
+                        </div>
                         <p className="text-sm text-gray-500 mt-1">
                           Category:{" "}
                           {categoryMap[product?.category?.id || ""] || "N/A"}
@@ -332,7 +433,26 @@ export default function ProductsPage() {
                         title="View details"
                         className="h-8 w-8 p-0"
                       >
-                        <Eye className="h-4 w-4" />
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToogleStatus(product);
+                        }}
+                        disabled={loading}
+                        title={product?.isApproved ? "Unpublish" : "Publish"}
+                        className="h-8 w-8 p-0"
+                      >
+                        {loading ? (
+                          <LoadingSpinner size="sm" />
+                        ) : product?.isApproved ? (
+                          <EyeClosed className="w-4 h-4" />
+                        ) : (
+                          <Globe className="w-4 h-4" />
+                        )}
                       </Button>
                       <Button
                         variant="outline"
@@ -371,6 +491,7 @@ export default function ProductsPage() {
                     <TableHead>Category</TableHead>
                     <TableHead>Farmers</TableHead>
                     <TableHead>Created Date</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -415,6 +536,30 @@ export default function ProductsPage() {
                       <TableCell>
                         {moment(product?.createdAt).format("DD-MM-YYYY")}
                       </TableCell>
+                      <TableCell>
+                        <div
+                          className={`flex flex-row items-center w-fit gap-x-1 px-2 py-1 rounded-full ${
+                            product?.isApproved
+                              ? "bg-green-100"
+                              : "bg-yellow-100"
+                          }`}
+                        >
+                          {product?.isApproved ? (
+                            <Globe className="w-4 h-4 text-green-700" />
+                          ) : (
+                            <EyeClosed className="w-4 h-4 text-yellow-700" />
+                          )}
+                          <p
+                            className={`text-xs font-medium ${
+                              product?.isApproved
+                                ? "text-green-700"
+                                : "text-yellow-700"
+                            }`}
+                          >
+                            {product?.isApproved ? "Published" : "UnPublished"}
+                          </p>
+                        </div>
+                      </TableCell>
                       <TableCell
                         className="text-right"
                         onClick={(e) => e.stopPropagation()}
@@ -426,7 +571,28 @@ export default function ProductsPage() {
                             onClick={() => handleOpenDetailsDialog(product)}
                             title="View details"
                           >
-                            <Eye className="h-4 w-4" />
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={loading}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToogleStatus(product);
+                            }}
+                            title={
+                              product?.isApproved ? "Unpublish" : "Publish"
+                            }
+                            className="h-8 w-8 p-0"
+                          >
+                            {loading ? (
+                              <LoadingSpinner size="sm" />
+                            ) : product?.isApproved ? (
+                              <EyeClosed className="w-4 h-4" />
+                            ) : (
+                              <Globe className="w-4 h-4" />
+                            )}
                           </Button>
                           <Button
                             variant="outline"

@@ -34,6 +34,8 @@ const (
 	Products_CreateProductName_FullMethodName  = "/productsgrpc.Products/CreateProductName"
 	Products_DeleteProductName_FullMethodName  = "/productsgrpc.Products/DeleteProductName"
 	Products_CreatePriceType_FullMethodName    = "/productsgrpc.Products/CreatePriceType"
+	Products_PublishProduct_FullMethodName     = "/productsgrpc.Products/PublishProduct"
+	Products_UnPublishProduct_FullMethodName   = "/productsgrpc.Products/UnPublishProduct"
 	Products_DeletePriceType_FullMethodName    = "/productsgrpc.Products/DeletePriceType"
 	Products_ListProductNames_FullMethodName   = "/productsgrpc.Products/ListProductNames"
 	Products_ListPriceTypes_FullMethodName     = "/productsgrpc.Products/ListPriceTypes"
@@ -60,6 +62,8 @@ type ProductsClient interface {
 	CreateProductName(ctx context.Context, in *CreateProductNameRequest, opts ...grpc.CallOption) (*CreateProductNameResponse, error)
 	DeleteProductName(ctx context.Context, in *DeleteProductNameRequest, opts ...grpc.CallOption) (*DeleteProductNameResponse, error)
 	CreatePriceType(ctx context.Context, in *CreatePriceTypeRequest, opts ...grpc.CallOption) (*CreatePriceTypeResponse, error)
+	PublishProduct(ctx context.Context, in *PublishProductRequest, opts ...grpc.CallOption) (*PublishProductResponse, error)
+	UnPublishProduct(ctx context.Context, in *UnPublishProductRequest, opts ...grpc.CallOption) (*UnPublishProductResponse, error)
 	DeletePriceType(ctx context.Context, in *DeletePriceTypeRequest, opts ...grpc.CallOption) (*DeletePriceTypeResponse, error)
 	ListProductNames(ctx context.Context, in *ListProductNamesRequest, opts ...grpc.CallOption) (*ListProductNamesResponse, error)
 	ListPriceTypes(ctx context.Context, in *ListPriceTypesRequest, opts ...grpc.CallOption) (*ListPriceTypesResponse, error)
@@ -225,6 +229,26 @@ func (c *productsClient) CreatePriceType(ctx context.Context, in *CreatePriceTyp
 	return out, nil
 }
 
+func (c *productsClient) PublishProduct(ctx context.Context, in *PublishProductRequest, opts ...grpc.CallOption) (*PublishProductResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PublishProductResponse)
+	err := c.cc.Invoke(ctx, Products_PublishProduct_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *productsClient) UnPublishProduct(ctx context.Context, in *UnPublishProductRequest, opts ...grpc.CallOption) (*UnPublishProductResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UnPublishProductResponse)
+	err := c.cc.Invoke(ctx, Products_UnPublishProduct_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *productsClient) DeletePriceType(ctx context.Context, in *DeletePriceTypeRequest, opts ...grpc.CallOption) (*DeletePriceTypeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DeletePriceTypeResponse)
@@ -294,6 +318,8 @@ type ProductsServer interface {
 	CreateProductName(context.Context, *CreateProductNameRequest) (*CreateProductNameResponse, error)
 	DeleteProductName(context.Context, *DeleteProductNameRequest) (*DeleteProductNameResponse, error)
 	CreatePriceType(context.Context, *CreatePriceTypeRequest) (*CreatePriceTypeResponse, error)
+	PublishProduct(context.Context, *PublishProductRequest) (*PublishProductResponse, error)
+	UnPublishProduct(context.Context, *UnPublishProductRequest) (*UnPublishProductResponse, error)
 	DeletePriceType(context.Context, *DeletePriceTypeRequest) (*DeletePriceTypeResponse, error)
 	ListProductNames(context.Context, *ListProductNamesRequest) (*ListProductNamesResponse, error)
 	ListPriceTypes(context.Context, *ListPriceTypesRequest) (*ListPriceTypesResponse, error)
@@ -353,6 +379,12 @@ func (UnimplementedProductsServer) DeleteProductName(context.Context, *DeletePro
 }
 func (UnimplementedProductsServer) CreatePriceType(context.Context, *CreatePriceTypeRequest) (*CreatePriceTypeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePriceType not implemented")
+}
+func (UnimplementedProductsServer) PublishProduct(context.Context, *PublishProductRequest) (*PublishProductResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PublishProduct not implemented")
+}
+func (UnimplementedProductsServer) UnPublishProduct(context.Context, *UnPublishProductRequest) (*UnPublishProductResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UnPublishProduct not implemented")
 }
 func (UnimplementedProductsServer) DeletePriceType(context.Context, *DeletePriceTypeRequest) (*DeletePriceTypeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePriceType not implemented")
@@ -660,6 +692,42 @@ func _Products_CreatePriceType_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Products_PublishProduct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PublishProductRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProductsServer).PublishProduct(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Products_PublishProduct_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProductsServer).PublishProduct(ctx, req.(*PublishProductRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Products_UnPublishProduct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UnPublishProductRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProductsServer).UnPublishProduct(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Products_UnPublishProduct_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProductsServer).UnPublishProduct(ctx, req.(*UnPublishProductRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Products_DeletePriceType_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeletePriceTypeRequest)
 	if err := dec(in); err != nil {
@@ -816,6 +884,14 @@ var Products_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreatePriceType",
 			Handler:    _Products_CreatePriceType_Handler,
+		},
+		{
+			MethodName: "PublishProduct",
+			Handler:    _Products_PublishProduct_Handler,
+		},
+		{
+			MethodName: "UnPublishProduct",
+			Handler:    _Products_UnPublishProduct_Handler,
 		},
 		{
 			MethodName: "DeletePriceType",

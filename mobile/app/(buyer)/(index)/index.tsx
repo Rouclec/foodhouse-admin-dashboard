@@ -83,6 +83,7 @@ export default function BuyerProducts() {
         categoryId: selectedCategoryId,
         search: debounceQuery,
         startKey: '',
+        isApproved: true,
       },
     }),
     placeholderData: keepPreviousData,
