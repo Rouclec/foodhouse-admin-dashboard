@@ -48,6 +48,8 @@ const (
 	ClaimKeyStatus = "status"
 
 	TWO = 2
+
+	THIRTY_TWO = 32
 )
 
 // Impl is the implementation of the Users service.
@@ -221,7 +223,7 @@ func (i *Impl) Signup(ctx context.Context, req *usersgrpc.SignupRequest) (*users
 
 	if password == "" {
 		var genErr error
-		password, genErr = RandomString(32)
+		password, genErr = RandomString(THIRTY_TWO)
 
 		if genErr != nil {
 			i.logger.Debug().Msgf("generate password error : %v", genErr)
