@@ -214,13 +214,16 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 
 	args := sqlc.ListProductsParams{
 		CategoryID:   req.GetCategoryId(),
-		IsApproved:  *req.IsApproved,
 		CreatedBy:    req.GetCreatedBy(),
 		MinValue:     req.GetMinAmount().GetValue(),
 		MaxValue:     req.GetMaxAmount().GetValue(),
 		Search:       req.GetSearch(),
 		CreatedAfter: startKey,
 		Count:        int32(count), // Convert count to int32
+	}
+
+	if req.IsApproved != nil {
+		args.IsApproved = *req.IsApproved
 	}
 
 	products, err := i.repo.Do().ListProducts(ctx, args)
