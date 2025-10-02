@@ -13,7 +13,7 @@ export default function FarmerLayout() {
       initialRouteName="(index)">
       <Stack.Screen name="(index)" options={{ headerShown: false }} />
       <Stack.Screen name="create-product" options={{ headerShown: false }} />
-      <Stack.Screen name="change-password" options={{ headerShown: false }} />
+      
       <Stack.Screen name="contact-us" options={{ headerShown: false }} />
       <Stack.Screen name="personal-info" options={{ headerShown: false }} />
       <Stack.Screen name="settings" options={{ headerShown: false }} />

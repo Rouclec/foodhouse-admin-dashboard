@@ -193,13 +193,7 @@ const Info = () => {
                     />
                   }
                 />
-                {confirmPassword.length > 0 && confirmPassword !== password && (
-                  <HelperText style={defaultStyles.errorText} type="error">
-                    {i18n.t(
-                      '(auth).(forgot-password).create-new-password.passwordsDoNot',
-                    )}
-                  </HelperText>
-                )}
+                
               </View>
             </View>
           </ScrollView>
