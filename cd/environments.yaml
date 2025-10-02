@@ -1,6 +1,6 @@
 - envId: dev
   name: Development
-  gitRefName: release/updated-prod
+  gitRefName: release/testing/1.2
   awsAccountId: 694364706342
   domainName: foodhousetesting.xyz
   
