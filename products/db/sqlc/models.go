@@ -41,10 +41,17 @@ type Product struct {
 	DeliveryFeeAmount   *float64           `json:"delivery_fee_amount"`
 	DeliveryFeeCurrency *string            `json:"delivery_fee_currency"`
 	IsApproved          *bool              `json:"is_approved"`
+	Location            interface{}        `json:"location"`
 }
 
 type ProductName struct {
 	Name       string  `json:"name"`
 	Slug       string  `json:"slug"`
 	CategoryID *string `json:"category_id"`
+}
+
+type Region struct {
+	ID       int32       `json:"id"`
+	Name     string      `json:"name"`
+	Boundary interface{} `json:"boundary"`
 }

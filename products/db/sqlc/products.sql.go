@@ -71,26 +71,27 @@ func (q *Queries) CreatePriceType(ctx context.Context, arg CreatePriceTypeParams
 const createProduct = `-- name: CreateProduct :one
 INSERT INTO products (
   category_id, name, unit_type, value, currency_iso_code,
-  description, image, created_by, whole_sale, delivery_fee_amount, delivery_fee_currency
+  description, image, created_by, whole_sale, delivery_fee_amount, delivery_fee_currency, location
 ) VALUES (
   $1, $2, $3, $4, $5,
-  $6, $7, $8, $9, $10, $11
+  $6, $7, $8, $9, $10, $11, $12
 )
-RETURNING id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency, is_approved
+RETURNING id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency, is_approved, location
 `
 
 type CreateProductParams struct {
-	CategoryID          *string  `json:"category_id"`
-	Name                string   `json:"name"`
-	UnitType            string   `json:"unit_type"`
-	Value               float64  `json:"value"`
-	CurrencyIsoCode     string   `json:"currency_iso_code"`
-	Description         string   `json:"description"`
-	Image               string   `json:"image"`
-	CreatedBy           *string  `json:"created_by"`
-	WholeSale           bool     `json:"whole_sale"`
-	DeliveryFeeAmount   *float64 `json:"delivery_fee_amount"`
-	DeliveryFeeCurrency *string  `json:"delivery_fee_currency"`
+	CategoryID          *string     `json:"category_id"`
+	Name                string      `json:"name"`
+	UnitType            string      `json:"unit_type"`
+	Value               float64     `json:"value"`
+	CurrencyIsoCode     string      `json:"currency_iso_code"`
+	Description         string      `json:"description"`
+	Image               string      `json:"image"`
+	CreatedBy           *string     `json:"created_by"`
+	WholeSale           bool        `json:"whole_sale"`
+	DeliveryFeeAmount   *float64    `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency *string     `json:"delivery_fee_currency"`
+	Location            interface{} `json:"location"`
 }
 
 func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error) {
@@ -106,6 +107,7 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 		arg.WholeSale,
 		arg.DeliveryFeeAmount,
 		arg.DeliveryFeeCurrency,
+		arg.Location,
 	)
 	var i Product
 	err := row.Scan(
@@ -125,6 +127,7 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 		&i.DeliveryFeeAmount,
 		&i.DeliveryFeeCurrency,
 		&i.IsApproved,
+		&i.Location,
 	)
 	return i, err
 }
@@ -220,7 +223,7 @@ func (q *Queries) GetPriceTypeById(ctx context.Context, id string) (PriceType, e
 }
 
 const getProduct = `-- name: GetProduct :one
-SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency, is_approved FROM products where id = $1
+SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency, is_approved, location FROM products where id = $1
 `
 
 func (q *Queries) GetProduct(ctx context.Context, id string) (Product, error) {
@@ -243,12 +246,13 @@ func (q *Queries) GetProduct(ctx context.Context, id string) (Product, error) {
 		&i.DeliveryFeeAmount,
 		&i.DeliveryFeeCurrency,
 		&i.IsApproved,
+		&i.Location,
 	)
 	return i, err
 }
 
 const getProductForUpdate = `-- name: GetProductForUpdate :one
-SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency, is_approved FROM products WHERE   
+SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency, is_approved, location FROM products WHERE   
 deleted_at IS NULL AND  
 id = $1 FOR UPDATE
 `
@@ -273,6 +277,7 @@ func (q *Queries) GetProductForUpdate(ctx context.Context, id string) (Product, 
 		&i.DeliveryFeeAmount,
 		&i.DeliveryFeeCurrency,
 		&i.IsApproved,
+		&i.Location,
 	)
 	return i, err
 }
@@ -295,6 +300,28 @@ func (q *Queries) GetProductStatsBetweenDates(ctx context.Context, arg GetProduc
 	var total_products int64
 	err := row.Scan(&total_products)
 	return total_products, err
+}
+
+const getRegionName = `-- name: GetRegionName :one
+SELECT name
+FROM regions
+WHERE ST_Contains(
+    boundary,
+    ST_SetSRID(ST_MakePoint($1::float, $2::float), 4326)::geography
+)
+LIMIT 1
+`
+
+type GetRegionNameParams struct {
+	Lon float64 `json:"lon"`
+	Lat float64 `json:"lat"`
+}
+
+func (q *Queries) GetRegionName(ctx context.Context, arg GetRegionNameParams) (string, error) {
+	row := q.db.QueryRow(ctx, getRegionName, arg.Lon, arg.Lat)
+	var name string
+	err := row.Scan(&name)
+	return name, err
 }
 
 const listCategories = `-- name: ListCategories :many
@@ -386,27 +413,42 @@ func (q *Queries) ListProductNames(ctx context.Context, categoryID string) ([]Pr
 }
 
 const listProducts = `-- name: ListProducts :many
-SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency, is_approved FROM products
+SELECT p.id, p.category_id, p.name, p.unit_type, p.value, p.currency_iso_code, p.description, p.image, p.created_by, p.created_at, p.updated_at, p.whole_sale, p.deleted_at, p.delivery_fee_amount, p.delivery_fee_currency, p.is_approved, p.location
+FROM products p
+JOIN regions r
+  ON ST_Contains(r.boundary, p.location)
 WHERE
   deleted_at IS NULL AND
   (
-  $1::boolean = false
-  OR is_approved = $2::boolean
-  ) AND
-  ($3::varchar = '' OR created_by = $3::varchar) AND
-  ($4::varchar = '' OR category_id = $4::varchar) AND
-  ($5::float = 0 OR value >= $5::float) AND
-  (
+    $1::boolean = false
+    OR is_approved = $2::boolean
+  )
+  AND ($3::varchar = '' OR created_by = $3::varchar)
+  AND ($4::varchar = '' OR category_id = $4::varchar)
+  AND ($5::float = 0 OR value >= $5::float)
+  AND (
     $6::float = 0 OR value <= COALESCE($6::float, 9223372036854775807)
-  ) AND
-  (
+  )
+  AND (
     $7::text = '' OR
     name ILIKE '%' || $7::text || '%' OR
     description ILIKE '%' || $7::text || '%'
-  ) AND
-  ($8::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at > $8::timestamptz)
+  )
+  AND (
+    $8::timestamptz = '0001-01-01 00:00:00+00'::timestamptz
+    OR created_at > $8::timestamptz
+  )
+ AND (
+  -- Case 1: allowed_regions IS NULL → return all products
+  $9::text[] IS NULL
+  OR (
+    -- Case 2: allowed_regions is NOT empty
+    array_length($9::text[], 1) > 0
+    AND r.name = ANY($9::text[])
+  )
+)
 ORDER BY created_at ASC
-LIMIT $9::int
+LIMIT $10::int
 `
 
 type ListProductsParams struct {
@@ -418,6 +460,7 @@ type ListProductsParams struct {
 	MaxValue           float64   `json:"max_value"`
 	Search             string    `json:"search"`
 	CreatedAfter       time.Time `json:"created_after"`
+	AllowedRegions     []string  `json:"allowed_regions"`
 	Count              int32     `json:"count"`
 }
 
@@ -431,6 +474,7 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]P
 		arg.MaxValue,
 		arg.Search,
 		arg.CreatedAfter,
+		arg.AllowedRegions,
 		arg.Count,
 	)
 	if err != nil {
@@ -457,6 +501,7 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]P
 			&i.DeliveryFeeAmount,
 			&i.DeliveryFeeCurrency,
 			&i.IsApproved,
+			&i.Location,
 		); err != nil {
 			return nil, err
 		}
@@ -537,20 +582,22 @@ SET category_id = $2,
     description = $7,
     image = $8,
     whole_sale = $9,
+    location = $10,
     updated_at = now()
 WHERE id = $1
 `
 
 type UpdateProductParams struct {
-	ID              string  `json:"id"`
-	CategoryID      *string `json:"category_id"`
-	Name            string  `json:"name"`
-	UnitType        string  `json:"unit_type"`
-	Value           float64 `json:"value"`
-	CurrencyIsoCode string  `json:"currency_iso_code"`
-	Description     string  `json:"description"`
-	Image           string  `json:"image"`
-	WholeSale       bool    `json:"whole_sale"`
+	ID              string      `json:"id"`
+	CategoryID      *string     `json:"category_id"`
+	Name            string      `json:"name"`
+	UnitType        string      `json:"unit_type"`
+	Value           float64     `json:"value"`
+	CurrencyIsoCode string      `json:"currency_iso_code"`
+	Description     string      `json:"description"`
+	Image           string      `json:"image"`
+	WholeSale       bool        `json:"whole_sale"`
+	Location        interface{} `json:"location"`
 }
 
 func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) error {
@@ -564,6 +611,7 @@ func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) er
 		arg.Description,
 		arg.Image,
 		arg.WholeSale,
+		arg.Location,
 	)
 	return err
 }

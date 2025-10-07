@@ -178,6 +178,12 @@ export type typesAmount = {
     currencyIsoCode?: string;
 };
 
+export type typesPoint = {
+    lon?: number;
+    lat?: number;
+    address?: string;
+};
+
 export type ProductsCreateCategoryData = {
     body: ProductsCreateCategoryBody;
     path: {
@@ -320,6 +326,9 @@ export type ProductsListProductsData = {
         'minAmount.value'?: number;
         search?: string;
         startKey?: string;
+        'userLocation.address'?: string;
+        'userLocation.lat'?: number;
+        'userLocation.lon'?: number;
     };
 };
 

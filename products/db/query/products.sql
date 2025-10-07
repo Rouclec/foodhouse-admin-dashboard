@@ -22,10 +22,10 @@ SELECT * FROM categories where id = $1;
 -- name: CreateProduct :one
 INSERT INTO products (
   category_id, name, unit_type, value, currency_iso_code,
-  description, image, created_by, whole_sale, delivery_fee_amount, delivery_fee_currency
+  description, image, created_by, whole_sale, delivery_fee_amount, delivery_fee_currency, location
 ) VALUES (
   $1, $2, $3, $4, $5,
-  $6, $7, $8, $9, $10, $11
+  $6, $7, $8, $9, $10, $11, $12
 )
 RETURNING *;
 
@@ -39,6 +39,7 @@ SET category_id = $2,
     description = $7,
     image = $8,
     whole_sale = $9,
+    location = $10,
     updated_at = now()
 WHERE id = $1;
 
@@ -46,27 +47,43 @@ WHERE id = $1;
 UPDATE products SET deleted_at = now() WHERE id = $1;
 
 -- name: ListProducts :many
-SELECT * FROM products
+SELECT p.*
+FROM products p
+JOIN regions r
+  ON ST_Contains(r.boundary, p.location)
 WHERE
   deleted_at IS NULL AND
   (
-  sqlc.arg(is_approved_provided)::boolean = false
-  OR is_approved = sqlc.arg(is_approved)::boolean
-  ) AND
-  (sqlc.arg(created_by)::varchar = '' OR created_by = sqlc.arg(created_by)::varchar) AND
-  (sqlc.arg(category_id)::varchar = '' OR category_id = sqlc.arg(category_id)::varchar) AND
-  (sqlc.arg(min_value)::float = 0 OR value >= sqlc.arg(min_value)::float) AND
-  (
+    sqlc.arg(is_approved_provided)::boolean = false
+    OR is_approved = sqlc.arg(is_approved)::boolean
+  )
+  AND (sqlc.arg(created_by)::varchar = '' OR created_by = sqlc.arg(created_by)::varchar)
+  AND (sqlc.arg(category_id)::varchar = '' OR category_id = sqlc.arg(category_id)::varchar)
+  AND (sqlc.arg(min_value)::float = 0 OR value >= sqlc.arg(min_value)::float)
+  AND (
     sqlc.arg(max_value)::float = 0 OR value <= COALESCE(sqlc.arg(max_value)::float, 9223372036854775807)
-  ) AND
-  (
+  )
+  AND (
     sqlc.arg(search)::text = '' OR
     name ILIKE '%' || sqlc.arg(search)::text || '%' OR
     description ILIKE '%' || sqlc.arg(search)::text || '%'
-  ) AND
-  (sqlc.arg(created_after)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR created_at > sqlc.arg(created_after)::timestamptz)
+  )
+  AND (
+    sqlc.arg(created_after)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz
+    OR created_at > sqlc.arg(created_after)::timestamptz
+  )
+ AND (
+  -- Case 1: allowed_regions IS NULL → return all products
+  sqlc.arg(allowed_regions)::text[] IS NULL
+  OR (
+    -- Case 2: allowed_regions is NOT empty
+    array_length(sqlc.arg(allowed_regions)::text[], 1) > 0
+    AND r.name = ANY(sqlc.arg(allowed_regions)::text[])
+  )
+)
 ORDER BY created_at ASC
 LIMIT sqlc.arg(count)::int;
+
 
 -- name: GetProductForUpdate :one
 SELECT * FROM products WHERE   
@@ -130,3 +147,12 @@ UPDATE products SET is_approved = true where id = $1;
 
 -- name: UnPublishProduct :exec
 UPDATE products SET is_approved = false where id = $1;
+
+-- name: GetRegionName :one
+SELECT name
+FROM regions
+WHERE ST_Contains(
+    boundary,
+    ST_SetSRID(ST_MakePoint(sqlc.arg(lon)::float, sqlc.arg(lat)::float), 4326)::geography
+)
+LIMIT 1;

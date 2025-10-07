@@ -554,6 +554,26 @@
             "in": "query",
             "required": false,
             "type": "boolean"
+          },
+          {
+            "name": "userLocation.lon",
+            "in": "query",
+            "required": false,
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "name": "userLocation.lat",
+            "in": "query",
+            "required": false,
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "name": "userLocation.address",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -1251,6 +1271,22 @@
           "format": "double"
         },
         "currencyIsoCode": {
+          "type": "string"
+        }
+      }
+    },
+    "typesPoint": {
+      "type": "object",
+      "properties": {
+        "lon": {
+          "type": "number",
+          "format": "double"
+        },
+        "lat": {
+          "type": "number",
+          "format": "double"
+        },
+        "address": {
           "type": "string"
         }
       }

@@ -232,6 +232,21 @@ func (mr *MockQuerierMockRecorder) GetProductStatsBetweenDates(ctx, arg any) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProductStatsBetweenDates", reflect.TypeOf((*MockQuerier)(nil).GetProductStatsBetweenDates), ctx, arg)
 }
 
+// GetRegionName mocks base method.
+func (m *MockQuerier) GetRegionName(ctx context.Context, arg sqlc.GetRegionNameParams) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRegionName", ctx, arg)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRegionName indicates an expected call of GetRegionName.
+func (mr *MockQuerierMockRecorder) GetRegionName(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRegionName", reflect.TypeOf((*MockQuerier)(nil).GetRegionName), ctx, arg)
+}
+
 // ListCategories mocks base method.
 func (m *MockQuerier) ListCategories(ctx context.Context) ([]sqlc.Category, error) {
 	m.ctrl.T.Helper()

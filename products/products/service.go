@@ -194,6 +194,22 @@ func (i *Impl) HealthCheck(context.Context, *productsgrpc.HealthCheckRequest) (*
 	return &productsgrpc.HealthCheckResponse{}, nil
 }
 
+// Region mapping
+var RegionMapping = map[string][]string{
+	"NORTH_WEST": {"NORTH_WEST", "SOUTH_WEST", "DOUALA", "YAOUNDE"},
+	"SOUTH_WEST": {"SOUTH_WEST", "NORTH_WEST", "DOUALA", "YAOUNDE"},
+	"DOUALA":     {"CAMEROON"},
+	"YAOUNDE":    {"CAMEROON"},
+	"WEST":       {"DOUALA", "YAOUNDE"}, // all other Cameroonian regions
+}
+
+func GetAllowedRegions(region string) []string {
+	if allowed, ok := RegionMapping[region]; ok {
+		return allowed
+	}
+	return []string{} // unknown/outside Cameroon
+}
+
 // ListProducts implements productsgrpc.ProductsServer.
 func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsRequest) (*productsgrpc.ListProductsResponse, error) {
 	var err error
@@ -212,7 +228,28 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 		}
 	}
 
-	i.logger.Debug().Msgf("is approved variable: %v", req.IsApproved)
+	var allowedRegions []string
+
+	if req.UserLocation.Lat == 0 && req.UserLocation.Lon == 0 {
+		// Admin override: treat as "no restriction"
+		allowedRegions = nil
+	} else {
+		// Normal flow: derive allowed regions based on location
+		region, err := i.repo.Do().GetRegionName(ctx, sqlc.GetRegionNameParams{
+			Lon: req.UserLocation.Lon, Lat: req.UserLocation.Lon,
+		})
+
+		if err == nil {
+			allowedRegions = GetAllowedRegions(region)
+
+			// If user is outside Cameroon or has no mapping
+			if len(allowedRegions) == 0 {
+				// Empty slice means "return nothing"
+				allowedRegions = []string{}
+			}
+		}
+
+	}
 
 	args := sqlc.ListProductsParams{
 		CategoryID:         req.GetCategoryId(),
@@ -223,6 +260,7 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 		CreatedAfter:       startKey,
 		Count:              int32(count), // Convert count to int32
 		IsApprovedProvided: false,
+		AllowedRegions:     allowedRegions,
 	}
 
 	i.logger.Debug().Msgf("argurements : %v", args)
