@@ -11,12 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/foodhouse/foodhouseapp/grpc/go/types"
-	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
-	"github.com/foodhouse/foodhouseapp/sms"
-	"github.com/foodhouse/foodhouseapp/users/db/converters"
-	"github.com/foodhouse/foodhouseapp/users/db/repo"
-	"github.com/foodhouse/foodhouseapp/users/db/sqlc"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/nyaruka/phonenumbers"
 	"github.com/rs/zerolog"
@@ -24,6 +18,13 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
+	"github.com/foodhouse/foodhouseapp/grpc/go/types"
+	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
+	"github.com/foodhouse/foodhouseapp/sms"
+	"github.com/foodhouse/foodhouseapp/users/db/converters"
+	"github.com/foodhouse/foodhouseapp/users/db/repo"
+	"github.com/foodhouse/foodhouseapp/users/db/sqlc"
 )
 
 const (
@@ -1942,4 +1943,43 @@ func (i *Impl) GetReferralByReferredID(
 			CreatedAt:  timestamppb.New(referral.CreatedAt.Time),
 		},
 	}, nil
+}
+
+func (i *Impl) NotifyFarmer(
+	ctx context.Context,
+	req *usersgrpc.NotifyFarmerRequest,
+) (*usersgrpc.NotifyFarmerResponse, error) {
+	farmer, err := i.repo.Do().GetUser(ctx, req.GetFarmerUserId())
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			i.logger.Warn().Str("farmer_id", req.GetFarmerUserId()).Msg("Farmer not found for notification")
+			return nil, status.Errorf(codes.NotFound, "farmer not found with ID %s", req.GetFarmerUserId())
+		}
+		i.logger.Err(err).Str("farmer_id", req.GetFarmerUserId()).Msg("Database error fetching farmer")
+		return nil, status.Errorf(codes.Internal, "error fetching farmer data: %v", err)
+	}
+
+	phoneNumber := farmer.PhoneNumber
+
+	//  Composing the SMS
+	message := fmt.Sprintf(
+		"New Order! Product: %s, Qty: %d, Total: %.2f, Buyer Loc: %s",
+		req.GetProductName(),
+		req.GetQuantity(),
+		req.GetTotalPrice().GetValue(),
+		req.GetBuyerLocation(),
+	)
+
+	// Send the SMS
+
+	_, smsErr := i.smsSender.SendSms(ctx, phoneNumber, message)
+
+	if smsErr != nil {
+		i.logger.Warn().Err(smsErr).Str("phone_number", phoneNumber).Msg("Failed to send SMS to farmer")
+		return nil, status.Errorf(codes.Internal, "failed to send SMS: %v", smsErr)
+	}
+
+	i.logger.Info().Str("farmer_id", req.GetFarmerUserId()).Msg("Successfully sent order notification SMS")
+	return &usersgrpc.NotifyFarmerResponse{Success: true}, nil
 }

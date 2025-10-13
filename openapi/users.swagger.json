@@ -1889,6 +1889,14 @@
       },
       "title": "Response message for ListAllUsers"
     },
+    "usersgrpcNotifyFarmerResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        }
+      }
+    },
     "usersgrpcOtpIntent": {
       "type": "string",
       "enum": [

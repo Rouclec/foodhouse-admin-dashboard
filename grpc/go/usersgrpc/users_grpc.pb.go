@@ -58,6 +58,7 @@ const (
 	Users_ReactivateUser_FullMethodName                = "/usersgrpc.Users/ReactivateUser"
 	Users_DeleteAgent_FullMethodName                   = "/usersgrpc.Users/DeleteAgent"
 	Users_GetReferralByReferredID_FullMethodName       = "/usersgrpc.Users/GetReferralByReferredID"
+	Users_NotifyFarmer_FullMethodName                  = "/usersgrpc.Users/NotifyFarmer"
 )
 
 // UsersClient is the client API for Users service.
@@ -103,6 +104,7 @@ type UsersClient interface {
 	ReactivateUser(ctx context.Context, in *ReactivateUserRequest, opts ...grpc.CallOption) (*ReactivateUserResponse, error)
 	DeleteAgent(ctx context.Context, in *DeleteAgentRequest, opts ...grpc.CallOption) (*DeleteAgentResponse, error)
 	GetReferralByReferredID(ctx context.Context, in *GetReferralByReferredIdRequest, opts ...grpc.CallOption) (*GetReferralByReferredIdResponse, error)
+	NotifyFarmer(ctx context.Context, in *NotifyFarmerRequest, opts ...grpc.CallOption) (*NotifyFarmerResponse, error)
 }
 
 type usersClient struct {
@@ -503,6 +505,16 @@ func (c *usersClient) GetReferralByReferredID(ctx context.Context, in *GetReferr
 	return out, nil
 }
 
+func (c *usersClient) NotifyFarmer(ctx context.Context, in *NotifyFarmerRequest, opts ...grpc.CallOption) (*NotifyFarmerResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(NotifyFarmerResponse)
+	err := c.cc.Invoke(ctx, Users_NotifyFarmer_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsersServer is the server API for Users service.
 // All implementations must embed UnimplementedUsersServer
 // for forward compatibility.
@@ -546,6 +558,7 @@ type UsersServer interface {
 	ReactivateUser(context.Context, *ReactivateUserRequest) (*ReactivateUserResponse, error)
 	DeleteAgent(context.Context, *DeleteAgentRequest) (*DeleteAgentResponse, error)
 	GetReferralByReferredID(context.Context, *GetReferralByReferredIdRequest) (*GetReferralByReferredIdResponse, error)
+	NotifyFarmer(context.Context, *NotifyFarmerRequest) (*NotifyFarmerResponse, error)
 	mustEmbedUnimplementedUsersServer()
 }
 
@@ -672,6 +685,9 @@ func (UnimplementedUsersServer) DeleteAgent(context.Context, *DeleteAgentRequest
 }
 func (UnimplementedUsersServer) GetReferralByReferredID(context.Context, *GetReferralByReferredIdRequest) (*GetReferralByReferredIdResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetReferralByReferredID not implemented")
+}
+func (UnimplementedUsersServer) NotifyFarmer(context.Context, *NotifyFarmerRequest) (*NotifyFarmerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method NotifyFarmer not implemented")
 }
 func (UnimplementedUsersServer) mustEmbedUnimplementedUsersServer() {}
 func (UnimplementedUsersServer) testEmbeddedByValue()               {}
@@ -1396,6 +1412,24 @@ func _Users_GetReferralByReferredID_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Users_NotifyFarmer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NotifyFarmerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).NotifyFarmer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Users_NotifyFarmer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).NotifyFarmer(ctx, req.(*NotifyFarmerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Users_ServiceDesc is the grpc.ServiceDesc for Users service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1558,6 +1592,10 @@ var Users_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetReferralByReferredID",
 			Handler:    _Users_GetReferralByReferredID_Handler,
+		},
+		{
+			MethodName: "NotifyFarmer",
+			Handler:    _Users_NotifyFarmer_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
