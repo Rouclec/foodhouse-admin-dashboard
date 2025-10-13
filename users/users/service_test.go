@@ -594,11 +594,11 @@ func TestNotifyFarmer(t *testing.T) {
 					testTotalPriceValue,
 					testBuyerLocation,
 				)
-				
+
 				smsResponseID := uuid.NewString()
 				mockSmsSender.EXPECT().
-					 SendSms(gomock.Any(), testFarmerPhoneNumber, expectedMessage).
-					Return(&smsResponseID, nil). 
+					SendSms(gomock.Any(), testFarmerPhoneNumber, expectedMessage).
+					Return(&smsResponseID, nil).
 					Times(1)
 			},
 			request: &usersgrpc.NotifyFarmerRequest{
@@ -622,7 +622,6 @@ func TestNotifyFarmer(t *testing.T) {
 				mockQuerier *sqlc_mocks.MockQuerier,
 				_ *smsMock.MockSmsSender,
 			) {
-
 				mockRepo.EXPECT().Do().Return(mockQuerier).AnyTimes()
 				mockQuerier.EXPECT().
 					GetUser(gomock.Any(), testFarmerID).
@@ -649,7 +648,7 @@ func TestNotifyFarmer(t *testing.T) {
 
 				mockSmsSender.EXPECT().
 					SendSms(gomock.Any(), gomock.Any(), gomock.Any()).
-					Return(nil, fmt.Errorf("Nexmo gateway timeout")). 
+					Return(nil, fmt.Errorf("Nexmo gateway timeout")).
 					Times(1)
 			},
 			request: &usersgrpc.NotifyFarmerRequest{
