@@ -12,8 +12,8 @@ import (
 )
 
 type User struct {
-	ID                 string
-	LocationCoordinates pgtype.Point
+	ID        string
+	Location  pgtype.Point
 }
 
 func main() {
@@ -34,49 +34,66 @@ func main() {
 	}
 	defer productDB.Close()
 
-	rows, err := userDB.Query(`
-		SELECT id, location_coordinates
-		FROM users
-		WHERE location_coordinates IS NOT NULL
-		AND role = 'USER_ROLE_FARMER'
+	// Fetch distinct user IDs from products
+	userRows, err := productDB.Query(`
+		SELECT DISTINCT created_by
+		FROM products
+		WHERE location IS NULL
 	`)
 	if err != nil {
-		log.Fatal("❌ Failed to fetch users:", err)
+		log.Fatal("❌ Failed to fetch users from products:", err)
 	}
-	defer rows.Close()
+	defer userRows.Close()
 
-	updatedCount := 0
-
-	for rows.Next() {
-		var u User
-		if err := rows.Scan(&u.ID, &u.LocationCoordinates); err != nil {
+	var updatedCount int
+	for userRows.Next() {
+		var userID string
+		if err := userRows.Scan(&userID); err != nil {
 			log.Println("⚠️ Skipping user due to scan error:", err)
 			continue
 		}
 
-		// Skip if null or invalid point
-		if !u.LocationCoordinates.Valid {
+		// Fetch user's location
+		var u User
+		err := userDB.QueryRow(`
+			SELECT id, location_coordinates
+			FROM users
+			WHERE id = $1
+			  AND role = 'USER_ROLE_FARMER'
+		`, userID).Scan(&u.ID, &u.Location)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				// Skip if user not found
+				continue
+			}
+			log.Printf("⚠️ Error fetching user %s: %v\n", userID, err)
 			continue
 		}
 
-		longitude := u.LocationCoordinates.P.X
-		latitude := u.LocationCoordinates.P.Y
+		// Skip if location is null or (0,0)
+		if !u.Location.Valid || (u.Location.P.X == 0 && u.Location.P.Y == 0) {
+			continue
+		}
 
-		// Update products
-		_, err = productDB.Exec(`
+		lon := u.Location.P.X
+		lat := u.Location.P.Y
+
+		// Update all products for this user
+		res, err := productDB.Exec(`
 			UPDATE products
-			SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography
+			SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326)
 			WHERE created_by = $3
-			  AND (location IS NULL OR ST_IsEmpty(location));
-		`, longitude, latitude, u.ID)
-
+			  AND location IS NULL
+		`, lon, lat, u.ID)
 		if err != nil {
 			log.Printf("⚠️ Failed updating products for user %s: %v\n", u.ID, err)
 			continue
 		}
 
-		updatedCount++
+		count, _ := res.RowsAffected()
+		updatedCount += int(count)
+		log.Printf("✅ Updated %d products for user %s\n", count, u.ID)
 	}
 
-	fmt.Printf("✅ Updated product locations for %d users\n", updatedCount)
+	fmt.Printf("🎉 Total products updated: %d\n", updatedCount)
 }

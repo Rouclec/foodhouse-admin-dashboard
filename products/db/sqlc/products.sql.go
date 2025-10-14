@@ -443,8 +443,9 @@ WHERE
     OR p.created_at > $8::timestamptz
   )
   AND (
-    -- Case 1: allowed_regions IS NULL → return all products
-    $9::text[] IS NULL
+    -- Case 1: Admin override: the array equals exactly ["__ADMIN_OVERRIDE__"]
+    $9::text[] = ARRAY['__ADMIN_OVERRIDE__']
+
     OR (
       -- Case 2: allowed_regions is NOT empty
       array_length($9::text[], 1) > 0

@@ -75,8 +75,9 @@ WHERE
     OR p.created_at > sqlc.arg(created_after)::timestamptz
   )
   AND (
-    -- Case 1: allowed_regions IS NULL → return all products
-    sqlc.arg(allowed_regions)::text[] IS NULL
+    -- Case 1: Admin override: the array equals exactly ["__ADMIN_OVERRIDE__"]
+    sqlc.arg(allowed_regions)::text[] = ARRAY['__ADMIN_OVERRIDE__']
+
     OR (
       -- Case 2: allowed_regions is NOT empty
       array_length(sqlc.arg(allowed_regions)::text[], 1) > 0
