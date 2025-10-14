@@ -34,6 +34,9 @@ const (
 	OneMillion = 1000000
 
 	CENT = 100
+
+	AdminOverrideLon = 999.0
+	AdminOverrideLat = 999.0
 )
 
 // Impl is the implementation of the products service.
@@ -240,8 +243,8 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 		allowedRegions = []string{}
 	}
 
-	// Case 2: Explicitly (0,0) → Admin override
-	if userLoc.GetLat() == 0 && userLoc.GetLon() == 0 {
+	// Case 2: Explicitly (999.0,999.0) → Admin override
+	if userLoc.GetLat() == AdminOverrideLat && userLoc.GetLon() == AdminOverrideLon {
 		// nil means "no restriction"
 		allowedRegions = nil
 	}
