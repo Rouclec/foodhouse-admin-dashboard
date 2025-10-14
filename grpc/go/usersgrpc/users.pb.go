@@ -5241,11 +5241,10 @@ type NotifyFarmerRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	FarmerUserId  string        `protobuf:"bytes,1,opt,name=farmer_user_id,json=farmerUserId,proto3" json:"farmer_user_id,omitempty"`
-	ProductName   string        `protobuf:"bytes,2,opt,name=product_name,json=productName,proto3" json:"product_name,omitempty"`
-	Quantity      int32         `protobuf:"varint,3,opt,name=quantity,proto3" json:"quantity,omitempty"`
-	BuyerLocation string        `protobuf:"bytes,4,opt,name=buyer_location,json=buyerLocation,proto3" json:"buyer_location,omitempty"`
-	TotalPrice    *types.Amount `protobuf:"bytes,5,opt,name=total_price,json=totalPrice,proto3" json:"total_price,omitempty"`
+	FarmerUserId  string `protobuf:"bytes,1,opt,name=farmer_user_id,json=farmerUserId,proto3" json:"farmer_user_id,omitempty"`
+	ProductName   string `protobuf:"bytes,2,opt,name=product_name,json=productName,proto3" json:"product_name,omitempty"`
+	Quantity      int32  `protobuf:"varint,3,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	BuyerLocation string `protobuf:"bytes,4,opt,name=buyer_location,json=buyerLocation,proto3" json:"buyer_location,omitempty"`
 }
 
 func (x *NotifyFarmerRequest) Reset() {
@@ -5304,13 +5303,6 @@ func (x *NotifyFarmerRequest) GetBuyerLocation() string {
 		return x.BuyerLocation
 	}
 	return ""
-}
-
-func (x *NotifyFarmerRequest) GetTotalPrice() *types.Amount {
-	if x != nil {
-		return x.TotalPrice
-	}
-	return nil
 }
 
 type NotifyFarmerResponse struct {
@@ -5971,7 +5963,7 @@ var file_users_proto_rawDesc = []byte{
 	0x72, 0x65, 0x64, 0x49, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x2f, 0x0a,
 	0x08, 0x72, 0x65, 0x66, 0x65, 0x72, 0x72, 0x61, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32,
 	0x13, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x73, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x52, 0x65, 0x66, 0x65,
-	0x72, 0x72, 0x61, 0x6c, 0x52, 0x08, 0x72, 0x65, 0x66, 0x65, 0x72, 0x72, 0x61, 0x6c, 0x22, 0xd1,
+	0x72, 0x72, 0x61, 0x6c, 0x52, 0x08, 0x72, 0x65, 0x66, 0x65, 0x72, 0x72, 0x61, 0x6c, 0x22, 0xa1,
 	0x01, 0x0a, 0x13, 0x4e, 0x6f, 0x74, 0x69, 0x66, 0x79, 0x46, 0x61, 0x72, 0x6d, 0x65, 0x72, 0x52,
 	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x24, 0x0a, 0x0e, 0x66, 0x61, 0x72, 0x6d, 0x65, 0x72,
 	0x5f, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c,
@@ -5982,10 +5974,7 @@ var file_users_proto_rawDesc = []byte{
 	0x05, 0x52, 0x08, 0x71, 0x75, 0x61, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x12, 0x25, 0x0a, 0x0e, 0x62,
 	0x75, 0x79, 0x65, 0x72, 0x5f, 0x6c, 0x6f, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x04, 0x20,
 	0x01, 0x28, 0x09, 0x52, 0x0d, 0x62, 0x75, 0x79, 0x65, 0x72, 0x4c, 0x6f, 0x63, 0x61, 0x74, 0x69,
-	0x6f, 0x6e, 0x12, 0x2e, 0x0a, 0x0b, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x5f, 0x70, 0x72, 0x69, 0x63,
-	0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x74, 0x79, 0x70, 0x65, 0x73, 0x2e,
-	0x41, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x52, 0x0a, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x50, 0x72, 0x69,
-	0x63, 0x65, 0x22, 0x30, 0x0a, 0x14, 0x4e, 0x6f, 0x74, 0x69, 0x66, 0x79, 0x46, 0x61, 0x72, 0x6d,
+	0x6f, 0x6e, 0x22, 0x30, 0x0a, 0x14, 0x4e, 0x6f, 0x74, 0x69, 0x66, 0x79, 0x46, 0x61, 0x72, 0x6d,
 	0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x73, 0x75,
 	0x63, 0x63, 0x65, 0x73, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x07, 0x73, 0x75, 0x63,
 	0x63, 0x65, 0x73, 0x73, 0x2a, 0x99, 0x01, 0x0a, 0x08, 0x55, 0x73, 0x65, 0x72, 0x52, 0x6f, 0x6c,
@@ -6558,92 +6547,91 @@ var file_users_proto_depIdxs = []int32{
 	82, // 49: usersgrpc.GetUserStatsResponse.data:type_name -> usersgrpc.StatItem
 	97, // 50: usersgrpc.Referral.created_at:type_name -> google.protobuf.Timestamp
 	91, // 51: usersgrpc.GetReferralByReferredIdResponse.referral:type_name -> usersgrpc.Referral
-	98, // 52: usersgrpc.NotifyFarmerRequest.total_price:type_name -> types.Amount
-	20, // 53: usersgrpc.Users.SendSignupSmsOtp:input_type -> usersgrpc.SendSignupSmsOtpRequest
-	24, // 54: usersgrpc.Users.Signup:input_type -> usersgrpc.SignupRequest
-	26, // 55: usersgrpc.Users.GetUserByID:input_type -> usersgrpc.GetUserByIDRequest
-	28, // 56: usersgrpc.Users.GetFarmerByID:input_type -> usersgrpc.GetFarmerByIDRequest
-	30, // 57: usersgrpc.Users.CompleteRegistration:input_type -> usersgrpc.CompleteRegistrationRequest
-	22, // 58: usersgrpc.Users.HealthCheck:input_type -> usersgrpc.HealthCheckRequest
-	13, // 59: usersgrpc.Users.RefreshAccessToken:input_type -> usersgrpc.RefreshAccessTokenRequest
-	15, // 60: usersgrpc.Users.Authenticate:input_type -> usersgrpc.AuthenticateRequest
-	16, // 61: usersgrpc.Users.OAuth:input_type -> usersgrpc.OAuthRequest
-	32, // 62: usersgrpc.Users.SendEmailOtp:input_type -> usersgrpc.SendEmailOtpRequest
-	18, // 63: usersgrpc.Users.SendSmsOtp:input_type -> usersgrpc.SendSmsOtpRequest
-	34, // 64: usersgrpc.Users.ChangePassword:input_type -> usersgrpc.ChangePasswordRequest
-	36, // 65: usersgrpc.Users.RevokeRefreshToken:input_type -> usersgrpc.RevokeRefreshTokenRequest
-	38, // 66: usersgrpc.Users.VerifyOtp:input_type -> usersgrpc.VerifyOtpRequest
-	40, // 67: usersgrpc.Users.LastOtpForFactor:input_type -> usersgrpc.LastOtpForFactorRequest
-	42, // 68: usersgrpc.Users.GrantAdmin:input_type -> usersgrpc.GrantAdminRequest
-	44, // 69: usersgrpc.Users.GrantAgent:input_type -> usersgrpc.GrantAgentRequest
-	46, // 70: usersgrpc.Users.ListUsers:input_type -> usersgrpc.ListUsersRequest
-	48, // 71: usersgrpc.Users.CreateSubscription:input_type -> usersgrpc.CreateSubscriptionRequest
-	50, // 72: usersgrpc.Users.UpdateSubscription:input_type -> usersgrpc.UpdateSubscriptionRequest
-	52, // 73: usersgrpc.Users.DeleteSubscription:input_type -> usersgrpc.DeleteSubscriptionRequst
-	56, // 74: usersgrpc.Users.Subscribe:input_type -> usersgrpc.SubscribeRequest
-	58, // 75: usersgrpc.Users.ActivateUserSubscription:input_type -> usersgrpc.ActivateUserSubscriptionRequest
-	60, // 76: usersgrpc.Users.DeleteUserSubscription:input_type -> usersgrpc.DeleteUserSubscriptionRequest
-	67, // 77: usersgrpc.Users.GetUserSubscriptions:input_type -> usersgrpc.GetUserSubscriptionsRequest
-	71, // 78: usersgrpc.Users.GetUserActiveSubscription:input_type -> usersgrpc.GetUserActiveSubscriptionRequest
-	69, // 79: usersgrpc.Users.GetUserSubscriptionByID:input_type -> usersgrpc.GetUserSubscriptionByIDRequest
-	65, // 80: usersgrpc.Users.GetUserPaymentMethodsByUserID:input_type -> usersgrpc.GetUserPaymentMethodsByUserIDRequest
-	63, // 81: usersgrpc.Users.DeleteUserPaymentMethod:input_type -> usersgrpc.DeleteUserPaymentMethodRequest
-	54, // 82: usersgrpc.Users.ListSubscriptions:input_type -> usersgrpc.ListSubscriptionsRequest
-	73, // 83: usersgrpc.Users.GetPublicUser:input_type -> usersgrpc.GetPublicUserRequest
-	75, // 84: usersgrpc.Users.ReviewFarmer:input_type -> usersgrpc.ReviewFarmerRequest
-	80, // 85: usersgrpc.Users.ListFarmersReivews:input_type -> usersgrpc.ListFarmersReviewsRequest
-	77, // 86: usersgrpc.Users.ListFarmers:input_type -> usersgrpc.ListFarmersRequest
-	83, // 87: usersgrpc.Users.GetUserStats:input_type -> usersgrpc.GetUserStatsRequest
-	85, // 88: usersgrpc.Users.SuspendUser:input_type -> usersgrpc.SuspendUserRequest
-	87, // 89: usersgrpc.Users.ReactivateUser:input_type -> usersgrpc.ReactivateUserRequest
-	89, // 90: usersgrpc.Users.DeleteAgent:input_type -> usersgrpc.DeleteAgentRequest
-	92, // 91: usersgrpc.Users.GetReferralByReferredID:input_type -> usersgrpc.GetReferralByReferredIdRequest
-	94, // 92: usersgrpc.Users.NotifyFarmer:input_type -> usersgrpc.NotifyFarmerRequest
-	21, // 93: usersgrpc.Users.SendSignupSmsOtp:output_type -> usersgrpc.SendSignUpSmsOtpResponse
-	25, // 94: usersgrpc.Users.Signup:output_type -> usersgrpc.SignupResponse
-	27, // 95: usersgrpc.Users.GetUserByID:output_type -> usersgrpc.GetUserByIDResponse
-	29, // 96: usersgrpc.Users.GetFarmerByID:output_type -> usersgrpc.GetFarmerByIDResponse
-	31, // 97: usersgrpc.Users.CompleteRegistration:output_type -> usersgrpc.CompleteRegistrationResponse
-	23, // 98: usersgrpc.Users.HealthCheck:output_type -> usersgrpc.HealthCheckResponse
-	14, // 99: usersgrpc.Users.RefreshAccessToken:output_type -> usersgrpc.RefreshAccessTokenResponse
-	17, // 100: usersgrpc.Users.Authenticate:output_type -> usersgrpc.AuthenticateResponse
-	17, // 101: usersgrpc.Users.OAuth:output_type -> usersgrpc.AuthenticateResponse
-	33, // 102: usersgrpc.Users.SendEmailOtp:output_type -> usersgrpc.SendEmailOtpResponse
-	19, // 103: usersgrpc.Users.SendSmsOtp:output_type -> usersgrpc.SendSmsOtpResponse
-	35, // 104: usersgrpc.Users.ChangePassword:output_type -> usersgrpc.ChangePasswordResponse
-	37, // 105: usersgrpc.Users.RevokeRefreshToken:output_type -> usersgrpc.RevokeRefreshTokenResponse
-	39, // 106: usersgrpc.Users.VerifyOtp:output_type -> usersgrpc.VerifyOtpResponse
-	41, // 107: usersgrpc.Users.LastOtpForFactor:output_type -> usersgrpc.LastOtpForFactorResponse
-	43, // 108: usersgrpc.Users.GrantAdmin:output_type -> usersgrpc.GrantAdminResponse
-	45, // 109: usersgrpc.Users.GrantAgent:output_type -> usersgrpc.GrantAgentResponse
-	47, // 110: usersgrpc.Users.ListUsers:output_type -> usersgrpc.ListUsersResponse
-	49, // 111: usersgrpc.Users.CreateSubscription:output_type -> usersgrpc.CreateSubscriptionResponse
-	51, // 112: usersgrpc.Users.UpdateSubscription:output_type -> usersgrpc.UpdateSubscriptionResponse
-	53, // 113: usersgrpc.Users.DeleteSubscription:output_type -> usersgrpc.DeleteSubscriptionResponse
-	57, // 114: usersgrpc.Users.Subscribe:output_type -> usersgrpc.SubscribeResponse
-	59, // 115: usersgrpc.Users.ActivateUserSubscription:output_type -> usersgrpc.ActivateUserSubscriptionResponse
-	61, // 116: usersgrpc.Users.DeleteUserSubscription:output_type -> usersgrpc.DeleteUserSubscriptionResponse
-	68, // 117: usersgrpc.Users.GetUserSubscriptions:output_type -> usersgrpc.GetUserSubscriptionsResponse
-	72, // 118: usersgrpc.Users.GetUserActiveSubscription:output_type -> usersgrpc.GetUserActiveSubscriptionResponse
-	70, // 119: usersgrpc.Users.GetUserSubscriptionByID:output_type -> usersgrpc.GetUserSubscriptionByIDResponse
-	66, // 120: usersgrpc.Users.GetUserPaymentMethodsByUserID:output_type -> usersgrpc.GetUserPaymentMethodsByUserIDResponse
-	64, // 121: usersgrpc.Users.DeleteUserPaymentMethod:output_type -> usersgrpc.DeleteUserPaymentMethodResponse
-	55, // 122: usersgrpc.Users.ListSubscriptions:output_type -> usersgrpc.ListSubscriptionsResponse
-	74, // 123: usersgrpc.Users.GetPublicUser:output_type -> usersgrpc.GetPublicUserResponse
-	76, // 124: usersgrpc.Users.ReviewFarmer:output_type -> usersgrpc.ReviewFarmerResponse
-	81, // 125: usersgrpc.Users.ListFarmersReivews:output_type -> usersgrpc.ListFarmersReivewsResponse
-	79, // 126: usersgrpc.Users.ListFarmers:output_type -> usersgrpc.ListFarmersResponse
-	84, // 127: usersgrpc.Users.GetUserStats:output_type -> usersgrpc.GetUserStatsResponse
-	86, // 128: usersgrpc.Users.SuspendUser:output_type -> usersgrpc.SuspendUserResponse
-	88, // 129: usersgrpc.Users.ReactivateUser:output_type -> usersgrpc.ReactivateUserResponse
-	90, // 130: usersgrpc.Users.DeleteAgent:output_type -> usersgrpc.DeleteAgentResponse
-	93, // 131: usersgrpc.Users.GetReferralByReferredID:output_type -> usersgrpc.GetReferralByReferredIdResponse
-	95, // 132: usersgrpc.Users.NotifyFarmer:output_type -> usersgrpc.NotifyFarmerResponse
-	93, // [93:133] is the sub-list for method output_type
-	53, // [53:93] is the sub-list for method input_type
-	53, // [53:53] is the sub-list for extension type_name
-	53, // [53:53] is the sub-list for extension extendee
-	0,  // [0:53] is the sub-list for field type_name
+	20, // 52: usersgrpc.Users.SendSignupSmsOtp:input_type -> usersgrpc.SendSignupSmsOtpRequest
+	24, // 53: usersgrpc.Users.Signup:input_type -> usersgrpc.SignupRequest
+	26, // 54: usersgrpc.Users.GetUserByID:input_type -> usersgrpc.GetUserByIDRequest
+	28, // 55: usersgrpc.Users.GetFarmerByID:input_type -> usersgrpc.GetFarmerByIDRequest
+	30, // 56: usersgrpc.Users.CompleteRegistration:input_type -> usersgrpc.CompleteRegistrationRequest
+	22, // 57: usersgrpc.Users.HealthCheck:input_type -> usersgrpc.HealthCheckRequest
+	13, // 58: usersgrpc.Users.RefreshAccessToken:input_type -> usersgrpc.RefreshAccessTokenRequest
+	15, // 59: usersgrpc.Users.Authenticate:input_type -> usersgrpc.AuthenticateRequest
+	16, // 60: usersgrpc.Users.OAuth:input_type -> usersgrpc.OAuthRequest
+	32, // 61: usersgrpc.Users.SendEmailOtp:input_type -> usersgrpc.SendEmailOtpRequest
+	18, // 62: usersgrpc.Users.SendSmsOtp:input_type -> usersgrpc.SendSmsOtpRequest
+	34, // 63: usersgrpc.Users.ChangePassword:input_type -> usersgrpc.ChangePasswordRequest
+	36, // 64: usersgrpc.Users.RevokeRefreshToken:input_type -> usersgrpc.RevokeRefreshTokenRequest
+	38, // 65: usersgrpc.Users.VerifyOtp:input_type -> usersgrpc.VerifyOtpRequest
+	40, // 66: usersgrpc.Users.LastOtpForFactor:input_type -> usersgrpc.LastOtpForFactorRequest
+	42, // 67: usersgrpc.Users.GrantAdmin:input_type -> usersgrpc.GrantAdminRequest
+	44, // 68: usersgrpc.Users.GrantAgent:input_type -> usersgrpc.GrantAgentRequest
+	46, // 69: usersgrpc.Users.ListUsers:input_type -> usersgrpc.ListUsersRequest
+	48, // 70: usersgrpc.Users.CreateSubscription:input_type -> usersgrpc.CreateSubscriptionRequest
+	50, // 71: usersgrpc.Users.UpdateSubscription:input_type -> usersgrpc.UpdateSubscriptionRequest
+	52, // 72: usersgrpc.Users.DeleteSubscription:input_type -> usersgrpc.DeleteSubscriptionRequst
+	56, // 73: usersgrpc.Users.Subscribe:input_type -> usersgrpc.SubscribeRequest
+	58, // 74: usersgrpc.Users.ActivateUserSubscription:input_type -> usersgrpc.ActivateUserSubscriptionRequest
+	60, // 75: usersgrpc.Users.DeleteUserSubscription:input_type -> usersgrpc.DeleteUserSubscriptionRequest
+	67, // 76: usersgrpc.Users.GetUserSubscriptions:input_type -> usersgrpc.GetUserSubscriptionsRequest
+	71, // 77: usersgrpc.Users.GetUserActiveSubscription:input_type -> usersgrpc.GetUserActiveSubscriptionRequest
+	69, // 78: usersgrpc.Users.GetUserSubscriptionByID:input_type -> usersgrpc.GetUserSubscriptionByIDRequest
+	65, // 79: usersgrpc.Users.GetUserPaymentMethodsByUserID:input_type -> usersgrpc.GetUserPaymentMethodsByUserIDRequest
+	63, // 80: usersgrpc.Users.DeleteUserPaymentMethod:input_type -> usersgrpc.DeleteUserPaymentMethodRequest
+	54, // 81: usersgrpc.Users.ListSubscriptions:input_type -> usersgrpc.ListSubscriptionsRequest
+	73, // 82: usersgrpc.Users.GetPublicUser:input_type -> usersgrpc.GetPublicUserRequest
+	75, // 83: usersgrpc.Users.ReviewFarmer:input_type -> usersgrpc.ReviewFarmerRequest
+	80, // 84: usersgrpc.Users.ListFarmersReivews:input_type -> usersgrpc.ListFarmersReviewsRequest
+	77, // 85: usersgrpc.Users.ListFarmers:input_type -> usersgrpc.ListFarmersRequest
+	83, // 86: usersgrpc.Users.GetUserStats:input_type -> usersgrpc.GetUserStatsRequest
+	85, // 87: usersgrpc.Users.SuspendUser:input_type -> usersgrpc.SuspendUserRequest
+	87, // 88: usersgrpc.Users.ReactivateUser:input_type -> usersgrpc.ReactivateUserRequest
+	89, // 89: usersgrpc.Users.DeleteAgent:input_type -> usersgrpc.DeleteAgentRequest
+	92, // 90: usersgrpc.Users.GetReferralByReferredID:input_type -> usersgrpc.GetReferralByReferredIdRequest
+	94, // 91: usersgrpc.Users.NotifyFarmer:input_type -> usersgrpc.NotifyFarmerRequest
+	21, // 92: usersgrpc.Users.SendSignupSmsOtp:output_type -> usersgrpc.SendSignUpSmsOtpResponse
+	25, // 93: usersgrpc.Users.Signup:output_type -> usersgrpc.SignupResponse
+	27, // 94: usersgrpc.Users.GetUserByID:output_type -> usersgrpc.GetUserByIDResponse
+	29, // 95: usersgrpc.Users.GetFarmerByID:output_type -> usersgrpc.GetFarmerByIDResponse
+	31, // 96: usersgrpc.Users.CompleteRegistration:output_type -> usersgrpc.CompleteRegistrationResponse
+	23, // 97: usersgrpc.Users.HealthCheck:output_type -> usersgrpc.HealthCheckResponse
+	14, // 98: usersgrpc.Users.RefreshAccessToken:output_type -> usersgrpc.RefreshAccessTokenResponse
+	17, // 99: usersgrpc.Users.Authenticate:output_type -> usersgrpc.AuthenticateResponse
+	17, // 100: usersgrpc.Users.OAuth:output_type -> usersgrpc.AuthenticateResponse
+	33, // 101: usersgrpc.Users.SendEmailOtp:output_type -> usersgrpc.SendEmailOtpResponse
+	19, // 102: usersgrpc.Users.SendSmsOtp:output_type -> usersgrpc.SendSmsOtpResponse
+	35, // 103: usersgrpc.Users.ChangePassword:output_type -> usersgrpc.ChangePasswordResponse
+	37, // 104: usersgrpc.Users.RevokeRefreshToken:output_type -> usersgrpc.RevokeRefreshTokenResponse
+	39, // 105: usersgrpc.Users.VerifyOtp:output_type -> usersgrpc.VerifyOtpResponse
+	41, // 106: usersgrpc.Users.LastOtpForFactor:output_type -> usersgrpc.LastOtpForFactorResponse
+	43, // 107: usersgrpc.Users.GrantAdmin:output_type -> usersgrpc.GrantAdminResponse
+	45, // 108: usersgrpc.Users.GrantAgent:output_type -> usersgrpc.GrantAgentResponse
+	47, // 109: usersgrpc.Users.ListUsers:output_type -> usersgrpc.ListUsersResponse
+	49, // 110: usersgrpc.Users.CreateSubscription:output_type -> usersgrpc.CreateSubscriptionResponse
+	51, // 111: usersgrpc.Users.UpdateSubscription:output_type -> usersgrpc.UpdateSubscriptionResponse
+	53, // 112: usersgrpc.Users.DeleteSubscription:output_type -> usersgrpc.DeleteSubscriptionResponse
+	57, // 113: usersgrpc.Users.Subscribe:output_type -> usersgrpc.SubscribeResponse
+	59, // 114: usersgrpc.Users.ActivateUserSubscription:output_type -> usersgrpc.ActivateUserSubscriptionResponse
+	61, // 115: usersgrpc.Users.DeleteUserSubscription:output_type -> usersgrpc.DeleteUserSubscriptionResponse
+	68, // 116: usersgrpc.Users.GetUserSubscriptions:output_type -> usersgrpc.GetUserSubscriptionsResponse
+	72, // 117: usersgrpc.Users.GetUserActiveSubscription:output_type -> usersgrpc.GetUserActiveSubscriptionResponse
+	70, // 118: usersgrpc.Users.GetUserSubscriptionByID:output_type -> usersgrpc.GetUserSubscriptionByIDResponse
+	66, // 119: usersgrpc.Users.GetUserPaymentMethodsByUserID:output_type -> usersgrpc.GetUserPaymentMethodsByUserIDResponse
+	64, // 120: usersgrpc.Users.DeleteUserPaymentMethod:output_type -> usersgrpc.DeleteUserPaymentMethodResponse
+	55, // 121: usersgrpc.Users.ListSubscriptions:output_type -> usersgrpc.ListSubscriptionsResponse
+	74, // 122: usersgrpc.Users.GetPublicUser:output_type -> usersgrpc.GetPublicUserResponse
+	76, // 123: usersgrpc.Users.ReviewFarmer:output_type -> usersgrpc.ReviewFarmerResponse
+	81, // 124: usersgrpc.Users.ListFarmersReivews:output_type -> usersgrpc.ListFarmersReivewsResponse
+	79, // 125: usersgrpc.Users.ListFarmers:output_type -> usersgrpc.ListFarmersResponse
+	84, // 126: usersgrpc.Users.GetUserStats:output_type -> usersgrpc.GetUserStatsResponse
+	86, // 127: usersgrpc.Users.SuspendUser:output_type -> usersgrpc.SuspendUserResponse
+	88, // 128: usersgrpc.Users.ReactivateUser:output_type -> usersgrpc.ReactivateUserResponse
+	90, // 129: usersgrpc.Users.DeleteAgent:output_type -> usersgrpc.DeleteAgentResponse
+	93, // 130: usersgrpc.Users.GetReferralByReferredID:output_type -> usersgrpc.GetReferralByReferredIdResponse
+	95, // 131: usersgrpc.Users.NotifyFarmer:output_type -> usersgrpc.NotifyFarmerResponse
+	92, // [92:132] is the sub-list for method output_type
+	52, // [52:92] is the sub-list for method input_type
+	52, // [52:52] is the sub-list for extension type_name
+	52, // [52:52] is the sub-list for extension extendee
+	0,  // [0:52] is the sub-list for field type_name
 }
 
 func init() { file_users_proto_init() }

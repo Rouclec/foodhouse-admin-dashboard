@@ -561,9 +561,8 @@ func TestNotifyFarmer(t *testing.T) {
 	testFarmerPhoneNumber := "+237677111222"
 	testProductName := "Fresh Tomatoes"
 	testQuantity := int32(10)
-	testTotalPriceValue := 8500.00
-	testCurrency := "XAF"
 	testBuyerLocation := "Buea Market"
+	testFarmerFirstName := "Indah"
 
 	testCases := map[string]struct {
 		setupMocks func(
@@ -582,16 +581,19 @@ func TestNotifyFarmer(t *testing.T) {
 				mockSmsSender *smsMock.MockSmsSender,
 			) {
 				mockRepo.EXPECT().Do().Return(mockQuerier).AnyTimes()
+
+				firstNamePtr := &testFarmerFirstName
 				mockQuerier.EXPECT().
 					GetUser(gomock.Any(), testFarmerID).
-					Return(sqlc.User{ID: testFarmerID, PhoneNumber: testFarmerPhoneNumber}, nil).
+					Return(sqlc.User{ID: testFarmerID, PhoneNumber: testFarmerPhoneNumber, FirstName: firstNamePtr}, nil).
 					Times(1)
 
 				expectedMessage := fmt.Sprintf(
-					"New Order! Product: %s, Qty: %d, Total: %.2f, Buyer Loc: %s",
-					testProductName,
+
+					"Hello %s, you have received an order for %d of %s from a buyer in %s.",
+					testFarmerFirstName,
 					testQuantity,
-					testTotalPriceValue,
+					testProductName,
 					testBuyerLocation,
 				)
 
@@ -606,10 +608,6 @@ func TestNotifyFarmer(t *testing.T) {
 				ProductName:   testProductName,
 				Quantity:      testQuantity,
 				BuyerLocation: testBuyerLocation,
-				TotalPrice: &types.Amount{
-					Value:           testTotalPriceValue,
-					CurrencyIsoCode: testCurrency,
-				},
 			},
 			expectedError: nil,
 			expectedResp: &usersgrpc.NotifyFarmerResponse{

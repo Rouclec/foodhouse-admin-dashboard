@@ -350,17 +350,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 
 			buyerLocation := updatedOrder.DeliveryAddress
 
-			var totalPriceProto *types.Amount
-			if product != nil && product.GetProduct() != nil {
-				totalPriceValue := product.GetProduct().GetAmount().GetValue() * float64(quantity) * FarmersPercentage
-
-				totalPriceProto = &types.Amount{
-					Value:           totalPriceValue,
-					CurrencyIsoCode: product.GetProduct().GetAmount().GetCurrencyIsoCode(),
-				}
-			} else {
-				totalPriceProto = &types.Amount{Value: 0.0, CurrencyIsoCode: "XAF"}
-			}
+			
 
 
 			if farmerID != "" {
@@ -369,7 +359,6 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 					ProductName:   product.GetProduct().GetName(),
 					Quantity:      quantity,
 					BuyerLocation: buyerLocation,
-					TotalPrice:    totalPriceProto,
 				})
 
 				if notifyErr != nil {

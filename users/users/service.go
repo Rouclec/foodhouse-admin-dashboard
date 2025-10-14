@@ -1963,11 +1963,19 @@ func (i *Impl) NotifyFarmer(
 	phoneNumber := farmer.PhoneNumber
 
 	//  Composing the SMS
+
+	var farmerName string
+	if farmer.FirstName != nil {
+		farmerName = *farmer.FirstName
+	} else {
+		farmerName = "Farmer"
+	}
+
 	message := fmt.Sprintf(
-		"New Order! Product: %s, Qty: %d, Total: %.2f, Buyer Loc: %s",
-		req.GetProductName(),
+		"Hello %s, you have received an order for %d of %s from a buyer in %s.",
+		farmerName,
 		req.GetQuantity(),
-		req.GetTotalPrice().GetValue(),
+		req.GetProductName(),
 		req.GetBuyerLocation(),
 	)
 
