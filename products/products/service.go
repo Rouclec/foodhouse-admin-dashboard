@@ -239,7 +239,7 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 			Lon: req.UserLocation.Lon, Lat: req.UserLocation.Lon,
 		})
 
-		if err == nil {
+		if err != nil {
 			allowedRegions = GetAllowedRegions(region)
 
 			// If user is outside Cameroon or has no mapping

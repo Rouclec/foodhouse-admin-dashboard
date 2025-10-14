@@ -21,7 +21,7 @@ func derefFloat(f *float64) float64 {
 	return 0.00
 }
 
-func SqlcToProtoProducts(sqlcProducts []sqlc.Product) ([]*productsgrpc.Product, error) {
+func SqlcToProtoProducts(sqlcProducts []sqlc.ListProductsRow) ([]*productsgrpc.Product, error) {
 	protoProducts := make([]*productsgrpc.Product, 0, len(sqlcProducts))
 
 	for _, t := range sqlcProducts {
@@ -36,7 +36,7 @@ func SqlcToProtoProducts(sqlcProducts []sqlc.Product) ([]*productsgrpc.Product, 
 	return protoProducts, nil
 }
 
-func SqlcToProtoProductRow(sqlcProduct sqlc.Product, sqlcCategory *sqlc.Category) (*productsgrpc.Product, error) {
+func SqlcToProtoProductRow(sqlcProduct sqlc.ListProductsRow, sqlcCategory *sqlc.Category) (*productsgrpc.Product, error) {
 
 	// Build a minimal category with just the ID if category is nil
 	category := &productsgrpc.Category{Id: *sqlcProduct.CategoryID}

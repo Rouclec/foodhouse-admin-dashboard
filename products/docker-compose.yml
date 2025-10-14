@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  gis:
+    build:
+      context: .
+      dockerfile: Dockerfile.pg
+    container_name: gis
+    image: gis
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: products
+    volumes:
+      - pg:/var/lib/postgresql/data
+      - ./gis.sh:/docker-entrypoint-initdb.d/gis.sh
+    ports:
+      - "5432:5432"
+volumes:
+  pg:

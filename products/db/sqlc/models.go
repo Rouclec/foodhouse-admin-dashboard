@@ -5,6 +5,7 @@
 package sqlc
 
 import (
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -51,7 +52,7 @@ type ProductName struct {
 }
 
 type Region struct {
-	ID       int32       `json:"id"`
+	ID       uuid.UUID   `json:"id"`
 	Name     string      `json:"name"`
 	Boundary interface{} `json:"boundary"`
 }

@@ -30,5 +30,8 @@ create-migration:
 generate-sqlc:
 	go generate ./...
 
+# rundb:
+# 	docker run --name postgres16 -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=$(DB_PASSWORD) -e POSTGRES_DB=products -d postgres:16-alpine
+
 rundb:
-	docker run --name postgres16 -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=$(DB_PASSWORD) -e POSTGRES_DB=products -d postgres:16-alpine
+	docker compose up -d
