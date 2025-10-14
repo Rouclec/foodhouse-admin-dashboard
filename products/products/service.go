@@ -230,7 +230,7 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 
 	var allowedRegions []string
 
-	if req.UserLocation.Lat == 0 && req.UserLocation.Lon == 0 {
+	if req.GetUserLocation().GetLat() == 0 && req.GetUserLocation().GetLon() == 0 {
 		// Admin override: treat as "no restriction"
 		allowedRegions = nil
 	} else {
