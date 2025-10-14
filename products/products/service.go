@@ -35,8 +35,8 @@ const (
 
 	CENT = 100
 
-	AdminOverrideLon = 999.0
-	AdminOverrideLat = 999.0
+	AdminOverrideLon = 999
+	AdminOverrideLat = 999
 )
 
 // Impl is the implementation of the products service.
@@ -213,6 +213,43 @@ func GetAllowedRegions(region string) []string {
 	return []string{} // unknown/outside Cameroon
 }
 
+// DetermineAllowedRegions decides which regions a user can access based on their location.
+// Returns nil for unrestricted (admin), empty slice for blocked access, or allowed region list.
+func (i *Impl) DetermineAllowedRegions(ctx context.Context, logger *zerolog.Logger, userLoc *types.Point) []string {
+
+	// Case 1: No location → block access
+	if userLoc == nil {
+		logger.Debug().Msg("no user location → block access")
+		return []string{}
+	}
+
+	// Case 2: Admin override → unrestricted
+	if userLoc.GetLat() == AdminOverrideLat && userLoc.GetLon() == AdminOverrideLon {
+		logger.Debug().Msg("admin override → unrestricted view")
+		return nil
+	}
+
+	// Case 3: Normal user → region lookup
+	region, err := i.repo.Do().GetRegionName(ctx, sqlc.GetRegionNameParams{
+		Lon: userLoc.GetLon(),
+		Lat: userLoc.GetLat(),
+	})
+	if err != nil {
+		logger.Warn().Err(err).Msg("failed to get region name")
+		return []string{}
+	}
+
+	allowedRegions := GetAllowedRegions(region)
+
+	// Case 4: Unmapped region → block
+	if len(allowedRegions) == 0 {
+		logger.Debug().Msg("no mapped regions → block access")
+		return []string{}
+	}
+
+	return allowedRegions
+}
+
 // ListProducts implements productsgrpc.ProductsServer.
 func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsRequest) (*productsgrpc.ListProductsResponse, error) {
 	var err error
@@ -231,42 +268,11 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 		}
 	}
 
-	var allowedRegions []string
-
 	userLoc := req.GetUserLocation()
 
 	i.logger.Debug().Msgf("user location: %v", userLoc)
 
-	// Case 1: No location at all (old app) → Block access
-	if userLoc == nil {
-		// Empty array means "return nothing"
-		allowedRegions = []string{}
-	}
-
-	// Case 2: Explicitly (999.0,999.0) → Admin override
-	if userLoc.GetLat() == AdminOverrideLat && userLoc.GetLon() == AdminOverrideLon {
-		// nil means "no restriction"
-		allowedRegions = nil
-	}
-
-	// Case 3: Normal user with valid coordinates
-	region, err := i.repo.Do().GetRegionName(ctx, sqlc.GetRegionNameParams{
-		Lon: userLoc.GetLon(),
-		Lat: userLoc.GetLat(),
-	})
-
-	if err != nil {
-		i.logger.Warn().Msgf("Failed to get region name, %v", err)
-		// Could decide to block access instead of showing all products
-		allowedRegions = []string{}
-	}
-
-	allowedRegions = GetAllowedRegions(region)
-
-	// If user’s region is unmapped → block
-	if len(allowedRegions) == 0 {
-		allowedRegions = []string{}
-	}
+	allowedRegions := i.DetermineAllowedRegions(ctx, &i.logger, req.GetUserLocation())
 
 	args := sqlc.ListProductsParams{
 		CategoryID:         req.GetCategoryId(),
