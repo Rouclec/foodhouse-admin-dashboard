@@ -215,12 +215,13 @@ func GetAllowedRegions(region string) []string {
 
 // DetermineAllowedRegions decides which regions a user can access based on their location.
 // Returns nil for unrestricted (admin), empty slice for blocked access, or allowed region list.
-func (i *Impl) DetermineAllowedRegions(ctx context.Context, logger *zerolog.Logger, userLoc *types.Point) []string {
+func (i *Impl) DetermineAllowedRegions(ctx context.Context, logger *zerolog.Logger, userLoc *types.Point) *[]string {
 
 	// Case 1: No location → block access
 	if userLoc == nil {
 		logger.Debug().Msg("no user location → block access")
-		return []string{}
+		empty := []string{}
+		return &empty
 	}
 
 	// Case 2: Admin override → unrestricted
@@ -236,7 +237,8 @@ func (i *Impl) DetermineAllowedRegions(ctx context.Context, logger *zerolog.Logg
 	})
 	if err != nil {
 		logger.Warn().Err(err).Msg("failed to get region name")
-		return []string{}
+		empty := []string{}
+		return &empty
 	}
 
 	allowedRegions := GetAllowedRegions(region)
@@ -244,10 +246,11 @@ func (i *Impl) DetermineAllowedRegions(ctx context.Context, logger *zerolog.Logg
 	// Case 4: Unmapped region → block
 	if len(allowedRegions) == 0 {
 		logger.Debug().Msg("no mapped regions → block access")
-		return []string{}
+		empty := []string{}
+		return &empty
 	}
 
-	return allowedRegions
+	return &allowedRegions
 }
 
 // ListProducts implements productsgrpc.ProductsServer.
@@ -274,6 +277,8 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 
 	allowedRegions := i.DetermineAllowedRegions(ctx, &i.logger, req.GetUserLocation())
 
+	i.logger.Debug().Msgf("allowed regions: ", allowedRegions)
+
 	args := sqlc.ListProductsParams{
 		CategoryID:         req.GetCategoryId(),
 		CreatedBy:          req.GetCreatedBy(),
@@ -283,7 +288,10 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 		CreatedAfter:       startKey,
 		Count:              int32(count), // Convert count to int32
 		IsApprovedProvided: false,
-		AllowedRegions:     allowedRegions,
+	}
+
+	if allowedRegions != nil {
+		args.AllowedRegions = *allowedRegions
 	}
 
 	i.logger.Debug().Msgf("argurements : %v", args)
