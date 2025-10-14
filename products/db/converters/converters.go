@@ -63,7 +63,7 @@ func SqlcToProtoProductRow(sqlcProduct sqlc.ListProductsRow, sqlcCategory *sqlc.
 	}, nil
 }
 
-func SqlcToProtoProduct(sqlcProduct sqlc.Product) (*productsgrpc.Product, error) {
+func SqlcToProtoProduct(sqlcProduct sqlc.GetProductRow) (*productsgrpc.Product, error) {
 
 	return &productsgrpc.Product{
 		Id:       sqlcProduct.ID,

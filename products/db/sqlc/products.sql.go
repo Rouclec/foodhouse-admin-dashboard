@@ -225,12 +225,49 @@ func (q *Queries) GetPriceTypeById(ctx context.Context, id string) (PriceType, e
 }
 
 const getProduct = `-- name: GetProduct :one
-SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency, is_approved, location FROM products where id = $1
+SELECT 
+    p.id,
+    p.category_id,
+    p.name,
+    p.unit_type,
+    p.value,
+    p.currency_iso_code,
+    p.description,
+    p.image,
+    p.created_by,
+    p.created_at,
+    p.updated_at,
+    p.whole_sale,
+    p.deleted_at,
+    p.delivery_fee_amount,
+    p.delivery_fee_currency,
+    p.is_approved
+FROM products p
+WHERE id = $1
 `
 
-func (q *Queries) GetProduct(ctx context.Context, id string) (Product, error) {
+type GetProductRow struct {
+	ID                  string             `json:"id"`
+	CategoryID          *string            `json:"category_id"`
+	Name                string             `json:"name"`
+	UnitType            string             `json:"unit_type"`
+	Value               float64            `json:"value"`
+	CurrencyIsoCode     string             `json:"currency_iso_code"`
+	Description         string             `json:"description"`
+	Image               string             `json:"image"`
+	CreatedBy           *string            `json:"created_by"`
+	CreatedAt           pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
+	WholeSale           bool               `json:"whole_sale"`
+	DeletedAt           pgtype.Timestamptz `json:"deleted_at"`
+	DeliveryFeeAmount   *float64           `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency *string            `json:"delivery_fee_currency"`
+	IsApproved          *bool              `json:"is_approved"`
+}
+
+func (q *Queries) GetProduct(ctx context.Context, id string) (GetProductRow, error) {
 	row := q.db.QueryRow(ctx, getProduct, id)
-	var i Product
+	var i GetProductRow
 	err := row.Scan(
 		&i.ID,
 		&i.CategoryID,
@@ -248,20 +285,56 @@ func (q *Queries) GetProduct(ctx context.Context, id string) (Product, error) {
 		&i.DeliveryFeeAmount,
 		&i.DeliveryFeeCurrency,
 		&i.IsApproved,
-		&i.Location,
 	)
 	return i, err
 }
 
 const getProductForUpdate = `-- name: GetProductForUpdate :one
-SELECT id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency, is_approved, location FROM products WHERE   
+SELECT 
+    p.id,
+    p.category_id,
+    p.name,
+    p.unit_type,
+    p.value,
+    p.currency_iso_code,
+    p.description,
+    p.image,
+    p.created_by,
+    p.created_at,
+    p.updated_at,
+    p.whole_sale,
+    p.deleted_at,
+    p.delivery_fee_amount,
+    p.delivery_fee_currency,
+    p.is_approved
+FROM products p
+WHERE   
 deleted_at IS NULL AND  
 id = $1 FOR UPDATE
 `
 
-func (q *Queries) GetProductForUpdate(ctx context.Context, id string) (Product, error) {
+type GetProductForUpdateRow struct {
+	ID                  string             `json:"id"`
+	CategoryID          *string            `json:"category_id"`
+	Name                string             `json:"name"`
+	UnitType            string             `json:"unit_type"`
+	Value               float64            `json:"value"`
+	CurrencyIsoCode     string             `json:"currency_iso_code"`
+	Description         string             `json:"description"`
+	Image               string             `json:"image"`
+	CreatedBy           *string            `json:"created_by"`
+	CreatedAt           pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
+	WholeSale           bool               `json:"whole_sale"`
+	DeletedAt           pgtype.Timestamptz `json:"deleted_at"`
+	DeliveryFeeAmount   *float64           `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency *string            `json:"delivery_fee_currency"`
+	IsApproved          *bool              `json:"is_approved"`
+}
+
+func (q *Queries) GetProductForUpdate(ctx context.Context, id string) (GetProductForUpdateRow, error) {
 	row := q.db.QueryRow(ctx, getProductForUpdate, id)
-	var i Product
+	var i GetProductForUpdateRow
 	err := row.Scan(
 		&i.ID,
 		&i.CategoryID,
@@ -279,7 +352,6 @@ func (q *Queries) GetProductForUpdate(ctx context.Context, id string) (Product, 
 		&i.DeliveryFeeAmount,
 		&i.DeliveryFeeCurrency,
 		&i.IsApproved,
-		&i.Location,
 	)
 	return i, err
 }
@@ -416,42 +488,54 @@ func (q *Queries) ListProductNames(ctx context.Context, categoryID string) ([]Pr
 
 const listProducts = `-- name: ListProducts :many
 SELECT 
-  p.id, p.category_id, p.name, p.unit_type, p.value, p.currency_iso_code, p.description, p.image, p.created_by, p.created_at, p.updated_at, p.whole_sale, p.deleted_at, p.delivery_fee_amount, p.delivery_fee_currency, p.is_approved, p.location, 
-  r.name AS region_name
+    p.id,
+    p.category_id,
+    p.name,
+    p.unit_type,
+    p.value,
+    p.currency_iso_code,
+    p.description,
+    p.image,
+    p.created_by,
+    p.created_at,
+    p.updated_at,
+    p.whole_sale,
+    p.deleted_at,
+    p.delivery_fee_amount,
+    p.delivery_fee_currency,
+    p.is_approved,
+    r.name AS region_name
 FROM products p
-JOIN regions r
-  ON ST_Contains(r.boundary, p.location)
+LEFT JOIN regions r
+    ON ST_Contains(r.boundary, p.location)
 WHERE
-  p.deleted_at IS NULL AND
-  (
-    $1::boolean = false
-    OR p.is_approved = $2::boolean
-  )
-  AND ($3::varchar = '' OR p.created_by = $3::varchar)
-  AND ($4::varchar = '' OR p.category_id = $4::varchar)
-  AND ($5::float = 0 OR p.value >= $5::float)
-  AND (
-    $6::float = 0 OR p.value <= COALESCE($6::float, 9223372036854775807)
-  )
-  AND (
-    $7::text = '' OR
-    p.name ILIKE '%' || $7::text || '%' OR
-    p.description ILIKE '%' || $7::text || '%'
-  )
-  AND (
-    $8::timestamptz = '0001-01-01 00:00:00+00'::timestamptz
-    OR p.created_at > $8::timestamptz
-  )
-  AND (
-    -- Case 1: Admin override: the array equals exactly ["__ADMIN_OVERRIDE__"]
-    $9::text[] = ARRAY['__ADMIN_OVERRIDE__']
-
-    OR (
-      -- Case 2: allowed_regions is NOT empty
-      array_length($9::text[], 1) > 0
-      AND r.name = ANY($9::text[])
+    p.deleted_at IS NULL
+    AND (
+        $1::boolean = false
+        OR p.is_approved = $2::boolean
     )
-  )
+    AND ($3::varchar = '' OR p.created_by = $3::varchar)
+    AND ($4::varchar = '' OR p.category_id = $4::varchar)
+    AND ($5::float = 0 OR p.value >= $5::float)
+    AND (
+        $6::float = 0 OR p.value <= COALESCE($6::float, 9223372036854775807)
+    )
+    AND (
+        $7::text = '' OR
+        p.name ILIKE '%' || $7::text || '%' OR
+        p.description ILIKE '%' || $7::text || '%'
+    )
+    AND (
+        $8::timestamptz = '0001-01-01 00:00:00+00'::timestamptz
+        OR p.created_at > $8::timestamptz
+    )
+    AND (
+        $9::text[] = ARRAY['__ADMIN_OVERRIDE__']
+        OR (
+            array_length($9::text[], 1) > 0
+            AND r.name = ANY($9::text[])
+        )
+    )
 ORDER BY p.created_at ASC
 LIMIT $10::int
 `
@@ -486,7 +570,6 @@ type ListProductsRow struct {
 	DeliveryFeeAmount   *float64           `json:"delivery_fee_amount"`
 	DeliveryFeeCurrency *string            `json:"delivery_fee_currency"`
 	IsApproved          *bool              `json:"is_approved"`
-	Location            interface{}        `json:"location"`
 	RegionName          string             `json:"region_name"`
 }
 
@@ -527,7 +610,6 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]L
 			&i.DeliveryFeeAmount,
 			&i.DeliveryFeeCurrency,
 			&i.IsApproved,
-			&i.Location,
 			&i.RegionName,
 		); err != nil {
 			return nil, err

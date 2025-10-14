@@ -188,10 +188,10 @@ func (mr *MockQuerierMockRecorder) GetPriceTypeById(ctx, id any) *gomock.Call {
 }
 
 // GetProduct mocks base method.
-func (m *MockQuerier) GetProduct(ctx context.Context, id string) (sqlc.Product, error) {
+func (m *MockQuerier) GetProduct(ctx context.Context, id string) (sqlc.GetProductRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetProduct", ctx, id)
-	ret0, _ := ret[0].(sqlc.Product)
+	ret0, _ := ret[0].(sqlc.GetProductRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -203,10 +203,10 @@ func (mr *MockQuerierMockRecorder) GetProduct(ctx, id any) *gomock.Call {
 }
 
 // GetProductForUpdate mocks base method.
-func (m *MockQuerier) GetProductForUpdate(ctx context.Context, id string) (sqlc.Product, error) {
+func (m *MockQuerier) GetProductForUpdate(ctx context.Context, id string) (sqlc.GetProductForUpdateRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetProductForUpdate", ctx, id)
-	ret0, _ := ret[0].(sqlc.Product)
+	ret0, _ := ret[0].(sqlc.GetProductForUpdateRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
