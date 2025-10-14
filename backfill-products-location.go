@@ -6,18 +6,12 @@ import (
 	"log"
 	"os"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
-type User struct {
-	ID        string
-	Location  pgtype.Point
-}
-
 func main() {
-	// Load .env file
+	// Load .env
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("❌ Error loading .env file:", err)
 	}
@@ -34,7 +28,7 @@ func main() {
 	}
 	defer productDB.Close()
 
-	// Fetch distinct user IDs from products
+	// Fetch distinct user IDs for products missing locations
 	userRows, err := productDB.Query(`
 		SELECT DISTINCT created_by
 		FROM products
@@ -45,7 +39,7 @@ func main() {
 	}
 	defer userRows.Close()
 
-	var updatedCount int
+	var totalUpdated int
 	for userRows.Next() {
 		var userID string
 		if err := userRows.Scan(&userID); err != nil {
@@ -53,47 +47,51 @@ func main() {
 			continue
 		}
 
-		// Fetch user's location
-		var u User
+		// Fetch user location as raw point string
+		var rawPoint string
 		err := userDB.QueryRow(`
-			SELECT id, location_coordinates
+			SELECT location_coordinates
 			FROM users
-			WHERE id = $1
-			  AND role = 'USER_ROLE_FARMER'
-		`, userID).Scan(&u.ID, &u.Location)
+			WHERE id = $1 AND role = 'USER_ROLE_FARMER'
+		`, userID).Scan(&rawPoint)
 		if err != nil {
 			if err == sql.ErrNoRows {
-				// Skip if user not found
 				continue
 			}
 			log.Printf("⚠️ Error fetching user %s: %v\n", userID, err)
 			continue
 		}
 
-		// Skip if location is null or (0,0)
-		if !u.Location.Valid || (u.Location.P.X == 0 && u.Location.P.Y == 0) {
+		// Log the user as they are fetched
+		log.Printf("📍 Fetched user %s with location: %s\n", userID, rawPoint)
+
+		var lon, lat float64
+		_, err = fmt.Sscanf(rawPoint, "(%f,%f)", &lon, &lat)
+		if err != nil {
+			log.Printf("⚠️ Failed parsing location for user %s: %v\n", userID, err)
 			continue
 		}
 
-		lon := u.Location.P.X
-		lat := u.Location.P.Y
+		// Skip if location is (0,0)
+		if lon == 0 && lat == 0 {
+			continue
+		}
 
 		// Update all products for this user
 		res, err := productDB.Exec(`
 			UPDATE products
 			SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326)
-			WHERE created_by = $3
-			  AND location IS NULL
-		`, lon, lat, u.ID)
+			WHERE created_by = $3 AND location IS NULL
+		`, lon, lat, userID)
 		if err != nil {
-			log.Printf("⚠️ Failed updating products for user %s: %v\n", u.ID, err)
+			log.Printf("⚠️ Failed updating products for user %s: %v\n", userID, err)
 			continue
 		}
 
 		count, _ := res.RowsAffected()
-		updatedCount += int(count)
-		log.Printf("✅ Updated %d products for user %s\n", count, u.ID)
+		totalUpdated += int(count)
+		log.Printf("✅ Updated %d products for user %s\n", count, userID)
 	}
 
-	fmt.Printf("🎉 Total products updated: %d\n", updatedCount)
+	fmt.Printf("🎉 Total products updated: %d\n", totalUpdated)
 }
