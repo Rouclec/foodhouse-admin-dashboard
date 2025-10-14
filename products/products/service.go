@@ -297,11 +297,15 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 
 	products, err := i.repo.Do().ListProducts(ctx, args)
 
+	i.logger.Debug().Msgf("sqlc products: %v", products)
+
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error getting products %v", err)
 	}
 
 	protoProducts, err := converters.SqlcToProtoProducts(products)
+
+	i.logger.Debug().Msgf("proto products: %v", protoProducts)
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to convert sqlc products to proto: %v", err)
