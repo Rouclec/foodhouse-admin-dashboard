@@ -133,6 +133,8 @@ export default function ProductsPage() {
             : statusFilter?.value === "false"
             ? false
             : undefined,
+        "userLocation.lat": 0,
+        "userLocation.lon": 0,
       },
     }),
     placeholderData: keepPreviousData,

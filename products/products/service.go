@@ -230,25 +230,39 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 
 	var allowedRegions []string
 
-	if req.GetUserLocation().GetLat() == 0 && req.GetUserLocation().GetLon() == 0 {
-		// Admin override: treat as "no restriction"
+	userLoc := req.GetUserLocation()
+
+	i.logger.Debug().Msgf("user location: %v", userLoc)
+
+	// Case 1: No location at all (old app) → Block access
+	if userLoc == nil {
+		// Empty array means "return nothing"
+		allowedRegions = []string{}
+	}
+
+	// Case 2: Explicitly (0,0) → Admin override
+	if userLoc.GetLat() == 0 && userLoc.GetLon() == 0 {
+		// nil means "no restriction"
 		allowedRegions = nil
-	} else {
-		// Normal flow: derive allowed regions based on location
-		region, err := i.repo.Do().GetRegionName(ctx, sqlc.GetRegionNameParams{
-			Lon: req.UserLocation.Lon, Lat: req.UserLocation.Lon,
-		})
+	}
 
-		if err != nil {
-			allowedRegions = GetAllowedRegions(region)
+	// Case 3: Normal user with valid coordinates
+	region, err := i.repo.Do().GetRegionName(ctx, sqlc.GetRegionNameParams{
+		Lon: userLoc.GetLon(),
+		Lat: userLoc.GetLat(),
+	})
 
-			// If user is outside Cameroon or has no mapping
-			if len(allowedRegions) == 0 {
-				// Empty slice means "return nothing"
-				allowedRegions = []string{}
-			}
-		}
+	if err != nil {
+		i.logger.Warn().Msgf("Failed to get region name, %v", err)
+		// Could decide to block access instead of showing all products
+		allowedRegions = []string{}
+	}
 
+	allowedRegions = GetAllowedRegions(region)
+
+	// If user’s region is unmapped → block
+	if len(allowedRegions) == 0 {
+		allowedRegions = []string{}
 	}
 
 	args := sqlc.ListProductsParams{
