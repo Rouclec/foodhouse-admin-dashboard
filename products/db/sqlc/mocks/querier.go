@@ -72,10 +72,10 @@ func (mr *MockQuerierMockRecorder) CreatePriceType(ctx, arg any) *gomock.Call {
 }
 
 // CreateProduct mocks base method.
-func (m *MockQuerier) CreateProduct(ctx context.Context, arg sqlc.CreateProductParams) (sqlc.Product, error) {
+func (m *MockQuerier) CreateProduct(ctx context.Context, arg sqlc.CreateProductParams) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateProduct", ctx, arg)
-	ret0, _ := ret[0].(sqlc.Product)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

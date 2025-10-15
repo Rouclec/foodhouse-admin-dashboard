@@ -11,7 +11,7 @@ import (
 type Querier interface {
 	CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error)
 	CreatePriceType(ctx context.Context, arg CreatePriceTypeParams) (PriceType, error)
-	CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error)
+	CreateProduct(ctx context.Context, arg CreateProductParams) (string, error)
 	CreateProductName(ctx context.Context, arg CreateProductNameParams) (ProductName, error)
 	DeleteCategory(ctx context.Context, id string) error
 	DeletePriceType(ctx context.Context, id string) error

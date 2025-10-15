@@ -48,7 +48,7 @@ VALUES (
   sqlc.arg(delivery_fee_currency)::text,
   ST_SetSRID(ST_MakePoint(sqlc.arg(lon)::float8, sqlc.arg(lat)::float8), 4326)
 )
-RETURNING *;
+RETURNING id;
 
 -- name: UpdateProduct :exec
 UPDATE products

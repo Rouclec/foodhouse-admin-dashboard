@@ -18,7 +18,6 @@ import (
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const (
@@ -119,11 +118,11 @@ func (i *Impl) UpdateCategory(ctx context.Context, req *productsgrpc.UpdateCateg
 // CreateProduct implements productsgrpc.ProductsServer.
 func (i *Impl) CreateProduct(ctx context.Context, req *productsgrpc.CreateProductRequest) (*productsgrpc.CreateProductResponse, error) {
 
-	category, err := i.repo.Do().GetCategory(ctx, req.GetCategoryId())
+	// category, err := i.repo.Do().GetCategory(ctx, req.GetCategoryId())
 
-	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "error getting category %v", err)
-	}
+	// if err != nil {
+	// 	return nil, status.Errorf(codes.InvalidArgument, "error getting category %v", err)
+	// }
 
 	unitType, err := i.repo.Do().GetPriceTypeById(ctx, req.GetUnitTypeId())
 
@@ -140,7 +139,7 @@ func (i *Impl) CreateProduct(ctx context.Context, req *productsgrpc.CreateProduc
 		return nil, status.Errorf(codes.Internal, "error getting farmer. Why: %v", err)
 	}
 
-	product, err := i.repo.Do().CreateProduct(ctx, sqlc.CreateProductParams{
+	product_id, err := i.repo.Do().CreateProduct(ctx, sqlc.CreateProductParams{
 		CategoryID:          req.GetCategoryId(),
 		Name:                req.GetName(),
 		UnitType:            unitType.Slug,
@@ -161,23 +160,7 @@ func (i *Impl) CreateProduct(ctx context.Context, req *productsgrpc.CreateProduc
 
 	return &productsgrpc.CreateProductResponse{
 		Product: &productsgrpc.Product{
-			Id: product.ID,
-			Category: &productsgrpc.Category{
-				Id:   category.ID,
-				Name: category.Name,
-				Slug: category.Slug,
-			},
-			Name:     product.Name,
-			UnitType: product.UnitType,
-			Amount: &types.Amount{
-				Value:           product.Value,
-				CurrencyIsoCode: product.CurrencyIsoCode,
-			},
-			Description: product.Description,
-			Image:       product.Image,
-			CreatedBy:   *product.CreatedBy,
-			CreatedAt:   timestamppb.New(product.CreatedAt.Time),
-			UpdatedAt:   timestamppb.New(product.UpdatedAt.Time),
+			Id: product_id,
 		},
 	}, nil
 }

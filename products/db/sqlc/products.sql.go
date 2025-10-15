@@ -99,7 +99,7 @@ VALUES (
   $11::text,
   ST_SetSRID(ST_MakePoint($12::float8, $13::float8), 4326)
 )
-RETURNING id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency, is_approved, location
+RETURNING id
 `
 
 type CreateProductParams struct {
@@ -118,7 +118,7 @@ type CreateProductParams struct {
 	Lat                 float64 `json:"lat"`
 }
 
-func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error) {
+func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (string, error) {
 	row := q.db.QueryRow(ctx, createProduct,
 		arg.CategoryID,
 		arg.Name,
@@ -134,27 +134,9 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 		arg.Lon,
 		arg.Lat,
 	)
-	var i Product
-	err := row.Scan(
-		&i.ID,
-		&i.CategoryID,
-		&i.Name,
-		&i.UnitType,
-		&i.Value,
-		&i.CurrencyIsoCode,
-		&i.Description,
-		&i.Image,
-		&i.CreatedBy,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.WholeSale,
-		&i.DeletedAt,
-		&i.DeliveryFeeAmount,
-		&i.DeliveryFeeCurrency,
-		&i.IsApproved,
-		&i.Location,
-	)
-	return i, err
+	var id string
+	err := row.Scan(&id)
+	return id, err
 }
 
 const createProductName = `-- name: CreateProductName :one
