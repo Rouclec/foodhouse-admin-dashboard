@@ -305,7 +305,9 @@
         "home": "Accueil",
         "farmers": "Agriculteurs",
         "orders": "Commandes",
-        "profile": "Profil"
+        "profile": "Profil",
+        "permissionDenied": "L’autorisation d’accéder à la localisation a été refusée.",
+        "couldNotGetLocation": "Impossible d’obtenir la localisation"
       },
       "products": {
         "products": "Produits",

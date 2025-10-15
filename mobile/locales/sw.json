@@ -301,7 +301,9 @@
         "home": "Mwanzo",
         "farmers": "Wakulima",
         "orders": "Madai",
-        "profile": "Wasifu"
+        "profile": "Wasifu",
+        "permissionDenied": "Ruhusa ya kufikia eneo ilikataliwa.",
+        "couldNotGetLocation": "Haikuweza kupata eneo"
       },
       "products": {
         "products": "Bidhaa",

@@ -307,7 +307,9 @@
         "home": "Home",
         "farmers": "Farmers",
         "orders": "Orders",
-        "profile": "Profile"
+        "profile": "Profile",
+        "permissionDenied": "Permission to access location was denied",
+        "couldNotGetLocation": "Could not get location"
       },
       "products": {
         "products": "Products",

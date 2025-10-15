@@ -60,7 +60,8 @@ export default function BuyerProducts() {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
-          setLocationError('Permission to access location was denied');
+          setLocationError(i18n.t('(buyer).(index).products.permissionDenied'));
+
           return;
         }
 
@@ -74,7 +75,8 @@ export default function BuyerProducts() {
         });
       } catch (error) {
         console.warn('Error getting location:', error);
-        setLocationError('Could not get location');
+        setLocationError(i18n.t('(buyer).i(ndex).products.couldNotGetLocation'));
+
       }
     })();
   }, []);
@@ -111,9 +113,8 @@ export default function BuyerProducts() {
         'minAmount.currencyIsoCode': userCurrency,
         'minAmount.value': minAmount ? parseFloat(minAmount ?? '') : undefined,
 
-       
-          'userLocation.lat': userLocation?.lat,
-          'userLocation.lon': userLocation?.lon,
+        'userLocation.lat': userLocation?.lat,
+        'userLocation.lon': userLocation?.lon,
 
         categoryId: selectedCategoryId,
         search: debounceQuery,
