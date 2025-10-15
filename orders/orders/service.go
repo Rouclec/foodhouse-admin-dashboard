@@ -13,6 +13,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/nyaruka/phonenumbers"
+	"github.com/rs/zerolog"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	"github.com/foodhouse/foodhouseapp/email"
 	"github.com/foodhouse/foodhouseapp/grpc/go/ordersgrpc"
 	"github.com/foodhouse/foodhouseapp/grpc/go/productsgrpc"
@@ -22,13 +30,6 @@ import (
 	"github.com/foodhouse/foodhouseapp/orders/db/repo"
 	"github.com/foodhouse/foodhouseapp/orders/db/sqlc"
 	"github.com/foodhouse/foodhouseapp/payment"
-	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/nyaruka/phonenumbers"
-	"github.com/rs/zerolog"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const (
@@ -272,11 +273,13 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 		var updatedPaymentStatus ordersgrpc.PaymentStatus
 		var updatedOrderStatus ordersgrpc.OrderStatus
 		shouldSendReceipt := false
+		shouldNotifyFarmer := false
 
 		if req.GetStatus() == TPWPaymentStatusCompleted {
 			updatedPaymentStatus = ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED
 			updatedOrderStatus = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL
 			shouldSendReceipt = true
+			shouldNotifyFarmer = true
 		} else {
 			updatedPaymentStatus = ordersgrpc.PaymentStatus_PaymentStatus_FAILED
 			updatedOrderStatus = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED
@@ -326,6 +329,46 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "error creating audit log")
+		}
+
+		if shouldNotifyFarmer {
+			i.logger.Debug().Msg("Attempting to notify farmer of new order.")
+			product, err := i.productService.GetProduct(ctx, &productsgrpc.GetProductRequest{ProductId: *order.Product})
+			if err != nil {
+				i.logger.Error().Msgf("Error getting product for farmer notification %v", err)
+			}
+
+			var farmerID string
+			if updatedOrder.ProductOwner != nil {
+				farmerID = *updatedOrder.ProductOwner
+			}
+
+			var quantity int32
+			if updatedOrder.Quantity != nil {
+				quantity = int32(*updatedOrder.Quantity)
+			}
+
+			buyerLocation := updatedOrder.DeliveryAddress
+
+			
+
+
+			if farmerID != "" {
+				_, notifyErr := i.userService.NotifyFarmer(ctx, &usersgrpc.NotifyFarmerRequest{
+					FarmerUserId:  farmerID,
+					ProductName:   product.GetProduct().GetName(),
+					Quantity:      quantity,
+					BuyerLocation: buyerLocation,
+				})
+
+				if notifyErr != nil {
+					i.logger.Warn().Err(notifyErr).Str("farmer_id", farmerID).Msg("Failed to send farmer order notification.")
+				} else {
+					i.logger.Info().Str("farmer_id", farmerID).Msg("Farmer order notification successfully dispatched.")
+				}
+			} else {
+				i.logger.Debug().Msgf("Order %d has no associated farmer; skipping notification.", order.OrderNumber)
+			}
 		}
 
 		if shouldSendReceipt {

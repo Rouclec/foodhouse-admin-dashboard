@@ -491,6 +491,15 @@ message GetReferralByReferredIdRequest { string referred_id = 1; }
 
 message GetReferralByReferredIdResponse { Referral referral = 1; }
 
+message NotifyFarmerRequest {
+  string farmer_user_id = 1;
+  string product_name = 2;
+  int32 quantity = 3;
+  string buyer_location = 4;
+}
+
+message NotifyFarmerResponse { bool success = 1; }
+
 service Users {
 
   rpc SendSignupSmsOtp(SendSignupSmsOtpRequest)
@@ -751,4 +760,6 @@ service Users {
 
   rpc GetReferralByReferredID(GetReferralByReferredIdRequest)
       returns (GetReferralByReferredIdResponse) {}
+
+  rpc NotifyFarmer(NotifyFarmerRequest) returns (NotifyFarmerResponse);
 }

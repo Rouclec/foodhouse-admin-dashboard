@@ -3,26 +3,23 @@ package users_test
 import (
 	"context"
 	"database/sql"
-
 	"fmt"
 	"os"
-
 	"testing"
+
+	"github.com/google/uuid"
+	"github.com/rs/zerolog"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 
 	"github.com/foodhouse/foodhouseapp/grpc/go/types"
 	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
-
 	smsMock "github.com/foodhouse/foodhouseapp/sms/mocks"
 	"github.com/foodhouse/foodhouseapp/users/db/repo/mocks"
 	"github.com/foodhouse/foodhouseapp/users/db/sqlc"
 	sqlc_mocks "github.com/foodhouse/foodhouseapp/users/db/sqlc/mocks"
 	"github.com/foodhouse/foodhouseapp/users/users"
 	usersMocks "github.com/foodhouse/foodhouseapp/users/users/mocks"
-	"github.com/google/uuid"
-	"github.com/rs/zerolog"
-
-	"github.com/stretchr/testify/require"
-	"go.uber.org/mock/gomock"
 )
 
 func TestSendSignupSmsOtp(t *testing.T) {
@@ -550,6 +547,135 @@ func TestCompleteRegistration(t *testing.T) {
 				require.NoError(t, err)
 				require.NotNil(t, resp)
 				require.Equal(t, tc.expectedResp.GetMessage(), resp.GetMessage())
+			}
+		})
+	}
+}
+
+func TestNotifyFarmer(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	logger := zerolog.New(os.Stdout)
+	testFarmerID := "farmer123"
+	testFarmerPhoneNumber := "+237677111222"
+	testProductName := "Fresh Tomatoes"
+	testQuantity := int32(10)
+	testBuyerLocation := "Buea Market"
+	testFarmerFirstName := "Indah"
+
+	testCases := map[string]struct {
+		setupMocks func(
+			mockRepo *mocks.MockUsersRepo,
+			mockQuerier *sqlc_mocks.MockQuerier,
+			mockSmsSender *smsMock.MockSmsSender,
+		)
+		request       *usersgrpc.NotifyFarmerRequest
+		expectedError error
+		expectedResp  *usersgrpc.NotifyFarmerResponse
+	}{
+		"SuccessfulNotification": {
+			setupMocks: func(
+				mockRepo *mocks.MockUsersRepo,
+				mockQuerier *sqlc_mocks.MockQuerier,
+				mockSmsSender *smsMock.MockSmsSender,
+			) {
+				mockRepo.EXPECT().Do().Return(mockQuerier).AnyTimes()
+
+				firstNamePtr := &testFarmerFirstName
+				mockQuerier.EXPECT().
+					GetUser(gomock.Any(), testFarmerID).
+					Return(sqlc.User{ID: testFarmerID, PhoneNumber: testFarmerPhoneNumber, FirstName: firstNamePtr}, nil).
+					Times(1)
+
+				expectedMessage := fmt.Sprintf(
+
+					"Hello %s, you have received an order for %d of %s from a buyer in %s.",
+					testFarmerFirstName,
+					testQuantity,
+					testProductName,
+					testBuyerLocation,
+				)
+
+				smsResponseID := uuid.NewString()
+				mockSmsSender.EXPECT().
+					SendSms(gomock.Any(), testFarmerPhoneNumber, expectedMessage).
+					Return(&smsResponseID, nil).
+					Times(1)
+			},
+			request: &usersgrpc.NotifyFarmerRequest{
+				FarmerUserId:  testFarmerID,
+				ProductName:   testProductName,
+				Quantity:      testQuantity,
+				BuyerLocation: testBuyerLocation,
+			},
+			expectedError: nil,
+			expectedResp: &usersgrpc.NotifyFarmerResponse{
+				Success: true,
+			},
+		},
+		"FarmerNotFound": {
+			setupMocks: func(
+				mockRepo *mocks.MockUsersRepo,
+				mockQuerier *sqlc_mocks.MockQuerier,
+				_ *smsMock.MockSmsSender,
+			) {
+				mockRepo.EXPECT().Do().Return(mockQuerier).AnyTimes()
+				mockQuerier.EXPECT().
+					GetUser(gomock.Any(), testFarmerID).
+					Return(sqlc.User{}, sql.ErrNoRows).
+					Times(1)
+			},
+			request: &usersgrpc.NotifyFarmerRequest{
+				FarmerUserId: testFarmerID,
+			},
+			expectedError: fmt.Errorf("rpc error: code = NotFound desc = farmer not found"),
+			expectedResp:  nil,
+		},
+		"SmsSendFailure": {
+			setupMocks: func(
+				mockRepo *mocks.MockUsersRepo,
+				mockQuerier *sqlc_mocks.MockQuerier,
+				mockSmsSender *smsMock.MockSmsSender,
+			) {
+				mockRepo.EXPECT().Do().Return(mockQuerier).AnyTimes()
+				mockQuerier.EXPECT().
+					GetUser(gomock.Any(), testFarmerID).
+					Return(sqlc.User{ID: testFarmerID, PhoneNumber: testFarmerPhoneNumber}, nil).
+					Times(1)
+
+				mockSmsSender.EXPECT().
+					SendSms(gomock.Any(), gomock.Any(), gomock.Any()).
+					Return(nil, fmt.Errorf("Nexmo gateway timeout")).
+					Times(1)
+			},
+			request: &usersgrpc.NotifyFarmerRequest{
+				FarmerUserId: testFarmerID,
+			},
+			expectedError: fmt.Errorf("rpc error: code = Internal desc = failed to send SMS: Nexmo gateway timeout"),
+			expectedResp:  nil,
+		},
+	}
+
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			mockRepo := mocks.NewMockUsersRepo(ctrl)
+			mockQuerier := sqlc_mocks.NewMockQuerier(ctrl)
+			mockSmsSender := smsMock.NewMockSmsSender(ctrl)
+
+			tc.setupMocks(mockRepo, mockQuerier, mockSmsSender)
+
+			usersService := users.NewUsers(mockRepo, logger, mockSmsSender, nil, nil, false)
+
+			resp, err := usersService.NotifyFarmer(context.Background(), tc.request)
+			if tc.expectedError != nil {
+				require.Error(t, err)
+				require.ErrorContains(t, err, tc.expectedError.Error())
+				require.Nil(t, resp)
+			} else {
+				require.NoError(t, err)
+				require.NotNil(t, resp)
+				require.Equal(t, tc.expectedResp.GetSuccess(), resp.GetSuccess())
 			}
 		})
 	}
