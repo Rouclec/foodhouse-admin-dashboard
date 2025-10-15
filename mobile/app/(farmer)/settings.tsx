@@ -91,7 +91,6 @@ export default function SettingsPage() {
                   </View>
                   <List.Icon icon="chevron-right" />
                 </TouchableOpacity>
-
                 <TouchableOpacity
                   style={styles.navigationItem}
                   onPress={() => router.push('/(farmer)/contact-us')}>
