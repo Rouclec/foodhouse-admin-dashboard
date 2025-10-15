@@ -63,6 +63,52 @@ func SqlcToProtoProductRow(sqlcProduct sqlc.ListProductsRow, sqlcCategory *sqlc.
 	}, nil
 }
 
+func SqlcToProtoFarmerProducts(
+	sqlcProducts []sqlc.ListFarmerProductsRow) (
+	[]*productsgrpc.Product, error) {
+	protoProducts := make([]*productsgrpc.Product, 0, len(sqlcProducts))
+
+	for _, t := range sqlcProducts {
+		protoProduct, err := SqlcToProtoFarmerProductRow(t, nil)
+
+		if err != nil {
+			return nil, err
+		}
+		protoProducts = append(protoProducts, protoProduct)
+	}
+
+	return protoProducts, nil
+}
+
+func SqlcToProtoFarmerProductRow(sqlcProduct sqlc.ListFarmerProductsRow,
+	sqlcCategory *sqlc.Category) (
+	*productsgrpc.Product, error) {
+
+	// Build a minimal category with just the ID if category is nil
+	category := &productsgrpc.Category{Id: *sqlcProduct.CategoryID}
+	if sqlcCategory != nil {
+		category.Name = sqlcCategory.Name
+		category.Slug = sqlcCategory.Slug
+	}
+
+	return &productsgrpc.Product{
+		Id:       sqlcProduct.ID,
+		Category: category, // Category will be nil if sqlcCategory is nil
+		Name:     sqlcProduct.Name,
+		UnitType: sqlcProduct.UnitType,
+		Amount: &types.Amount{
+			Value:           sqlcProduct.Value,
+			CurrencyIsoCode: sqlcProduct.CurrencyIsoCode,
+		},
+		Description: sqlcProduct.Description,
+		Image:       sqlcProduct.Image,
+		CreatedBy:   derefString(sqlcProduct.CreatedBy),
+		CreatedAt:   timestamppb.New(sqlcProduct.CreatedAt.Time),
+		UpdatedAt:   timestamppb.New(sqlcProduct.UpdatedAt.Time),
+		IsApproved:  *sqlcProduct.IsApproved,
+	}, nil
+}
+
 func SqlcToProtoProduct(sqlcProduct sqlc.GetProductRow) (*productsgrpc.Product, error) {
 
 	return &productsgrpc.Product{

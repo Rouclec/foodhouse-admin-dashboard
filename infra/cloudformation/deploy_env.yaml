@@ -285,6 +285,7 @@ Resources:
         ClusterArn: !GetAtt EcsStack.Outputs.ClusterArn
         DbAdminSecretArn: !GetAtt "RdsStack.Outputs.AdminSecretArn"
         DomainName: !Ref DomainName
+        UsersHostPort: "users:80" 
         SubnetIds:
           !Join [
             ",",

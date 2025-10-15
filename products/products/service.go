@@ -10,6 +10,7 @@ import (
 
 	"github.com/foodhouse/foodhouseapp/grpc/go/productsgrpc"
 	"github.com/foodhouse/foodhouseapp/grpc/go/types"
+	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
 	"github.com/foodhouse/foodhouseapp/products/db/converters"
 	"github.com/foodhouse/foodhouseapp/products/db/repo"
 	"github.com/foodhouse/foodhouseapp/products/db/sqlc"
@@ -44,6 +45,7 @@ type Impl struct {
 	repo               repo.ProductsRepo
 	logger             zerolog.Logger
 	devMethodsEndabled bool
+	userService        usersgrpc.UsersClient
 
 	productsgrpc.UnsafeProductsServer
 }
@@ -55,11 +57,13 @@ func Newproducts(
 	repo repo.ProductsRepo,
 	logger zerolog.Logger,
 	enableDevMethods bool,
+	userService usersgrpc.UsersClient,
 ) *Impl {
 	return &Impl{
 		repo:               repo,
 		logger:             logger,
 		devMethodsEndabled: enableDevMethods,
+		userService:        userService,
 	}
 }
 
@@ -127,17 +131,28 @@ func (i *Impl) CreateProduct(ctx context.Context, req *productsgrpc.CreateProduc
 		return nil, status.Errorf(codes.Internal, "error getting price type. Why: %v", err)
 	}
 
+	userResp, err := i.userService.GetFarmerByID(ctx, &usersgrpc.GetFarmerByIDRequest{
+		UserId:   req.GetUserId(),
+		FarmerId: req.GetUserId(),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting farmer. Why: %v", err)
+	}
+
 	product, err := i.repo.Do().CreateProduct(ctx, sqlc.CreateProductParams{
-		CategoryID:          &req.CategoryId,
+		CategoryID:          req.GetCategoryId(),
 		Name:                req.GetName(),
 		UnitType:            unitType.Slug,
 		Value:               req.GetAmount().GetValue(),
 		CurrencyIsoCode:     req.GetAmount().GetCurrencyIsoCode(),
 		Description:         req.GetDescription(),
 		Image:               req.GetImage(),
-		CreatedBy:           &req.UserId,
-		DeliveryFeeAmount:   unitType.DeliveryFeeAmount,
-		DeliveryFeeCurrency: unitType.DeliveryFeeCurrency,
+		CreatedBy:           req.GetUserId(),
+		DeliveryFeeAmount:   *unitType.DeliveryFeeAmount,
+		DeliveryFeeCurrency: *unitType.DeliveryFeeCurrency,
+		Lon:                 userResp.GetUser().GetLocationCoordinates().GetLon(),
+		Lat:                 userResp.GetUser().GetLocationCoordinates().GetLat(),
 	})
 
 	if err != nil {
@@ -325,7 +340,7 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 // ListFarmerProducts implements productsgrpc.ProductsServer.
 func (i *Impl) ListFarmerProducts(ctx context.Context, req *productsgrpc.ListFarmerProductsRequest) (*productsgrpc.ListFarmerProductsResponse, error) {
 	var err error
-	startKey := time.Time{}
+	startKey := time.Now()
 
 	if req.GetStartKey() != "" {
 		startKey, err = time.Parse(time.RFC3339, req.GetStartKey())
@@ -339,22 +354,19 @@ func (i *Impl) ListFarmerProducts(ctx context.Context, req *productsgrpc.ListFar
 		count = 20 // or whatever default you want
 	}
 
-	products, err := i.repo.Do().ListProducts(ctx, sqlc.ListProductsParams{
-		CreatedBy:          req.GetUserId(),
-		CategoryID:         req.GetCategoryId(),
-		MinValue:           req.GetMinAmount().GetValue(),
-		MaxValue:           req.GetMaxAmount().GetValue(),
-		Search:             req.GetSearch(),
-		CreatedAfter:       startKey,
-		Count:              int32(count), // Convert count to int32
-		IsApprovedProvided: false,
+	products, err := i.repo.Do().ListFarmerProducts(ctx, sqlc.ListFarmerProductsParams{
+		CreatedBy:     req.GetUserId(),
+		CategoryID:    req.GetCategoryId(),
+		Search:        req.GetSearch(),
+		CreatedBefore: startKey,
+		Count:         int32(count), // Convert count to int32
 	})
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error getting products %v", err)
 	}
 
-	protoProducts, err := converters.SqlcToProtoProducts(products)
+	protoProducts, err := converters.SqlcToProtoFarmerProducts(products)
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to convert sqlc products to proto: %v", err)
@@ -400,7 +412,7 @@ func (i *Impl) UpdateProduct(ctx context.Context, req *productsgrpc.UpdateProduc
 
 	arg := sqlc.UpdateProductParams{
 		ID:              product.ID,
-		CategoryID:      &req.CategoryId,
+		CategoryID:      req.CategoryId,
 		Name:            req.GetName(),
 		UnitType:        req.GetUnitType(),
 		Value:           req.Amount.GetValue(),

@@ -21,27 +21,49 @@ SELECT * FROM categories where id = $1;
 
 -- name: CreateProduct :one
 INSERT INTO products (
-  category_id, name, unit_type, value, currency_iso_code,
-  description, image, created_by, whole_sale, delivery_fee_amount, delivery_fee_currency, location
-) VALUES (
-  $1, $2, $3, $4, $5,
-  $6, $7, $8, $9, $10, $11, $12
+  category_id,
+  name,
+  unit_type,
+  value,
+  currency_iso_code,
+  description,
+  image,
+  created_by,
+  whole_sale,
+  delivery_fee_amount,
+  delivery_fee_currency,
+  location
+)
+VALUES (
+  sqlc.arg(category_id)::text,
+  sqlc.arg(name)::text,
+  sqlc.arg(unit_type)::text,
+  sqlc.arg(value)::float8,
+  sqlc.arg(currency_iso_code)::text,
+  sqlc.arg(description)::text,
+  sqlc.arg(image)::text,
+  sqlc.arg(created_by)::text,
+  sqlc.arg(whole_sale)::boolean,
+  sqlc.arg(delivery_fee_amount)::float8,
+  sqlc.arg(delivery_fee_currency)::text,
+  ST_SetSRID(ST_MakePoint(sqlc.arg(lon)::float8, sqlc.arg(lat)::float8), 4326)
 )
 RETURNING *;
 
 -- name: UpdateProduct :exec
 UPDATE products
-SET category_id = $2,
-    name = $3,
-    unit_type = $4,
-    value = $5,
-    currency_iso_code = $6,
-    description = $7,
-    image = $8,
-    whole_sale = $9,
-    location = $10,
-    updated_at = now()
-WHERE id = $1;
+SET
+  category_id = sqlc.arg(category_id)::text,
+  name = sqlc.arg(name)::text,
+  unit_type = sqlc.arg(unit_type)::text,
+  value = sqlc.arg(value)::float8,
+  currency_iso_code = sqlc.arg(currency_iso_code)::text,
+  description = sqlc.arg(description)::text,
+  image = sqlc.arg(image)::text,
+  whole_sale = sqlc.arg(whole_sale)::boolean,
+  location = ST_SetSRID(ST_MakePoint(sqlc.arg(lon)::float8, sqlc.arg(lat)::float8), 4326),
+  updated_at = now()
+WHERE id = sqlc.arg(id)::text;
 
 -- name: DeleteProduct :exec
 UPDATE products SET deleted_at = now() WHERE id = $1;
@@ -97,6 +119,41 @@ WHERE
         )
     )
 ORDER BY p.created_at ASC
+LIMIT sqlc.arg(count)::int;
+
+-- name: ListFarmerProducts :many
+SELECT 
+    p.id,
+    p.category_id,
+    p.name,
+    p.unit_type,
+    p.value,
+    p.currency_iso_code,
+    p.description,
+    p.image,
+    p.created_by,
+    p.created_at,
+    p.updated_at,
+    p.whole_sale,
+    p.deleted_at,
+    p.delivery_fee_amount,
+    p.delivery_fee_currency,
+    p.is_approved
+FROM products p
+WHERE
+    p.deleted_at IS NULL
+    AND p.created_by = sqlc.arg(created_by)::varchar
+    AND (sqlc.arg(category_id)::varchar = '' OR p.category_id = sqlc.arg(category_id)::varchar)
+    AND (
+        sqlc.arg(search)::text = '' OR
+        p.name ILIKE '%' || sqlc.arg(search)::text || '%' OR
+        p.description ILIKE '%' || sqlc.arg(search)::text || '%'
+    ) 
+    AND (
+        sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+        OR created_at < sqlc.arg(created_before)::timestamptz
+    ) 
+ORDER BY p.created_at DESC
 LIMIT sqlc.arg(count)::int;
 
 

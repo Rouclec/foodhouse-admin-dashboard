@@ -72,28 +72,50 @@ func (q *Queries) CreatePriceType(ctx context.Context, arg CreatePriceTypeParams
 
 const createProduct = `-- name: CreateProduct :one
 INSERT INTO products (
-  category_id, name, unit_type, value, currency_iso_code,
-  description, image, created_by, whole_sale, delivery_fee_amount, delivery_fee_currency, location
-) VALUES (
-  $1, $2, $3, $4, $5,
-  $6, $7, $8, $9, $10, $11, $12
+  category_id,
+  name,
+  unit_type,
+  value,
+  currency_iso_code,
+  description,
+  image,
+  created_by,
+  whole_sale,
+  delivery_fee_amount,
+  delivery_fee_currency,
+  location
+)
+VALUES (
+  $1::text,
+  $2::text,
+  $3::text,
+  $4::float8,
+  $5::text,
+  $6::text,
+  $7::text,
+  $8::text,
+  $9::boolean,
+  $10::float8,
+  $11::text,
+  ST_SetSRID(ST_MakePoint($12::float8, $13::float8), 4326)
 )
 RETURNING id, category_id, name, unit_type, value, currency_iso_code, description, image, created_by, created_at, updated_at, whole_sale, deleted_at, delivery_fee_amount, delivery_fee_currency, is_approved, location
 `
 
 type CreateProductParams struct {
-	CategoryID          *string     `json:"category_id"`
-	Name                string      `json:"name"`
-	UnitType            string      `json:"unit_type"`
-	Value               float64     `json:"value"`
-	CurrencyIsoCode     string      `json:"currency_iso_code"`
-	Description         string      `json:"description"`
-	Image               string      `json:"image"`
-	CreatedBy           *string     `json:"created_by"`
-	WholeSale           bool        `json:"whole_sale"`
-	DeliveryFeeAmount   *float64    `json:"delivery_fee_amount"`
-	DeliveryFeeCurrency *string     `json:"delivery_fee_currency"`
-	Location            interface{} `json:"location"`
+	CategoryID          string  `json:"category_id"`
+	Name                string  `json:"name"`
+	UnitType            string  `json:"unit_type"`
+	Value               float64 `json:"value"`
+	CurrencyIsoCode     string  `json:"currency_iso_code"`
+	Description         string  `json:"description"`
+	Image               string  `json:"image"`
+	CreatedBy           string  `json:"created_by"`
+	WholeSale           bool    `json:"whole_sale"`
+	DeliveryFeeAmount   float64 `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency string  `json:"delivery_fee_currency"`
+	Lon                 float64 `json:"lon"`
+	Lat                 float64 `json:"lat"`
 }
 
 func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error) {
@@ -109,7 +131,8 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 		arg.WholeSale,
 		arg.DeliveryFeeAmount,
 		arg.DeliveryFeeCurrency,
-		arg.Location,
+		arg.Lon,
+		arg.Lat,
 	)
 	var i Product
 	err := row.Scan(
@@ -427,6 +450,112 @@ func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
 	return items, nil
 }
 
+const listFarmerProducts = `-- name: ListFarmerProducts :many
+SELECT 
+    p.id,
+    p.category_id,
+    p.name,
+    p.unit_type,
+    p.value,
+    p.currency_iso_code,
+    p.description,
+    p.image,
+    p.created_by,
+    p.created_at,
+    p.updated_at,
+    p.whole_sale,
+    p.deleted_at,
+    p.delivery_fee_amount,
+    p.delivery_fee_currency,
+    p.is_approved
+FROM products p
+WHERE
+    p.deleted_at IS NULL
+    AND p.created_by = $1::varchar
+    AND ($2::varchar = '' OR p.category_id = $2::varchar)
+    AND (
+        $3::text = '' OR
+        p.name ILIKE '%' || $3::text || '%' OR
+        p.description ILIKE '%' || $3::text || '%'
+    ) 
+    AND (
+        $4::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+        OR created_at < $4::timestamptz
+    ) 
+ORDER BY p.created_at DESC
+LIMIT $5::int
+`
+
+type ListFarmerProductsParams struct {
+	CreatedBy     string    `json:"created_by"`
+	CategoryID    string    `json:"category_id"`
+	Search        string    `json:"search"`
+	CreatedBefore time.Time `json:"created_before"`
+	Count         int32     `json:"count"`
+}
+
+type ListFarmerProductsRow struct {
+	ID                  string             `json:"id"`
+	CategoryID          *string            `json:"category_id"`
+	Name                string             `json:"name"`
+	UnitType            string             `json:"unit_type"`
+	Value               float64            `json:"value"`
+	CurrencyIsoCode     string             `json:"currency_iso_code"`
+	Description         string             `json:"description"`
+	Image               string             `json:"image"`
+	CreatedBy           *string            `json:"created_by"`
+	CreatedAt           pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
+	WholeSale           bool               `json:"whole_sale"`
+	DeletedAt           pgtype.Timestamptz `json:"deleted_at"`
+	DeliveryFeeAmount   *float64           `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency *string            `json:"delivery_fee_currency"`
+	IsApproved          *bool              `json:"is_approved"`
+}
+
+func (q *Queries) ListFarmerProducts(ctx context.Context, arg ListFarmerProductsParams) ([]ListFarmerProductsRow, error) {
+	rows, err := q.db.Query(ctx, listFarmerProducts,
+		arg.CreatedBy,
+		arg.CategoryID,
+		arg.Search,
+		arg.CreatedBefore,
+		arg.Count,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListFarmerProductsRow{}
+	for rows.Next() {
+		var i ListFarmerProductsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.CategoryID,
+			&i.Name,
+			&i.UnitType,
+			&i.Value,
+			&i.CurrencyIsoCode,
+			&i.Description,
+			&i.Image,
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.WholeSale,
+			&i.DeletedAt,
+			&i.DeliveryFeeAmount,
+			&i.DeliveryFeeCurrency,
+			&i.IsApproved,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listPriceTypes = `-- name: ListPriceTypes :many
 SELECT id, name, slug, category_id, delivery_fee_amount, delivery_fee_currency FROM price_types
 WHERE ($1::text = '' OR category_id = $1)
@@ -683,35 +812,36 @@ func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) 
 
 const updateProduct = `-- name: UpdateProduct :exec
 UPDATE products
-SET category_id = $2,
-    name = $3,
-    unit_type = $4,
-    value = $5,
-    currency_iso_code = $6,
-    description = $7,
-    image = $8,
-    whole_sale = $9,
-    location = $10,
-    updated_at = now()
-WHERE id = $1
+SET
+  category_id = $1::text,
+  name = $2::text,
+  unit_type = $3::text,
+  value = $4::float8,
+  currency_iso_code = $5::text,
+  description = $6::text,
+  image = $7::text,
+  whole_sale = $8::boolean,
+  location = ST_SetSRID(ST_MakePoint($9::float8, $10::float8), 4326),
+  updated_at = now()
+WHERE id = $11::text
 `
 
 type UpdateProductParams struct {
-	ID              string      `json:"id"`
-	CategoryID      *string     `json:"category_id"`
-	Name            string      `json:"name"`
-	UnitType        string      `json:"unit_type"`
-	Value           float64     `json:"value"`
-	CurrencyIsoCode string      `json:"currency_iso_code"`
-	Description     string      `json:"description"`
-	Image           string      `json:"image"`
-	WholeSale       bool        `json:"whole_sale"`
-	Location        interface{} `json:"location"`
+	CategoryID      string  `json:"category_id"`
+	Name            string  `json:"name"`
+	UnitType        string  `json:"unit_type"`
+	Value           float64 `json:"value"`
+	CurrencyIsoCode string  `json:"currency_iso_code"`
+	Description     string  `json:"description"`
+	Image           string  `json:"image"`
+	WholeSale       bool    `json:"whole_sale"`
+	Lon             float64 `json:"lon"`
+	Lat             float64 `json:"lat"`
+	ID              string  `json:"id"`
 }
 
 func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) error {
 	_, err := q.db.Exec(ctx, updateProduct,
-		arg.ID,
 		arg.CategoryID,
 		arg.Name,
 		arg.UnitType,
@@ -720,7 +850,9 @@ func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) er
 		arg.Description,
 		arg.Image,
 		arg.WholeSale,
-		arg.Location,
+		arg.Lon,
+		arg.Lat,
+		arg.ID,
 	)
 	return err
 }

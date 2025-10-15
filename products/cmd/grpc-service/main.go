@@ -13,6 +13,7 @@ import (
 
 	"github.com/ardanlabs/conf/v3"
 	"github.com/foodhouse/foodhouseapp/grpc/go/productsgrpc"
+	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
 	"github.com/foodhouse/foodhouseapp/products/db/repo"
 	"github.com/foodhouse/foodhouseapp/products/products"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
@@ -21,6 +22,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -32,6 +34,8 @@ type Config struct {
 	ListenPort uint `conf:"env:LISTEN_PORT,required"`
 
 	MigrationPath string `conf:"env:MIGRATION_PATH,required"`
+
+	UsersHostPort string `conf:"env:USERS_HOST_PORT,required"`
 
 	// EnableDevMethods is a flag that enables development methods in the gRPC server.
 	// These methods can leak sensitive data and should not be enabled in production.
@@ -88,6 +92,13 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 
 	productsRepo := repo.NewProductsRepo(db)
 
+	usersConn, err := grpc.NewClient(config.UsersHostPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return fmt.Errorf("failed to create gRPC connection: %w", err)
+	}
+	defer usersConn.Close()
+	usersClient := usersgrpc.NewUsersClient(usersConn)
+
 	// First Start the gRPC server
 	svrOpts := []grpc.ServerOption{
 		grpc.ChainUnaryInterceptor(
@@ -98,7 +109,9 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 	grpcServer := grpc.NewServer(svrOpts...)
 	reflection.Register(grpcServer)
 
-	productsgrpc.RegisterProductsServer(grpcServer, products.Newproducts(productsRepo, logger, config.EnableDevMethods))
+	productsgrpc.RegisterProductsServer(grpcServer, products.Newproducts(productsRepo, logger,
+		config.EnableDevMethods,
+		usersClient))
 
 	logger.Info().Msg("Successfully registered productsgrpc...")
 

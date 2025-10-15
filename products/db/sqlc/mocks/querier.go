@@ -262,6 +262,21 @@ func (mr *MockQuerierMockRecorder) ListCategories(ctx any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListCategories", reflect.TypeOf((*MockQuerier)(nil).ListCategories), ctx)
 }
 
+// ListFarmerProducts mocks base method.
+func (m *MockQuerier) ListFarmerProducts(ctx context.Context, arg sqlc.ListFarmerProductsParams) ([]sqlc.ListFarmerProductsRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListFarmerProducts", ctx, arg)
+	ret0, _ := ret[0].([]sqlc.ListFarmerProductsRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListFarmerProducts indicates an expected call of ListFarmerProducts.
+func (mr *MockQuerierMockRecorder) ListFarmerProducts(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListFarmerProducts", reflect.TypeOf((*MockQuerier)(nil).ListFarmerProducts), ctx, arg)
+}
+
 // ListPriceTypes mocks base method.
 func (m *MockQuerier) ListPriceTypes(ctx context.Context, categoryID string) ([]sqlc.PriceType, error) {
 	m.ctrl.T.Helper()

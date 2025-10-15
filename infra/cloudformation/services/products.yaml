@@ -37,6 +37,9 @@ Parameters:
   DomainName:
     Type: String
 
+  UsersHostPort:
+    Type: String
+
   # The following are optional parameters and are treated more like constants.
   ContainerPort:
     Type: Number
@@ -99,6 +102,8 @@ Resources:
               Value: !Ref ContainerPort
             - Name: LISTEN_PORT
               Value: !Ref ContainerPort
+            - Name: USERS_HOST_PORT
+              Value: !Ref UsersHostPort
             - Name: MIGRATION_PATH
               Value: "/app/migrations"
             - Name: ENABLE_DEV_METHODS
