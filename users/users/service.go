@@ -1308,6 +1308,10 @@ func (i *Impl) GetFarmerByID(
 			Address:                 safeString(foundUser.Address),
 			CreatedAt:               timestamppb.New(foundUser.CreatedAt.Time),
 			UpdatedAt:               timestamppb.New(foundUser.UpdatedAt.Time),
+			LocationCoordinates: &types.Point{
+				Lon: foundUser.LocationCoordinates.P.X,
+				Lat: foundUser.LocationCoordinates.P.Y,
+			},
 		},
 		Rating: farmerRating,
 	}, nil
