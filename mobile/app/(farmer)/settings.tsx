@@ -76,24 +76,6 @@ export default function SettingsPage() {
 
                 <TouchableOpacity
                   style={styles.navigationItem}
-                  onPress={() => router.push('/(farmer)/change-password')}>
-                  <View style={styles.navigationContent}>
-                    <View style={profileFlowStyles.iconContainer}>
-                      <FontAwesome
-                        name="lock"
-                        size={20}
-                        color={Colors.primary[500]}
-                      />
-                    </View>
-                    <Text style={styles.navigationText}>
-                      {i18n.t('(farmer).(profile-flow).(settings).heading2')}{' '}
-                    </Text>
-                  </View>
-                  <List.Icon icon="chevron-right" />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.navigationItem}
                   onPress={() => router.push('/(farmer)/language')}>
                   <View style={styles.navigationContent}>
                     <View style={profileFlowStyles.iconContainer}>
