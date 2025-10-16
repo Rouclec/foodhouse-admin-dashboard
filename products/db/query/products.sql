@@ -86,7 +86,7 @@ SELECT
     p.delivery_fee_amount,
     p.delivery_fee_currency,
     p.is_approved,
-    r.name AS region_name
+    COALESCE(r.name, '') AS region_name
 FROM products p
 LEFT JOIN regions r
     ON ST_Contains(r.boundary, p.location)
