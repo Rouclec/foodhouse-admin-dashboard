@@ -53,7 +53,7 @@ message AWSV4Signature {
   // The optional version identifier for the access key. You can use this to keep track of different iterations of your access key.
   optional string access_key_version = 80261277;
 
-  // The name of the cloud region of your origin. This is a free-form field with the name of the region your cloud uses to host your origin. For example, "us-east-2" for AWS or "us-ashburn-1" for OCI.
+  // The name of the cloud region of your origin. This is a free-form field with the name of the region your cloud uses to host your origin. For example, "us-east-1" for AWS or "us-ashburn-1" for OCI.
   optional string origin_region = 265305645;
 
 }
