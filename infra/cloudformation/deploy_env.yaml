@@ -400,40 +400,40 @@ Resources:
           ],
         ]
 
-  PgAdminStack:
-    Type: AWS::CloudFormation::Stack
-    DependsOn:
-      - VpcStack
-      - RdsStack
-    Properties:
-      Parameters:
-        EnvId: !Ref "EnvId"
-        VPC: !GetAtt VpcStack.Outputs.VPC
-        LogGroupName: !Ref LogGroup
-        ClusterArn: !GetAtt EcsStack.Outputs.ClusterArn
-        SubnetIds:
-          !Join [
-            ",",
-            [
-              !GetAtt VpcStack.Outputs.SubnetAPrivate,
-              !GetAtt VpcStack.Outputs.SubnetBPrivate,
-            ],
-          ]
-        DomainName: !Ref DomainName
-        LoadBalancerCanonicalHostedZoneID: !GetAtt LoadBalancerStack.Outputs.LoadBalancerCanonicalHostedZoneID
-        LoadBalancerDNSName: !GetAtt LoadBalancerStack.Outputs.LoadBalancerDNSName
-        HttpsListener: !GetAtt LoadBalancerStack.Outputs.HttpsListener
-      Tags:
-        - Key: EnvId
-          Value: !Ref "EnvId"
-      TemplateURL:
-        !Join [
-          "",
-          [
-            "https://s3.amazonaws.com/",
-            !Ref "InfraArtifactsBucket",
-            "/cloudformation/",
-            !Ref "InfraReleaseHash",
-            "/services/pgadmin.yaml",
-          ],
-        ]
+  # PgAdminStack:
+  #   Type: AWS::CloudFormation::Stack
+  #   DependsOn:
+  #     - VpcStack
+  #     - RdsStack
+  #   Properties:
+  #     Parameters:
+  #       EnvId: !Ref "EnvId"
+  #       VPC: !GetAtt VpcStack.Outputs.VPC
+  #       LogGroupName: !Ref LogGroup
+  #       ClusterArn: !GetAtt EcsStack.Outputs.ClusterArn
+  #       SubnetIds:
+  #         !Join [
+  #           ",",
+  #           [
+  #             !GetAtt VpcStack.Outputs.SubnetAPrivate,
+  #             !GetAtt VpcStack.Outputs.SubnetBPrivate,
+  #           ],
+  #         ]
+  #       DomainName: !Ref DomainName
+  #       LoadBalancerCanonicalHostedZoneID: !GetAtt LoadBalancerStack.Outputs.LoadBalancerCanonicalHostedZoneID
+  #       LoadBalancerDNSName: !GetAtt LoadBalancerStack.Outputs.LoadBalancerDNSName
+  #       HttpsListener: !GetAtt LoadBalancerStack.Outputs.HttpsListener
+  #     Tags:
+  #       - Key: EnvId
+  #         Value: !Ref "EnvId"
+  #     TemplateURL:
+  #       !Join [
+  #         "",
+  #         [
+  #           "https://s3.amazonaws.com/",
+  #           !Ref "InfraArtifactsBucket",
+  #           "/cloudformation/",
+  #           !Ref "InfraReleaseHash",
+  #           "/services/pgadmin.yaml",
+  #         ],
+  #       ]
