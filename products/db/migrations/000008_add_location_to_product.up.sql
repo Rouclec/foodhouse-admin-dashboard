@@ -8,7 +8,7 @@ CREATE TABLE regions (
     boundary geometry(POLYGON, 4326) NOT NULL
 );
 
--- Cameroon region polygons (approx bounding boxes)
+-- Cameroon region polygons (approx bounding boxes).
 INSERT INTO regions (name, boundary)
 VALUES
 ('NORTH_WEST',
