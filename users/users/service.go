@@ -143,7 +143,7 @@ func (i *Impl) SendSignupSmsOtp(ctx context.Context, req *usersgrpc.SendSignupSm
 		return nil, status.Errorf(codes.ResourceExhausted, "Too many requests to this phone number")
 	}
 
-	// Generate a random 6-digit number
+	// Generate a random 6-digit number.
 	requestID, otp, err := i.otpGenerator.GenerateOtp(ctx, usersgrpc.FactorType_FACTOR_TYPE_SMS_OTP, formattedNumber)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Error generating OTP: %v", err)
@@ -151,7 +151,7 @@ func (i *Impl) SendSignupSmsOtp(ctx context.Context, req *usersgrpc.SendSignupSm
 
 	i.logger.Debug().Msgf("Request id %v, otp %v", requestID, otp)
 
-	// Send the Message to the formatted number
+	// Send the Message to the formatted number.
 	response, err := i.smsSender.SendSms(
 		ctx,
 		formattedNumber,
