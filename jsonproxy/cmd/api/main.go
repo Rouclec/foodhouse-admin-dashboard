@@ -124,7 +124,8 @@ func run(ctx context.Context, log zerolog.Logger) error {
 	}).Handler(handler)
 
 	log.Info().Msgf("Starting server on port %d", config.ListenPort)
-	// Start HTTP server (and proxy calls to gRPC server endpoint)
+
+	// Start HTTP server (and proxy calls to gRPC server endpoint.
 	bindAddress := fmt.Sprintf(":%d", config.ListenPort)
 	server := &http.Server{
 		Addr:    bindAddress,
