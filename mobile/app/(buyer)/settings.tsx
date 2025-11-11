@@ -195,10 +195,8 @@ export default function SettingsPage() {
                   <List.Icon icon="chevron-right" />
                 </TouchableOpacity>
 
-                <Divider style={profileFlowStyles.divider} />
-                <TouchableOpacity
-                  style={styles.navigationItem}
-                  onPress={openWhatsApp}>
+                {/* <Divider style={profileFlowStyles.divider} />
+                <TouchableOpacity style={styles.navigationItem}>
                   <View style={styles.navigationContent}>
                     <View style={profileFlowStyles.dangerContainer}>
                       <FontAwesome
@@ -211,7 +209,7 @@ export default function SettingsPage() {
                       {i18n.t('(farmer).(profile-flow).(settings).heading9')}{' '}
                     </Text>
                   </View>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
               </View>
             </View>
           </ScrollView>
