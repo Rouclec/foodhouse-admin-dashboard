@@ -124,77 +124,6 @@ const Info = () => {
                 phoneNumber={mobile}
                 containerStyle={signupStyles.phoneNumberInputContainerStyle}
               />
-              <View style={signupStyles.inputGap}>
-                <TextInput
-                  label={i18n.t('(auth).createAccount.createPassword')}
-                  value={password}
-                  onChangeText={setPassword}
-                  autoCapitalize="none"
-                  secureTextEntry={!showPassword}
-                  mode="outlined"
-                  placeholder={i18n.t('(auth).createAccount.placeholder')}
-                  outlineColor={Colors.grey['bg']}
-                  style={defaultStyles.input}
-                  theme={{
-                    colors: {
-                      primary: Colors.primary[500],
-                      background: Colors.grey['fa'],
-                      error: Colors.error,
-                    },
-                    roundness: 10,
-                  }}
-                  error={password.length > 0 && password.length < 12}
-                  right={
-                    <TextInput.Icon
-                      icon={showPassword ? 'eye-off' : 'eye'}
-                      onPress={() => setShowPassword(!showPassword)}
-                      size={16}
-                      color={Colors.grey['e7']}
-                    />
-                  }
-                />
-                {password.length > 0 && password.length < 12 && (
-                  <HelperText style={defaultStyles.errorText} type="error">
-                    {i18n.t('(auth).createAccount.passwordMustBe')}
-                  </HelperText>
-                )}
-              </View>
-              <View style={signupStyles.inputGap}>
-                <TextInput
-                  label={i18n.t('(auth).createAccount.reEnterPassword')}
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  autoCapitalize="none"
-                  secureTextEntry={!showConfirmPassword}
-                  mode="outlined"
-                  outlineColor={Colors.grey['bg']}
-                  style={defaultStyles.input}
-                  theme={{
-                    colors: {
-                      primary: Colors.primary[500],
-                      background: Colors.grey['fa'],
-                      error: Colors.error,
-                    },
-                    roundness: 10,
-                  }}
-                  error={
-                    password?.length > 0 &&
-                    confirmPassword?.length > 0 &&
-                    confirmPassword != password
-                  }
-                  right={
-                    <TextInput.Icon
-                      icon={showConfirmPassword ? 'eye-off' : 'eye'}
-                      onPress={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                      size={16}
-                      color={Colors.grey['e7']}
-                    />
-                  }
-                />
-                
-              </View>
             </View>
           </ScrollView>
         </View>
@@ -207,15 +136,7 @@ const Info = () => {
           buttonColor={Colors.primary['500']}
           style={defaultStyles.button}
           loading={loading}
-          disabled={
-            loading ||
-            !country ||
-            !mobile ||
-            // !email ||
-            !password ||
-            password.length < 12 ||
-            password !== confirmPassword
-          }>
+          disabled={loading || !country || !mobile}>
           {i18n.t('(auth).createAccount.createAccount')}
         </Button>
       </View>

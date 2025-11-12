@@ -208,6 +208,10 @@ export const defaultStyles = StyleSheet.create({
     borderWidth: 0,
     borderColor: 'transparent',
   },
+  halfContainer: {
+    backgroundColor: Colors.error,
+  },
+
   linkText: {
     color: Colors.primary[300],
   },
@@ -367,4 +371,21 @@ export const defaultStyles = StyleSheet.create({
     backgroundColor: Colors.primary[500],
   },
   flexShrink: { flexShrink: 1 },
+
+  location: {
+    backgroundColor: Colors.light[10],
+    alignItems: 'center',
+
+    borderRadius: 48,
+    rowGap: 8,
+  },
+  actions: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+
+  headText: {
+    color: Colors.error,
+  },
 });

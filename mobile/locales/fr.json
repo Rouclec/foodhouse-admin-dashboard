@@ -101,6 +101,13 @@
         "passwordReset": "Réinitialisation du mot de passe!"
       }
     },
+    "location": {
+      "title": "Accès à la localisation requis",
+      "body": "Nous ne pouvons pas accéder à votre position. Veuillez activer les services de localisation dans les paramètres de votre appareil pour continuer. Cela nous aide à afficher des informations précises et à améliorer votre expérience.",
+      "tail": "Astuce : Allez dans Paramètres → Applications → [foodhouse] → Autorisations → Localisation, et activez-la.",
+      "button1": "Ouvrir les paramètres",
+      "button2": "Annuler"
+    },
     "register": {
       "createAccount": "Créer un compte",
       "registerNewAccount": "Enregistrer un nouveau compte",
@@ -242,7 +249,7 @@
         "heading6": "Conditions générales",
         "heading7": "Politique de confidentialité",
         "heading8": "À propos de Foodhouse",
-        "heading9": "Supprimer le compte",
+        "heading9": "Demande de suppression de compte",
         "english": "Anglais (US)",
         "french": "Français",
         "swahili": "Swahili",
