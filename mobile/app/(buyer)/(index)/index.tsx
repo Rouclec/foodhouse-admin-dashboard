@@ -5,6 +5,7 @@ import {
   Image,
   Keyboard,
   KeyboardAvoidingView,
+  Linking,
   SafeAreaView,
   TouchableOpacity,
   View,
@@ -20,7 +21,9 @@ import { Context, ContextType } from '@/app/_layout';
 import {
   ActivityIndicator,
   Button,
+  Dialog,
   Icon,
+  Portal,
   Text,
   TextInput,
 } from 'react-native-paper';
@@ -46,6 +49,8 @@ export default function BuyerProducts() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>();
   const [minAmount, setMinAmount] = useState<string>();
   const [maxAmount, setMaxAmount] = useState<string>();
+  const [showLocationModal, setShowLocationModal] = useState(false);
+
   const [userLocation, setUserLocation] = useState<{
     lat: number;
     lon: number;
@@ -61,6 +66,7 @@ export default function BuyerProducts() {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
           setLocationError(i18n.t('(buyer).(index).products.permissionDenied'));
+          setShowLocationModal(true);
 
           return;
         }
@@ -75,8 +81,9 @@ export default function BuyerProducts() {
         });
       } catch (error) {
         console.warn('Error getting location:', error);
-        setLocationError(i18n.t('(buyer).i(ndex).products.couldNotGetLocation'));
-
+        setLocationError(
+          i18n.t('(buyer).i(ndex).products.couldNotGetLocation'),
+        );
       }
     })();
   }, []);
@@ -625,6 +632,47 @@ export default function BuyerProducts() {
           </View>
         </View>
       </FilterBottomSheet>
+      <Portal>
+        <Dialog
+          visible={showLocationModal}
+          onDismiss={() => setShowLocationModal(false)}
+          style={defaultStyles.location}>
+          <Dialog.Content>
+            <Text variant="titleLarge" style={defaultStyles.headText}>
+              {i18n.t('(auth).location.title')}
+            </Text>
+          </Dialog.Content>
+
+          <Dialog.Content>
+            <Text style={defaultStyles.bodyText}>
+              {i18n.t('(auth).location.body')}
+            </Text>
+          </Dialog.Content>
+
+          <Dialog.Actions style={defaultStyles.actions}>
+            <Button
+              style={[
+                defaultStyles.button,
+
+                defaultStyles.halfContainer,
+               
+              ]}
+              textColor={Colors.light['10']}
+              onPress={() => setShowLocationModal(false)}>
+              {i18n.t('(auth).location.button1')}
+            </Button>
+            <Button
+              style={[defaultStyles.button, defaultStyles.primaryButton]}
+              textColor={Colors.light['10']}
+              onPress={() => {
+                Linking.openSettings();
+                setShowLocationModal(false);
+              }}>
+              {i18n.t('(auth).location.button2')}
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </>
   );
 }

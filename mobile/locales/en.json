@@ -89,19 +89,18 @@
         "resendCode": "Resend code",
         "in": "in",
         "verifyOtp": "Verify otp"
-      },
-      "create-new-password": {
-        "createNewPassword": "Create new password",
-        "password": "Password",
-        "confirmPassword": "Confirm password",
-        "passwordMustBe": "Password must be at least 12 characters",
-        "passwordsDoNot": "Passwords do not match",
-        "continue": "Continue",
-        "yourPasswordHasBeenReset": "Your password has been reset successfully. You will be redirected to the login page in a few seconds.",
-        "unknownError": "An unknown error occured",
-        "passwordReset": "Password Reset!"
       }
+     
     },
+
+     "location": {
+        "title": "Location Access Needed",
+        "body": "We’re unable to access your location. Please enable location services in your device settings to continue. This helps us show accurate information and improve your experience.",
+        "tail": "Tip: Go to Settings → Apps → [foodhouse] → Permissions → Location, and turn it ON.",
+        "button2": "Open Settings",
+        "button1":"Cancel"
+      },
+
     "register": {
       "createAccount": "Create Account",
       "registerNewAccount": "Register New Account",
@@ -244,7 +243,7 @@
         "heading6": "Terms and conditions",
         "heading7": "Privacy Policy",
         "heading8": "About Foodhouse",
-        "heading9": "Delete Account",
+        "heading9": "Request to delete account",
         "english": "English (US)",
         "french": "French",
         "swahili": "Swahili",

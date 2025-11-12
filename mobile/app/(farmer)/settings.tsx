@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   View,
   ScrollView,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   KeyboardAvoidingView,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Appbar, Text, List, Divider, Icon } from 'react-native-paper';
@@ -19,11 +20,38 @@ import i18n from '@/i18n';
 import { FontAwesome } from '@expo/vector-icons';
 import { Colors } from '@/constants';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Context, ContextType } from '../_layout';
 
 export default function SettingsPage() {
   const router = useRouter();
+  const { user } = useContext(Context) as ContextType;
 
   const insets = useSafeAreaInsets();
+  if (!user || !user.phoneNumber) {
+    Alert.alert('Error', 'User phone number not available.');
+    return;
+  }
+  const MESSAGE = `Hello Foodhouse Admin, I want to delete my account. My phone number is ${user.phoneNumber}`;
+  const WHATSAPP_NUMBER = process.env.EXPO_PUBLIC_PHONE_NUMBER;
+
+  const openWhatsApp = async () => {
+    if (!WHATSAPP_NUMBER) {
+      Alert.alert('Error', 'WhatsApp number not found.');
+      return;
+    }
+
+    const url = `https://wa.me/${WHATSAPP_NUMBER.replace(
+      '+',
+      '',
+    )}?text=${encodeURIComponent(MESSAGE)}`;
+    const supported = await Linking.canOpenURL(url);
+
+    if (supported) {
+      await Linking.openURL(url);
+    } else {
+      Alert.alert('Error', 'WhatsApp is not installed on your device.');
+    }
+  };
 
   return (
     <>
@@ -168,7 +196,9 @@ export default function SettingsPage() {
                 </TouchableOpacity>
 
                 <Divider style={profileFlowStyles.divider} />
-                <TouchableOpacity style={styles.navigationItem}>
+                <TouchableOpacity
+                  style={styles.navigationItem}
+                  onPress={openWhatsApp}>
                   <View style={styles.navigationContent}>
                     <View style={profileFlowStyles.dangerContainer}>
                       <FontAwesome

@@ -101,6 +101,13 @@
         "passwordReset": "Nenosiri Limewekwa Upya!"
       }
     },
+    "location": {
+      "title": "Utoaji wa Eneo Unahitajika",
+      "body": "Hatuwezi kupata eneo lako. Tafadhali wezesha huduma za eneo kwenye mipangilio ya kifaa chako ili kuendelea. Hii inatusaidia kuonyesha taarifa sahihi na kuboresha uzoefu wako.",
+      "tail": "Ushauri: Nenda kwenye Mipangilio → Programu → [foodhouse] → Ruhusa → Eneo, kisha iwashe.",
+      "button1": "Fungua Mipangilio",
+      "button2": "Ghairi"
+    },
     "register": {
       "createAccount": "Unda Akaunti",
       "registerNewAccount": "Sajili Akaunti Mpya",
@@ -238,7 +245,7 @@
         "heading6": "Masharti na vigezo",
         "heading7": "Sera ya usiri",
         "heading8": "Kuhusu Foodhouse",
-        "heading9": "Futa akaunti",
+        "heading9": "Omba kufuta akaunti",
         "english": "Kiingereza (US)",
         "french": "Kifaransa",
         "swahili": "Kiswahili",
