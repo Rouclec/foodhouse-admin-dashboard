@@ -137,7 +137,9 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 	}
 	defer productsConn.Close()
 	productsClient := productsgrpc.NewProductsClient(productsConn)
-	// First Start the gRPC server
+
+
+	// First Start the gRPC server.
 	svrOpts := []grpc.ServerOption{
 		grpc.ChainUnaryInterceptor(
 			grpc_recovery.UnaryServerInterceptor(),
