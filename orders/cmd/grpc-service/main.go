@@ -53,6 +53,11 @@ type Config struct {
 		WebHook   string `conf:"env:TRUST_PAY_WAY_WEBHOOK,required"`
 	}
 
+	NkwaPay struct {
+		BaseUrl string `conf:"env:NKWA_PAY_BASE_URL,required"`
+		ApiKey  string `conf:"env:NKWA_PAY_API_KEY,required"`
+	}
+
 	Email struct {
 		Smtp struct {
 			Host     string `conf:"env:SMTP_HOST,required"`
@@ -138,7 +143,6 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 	defer productsConn.Close()
 	productsClient := productsgrpc.NewProductsClient(productsConn)
 
-
 	// First Start the gRPC server.
 	svrOpts := []grpc.ServerOption{
 		grpc.ChainUnaryInterceptor(
@@ -150,7 +154,8 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 	reflection.Register(grpcServer)
 
 	// paymentService, err := payment.NewCampayProvider(config.CampayConfig.CampayUsername, config.CampayConfig.CampayPassword, config.CampayConfig.CampayBaseUrl, config.CampayConfig.CampayWebHook)
-	paymentService, err := payment.NewTPWProvider(config.TrustPayWay.SecretKey, config.TrustPayWay.AppToken, config.TrustPayWay.BaseUrl, config.TrustPayWay.WebHook, logger)
+	// paymentService, err := payment.NewTPWProvider(config.TrustPayWay.SecretKey, config.TrustPayWay.AppToken, config.TrustPayWay.BaseUrl, config.TrustPayWay.WebHook, logger)
+	paymentService, err := payment.NewNkwaPayProvider(config.NkwaPay.ApiKey, config.NkwaPay.BaseUrl, logger)
 
 	if err != nil {
 		return fmt.Errorf("error initializing campay provider: %w", err)

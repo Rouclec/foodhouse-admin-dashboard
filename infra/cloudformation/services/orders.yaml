@@ -164,6 +164,10 @@ Resources:
               ValueFrom: !Sub "${CompanyInfoArn}:phone::"
             - Name: ENABLE_DEV_METHODS
               ValueFrom: !Sub "${CampaySecretArn}:enable_dev_methods::"
+            - Name: NKWA_PAY_BASE_URL
+              ValueFrom: !Sub "${CampaySecretArn}:nkwa_pay_base_url::"
+            - Name: NKWA_PAY_API_KEY
+              ValueFrom: !Sub "${CampaySecretArn}:nkwa_pay_api_key::"
 
 
   # We create a data in the RDS instance for the application.
