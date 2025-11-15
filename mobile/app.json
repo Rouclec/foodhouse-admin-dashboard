@@ -52,21 +52,21 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
+          "cameraPermission": "$(PRODUCT_NAME) requires access to your camera to take photos for your profile and products."
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos",
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
+          "photosPermission": "$(PRODUCT_NAME) requires access to your photos so you can select photos for your profile and products.",
+          "cameraPermission": "$(PRODUCT_NAME) requires access to your camera to take photos for your profile and products."
         }
       ],
       "expo-localization",
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+          "locationWhenInUsePermission": "$(PRODUCT_NAME) uses your location to match you with nearby farmers or buyers and to support home delivery."
         }
       ],
       [

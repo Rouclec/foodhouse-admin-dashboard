@@ -99,7 +99,7 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 	defer usersConn.Close()
 	usersClient := usersgrpc.NewUsersClient(usersConn)
 
-	// First Start the gRPC server
+	// First Start the gRPC server.
 	svrOpts := []grpc.ServerOption{
 		grpc.ChainUnaryInterceptor(
 			grpc_recovery.UnaryServerInterceptor(),
@@ -133,7 +133,7 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 		}
 	}()
 
-	// Do a graceful shutdown if the context is canceled
+	// Do a graceful shutdown if the context is canceled.
 	go func() {
 		<-ctx.Done()
 		logger.Info().Msg("Shutting down gRPC server...")
