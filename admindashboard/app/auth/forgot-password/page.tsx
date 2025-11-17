@@ -1,63 +1,121 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2, ArrowLeft, Leaf } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Loader2, ArrowLeft, Leaf } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import {
+  usersChangePasswordMutation,
+  usersSendEmailOtpMutation,
+} from "@/client/users.swagger/@tanstack/react-query.gen";
+import { delay } from "@/utils";
+import { useRouter } from "next/navigation";
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [isOtpSent, setIsOtpSent] = useState(false)
-  const [otp, setOtp] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const { toast } = useToast()
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [requestId, setRequestId] = useState<string>();
+
+  const { toast } = useToast();
+
+  const router = useRouter();
 
   const handleSendOtp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsOtpSent(true)
-      setIsLoading(false)
+    await sendEmailOtp({
+      body: {
+        email: email,
+        intent: "OTP_INTENT_RESET_PASSWORD",
+      },
+    });
+  };
+
+  const { mutateAsync: sendEmailOtp } = useMutation({
+    ...usersSendEmailOtpMutation(),
+    onSuccess: (data) => {
+      setRequestId(data?.requestId);
+      setIsOtpSent(true);
+      setIsLoading(false);
       toast({
         title: "OTP sent",
         description: "Check your email for the verification code",
-      })
-    }, 1000)
-  }
+      });
+    },
+    onError: async (error) => {
+      setIsLoading(false);
+      toast({
+        title: "Error",
+        description:
+          error?.response?.data?.message ?? "Failed to send email OTP",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleResetPassword = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (newPassword !== confirmPassword) {
       toast({
         title: "Error",
         description: "Passwords do not match",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
+    await resetPassword({
+      body: {
+        newPassword: newPassword,
+        emailFactor: {
+          type: "FACTOR_TYPE_EMAIL_OTP",
+          id: requestId,
+          secretValue: otp,
+        },
+      },
+    });
+  };
+
+  const { mutateAsync: resetPassword } = useMutation({
+    ...usersChangePasswordMutation(),
+    onSuccess: () => {
+      setIsLoading(false);
       toast({
         title: "Password reset successful",
         description: "You can now login with your new password",
-      })
-    }, 1000)
-  }
-
+      });
+      router.push("/auth/login");
+    },
+    onError: async (error) => {
+      setIsLoading(false);
+      toast({
+        title: "Error",
+        description:
+          error?.response?.data?.message ?? "Error reseting password",
+        variant: "destructive",
+      });
+    },
+  });
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F6F6F6] to-[#F3F3F3] p-4">
       <Card className="w-full max-w-md">
@@ -69,7 +127,9 @@ export default function ForgotPasswordPage() {
           </div>
           <CardTitle className="text-2xl font-bold">Reset Password</CardTitle>
           <CardDescription>
-            {!isOtpSent ? "Enter your email to receive a verification code" : "Enter the OTP and your new password"}
+            {!isOtpSent
+              ? "Enter your email to receive a verification code"
+              : "Enter the OTP and your new password"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -139,7 +199,10 @@ export default function ForgotPasswordPage() {
           )}
 
           <div className="mt-6 text-center">
-            <Link href="/auth/login" className="inline-flex items-center text-sm text-green-600 hover:underline">
+            <Link
+              href="/auth/login"
+              className="inline-flex items-center text-sm text-green-600 hover:underline"
+            >
               <ArrowLeft className="mr-1 h-4 w-4" />
               Back to login
             </Link>
@@ -147,5 +210,5 @@ export default function ForgotPasswordPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

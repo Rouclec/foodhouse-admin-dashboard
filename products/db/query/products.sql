@@ -88,8 +88,13 @@ SELECT
     p.is_approved,
     COALESCE(r.name, '') AS region_name
 FROM products p
-LEFT JOIN regions r
-    ON ST_Contains(r.boundary, p.location)
+LEFT JOIN LATERAL (
+    SELECT r.name
+    FROM regions r
+    WHERE ST_Contains(r.boundary, p.location)
+    ORDER BY ST_Area(r.boundary) ASC
+    LIMIT 1
+) r ON true
 WHERE
     p.deleted_at IS NULL
     AND (
@@ -100,15 +105,16 @@ WHERE
     AND (sqlc.arg(category_id)::varchar = '' OR p.category_id = sqlc.arg(category_id)::varchar)
     AND (sqlc.arg(min_value)::float = 0 OR p.value >= sqlc.arg(min_value)::float)
     AND (
-        sqlc.arg(max_value)::float = 0 OR p.value <= COALESCE(sqlc.arg(max_value)::float, 9223372036854775807)
+        sqlc.arg(max_value)::float = 0 
+        OR p.value <= COALESCE(sqlc.arg(max_value)::float, 9223372036854775807)
     )
     AND (
-        sqlc.arg(search)::text = '' OR
-        p.name ILIKE '%' || sqlc.arg(search)::text || '%' OR
-        p.description ILIKE '%' || sqlc.arg(search)::text || '%'
+        sqlc.arg(search)::text = '' 
+        OR p.name ILIKE '%' || sqlc.arg(search)::text || '%'
+        OR p.description ILIKE '%' || sqlc.arg(search)::text || '%'
     )
     AND (
-        sqlc.arg(created_after)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz
+        sqlc.arg(created_after)::timestamptz = '0001-01-01 00:00:00+00'
         OR p.created_at > sqlc.arg(created_after)::timestamptz
     )
     AND (
@@ -120,6 +126,7 @@ WHERE
     )
 ORDER BY p.created_at ASC
 LIMIT sqlc.arg(count)::int;
+
 
 -- name: ListFarmerProducts :many
 SELECT 

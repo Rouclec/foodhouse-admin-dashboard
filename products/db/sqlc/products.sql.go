@@ -617,8 +617,13 @@ SELECT
     p.is_approved,
     COALESCE(r.name, '') AS region_name
 FROM products p
-LEFT JOIN regions r
-    ON ST_Contains(r.boundary, p.location)
+LEFT JOIN LATERAL (
+    SELECT r.name
+    FROM regions r
+    WHERE ST_Contains(r.boundary, p.location)
+    ORDER BY ST_Area(r.boundary) ASC
+    LIMIT 1
+) r ON true
 WHERE
     p.deleted_at IS NULL
     AND (
@@ -629,15 +634,16 @@ WHERE
     AND ($4::varchar = '' OR p.category_id = $4::varchar)
     AND ($5::float = 0 OR p.value >= $5::float)
     AND (
-        $6::float = 0 OR p.value <= COALESCE($6::float, 9223372036854775807)
+        $6::float = 0 
+        OR p.value <= COALESCE($6::float, 9223372036854775807)
     )
     AND (
-        $7::text = '' OR
-        p.name ILIKE '%' || $7::text || '%' OR
-        p.description ILIKE '%' || $7::text || '%'
+        $7::text = '' 
+        OR p.name ILIKE '%' || $7::text || '%'
+        OR p.description ILIKE '%' || $7::text || '%'
     )
     AND (
-        $8::timestamptz = '0001-01-01 00:00:00+00'::timestamptz
+        $8::timestamptz = '0001-01-01 00:00:00+00'
         OR p.created_at > $8::timestamptz
     )
     AND (
