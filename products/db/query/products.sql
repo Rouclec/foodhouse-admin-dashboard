@@ -114,9 +114,9 @@ WHERE
         OR p.description ILIKE '%' || sqlc.arg(search)::text || '%'
     )
     AND (
-        sqlc.arg(created_after)::timestamptz = '0001-01-01 00:00:00+00'
-        OR p.created_at > sqlc.arg(created_after)::timestamptz
-    )
+        sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+        OR created_at < sqlc.arg(created_before)::timestamptz
+    ) 
     AND (
         sqlc.arg(allowed_regions)::text[] = ARRAY['__ADMIN_OVERRIDE__']
         OR (
@@ -124,7 +124,7 @@ WHERE
             AND r.name = ANY(sqlc.arg(allowed_regions)::text[])
         )
     )
-ORDER BY p.created_at ASC
+ORDER BY p.created_at DESC
 LIMIT sqlc.arg(count)::int;
 
 

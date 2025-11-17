@@ -643,9 +643,9 @@ WHERE
         OR p.description ILIKE '%' || $7::text || '%'
     )
     AND (
-        $8::timestamptz = '0001-01-01 00:00:00+00'
-        OR p.created_at > $8::timestamptz
-    )
+        $8::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+        OR created_at < $8::timestamptz
+    ) 
     AND (
         $9::text[] = ARRAY['__ADMIN_OVERRIDE__']
         OR (
@@ -653,7 +653,7 @@ WHERE
             AND r.name = ANY($9::text[])
         )
     )
-ORDER BY p.created_at ASC
+ORDER BY p.created_at DESC
 LIMIT $10::int
 `
 
@@ -665,7 +665,7 @@ type ListProductsParams struct {
 	MinValue           float64   `json:"min_value"`
 	MaxValue           float64   `json:"max_value"`
 	Search             string    `json:"search"`
-	CreatedAfter       time.Time `json:"created_after"`
+	CreatedBefore      time.Time `json:"created_before"`
 	AllowedRegions     []string  `json:"allowed_regions"`
 	Count              int32     `json:"count"`
 }
@@ -699,7 +699,7 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]L
 		arg.MinValue,
 		arg.MaxValue,
 		arg.Search,
-		arg.CreatedAfter,
+		arg.CreatedBefore,
 		arg.AllowedRegions,
 		arg.Count,
 	)

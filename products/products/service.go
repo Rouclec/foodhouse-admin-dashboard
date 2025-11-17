@@ -252,7 +252,7 @@ func (i *Impl) DetermineAllowedRegions(ctx context.Context, logger *zerolog.Logg
 func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsRequest) (*productsgrpc.ListProductsResponse, error) {
 	var err error
 
-	startKey := time.Time{}
+	startKey := time.Now()
 
 	count := int(req.GetCount())
 	if count == 0 {
@@ -280,7 +280,7 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 		MinValue:           req.GetMinAmount().GetValue(),
 		MaxValue:           req.GetMaxAmount().GetValue(),
 		Search:             req.GetSearch(),
-		CreatedAfter:       startKey,
+		CreatedBefore:      startKey,
 		Count:              int32(count), // Convert count to int32
 		IsApprovedProvided: false,
 		AllowedRegions:     allowedRegions,

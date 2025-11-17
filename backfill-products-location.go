@@ -32,7 +32,9 @@ func main() {
 	userRows, err := productDB.Query(`
 		SELECT DISTINCT created_by
 		FROM products
-		WHERE location IS NULL
+		WHERE 
+    		location IS NULL
+    		OR ST_Equals(location, ST_SetSRID(ST_MakePoint(0, 0), 4326));
 	`)
 	if err != nil {
 		log.Fatal("❌ Failed to fetch users from products:", err)
@@ -81,8 +83,14 @@ func main() {
 		res, err := productDB.Exec(`
 			UPDATE products
 			SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326)
-			WHERE created_by = $3 AND location IS NULL
+			WHERE 
+				created_by = $3 
+				AND (
+					location IS NULL
+					OR ST_Equals(location, ST_SetSRID(ST_MakePoint(0, 0), 4326))
+				)
 		`, lon, lat, userID)
+
 		if err != nil {
 			log.Printf("⚠️ Failed updating products for user %s: %v\n", userID, err)
 			continue
