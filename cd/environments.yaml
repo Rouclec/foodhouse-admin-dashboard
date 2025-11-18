@@ -6,7 +6,7 @@
   
 - envId: testing
   name: Testing
-  gitRefName: main
+  gitRefName: release/testing/deploying-revert-to-tpw 
   awsAccountId: 841306720336
   domainName: foodhousetesting.xyz
 
