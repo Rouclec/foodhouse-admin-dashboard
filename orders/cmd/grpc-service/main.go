@@ -154,8 +154,8 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 	reflection.Register(grpcServer)
 
 	// paymentService, err := payment.NewCampayProvider(config.CampayConfig.CampayUsername, config.CampayConfig.CampayPassword, config.CampayConfig.CampayBaseUrl, config.CampayConfig.CampayWebHook)
-	// paymentService, err := payment.NewTPWProvider(config.TrustPayWay.SecretKey, config.TrustPayWay.AppToken, config.TrustPayWay.BaseUrl, config.TrustPayWay.WebHook, logger)
-	paymentService, err := payment.NewNkwaPayProvider(config.NkwaPay.ApiKey, config.NkwaPay.BaseUrl, logger)
+	paymentService, err := payment.NewTPWProvider(config.TrustPayWay.SecretKey, config.TrustPayWay.AppToken, config.TrustPayWay.BaseUrl, config.TrustPayWay.WebHook, logger)
+	// paymentService, err := payment.NewNkwaPayProvider(config.NkwaPay.ApiKey, config.NkwaPay.BaseUrl, logger)
 
 	if err != nil {
 		return fmt.Errorf("error initializing campay provider: %w", err)
