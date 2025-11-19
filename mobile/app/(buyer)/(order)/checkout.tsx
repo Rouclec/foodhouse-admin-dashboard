@@ -332,17 +332,6 @@ export default function Checkout() {
                     )}
                   </Text>
                 </View>
-                <View style={styles.rowItem}>
-                  <Text style={styles.textSmall}>
-                    {i18n.t('(buyer).(order).checkout.serviceCharges')}
-                  </Text>
-                  <Text style={styles.textAlignRight} variant="titleMedium">
-                    {productData?.product?.amount?.currencyIsoCode}{' '}
-                    {formatAmount(((totalPrice ?? 0) * 0.1)?.toString() ?? '', {
-                      decimalPlaces: 2,
-                    })}
-                  </Text>
-                </View>
                 <View style={[styles.rowItem, styles.lastRowItem]}>
                   <Text style={styles.textSmall}>
                     {i18n.t('(buyer).(order).checkout.total')}
@@ -351,7 +340,7 @@ export default function Checkout() {
                     {productData?.product?.amount?.currencyIsoCode}{' '}
                     {formatAmount(
                       (
-                        (totalPrice ?? 0) * 1.1 +
+                        (totalPrice ?? 0) +
                         (estiamtedDeliverFee?.estimatedDeliveryFee?.value ?? 0)
                       )?.toString() ?? '',
                       {
