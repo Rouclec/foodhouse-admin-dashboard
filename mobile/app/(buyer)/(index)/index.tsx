@@ -198,28 +198,17 @@ export default function BuyerProducts() {
                       </Text>
                     </View>
                   </View>
-                  {/* <TouchableOpacity style={styles.iconContainer}>
-                    <View style={defaultStyles.relativeContainer}>
-                      <Icon
-                        source={'cart'}
-                        size={24}
-                        color={Colors.primary[500]}
-                      />
-                      
-                    </View>
-                  </TouchableOpacity> */}
+                 
 
                   <TouchableOpacity style={styles.iconContainer}
                     onPress={() => {
-                      // 1. Check if cart has items before navigating
+                     
                       if (cartItems.length === 0) {
-                        // Optional: Show a message if empty
-                        // Alert.alert("Empty", "Your cart is empty");
+                        
                         return;
                       }
 
-                      // 2. Navigate directly to the Order/Delivery screen.
-                      // The target screen will access 'cartItems' from the Context.
+                     
                       router.push('/(buyer)/(order)');
                     }}>
                     <View style={defaultStyles.relativeContainer}>

@@ -31,12 +31,25 @@ import { Context, ContextType } from '@/app/_layout';
 import { delay } from '@/utils';
 
 export default function Checkout() {
+  type CartItem = {
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+    currency: string;
+    image?: string;
+    unitType?: string;
+    // Add other properties from your cart item structure here
+  };
+  type LocalOrderItem = Omit<CartItem, 'quantity'> & {
+    quantity: string;
+  };
+
   const router = useRouter();
 
   const { user, productId, deliveryLocation, setPaymentData, cartItems } =
-    useContext(Context) as ContextType;
+    useContext(Context) as ContextType & { cartItems: CartItem[] };
 
-  const [quantity, setQuantity] = useState('1');
   const [totalPrice, setTotalPrice] = useState<number>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
@@ -46,6 +59,49 @@ export default function Checkout() {
   const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   // Helper: Get Currency (assuming all items have same currency)
   const currency = cartItems[0]?.currency || 'XAF';
+  const [orderItems, setOrderItems] = useState<LocalOrderItem[]>(
+    cartItems.map(item => ({
+      ...(item as CartItem),
+      quantity: item.quantity.toString(), // Convert number to string for local management
+    })),
+  );
+
+  const handleQuantityChange = (
+    index: number,
+    type: 'increase' | 'decrease' | 'input',
+    value?: string,
+  ) => {
+    setOrderItems(prevItems => {
+      const newItems = [...prevItems];
+      const currentItem = newItems[index];
+      const currentQty = parseInt(currentItem.quantity) || 0;
+
+      if (type === 'increase') {
+        newItems[index].quantity = (currentQty + 1).toString();
+      } else if (type === 'decrease' && currentQty > 1) {
+        newItems[index].quantity = (currentQty - 1).toString();
+      } else if (type === 'input' && value !== undefined) {
+        // Safety check for numeric input
+        const numericValue = value.replace(/[^0-9]/g, '');
+        newItems[index].quantity = numericValue || '1';
+      }
+
+      return newItems;
+    });
+  };
+  useEffect(() => {
+    const total = orderItems.reduce(
+      // Use parseInt(item.quantity) because it's stored as a string locally
+      (sum, item) => sum + item.price * (parseInt(item.quantity) || 0),
+      0,
+    );
+    setSubtotal(total);
+  }, [orderItems]);
+
+  const totalQuantityForFee = orderItems.reduce(
+    (sum, item) => sum + (parseInt(item.quantity) || 0),
+    0,
+  );
 
   // 2. Calculate Subtotal whenever cart changes
   useEffect(() => {
@@ -77,19 +133,12 @@ export default function Checkout() {
       query: {
         'deliveryLocation.lat': deliveryLocation?.region.latitude,
         'deliveryLocation.lon': deliveryLocation?.region?.longitude,
-        productId: cartItems[0]?.id,
-        quantity: quantity,
+        productId: orderItems[0]?.id, // Use the first item's ID as reference
+        quantity: totalQuantityForFee.toString(),
       },
     }),
     enabled: !!productId,
   });
-
-  useEffect(() => {
-    setTotalPrice(
-      (productData?.product?.amount?.value ?? 0) *
-        (!quantity ? 0 : parseInt(quantity)),
-    );
-  }, [productData, quantity]);
 
   const { mutateAsync } = useMutation({
     ...ordersCreateOrderMutation(),
@@ -126,10 +175,16 @@ export default function Checkout() {
   const handleCreateOrder = async () => {
     try {
       setLoading(true);
+
+      // 6. ✅ Prepare the payload using the LOCAL `orderItems`
+      const itemsPayload = orderItems.map(item => ({
+        productId: item.id,
+        quantity: item.quantity,
+      }));
+
       await mutateAsync({
         body: {
-          productId: productId,
-          quantity: quantity.toString(),
+          orderItems: itemsPayload,
           deliveryLocation: {
             address: deliveryLocation?.description,
             lon: deliveryLocation?.region?.longitude,
@@ -259,19 +314,14 @@ export default function Checkout() {
             </View>
 
             <View style={styles.orderContainer}>
-              <Text variant="titleMedium">
-                {i18n.t('(buyer).(order).checkout.order')}
-              </Text>
               <Text variant="titleMedium" style={{ marginBottom: 16 }}>
                 {i18n.t('(buyer).(order).checkout.order')} ({cartItems.length}{' '}
                 items)
               </Text>
 
-              {/* 4. RENDER ALL CART ITEMS */}
-              {cartItems.map((item, index) => (
-                <View
-                  key={item.id}
-                  style={[styles.orderDetailsContainer]}>
+
+              {orderItems.map((item, index) => (
+                <View key={item.id} style={[styles.orderDetailsContainer]}>
                   <Image
                     source={{ uri: item.image }}
                     style={styles.productImage}
@@ -280,134 +330,65 @@ export default function Checkout() {
                     <Text variant="titleMedium" numberOfLines={1}>
                       {item.name}
                     </Text>
-                    
-                      <Text style={styles.price}>
-                        {currency} {item.price}
-                        <Text style={styles.greyText}>
-                          {' '}
-                          {productData?.product?.unitType?.replace('per_', '/')}
-                        </Text>
+
+                    <Text style={styles.price}>
+                      {currency} {item.price}
+                      <Text style={styles.greyText}>
+                        {' '}
+                        {productData?.product?.unitType?.replace('per_', '/')}
                       </Text>
-                      <View style={styles.buttonsContainer}>
-                        <TouchableOpacity
-                          disabled={parseInt(quantity) === 1}
-                          onPress={() => {
-                            setQuantity(prev =>
-                              (parseInt(prev) - 1).toString(),
-                            );
-                          }}
+                    </Text>
+                    <View style={styles.buttonsContainer}>
+                      <TouchableOpacity
+                        // Use item.quantity
+                        disabled={parseInt(item.quantity) === 1}
+                        onPress={() => handleQuantityChange(index, 'decrease')}
+                        style={[
+                          styles.quantityButton,
+                          parseInt(item.quantity) === 1 &&
+                            styles.inactiveButton,
+                        ]}>
+                        <Text
+                          variant="titleMedium"
                           style={[
-                            styles.quantityButton,
-                            parseInt(quantity) === 1 && styles.inactiveButton,
+                            styles.textCenter,
+                            parseInt(item.quantity) === 1 &&
+                              styles.inactiveText,
                           ]}>
-                          <Text
-                            variant="titleMedium"
-                            style={[
-                              styles.textCenter,
-                              parseInt(quantity) === 1 && styles.inactiveText,
-                            ]}>
-                            -
-                          </Text>
-                        </TouchableOpacity>
-                        <TextInput
-                          style={styles.quantityInput}
-                          theme={{
-                            colors: {
-                              primary: Colors.primary[500],
-                              background: Colors.grey['fa'],
-                              error: Colors.error,
-                            },
-                            roundness: 10,
-                          }}
-                          contentStyle={styles.quantityInputContent}
-                          mode="outlined"
-                          value={quantity}
-                          onChangeText={text => setQuantity(text)}
-                          inputMode="numeric"
-                        />
-                        <TouchableOpacity
-                          onPress={() => {
-                            setQuantity(prev =>
-                              (parseInt(prev) + 1).toString(),
-                            );
-                          }}
-                          style={styles.quantityButton}>
-                          <Text variant="titleMedium" style={styles.textCenter}>
-                            +
-                          </Text>
-                        </TouchableOpacity>
-                     
-                      {/* <Text variant="titleMedium" style={{ color: Colors.primary[500] }}>
-                             {currency} {formatAmount((item.price * item.quantity).toString())}
-                        </Text> */}
+                          -
+                        </Text>
+                      </TouchableOpacity>
+                      <TextInput
+                        style={styles.quantityInput}
+                        theme={{
+                          colors: {
+                            primary: Colors.primary[500],
+                            background: Colors.grey['fa'],
+                            error: Colors.error,
+                          },
+                          roundness: 10,
+                        }}
+                        contentStyle={styles.quantityInputContent}
+                        mode="outlined"
+                        // Use item.quantity
+                        value={item.quantity}
+                        // Use handler specific to this item's index
+                        onChangeText={text =>
+                          handleQuantityChange(index, 'input', text)
+                        }
+                        inputMode="numeric"
+                      />
+                      <TouchableOpacity
+                        onPress={() => handleQuantityChange(index, 'increase')}
+                        style={styles.quantityButton}>
+                        <Text variant="titleMedium" style={styles.textCenter}>
+                          +
+                        </Text>
+                      </TouchableOpacity>
                     </View>
                   </View>
                 </View>
               ))}
-              {/* <View style={styles.orderDetailsContainer}>
-                <Image
-                  source={{ uri: productData?.product?.image }}
-                  style={styles.productImage}
-                />
-                <View style={styles.rightContainer}>
-                  <Text variant="titleMedium">
-                    {productData?.product?.name}
-                  </Text>
-                  <Text style={styles.price}>
-                    {productData?.product?.amount?.currencyIsoCode}{' '}
-                    {productData?.product?.amount?.value}
-                    <Text style={styles.greyText}>
-                      {' '}
-                      {productData?.product?.unitType?.replace('per_', '/')}
-                    </Text>
-                  </Text>
-                  <View style={styles.buttonsContainer}>
-                    <TouchableOpacity
-                      disabled={parseInt(quantity) === 1}
-                      onPress={() => {
-                        setQuantity(prev => (parseInt(prev) - 1).toString());
-                      }}
-                      style={[
-                        styles.quantityButton,
-                        parseInt(quantity) === 1 && styles.inactiveButton,
-                      ]}>
-                      <Text
-                        variant="titleMedium"
-                        style={[
-                          styles.textCenter,
-                          parseInt(quantity) === 1 && styles.inactiveText,
-                        ]}>
-                        -
-                      </Text>
-                    </TouchableOpacity>
-                    <TextInput
-                      style={styles.quantityInput}
-                      theme={{
-                        colors: {
-                          primary: Colors.primary[500],
-                          background: Colors.grey['fa'],
-                          error: Colors.error,
-                        },
-                        roundness: 10,
-                      }}
-                      contentStyle={styles.quantityInputContent}
-                      mode="outlined"
-                      value={quantity}
-                      onChangeText={text => setQuantity(text)}
-                      inputMode="numeric"
-                    />
-                    <TouchableOpacity
-                      onPress={() => {
-                        setQuantity(prev => (parseInt(prev) + 1).toString());
-                      }}
-                      style={styles.quantityButton}>
-                      <Text variant="titleMedium" style={styles.textCenter}>
-                        +
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View> */}
 
               <View style={[styles.orderDetailsContainer, styles.flexColumn]}>
                 <View style={styles.rowItem}>
@@ -460,10 +441,10 @@ export default function Checkout() {
           style={[
             defaultStyles.button,
             defaultStyles.primaryButton,
-            (loading || !quantity) && defaultStyles.greyButton,
+            (loading || totalQuantityForFee === 0) && defaultStyles.greyButton, // Check if total quantity > 0
           ]}
           loading={loading}
-          disabled={loading || !quantity}
+          disabled={loading || totalQuantityForFee === 0}
           onPress={handleCreateOrder}>
           <Text variant="titleMedium" style={defaultStyles?.buttonText}>
             {i18n.t('(buyer).(order).checkout.confirmPayment')}{' '}
