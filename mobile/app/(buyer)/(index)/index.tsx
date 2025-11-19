@@ -98,7 +98,8 @@ export default function BuyerProducts() {
 
   const router = useRouter();
 
-  const { user } = useContext(Context) as ContextType;
+  const { user, cartItems } = useContext(Context) as ContextType;
+  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   const { data: categories, isLoading: isCategoriesLoading } = useQuery({
     ...productsListCategoriesOptions(),
@@ -197,7 +198,7 @@ export default function BuyerProducts() {
                       </Text>
                     </View>
                   </View>
-                  <TouchableOpacity style={styles.iconContainer}>
+                  {/* <TouchableOpacity style={styles.iconContainer}>
                     <View style={defaultStyles.relativeContainer}>
                       <Icon
                         source={'cart'}
@@ -205,6 +206,57 @@ export default function BuyerProducts() {
                         color={Colors.primary[500]}
                       />
                       
+                    </View>
+                  </TouchableOpacity> */}
+
+                  <TouchableOpacity style={styles.iconContainer}
+                    onPress={() => {
+                      // 1. Check if cart has items before navigating
+                      if (cartItems.length === 0) {
+                        // Optional: Show a message if empty
+                        // Alert.alert("Empty", "Your cart is empty");
+                        return;
+                      }
+
+                      // 2. Navigate directly to the Order/Delivery screen.
+                      // The target screen will access 'cartItems' from the Context.
+                      router.push('/(buyer)/(order)');
+                    }}>
+                    <View style={defaultStyles.relativeContainer}>
+                      <Icon
+                        source={'cart'}
+                        size={24}
+                        color={Colors.primary[500]}
+                      />
+
+                      {/* BADGE LOGIC */}
+                      {cartCount > 0 && (
+                        <View
+                          style={{
+                            position: 'absolute',
+                            top: -6,
+                            right: -6,
+                            backgroundColor: Colors.error,
+                            borderRadius: 10,
+                            minWidth: 18,
+                            height: 18,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            borderWidth: 1.5,
+                            borderColor: 'white',
+                            paddingHorizontal: 2,
+                          }}>
+                          <Text
+                            style={{
+                              color: 'white',
+                              fontSize: 10,
+                              fontWeight: 'bold',
+                              lineHeight: 12,
+                            }}>
+                            {cartCount}
+                          </Text>
+                        </View>
+                      )}
                     </View>
                   </TouchableOpacity>
                 </View>
@@ -651,12 +703,7 @@ export default function BuyerProducts() {
 
           <Dialog.Actions style={defaultStyles.actions}>
             <Button
-              style={[
-                defaultStyles.button,
-
-                defaultStyles.halfContainer,
-               
-              ]}
+              style={[defaultStyles.button, defaultStyles.halfContainer]}
               textColor={Colors.light['10']}
               onPress={() => setShowLocationModal(false)}>
               {i18n.t('(auth).location.button1')}

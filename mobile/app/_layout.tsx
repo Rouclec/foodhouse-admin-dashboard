@@ -21,6 +21,7 @@ import { Region } from "react-native-maps";
 import { ordersgrpcPaymentEntity, typesAmount } from "@/client/orders.swagger";
 import { RelativePathString } from "expo-router";
 import { ExternalPathString } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -44,6 +45,16 @@ export default function RootLayout() {
   );
 }
 
+export type CartItem = {
+  id: string; 
+  name: string;
+  price: number;
+  image?: string;
+  quantity: number;
+  currency?: string;
+ 
+};
+
 const client = new QueryClient();
 
 interface ContextInfo {
@@ -65,6 +76,9 @@ interface ContextInfo {
         amount: typesAmount;
       }
     | undefined;
+  
+    cartItems: CartItem[];
+  
 }
 
 interface ContextSetters {
@@ -91,6 +105,8 @@ interface ContextSetters {
         }
       | undefined
   ) => void;
+
+  addToCart: (product: any) => void;
 }
 
 export interface ContextType extends ContextInfo, ContextSetters {}
@@ -148,6 +164,7 @@ function RootLayoutNav() {
     productId: undefined,
     deliveryLocation: undefined,
     paymentData: undefined,
+    cartItems: [],
   };
 
   const [contextInfo, setContextInfo] = useState(initialState);
@@ -195,12 +212,47 @@ function RootLayoutNav() {
     }));
   }
 
+  const addToCart = async (product: any) => {
+    setContextInfo((prevState) => {
+        
+        const updatedCart = [...prevState.cartItems];
+        
+       
+        const existingIndex = updatedCart.findIndex(item => item.id === product.id);
+
+        if (existingIndex > -1) {
+            
+            updatedCart[existingIndex].quantity += 1;
+        } else {
+            
+            updatedCart.push({
+                id: product.id,
+                name: product.name,
+                price: product.amount?.value || 0, 
+                image: product.image,
+                currency: product.amount?.currencyIsoCode || 'XAF',
+                quantity: 1,
+            });
+        }
+
+        
+        AsyncStorage.setItem('user_cart', JSON.stringify(updatedCart))
+            .catch(err => console.error("Error saving cart", err));
+
+        return {
+            ...prevState,
+            cartItems: updatedCart
+        };
+    });
+  };
+
   const contextSetters: ContextSetters = {
     setUser,
     setUserRole,
     setDeliveryLocation,
     setProductId,
     setPaymentData,
+    addToCart,
   };
 
   return (

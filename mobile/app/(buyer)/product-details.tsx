@@ -8,6 +8,7 @@ import {
   ScrollView,
   TouchableOpacity,
   View,
+  Alert,
 } from 'react-native';
 import { defaultStyles, productDetailsStyles as styles } from '@/styles';
 import { Colors } from '@/constants';
@@ -22,7 +23,7 @@ import { formatAmount } from '@/utils/amountFormater';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ProductDetails() {
-  const { user, productId, setProductId } = useContext(Context) as ContextType;
+  const { user, productId, setProductId, addToCart } = useContext(Context) as ContextType;
   const [errorLoadingProduct, setErrorLoadingProduct] = useState(false);
 
   const params = useLocalSearchParams();
@@ -57,6 +58,16 @@ export default function ProductDetails() {
   });
 
   const insets = useSafeAreaInsets();
+
+  const handleAddToCart = () => {
+  if (data?.product) {
+    addToCart(data.product);
+    Alert.alert(
+      i18n.t('Success'), 
+      i18n.t('Item added to cart')
+    );
+  }
+};
 
   if (isLoading) {
     return (
@@ -231,10 +242,11 @@ export default function ProductDetails() {
                 defaultStyles.primaryButton,
                 styles.halfContainer,
               ]}
-              onPress={() => {
-                setProductId(data?.product?.id);
-                router.push('/(buyer)/(order)');
-              }}>
+              // onPress={() => {
+              //   setProductId(data?.product?.id);
+              //   router.push('/(buyer)/(order)');
+              // }}
+              onPress={handleAddToCart}>
               <Text style={defaultStyles.buttonText}>
                 {i18n.t('(buyer).product-details.orderNow')}
               </Text>

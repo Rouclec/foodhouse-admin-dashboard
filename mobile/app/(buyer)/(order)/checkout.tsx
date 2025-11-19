@@ -33,7 +33,11 @@ import { delay } from '@/utils';
 export default function Checkout() {
   const router = useRouter();
 
-  const { user, productId, deliveryLocation, setPaymentData } = useContext(
+
+
+ 
+
+  const { user, productId, deliveryLocation, setPaymentData, cartItems } = useContext(
     Context,
   ) as ContextType;
 
@@ -41,6 +45,18 @@ export default function Checkout() {
   const [totalPrice, setTotalPrice] = useState<number>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
+   const [subtotal, setSubtotal] = useState<number>(0);
+
+  // Helper: Get total quantity of items in cart
+  const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  // Helper: Get Currency (assuming all items have same currency)
+  const currency = cartItems[0]?.currency || 'XAF';
+
+  // 2. Calculate Subtotal whenever cart changes
+  useEffect(() => {
+    const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    setSubtotal(total);
+  }, [cartItems]);
 
   const {
     data: productData,
@@ -63,7 +79,7 @@ export default function Checkout() {
       query: {
         'deliveryLocation.lat': deliveryLocation?.region.latitude,
         'deliveryLocation.lon': deliveryLocation?.region?.longitude,
-        productId: productId,
+        productId: cartItems[0]?.id,
         quantity: quantity,
       },
     }),
@@ -77,6 +93,8 @@ export default function Checkout() {
     );
   }, [productData, quantity]);
 
+  
+
   const { mutateAsync } = useMutation({
     ...ordersCreateOrderMutation(),
     onSuccess: data => {
@@ -84,11 +102,16 @@ export default function Checkout() {
         entity: 'PaymentEntity_ORDER',
         entityId: data?.order?.orderNumber ?? '',
         nextScreen: '/(buyer)/(index)' as RelativePathString,
+        // amount: {
+        //   value:
+        //     (totalPrice ?? 0) * 1.1 +
+        //     (estiamtedDeliverFee?.estimatedDeliveryFee?.value ?? 0),
+        //   currencyIsoCode: productData?.product?.amount?.currencyIsoCode,
+        // },
+
         amount: {
-          value:
-            (totalPrice ?? 0) * 1.1 +
-            (estiamtedDeliverFee?.estimatedDeliveryFee?.value ?? 0),
-          currencyIsoCode: productData?.product?.amount?.currencyIsoCode,
+          value: (subtotal +(estiamtedDeliverFee?.estimatedDeliveryFee?.value ?? 0)) , // Send the full cart amount
+          currencyIsoCode: currency,
         },
       });
       router.push('/(payment)');
@@ -211,11 +234,68 @@ export default function Checkout() {
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled">
+
+               <Text variant="titleMedium">
+                {i18n.t('(buyer).(order).checkout.shippingAddress')}
+              </Text>
+              <View style={[styles.orderDetailsContainer, styles.flexRow]}>
+                <View style={styles.outterLocationIconContainer}>
+                  <View style={styles.innerLocationIconContainer}>
+                    <Icon
+                      source={'map-marker'}
+                      size={24}
+                      color={Colors.light[10]}
+                    />
+                  </View>
+                </View>
+
+                <View style={styles.rowGap8}>
+                  <Text variant="titleMedium" style={styles.text16}>
+                    {deliveryLocation?.description}
+                  </Text>
+                  <Text style={styles.textSmall}>
+                    {deliveryLocation?.address}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => router.push('/(buyer)/(order)')}>
+                  <Icon source={'pencil-outline'} size={24} />
+                </TouchableOpacity>
+              </View>
+
+             
             <View style={styles.orderContainer}>
               <Text variant="titleMedium">
                 {i18n.t('(buyer).(order).checkout.order')}
               </Text>
-              <View style={styles.orderDetailsContainer}>
+              <Text variant="titleMedium" style={{ marginBottom: 16 }}>
+                {i18n.t('(buyer).(order).checkout.order')} ({cartItems.length} items)
+              </Text>
+
+              {/* 4. RENDER ALL CART ITEMS */}
+              {cartItems.map((item, index) => (
+                <View key={item.id} style={[styles.orderDetailsContainer, { marginBottom: 16 }]}>
+                  <Image
+                    source={{ uri: item.image }}
+                    style={styles.productImage}
+                  />
+                  <View style={styles.rightContainer}>
+                    <Text variant="titleMedium" numberOfLines={1}>
+                      {item.name}
+                    </Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                        <Text style={styles.price}>
+                            {currency} {item.price}
+                            <Text style={styles.greyText}> x {item.quantity}</Text>
+                        </Text>
+                        <Text variant="titleMedium" style={{ color: Colors.primary[500] }}>
+                             {currency} {formatAmount((item.price * item.quantity).toString())}
+                        </Text>
+                    </View>
+                  </View>
+                </View>
+              ))}
+              {/* <View style={styles.orderDetailsContainer}>
                 <Image
                   source={{ uri: productData?.product?.image }}
                   style={styles.productImage}
@@ -278,34 +358,8 @@ export default function Checkout() {
                     </TouchableOpacity>
                   </View>
                 </View>
-              </View>
-              <Text variant="titleMedium">
-                {i18n.t('(buyer).(order).checkout.shippingAddress')}
-              </Text>
-              <View style={[styles.orderDetailsContainer, styles.flexRow]}>
-                <View style={styles.outterLocationIconContainer}>
-                  <View style={styles.innerLocationIconContainer}>
-                    <Icon
-                      source={'map-marker'}
-                      size={24}
-                      color={Colors.light[10]}
-                    />
-                  </View>
-                </View>
-
-                <View style={styles.rowGap8}>
-                  <Text variant="titleMedium" style={styles.text16}>
-                    {deliveryLocation?.description}
-                  </Text>
-                  <Text style={styles.textSmall}>
-                    {deliveryLocation?.address}
-                  </Text>
-                </View>
-                <TouchableOpacity
-                  onPress={() => router.push('/(buyer)/(order)')}>
-                  <Icon source={'pencil-outline'} size={24} />
-                </TouchableOpacity>
-              </View>
+              </View> */}
+             
               <View style={[styles.orderDetailsContainer, styles.flexColumn]}>
                 <View style={styles.rowItem}>
                   <Text style={styles.textSmall}>
@@ -313,9 +367,7 @@ export default function Checkout() {
                   </Text>
                   <Text style={styles.textAlignRight} variant="titleMedium">
                     {productData?.product?.amount?.currencyIsoCode}{' '}
-                    {formatAmount(totalPrice?.toString() ?? '', {
-                      decimalPlaces: 2,
-                    })}
+                    {currency} {formatAmount(subtotal.toString(), { decimalPlaces: 2 })}
                   </Text>
                 </View>
                 <View style={styles.rowItem}>
@@ -340,7 +392,7 @@ export default function Checkout() {
                     {productData?.product?.amount?.currencyIsoCode}{' '}
                     {formatAmount(
                       (
-                        (totalPrice ?? 0) +
+                        (subtotal ?? 0) +
                         (estiamtedDeliverFee?.estimatedDeliveryFee?.value ?? 0)
                       )?.toString() ?? '',
                       {
@@ -369,7 +421,7 @@ export default function Checkout() {
             {productData?.product?.amount?.currencyIsoCode}{' '}
             {formatAmount(
               (
-                (totalPrice ?? 0) * 1.1 +
+                (subtotal ?? 0) +
                 (estiamtedDeliverFee?.estimatedDeliveryFee?.value ?? 0)
               )?.toString() ?? '',
               {
