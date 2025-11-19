@@ -39,7 +39,7 @@ export default function Checkout() {
     currency: string;
     image?: string;
     unitType?: string;
-    // Add other properties from your cart item structure here
+
   };
   type LocalOrderItem = Omit<CartItem, 'quantity'> & {
     quantity: string;
@@ -55,14 +55,14 @@ export default function Checkout() {
   const [error, setError] = useState<string>();
   const [subtotal, setSubtotal] = useState<number>(0);
 
-  // Helper: Get total quantity of items in cart
+
   const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-  // Helper: Get Currency (assuming all items have same currency)
+
   const currency = cartItems[0]?.currency || 'XAF';
   const [orderItems, setOrderItems] = useState<LocalOrderItem[]>(
     cartItems.map(item => ({
       ...(item as CartItem),
-      quantity: item.quantity.toString(), // Convert number to string for local management
+      quantity: item.quantity.toString(), 
     })),
   );
 
@@ -81,7 +81,7 @@ export default function Checkout() {
       } else if (type === 'decrease' && currentQty > 1) {
         newItems[index].quantity = (currentQty - 1).toString();
       } else if (type === 'input' && value !== undefined) {
-        // Safety check for numeric input
+        
         const numericValue = value.replace(/[^0-9]/g, '');
         newItems[index].quantity = numericValue || '1';
       }
@@ -91,7 +91,7 @@ export default function Checkout() {
   };
   useEffect(() => {
     const total = orderItems.reduce(
-      // Use parseInt(item.quantity) because it's stored as a string locally
+
       (sum, item) => sum + item.price * (parseInt(item.quantity) || 0),
       0,
     );
@@ -103,7 +103,6 @@ export default function Checkout() {
     0,
   );
 
-  // 2. Calculate Subtotal whenever cart changes
   useEffect(() => {
     const total = cartItems.reduce(
       (sum, item) => sum + item.price * item.quantity,
@@ -133,7 +132,7 @@ export default function Checkout() {
       query: {
         'deliveryLocation.lat': deliveryLocation?.region.latitude,
         'deliveryLocation.lon': deliveryLocation?.region?.longitude,
-        productId: orderItems[0]?.id, // Use the first item's ID as reference
+        productId: orderItems[0]?.id, 
         quantity: totalQuantityForFee.toString(),
       },
     }),
@@ -147,12 +146,7 @@ export default function Checkout() {
         entity: 'PaymentEntity_ORDER',
         entityId: data?.order?.orderNumber ?? '',
         nextScreen: '/(buyer)/(index)' as RelativePathString,
-        // amount: {
-        //   value:
-        //     (totalPrice ?? 0) * 1.1 +
-        //     (estiamtedDeliverFee?.estimatedDeliveryFee?.value ?? 0),
-        //   currencyIsoCode: productData?.product?.amount?.currencyIsoCode,
-        // },
+       
 
         amount: {
           value:
@@ -176,7 +170,6 @@ export default function Checkout() {
     try {
       setLoading(true);
 
-      // 6. ✅ Prepare the payload using the LOCAL `orderItems`
       const itemsPayload = orderItems.map(item => ({
         productId: item.id,
         quantity: item.quantity,
