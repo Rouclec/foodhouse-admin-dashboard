@@ -197,16 +197,16 @@ export default function BuyerProducts() {
                       </Text>
                     </View>
                   </View>
-                  {/* <TouchableOpacity style={styles.iconContainer}>
+                  <TouchableOpacity style={styles.iconContainer}>
                     <View style={defaultStyles.relativeContainer}>
                       <Icon
-                        source={'bell-outline'}
+                        source={'cart'}
                         size={24}
-                        color={Colors.dark[10]}
+                        color={Colors.primary[500]}
                       />
-                      <View style={styles.noticiatonIndicator} />
+                      
                     </View>
-                  </TouchableOpacity> */}
+                  </TouchableOpacity>
                 </View>
                 <TextInput
                   placeholder={i18n.t(
