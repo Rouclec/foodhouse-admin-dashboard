@@ -15,7 +15,7 @@ export const checkoutStyles = StyleSheet.create({
     padding: 20,
     borderRadius: 16,
     flexDirection: 'row',
-    columnGap: 16,
+    columnGap: 24,
   },
   rightContainer: {
     rowGap: 12,

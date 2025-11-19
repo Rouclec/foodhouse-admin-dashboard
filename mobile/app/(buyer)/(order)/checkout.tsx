@@ -33,19 +33,14 @@ import { delay } from '@/utils';
 export default function Checkout() {
   const router = useRouter();
 
-
-
- 
-
-  const { user, productId, deliveryLocation, setPaymentData, cartItems } = useContext(
-    Context,
-  ) as ContextType;
+  const { user, productId, deliveryLocation, setPaymentData, cartItems } =
+    useContext(Context) as ContextType;
 
   const [quantity, setQuantity] = useState('1');
   const [totalPrice, setTotalPrice] = useState<number>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
-   const [subtotal, setSubtotal] = useState<number>(0);
+  const [subtotal, setSubtotal] = useState<number>(0);
 
   // Helper: Get total quantity of items in cart
   const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
@@ -54,7 +49,10 @@ export default function Checkout() {
 
   // 2. Calculate Subtotal whenever cart changes
   useEffect(() => {
-    const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const total = cartItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0,
+    );
     setSubtotal(total);
   }, [cartItems]);
 
@@ -93,8 +91,6 @@ export default function Checkout() {
     );
   }, [productData, quantity]);
 
-  
-
   const { mutateAsync } = useMutation({
     ...ordersCreateOrderMutation(),
     onSuccess: data => {
@@ -110,7 +106,8 @@ export default function Checkout() {
         // },
 
         amount: {
-          value: (subtotal +(estiamtedDeliverFee?.estimatedDeliveryFee?.value ?? 0)) , // Send the full cart amount
+          value:
+            subtotal + (estiamtedDeliverFee?.estimatedDeliveryFee?.value ?? 0), // Send the full cart amount
           currencyIsoCode: currency,
         },
       });
@@ -234,47 +231,47 @@ export default function Checkout() {
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled">
-
-               <Text variant="titleMedium">
-                {i18n.t('(buyer).(order).checkout.shippingAddress')}
-              </Text>
-              <View style={[styles.orderDetailsContainer, styles.flexRow]}>
-                <View style={styles.outterLocationIconContainer}>
-                  <View style={styles.innerLocationIconContainer}>
-                    <Icon
-                      source={'map-marker'}
-                      size={24}
-                      color={Colors.light[10]}
-                    />
-                  </View>
+            <Text variant="titleMedium">
+              {i18n.t('(buyer).(order).checkout.shippingAddress')}
+            </Text>
+            <View style={[styles.orderDetailsContainer, styles.flexRow]}>
+              <View style={styles.outterLocationIconContainer}>
+                <View style={styles.innerLocationIconContainer}>
+                  <Icon
+                    source={'map-marker'}
+                    size={24}
+                    color={Colors.light[10]}
+                  />
                 </View>
-
-                <View style={styles.rowGap8}>
-                  <Text variant="titleMedium" style={styles.text16}>
-                    {deliveryLocation?.description}
-                  </Text>
-                  <Text style={styles.textSmall}>
-                    {deliveryLocation?.address}
-                  </Text>
-                </View>
-                <TouchableOpacity
-                  onPress={() => router.push('/(buyer)/(order)')}>
-                  <Icon source={'pencil-outline'} size={24} />
-                </TouchableOpacity>
               </View>
 
-             
+              <View style={styles.rowGap8}>
+                <Text variant="titleMedium" style={styles.text16}>
+                  {deliveryLocation?.description}
+                </Text>
+                <Text style={styles.textSmall}>
+                  {deliveryLocation?.address}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => router.push('/(buyer)/(order)')}>
+                <Icon source={'pencil-outline'} size={24} />
+              </TouchableOpacity>
+            </View>
+
             <View style={styles.orderContainer}>
               <Text variant="titleMedium">
                 {i18n.t('(buyer).(order).checkout.order')}
               </Text>
               <Text variant="titleMedium" style={{ marginBottom: 16 }}>
-                {i18n.t('(buyer).(order).checkout.order')} ({cartItems.length} items)
+                {i18n.t('(buyer).(order).checkout.order')} ({cartItems.length}{' '}
+                items)
               </Text>
 
               {/* 4. RENDER ALL CART ITEMS */}
               {cartItems.map((item, index) => (
-                <View key={item.id} style={[styles.orderDetailsContainer, { marginBottom: 16 }]}>
+                <View
+                  key={item.id}
+                  style={[styles.orderDetailsContainer]}>
                   <Image
                     source={{ uri: item.image }}
                     style={styles.productImage}
@@ -283,14 +280,66 @@ export default function Checkout() {
                     <Text variant="titleMedium" numberOfLines={1}>
                       {item.name}
                     </Text>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-                        <Text style={styles.price}>
-                            {currency} {item.price}
-                            <Text style={styles.greyText}> x {item.quantity}</Text>
+                    
+                      <Text style={styles.price}>
+                        {currency} {item.price}
+                        <Text style={styles.greyText}>
+                          {' '}
+                          {productData?.product?.unitType?.replace('per_', '/')}
                         </Text>
-                        <Text variant="titleMedium" style={{ color: Colors.primary[500] }}>
+                      </Text>
+                      <View style={styles.buttonsContainer}>
+                        <TouchableOpacity
+                          disabled={parseInt(quantity) === 1}
+                          onPress={() => {
+                            setQuantity(prev =>
+                              (parseInt(prev) - 1).toString(),
+                            );
+                          }}
+                          style={[
+                            styles.quantityButton,
+                            parseInt(quantity) === 1 && styles.inactiveButton,
+                          ]}>
+                          <Text
+                            variant="titleMedium"
+                            style={[
+                              styles.textCenter,
+                              parseInt(quantity) === 1 && styles.inactiveText,
+                            ]}>
+                            -
+                          </Text>
+                        </TouchableOpacity>
+                        <TextInput
+                          style={styles.quantityInput}
+                          theme={{
+                            colors: {
+                              primary: Colors.primary[500],
+                              background: Colors.grey['fa'],
+                              error: Colors.error,
+                            },
+                            roundness: 10,
+                          }}
+                          contentStyle={styles.quantityInputContent}
+                          mode="outlined"
+                          value={quantity}
+                          onChangeText={text => setQuantity(text)}
+                          inputMode="numeric"
+                        />
+                        <TouchableOpacity
+                          onPress={() => {
+                            setQuantity(prev =>
+                              (parseInt(prev) + 1).toString(),
+                            );
+                          }}
+                          style={styles.quantityButton}>
+                          <Text variant="titleMedium" style={styles.textCenter}>
+                            +
+                          </Text>
+                        </TouchableOpacity>
+                     
+                      {/* <Text variant="titleMedium" style={{ color: Colors.primary[500] }}>
                              {currency} {formatAmount((item.price * item.quantity).toString())}
-                        </Text>
+                        </Text> */}
                     </View>
                   </View>
                 </View>
@@ -359,15 +408,15 @@ export default function Checkout() {
                   </View>
                 </View>
               </View> */}
-             
+
               <View style={[styles.orderDetailsContainer, styles.flexColumn]}>
                 <View style={styles.rowItem}>
                   <Text style={styles.textSmall}>
                     {i18n.t('(buyer).(order).checkout.amount')}
                   </Text>
                   <Text style={styles.textAlignRight} variant="titleMedium">
-                    {productData?.product?.amount?.currencyIsoCode}{' '}
-                    {currency} {formatAmount(subtotal.toString(), { decimalPlaces: 2 })}
+                    {productData?.product?.amount?.currencyIsoCode} {currency}{' '}
+                    {formatAmount(subtotal.toString(), { decimalPlaces: 2 })}
                   </Text>
                 </View>
                 <View style={styles.rowItem}>
