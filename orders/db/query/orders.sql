@@ -4,7 +4,6 @@ INSERT INTO orders (
     price_value, 
     price_currency, 
     status, 
-    product, 
     created_by, 
     secret_key, 
     product_owner,
@@ -12,7 +11,6 @@ INSERT INTO orders (
     rating, 
     review,
     delivery_address,
-    quantity,
     delivery_fee_amount,
     delivery_fee_currency
 )
@@ -21,7 +19,6 @@ VALUES (
     sqlc.arg(price_value)::float,         -- Enforcing as BIGINT
     sqlc.arg(price_currency)::varchar(3),  -- Enforcing as VARCHAR(3)
     sqlc.arg(status)::text,                -- Enforcing as TEXT
-    sqlc.arg(product)::text,               -- Enforcing as TEXT
     sqlc.arg(created_by)::varchar(36),     -- Enforcing as VARCHAR(36)
     sqlc.arg(secret_key)::varchar(6),      -- Enforcing as VARCHAR(6)
     sqlc.arg(product_owner)::varchar(36),   -- Enforcing as VARCHAR(36)
@@ -29,7 +26,6 @@ VALUES (
     1, -- Default rating
     '', -- Default review
     sqlc.arg(delivery_address)::text,
-    sqlc.arg(quantity)::bigint,
     sqlc.arg(delivery_fee_amount)::float,
     sqlc.arg(delivery_fee_currency)::varchar(3)
 )
@@ -51,60 +47,80 @@ SELECT * FROM orders WHERE order_number = $1;
 SELECT * FROM orders WHERE secret_key = $1;
 
 -- name: ListUserOrders :many
-SELECT * FROM orders 
-WHERE created_by = $1 AND 
+SELECT 
+  o.*,
+  COALESCE(COUNT(oi.id), 0) AS total_items
+FROM orders o
+LEFT JOIN order_item oi 
+  ON o.order_number = oi.order_number
+WHERE 
+  o.created_by = $1 AND 
   (
     sqlc.arg(included_statuses)::TEXT[] IS NULL OR
     sqlc.arg(included_statuses)::TEXT[] = '{}'::TEXT[] OR
-    status::TEXT = ANY(sqlc.arg(included_statuses))
+    o.status::TEXT = ANY(sqlc.arg(included_statuses))
   ) AND 
   (
     sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
-    OR created_at < sqlc.arg(created_before)::timestamptz
+    OR o.created_at < sqlc.arg(created_before)::timestamptz
   ) AND
   (
-    sqlc.arg(search_key)::TEXT IS NULL OR order_number::TEXT ILIKE '%' || sqlc.arg(search_key) || '%'
+    sqlc.arg(search_key)::TEXT IS NULL 
+    OR o.order_number::TEXT ILIKE '%' || sqlc.arg(search_key) || '%'
   )
-ORDER BY created_at DESC
+GROUP BY o.order_number
+ORDER BY o.created_at DESC
 LIMIT sqlc.arg(count)::int;
 
 -- name: ListFarmerOrders :many
-SELECT * 
-FROM orders 
-WHERE product_owner = $1 AND 
+SELECT 
+  o.*,
+  COALESCE(COUNT(oi.id), 0) AS total_items
+FROM orders o
+LEFT JOIN order_item oi 
+  ON o.order_number = oi.order_number
+WHERE 
+  o.product_owner = $1 AND 
   (
-        sqlc.arg(included_statuses)::TEXT[] IS NULL OR
-        sqlc.arg(included_statuses)::TEXT[] = '{}'::TEXT[] OR
-        status::TEXT  = ANY(sqlc.arg(included_statuses))
+    sqlc.arg(included_statuses)::TEXT[] IS NULL OR
+    sqlc.arg(included_statuses)::TEXT[] = '{}'::TEXT[] OR
+    o.status::TEXT = ANY(sqlc.arg(included_statuses))
   ) AND 
   (
     sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
-    OR created_at < sqlc.arg(created_before)::timestamptz
-  )
-  AND
+    OR o.created_at < sqlc.arg(created_before)::timestamptz
+  ) AND
   (
-    sqlc.arg(search_key)::TEXT IS NULL OR order_number::TEXT ILIKE '%' || sqlc.arg(search_key) || '%'
+    sqlc.arg(search_key)::TEXT IS NULL 
+    OR o.order_number::TEXT ILIKE '%' || sqlc.arg(search_key) || '%'
   )
-ORDER BY created_at DESC
+GROUP BY o.order_number
+ORDER BY o.created_at DESC
 LIMIT sqlc.arg(count)::int;
 
 -- name: ListOrders :many
-SELECT * FROM orders 
+SELECT 
+  o.*,
+  COALESCE(COUNT(oi.id), 0) AS total_items
+FROM orders o
+LEFT JOIN order_item oi 
+  ON o.order_number = oi.order_number
 WHERE 
   (
     sqlc.arg(included_statuses)::TEXT[] IS NULL OR
     sqlc.arg(included_statuses)::TEXT[] = '{}'::TEXT[] OR
-    status::TEXT = ANY(sqlc.arg(included_statuses))
+    o.status::TEXT = ANY(sqlc.arg(included_statuses))
   ) AND 
   (
     sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
-    OR created_at < sqlc.arg(created_before)::timestamptz
+    OR o.created_at < sqlc.arg(created_before)::timestamptz
   ) AND
   (
     sqlc.arg(search_key)::TEXT IS NULL 
-    OR order_number::TEXT ILIKE '%' || sqlc.arg(search_key) || '%'
+    OR o.order_number::TEXT ILIKE '%' || sqlc.arg(search_key) || '%'
   )
-ORDER BY created_at DESC
+GROUP BY o.order_number
+ORDER BY o.created_at DESC
 LIMIT sqlc.arg(count)::int;
 
 -- name: ReviewOrder :exec
@@ -228,3 +244,12 @@ WHERE
   )
 ORDER BY created_at DESC
 LIMIT sqlc.arg(count)::int;
+
+
+-- name: CreateOrderItem :exec
+INSERT INTO order_item (order_number, product, quantity)
+VALUES (
+    sqlc.arg(order_number)::int,
+    sqlc.arg(product)::text,
+    sqlc.arg(quantity)::int
+);

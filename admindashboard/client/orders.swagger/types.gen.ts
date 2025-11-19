@@ -15,8 +15,7 @@ export type OrdersCreateDeliveryPointBody = {
 };
 
 export type OrdersCreateOrderBody = {
-    productId?: string;
-    quantity?: string;
+    orderItems?: Array<ordersgrpcOrderItem>;
     deliveryLocation?: typesPoint;
 };
 
@@ -163,20 +162,20 @@ export type ordersgrpcListUserOrdersResponse = {
 export type ordersgrpcOrder = {
     orderNumber?: string;
     deliveryLocation?: typesPoint;
-    price?: typesAmount;
+    sumTotal?: typesAmount;
     status?: ordersgrpcOrderStatus;
     rating?: number;
     review?: string;
-    product?: string;
+    orderItems?: Array<ordersgrpcOrderItem>;
     createdBy?: string;
     createdAt?: string;
     updatedAt?: string;
     secretKey?: string;
     productOwner?: string;
     payoutPhoneNumber?: string;
-    quantity?: string;
     dispatchedBy?: string;
     deliveryFee?: typesAmount;
+    totalItems?: number;
 };
 
 export type ordersgrpcOrderAuditLog = {
@@ -186,6 +185,11 @@ export type ordersgrpcOrderAuditLog = {
     reason?: string;
     before?: ordersgrpcOrder;
     after?: ordersgrpcOrder;
+};
+
+export type ordersgrpcOrderItem = {
+    productId?: string;
+    quantity?: string;
 };
 
 export type ordersgrpcOrderStatus = 'OrderStatus_UNSPECIFIED' | 'OrderStatus_CREATED' | 'OrderStatus_PAYMENT_SUCCESSFUL' | 'OrderStatus_PAYMENT_FAILED' | 'OrderStatus_IN_TRANSIT' | 'OrderStatus_DELIVERED' | 'OrderStatus_APPROVED' | 'OrderStatus_REJECTED';

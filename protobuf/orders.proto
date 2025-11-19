@@ -28,23 +28,29 @@ enum PaymentStatus {
   PaymentStatus_CANCELED = 4;
 }
 
+message OrderItem {
+  string product_id = 2;
+  int64 quantity = 3;
+}
+
+
 message Order {
   string order_number = 1;
   types.Point delivery_location = 2;
-  types.Amount price = 3;
+  types.Amount sum_total = 3;
   OrderStatus status = 4;
   int32 rating = 5;
   string review = 6;
-  string product = 7;
+  repeated OrderItem order_items = 7;
   string created_by = 8;
   google.protobuf.Timestamp created_at = 9;
   google.protobuf.Timestamp updated_at = 10;
   string secret_key = 11;
   string product_owner = 12;
   string payout_phone_number = 13;
-  int64 quantity = 14;
-  string dispatched_by = 15;
-  types.Amount delivery_fee = 16;
+  string dispatched_by = 14;
+  types.Amount delivery_fee = 15;
+  int32 total_items = 16;
 }
 
 message OrderAuditLog {
@@ -58,9 +64,8 @@ message OrderAuditLog {
 
 message CreateOrderRequest {
   string user_id = 1;
-  string product_id = 2;
-  int64 quantity = 3;
-  types.Point delivery_location = 4;
+  repeated OrderItem order_items = 2;
+  types.Point delivery_location = 3;
 }
 
 message CreateOrderResponse { Order order = 1; }

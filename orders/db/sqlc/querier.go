@@ -17,6 +17,7 @@ type Querier interface {
 	CreateDeliveryPoint(ctx context.Context, arg CreateDeliveryPointParams) (DeliveryPoint, error)
 	CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error)
 	CreateOrderAuditLog(ctx context.Context, arg CreateOrderAuditLogParams) error
+	CreateOrderItem(ctx context.Context, arg CreateOrderItemParams) error
 	CreatePayment(ctx context.Context, arg CreatePaymentParams) (Payment, error)
 	DeleteDeliveryPoint(ctx context.Context, id string) error
 	GetCommissionsByIDsForUpdate(ctx context.Context, commissionIds []string) ([]Commission, error)
@@ -31,12 +32,12 @@ type Querier interface {
 	GetUserOrderBySecretKey(ctx context.Context, secretKey *string) (Order, error)
 	ListCommissionsByReferrer(ctx context.Context, arg ListCommissionsByReferrerParams) ([]Commission, error)
 	ListDeliveryPoints(ctx context.Context, arg ListDeliveryPointsParams) ([]DeliveryPoint, error)
-	ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersParams) ([]Order, error)
+	ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersParams) ([]ListFarmerOrdersRow, error)
 	ListOrderAuditLogs(ctx context.Context, orderNumber int64) ([]OrdersAudit, error)
-	ListOrders(ctx context.Context, arg ListOrdersParams) ([]Order, error)
+	ListOrders(ctx context.Context, arg ListOrdersParams) ([]ListOrdersRow, error)
 	ListPayments(ctx context.Context, arg ListPaymentsParams) ([]Payment, error)
 	ListUniqueCities(ctx context.Context) ([]string, error)
-	ListUserOrders(ctx context.Context, arg ListUserOrdersParams) ([]Order, error)
+	ListUserOrders(ctx context.Context, arg ListUserOrdersParams) ([]ListUserOrdersRow, error)
 	ReviewOrder(ctx context.Context, arg ReviewOrderParams) error
 	UpdateDeliveryPoint(ctx context.Context, arg UpdateDeliveryPointParams) error
 	UpdateOrderStatus(ctx context.Context, arg UpdateOrderStatusParams) error

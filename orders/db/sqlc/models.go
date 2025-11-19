@@ -37,7 +37,6 @@ type Order struct {
 	Status              string             `json:"status"`
 	Rating              pgtype.Numeric     `json:"rating"`
 	Review              string             `json:"review"`
-	Product             *string            `json:"product"`
 	CreatedBy           *string            `json:"created_by"`
 	CreatedAt           pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
@@ -45,10 +44,16 @@ type Order struct {
 	ProductOwner        *string            `json:"product_owner"`
 	PayoutPhoneNumber   *string            `json:"payout_phone_number"`
 	DeliveryAddress     string             `json:"delivery_address"`
-	Quantity            *int64             `json:"quantity"`
 	DispatchedBy        *string            `json:"dispatched_by"`
 	DeliveryFeeAmount   *float64           `json:"delivery_fee_amount"`
 	DeliveryFeeCurrency *string            `json:"delivery_fee_currency"`
+}
+
+type OrderItem struct {
+	ID          int32  `json:"id"`
+	OrderNumber int32  `json:"order_number"`
+	Product     string `json:"product"`
+	Quantity    int32  `json:"quantity"`
 }
 
 type OrdersAudit struct {

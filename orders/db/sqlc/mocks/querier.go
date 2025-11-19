@@ -158,6 +158,20 @@ func (mr *MockQuerierMockRecorder) CreateOrderAuditLog(ctx, arg any) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrderAuditLog", reflect.TypeOf((*MockQuerier)(nil).CreateOrderAuditLog), ctx, arg)
 }
 
+// CreateOrderItem mocks base method.
+func (m *MockQuerier) CreateOrderItem(ctx context.Context, arg sqlc.CreateOrderItemParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateOrderItem", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateOrderItem indicates an expected call of CreateOrderItem.
+func (mr *MockQuerierMockRecorder) CreateOrderItem(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrderItem", reflect.TypeOf((*MockQuerier)(nil).CreateOrderItem), ctx, arg)
+}
+
 // CreatePayment mocks base method.
 func (m *MockQuerier) CreatePayment(ctx context.Context, arg sqlc.CreatePaymentParams) (sqlc.Payment, error) {
 	m.ctrl.T.Helper()
@@ -368,10 +382,10 @@ func (mr *MockQuerierMockRecorder) ListDeliveryPoints(ctx, arg any) *gomock.Call
 }
 
 // ListFarmerOrders mocks base method.
-func (m *MockQuerier) ListFarmerOrders(ctx context.Context, arg sqlc.ListFarmerOrdersParams) ([]sqlc.Order, error) {
+func (m *MockQuerier) ListFarmerOrders(ctx context.Context, arg sqlc.ListFarmerOrdersParams) ([]sqlc.ListFarmerOrdersRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListFarmerOrders", ctx, arg)
-	ret0, _ := ret[0].([]sqlc.Order)
+	ret0, _ := ret[0].([]sqlc.ListFarmerOrdersRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -398,10 +412,10 @@ func (mr *MockQuerierMockRecorder) ListOrderAuditLogs(ctx, orderNumber any) *gom
 }
 
 // ListOrders mocks base method.
-func (m *MockQuerier) ListOrders(ctx context.Context, arg sqlc.ListOrdersParams) ([]sqlc.Order, error) {
+func (m *MockQuerier) ListOrders(ctx context.Context, arg sqlc.ListOrdersParams) ([]sqlc.ListOrdersRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListOrders", ctx, arg)
-	ret0, _ := ret[0].([]sqlc.Order)
+	ret0, _ := ret[0].([]sqlc.ListOrdersRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -443,10 +457,10 @@ func (mr *MockQuerierMockRecorder) ListUniqueCities(ctx any) *gomock.Call {
 }
 
 // ListUserOrders mocks base method.
-func (m *MockQuerier) ListUserOrders(ctx context.Context, arg sqlc.ListUserOrdersParams) ([]sqlc.Order, error) {
+func (m *MockQuerier) ListUserOrders(ctx context.Context, arg sqlc.ListUserOrdersParams) ([]sqlc.ListUserOrdersRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListUserOrders", ctx, arg)
-	ret0, _ := ret[0].([]sqlc.Order)
+	ret0, _ := ret[0].([]sqlc.ListUserOrdersRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

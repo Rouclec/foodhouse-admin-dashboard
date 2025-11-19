@@ -1198,12 +1198,12 @@
     "OrdersCreateOrderBody": {
       "type": "object",
       "properties": {
-        "productId": {
-          "type": "string"
-        },
-        "quantity": {
-          "type": "string",
-          "format": "int64"
+        "orderItems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ordersgrpcOrderItem"
+          }
         },
         "deliveryLocation": {
           "$ref": "#/definitions/typesPoint"
@@ -1624,7 +1624,7 @@
         "deliveryLocation": {
           "$ref": "#/definitions/typesPoint"
         },
-        "price": {
+        "sumTotal": {
           "$ref": "#/definitions/typesAmount"
         },
         "status": {
@@ -1637,8 +1637,12 @@
         "review": {
           "type": "string"
         },
-        "product": {
-          "type": "string"
+        "orderItems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ordersgrpcOrderItem"
+          }
         },
         "createdBy": {
           "type": "string"
@@ -1660,15 +1664,15 @@
         "payoutPhoneNumber": {
           "type": "string"
         },
-        "quantity": {
-          "type": "string",
-          "format": "int64"
-        },
         "dispatchedBy": {
           "type": "string"
         },
         "deliveryFee": {
           "$ref": "#/definitions/typesAmount"
+        },
+        "totalItems": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },
@@ -1693,6 +1697,18 @@
         },
         "after": {
           "$ref": "#/definitions/ordersgrpcOrder"
+        }
+      }
+    },
+    "ordersgrpcOrderItem": {
+      "type": "object",
+      "properties": {
+        "productId": {
+          "type": "string"
+        },
+        "quantity": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
