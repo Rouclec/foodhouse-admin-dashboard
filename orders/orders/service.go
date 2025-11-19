@@ -53,11 +53,11 @@ const (
 
 	TPWPaymentStatusFailed = "FAILED"
 
-	TotalPercentage = 1.10
+	TotalPercentage = 1.00
 
 	RefundPercentage = 0.95
 
-	FarmersPercentage = 0.9
+	FarmersPercentage = 0.00
 
 	// agent commission 30% * 20%.
 	ReferralCommissionPercentage = 0.06
