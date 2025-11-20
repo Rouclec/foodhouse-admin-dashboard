@@ -33,7 +33,6 @@ message OrderItem {
   int64 quantity = 3;
 }
 
-
 message Order {
   string order_number = 1;
   types.Point delivery_location = 2;

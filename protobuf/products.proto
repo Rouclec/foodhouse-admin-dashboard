@@ -218,9 +218,7 @@ message UnPublishProductRequest {
 
 message UnPublishProductResponse {}
 
-message GetDeliveryFeeRequest {
-  repeated string product_ids = 1;
-}
+message GetDeliveryFeeRequest { repeated string product_ids = 1; }
 
 message GetDeliveryFeeResponse {
   types.Amount amount = 1;
@@ -371,5 +369,4 @@ service Products {
   rpc GetProductStats(GetProductStatsRequest) returns (GetProductStatsResponse);
 
   rpc GetDeliveryFee(GetDeliveryFeeRequest) returns (GetDeliveryFeeResponse);
-
 }
