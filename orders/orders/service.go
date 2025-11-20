@@ -899,9 +899,7 @@ func (i *Impl) GetOrderDetails(ctx context.Context, req *ordersgrpc.GetOrderDeta
 		return nil, status.Errorf(codes.Internal, "failed to decode order items: %v", err)
 	}
 
-	// ==========================
-	// 1. ENRICH ORDER ITEMS
-	// ==========================
+	// 1. ENRICH ORDER ITEMS.
 	enrichedItems := make([]ordersgrpc.OrderItem, 0)
 
 	for index, item := range orderItems {
@@ -927,14 +925,12 @@ func (i *Impl) GetOrderDetails(ctx context.Context, req *ordersgrpc.GetOrderDeta
 		})
 	}
 
-	// replace items with enriched version
+	// replace items with enriched version.
 	sqlcOrder.Items = enrichedItems
 
 	i.logger.Debug().Msgf("SQLC order: %v", sqlcOrder)
 
-	// ==========================
-	// 2. AUDIT LOGS
-	// ==========================
+	// 2. AUDIT LOGS.
 	sqlcAuditLogs, err := i.repo.Do().ListOrderAuditLogs(ctx, req.GetOrderNumber())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error fetching audit logs %v", err)
@@ -945,9 +941,7 @@ func (i *Impl) GetOrderDetails(ctx context.Context, req *ordersgrpc.GetOrderDeta
 		return nil, status.Errorf(codes.Internal, "error converting sqlc to proto audit logs %v", err)
 	}
 
-	// ==========================
-	// 3. CONVERT ORDER + ITEMS TO PROTO
-	// ==========================
+	// 3. CONVERT ORDER + ITEMS TO PROTO.
 	protoOrder := converters.SqlcOrderByNumberToProto(sqlcOrder)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error converting order to proto: %v", err)
