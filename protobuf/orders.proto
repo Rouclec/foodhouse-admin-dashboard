@@ -569,7 +569,7 @@ service Orders {
       returns (EstimateDeliveryFeeResponse) {
     option (google.api.http) = {
       post : "/v1/users/{user_id}/orders/estimate-delivery-fee"
-      body: "*"
+      body : "*"
     };
   }
 }
