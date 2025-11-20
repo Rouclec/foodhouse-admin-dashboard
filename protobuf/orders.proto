@@ -568,7 +568,8 @@ service Orders {
   rpc EstimateDeliveryFee(EstimateDeliveryFeeRequest)
       returns (EstimateDeliveryFeeResponse) {
     option (google.api.http) = {
-      get : "/v1/users/{user_id}/orders/estimate-delivery-fee"
+      post : "/v1/users/{user_id}/orders/estimate-delivery-fee"
+      body: "*"
     };
   }
 }

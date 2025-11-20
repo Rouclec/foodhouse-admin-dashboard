@@ -651,7 +651,7 @@
       }
     },
     "/v1/users/{userId}/orders/estimate-delivery-fee": {
-      "get": {
+      "post": {
         "operationId": "Orders_EstimateDeliveryFee",
         "responses": {
           "200": {
@@ -675,24 +675,12 @@
             "type": "string"
           },
           {
-            "name": "deliveryLocation.lon",
-            "in": "query",
-            "required": false,
-            "type": "number",
-            "format": "double"
-          },
-          {
-            "name": "deliveryLocation.lat",
-            "in": "query",
-            "required": false,
-            "type": "number",
-            "format": "double"
-          },
-          {
-            "name": "deliveryLocation.address",
-            "in": "query",
-            "required": false,
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/OrdersEstimateDeliveryFeeBody"
+            }
           }
         ],
         "tags": [
@@ -1202,6 +1190,21 @@
       "properties": {
         "payoutPhoneNumber": {
           "type": "string"
+        }
+      }
+    },
+    "OrdersEstimateDeliveryFeeBody": {
+      "type": "object",
+      "properties": {
+        "orderItems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ordersgrpcOrderItem"
+          }
+        },
+        "deliveryLocation": {
+          "$ref": "#/definitions/typesPoint"
         }
       }
     },
