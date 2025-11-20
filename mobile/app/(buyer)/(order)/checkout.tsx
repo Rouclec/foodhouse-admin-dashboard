@@ -29,40 +29,25 @@ import {
 } from '@/client/orders.swagger/@tanstack/react-query.gen';
 import { Context, ContextType } from '@/app/_layout';
 import { delay } from '@/utils';
+import { CartItem, LocalOrderItem } from '@/utils/types';
 
 export default function Checkout() {
-  type CartItem = {
-    id: string;
-    name: string;
-    price: number;
-    quantity: number;
-    currency: string;
-    image?: string;
-    unitType?: string;
-
-  };
-  type LocalOrderItem = Omit<CartItem, 'quantity'> & {
-    quantity: string;
-  };
-
   const router = useRouter();
 
   const { user, productId, deliveryLocation, setPaymentData, cartItems } =
     useContext(Context) as ContextType & { cartItems: CartItem[] };
 
-  const [totalPrice, setTotalPrice] = useState<number>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [subtotal, setSubtotal] = useState<number>(0);
 
 
-  const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   const currency = cartItems[0]?.currency || 'XAF';
   const [orderItems, setOrderItems] = useState<LocalOrderItem[]>(
     cartItems.map(item => ({
       ...(item as CartItem),
-      quantity: item.quantity.toString(), 
+      quantity: item.quantity.toString(),
     })),
   );
 
@@ -81,7 +66,6 @@ export default function Checkout() {
       } else if (type === 'decrease' && currentQty > 1) {
         newItems[index].quantity = (currentQty - 1).toString();
       } else if (type === 'input' && value !== undefined) {
-        
         const numericValue = value.replace(/[^0-9]/g, '');
         newItems[index].quantity = numericValue || '1';
       }
@@ -91,7 +75,6 @@ export default function Checkout() {
   };
   useEffect(() => {
     const total = orderItems.reduce(
-
       (sum, item) => sum + item.price * (parseInt(item.quantity) || 0),
       0,
     );
@@ -132,7 +115,7 @@ export default function Checkout() {
       query: {
         'deliveryLocation.lat': deliveryLocation?.region.latitude,
         'deliveryLocation.lon': deliveryLocation?.region?.longitude,
-        productId: orderItems[0]?.id, 
+        productId: orderItems[0]?.id,
         quantity: totalQuantityForFee.toString(),
       },
     }),
@@ -146,7 +129,6 @@ export default function Checkout() {
         entity: 'PaymentEntity_ORDER',
         entityId: data?.order?.orderNumber ?? '',
         nextScreen: '/(buyer)/(index)' as RelativePathString,
-       
 
         amount: {
           value:
@@ -311,7 +293,6 @@ export default function Checkout() {
                 {i18n.t('(buyer).(order).checkout.order')} ({cartItems.length}{' '}
                 items)
               </Text>
-
 
               {orderItems.map((item, index) => (
                 <View key={item.id} style={[styles.orderDetailsContainer]}>
