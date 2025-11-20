@@ -62,7 +62,7 @@ const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
   } = useQuery({
     ...productsGetProductOptions({
       path: {
-        productId: item?.product ?? '',
+        productId: item?.orderItems?.[0]?.productId ?? '',
       },
     }),
   });
@@ -91,13 +91,13 @@ const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
         <Text variant="titleMedium">{productData?.product?.name}</Text>
         <View style={styles.centerRow}>
           <Text variant="titleSmall" style={styles.primaryText}>
-            {item?.price?.currencyIsoCode} {item?.price?.currencyIsoCode}{' '}
+            {item?.sumTotal?.currencyIsoCode} {item?.sumTotal?.currencyIsoCode}{' '}
             {formatCurrency(
               (
-                Number(item?.price?.value ?? 0) +
+                Number(item?.sumTotal?.value ?? 0) +
                 Number(item?.deliveryFee?.value ?? 0)
               ).toFixed(2),
-              item?.price?.currencyIsoCode ?? '',
+              item?.sumTotal?.currencyIsoCode ?? '',
             )}
           </Text>
         </View>
@@ -216,7 +216,7 @@ export default function Orders() {
         body: {
           farmerId: selectedOrder?.productOwner ?? '',
           orderId: selectedOrder?.orderNumber ?? '',
-          productId: selectedOrder?.product ?? '',
+          productId: selectedOrder?.orderItems?.[0]?.productId ?? '',
           rating: rating,
           comment: comment,
         },

@@ -116,7 +116,7 @@ export default function Checkout() {
         'deliveryLocation.lat': deliveryLocation?.region.latitude,
         'deliveryLocation.lon': deliveryLocation?.region?.longitude,
         "deliveryLocation.address": deliveryLocation?.address,
-        orderItems
+        productId: orderItems[0]?.id,  
       },
     }),
     enabled: !!productId,
