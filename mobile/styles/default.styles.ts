@@ -112,7 +112,7 @@ export const defaultStyles = StyleSheet.create({
     // position: "absolute",
     alignSelf: 'center',
     bottom: 0,
-    backgroundColor: Colors.primary['500'],
+    
     // backgroundColor: "transparent",
     // height: 96,
     height: 'auto',
@@ -121,6 +121,7 @@ export const defaultStyles = StyleSheet.create({
     paddingHorizontal: 24,
     rowGap: 12,
     paddingTop: 12,
+    marginHorizontal: 8,
   },
   bottomContainerWithContent: {
     paddingTop: 12,

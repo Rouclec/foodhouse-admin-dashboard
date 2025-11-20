@@ -239,12 +239,11 @@ export default function TrackOrder() {
                   </Text>
                   <Text variant="titleSmall" style={styles.text20}>
                     {item.productName} - {item.quantity}{' '}
-                    {/* {productData?.product?.unitType?.replace('per_', '')} */}
-                    {/* {parseInt(orderDetails?.order?.orderItems?.[0]?.quantity ?? '') > 1 && 's'} */}
+                    
                   </Text>
                   <View style={styles.centerRow}>
                     <Text variant="titleSmall" style={styles.primaryText}>
-                      {/* {item?.productUnitPrice?.currencyIsoCode}{''} */}
+                     
                       {formatCurrency(
                         (
                           Number(item?.productUnitPrice?.value ?? 0) +

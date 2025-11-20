@@ -19,16 +19,16 @@ export const trackOrderStyles = StyleSheet.create({
     alignItems: 'center',
   },
   primaryText: { fontSize: 16, color: Colors.primary[500] },
-  flatListContainer: {
-    marginVertical: 24,
-    height: 64,
-    alignSelf: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  // flatListContainer: {
+  //   marginVertical: 12,
+  //   height: 64,
+  //   alignSelf: 'center',
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  // },
   flatListIconContainer: {
     alignItems: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: 12,
     rowGap: 6,
   },
   relativeContainer: {
