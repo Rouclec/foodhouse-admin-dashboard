@@ -37,3 +37,16 @@ jobs:
     uses: ./.github/workflows/deploy_single_environment.yaml
     with:
       envId: 'testing'
+
+  notifyOnDeploymentFailure:
+    if: failure()
+    needs: [deploy-dev, deploy-testing]
+    runs-on: ubuntu-latest
+    steps:
+        - name: Send notification to chats
+          uses: fjogeleit/http-request-action@v1
+          with:
+              url: "${{secrets.GOOGLE_CHAT_WEBHOOK_URL}}"
+              method: "POST"
+              customHeaders: '{"Content-Type": "application/json"}'
+              data: '{ "text": "A recent deployment has failed in the ${{github.repository}} application.\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Deployment Details>" }'

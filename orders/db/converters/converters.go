@@ -7,6 +7,7 @@ import (
 	"github.com/foodhouse/foodhouseapp/grpc/go/ordersgrpc"
 	"github.com/foodhouse/foodhouseapp/grpc/go/types"
 	"github.com/foodhouse/foodhouseapp/orders/db/sqlc"
+	"github.com/rs/zerolog"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -94,7 +95,7 @@ func SqlcOrderBySecretKeyToProto(order sqlc.GetUserOrderBySecretKeyRow) *ordersg
 	}
 }
 
-func SqlcOrderByNumberToProto(order sqlc.GetOrderByOrderNumberRow) *ordersgrpc.Order {
+func SqlcOrderByNumberToProto(order sqlc.GetOrderByOrderNumberRow, logger zerolog.Logger) *ordersgrpc.Order {
 
 	// Convert price
 	var price *types.Amount
@@ -124,7 +125,7 @@ func SqlcOrderByNumberToProto(order sqlc.GetOrderByOrderNumberRow) *ordersgrpc.O
 		statusEnum = ordersgrpc.OrderStatus_OrderStatus_REJECTED
 	}
 
-	fmt.Printf("order items: ", order.Items)
+	logger.Debug().Msgf("order items: %v", order.Items)
 
 	// Convert items JSON -> []*ordersgrpc.OrderItem
 	var items []*ordersgrpc.OrderItem

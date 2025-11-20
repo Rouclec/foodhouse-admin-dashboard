@@ -269,7 +269,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 			return nil, status.Errorf(codes.Internal, "error getting order for payment with ref %v, why: %v", payment.ID, err)
 		}
 
-		beforeBytes, err := protojson.Marshal(converters.SqlcOrderByNumberToProto(order))
+		beforeBytes, err := protojson.Marshal(converters.SqlcOrderByNumberToProto(order, i.logger))
 
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
@@ -316,7 +316,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 			return nil, status.Errorf(codes.Internal, "error getting updated order %v", err)
 		}
 
-		afterBytes, err := protojson.Marshal(converters.SqlcOrderByNumberToProto(updatedOrder))
+		afterBytes, err := protojson.Marshal(converters.SqlcOrderByNumberToProto(updatedOrder, i.logger))
 
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
@@ -693,7 +693,7 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 		return nil, status.Errorf(codes.Internal, "error getting order %v", err)
 	}
 
-	beforeBytes, err := protojson.Marshal(converters.SqlcOrderByNumberToProto(order))
+	beforeBytes, err := protojson.Marshal(converters.SqlcOrderByNumberToProto(order, i.logger))
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
@@ -728,7 +728,7 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 		return nil, status.Errorf(codes.Internal, "error getting updated order %v", err)
 	}
 
-	afterBytes, err := protojson.Marshal(converters.SqlcOrderByNumberToProto(updatedOrder))
+	afterBytes, err := protojson.Marshal(converters.SqlcOrderByNumberToProto(updatedOrder, i.logger))
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
@@ -942,7 +942,7 @@ func (i *Impl) GetOrderDetails(ctx context.Context, req *ordersgrpc.GetOrderDeta
 	}
 
 	// 3. CONVERT ORDER + ITEMS TO PROTO.
-	protoOrder := converters.SqlcOrderByNumberToProto(sqlcOrder)
+	protoOrder := converters.SqlcOrderByNumberToProto(sqlcOrder, i.logger)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error converting order to proto: %v", err)
 	}
@@ -1246,7 +1246,7 @@ func (i *Impl) ApproveOrder(ctx context.Context, req *ordersgrpc.ApproveOrderReq
 	// 	return nil, status.Error(codes.PermissionDenied, "user does not have permission to approve this order")
 	// }
 
-	beforeBytes, err := protojson.Marshal(converters.SqlcOrderByNumberToProto(order))
+	beforeBytes, err := protojson.Marshal(converters.SqlcOrderByNumberToProto(order, i.logger))
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
 	}
@@ -1266,7 +1266,7 @@ func (i *Impl) ApproveOrder(ctx context.Context, req *ordersgrpc.ApproveOrderReq
 		return nil, status.Errorf(codes.Internal, "error getting updated order %v", err)
 	}
 
-	afterBytes, err := protojson.Marshal(converters.SqlcOrderByNumberToProto(updatedOrder))
+	afterBytes, err := protojson.Marshal(converters.SqlcOrderByNumberToProto(updatedOrder, i.logger))
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
@@ -1775,7 +1775,7 @@ func (i *Impl) RejectOrder(ctx context.Context,
 	// 	return nil, status.Error(codes.PermissionDenied, "user does not have permission to approve this order")
 	// }
 
-	beforeBytes, err := protojson.Marshal(converters.SqlcOrderByNumberToProto(order))
+	beforeBytes, err := protojson.Marshal(converters.SqlcOrderByNumberToProto(order, i.logger))
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
 	}
@@ -1844,7 +1844,7 @@ func (i *Impl) RejectOrder(ctx context.Context,
 		return nil, status.Errorf(codes.Internal, "error getting updated order %v", err)
 	}
 
-	afterBytes, err := protojson.Marshal(converters.SqlcOrderByNumberToProto(updatedOrder))
+	afterBytes, err := protojson.Marshal(converters.SqlcOrderByNumberToProto(updatedOrder, i.logger))
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to marshal proto order: %v", err)
