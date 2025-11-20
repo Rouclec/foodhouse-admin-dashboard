@@ -106,6 +106,7 @@ export const defaultStyles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     paddingBottom: 32,
+    backgroundColor: 'blue',
   },
   bottomButtonContainer: {
     // position: "absolute",

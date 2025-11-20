@@ -13,6 +13,7 @@ export const trackOrderStyles = StyleSheet.create({
     flexGrow: 1,
     overflow: "hidden",
     rowGap: 16,
+    backgroundColor: 'red'
   },
   centerRow: {
     flexDirection: "row",
@@ -25,6 +26,7 @@ export const trackOrderStyles = StyleSheet.create({
     alignSelf: "center",
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: Colors.primary["50"],
   },
   flatListIconContainer: {
     alignItems: "center",
@@ -45,7 +47,7 @@ export const trackOrderStyles = StyleSheet.create({
     borderColor: Colors.primary[500],
   },
   contentContainer: {
-    borderTopColor: Colors.grey["bg"],
+    borderTopColor: Colors.primary["500"],
     borderTopWidth: 1,
     paddingVertical: 24,
     rowGap: 24,

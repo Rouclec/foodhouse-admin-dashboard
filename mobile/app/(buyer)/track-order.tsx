@@ -52,18 +52,18 @@ export default function TrackOrder() {
     enabled: !!orderNumber,
   });
 
-  const {
-    isLoading: isProductLoading,
-    data: productData,
-    isError: errorLoadingProduct,
-  } = useQuery({
-    ...productsGetProductOptions({
-      path: {
-        productId: orderDetails?.order?.orderItems?.[0]?.productId ?? '',
-      },
-    }),
-    enabled: !!orderDetails?.order,
-  });
+  // const {
+  //   isLoading: isProductLoading,
+  //   data: productData,
+  //   isError: errorLoadingProduct,
+  // } = useQuery({
+  //   ...productsGetProductOptions({
+  //     path: {
+  //       productId: orderDetails?.order?.orderItems?.[0]?.productId ?? '',
+  //     },
+  //   }),
+  //   enabled: !!orderDetails?.order,
+  // });
 
   const handleConfirmDelivery = async () => {
     try {
@@ -126,7 +126,7 @@ export default function TrackOrder() {
 
   const insets = useSafeAreaInsets();
 
-  if (isOrderDetailsLoading || isProductLoading) {
+  if (isOrderDetailsLoading ) {
     return (
       <>
         <KeyboardAvoidingView
@@ -166,7 +166,7 @@ export default function TrackOrder() {
     );
   }
 
-  if (errorLoadingOrder || errorLoadingProduct) {
+  if (errorLoadingOrder) {
     return (
       <>
         <KeyboardAvoidingView
@@ -219,9 +219,15 @@ export default function TrackOrder() {
             </Text>
             <View />
           </Appbar.Header>
-          <View style={defaultStyles.card}>
+           <ScrollView
+            contentContainerStyle={defaultStyles.scrollContainer}
+            showsVerticalScrollIndicator={false}
+            nestedScrollEnabled={true}
+            keyboardShouldPersistTaps="handled">
+          {orderDetails?.order?.orderItems?.map((item, index) => (
+            <View key={index} style={[defaultStyles.card]}>
             <Image
-              source={{ uri: productData?.product?.image }}
+              source={{ uri: item?.productImage }}
               style={styles.productImage}
             />
             <View style={styles.orderDetailsContainer}>
@@ -232,9 +238,9 @@ export default function TrackOrder() {
                 </Text>
               </Text>
               <Text variant="titleSmall" style={styles.text20}>
-                {productData?.product?.name} - {orderDetails?.order?.orderItems?.[0]?.quantity}{' '}
-                {productData?.product?.unitType?.replace('per_', '')}
-                {parseInt(orderDetails?.order?.orderItems?.[0]?.quantity ?? '') > 1 && 's'}
+                {item.productName} - {item.quantity}{' '}
+                {/* {productData?.product?.unitType?.replace('per_', '')} */}
+                {/* {parseInt(orderDetails?.order?.orderItems?.[0]?.quantity ?? '') > 1 && 's'} */}
               </Text>
               <View style={styles.centerRow}>
                 <Text variant="titleSmall" style={styles.primaryText}>
@@ -250,6 +256,7 @@ export default function TrackOrder() {
               </View>
             </View>
           </View>
+          ))}
           <View style={styles.flatListContainer}>
             <FlatList
               horizontal
@@ -314,6 +321,8 @@ export default function TrackOrder() {
               }}
             />
           </View>
+          </ScrollView>
+
           <ScrollView
             contentContainerStyle={defaultStyles.scrollContainer}
             showsVerticalScrollIndicator={false}
