@@ -741,3 +741,20 @@ func (i *Impl) UnPublishProduct(ctx context.Context, req *productsgrpc.UnPublish
 
 	return &productsgrpc.UnPublishProductResponse{}, nil
 }
+
+// GetDeliveryFee implements productsgrpc.ProductsServer.
+func (i *Impl) GetDeliveryFee(ctx context.Context, req *productsgrpc.GetDeliveryFeeRequest) (*productsgrpc.GetDeliveryFeeResponse, error) {
+
+	maxFee, err := i.repo.Do().GetMaxDeliveryFeeByProductIds(ctx, req.GetProductIds())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error fetching max delivery fee: %v", err)
+	}
+
+	return &productsgrpc.GetDeliveryFeeResponse{
+		Amount: &types.Amount{
+			CurrencyIsoCode: *maxFee.DeliveryFeeCurrency,
+			Value:           *maxFee.DeliveryFeeAmount,
+		},
+		FarmerId: *maxFee.CreatedBy,
+	}, nil
+}

@@ -386,9 +386,8 @@ message ListTotalCommissionAmountByReferrerResponse {
 
 message EstimateDeliveryFeeRequest {
   string user_id = 1;
-  string product_id = 2;
+  repeated OrderItem order_items = 2;
   types.Point delivery_location = 3;
-  int64 quantity = 4;
 }
 
 message EstimateDeliveryFeeResponse { types.Amount estimated_delivery_fee = 1; }

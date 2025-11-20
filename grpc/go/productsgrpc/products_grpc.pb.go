@@ -41,6 +41,7 @@ const (
 	Products_ListPriceTypes_FullMethodName     = "/productsgrpc.Products/ListPriceTypes"
 	Products_SumProductAmounts_FullMethodName  = "/productsgrpc.Products/SumProductAmounts"
 	Products_GetProductStats_FullMethodName    = "/productsgrpc.Products/GetProductStats"
+	Products_GetDeliveryFee_FullMethodName     = "/productsgrpc.Products/GetDeliveryFee"
 )
 
 // ProductsClient is the client API for Products service.
@@ -69,6 +70,7 @@ type ProductsClient interface {
 	ListPriceTypes(ctx context.Context, in *ListPriceTypesRequest, opts ...grpc.CallOption) (*ListPriceTypesResponse, error)
 	SumProductAmounts(ctx context.Context, in *SumProductAmountsRequest, opts ...grpc.CallOption) (*SumProductAmountsResponse, error)
 	GetProductStats(ctx context.Context, in *GetProductStatsRequest, opts ...grpc.CallOption) (*GetProductStatsResponse, error)
+	GetDeliveryFee(ctx context.Context, in *GetDeliveryFeeRequest, opts ...grpc.CallOption) (*GetDeliveryFeeResponse, error)
 }
 
 type productsClient struct {
@@ -299,6 +301,16 @@ func (c *productsClient) GetProductStats(ctx context.Context, in *GetProductStat
 	return out, nil
 }
 
+func (c *productsClient) GetDeliveryFee(ctx context.Context, in *GetDeliveryFeeRequest, opts ...grpc.CallOption) (*GetDeliveryFeeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetDeliveryFeeResponse)
+	err := c.cc.Invoke(ctx, Products_GetDeliveryFee_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProductsServer is the server API for Products service.
 // All implementations must embed UnimplementedProductsServer
 // for forward compatibility.
@@ -325,6 +337,7 @@ type ProductsServer interface {
 	ListPriceTypes(context.Context, *ListPriceTypesRequest) (*ListPriceTypesResponse, error)
 	SumProductAmounts(context.Context, *SumProductAmountsRequest) (*SumProductAmountsResponse, error)
 	GetProductStats(context.Context, *GetProductStatsRequest) (*GetProductStatsResponse, error)
+	GetDeliveryFee(context.Context, *GetDeliveryFeeRequest) (*GetDeliveryFeeResponse, error)
 	mustEmbedUnimplementedProductsServer()
 }
 
@@ -400,6 +413,9 @@ func (UnimplementedProductsServer) SumProductAmounts(context.Context, *SumProduc
 }
 func (UnimplementedProductsServer) GetProductStats(context.Context, *GetProductStatsRequest) (*GetProductStatsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProductStats not implemented")
+}
+func (UnimplementedProductsServer) GetDeliveryFee(context.Context, *GetDeliveryFeeRequest) (*GetDeliveryFeeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDeliveryFee not implemented")
 }
 func (UnimplementedProductsServer) mustEmbedUnimplementedProductsServer() {}
 func (UnimplementedProductsServer) testEmbeddedByValue()                  {}
@@ -818,6 +834,24 @@ func _Products_GetProductStats_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Products_GetDeliveryFee_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDeliveryFeeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProductsServer).GetDeliveryFee(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Products_GetDeliveryFee_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProductsServer).GetDeliveryFee(ctx, req.(*GetDeliveryFeeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Products_ServiceDesc is the grpc.ServiceDesc for Products service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -912,6 +946,10 @@ var Products_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetProductStats",
 			Handler:    _Products_GetProductStats_Handler,
+		},
+		{
+			MethodName: "GetDeliveryFee",
+			Handler:    _Products_GetDeliveryFee_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

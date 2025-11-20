@@ -211,6 +211,27 @@ func (q *Queries) GetCategory(ctx context.Context, id string) (Category, error) 
 	return i, err
 }
 
+const getMaxDeliveryFeeByProductIds = `-- name: GetMaxDeliveryFeeByProductIds :one
+SELECT delivery_fee_amount, delivery_fee_currency, created_by
+FROM products
+WHERE id = ANY($1::text[])
+ORDER BY delivery_fee_amount DESC
+LIMIT 1
+`
+
+type GetMaxDeliveryFeeByProductIdsRow struct {
+	DeliveryFeeAmount   *float64 `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency *string  `json:"delivery_fee_currency"`
+	CreatedBy           *string  `json:"created_by"`
+}
+
+func (q *Queries) GetMaxDeliveryFeeByProductIds(ctx context.Context, dollar_1 []string) (GetMaxDeliveryFeeByProductIdsRow, error) {
+	row := q.db.QueryRow(ctx, getMaxDeliveryFeeByProductIds, dollar_1)
+	var i GetMaxDeliveryFeeByProductIdsRow
+	err := row.Scan(&i.DeliveryFeeAmount, &i.DeliveryFeeCurrency, &i.CreatedBy)
+	return i, err
+}
+
 const getPriceTypeById = `-- name: GetPriceTypeById :one
 SELECT id, name, slug, category_id, delivery_fee_amount, delivery_fee_currency FROM price_types where id = $1
 `

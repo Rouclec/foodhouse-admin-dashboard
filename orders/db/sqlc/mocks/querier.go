@@ -217,10 +217,10 @@ func (mr *MockQuerierMockRecorder) GetCommissionsByIDsForUpdate(ctx, commissionI
 }
 
 // GetOrderByOrderNumber mocks base method.
-func (m *MockQuerier) GetOrderByOrderNumber(ctx context.Context, orderNumber int64) (sqlc.Order, error) {
+func (m *MockQuerier) GetOrderByOrderNumber(ctx context.Context, orderNumber int64) (sqlc.GetOrderByOrderNumberRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetOrderByOrderNumber", ctx, orderNumber)
-	ret0, _ := ret[0].(sqlc.Order)
+	ret0, _ := ret[0].(sqlc.GetOrderByOrderNumberRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -229,6 +229,21 @@ func (m *MockQuerier) GetOrderByOrderNumber(ctx context.Context, orderNumber int
 func (mr *MockQuerierMockRecorder) GetOrderByOrderNumber(ctx, orderNumber any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderByOrderNumber", reflect.TypeOf((*MockQuerier)(nil).GetOrderByOrderNumber), ctx, orderNumber)
+}
+
+// GetOrderItemsByOrderNumber mocks base method.
+func (m *MockQuerier) GetOrderItemsByOrderNumber(ctx context.Context, orderNumber int32) ([]sqlc.OrderItem, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrderItemsByOrderNumber", ctx, orderNumber)
+	ret0, _ := ret[0].([]sqlc.OrderItem)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrderItemsByOrderNumber indicates an expected call of GetOrderItemsByOrderNumber.
+func (mr *MockQuerierMockRecorder) GetOrderItemsByOrderNumber(ctx, orderNumber any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderItemsByOrderNumber", reflect.TypeOf((*MockQuerier)(nil).GetOrderItemsByOrderNumber), ctx, orderNumber)
 }
 
 // GetOrderStatsBetweenDates mocks base method.
@@ -337,10 +352,10 @@ func (mr *MockQuerierMockRecorder) GetPaymentStatsBetweenDates(ctx, arg any) *go
 }
 
 // GetUserOrderBySecretKey mocks base method.
-func (m *MockQuerier) GetUserOrderBySecretKey(ctx context.Context, secretKey *string) (sqlc.Order, error) {
+func (m *MockQuerier) GetUserOrderBySecretKey(ctx context.Context, secretKey *string) (sqlc.GetUserOrderBySecretKeyRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserOrderBySecretKey", ctx, secretKey)
-	ret0, _ := ret[0].(sqlc.Order)
+	ret0, _ := ret[0].(sqlc.GetUserOrderBySecretKeyRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

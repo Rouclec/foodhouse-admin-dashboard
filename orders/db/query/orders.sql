@@ -41,85 +41,133 @@ WHERE order_number = $1;
 
 
 -- name: GetOrderByOrderNumber :one
-SELECT * FROM orders WHERE order_number = $1;
+SELECT 
+    o.*,
+    COALESCE(
+        JSON_AGG(
+            JSON_BUILD_OBJECT(
+                'product_id', oi.product,
+                'quantity', oi.quantity
+            )
+        ) FILTER (WHERE oi.id IS NOT NULL),
+        '[]'
+    ) AS items
+FROM orders o
+LEFT JOIN order_item oi
+    ON o.order_number = oi.order_number
+WHERE o.order_number = $1
+GROUP BY o.order_number;
 
 -- name: GetUserOrderBySecretKey :one
-SELECT * FROM orders WHERE secret_key = $1;
+SELECT 
+    o.*,
+    COALESCE(
+        JSON_AGG(
+            JSON_BUILD_OBJECT(
+                'product_id', oi.product,
+                'quantity', oi.quantity
+            )
+        ) FILTER (WHERE oi.id IS NOT NULL),
+        '[]'
+    ) AS items
+FROM orders o
+LEFT JOIN order_item oi
+    ON o.order_number = oi.order_number
+WHERE o.secret_key = $1
+GROUP BY o.order_number;
 
 -- name: ListUserOrders :many
 SELECT 
   o.*,
-  COALESCE(COUNT(oi.id), 0) AS total_items
+  COALESCE(oi_count.total_items, 0)::int AS total_items,
+  oi_preview.product AS preview_product,
+  oi_preview.quantity AS preview_quantity
 FROM orders o
-LEFT JOIN order_item oi 
-  ON o.order_number = oi.order_number
+LEFT JOIN LATERAL (
+    SELECT product, quantity
+    FROM order_item
+    WHERE order_number = o.order_number
+    LIMIT 1
+) AS oi_preview ON TRUE
+LEFT JOIN (
+    SELECT order_number, COUNT(*) AS total_items
+    FROM order_item
+    GROUP BY order_number
+) AS oi_count ON oi_count.order_number = o.order_number
 WHERE 
-  o.created_by = $1 AND 
-  (
+  o.created_by = $1
+  AND (
     sqlc.arg(included_statuses)::TEXT[] IS NULL OR
     sqlc.arg(included_statuses)::TEXT[] = '{}'::TEXT[] OR
     o.status::TEXT = ANY(sqlc.arg(included_statuses))
-  ) AND 
-  (
-    sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
-    OR o.created_at < sqlc.arg(created_before)::timestamptz
-  ) AND
-  (
-    sqlc.arg(search_key)::TEXT IS NULL 
-    OR o.order_number::TEXT ILIKE '%' || sqlc.arg(search_key) || '%'
   )
-GROUP BY o.order_number
+  AND (
+    sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR
+    o.created_at < sqlc.arg(created_before)::timestamptz
+  )
+  AND (
+    sqlc.arg(search_key)::TEXT IS NULL OR
+    o.order_number::TEXT ILIKE '%' || sqlc.arg(search_key) || '%'
+  )
 ORDER BY o.created_at DESC
 LIMIT sqlc.arg(count)::int;
 
 -- name: ListFarmerOrders :many
 SELECT 
-  o.*,
-  COALESCE(COUNT(oi.id), 0) AS total_items
+    o.*,
+    COALESCE(oi_count.total_items, 0)::int AS total_items,
+    oi_preview.product AS preview_product,
+    oi_preview.quantity AS preview_quantity
 FROM orders o
-LEFT JOIN order_item oi 
-  ON o.order_number = oi.order_number
+LEFT JOIN LATERAL (
+    SELECT product, quantity
+    FROM order_item
+    WHERE order_number = o.order_number
+    LIMIT 1
+) AS oi_preview ON TRUE
+LEFT JOIN (
+    SELECT order_number, COUNT(*) AS total_items
+    FROM order_item
+    GROUP BY order_number
+) AS oi_count ON oi_count.order_number = o.order_number
 WHERE 
-  o.product_owner = $1 AND 
-  (
-    sqlc.arg(included_statuses)::TEXT[] IS NULL OR
-    sqlc.arg(included_statuses)::TEXT[] = '{}'::TEXT[] OR
-    o.status::TEXT = ANY(sqlc.arg(included_statuses))
-  ) AND 
-  (
-    sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
-    OR o.created_at < sqlc.arg(created_before)::timestamptz
-  ) AND
-  (
-    sqlc.arg(search_key)::TEXT IS NULL 
-    OR o.order_number::TEXT ILIKE '%' || sqlc.arg(search_key) || '%'
-  )
-GROUP BY o.order_number
+    o.product_owner = $1
+    AND (sqlc.arg(included_statuses)::TEXT[] IS NULL OR
+         sqlc.arg(included_statuses)::TEXT[] = '{}'::TEXT[] OR
+         o.status::TEXT = ANY(sqlc.arg(included_statuses)))
+    AND (sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+         OR o.created_at < sqlc.arg(created_before)::timestamptz)
+    AND (sqlc.arg(search_key)::TEXT IS NULL 
+         OR o.order_number::TEXT ILIKE '%' || sqlc.arg(search_key) || '%')
 ORDER BY o.created_at DESC
 LIMIT sqlc.arg(count)::int;
 
 -- name: ListOrders :many
 SELECT 
-  o.*,
-  COALESCE(COUNT(oi.id), 0) AS total_items
+    o.*,
+    COALESCE(oi_count.total_items, 0)::int AS total_items,
+    oi_preview.product AS preview_product,
+    oi_preview.quantity AS preview_quantity
 FROM orders o
-LEFT JOIN order_item oi 
-  ON o.order_number = oi.order_number
+LEFT JOIN LATERAL (
+    SELECT product, quantity
+    FROM order_item
+    WHERE order_number = o.order_number
+    LIMIT 1
+) AS oi_preview ON TRUE
+LEFT JOIN (
+    SELECT order_number, COUNT(*) AS total_items
+    FROM order_item
+    GROUP BY order_number
+) AS oi_count ON oi_count.order_number = o.order_number
 WHERE 
-  (
-    sqlc.arg(included_statuses)::TEXT[] IS NULL OR
-    sqlc.arg(included_statuses)::TEXT[] = '{}'::TEXT[] OR
-    o.status::TEXT = ANY(sqlc.arg(included_statuses))
-  ) AND 
-  (
-    sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
-    OR o.created_at < sqlc.arg(created_before)::timestamptz
-  ) AND
-  (
-    sqlc.arg(search_key)::TEXT IS NULL 
-    OR o.order_number::TEXT ILIKE '%' || sqlc.arg(search_key) || '%'
-  )
-GROUP BY o.order_number
+    (sqlc.arg(included_statuses)::TEXT[] IS NULL OR
+     sqlc.arg(included_statuses)::TEXT[] = '{}'::TEXT[] OR
+     o.status::TEXT = ANY(sqlc.arg(included_statuses)))
+  AND (sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz 
+       OR o.created_at < sqlc.arg(created_before)::timestamptz)
+  AND (sqlc.arg(search_key)::TEXT IS NULL 
+       OR o.order_number::TEXT ILIKE '%' || sqlc.arg(search_key) || '%')
 ORDER BY o.created_at DESC
 LIMIT sqlc.arg(count)::int;
 
@@ -159,45 +207,58 @@ UPDATE payments SET status = $2, updated_at = now() WHERE id = $1;
 
 -- name: GetOrdersGroupedByDay :many
 SELECT 
-  DATE_TRUNC('day', updated_at)::timestamptz AS group_date,
-  JSON_AGG(JSON_BUILD_OBJECT(
-    'product_id', product,
-    'quantity', quantity
-  )) AS products
-FROM orders
-WHERE product_owner = $1
-  AND status = $2
-  AND updated_at BETWEEN $3 AND $4
+  DATE_TRUNC('day', o.updated_at)::timestamptz AS group_date,
+  JSON_AGG(
+    JSON_BUILD_OBJECT(
+      'product_id', oi.product,
+      'quantity', oi.quantity
+    )
+  ) AS products
+FROM orders o
+JOIN order_item oi
+  ON o.order_number = oi.order_number
+WHERE o.product_owner = $1
+  AND o.status = $2
+  AND o.updated_at BETWEEN $3 AND $4
 GROUP BY group_date
 ORDER BY group_date;
 
 -- name: GetOrdersGroupedByMonth :many
 SELECT 
-  DATE_TRUNC('month', updated_at)::timestamptz AS group_date,
-  JSON_AGG(JSON_BUILD_OBJECT(
-    'product_id', product,
-    'quantity', quantity
-  )) AS products
-FROM orders
-WHERE product_owner = $1
-  AND status = $2
-  AND updated_at BETWEEN $3 AND $4
+  DATE_TRUNC('month', o.updated_at)::timestamptz AS group_date,
+  JSON_AGG(
+    JSON_BUILD_OBJECT(
+      'product_id', oi.product,
+      'quantity', oi.quantity
+    )
+  ) AS products
+FROM orders o
+JOIN order_item oi
+  ON o.order_number = oi.order_number
+WHERE o.product_owner = $1
+  AND o.status = $2
+  AND o.updated_at BETWEEN $3 AND $4
 GROUP BY group_date
 ORDER BY group_date;
 
 -- name: GetOrdersGroupedByYear :many
 SELECT 
-  DATE_TRUNC('year', updated_at)::timestamptz AS group_date,
-  JSON_AGG(JSON_BUILD_OBJECT(
-    'product_id', product,
-    'quantity', quantity
-  )) AS products
-FROM orders
-WHERE product_owner = $1
-  AND status = $2
-  AND updated_at BETWEEN $3 AND $4
+  DATE_TRUNC('year', o.updated_at)::timestamptz AS group_date,
+  JSON_AGG(
+    JSON_BUILD_OBJECT(
+      'product_id', oi.product,
+      'quantity', oi.quantity
+    )
+  ) AS products
+FROM orders o
+JOIN order_item oi
+  ON o.order_number = oi.order_number
+WHERE o.product_owner = $1
+  AND o.status = $2
+  AND o.updated_at BETWEEN $3 AND $4
 GROUP BY group_date
 ORDER BY group_date;
+
 
 -- name: GetOrderStatsBetweenDates :one
 SELECT 
@@ -253,3 +314,8 @@ VALUES (
     sqlc.arg(product)::text,
     sqlc.arg(quantity)::int
 );
+
+-- name: GetOrderItemsByOrderNumber :many
+SELECT * FROM order_item
+WHERE order_number = $1
+ORDER BY id;

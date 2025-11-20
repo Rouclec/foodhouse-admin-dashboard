@@ -675,12 +675,6 @@
             "type": "string"
           },
           {
-            "name": "productId",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
             "name": "deliveryLocation.lon",
             "in": "query",
             "required": false,
@@ -699,13 +693,6 @@
             "in": "query",
             "required": false,
             "type": "string"
-          },
-          {
-            "name": "quantity",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
           }
         ],
         "tags": [

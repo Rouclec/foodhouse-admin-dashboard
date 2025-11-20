@@ -21,7 +21,8 @@ type Querier interface {
 	CreatePayment(ctx context.Context, arg CreatePaymentParams) (Payment, error)
 	DeleteDeliveryPoint(ctx context.Context, id string) error
 	GetCommissionsByIDsForUpdate(ctx context.Context, commissionIds []string) ([]Commission, error)
-	GetOrderByOrderNumber(ctx context.Context, orderNumber int64) (Order, error)
+	GetOrderByOrderNumber(ctx context.Context, orderNumber int64) (GetOrderByOrderNumberRow, error)
+	GetOrderItemsByOrderNumber(ctx context.Context, orderNumber int32) ([]OrderItem, error)
 	GetOrderStatsBetweenDates(ctx context.Context, arg GetOrderStatsBetweenDatesParams) (int64, error)
 	GetOrdersGroupedByDay(ctx context.Context, arg GetOrdersGroupedByDayParams) ([]GetOrdersGroupedByDayRow, error)
 	GetOrdersGroupedByMonth(ctx context.Context, arg GetOrdersGroupedByMonthParams) ([]GetOrdersGroupedByMonthRow, error)
@@ -29,7 +30,7 @@ type Querier interface {
 	GetPaymentByEntity(ctx context.Context, arg GetPaymentByEntityParams) (Payment, error)
 	GetPaymentById(ctx context.Context, id string) (Payment, error)
 	GetPaymentStatsBetweenDates(ctx context.Context, arg GetPaymentStatsBetweenDatesParams) (float64, error)
-	GetUserOrderBySecretKey(ctx context.Context, secretKey *string) (Order, error)
+	GetUserOrderBySecretKey(ctx context.Context, secretKey *string) (GetUserOrderBySecretKeyRow, error)
 	ListCommissionsByReferrer(ctx context.Context, arg ListCommissionsByReferrerParams) ([]Commission, error)
 	ListDeliveryPoints(ctx context.Context, arg ListDeliveryPointsParams) ([]DeliveryPoint, error)
 	ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersParams) ([]ListFarmerOrdersRow, error)

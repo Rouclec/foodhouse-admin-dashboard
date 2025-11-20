@@ -218,6 +218,15 @@ message UnPublishProductRequest {
 
 message UnPublishProductResponse {}
 
+message GetDeliveryFeeRequest {
+  repeated string product_ids = 1;
+}
+
+message GetDeliveryFeeResponse {
+  types.Amount amount = 1;
+  string farmer_id = 2;
+}
+
 service Products {
 
   rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryResponse) {
@@ -360,4 +369,7 @@ service Products {
       returns (SumProductAmountsResponse);
 
   rpc GetProductStats(GetProductStatsRequest) returns (GetProductStatsResponse);
+
+  rpc GetDeliveryFee(GetDeliveryFeeRequest) returns (GetDeliveryFeeResponse);
+
 }

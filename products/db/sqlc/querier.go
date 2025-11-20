@@ -18,6 +18,7 @@ type Querier interface {
 	DeleteProduct(ctx context.Context, id string) error
 	DeleteProductName(ctx context.Context, name string) error
 	GetCategory(ctx context.Context, id string) (Category, error)
+	GetMaxDeliveryFeeByProductIds(ctx context.Context, dollar_1 []string) (GetMaxDeliveryFeeByProductIdsRow, error)
 	GetPriceTypeById(ctx context.Context, id string) (PriceType, error)
 	GetProduct(ctx context.Context, id string) (GetProductRow, error)
 	GetProductForUpdate(ctx context.Context, id string) (GetProductForUpdateRow, error)

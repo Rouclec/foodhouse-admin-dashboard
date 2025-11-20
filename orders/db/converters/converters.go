@@ -1,6 +1,7 @@
 package converters
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/foodhouse/foodhouseapp/grpc/go/ordersgrpc"
@@ -17,7 +18,7 @@ func derefFloat(f *float64) float64 {
 	return 0.00
 }
 
-func SqlcOrderToProto(order sqlc.Order) *ordersgrpc.Order {
+func SqlcOrderBySecretKeyToProto(order sqlc.GetUserOrderBySecretKeyRow) *ordersgrpc.Order {
 
 	// Convert price
 	var price *types.Amount
@@ -29,6 +30,362 @@ func SqlcOrderToProto(order sqlc.Order) *ordersgrpc.Order {
 	}
 
 	// Convert status (string → enum) — safe default
+	statusEnum := ordersgrpc.OrderStatus_OrderStatus_UNSPECIFIED
+	switch order.Status {
+	case ordersgrpc.OrderStatus_OrderStatus_CREATED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_CREATED
+	case ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL
+	case ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED
+	case ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT
+	case ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_DELIVERED
+	case ordersgrpc.OrderStatus_OrderStatus_APPROVED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_APPROVED
+	case ordersgrpc.OrderStatus_OrderStatus_REJECTED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_REJECTED
+	}
+
+	// Convert items JSON -> []*ordersgrpc.OrderItem
+	var items []*ordersgrpc.OrderItem
+	if order.Items != nil {
+		switch v := order.Items.(type) {
+		case []byte:
+			err := json.Unmarshal(v, &items)
+			if err != nil {
+				// handle error
+			}
+		case string:
+			err := json.Unmarshal([]byte(v), &items)
+			if err != nil {
+				// handle error
+			}
+		default:
+			// unexpected type
+			items = []*ordersgrpc.OrderItem{}
+		}
+	}
+
+	return &ordersgrpc.Order{
+		OrderNumber: stringFromInt64(order.OrderNumber),
+		DeliveryLocation: &types.Point{
+			Address: order.DeliveryAddress,
+			Lat:     order.DeliveryLocation.P.Y,
+			Lon:     order.DeliveryLocation.P.X,
+		},
+		SumTotal:          price,
+		Status:            statusEnum,
+		Rating:            int32(order.Rating.Int.Int64()),
+		Review:            order.Review,
+		CreatedBy:         derefString(order.CreatedBy),
+		CreatedAt:         timestamppb.New(order.CreatedAt.Time),
+		UpdatedAt:         timestamppb.New(order.UpdatedAt.Time),
+		SecretKey:         derefString(order.SecretKey),
+		ProductOwner:      derefString(order.ProductOwner),
+		PayoutPhoneNumber: derefString(order.PayoutPhoneNumber),
+		DispatchedBy:      derefString(order.DispatchedBy),
+		DeliveryFee: &types.Amount{
+			Value:           derefFloat(order.DeliveryFeeAmount),
+			CurrencyIsoCode: derefString(order.DeliveryFeeCurrency),
+		},
+		OrderItems: items,
+	}
+}
+
+func SqlcOrderByNumberToProto(order sqlc.GetOrderByOrderNumberRow) *ordersgrpc.Order {
+
+	// Convert price
+	var price *types.Amount
+	if order.PriceValue != nil && order.PriceCurrency != nil {
+		price = &types.Amount{
+			Value:           *order.PriceValue,
+			CurrencyIsoCode: *order.PriceCurrency,
+		}
+	}
+
+	// Convert status (string → enum) — safe default
+	statusEnum := ordersgrpc.OrderStatus_OrderStatus_UNSPECIFIED
+	switch order.Status {
+	case ordersgrpc.OrderStatus_OrderStatus_CREATED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_CREATED
+	case ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL
+	case ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED
+	case ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT
+	case ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_DELIVERED
+	case ordersgrpc.OrderStatus_OrderStatus_APPROVED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_APPROVED
+	case ordersgrpc.OrderStatus_OrderStatus_REJECTED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_REJECTED
+	}
+
+	// Convert items JSON -> []*ordersgrpc.OrderItem
+	var items []*ordersgrpc.OrderItem
+	if order.Items != nil {
+		switch v := order.Items.(type) {
+		case []byte:
+			err := json.Unmarshal(v, &items)
+			if err != nil {
+				// handle error
+			}
+		case string:
+			err := json.Unmarshal([]byte(v), &items)
+			if err != nil {
+				// handle error
+			}
+		default:
+			// unexpected type
+			items = []*ordersgrpc.OrderItem{}
+		}
+	}
+
+	return &ordersgrpc.Order{
+		OrderNumber: stringFromInt64(order.OrderNumber),
+		DeliveryLocation: &types.Point{
+			Address: order.DeliveryAddress,
+			Lat:     order.DeliveryLocation.P.Y,
+			Lon:     order.DeliveryLocation.P.X,
+		},
+		SumTotal:          price,
+		Status:            statusEnum,
+		Rating:            int32(order.Rating.Int.Int64()),
+		Review:            order.Review,
+		CreatedBy:         derefString(order.CreatedBy),
+		CreatedAt:         timestamppb.New(order.CreatedAt.Time),
+		UpdatedAt:         timestamppb.New(order.UpdatedAt.Time),
+		SecretKey:         derefString(order.SecretKey),
+		ProductOwner:      derefString(order.ProductOwner),
+		PayoutPhoneNumber: derefString(order.PayoutPhoneNumber),
+		DispatchedBy:      derefString(order.DispatchedBy),
+		DeliveryFee: &types.Amount{
+			Value:           derefFloat(order.DeliveryFeeAmount),
+			CurrencyIsoCode: derefString(order.DeliveryFeeCurrency),
+		},
+		OrderItems: items,
+	}
+}
+
+func SqlcOrderRowToProto(order sqlc.ListOrdersRow) *ordersgrpc.Order {
+
+	// Convert price
+	var price *types.Amount
+	if order.PriceValue != nil && order.PriceCurrency != nil {
+		price = &types.Amount{
+			Value:           *order.PriceValue,
+			CurrencyIsoCode: *order.PriceCurrency,
+		}
+	}
+
+	// Convert status (string → enum)
+	statusEnum := ordersgrpc.OrderStatus_OrderStatus_UNSPECIFIED
+	switch order.Status {
+	case ordersgrpc.OrderStatus_OrderStatus_CREATED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_CREATED
+	case ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL
+	case ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED
+	case ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT
+	case ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_DELIVERED
+	case ordersgrpc.OrderStatus_OrderStatus_APPROVED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_APPROVED
+	case ordersgrpc.OrderStatus_OrderStatus_REJECTED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_REJECTED
+	}
+
+	// Convert preview item
+	var previewItems []*ordersgrpc.OrderItem
+	if order.PreviewProduct != "" {
+		previewItems = []*ordersgrpc.OrderItem{
+			{
+				ProductId: order.PreviewProduct,
+				Quantity:  int64(order.PreviewQuantity),
+			},
+		}
+	}
+
+	return &ordersgrpc.Order{
+		OrderNumber: stringFromInt64(order.OrderNumber),
+		DeliveryLocation: &types.Point{
+			Address: order.DeliveryAddress,
+			Lat:     order.DeliveryLocation.P.Y,
+			Lon:     order.DeliveryLocation.P.X,
+		},
+		SumTotal:          price,
+		Status:            statusEnum,
+		Rating:            int32(order.Rating.Int.Int64()),
+		Review:            order.Review,
+		CreatedBy:         derefString(order.CreatedBy),
+		CreatedAt:         timestamppb.New(order.CreatedAt.Time),
+		UpdatedAt:         timestamppb.New(order.UpdatedAt.Time),
+		SecretKey:         derefString(order.SecretKey),
+		ProductOwner:      derefString(order.ProductOwner),
+		PayoutPhoneNumber: derefString(order.PayoutPhoneNumber),
+		DispatchedBy:      derefString(order.DispatchedBy),
+		DeliveryFee: &types.Amount{
+			Value:           derefFloat(order.DeliveryFeeAmount),
+			CurrencyIsoCode: derefString(order.DeliveryFeeCurrency),
+		},
+		TotalItems: order.TotalItems,
+		OrderItems: previewItems,
+	}
+}
+
+func SqlcUserOrderRowToProto(order sqlc.ListUserOrdersRow) *ordersgrpc.Order {
+
+	// Convert price
+	var price *types.Amount
+	if order.PriceValue != nil && order.PriceCurrency != nil {
+		price = &types.Amount{
+			Value:           *order.PriceValue,
+			CurrencyIsoCode: *order.PriceCurrency,
+		}
+	}
+
+	// Convert status (string → enum)
+	statusEnum := ordersgrpc.OrderStatus_OrderStatus_UNSPECIFIED
+	switch order.Status {
+	case ordersgrpc.OrderStatus_OrderStatus_CREATED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_CREATED
+	case ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL
+	case ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED
+	case ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT
+	case ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_DELIVERED
+	case ordersgrpc.OrderStatus_OrderStatus_APPROVED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_APPROVED
+	case ordersgrpc.OrderStatus_OrderStatus_REJECTED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_REJECTED
+	}
+
+	// Convert preview item
+	var previewItems []*ordersgrpc.OrderItem
+	if order.PreviewProduct != "" {
+		previewItems = []*ordersgrpc.OrderItem{
+			{
+				ProductId: order.PreviewProduct,
+				Quantity:  int64(order.PreviewQuantity),
+			},
+		}
+	}
+
+	return &ordersgrpc.Order{
+		OrderNumber: stringFromInt64(order.OrderNumber),
+		DeliveryLocation: &types.Point{
+			Address: order.DeliveryAddress,
+			Lat:     order.DeliveryLocation.P.Y,
+			Lon:     order.DeliveryLocation.P.X,
+		},
+		SumTotal:          price,
+		Status:            statusEnum,
+		Rating:            int32(order.Rating.Int.Int64()),
+		Review:            order.Review,
+		CreatedBy:         derefString(order.CreatedBy),
+		CreatedAt:         timestamppb.New(order.CreatedAt.Time),
+		UpdatedAt:         timestamppb.New(order.UpdatedAt.Time),
+		SecretKey:         derefString(order.SecretKey),
+		ProductOwner:      derefString(order.ProductOwner),
+		PayoutPhoneNumber: derefString(order.PayoutPhoneNumber),
+		DispatchedBy:      derefString(order.DispatchedBy),
+		DeliveryFee: &types.Amount{
+			Value:           derefFloat(order.DeliveryFeeAmount),
+			CurrencyIsoCode: derefString(order.DeliveryFeeCurrency),
+		},
+		TotalItems: order.TotalItems,
+		OrderItems: previewItems,
+	}
+}
+
+func SqlcFarmerOrderRowToProto(order sqlc.ListFarmerOrdersRow) *ordersgrpc.Order {
+
+	// Convert price
+	var price *types.Amount
+	if order.PriceValue != nil && order.PriceCurrency != nil {
+		price = &types.Amount{
+			Value:           *order.PriceValue,
+			CurrencyIsoCode: *order.PriceCurrency,
+		}
+	}
+
+	// Convert status (string → enum)
+	statusEnum := ordersgrpc.OrderStatus_OrderStatus_UNSPECIFIED
+	switch order.Status {
+	case ordersgrpc.OrderStatus_OrderStatus_CREATED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_CREATED
+	case ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL
+	case ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED
+	case ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT
+	case ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_DELIVERED
+	case ordersgrpc.OrderStatus_OrderStatus_APPROVED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_APPROVED
+	case ordersgrpc.OrderStatus_OrderStatus_REJECTED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_REJECTED
+	}
+
+	// Convert preview item
+	var previewItems []*ordersgrpc.OrderItem
+	if order.PreviewProduct != "" {
+		previewItems = []*ordersgrpc.OrderItem{
+			{
+				ProductId: order.PreviewProduct,
+				Quantity:  int64(order.PreviewQuantity),
+			},
+		}
+	}
+
+	return &ordersgrpc.Order{
+		OrderNumber: stringFromInt64(order.OrderNumber),
+		DeliveryLocation: &types.Point{
+			Address: order.DeliveryAddress,
+			Lat:     order.DeliveryLocation.P.Y,
+			Lon:     order.DeliveryLocation.P.X,
+		},
+		SumTotal:          price,
+		Status:            statusEnum,
+		Rating:            int32(order.Rating.Int.Int64()),
+		Review:            order.Review,
+		CreatedBy:         derefString(order.CreatedBy),
+		CreatedAt:         timestamppb.New(order.CreatedAt.Time),
+		UpdatedAt:         timestamppb.New(order.UpdatedAt.Time),
+		SecretKey:         derefString(order.SecretKey),
+		ProductOwner:      derefString(order.ProductOwner),
+		PayoutPhoneNumber: derefString(order.PayoutPhoneNumber),
+		DispatchedBy:      derefString(order.DispatchedBy),
+		DeliveryFee: &types.Amount{
+			Value:           derefFloat(order.DeliveryFeeAmount),
+			CurrencyIsoCode: derefString(order.DeliveryFeeCurrency),
+		},
+		TotalItems: order.TotalItems,
+		OrderItems: previewItems,
+	}
+}
+
+func SqlcOrderToProto(order sqlc.Order) *ordersgrpc.Order {
+
+	// Convert price
+	var price *types.Amount
+	if order.PriceValue != nil && order.PriceCurrency != nil {
+		price = &types.Amount{
+			Value:           *order.PriceValue,
+			CurrencyIsoCode: *order.PriceCurrency,
+		}
+	}
+
+	// Convert status (string → enum)
 	statusEnum := ordersgrpc.OrderStatus_OrderStatus_UNSPECIFIED
 	switch order.Status {
 	case ordersgrpc.OrderStatus_OrderStatus_CREATED.String():
@@ -72,10 +429,26 @@ func SqlcOrderToProto(order sqlc.Order) *ordersgrpc.Order {
 	}
 }
 
-func SqlcOrdersToProto(orders []sqlc.Order) []*ordersgrpc.Order {
+func SqlcOrdersToProto(orders []sqlc.ListOrdersRow) []*ordersgrpc.Order {
 	result := make([]*ordersgrpc.Order, 0, len(orders))
 	for _, order := range orders {
-		result = append(result, SqlcOrderToProto(order))
+		result = append(result, SqlcOrderRowToProto(order))
+	}
+	return result
+}
+
+func SqlcFarmerOrdersToProto(orders []sqlc.ListFarmerOrdersRow) []*ordersgrpc.Order {
+	result := make([]*ordersgrpc.Order, 0, len(orders))
+	for _, order := range orders {
+		result = append(result, SqlcFarmerOrderRowToProto(order))
+	}
+	return result
+}
+
+func SqlcUserOrdersToProto(orders []sqlc.ListUserOrdersRow) []*ordersgrpc.Order {
+	result := make([]*ordersgrpc.Order, 0, len(orders))
+	for _, order := range orders {
+		result = append(result, SqlcUserOrderRowToProto(order))
 	}
 	return result
 }

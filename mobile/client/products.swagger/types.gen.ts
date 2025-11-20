@@ -59,6 +59,11 @@ export type productsgrpcDeleteProductResponse = {
     message?: string;
 };
 
+export type productsgrpcGetDeliveryFeeResponse = {
+    amount?: typesAmount;
+    farmerId?: string;
+};
+
 export type productsgrpcGetFarmerProductResponse = {
     product?: productsgrpcProduct;
 };

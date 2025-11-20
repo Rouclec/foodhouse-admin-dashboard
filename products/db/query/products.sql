@@ -272,3 +272,10 @@ WHERE ST_Contains(
     ST_SetSRID(ST_MakePoint(sqlc.arg(lon)::float, sqlc.arg(lat)::float), 4326)
 )
 LIMIT 1;
+
+-- name: GetMaxDeliveryFeeByProductIds :one
+SELECT delivery_fee_amount, delivery_fee_currency, created_by
+FROM products
+WHERE id = ANY($1::text[])
+ORDER BY delivery_fee_amount DESC
+LIMIT 1;

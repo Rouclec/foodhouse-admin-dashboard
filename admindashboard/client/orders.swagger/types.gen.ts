@@ -446,8 +446,6 @@ export type OrdersEstimateDeliveryFeeData = {
         'deliveryLocation.address'?: string;
         'deliveryLocation.lat'?: number;
         'deliveryLocation.lon'?: number;
-        productId?: string;
-        quantity?: string;
     };
 };
 

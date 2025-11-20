@@ -172,6 +172,21 @@ func (mr *MockQuerierMockRecorder) GetCategory(ctx, id any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCategory", reflect.TypeOf((*MockQuerier)(nil).GetCategory), ctx, id)
 }
 
+// GetMaxDeliveryFeeByProductIds mocks base method.
+func (m *MockQuerier) GetMaxDeliveryFeeByProductIds(ctx context.Context, dollar_1 []string) (sqlc.GetMaxDeliveryFeeByProductIdsRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMaxDeliveryFeeByProductIds", ctx, dollar_1)
+	ret0, _ := ret[0].(sqlc.GetMaxDeliveryFeeByProductIdsRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMaxDeliveryFeeByProductIds indicates an expected call of GetMaxDeliveryFeeByProductIds.
+func (mr *MockQuerierMockRecorder) GetMaxDeliveryFeeByProductIds(ctx, dollar_1 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMaxDeliveryFeeByProductIds", reflect.TypeOf((*MockQuerier)(nil).GetMaxDeliveryFeeByProductIds), ctx, dollar_1)
+}
+
 // GetPriceTypeById mocks base method.
 func (m *MockQuerier) GetPriceTypeById(ctx context.Context, id string) (sqlc.PriceType, error) {
 	m.ctrl.T.Helper()

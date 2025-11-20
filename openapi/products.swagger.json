@@ -1016,6 +1016,17 @@
         }
       }
     },
+    "productsgrpcGetDeliveryFeeResponse": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "$ref": "#/definitions/typesAmount"
+        },
+        "farmerId": {
+          "type": "string"
+        }
+      }
+    },
     "productsgrpcGetFarmerProductResponse": {
       "type": "object",
       "properties": {
