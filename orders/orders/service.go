@@ -2206,6 +2206,7 @@ func Distance(p1, p2 *types.Point) float64 {
 }
 
 // EstimateDeliveryFee implements ordersgrpc.OrdersServer.
+// using multiple products here.
 func (i *Impl) EstimateDeliveryFee(ctx context.Context,
 	req *ordersgrpc.EstimateDeliveryFeeRequest,
 ) (*ordersgrpc.EstimateDeliveryFeeResponse, error) {
