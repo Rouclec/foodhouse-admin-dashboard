@@ -211,7 +211,7 @@ SELECT
     COALESCE(
         JSON_AGG(
             JSON_BUILD_OBJECT(
-                'product_id', oi.product,
+                'product', oi.product,
                 'quantity', oi.quantity
             )
         ) FILTER (WHERE oi.id IS NOT NULL),
@@ -329,7 +329,7 @@ SELECT
   DATE_TRUNC('day', o.updated_at)::timestamptz AS group_date,
   JSON_AGG(
     JSON_BUILD_OBJECT(
-      'product_id', oi.product,
+      'product', oi.product,
       'quantity', oi.quantity
     )
   ) AS products
@@ -385,7 +385,7 @@ SELECT
   DATE_TRUNC('month', o.updated_at)::timestamptz AS group_date,
   JSON_AGG(
     JSON_BUILD_OBJECT(
-      'product_id', oi.product,
+      'product', oi.product,
       'quantity', oi.quantity
     )
   ) AS products
@@ -441,7 +441,7 @@ SELECT
   DATE_TRUNC('year', o.updated_at)::timestamptz AS group_date,
   JSON_AGG(
     JSON_BUILD_OBJECT(
-      'product_id', oi.product,
+      'product', oi.product,
       'quantity', oi.quantity
     )
   ) AS products
@@ -583,7 +583,7 @@ SELECT
     COALESCE(
         JSON_AGG(
             JSON_BUILD_OBJECT(
-                'product_id', oi.product,
+                'product', oi.product,
                 'quantity', oi.quantity
             )
         ) FILTER (WHERE oi.id IS NOT NULL),

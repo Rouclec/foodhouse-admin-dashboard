@@ -866,31 +866,90 @@ func calculateCommission(orderAmount float64) float64 {
 	return (orderAmount * ReferralCommissionPercentage) / TotalPercentage
 }
 
+func decodeOrderItems(raw interface{}) ([]sqlc.OrderItem, error) {
+	if raw == nil {
+		return []sqlc.OrderItem{}, nil
+	}
+
+	// Convert interface{} -> []byte
+	rawBytes, err := json.Marshal(raw)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal interface{}: %w", err)
+	}
+
+	// Decode JSON array
+	var items []sqlc.OrderItem
+	err = json.Unmarshal(rawBytes, &items)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal order items: %w", err)
+	}
+
+	return items, nil
+}
+
 // GetOrderDetails implements ordersgrpc.OrdersServer.
 func (i *Impl) GetOrderDetails(ctx context.Context, req *ordersgrpc.GetOrderDetailsRequest) (*ordersgrpc.GetOrderDetailsResponse, error) {
 	sqlcOrder, err := i.repo.Do().GetOrderByOrderNumber(ctx, req.GetOrderNumber())
-
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error getting order with number %v. why?: %v", req.GetOrderNumber(), err)
+		return nil, status.Errorf(codes.Internal, "error getting order %v: %v", req.GetOrderNumber(), err)
 	}
 
-	i.logger.Debug().Msgf("sqlc order: %v", sqlcOrder)
+	orderItems, err := decodeOrderItems(sqlcOrder.Items)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to decode order items: %v", err)
+	}
 
+	// ==========================
+	// 1. ENRICH ORDER ITEMS
+	// ==========================
+	enrichedItems := make([]ordersgrpc.OrderItem, 0)
+
+	for _, item := range orderItems {
+		prodResp, err := i.productService.GetProduct(ctx, &productsgrpc.GetProductRequest{
+			ProductId: item.Product,
+		})
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error fetching product %v: %v", item.Product, err)
+		}
+
+		enrichedItems = append(enrichedItems, ordersgrpc.OrderItem{
+			ProductId:    prodResp.GetProduct().GetId(),
+			Quantity:     int64(item.Quantity),
+			ProductImage: prodResp.GetProduct().GetImage(),
+			ProductName:  prodResp.GetProduct().GetName(),
+			ProductUnitPrice: &types.Amount{
+				Value:           prodResp.GetProduct().GetAmount().GetValue(),
+				CurrencyIsoCode: prodResp.GetProduct().GetAmount().GetCurrencyIsoCode(),
+			},
+		})
+	}
+
+	// replace items with enriched version
+	sqlcOrder.Items = enrichedItems
+
+	// ==========================
+	// 2. AUDIT LOGS
+	// ==========================
 	sqlcAuditLogs, err := i.repo.Do().ListOrderAuditLogs(ctx, req.GetOrderNumber())
-
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error fetching audit logs %v", err)
 	}
 
 	protoAuditLogs, err := converters.SqlcToProtoOrderAuditLogs(sqlcAuditLogs)
-
 	if err != nil {
-		i.logger.Debug().Msgf("error converting sqlc to proto audit logs %v", err)
 		return nil, status.Errorf(codes.Internal, "error converting sqlc to proto audit logs %v", err)
 	}
 
+	// ==========================
+	// 3. CONVERT ORDER + ITEMS TO PROTO
+	// ==========================
+	protoOrder := converters.SqlcOrderByNumberToProto(sqlcOrder)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error converting order to proto: %v", err)
+	}
+
 	return &ordersgrpc.GetOrderDetailsResponse{
-		Order:    converters.SqlcOrderByNumberToProto(sqlcOrder),
+		Order:    protoOrder,
 		AuditLog: protoAuditLogs,
 	}, nil
 }

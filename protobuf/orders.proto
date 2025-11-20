@@ -31,6 +31,9 @@ enum PaymentStatus {
 message OrderItem {
   string product_id = 2;
   int64 quantity = 3;
+  string product_image = 4;
+  string product_name  = 5;
+  types.Amount product_unit_price = 6;
 }
 
 message Order {

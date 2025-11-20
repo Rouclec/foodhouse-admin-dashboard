@@ -1699,6 +1699,15 @@
         "quantity": {
           "type": "string",
           "format": "int64"
+        },
+        "productImage": {
+          "type": "string"
+        },
+        "productName": {
+          "type": "string"
+        },
+        "productUnitPrice": {
+          "$ref": "#/definitions/typesAmount"
         }
       }
     },
