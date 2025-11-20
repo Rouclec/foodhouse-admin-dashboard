@@ -115,8 +115,8 @@ export default function Checkout() {
       query: {
         'deliveryLocation.lat': deliveryLocation?.region.latitude,
         'deliveryLocation.lon': deliveryLocation?.region?.longitude,
-        productId: orderItems[0]?.id,
-        quantity: totalQuantityForFee.toString(),
+        "deliveryLocation.address": deliveryLocation?.address,
+        orderItems
       },
     }),
     enabled: !!productId,
@@ -415,7 +415,7 @@ export default function Checkout() {
           style={[
             defaultStyles.button,
             defaultStyles.primaryButton,
-            (loading || totalQuantityForFee === 0) && defaultStyles.greyButton, // Check if total quantity > 0
+            (loading || totalQuantityForFee === 0) && defaultStyles.greyButton, 
           ]}
           loading={loading}
           disabled={loading || totalQuantityForFee === 0}

@@ -64,29 +64,24 @@ export default function ProductDetails() {
 
   const handleAddToCart = () => {
     if (!data?.product) return;
-
-    // 2. Access cartItems from Context (must ensure it's destructured or accessed correctly)
-    const productExists = cartItems.some(item => item.id === data.product!.id); // Use non-null assertion if data.product is guaranteed by the check above
+    const productExists = cartItems.some(item => item.id === data.product!.id); 
 
     if (productExists) {
-      // 2. Handle if product already exists
       setSnackbarMessage(i18n.t('This item is already in your cart.'));
       setSnackbarAction('info');
       setSnackbarVisible(true);
       return;
     }
     
-    // 3. Add the product and show success toast
     addToCart(data.product);
 
-    setSnackbarMessage(i18n.t('Item added to cart! Redirecting...'));
+    setSnackbarMessage(i18n.t('Item added to cart!'));
     setSnackbarAction('success');
     setSnackbarVisible(true);
 
-    // 4. Return the user to the index screen after a short delay
     setTimeout(() => {
         router.replace('/(buyer)/(index)');
-    }, 1500); // 1.5 second delay for toast to be seen
+    }, 1500); 
   };
 
   if (isLoading) {
