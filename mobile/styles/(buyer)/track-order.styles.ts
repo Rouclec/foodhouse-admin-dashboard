@@ -1,7 +1,7 @@
-import { Colors } from "@/constants";
-import { Dimensions, StyleSheet } from "react-native";
+import { Colors } from '@/constants';
+import { Dimensions, StyleSheet } from 'react-native';
 
-const { width } = Dimensions.get("window");
+const { width } = Dimensions.get('window');
 export const trackOrderStyles = StyleSheet.create({
   productImage: {
     width: 102,
@@ -11,71 +11,73 @@ export const trackOrderStyles = StyleSheet.create({
   orderDetailsContainer: {
     flexShrink: 1,
     flexGrow: 1,
-    overflow: "hidden",
-    rowGap: 16,
-    backgroundColor: 'red'
+    overflow: 'hidden',
+    rowGap: 8,
   },
   centerRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   primaryText: { fontSize: 16, color: Colors.primary[500] },
   flatListContainer: {
     marginVertical: 24,
     height: 64,
-    alignSelf: "center",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: Colors.primary["50"],
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   flatListIconContainer: {
-    alignItems: "center",
+    alignItems: 'center',
     paddingHorizontal: 24,
     rowGap: 6,
   },
   relativeContainer: {
-    position: "relative",
+    position: 'relative',
   },
   dashedConnector: {
-    position: "absolute",
+    position: 'absolute',
     left: 24,
     top: 10,
     width: 52,
     height: 1,
-    borderStyle: "dashed", // or "dashed"
+    borderStyle: 'dashed', // or "dashed"
     borderWidth: 1,
     borderColor: Colors.primary[500],
   },
   contentContainer: {
-    borderTopColor: Colors.primary["500"],
+    borderTopColor: Colors.light['10'],
     borderTopWidth: 1,
-    paddingVertical: 24,
+    // paddingVertical: 24,
     rowGap: 24,
   },
   filterLogsContainer: {
-    position: "relative",
-    flexDirection: "row",
+    position: 'relative',
+    flexDirection: 'row',
     columnGap: 16,
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 32,
   },
   filterLogConentContainer: {
     flexGrow: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    overflow: "hidden",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    overflow: 'hidden',
     columnGap: 12,
   },
   verticalDivider: {
-    position: "absolute",
+    position: 'absolute',
     height: 64,
-    borderStyle: "dashed",
+    borderStyle: 'dashed',
     borderWidth: 1,
     width: 1,
-    borderColor: Colors.grey["bd"],
+    borderColor: Colors.grey['bd'],
     left: 8,
     top: 28,
+  },
+  columnGap: {
+    gap: 10,
+    flex: 1,
   },
   rowGap6: {
     rowGap: 6,
@@ -85,23 +87,26 @@ export const trackOrderStyles = StyleSheet.create({
   },
   bodyText: {
     fontSize: 14,
-    color: Colors.grey["61"],
+    color: Colors.grey['61'],
     flexShrink: 1,
-    overflow: "hidden",
+    overflow: 'hidden',
   },
   timeText: {
-    textAlign: "right",
+    textAlign: 'right',
     fontSize: 12,
-    color: Colors.grey["61"],
+    color: Colors.grey['61'],
     flexShrink: 0,
   },
   leftText: {
     flexShrink: 1,
     fontSize: 14,
-    color: Colors.grey["61"],
+    color: Colors.grey['61'],
   },
-  rightText: { flexShrink: 1, textAlign: "right", fontSize: 16 },
+  rightText: { flexShrink: 1, textAlign: 'right', fontSize: 16 },
   text20: {
     fontSize: 20,
   },
+  padding: {
+    paddingBottom: 4
+  }
 });

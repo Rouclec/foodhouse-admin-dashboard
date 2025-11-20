@@ -166,6 +166,7 @@ function RootLayoutNav() {
     paymentData: undefined,
     cartItems: [],
   };
+  
 
   const [contextInfo, setContextInfo] = useState(initialState);
 
@@ -245,6 +246,8 @@ function RootLayoutNav() {
         };
     });
   };
+  ;
+
 
   const contextSetters: ContextSetters = {
     setUser,
@@ -253,6 +256,7 @@ function RootLayoutNav() {
     setProductId,
     setPaymentData,
     addToCart,
+    
   };
 
   return (

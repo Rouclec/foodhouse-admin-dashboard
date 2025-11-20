@@ -214,16 +214,16 @@ export default function BuyerProducts() {
                     <View style={defaultStyles.relativeContainer}>
                       <Icon
                         source={'cart'}
-                        size={24}
+                        size={32}
                         color={Colors.primary[500]}
                       />
 
-                      {/* BADGE LOGIC */}
+                     
                       {cartCount > 0 && (
                         <View
                           style={{
                             position: 'absolute',
-                            top: -6,
+                            top: -16,
                             right: -6,
                             backgroundColor: Colors.error,
                             borderRadius: 10,

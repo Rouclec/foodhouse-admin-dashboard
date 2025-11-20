@@ -54,6 +54,9 @@ interface OrderItemProps {
 }
 const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
   if (!item) return;
+  const orderItemsCount = item?.orderItems?.length ?? 0;
+  const firstItem = item?.orderItems?.[0];
+  const remainingItemsCount = orderItemsCount > 1 ? orderItemsCount - 1 : 0;
 
   const {
     isLoading: isProductLoading,
@@ -62,9 +65,10 @@ const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
   } = useQuery({
     ...productsGetProductOptions({
       path: {
-        productId: item?.orderItems?.[0]?.productId ?? '',
+        productId: firstItem?.productId ?? '',
       },
     }),
+    enabled: !!firstItem?.productId,
   });
 
   if (isProductLoading)
@@ -81,6 +85,12 @@ const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
       </View>
     );
   }
+
+  const displayName = productData?.product?.name;
+  const summaryText = remainingItemsCount > 0
+    ? `${displayName} +${remainingItemsCount} ${i18n.t('(buyer).(index).orders.items')}`
+    : displayName;
+    
   return (
     <View style={defaultStyles.card}>
       <Image
@@ -88,7 +98,7 @@ const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
         style={styles.productImage}
       />
       <View style={styles.orderDetailsContainer}>
-        <Text variant="titleMedium">{productData?.product?.name}</Text>
+        <Text variant="titleMedium">{summaryText}</Text>
         <View style={styles.centerRow}>
           <Text variant="titleSmall" style={styles.primaryText}>
             {/* {item?.sumTotal?.currencyIsoCode} {item?.sumTotal?.currencyIsoCode}{' '} */}
