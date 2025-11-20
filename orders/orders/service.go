@@ -900,7 +900,7 @@ func (i *Impl) GetOrderDetails(ctx context.Context, req *ordersgrpc.GetOrderDeta
 	}
 
 	// 1. ENRICH ORDER ITEMS.
-	enrichedItems := make([]ordersgrpc.OrderItem, 0)
+	enrichedItems := make([]*ordersgrpc.OrderItem, 0)
 
 	for index, item := range orderItems {
 		prodResp, err := i.productService.GetProduct(ctx, &productsgrpc.GetProductRequest{
@@ -913,7 +913,7 @@ func (i *Impl) GetOrderDetails(ctx context.Context, req *ordersgrpc.GetOrderDeta
 
 		i.logger.Debug().Msgf("product for order %v: %v", index, prodResp)
 
-		enrichedItems = append(enrichedItems, ordersgrpc.OrderItem{
+		enrichedItems = append(enrichedItems, &ordersgrpc.OrderItem{
 			ProductId:    prodResp.GetProduct().GetId(),
 			Quantity:     int64(item.Quantity),
 			ProductImage: prodResp.GetProduct().GetImage(),

@@ -63,6 +63,9 @@ func SqlcOrderBySecretKeyToProto(order sqlc.GetUserOrderBySecretKeyRow) *ordersg
 			if err != nil {
 				// handle error
 			}
+		case []*ordersgrpc.OrderItem:
+			// already enriched in memory → perfect, use directly
+			items = v
 		default:
 			// unexpected type
 			items = []*ordersgrpc.OrderItem{}
@@ -141,6 +144,9 @@ func SqlcOrderByNumberToProto(order sqlc.GetOrderByOrderNumberRow, logger zerolo
 			if err != nil {
 				// handle error
 			}
+		case []*ordersgrpc.OrderItem:
+			// already enriched in memory → perfect, use directly
+			items = v
 		default:
 			// unexpected type
 			items = []*ordersgrpc.OrderItem{}
