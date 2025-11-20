@@ -33,6 +33,7 @@ import { formatAmount } from '@/utils/amountFormater';
 import { usersGetPublicUserOptions } from '@/client/users.swagger/@tanstack/react-query.gen';
 import { delay } from '@/utils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ordersgrpcOrder } from '@/client/orders.swagger';
 
 export default function OrderDetails() {
   const router = useRouter();
@@ -48,7 +49,7 @@ export default function OrderDetails() {
   const [showRejectedModal, setShowRejectedModal] = useState(false);
 
   const {
-    data: orderDetails,
+    data: orderDetailsResult,
     isLoading: isOrderDetailsLoading,
     isError: errorLoadingOrder,
     refetch,
@@ -63,6 +64,12 @@ export default function OrderDetails() {
     placeholderData: keepPreviousData,
   });
 
+  const orderDetails = orderDetailsResult?.order as ordersgrpcOrder | undefined;
+
+  const firstOrderItem = orderDetails?.orderItems?.[0];
+  const firstProductId = firstOrderItem?.productId;
+  const itemQuantity = firstOrderItem?.quantity ?? '0';
+
   const {
     isLoading: isProductLoading,
     data: productData,
@@ -70,19 +77,19 @@ export default function OrderDetails() {
   } = useQuery({
     ...productsGetProductOptions({
       path: {
-        productId: orderDetails?.order?.product ?? '',
+        productId: firstProductId ?? '',
       },
     }),
-    enabled: !!orderDetails?.order,
+    enabled: !!firstProductId,
   });
 
   const { data: buyer } = useQuery({
     ...usersGetPublicUserOptions({
       path: {
-        userId: orderDetails?.order?.createdBy ?? '',
+        userId: orderDetails?.createdBy ?? '',
       },
     }),
-    enabled: !!orderDetails?.order?.createdBy,
+    enabled: !!orderDetails?.createdBy,
   });
 
   const handleApproveOrder = async () => {
@@ -91,7 +98,7 @@ export default function OrderDetails() {
       await mutateAsync({
         body: {},
         path: {
-          orderId: orderDetails?.order?.orderNumber ?? '',
+          orderId: orderDetails?.orderNumber ?? '',
           userId: user?.userId ?? '',
         },
       });
@@ -110,7 +117,7 @@ export default function OrderDetails() {
           reason: rejectReason,
         },
         path: {
-          orderId: orderDetails?.order?.orderNumber ?? '',
+          orderId: orderDetails?.orderNumber ?? '',
           userId: user?.userId ?? '',
         },
       });
@@ -159,6 +166,13 @@ export default function OrderDetails() {
   });
 
   const insets = useSafeAreaInsets();
+  const productPrice = productData?.product?.amount?.value ?? 0;
+  const orderQuantity = parseInt(itemQuantity, 10);
+  const currency =
+    productData?.product?.amount?.currencyIsoCode ??
+    orderDetails?.sumTotal?.currencyIsoCode;
+
+  const calculatedDisplayPrice = productPrice * orderQuantity * 0.9;
 
   if (isOrderDetailsLoading || isProductLoading) {
     return (
@@ -262,21 +276,17 @@ export default function OrderDetails() {
               <Text style={styles.leftText}>
                 {i18n.t('(farmer).order-details.orderNumber')}:{' '}
                 <Text variant="titleMedium" style={styles.rightText}>
-                  {orderDetails?.order?.orderNumber}
+                  {orderDetails?.orderNumber}
                 </Text>
               </Text>
               <Text variant="titleMedium">{productData?.product?.name}</Text>
               <View style={styles.centerRow}>
                 <Text variant="titleSmall" style={styles.primaryText}>
-                  {orderDetails?.order?.price?.currencyIsoCode}{' '}
-                  {formatAmount(
-                    (
-                      (productData?.product?.amount?.value ?? 0) *
-                      parseInt(orderDetails?.order?.quantity ?? '0', 10) *
-                      0.9
-                    ).toString(),
-                    { decimalPlaces: 2 },
-                  )}
+                  {/* FIX: Use the derived currency and the pre-calculated display price */}
+                  {currency}{' '}
+                  {formatAmount(calculatedDisplayPrice.toString(), {
+                    decimalPlaces: 2,
+                  })}
                 </Text>
               </View>
             </View>
@@ -303,10 +313,9 @@ export default function OrderDetails() {
                   {i18n.t('(farmer).order-details.quantity')}
                 </Text>
                 <Text variant="titleMedium" style={styles.rightText}>
-                  {formatAmount(orderDetails?.order?.quantity ?? '')}{' '}
+                  {formatAmount(itemQuantity)}{' '}
                   {(productData?.product?.unitType ?? '').replace('per_', '')}
-                  {(parseInt(orderDetails?.order?.quantity ?? '') ?? 0) > 1 &&
-                    's'}
+                  {(orderQuantity ?? 0) > 1 && 's'}
                 </Text>
               </View>
               <View style={styles.listItem}>
@@ -314,14 +323,14 @@ export default function OrderDetails() {
                   {i18n.t('(farmer).order-details.deliveryAddress')}
                 </Text>
                 <Text variant="titleMedium" style={styles.rightText}>
-                  {orderDetails?.order?.deliveryLocation?.address}
+                  {orderDetails?.deliveryLocation?.address}
                 </Text>
               </View>
             </View>
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
-      {orderDetails?.order?.status === 'OrderStatus_PAYMENT_SUCCESSFUL' && (
+      {orderDetails?.status === 'OrderStatus_PAYMENT_SUCCESSFUL' && (
         <View style={defaultStyles.bottomContainerWithContent}>
           <Button
             style={[
