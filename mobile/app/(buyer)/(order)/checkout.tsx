@@ -112,11 +112,18 @@ export default function Checkout() {
       path: {
         userId: user?.userId ?? '',
       },
-      query: {
-        'deliveryLocation.lat': deliveryLocation?.region.latitude,
-        'deliveryLocation.lon': deliveryLocation?.region?.longitude,
-        "deliveryLocation.address": deliveryLocation?.address,
-        productId: orderItems[0]?.id,  
+      body: { 
+        deliveryLocation : {
+          lon: deliveryLocation?.region?.longitude,
+          lat: deliveryLocation?.region?.latitude,
+          address: deliveryLocation?.description
+        },
+
+        orderItems: orderItems.map(item => ({
+          productId: item.id,
+          quantity: item.quantity,
+        }))
+
       },
     }),
     enabled: !!productId,
@@ -261,9 +268,11 @@ export default function Checkout() {
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled">
+            
             <Text variant="titleMedium">
               {i18n.t('(buyer).(order).checkout.shippingAddress')}
             </Text>
+            
             <View style={[styles.orderDetailsContainer, styles.flexRow]}>
               <View style={styles.outterLocationIconContainer}>
                 <View style={styles.innerLocationIconContainer}>

@@ -91,7 +91,7 @@ const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
         <Text variant="titleMedium">{productData?.product?.name}</Text>
         <View style={styles.centerRow}>
           <Text variant="titleSmall" style={styles.primaryText}>
-            {item?.sumTotal?.currencyIsoCode} {item?.sumTotal?.currencyIsoCode}{' '}
+            {/* {item?.sumTotal?.currencyIsoCode} {item?.sumTotal?.currencyIsoCode}{' '} */}
             {formatCurrency(
               (
                 Number(item?.sumTotal?.value ?? 0) +

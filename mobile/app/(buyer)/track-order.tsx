@@ -59,7 +59,7 @@ export default function TrackOrder() {
   } = useQuery({
     ...productsGetProductOptions({
       path: {
-        productId: orderDetails?.order?.product ?? '',
+        productId: orderDetails?.order?.orderItems?.[0]?.productId ?? '',
       },
     }),
     enabled: !!orderDetails?.order,
@@ -232,19 +232,19 @@ export default function TrackOrder() {
                 </Text>
               </Text>
               <Text variant="titleSmall" style={styles.text20}>
-                {productData?.product?.name} - {orderDetails?.order?.quantity}{' '}
+                {productData?.product?.name} - {orderDetails?.order?.orderItems?.[0]?.quantity}{' '}
                 {productData?.product?.unitType?.replace('per_', '')}
-                {parseInt(orderDetails?.order?.quantity ?? '') > 1 && 's'}
+                {parseInt(orderDetails?.order?.orderItems?.[0]?.quantity ?? '') > 1 && 's'}
               </Text>
               <View style={styles.centerRow}>
                 <Text variant="titleSmall" style={styles.primaryText}>
-                  {orderDetails?.order?.price?.currencyIsoCode}{' '}
+                  {orderDetails?.order?.sumTotal?.currencyIsoCode}{' '}
                   {formatCurrency(
                     (
-                      Number(orderDetails?.order?.price?.value ?? 0) +
+                      Number(orderDetails?.order?.sumTotal?.value ?? 0) +
                       Number(orderDetails?.order?.deliveryFee?.value ?? 0)
                     ).toFixed(2),
-                    orderDetails?.order?.price?.currencyIsoCode ?? '', 
+                    orderDetails?.order?.sumTotal?.currencyIsoCode ?? '', 
                   )}
                 </Text>
               </View>
