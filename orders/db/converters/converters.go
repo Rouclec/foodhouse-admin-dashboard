@@ -124,6 +124,8 @@ func SqlcOrderByNumberToProto(order sqlc.GetOrderByOrderNumberRow) *ordersgrpc.O
 		statusEnum = ordersgrpc.OrderStatus_OrderStatus_REJECTED
 	}
 
+	fmt.Printf("order items: ", order.Items)
+
 	// Convert items JSON -> []*ordersgrpc.OrderItem
 	var items []*ordersgrpc.OrderItem
 	if order.Items != nil {

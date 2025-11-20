@@ -904,13 +904,16 @@ func (i *Impl) GetOrderDetails(ctx context.Context, req *ordersgrpc.GetOrderDeta
 	// ==========================
 	enrichedItems := make([]ordersgrpc.OrderItem, 0)
 
-	for _, item := range orderItems {
+	for index, item := range orderItems {
 		prodResp, err := i.productService.GetProduct(ctx, &productsgrpc.GetProductRequest{
 			ProductId: item.Product,
 		})
+
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "error fetching product %v: %v", item.Product, err)
 		}
+
+		i.logger.Debug().Msgf("product for order %v: %v", index, prodResp)
 
 		enrichedItems = append(enrichedItems, ordersgrpc.OrderItem{
 			ProductId:    prodResp.GetProduct().GetId(),
@@ -926,6 +929,8 @@ func (i *Impl) GetOrderDetails(ctx context.Context, req *ordersgrpc.GetOrderDeta
 
 	// replace items with enriched version
 	sqlcOrder.Items = enrichedItems
+
+	i.logger.Debug().Msgf("SQLC order: %v", sqlcOrder)
 
 	// ==========================
 	// 2. AUDIT LOGS
