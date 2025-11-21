@@ -238,8 +238,10 @@ export default function TrackOrder() {
                     </Text>
                   </Text>
                   <Text variant="titleSmall" style={styles.text20}>
-                    {item.productName} - {item.quantity}{' '}
-                    
+                    {item.productName}
+                  </Text>
+                  <Text variant="titleSmall" style={styles.text20}>
+                   {item.quantity}{' '}
                   </Text>
                   <View style={styles.centerRow}>
                     <Text variant="titleSmall" style={styles.primaryText}>
