@@ -282,7 +282,7 @@ export default function OrderDetails() {
               <Text variant="titleMedium">{productData?.product?.name}</Text>
               <View style={styles.centerRow}>
                 <Text variant="titleSmall" style={styles.primaryText}>
-                  {/* FIX: Use the derived currency and the pre-calculated display price */}
+                  
                   {currency}{' '}
                   {formatAmount(calculatedDisplayPrice.toString(), {
                     decimalPlaces: 2,
