@@ -352,7 +352,6 @@ func SqlcFarmerOrderRowToProto(order sqlc.ListFarmerOrdersRow) *ordersgrpc.Order
 			{
 				ProductId: order.PreviewProduct,
 				Quantity:  int64(order.PreviewQuantity),
-				UnitType:  order.PreviewUnitType,
 			},
 		}
 	}
