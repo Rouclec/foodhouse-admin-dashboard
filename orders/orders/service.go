@@ -917,6 +917,7 @@ func (i *Impl) GetOrderDetails(ctx context.Context, req *ordersgrpc.GetOrderDeta
 		enrichedItems = append(enrichedItems, &ordersgrpc.OrderItem{
 			ProductId:    prodResp.GetProduct().GetId(),
 			Quantity:     int64(item.Quantity),
+			UnitType:     item.UnitType,
 			ProductImage: prodResp.GetProduct().GetImage(),
 			ProductName:  prodResp.GetProduct().GetName(),
 			ProductUnitPrice: &types.Amount{

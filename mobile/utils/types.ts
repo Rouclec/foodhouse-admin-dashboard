@@ -7,7 +7,3 @@ export type CartItem = {
   image?: string;
   unitType?: string;
 };
-
-export type LocalOrderItem = Omit<CartItem, 'quantity'> & {
-  quantity: string;
-};

@@ -44,9 +44,13 @@ export const trackOrderStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.primary[500],
   },
-  contentContainer: {
-    borderTopColor: Colors.light['10'],
+  divider: {
+    height: 1,
     borderTopWidth: 1,
+    borderColor: Colors.grey['border'],
+  },
+  contentContainer: {
+    paddingTop: 8,
     // paddingVertical: 24,
     rowGap: 24,
   },
@@ -107,6 +111,6 @@ export const trackOrderStyles = StyleSheet.create({
     fontSize: 20,
   },
   padding: {
-    paddingBottom: 4
-  }
+    padding: 8,
+  },
 });

@@ -220,7 +220,10 @@ export default function TrackOrder() {
             <View />
           </Appbar.Header>
           <ScrollView
-            contentContainerStyle={[defaultStyles.scrollContainer, trackOrderStyles.columnGap]}
+            contentContainerStyle={[
+              defaultStyles.scrollContainer,
+              trackOrderStyles.columnGap,
+            ]}
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled">
@@ -241,11 +244,10 @@ export default function TrackOrder() {
                     {item.productName}
                   </Text>
                   <Text variant="titleSmall" style={styles.text20}>
-                   {item.quantity}{' '}
+                    {item.quantity}{' '}
                   </Text>
                   <View style={styles.centerRow}>
                     <Text variant="titleSmall" style={styles.primaryText}>
-                     
                       {formatCurrency(
                         (
                           Number(item?.productUnitPrice?.value ?? 0) +
@@ -326,8 +328,13 @@ export default function TrackOrder() {
             ))}
           </ScrollView>
 
+          <View style={trackOrderStyles.divider} />
+
           <ScrollView
-            contentContainerStyle={[defaultStyles.scrollContainer, trackOrderStyles.padding]}
+            contentContainerStyle={[
+              defaultStyles.scrollContainer,
+              trackOrderStyles.padding,
+            ]}
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled">

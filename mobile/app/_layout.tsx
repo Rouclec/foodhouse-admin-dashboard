@@ -1,36 +1,37 @@
-import { Stack } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
-import React, { createContext, useState } from "react";
-import "react-native-reanimated";
+import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import React, { createContext, useState } from 'react';
+import 'react-native-reanimated';
 
-import { usersgrpcUser, usersgrpcUserType } from "@/client/users.swagger";
-import { useReactQueryDevTools } from "@dev-plugins/react-query";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { usersgrpcUser, usersgrpcUserType } from '@/client/users.swagger';
+import { useReactQueryDevTools } from '@dev-plugins/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   configureFonts,
   DefaultTheme,
   MD3LightTheme,
   PaperProvider,
-} from "react-native-paper";
-import { MD3Type } from "react-native-paper/lib/typescript/types";
-import { Colors } from "@/constants";
-import { StatusBar } from "expo-status-bar";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { defaultStyles } from "@/styles";
-import { Region } from "react-native-maps";
-import { ordersgrpcPaymentEntity, typesAmount } from "@/client/orders.swagger";
-import { RelativePathString } from "expo-router";
-import { ExternalPathString } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+} from 'react-native-paper';
+import { MD3Type } from 'react-native-paper/lib/typescript/types';
+import { Colors } from '@/constants';
+import { StatusBar } from 'expo-status-bar';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { defaultStyles } from '@/styles';
+import { Region } from 'react-native-maps';
+import { ordersgrpcPaymentEntity, typesAmount } from '@/client/orders.swagger';
+import { RelativePathString } from 'expo-router';
+import { ExternalPathString } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { productsgrpcProduct } from '@/client/products.swagger';
 
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
-} from "expo-router";
+} from 'expo-router';
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: "signup",
+  initialRouteName: 'signup',
 };
 
 // Hide the splash screen automatically
@@ -46,13 +47,13 @@ export default function RootLayout() {
 }
 
 export type CartItem = {
-  id: string; 
+  id: string;
   name: string;
   price: number;
   image?: string;
   quantity: number;
   currency?: string;
- 
+  unitType?: string;
 };
 
 const client = new QueryClient();
@@ -76,9 +77,8 @@ interface ContextInfo {
         amount: typesAmount;
       }
     | undefined;
-  
-    cartItems: CartItem[];
-  
+
+  cartItems: CartItem[];
 }
 
 interface ContextSetters {
@@ -93,7 +93,7 @@ interface ContextSetters {
           address: string;
           region: Region;
         }
-      | undefined
+      | undefined,
   ) => void;
   setPaymentData: (
     data:
@@ -103,10 +103,11 @@ interface ContextSetters {
           nextScreen: RelativePathString | ExternalPathString;
           amount: typesAmount;
         }
-      | undefined
+      | undefined,
   ) => void;
 
-  addToCart: (product: any) => void;
+  addToCart: (product: productsgrpcProduct) => void;
+  clearCart: () => void;
 }
 
 export interface ContextType extends ContextInfo, ContextSetters {}
@@ -118,29 +119,29 @@ function RootLayoutNav() {
 
   const fontConfig: Record<string, MD3Type> = {
     default: {
-      fontFamily: "urbanist-medium",
-      fontWeight: "400",
+      fontFamily: 'urbanist-medium',
+      fontWeight: '400',
       letterSpacing: 0.5,
       lineHeight: 20,
       fontSize: 16,
     },
     bodyLarge: {
-      fontFamily: "urbanist-semibold",
-      fontWeight: "500",
+      fontFamily: 'urbanist-semibold',
+      fontWeight: '500',
       letterSpacing: 0.75,
       lineHeight: 22,
       fontSize: 18,
     },
     titleMedium: {
-      fontFamily: "urbanist-bold",
-      fontWeight: "600",
+      fontFamily: 'urbanist-bold',
+      fontWeight: '600',
       letterSpacing: 1,
       lineHeight: 24,
       fontSize: 20,
     },
     titleLarge: {
-      fontFamily: "urbanist-extrabold",
-      fontWeight: "700",
+      fontFamily: 'urbanist-extrabold',
+      fontWeight: '700',
       letterSpacing: 1,
       lineHeight: 28,
       fontSize: 24,
@@ -153,7 +154,7 @@ function RootLayoutNav() {
     dark: false,
     colors: {
       ...DefaultTheme.colors,
-      text: Colors.dark["0"], // Override text color globally
+      text: Colors.dark['0'], // Override text color globally
     },
     fonts: configureFonts({ config: fontConfig }),
   };
@@ -166,20 +167,19 @@ function RootLayoutNav() {
     paymentData: undefined,
     cartItems: [],
   };
-  
 
   const [contextInfo, setContextInfo] = useState(initialState);
 
   function setUser(user: usersgrpcUser | undefined) {
-    setContextInfo((prevState) => ({ ...prevState, user }));
+    setContextInfo(prevState => ({ ...prevState, user }));
   }
 
   function setUserRole(role: usersgrpcUserType | undefined) {
-    setContextInfo((prevState) => ({ ...prevState, role }));
+    setContextInfo(prevState => ({ ...prevState, role }));
   }
 
   function setProductId(id: string | undefined) {
-    setContextInfo((prevState) => ({ ...prevState, productId: id }));
+    setContextInfo(prevState => ({ ...prevState, productId: id }));
   }
 
   function setDeliveryLocation(
@@ -189,9 +189,9 @@ function RootLayoutNav() {
           address: string;
           region: Region;
         }
-      | undefined
+      | undefined,
   ) {
-    setContextInfo((prevState) => ({
+    setContextInfo(prevState => ({
       ...prevState,
       deliveryLocation: location,
     }));
@@ -205,50 +205,55 @@ function RootLayoutNav() {
           nextScreen: RelativePathString | ExternalPathString;
           amount: typesAmount;
         }
-      | undefined
+      | undefined,
   ) {
-    setContextInfo((prevState) => ({
+    setContextInfo(prevState => ({
       ...prevState,
       paymentData: data,
     }));
   }
 
-  const addToCart = async (product: any) => {
-    setContextInfo((prevState) => {
-        
-        const updatedCart = [...prevState.cartItems];
-        
-       
-        const existingIndex = updatedCart.findIndex(item => item.id === product.id);
+  const addToCart = async (product: productsgrpcProduct) => {
+    setContextInfo(prevState => {
+      const updatedCart = [...prevState.cartItems];
 
-        if (existingIndex > -1) {
-            
-            updatedCart[existingIndex].quantity += 1;
-        } else {
-            
-            updatedCart.push({
-                id: product.id,
-                name: product.name,
-                price: product.amount?.value || 0, 
-                image: product.image,
-                currency: product.amount?.currencyIsoCode || 'XAF',
-                quantity: 1,
-            });
-        }
+      const existingIndex = updatedCart.findIndex(
+        item => item.id === product.id,
+      );
 
-        
-        AsyncStorage.setItem('user_cart', JSON.stringify(updatedCart))
-            .catch(err => console.error("Error saving cart", err));
+      if (existingIndex > -1) {
+        updatedCart[existingIndex].quantity += 1;
+      } else {
+        updatedCart.push({
+          id: product.id ?? '',
+          name: product.name ?? '',
+          price: product.amount?.value || 0,
+          image: product.image,
+          currency: product.amount?.currencyIsoCode || 'XAF',
+          quantity: 1,
+          unitType: product.unitType,
+        });
+      }
 
-        return {
-            ...prevState,
-            cartItems: updatedCart
-        };
+      AsyncStorage.setItem('user_cart', JSON.stringify(updatedCart)).catch(
+        err => console.error('Error saving cart', err),
+      );
+
+      return {
+        ...prevState,
+        cartItems: updatedCart,
+      };
     });
   };
-  ;
 
-
+  const clearCart = async () => {
+    setContextInfo(prevState => {
+      return {
+        ...prevState,
+        cartItems: [],
+      };
+    });
+  };
   const contextSetters: ContextSetters = {
     setUser,
     setUserRole,
@@ -256,7 +261,7 @@ function RootLayoutNav() {
     setProductId,
     setPaymentData,
     addToCart,
-    
+    clearCart,
   };
 
   return (
@@ -270,7 +275,7 @@ function RootLayoutNav() {
               <Stack.Screen name="(farmer)" options={{ headerShown: false }} />
               <Stack.Screen name="(buyer)" options={{ headerShown: false }} />
               <Stack.Screen name="(payment)" options={{ headerShown: false }} />
-              <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+              <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
             </Stack>
           </GestureHandlerRootView>
         </PaperProvider>

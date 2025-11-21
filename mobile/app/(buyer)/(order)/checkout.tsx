@@ -29,7 +29,7 @@ import {
 } from '@/client/orders.swagger/@tanstack/react-query.gen';
 import { Context, ContextType } from '@/app/_layout';
 import { delay } from '@/utils';
-import { CartItem, LocalOrderItem } from '@/utils/types';
+import { CartItem } from '@/utils/types';
 import { ordersEstimateDeliveryFee } from '@/client/orders.swagger';
 
 export default function Checkout() {
@@ -43,12 +43,7 @@ export default function Checkout() {
   const [subtotal, setSubtotal] = useState<number>(0);
 
   const currency = cartItems[0]?.currency || 'XAF';
-  const [orderItems, setOrderItems] = useState<LocalOrderItem[]>(
-    cartItems.map(item => ({
-      ...(item as CartItem),
-      quantity: item.quantity.toString(),
-    })),
-  );
+  const [orderItems, setOrderItems] = useState<CartItem[]>(cartItems);
 
   const handleQuantityChange = (
     index: number,
@@ -58,15 +53,15 @@ export default function Checkout() {
     setOrderItems(prevItems => {
       const newItems = [...prevItems];
       const currentItem = newItems[index];
-      const currentQty = parseInt(currentItem.quantity) || 0;
+      const currentQty = currentItem.quantity || 0;
 
       if (type === 'increase') {
-        newItems[index].quantity = (currentQty + 1).toString();
+        newItems[index].quantity = currentQty + 1;
       } else if (type === 'decrease' && currentQty > 1) {
-        newItems[index].quantity = (currentQty - 1).toString();
+        newItems[index].quantity = currentQty - 1;
       } else if (type === 'input' && value !== undefined) {
         const numericValue = value.replace(/[^0-9]/g, '');
-        newItems[index].quantity = numericValue || '1';
+        newItems[index].quantity = parseInt(numericValue || '1');
       }
 
       return newItems;
@@ -74,14 +69,14 @@ export default function Checkout() {
   };
   useEffect(() => {
     const total = orderItems.reduce(
-      (sum, item) => sum + item.price * (parseInt(item.quantity) || 0),
+      (sum, item) => sum + item.price * (item.quantity || 0),
       0,
     );
     setSubtotal(total);
   }, [orderItems]);
 
   const totalQuantityForFee = orderItems.reduce(
-    (sum, item) => sum + (parseInt(item.quantity) || 0),
+    (sum, item) => sum + (item.quantity || 0),
     0,
   );
 
@@ -122,7 +117,8 @@ export default function Checkout() {
 
             orderItems: orderItems.map(item => ({
               productId: item.id,
-              quantity: item.quantity,
+              quantity: (item.quantity ?? 1).toString(),
+              unitType: item.unitType,
             })),
           },
         }),
@@ -169,7 +165,8 @@ export default function Checkout() {
 
       const itemsPayload = orderItems.map(item => ({
         productId: item.id,
-        quantity: item.quantity,
+        quantity: (item.quantity ?? 0).toString(),
+        unitType: item.unitType,
       }));
 
       await mutateAsync({
@@ -331,19 +328,17 @@ export default function Checkout() {
                     <View style={styles.buttonsContainer}>
                       <TouchableOpacity
                         // Use item.quantity
-                        disabled={parseInt(item.quantity) === 1}
+                        disabled={item.quantity === 1}
                         onPress={() => handleQuantityChange(index, 'decrease')}
                         style={[
                           styles.quantityButton,
-                          parseInt(item.quantity) === 1 &&
-                            styles.inactiveButton,
+                          item.quantity === 1 && styles.inactiveButton,
                         ]}>
                         <Text
                           variant="titleMedium"
                           style={[
                             styles.textCenter,
-                            parseInt(item.quantity) === 1 &&
-                              styles.inactiveText,
+                            item.quantity === 1 && styles.inactiveText,
                           ]}>
                           -
                         </Text>
@@ -361,7 +356,7 @@ export default function Checkout() {
                         contentStyle={styles.quantityInputContent}
                         mode="outlined"
                         // Use item.quantity
-                        value={item.quantity}
+                        value={(item.quantity ?? 0).toString()}
                         // Use handler specific to this item's index
                         onChangeText={text =>
                           handleQuantityChange(index, 'input', text)
