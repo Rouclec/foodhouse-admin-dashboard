@@ -15,6 +15,8 @@ interface OrderItemProps {
   item: ordersgrpcOrder;
 }
 export const OrderItem: FC<OrderItemProps> = ({ item }) => {
+  const remainingItemsCount =
+    (item?.totalItems ?? 0) > 1 ? (item?.totalItems ?? 0) - 1 : 0;
   const router = useRouter();
 
   const {
@@ -24,7 +26,7 @@ export const OrderItem: FC<OrderItemProps> = ({ item }) => {
   } = useQuery({
     ...productsGetProductOptions({
       path: {
-        productId: item?.product ?? '',
+        productId: item?.orderItems?.[0].productId ?? '',
       },
     }),
   });
@@ -52,21 +54,21 @@ export const OrderItem: FC<OrderItemProps> = ({ item }) => {
       />
       <View style={styles.orderDetailsContainer}>
         <Text variant="titleMedium">{productData?.product?.name}</Text>
+        {remainingItemsCount > 0 && (
+          <Text style={defaultStyles.text14}>
+            +{remainingItemsCount} {i18n.t('(buyer).(index).orders.items')}
+          </Text>
+        )}
         <View style={styles.centerRow}>
           <Text variant="titleSmall" style={styles.primaryText}>
-            {item?.price?.currencyIsoCode}{' '}
-            {formatAmount(
-              (
-                (productData?.product?.amount?.value ?? 0) *
-                parseInt(item?.quantity ?? '0', 10) *
-                0.90
-              ).toString(),
-              { decimalPlaces: 2 },
-            )}
+            {item?.sumTotal?.currencyIsoCode}{' '}
+            {formatAmount(((item?.sumTotal?.value ?? 0) * 0.9).toString(), {
+              decimalPlaces: 2,
+            })}
           </Text>
         </View>
         <Button
-          style={defaultStyles.primaryButton}
+          style={[defaultStyles.primaryButton, { marginTop: 12 }]}
           onPress={() =>
             router.push({
               pathname: '/(farmer)/order-details',

@@ -148,7 +148,6 @@ export default function Orders() {
   const [selectedOrder, setSelectedOrder] = useState<ordersgrpcOrder>();
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [debounceQuery, setDebounceQuery] = useState('');
   const [count, setCount] = useState(10);
   const [tabItem, setTabItem] = useState<{
     name: string;
@@ -170,7 +169,6 @@ export default function Orders() {
         useNativeDriver: true,
       }).start(() => setSearchVisible(false));
       setSearchQuery('');
-      setDebounceQuery('');
     } else {
       setSearchVisible(true);
       Animated.timing(slideAnim, {
@@ -180,14 +178,6 @@ export default function Orders() {
       }).start();
     }
   };
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setDebounceQuery(searchQuery);
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
 
   const { data, isLoading } = useQuery({
     ...ordersListUserOrdersOptions({
@@ -238,6 +228,8 @@ export default function Orders() {
       setLoading(false);
     }
   };
+
+  console.log({ tabItem });
 
   return (
     <>
@@ -297,7 +289,7 @@ export default function Orders() {
                   onPress={() => setTabItem(item)}
                   style={[
                     styles.tabItemContainer,
-                    tabItem.value === item?.value &&
+                    tabItem.value.join('') === item?.value.join('') &&
                       styles.tabItemActiveContainer,
                   ]}>
                   <Text

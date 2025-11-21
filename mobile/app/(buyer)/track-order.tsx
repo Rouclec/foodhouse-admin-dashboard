@@ -22,7 +22,6 @@ import { Colors } from '@/constants';
 import { trackOrderStyles as styles } from '@/styles';
 import { formatCurrency } from '@/utils/amountFormater';
 import { ordersgrpcOrderAuditLog } from '@/client/orders.swagger';
-import { MaterialIcons } from '@expo/vector-icons';
 import moment from 'moment';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { delay } from '@/utils';
@@ -251,77 +250,6 @@ export default function TrackOrder() {
                       </Text>
                     </View>
                   </View>
-
-                  {/* Horizontal Progress Tracker */}
-                  <FlatList
-                    horizontal
-                    data={filteredLogs}
-                    keyExtractor={(log, index) =>
-                      log?.action ?? index.toString()
-                    }
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={[
-                      styles.flatListContainer,
-                      { paddingVertical: 10 },
-                    ]}
-                    renderItem={({ item, index }) => {
-                      const isLast = index === (filteredLogs?.length ?? 0) - 1;
-
-                      const getIcon = () => {
-                        switch (item?.action) {
-                          case 'ConfirmOrderPayment':
-                            return (
-                              <MaterialIcons
-                                name="paid"
-                                size={36}
-                                color={Colors.primary[500]}
-                              />
-                            );
-                          case 'ApproveOrder':
-                            return (
-                              <Icon
-                                source="timer-sand"
-                                size={36}
-                                color={Colors.primary[500]}
-                              />
-                            );
-                          case 'DispatchOrder':
-                            return (
-                              <Icon
-                                source="truck"
-                                size={36}
-                                color={Colors.primary[500]}
-                              />
-                            );
-                          default:
-                            return (
-                              <Icon
-                                source="package-variant-closed"
-                                size={36}
-                                color={Colors.primary[500]}
-                              />
-                            );
-                        }
-                      };
-
-                      return (
-                        <View style={styles.flatListIconContainer}>
-                          {getIcon()}
-
-                          <View style={styles.relativeContainer}>
-                            <Icon
-                              source="check-circle"
-                              color={Colors.primary[500]}
-                              size={20}
-                            />
-
-                            {/* Connector */}
-                            {!isLast && <View style={styles.dashedConnector} />}
-                          </View>
-                        </View>
-                      );
-                    }}
-                  />
                 </View>
               )}
             />

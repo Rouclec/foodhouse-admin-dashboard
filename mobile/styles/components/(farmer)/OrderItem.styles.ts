@@ -1,5 +1,5 @@
-import { Colors } from "@/constants";
-import { StyleSheet } from "react-native";
+import { Colors } from '@/constants';
+import { StyleSheet } from 'react-native';
 
 export const orderItemStyles = StyleSheet.create({
   productImage: {
@@ -10,12 +10,12 @@ export const orderItemStyles = StyleSheet.create({
   orderDetailsContainer: {
     flexShrink: 1,
     flexGrow: 1,
-    overflow: "hidden",
-    rowGap: 16,
+    overflow: 'hidden',
+    rowGap: 4,
   },
   centerRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   primaryText: { fontSize: 16, color: Colors.primary[500] },
 });

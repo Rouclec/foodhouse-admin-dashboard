@@ -1,5 +1,6 @@
 import React, { useContext, useState } from 'react';
 import {
+  FlatList,
   Image,
   KeyboardAvoidingView,
   ScrollView,
@@ -29,7 +30,7 @@ import { productsGetProductOptions } from '@/client/products.swagger/@tanstack/r
 import i18n from '@/i18n';
 import { Chase } from 'react-native-animated-spinkit';
 import { Colors } from '@/constants';
-import { formatAmount } from '@/utils/amountFormater';
+import { formatAmount, formatCurrency } from '@/utils/amountFormater';
 import { usersGetPublicUserOptions } from '@/client/users.swagger/@tanstack/react-query.gen';
 import { delay } from '@/utils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -267,7 +268,7 @@ export default function OrderDetails() {
             </Text>
             <View />
           </Appbar.Header>
-          <View style={defaultStyles.card}>
+          {/* <View style={defaultStyles.card}>
             <Image
               source={{ uri: productData?.product?.image }}
               style={styles.productImage}
@@ -290,44 +291,94 @@ export default function OrderDetails() {
                 </Text>
               </View>
             </View>
+          </View> */}
+          {/* TOP SECTION — 60% height */}
+          <View style={{ flex: 0.6, overflow: 'hidden' }}>
+            <FlatList
+              data={orderDetails?.orderItems ?? []}
+              keyExtractor={(_item, index) => index.toString()}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <View style={[defaultStyles.card, { marginBottom: 16 }]}>
+                  {/* Product Image */}
+                  <Image
+                    source={{ uri: item?.productImage }}
+                    style={styles.productImage}
+                  />
+
+                  {/* Product Details */}
+                  <View style={styles.orderDetailsContainer}>
+                    <Text style={styles.leftText}>
+                      {i18n.t('(buyer).track-order.orderNumber')}:{' '}
+                      <Text variant="titleMedium" style={styles.rightText}>
+                        {orderDetails?.orderNumber}
+                      </Text>
+                    </Text>
+
+                    <Text variant="titleSmall" style={defaultStyles.text16}>
+                      {item.productName}
+                    </Text>
+
+                    <Text variant="titleSmall" style={defaultStyles.text14}>
+                      {item.quantity} {item.unitType?.replace('per_', '')}
+                      {parseInt(item?.quantity ?? '0') > 1 && 's'}
+                    </Text>
+
+                    <View style={styles.centerRow}>
+                      <Text variant="titleSmall" style={styles.primaryText}>
+                        {formatCurrency(
+                          (
+                            Number(item?.productUnitPrice?.value ?? 0) +
+                            Number(orderDetails?.deliveryFee?.value ?? 0)
+                          ).toFixed(2),
+                          orderDetails?.sumTotal?.currencyIsoCode ?? '',
+                        )}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              )}
+            />
           </View>
-          <ScrollView
-            contentContainerStyle={[
-              defaultStyles.scrollContainer,
-              styles.mainContainer,
-            ]}
-            showsVerticalScrollIndicator={false}
-            nestedScrollEnabled={true}
-            keyboardShouldPersistTaps="handled">
-            <View style={styles.card}>
-              <View style={styles.listItem}>
-                <Text variant="titleSmall" style={styles.leftText}>
-                  {i18n.t('(farmer).order-details.customersName')}
-                </Text>
-                <Text variant="titleMedium" style={styles.rightText}>
-                  {buyer?.name}
-                </Text>
+          <View style={{ flex: 0.4 }}>
+            <ScrollView
+              contentContainerStyle={[
+                defaultStyles.scrollContainer,
+                styles.mainContainer,
+              ]}
+              showsVerticalScrollIndicator={false}
+              nestedScrollEnabled={true}
+              keyboardShouldPersistTaps="handled">
+              <View style={styles.card}>
+                <View style={styles.listItem}>
+                  <Text variant="titleSmall" style={styles.leftText}>
+                    {i18n.t('(farmer).order-details.customersName')}
+                  </Text>
+                  <Text variant="titleMedium" style={styles.rightText}>
+                    {buyer?.name}
+                  </Text>
+                </View>
+                <View style={styles.listItem}>
+                  <Text variant="titleSmall" style={styles.leftText}>
+                    {i18n.t('(farmer).order-details.quantity')}
+                  </Text>
+                  <Text variant="titleMedium" style={styles.rightText}>
+                    {formatAmount(itemQuantity)}{' '}
+                    {(productData?.product?.unitType ?? '').replace('per_', '')}
+                    {(orderQuantity ?? 0) > 1 && 's'}
+                  </Text>
+                </View>
+                <View style={styles.listItem}>
+                  <Text variant="titleSmall" style={styles.leftText}>
+                    {i18n.t('(farmer).order-details.deliveryAddress')}
+                  </Text>
+                  <Text variant="titleMedium" style={styles.rightText}>
+                    {orderDetails?.deliveryLocation?.address}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.listItem}>
-                <Text variant="titleSmall" style={styles.leftText}>
-                  {i18n.t('(farmer).order-details.quantity')}
-                </Text>
-                <Text variant="titleMedium" style={styles.rightText}>
-                  {formatAmount(itemQuantity)}{' '}
-                  {(productData?.product?.unitType ?? '').replace('per_', '')}
-                  {(orderQuantity ?? 0) > 1 && 's'}
-                </Text>
-              </View>
-              <View style={styles.listItem}>
-                <Text variant="titleSmall" style={styles.leftText}>
-                  {i18n.t('(farmer).order-details.deliveryAddress')}
-                </Text>
-                <Text variant="titleMedium" style={styles.rightText}>
-                  {orderDetails?.deliveryLocation?.address}
-                </Text>
-              </View>
-            </View>
-          </ScrollView>
+            </ScrollView>
+          </View>
         </View>
       </KeyboardAvoidingView>
       {orderDetails?.status === 'OrderStatus_PAYMENT_SUCCESSFUL' && (

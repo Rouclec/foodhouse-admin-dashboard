@@ -149,11 +149,10 @@ SELECT
     o.*,
     COALESCE(oi_count.total_items, 0)::int AS total_items,
     oi_preview.product AS preview_product,
-    oi_preview.quantity AS preview_quantity,
-    oi_preview.unit_type as preview_unit_type
+    oi_preview.quantity AS preview_quantity
 FROM orders o
 LEFT JOIN LATERAL (
-    SELECT product, quantity, unit_type
+    SELECT product, quantity
     FROM order_items
     WHERE order_number = o.order_number
     LIMIT 1
