@@ -23,14 +23,18 @@ import { formatAmount } from '@/utils/amountFormater';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ProductDetails() {
-  const { user, productId, setProductId, addToCart, cartItems } = useContext(Context) as ContextType;
+  const { user, productId, setProductId, addToCart, cartItems } = useContext(
+    Context,
+  ) as ContextType;
   const [errorLoadingProduct, setErrorLoadingProduct] = useState(false);
 
   const params = useLocalSearchParams();
   const router = useRouter();
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarAction, setSnackbarAction] = useState<'success' | 'info'>('success');
+  const [snackbarAction, setSnackbarAction] = useState<'success' | 'info'>(
+    'success',
+  );
 
   useEffect(() => {
     try {
@@ -64,7 +68,7 @@ export default function ProductDetails() {
 
   const handleAddToCart = () => {
     if (!data?.product) return;
-    const productExists = cartItems.some(item => item.id === data.product!.id); 
+    const productExists = cartItems.some(item => item.id === data.product!.id);
 
     if (productExists) {
       setSnackbarMessage(i18n.t('This item is already in your cart.'));
@@ -72,7 +76,7 @@ export default function ProductDetails() {
       setSnackbarVisible(true);
       return;
     }
-    
+
     addToCart(data.product);
 
     setSnackbarMessage(i18n.t('Item added to cart!'));
@@ -80,8 +84,8 @@ export default function ProductDetails() {
     setSnackbarVisible(true);
 
     setTimeout(() => {
-        router.replace('/(buyer)/(index)');
-    }, 1500); 
+      router.replace('/(buyer)/(index)');
+    }, 1500);
   };
 
   if (isLoading) {
@@ -211,7 +215,6 @@ export default function ProductDetails() {
                   <Text variant="titleMedium" style={styles.farmerName}>
                     {farmer?.user?.firstName} {farmer?.user?.lastName}
                   </Text>
-                  
                 </View>
               </View>
               <View style={styles.locationContainer}>
@@ -253,7 +256,6 @@ export default function ProductDetails() {
                 defaultStyles.primaryButton,
                 styles.halfContainer,
               ]}
-              
               onPress={handleAddToCart}>
               <Text style={defaultStyles.buttonText}>
                 {i18n.t('(buyer).product-details.orderNow')}
@@ -266,13 +268,20 @@ export default function ProductDetails() {
       <Snackbar
         visible={snackbarVisible}
         onDismiss={() => setSnackbarVisible(false)}
-        duration={1500} 
-        style={{ 
-            backgroundColor: snackbarAction === 'success' ? Colors.primary[500] : Colors.error,
-            marginBottom: insets.bottom + 10 
-        }}
-      >
-        <Text style={{ color: Colors.light[10] }}>{snackbarMessage}</Text>
+        duration={1500}
+        style={
+          snackbarAction === 'success'
+            ? defaultStyles.successSnackBar
+            : defaultStyles.snackbar
+        }>
+        <Text
+          style={
+            snackbarAction === 'success'
+              ? defaultStyles.primaryText
+              : defaultStyles.errorText
+          }>
+          {snackbarMessage}
+        </Text>
       </Snackbar>
     </>
   );

@@ -54,6 +54,7 @@ type OrderItem struct {
 	OrderNumber int32  `json:"order_number"`
 	Product     string `json:"product"`
 	Quantity    int32  `json:"quantity"`
+	UnitType    string `json:"unit_type"`
 }
 
 type OrdersAudit struct {

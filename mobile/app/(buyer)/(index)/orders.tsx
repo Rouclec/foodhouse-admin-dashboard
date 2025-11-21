@@ -14,7 +14,7 @@ import { Colors } from '@/constants';
 import i18n from '@/i18n';
 import { defaultStyles, ordersStyles as styles } from '@/styles';
 import { delay } from '@/utils';
-import {  formatCurrency } from '@/utils/amountFormater';
+import { formatCurrency } from '@/utils/amountFormater';
 import { Feather } from '@expo/vector-icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
@@ -54,7 +54,7 @@ interface OrderItemProps {
 }
 const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
   if (!item) return;
-  const orderItemsCount = item?.orderItems?.length ?? 0;
+  const orderItemsCount = item?.totalItems ?? 0;
   const firstItem = item?.orderItems?.[0];
   const remainingItemsCount = orderItemsCount > 1 ? orderItemsCount - 1 : 0;
 
@@ -86,11 +86,6 @@ const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
     );
   }
 
-  const displayName = productData?.product?.name;
-  const summaryText = remainingItemsCount > 0
-    ? `${displayName} +${remainingItemsCount} ${i18n.t('(buyer).(index).orders.items')}`
-    : displayName;
-    
   return (
     <View style={defaultStyles.card}>
       <Image
@@ -98,10 +93,14 @@ const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
         style={styles.productImage}
       />
       <View style={styles.orderDetailsContainer}>
-        <Text variant="titleMedium">{summaryText}</Text>
+        <Text variant="titleMedium">{productData?.product?.name ?? ''}</Text>
+        {remainingItemsCount > 0 && (
+          <Text style={defaultStyles.text14}>
+            +{remainingItemsCount} {i18n.t('(buyer).(index).orders.items')}
+          </Text>
+        )}
         <View style={styles.centerRow}>
           <Text variant="titleSmall" style={styles.primaryText}>
-            {/* {item?.sumTotal?.currencyIsoCode} {item?.sumTotal?.currencyIsoCode}{' '} */}
             {formatCurrency(
               (
                 Number(item?.sumTotal?.value ?? 0) +

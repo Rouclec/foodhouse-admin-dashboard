@@ -198,17 +198,14 @@ export default function BuyerProducts() {
                       </Text>
                     </View>
                   </View>
-                 
 
-                  <TouchableOpacity style={styles.iconContainer}
+                  <TouchableOpacity
+                    style={styles.iconContainer}
                     onPress={() => {
-                     
                       if (cartItems.length === 0) {
-                        
                         return;
                       }
 
-                     
                       router.push('/(buyer)/(order)');
                     }}>
                     <View style={defaultStyles.relativeContainer}>
@@ -218,29 +215,27 @@ export default function BuyerProducts() {
                         color={Colors.primary[500]}
                       />
 
-                     
                       {cartCount > 0 && (
                         <View
                           style={{
                             position: 'absolute',
-                            top: -16,
-                            right: -6,
-                            backgroundColor: Colors.error,
-                            borderRadius: 10,
-                            minWidth: 18,
-                            height: 18,
+                            top: -14,
+                            right: -14,
+                            backgroundColor: Colors.primary[500],
+                            borderRadius: 28,
+                            width: 24,
+                            height: 24,
                             justifyContent: 'center',
                             alignItems: 'center',
                             borderWidth: 1.5,
                             borderColor: 'white',
-                            paddingHorizontal: 2,
                           }}>
                           <Text
                             style={{
-                              color: 'white',
-                              fontSize: 10,
+                              color: Colors.light[10],
+                              fontSize: 14,
                               fontWeight: 'bold',
-                              lineHeight: 12,
+                              textAlign: 'center',
                             }}>
                             {cartCount}
                           </Text>

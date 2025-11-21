@@ -663,6 +663,7 @@ func (i *Impl) CreateOrder(ctx context.Context, req *ordersgrpc.CreateOrderReque
 			OrderNumber: int32(order.OrderNumber),
 			Product:     it.ProductId,
 			Quantity:    int32(it.Quantity),
+			UnitType:    it.UnitType,
 		})
 
 		if err != nil {

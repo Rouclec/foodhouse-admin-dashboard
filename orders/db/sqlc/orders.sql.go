@@ -135,11 +135,12 @@ func (q *Queries) CreateOrderAuditLog(ctx context.Context, arg CreateOrderAuditL
 }
 
 const createOrderItem = `-- name: CreateOrderItem :exec
-INSERT INTO order_item (order_number, product, quantity)
+INSERT INTO order_items (order_number, product, quantity, unit_type)
 VALUES (
     $1::int,
     $2::text,
-    $3::int
+    $3::int,
+    $4::text
 )
 `
 
@@ -147,10 +148,16 @@ type CreateOrderItemParams struct {
 	OrderNumber int32  `json:"order_number"`
 	Product     string `json:"product"`
 	Quantity    int32  `json:"quantity"`
+	UnitType    string `json:"unit_type"`
 }
 
 func (q *Queries) CreateOrderItem(ctx context.Context, arg CreateOrderItemParams) error {
-	_, err := q.db.Exec(ctx, createOrderItem, arg.OrderNumber, arg.Product, arg.Quantity)
+	_, err := q.db.Exec(ctx, createOrderItem,
+		arg.OrderNumber,
+		arg.Product,
+		arg.Quantity,
+		arg.UnitType,
+	)
 	return err
 }
 
@@ -212,13 +219,14 @@ SELECT
         JSON_AGG(
             JSON_BUILD_OBJECT(
                 'product', oi.product,
-                'quantity', oi.quantity
+                'quantity', oi.quantity,
+                'unit_type', oi.unit_type
             )
         ) FILTER (WHERE oi.id IS NOT NULL),
         '[]'
     ) AS items
 FROM orders o
-LEFT JOIN order_item oi
+LEFT JOIN order_items oi
     ON o.order_number = oi.order_number
 WHERE o.order_number = $1
 GROUP BY o.order_number
@@ -272,7 +280,7 @@ func (q *Queries) GetOrderByOrderNumber(ctx context.Context, orderNumber int64) 
 }
 
 const getOrderItemsByOrderNumber = `-- name: GetOrderItemsByOrderNumber :many
-SELECT id, order_number, product, quantity FROM order_item
+SELECT id, order_number, product, quantity, unit_type FROM order_items
 WHERE order_number = $1
 ORDER BY id
 `
@@ -291,6 +299,7 @@ func (q *Queries) GetOrderItemsByOrderNumber(ctx context.Context, orderNumber in
 			&i.OrderNumber,
 			&i.Product,
 			&i.Quantity,
+			&i.UnitType,
 		); err != nil {
 			return nil, err
 		}
@@ -330,11 +339,12 @@ SELECT
   JSON_AGG(
     JSON_BUILD_OBJECT(
       'product', oi.product,
-      'quantity', oi.quantity
+      'quantity', oi.quantity,
+      'unit_type', oi.unit_type
     )
   ) AS products
 FROM orders o
-JOIN order_item oi
+JOIN order_items oi
   ON o.order_number = oi.order_number
 WHERE o.product_owner = $1
   AND o.status = $2
@@ -386,11 +396,12 @@ SELECT
   JSON_AGG(
     JSON_BUILD_OBJECT(
       'product', oi.product,
-      'quantity', oi.quantity
+      'quantity', oi.quantity,
+      'unit_type', oi.unit_type
     )
   ) AS products
 FROM orders o
-JOIN order_item oi
+JOIN order_items oi
   ON o.order_number = oi.order_number
 WHERE o.product_owner = $1
   AND o.status = $2
@@ -442,11 +453,12 @@ SELECT
   JSON_AGG(
     JSON_BUILD_OBJECT(
       'product', oi.product,
-      'quantity', oi.quantity
+      'quantity', oi.quantity,
+      'unit_type', oi.unit_type
     )
   ) AS products
 FROM orders o
-JOIN order_item oi
+JOIN order_items oi
   ON o.order_number = oi.order_number
 WHERE o.product_owner = $1
   AND o.status = $2
@@ -584,13 +596,14 @@ SELECT
         JSON_AGG(
             JSON_BUILD_OBJECT(
                 'product', oi.product,
-                'quantity', oi.quantity
+                'quantity', oi.quantity,
+                'unit_type', oi.unit_type
             )
         ) FILTER (WHERE oi.id IS NOT NULL),
         '[]'
     ) AS items
 FROM orders o
-LEFT JOIN order_item oi
+LEFT JOIN order_items oi
     ON o.order_number = oi.order_number
 WHERE o.secret_key = $1
 GROUP BY o.order_number
@@ -648,17 +661,18 @@ SELECT
     o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency,
     COALESCE(oi_count.total_items, 0)::int AS total_items,
     oi_preview.product AS preview_product,
-    oi_preview.quantity AS preview_quantity
+    oi_preview.quantity AS preview_quantity,
+    oi_preview.unit_type as preview_unit_type
 FROM orders o
 LEFT JOIN LATERAL (
-    SELECT product, quantity
-    FROM order_item
+    SELECT product, quantity, unit_type
+    FROM order_items
     WHERE order_number = o.order_number
     LIMIT 1
 ) AS oi_preview ON TRUE
 LEFT JOIN (
     SELECT order_number, COUNT(*) AS total_items
-    FROM order_item
+    FROM order_items
     GROUP BY order_number
 ) AS oi_count ON oi_count.order_number = o.order_number
 WHERE 
@@ -703,6 +717,7 @@ type ListFarmerOrdersRow struct {
 	TotalItems          int32              `json:"total_items"`
 	PreviewProduct      string             `json:"preview_product"`
 	PreviewQuantity     int32              `json:"preview_quantity"`
+	PreviewUnitType     string             `json:"preview_unit_type"`
 }
 
 func (q *Queries) ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersParams) ([]ListFarmerOrdersRow, error) {
@@ -741,6 +756,7 @@ func (q *Queries) ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersPara
 			&i.TotalItems,
 			&i.PreviewProduct,
 			&i.PreviewQuantity,
+			&i.PreviewUnitType,
 		); err != nil {
 			return nil, err
 		}
@@ -790,17 +806,18 @@ SELECT
     o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency,
     COALESCE(oi_count.total_items, 0)::int AS total_items,
     oi_preview.product AS preview_product,
-    oi_preview.quantity AS preview_quantity
+    oi_preview.quantity AS preview_quantity,
+    oi_preview.unit_type as preview_unit_type
 FROM orders o
 LEFT JOIN LATERAL (
-    SELECT product, quantity
-    FROM order_item
+    SELECT product, quantity, unit_type
+    FROM order_items
     WHERE order_number = o.order_number
     LIMIT 1
 ) AS oi_preview ON TRUE
 LEFT JOIN (
     SELECT order_number, COUNT(*) AS total_items
-    FROM order_item
+    FROM order_items
     GROUP BY order_number
 ) AS oi_count ON oi_count.order_number = o.order_number
 WHERE 
@@ -843,6 +860,7 @@ type ListOrdersRow struct {
 	TotalItems          int32              `json:"total_items"`
 	PreviewProduct      string             `json:"preview_product"`
 	PreviewQuantity     int32              `json:"preview_quantity"`
+	PreviewUnitType     string             `json:"preview_unit_type"`
 }
 
 func (q *Queries) ListOrders(ctx context.Context, arg ListOrdersParams) ([]ListOrdersRow, error) {
@@ -880,6 +898,7 @@ func (q *Queries) ListOrders(ctx context.Context, arg ListOrdersParams) ([]ListO
 			&i.TotalItems,
 			&i.PreviewProduct,
 			&i.PreviewQuantity,
+			&i.PreviewUnitType,
 		); err != nil {
 			return nil, err
 		}
@@ -971,13 +990,13 @@ SELECT
 FROM orders o
 LEFT JOIN LATERAL (
     SELECT product, quantity
-    FROM order_item
+    FROM order_items
     WHERE order_number = o.order_number
     LIMIT 1
 ) AS oi_preview ON TRUE
 LEFT JOIN (
     SELECT order_number, COUNT(*) AS total_items
-    FROM order_item
+    FROM order_items
     GROUP BY order_number
 ) AS oi_count ON oi_count.order_number = o.order_number
 WHERE 

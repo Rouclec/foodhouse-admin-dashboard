@@ -1708,6 +1708,9 @@
         },
         "productUnitPrice": {
           "$ref": "#/definitions/typesAmount"
+        },
+        "unitType": {
+          "type": "string"
         }
       }
     },

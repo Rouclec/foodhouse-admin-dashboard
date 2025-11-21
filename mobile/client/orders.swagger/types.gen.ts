@@ -198,6 +198,7 @@ export type ordersgrpcOrderItem = {
     productImage?: string;
     productName?: string;
     productUnitPrice?: typesAmount;
+    unitType?: string;
 };
 
 export type ordersgrpcOrderStatus = 'OrderStatus_UNSPECIFIED' | 'OrderStatus_CREATED' | 'OrderStatus_PAYMENT_SUCCESSFUL' | 'OrderStatus_PAYMENT_FAILED' | 'OrderStatus_IN_TRANSIT' | 'OrderStatus_DELIVERED' | 'OrderStatus_APPROVED' | 'OrderStatus_REJECTED';

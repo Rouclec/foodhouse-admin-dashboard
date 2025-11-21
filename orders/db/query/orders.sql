@@ -47,13 +47,14 @@ SELECT
         JSON_AGG(
             JSON_BUILD_OBJECT(
                 'product', oi.product,
-                'quantity', oi.quantity
+                'quantity', oi.quantity,
+                'unit_type', oi.unit_type
             )
         ) FILTER (WHERE oi.id IS NOT NULL),
         '[]'
     ) AS items
 FROM orders o
-LEFT JOIN order_item oi
+LEFT JOIN order_items oi
     ON o.order_number = oi.order_number
 WHERE o.order_number = $1
 GROUP BY o.order_number;
@@ -65,13 +66,14 @@ SELECT
         JSON_AGG(
             JSON_BUILD_OBJECT(
                 'product', oi.product,
-                'quantity', oi.quantity
+                'quantity', oi.quantity,
+                'unit_type', oi.unit_type
             )
         ) FILTER (WHERE oi.id IS NOT NULL),
         '[]'
     ) AS items
 FROM orders o
-LEFT JOIN order_item oi
+LEFT JOIN order_items oi
     ON o.order_number = oi.order_number
 WHERE o.secret_key = $1
 GROUP BY o.order_number;
@@ -85,13 +87,13 @@ SELECT
 FROM orders o
 LEFT JOIN LATERAL (
     SELECT product, quantity
-    FROM order_item
+    FROM order_items
     WHERE order_number = o.order_number
     LIMIT 1
 ) AS oi_preview ON TRUE
 LEFT JOIN (
     SELECT order_number, COUNT(*) AS total_items
-    FROM order_item
+    FROM order_items
     GROUP BY order_number
 ) AS oi_count ON oi_count.order_number = o.order_number
 WHERE 
@@ -117,17 +119,18 @@ SELECT
     o.*,
     COALESCE(oi_count.total_items, 0)::int AS total_items,
     oi_preview.product AS preview_product,
-    oi_preview.quantity AS preview_quantity
+    oi_preview.quantity AS preview_quantity,
+    oi_preview.unit_type as preview_unit_type
 FROM orders o
 LEFT JOIN LATERAL (
-    SELECT product, quantity
-    FROM order_item
+    SELECT product, quantity, unit_type
+    FROM order_items
     WHERE order_number = o.order_number
     LIMIT 1
 ) AS oi_preview ON TRUE
 LEFT JOIN (
     SELECT order_number, COUNT(*) AS total_items
-    FROM order_item
+    FROM order_items
     GROUP BY order_number
 ) AS oi_count ON oi_count.order_number = o.order_number
 WHERE 
@@ -147,17 +150,18 @@ SELECT
     o.*,
     COALESCE(oi_count.total_items, 0)::int AS total_items,
     oi_preview.product AS preview_product,
-    oi_preview.quantity AS preview_quantity
+    oi_preview.quantity AS preview_quantity,
+    oi_preview.unit_type as preview_unit_type
 FROM orders o
 LEFT JOIN LATERAL (
-    SELECT product, quantity
-    FROM order_item
+    SELECT product, quantity, unit_type
+    FROM order_items
     WHERE order_number = o.order_number
     LIMIT 1
 ) AS oi_preview ON TRUE
 LEFT JOIN (
     SELECT order_number, COUNT(*) AS total_items
-    FROM order_item
+    FROM order_items
     GROUP BY order_number
 ) AS oi_count ON oi_count.order_number = o.order_number
 WHERE 
@@ -211,11 +215,12 @@ SELECT
   JSON_AGG(
     JSON_BUILD_OBJECT(
       'product', oi.product,
-      'quantity', oi.quantity
+      'quantity', oi.quantity,
+      'unit_type', oi.unit_type
     )
   ) AS products
 FROM orders o
-JOIN order_item oi
+JOIN order_items oi
   ON o.order_number = oi.order_number
 WHERE o.product_owner = $1
   AND o.status = $2
@@ -229,11 +234,12 @@ SELECT
   JSON_AGG(
     JSON_BUILD_OBJECT(
       'product', oi.product,
-      'quantity', oi.quantity
+      'quantity', oi.quantity,
+      'unit_type', oi.unit_type
     )
   ) AS products
 FROM orders o
-JOIN order_item oi
+JOIN order_items oi
   ON o.order_number = oi.order_number
 WHERE o.product_owner = $1
   AND o.status = $2
@@ -247,11 +253,12 @@ SELECT
   JSON_AGG(
     JSON_BUILD_OBJECT(
       'product', oi.product,
-      'quantity', oi.quantity
+      'quantity', oi.quantity,
+      'unit_type', oi.unit_type
     )
   ) AS products
 FROM orders o
-JOIN order_item oi
+JOIN order_items oi
   ON o.order_number = oi.order_number
 WHERE o.product_owner = $1
   AND o.status = $2
@@ -308,14 +315,15 @@ LIMIT sqlc.arg(count)::int;
 
 
 -- name: CreateOrderItem :exec
-INSERT INTO order_item (order_number, product, quantity)
+INSERT INTO order_items (order_number, product, quantity, unit_type)
 VALUES (
     sqlc.arg(order_number)::int,
     sqlc.arg(product)::text,
-    sqlc.arg(quantity)::int
+    sqlc.arg(quantity)::int,
+    sqlc.arg(unit_type)::text
 );
 
 -- name: GetOrderItemsByOrderNumber :many
-SELECT * FROM order_item
+SELECT * FROM order_items
 WHERE order_number = $1
 ORDER BY id;

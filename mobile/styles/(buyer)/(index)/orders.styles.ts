@@ -1,20 +1,20 @@
-import { Colors } from "@/constants";
-import { StyleSheet } from "react-native";
+import { Colors } from '@/constants';
+import { StyleSheet } from 'react-native';
 
 export const ordersStyles = StyleSheet.create({
   title: {
     marginTop: 24,
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   searchContainer: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
-    height: "100%",
-    width: "100%",
-    backgroundColor: Colors.light["bg"],
-    flexDirection: "row",
-    alignItems: "center",
+    height: '100%',
+    width: '100%',
+    backgroundColor: Colors.light['bg'],
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 16,
   },
   searchInput: {
@@ -30,24 +30,24 @@ export const ordersStyles = StyleSheet.create({
     rowGap: 24,
   },
   tabItemsMainContainer: {
-    width: "100%",
+    width: '100%',
     marginVertical: 24,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   tabItemContainer: {
-    width: "50%",
-    alignItems: "center",
+    width: '50%',
+    alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 2,
-    borderBottomColor: Colors.grey["border"],
+    borderBottomColor: Colors.grey['border'],
   },
   tabItemActiveContainer: {
     borderBottomWidth: 4,
     borderBottomColor: Colors.primary[500],
   },
-  tabItemText: { fontSize: 18, color: Colors.grey["9e"] },
+  tabItemText: { fontSize: 18, color: Colors.grey['9e'] },
   tabItemActiveText: { color: Colors.primary[500] },
   productImage: {
     width: 102,
@@ -57,28 +57,28 @@ export const ordersStyles = StyleSheet.create({
   orderDetailsContainer: {
     flexShrink: 1,
     flexGrow: 1,
-    overflow: "hidden",
-    rowGap: 16,
+    overflow: 'hidden',
+    rowGap: 8,
   },
   centerRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   primaryText: { fontSize: 16, color: Colors.primary[500] },
   ratingTitleContainer: {
     paddingVertical: 24,
     borderBottomWidth: 1,
-    borderColor: Colors.grey["border"],
+    borderColor: Colors.grey['border'],
   },
   ratingTitle: { fontSize: 24, lineHeight: 32 },
   ratingsButtonsContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     columnGap: 24,
     paddingVertical: 24,
   },
   halfButton: {
-    width: "45%",
+    width: '45%',
   },
 });
