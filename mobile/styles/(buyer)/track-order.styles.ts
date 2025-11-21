@@ -48,6 +48,7 @@ export const trackOrderStyles = StyleSheet.create({
     height: 1,
     borderTopWidth: 1,
     borderColor: Colors.grey['border'],
+    marginVertical: 16,
   },
   contentContainer: {
     paddingTop: 8,

@@ -17,7 +17,6 @@ import {
 } from 'react-native';
 import { Appbar, Button, Icon, Snackbar, Text } from 'react-native-paper';
 import { Context, ContextType } from '../_layout';
-import { productsGetProductOptions } from '@/client/products.swagger/@tanstack/react-query.gen';
 import { Chase } from 'react-native-animated-spinkit';
 import { Colors } from '@/constants';
 import { trackOrderStyles as styles } from '@/styles';
@@ -51,19 +50,6 @@ export default function TrackOrder() {
     }),
     enabled: !!orderNumber,
   });
-
-  // const {
-  //   isLoading: isProductLoading,
-  //   data: productData,
-  //   isError: errorLoadingProduct,
-  // } = useQuery({
-  //   ...productsGetProductOptions({
-  //     path: {
-  //       productId: orderDetails?.order?.orderItems?.[0]?.productId ?? '',
-  //     },
-  //   }),
-  //   enabled: !!orderDetails?.order,
-  // });
 
   const handleConfirmDelivery = async () => {
     try {
@@ -208,6 +194,7 @@ export default function TrackOrder() {
         behavior={'padding'}
         keyboardVerticalOffset={0}>
         <View style={defaultStyles.flex}>
+          {/* Header */}
           <Appbar.Header dark={false} style={defaultStyles.appHeader}>
             <TouchableOpacity
               onPress={() => router.back()}
@@ -219,52 +206,64 @@ export default function TrackOrder() {
             </Text>
             <View />
           </Appbar.Header>
-          <ScrollView
-            contentContainerStyle={[
-              defaultStyles.scrollContainer,
-              trackOrderStyles.columnGap,
-            ]}
-            showsVerticalScrollIndicator={false}
-            nestedScrollEnabled={true}
-            keyboardShouldPersistTaps="handled">
-            {orderDetails?.order?.orderItems?.map((item, index) => (
-              <View key={index} style={[defaultStyles.card]}>
-                <Image
-                  source={{ uri: item?.productImage }}
-                  style={styles.productImage}
-                />
-                <View style={styles.orderDetailsContainer}>
-                  <Text style={styles.leftText}>
-                    {i18n.t('(buyer).track-order.orderNumber')}:{' '}
-                    <Text variant="titleMedium" style={styles.rightText}>
-                      {orderDetails?.order?.orderNumber}
+
+          {/* TOP SECTION — 60% height */}
+          <View style={{ flex: 0.6, overflow: 'hidden' }}>
+            <FlatList
+              data={orderDetails?.order?.orderItems ?? []}
+              keyExtractor={(item, index) => index.toString()}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <View style={[defaultStyles.card, { marginBottom: 16 }]}>
+                  {/* Product Image */}
+                  <Image
+                    source={{ uri: item?.productImage }}
+                    style={styles.productImage}
+                  />
+
+                  {/* Product Details */}
+                  <View style={styles.orderDetailsContainer}>
+                    <Text style={styles.leftText}>
+                      {i18n.t('(buyer).track-order.orderNumber')}:{' '}
+                      <Text variant="titleMedium" style={styles.rightText}>
+                        {orderDetails?.order?.orderNumber}
+                      </Text>
                     </Text>
-                  </Text>
-                  <Text variant="titleSmall" style={styles.text20}>
-                    {item.productName}
-                  </Text>
-                  <Text variant="titleSmall" style={styles.text20}>
-                    {item.quantity}{' '}
-                  </Text>
-                  <View style={styles.centerRow}>
-                    <Text variant="titleSmall" style={styles.primaryText}>
-                      {formatCurrency(
-                        (
-                          Number(item?.productUnitPrice?.value ?? 0) +
-                          Number(orderDetails?.order?.deliveryFee?.value ?? 0)
-                        ).toFixed(2),
-                        orderDetails?.order?.sumTotal?.currencyIsoCode ?? '',
-                      )}
+
+                    <Text variant="titleSmall" style={styles.text20}>
+                      {item.productName}
                     </Text>
+
+                    <Text variant="titleSmall" style={defaultStyles.text14}>
+                      {item.quantity} {item.unitType?.replace('per_', '')}
+                      {parseInt(item?.quantity ?? '0') > 1 && 's'}
+                    </Text>
+
+                    <View style={styles.centerRow}>
+                      <Text variant="titleSmall" style={styles.primaryText}>
+                        {formatCurrency(
+                          (
+                            Number(item?.productUnitPrice?.value ?? 0) +
+                            Number(orderDetails?.order?.deliveryFee?.value ?? 0)
+                          ).toFixed(2),
+                          orderDetails?.order?.sumTotal?.currencyIsoCode ?? '',
+                        )}
+                      </Text>
+                    </View>
                   </View>
-                </View>
-                <View style={styles.flatListContainer}>
+
+                  {/* Horizontal Progress Tracker */}
                   <FlatList
                     horizontal
                     data={filteredLogs}
-                    keyExtractor={(item, index) =>
-                      item?.action ?? index.toString()
+                    keyExtractor={(log, index) =>
+                      log?.action ?? index.toString()
                     }
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={[
+                      styles.flatListContainer,
+                      { paddingVertical: 10 },
+                    ]}
                     renderItem={({ item, index }) => {
                       const isLast = index === (filteredLogs?.length ?? 0) - 1;
 
@@ -316,7 +315,7 @@ export default function TrackOrder() {
                               size={20}
                             />
 
-                            {/* Dashed connector line */}
+                            {/* Connector */}
                             {!isLast && <View style={styles.dashedConnector} />}
                           </View>
                         </View>
@@ -324,25 +323,25 @@ export default function TrackOrder() {
                     }}
                   />
                 </View>
-              </View>
-            ))}
-          </ScrollView>
+              )}
+            />
+          </View>
 
+          {/* Divider */}
           <View style={trackOrderStyles.divider} />
 
-          <ScrollView
-            contentContainerStyle={[
-              defaultStyles.scrollContainer,
-              trackOrderStyles.padding,
-            ]}
-            showsVerticalScrollIndicator={false}
-            nestedScrollEnabled={true}
-            keyboardShouldPersistTaps="handled">
-            <View style={[defaultStyles.flex, styles.contentContainer]}>
-              <Text variant="titleMedium">
-                {i18n.t('(buyer).track-order.orderStatusDetails')}
-              </Text>
-              {filteredLogs?.map((item, index) => {
+          {/* BOTTOM SECTION — 40% height */}
+          <View style={{ flex: 0.4 }}>
+            <FlatList
+              data={filteredLogs ?? []}
+              keyExtractor={(item, index) => index.toString()}
+              contentContainerStyle={[
+                defaultStyles.scrollContainer,
+                trackOrderStyles.padding,
+                { paddingBottom: 24 },
+              ]}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item, index }) => {
                 const getTitle = () => {
                   switch (item?.action) {
                     case 'ConfirmOrderPayment':
@@ -372,8 +371,9 @@ export default function TrackOrder() {
                       ];
                   }
                 };
+
                 return (
-                  <View key={index} style={styles.filterLogsContainer}>
+                  <View style={styles.filterLogsContainer}>
                     <View style={defaultStyles.relativeContainer}>
                       <View
                         style={[
@@ -387,33 +387,33 @@ export default function TrackOrder() {
                           ]}
                         />
                       </View>
+
                       {index !== (filteredLogs?.length ?? 0) - 1 && (
                         <View style={styles.verticalDivider} />
                       )}
                     </View>
+
                     <View style={styles.filterLogConentContainer}>
                       <View style={styles.rowGap6}>
                         <Text
                           variant="titleMedium"
-                          style={defaultStyles.text16}
-                          ellipsizeMode="tail">
-                          {getTitle()[0]}
-                          {' - '}
-                          {moment(item?.timestamp ?? '').format('MMMM DD')}
+                          style={defaultStyles.text16}>
+                          {getTitle()[0]} -{' '}
+                          {moment(item?.timestamp).format('MMMM DD')}
                         </Text>
-                        <Text style={styles.bodyText} ellipsizeMode="tail">
-                          {getTitle()[1]}
-                        </Text>
+
+                        <Text style={styles.bodyText}>{getTitle()[1]}</Text>
                       </View>
+
                       <Text style={styles.timeText}>
-                        {moment(item?.timestamp ?? '').format('hh:mm A')}
+                        {moment(item?.timestamp).format('hh:mm A')}
                       </Text>
                     </View>
                   </View>
                 );
-              })}
-            </View>
-          </ScrollView>
+              }}
+            />
+          </View>
         </View>
         {orderDetails?.order?.status === 'OrderStatus_IN_TRANSIT' && (
           <View style={defaultStyles.bottomButtonContainer}>
@@ -433,6 +433,8 @@ export default function TrackOrder() {
           </View>
         )}
       </KeyboardAvoidingView>
+
+      {/* Snackbar Error */}
       <Snackbar
         visible={!!error}
         onDismiss={() => {}}
