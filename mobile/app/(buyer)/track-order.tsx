@@ -3,7 +3,7 @@ import {
   ordersGetOrderDetailsOptions,
 } from '@/client/orders.swagger/@tanstack/react-query.gen';
 import i18n from '@/i18n';
-import { defaultStyles } from '@/styles';
+import { defaultStyles, trackOrderStyles } from '@/styles';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useContext, useEffect, useState } from 'react';
@@ -52,18 +52,18 @@ export default function TrackOrder() {
     enabled: !!orderNumber,
   });
 
-  const {
-    isLoading: isProductLoading,
-    data: productData,
-    isError: errorLoadingProduct,
-  } = useQuery({
-    ...productsGetProductOptions({
-      path: {
-        productId: orderDetails?.order?.product ?? '',
-      },
-    }),
-    enabled: !!orderDetails?.order,
-  });
+  // const {
+  //   isLoading: isProductLoading,
+  //   data: productData,
+  //   isError: errorLoadingProduct,
+  // } = useQuery({
+  //   ...productsGetProductOptions({
+  //     path: {
+  //       productId: orderDetails?.order?.orderItems?.[0]?.productId ?? '',
+  //     },
+  //   }),
+  //   enabled: !!orderDetails?.order,
+  // });
 
   const handleConfirmDelivery = async () => {
     try {
@@ -126,7 +126,7 @@ export default function TrackOrder() {
 
   const insets = useSafeAreaInsets();
 
-  if (isOrderDetailsLoading || isProductLoading) {
+  if (isOrderDetailsLoading) {
     return (
       <>
         <KeyboardAvoidingView
@@ -166,7 +166,7 @@ export default function TrackOrder() {
     );
   }
 
-  if (errorLoadingOrder || errorLoadingProduct) {
+  if (errorLoadingOrder) {
     return (
       <>
         <KeyboardAvoidingView
@@ -219,103 +219,115 @@ export default function TrackOrder() {
             </Text>
             <View />
           </Appbar.Header>
-          <View style={defaultStyles.card}>
-            <Image
-              source={{ uri: productData?.product?.image }}
-              style={styles.productImage}
-            />
-            <View style={styles.orderDetailsContainer}>
-              <Text style={styles.leftText}>
-                {i18n.t('(buyer).track-order.orderNumber')}:{' '}
-                <Text variant="titleMedium" style={styles.rightText}>
-                  {orderDetails?.order?.orderNumber}
-                </Text>
-              </Text>
-              <Text variant="titleSmall" style={styles.text20}>
-                {productData?.product?.name} - {orderDetails?.order?.quantity}{' '}
-                {productData?.product?.unitType?.replace('per_', '')}
-                {parseInt(orderDetails?.order?.quantity ?? '') > 1 && 's'}
-              </Text>
-              <View style={styles.centerRow}>
-                <Text variant="titleSmall" style={styles.primaryText}>
-                  {orderDetails?.order?.price?.currencyIsoCode}{' '}
-                  {formatCurrency(
-                    (
-                      Number(orderDetails?.order?.price?.value ?? 0) +
-                      Number(orderDetails?.order?.deliveryFee?.value ?? 0)
-                    ).toFixed(2),
-                    orderDetails?.order?.price?.currencyIsoCode ?? '', 
-                  )}
-                </Text>
-              </View>
-            </View>
-          </View>
-          <View style={styles.flatListContainer}>
-            <FlatList
-              horizontal
-              data={filteredLogs}
-              keyExtractor={(item, index) => item?.action ?? index.toString()}
-              renderItem={({ item, index }) => {
-                const isLast = index === (filteredLogs?.length ?? 0) - 1;
-
-                const getIcon = () => {
-                  switch (item?.action) {
-                    case 'ConfirmOrderPayment':
-                      return (
-                        <MaterialIcons
-                          name="paid"
-                          size={36}
-                          color={Colors.primary[500]}
-                        />
-                      );
-                    case 'ApproveOrder':
-                      return (
-                        <Icon
-                          source="timer-sand"
-                          size={36}
-                          color={Colors.primary[500]}
-                        />
-                      );
-                    case 'DispatchOrder':
-                      return (
-                        <Icon
-                          source="truck"
-                          size={36}
-                          color={Colors.primary[500]}
-                        />
-                      );
-                    default:
-                      return (
-                        <Icon
-                          source="package-variant-closed"
-                          size={36}
-                          color={Colors.primary[500]}
-                        />
-                      );
-                  }
-                };
-
-                return (
-                  <View style={styles.flatListIconContainer}>
-                    {getIcon()}
-
-                    <View style={styles.relativeContainer}>
-                      <Icon
-                        source="check-circle"
-                        color={Colors.primary[500]}
-                        size={20}
-                      />
-
-                      {/* Dashed connector line */}
-                      {!isLast && <View style={styles.dashedConnector} />}
-                    </View>
-                  </View>
-                );
-              }}
-            />
-          </View>
           <ScrollView
-            contentContainerStyle={defaultStyles.scrollContainer}
+            contentContainerStyle={[defaultStyles.scrollContainer, trackOrderStyles.columnGap]}
+            showsVerticalScrollIndicator={false}
+            nestedScrollEnabled={true}
+            keyboardShouldPersistTaps="handled">
+            {orderDetails?.order?.orderItems?.map((item, index) => (
+              <View key={index} style={[defaultStyles.card]}>
+                <Image
+                  source={{ uri: item?.productImage }}
+                  style={styles.productImage}
+                />
+                <View style={styles.orderDetailsContainer}>
+                  <Text style={styles.leftText}>
+                    {i18n.t('(buyer).track-order.orderNumber')}:{' '}
+                    <Text variant="titleMedium" style={styles.rightText}>
+                      {orderDetails?.order?.orderNumber}
+                    </Text>
+                  </Text>
+                  <Text variant="titleSmall" style={styles.text20}>
+                    {item.productName}
+                  </Text>
+                  <Text variant="titleSmall" style={styles.text20}>
+                   {item.quantity}{' '}
+                  </Text>
+                  <View style={styles.centerRow}>
+                    <Text variant="titleSmall" style={styles.primaryText}>
+                     
+                      {formatCurrency(
+                        (
+                          Number(item?.productUnitPrice?.value ?? 0) +
+                          Number(orderDetails?.order?.deliveryFee?.value ?? 0)
+                        ).toFixed(2),
+                        orderDetails?.order?.sumTotal?.currencyIsoCode ?? '',
+                      )}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.flatListContainer}>
+                  <FlatList
+                    horizontal
+                    data={filteredLogs}
+                    keyExtractor={(item, index) =>
+                      item?.action ?? index.toString()
+                    }
+                    renderItem={({ item, index }) => {
+                      const isLast = index === (filteredLogs?.length ?? 0) - 1;
+
+                      const getIcon = () => {
+                        switch (item?.action) {
+                          case 'ConfirmOrderPayment':
+                            return (
+                              <MaterialIcons
+                                name="paid"
+                                size={36}
+                                color={Colors.primary[500]}
+                              />
+                            );
+                          case 'ApproveOrder':
+                            return (
+                              <Icon
+                                source="timer-sand"
+                                size={36}
+                                color={Colors.primary[500]}
+                              />
+                            );
+                          case 'DispatchOrder':
+                            return (
+                              <Icon
+                                source="truck"
+                                size={36}
+                                color={Colors.primary[500]}
+                              />
+                            );
+                          default:
+                            return (
+                              <Icon
+                                source="package-variant-closed"
+                                size={36}
+                                color={Colors.primary[500]}
+                              />
+                            );
+                        }
+                      };
+
+                      return (
+                        <View style={styles.flatListIconContainer}>
+                          {getIcon()}
+
+                          <View style={styles.relativeContainer}>
+                            <Icon
+                              source="check-circle"
+                              color={Colors.primary[500]}
+                              size={20}
+                            />
+
+                            {/* Dashed connector line */}
+                            {!isLast && <View style={styles.dashedConnector} />}
+                          </View>
+                        </View>
+                      );
+                    }}
+                  />
+                </View>
+              </View>
+            ))}
+          </ScrollView>
+
+          <ScrollView
+            contentContainerStyle={[defaultStyles.scrollContainer, trackOrderStyles.padding]}
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled">

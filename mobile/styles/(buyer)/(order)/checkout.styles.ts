@@ -8,14 +8,15 @@ export const checkoutStyles = StyleSheet.create({
     marginBottom: 96,
   },
   orderContainer: {
-    rowGap: 24,
+    marginTop: 8,
+    rowGap: 16,
   },
   orderDetailsContainer: {
     backgroundColor: Colors.light[10],
     padding: 20,
     borderRadius: 16,
     flexDirection: 'row',
-    columnGap: 16,
+    columnGap: 24,
   },
   rightContainer: {
     rowGap: 12,

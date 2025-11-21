@@ -106,12 +106,13 @@ export const defaultStyles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     paddingBottom: 32,
+    
   },
   bottomButtonContainer: {
     // position: "absolute",
     alignSelf: 'center',
     bottom: 0,
-    backgroundColor: Colors.light['bg'],
+    
     // backgroundColor: "transparent",
     // height: 96,
     height: 'auto',
@@ -120,6 +121,7 @@ export const defaultStyles = StyleSheet.create({
     paddingHorizontal: 24,
     rowGap: 12,
     paddingTop: 12,
+    marginHorizontal: 8,
   },
   bottomContainerWithContent: {
     paddingTop: 12,

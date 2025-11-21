@@ -8,11 +8,12 @@ import {
   ScrollView,
   TouchableOpacity,
   View,
+  Alert,
 } from 'react-native';
 import { defaultStyles, productDetailsStyles as styles } from '@/styles';
 import { Colors } from '@/constants';
 import { Chase } from 'react-native-animated-spinkit';
-import { Appbar, Button, Icon, Text } from 'react-native-paper';
+import { Appbar, Button, Icon, Snackbar, Text } from 'react-native-paper';
 import i18n from '@/i18n';
 import { Context, ContextType } from '../_layout';
 import { useQuery } from '@tanstack/react-query';
@@ -22,11 +23,14 @@ import { formatAmount } from '@/utils/amountFormater';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ProductDetails() {
-  const { user, productId, setProductId } = useContext(Context) as ContextType;
+  const { user, productId, setProductId, addToCart, cartItems } = useContext(Context) as ContextType;
   const [errorLoadingProduct, setErrorLoadingProduct] = useState(false);
 
   const params = useLocalSearchParams();
   const router = useRouter();
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarAction, setSnackbarAction] = useState<'success' | 'info'>('success');
 
   useEffect(() => {
     try {
@@ -57,6 +61,28 @@ export default function ProductDetails() {
   });
 
   const insets = useSafeAreaInsets();
+
+  const handleAddToCart = () => {
+    if (!data?.product) return;
+    const productExists = cartItems.some(item => item.id === data.product!.id); 
+
+    if (productExists) {
+      setSnackbarMessage(i18n.t('This item is already in your cart.'));
+      setSnackbarAction('info');
+      setSnackbarVisible(true);
+      return;
+    }
+    
+    addToCart(data.product);
+
+    setSnackbarMessage(i18n.t('Item added to cart!'));
+    setSnackbarAction('success');
+    setSnackbarVisible(true);
+
+    setTimeout(() => {
+        router.replace('/(buyer)/(index)');
+    }, 1500); 
+  };
 
   if (isLoading) {
     return (
@@ -185,11 +211,7 @@ export default function ProductDetails() {
                   <Text variant="titleMedium" style={styles.farmerName}>
                     {farmer?.user?.firstName} {farmer?.user?.lastName}
                   </Text>
-                  {/* <Icon
-                    source={'check-decagram'}
-                    color={Colors.blue}
-                    size={18}
-                  /> */}
+                  
                 </View>
               </View>
               <View style={styles.locationContainer}>
@@ -231,10 +253,8 @@ export default function ProductDetails() {
                 defaultStyles.primaryButton,
                 styles.halfContainer,
               ]}
-              onPress={() => {
-                setProductId(data?.product?.id);
-                router.push('/(buyer)/(order)');
-              }}>
+              
+              onPress={handleAddToCart}>
               <Text style={defaultStyles.buttonText}>
                 {i18n.t('(buyer).product-details.orderNow')}
               </Text>
@@ -242,6 +262,18 @@ export default function ProductDetails() {
           </View>
         </SafeAreaView>
       </View>
+
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={1500} 
+        style={{ 
+            backgroundColor: snackbarAction === 'success' ? Colors.primary[500] : Colors.error,
+            marginBottom: insets.bottom + 10 
+        }}
+      >
+        <Text style={{ color: Colors.light[10] }}>{snackbarMessage}</Text>
+      </Snackbar>
     </>
   );
 }

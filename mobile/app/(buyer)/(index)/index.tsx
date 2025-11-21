@@ -98,7 +98,8 @@ export default function BuyerProducts() {
 
   const router = useRouter();
 
-  const { user } = useContext(Context) as ContextType;
+  const { user, cartItems } = useContext(Context) as ContextType;
+  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   const { data: categories, isLoading: isCategoriesLoading } = useQuery({
     ...productsListCategoriesOptions(),
@@ -197,16 +198,56 @@ export default function BuyerProducts() {
                       </Text>
                     </View>
                   </View>
-                  {/* <TouchableOpacity style={styles.iconContainer}>
+                 
+
+                  <TouchableOpacity style={styles.iconContainer}
+                    onPress={() => {
+                     
+                      if (cartItems.length === 0) {
+                        
+                        return;
+                      }
+
+                     
+                      router.push('/(buyer)/(order)');
+                    }}>
                     <View style={defaultStyles.relativeContainer}>
                       <Icon
-                        source={'bell-outline'}
-                        size={24}
-                        color={Colors.dark[10]}
+                        source={'cart'}
+                        size={32}
+                        color={Colors.primary[500]}
                       />
-                      <View style={styles.noticiatonIndicator} />
+
+                     
+                      {cartCount > 0 && (
+                        <View
+                          style={{
+                            position: 'absolute',
+                            top: -16,
+                            right: -6,
+                            backgroundColor: Colors.error,
+                            borderRadius: 10,
+                            minWidth: 18,
+                            height: 18,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            borderWidth: 1.5,
+                            borderColor: 'white',
+                            paddingHorizontal: 2,
+                          }}>
+                          <Text
+                            style={{
+                              color: 'white',
+                              fontSize: 10,
+                              fontWeight: 'bold',
+                              lineHeight: 12,
+                            }}>
+                            {cartCount}
+                          </Text>
+                        </View>
+                      )}
                     </View>
-                  </TouchableOpacity> */}
+                  </TouchableOpacity>
                 </View>
                 <TextInput
                   placeholder={i18n.t(
@@ -651,12 +692,7 @@ export default function BuyerProducts() {
 
           <Dialog.Actions style={defaultStyles.actions}>
             <Button
-              style={[
-                defaultStyles.button,
-
-                defaultStyles.halfContainer,
-               
-              ]}
+              style={[defaultStyles.button, defaultStyles.halfContainer]}
               textColor={Colors.light['10']}
               onPress={() => setShowLocationModal(false)}>
               {i18n.t('(auth).location.button1')}

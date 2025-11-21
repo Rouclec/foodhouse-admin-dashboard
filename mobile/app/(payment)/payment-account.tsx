@@ -42,9 +42,10 @@ const PaymentAccountPage = () => {
   const [mobile, setMobile] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { user, paymentData, setPaymentData } = useContext(
+  const { user, paymentData, setPaymentData, cartItems } = useContext(
     Context
   ) as ContextType;
+  
 
   const { paymentMethod } = params;
 
