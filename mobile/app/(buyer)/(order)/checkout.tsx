@@ -30,6 +30,7 @@ import {
 import { Context, ContextType } from '@/app/_layout';
 import { delay } from '@/utils';
 import { CartItem, LocalOrderItem } from '@/utils/types';
+import { ordersEstimateDeliveryFee } from '@/client/orders.swagger';
 
 export default function Checkout() {
   const router = useRouter();
@@ -40,8 +41,6 @@ export default function Checkout() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [subtotal, setSubtotal] = useState<number>(0);
-
-
 
   const currency = cartItems[0]?.currency || 'XAF';
   const [orderItems, setOrderItems] = useState<LocalOrderItem[]>(
@@ -107,27 +106,35 @@ export default function Checkout() {
     enabled: !!productId,
   });
 
-  const { data: estiamtedDeliverFee } = useQuery({
-    ...ordersEstimateDeliveryFeeOptions({
-      path: {
-        userId: user?.userId ?? '',
-      },
-      body: { 
-        deliveryLocation : {
-          lon: deliveryLocation?.region?.longitude,
-          lat: deliveryLocation?.region?.latitude,
-          address: deliveryLocation?.description
-        },
+  const { mutate: estimateDeliveryFee, data: estimatedDeliveryFee } =
+    useMutation({
+      mutationFn: () =>
+        ordersEstimateDeliveryFee({
+          path: {
+            userId: user?.userId ?? '',
+          },
+          body: {
+            deliveryLocation: {
+              lon: deliveryLocation?.region?.longitude,
+              lat: deliveryLocation?.region?.latitude,
+              address: deliveryLocation?.description,
+            },
 
-        orderItems: orderItems.map(item => ({
-          productId: item.id,
-          quantity: item.quantity,
-        }))
+            orderItems: orderItems.map(item => ({
+              productId: item.id,
+              quantity: item.quantity,
+            })),
+          },
+        }),
+    });
 
-      },
-    }),
-    enabled: !!productId,
-  });
+  useEffect(() => {
+    if (!user?.userId) return;
+    if (!deliveryLocation) return;
+    if (orderItems.length === 0) return;
+
+    estimateDeliveryFee();
+  }, [user?.userId, deliveryLocation, orderItems, estimateDeliveryFee]);
 
   const { mutateAsync } = useMutation({
     ...ordersCreateOrderMutation(),
@@ -139,7 +146,8 @@ export default function Checkout() {
 
         amount: {
           value:
-            subtotal + (estiamtedDeliverFee?.estimatedDeliveryFee?.value ?? 0), // Send the full cart amount
+            subtotal +
+            (estimatedDeliveryFee?.data?.estimatedDeliveryFee?.value ?? 0),
           currencyIsoCode: currency,
         },
       });
@@ -268,11 +276,10 @@ export default function Checkout() {
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled">
-            
             <Text variant="titleMedium">
               {i18n.t('(buyer).(order).checkout.shippingAddress')}
             </Text>
-            
+
             <View style={[styles.orderDetailsContainer, styles.flexRow]}>
               <View style={styles.outterLocationIconContainer}>
                 <View style={styles.innerLocationIconContainer}>
@@ -388,9 +395,14 @@ export default function Checkout() {
                     {i18n.t('(buyer).(order).checkout.delivery')}
                   </Text>
                   <Text style={styles.textAlignRight} variant="titleMedium">
-                    {estiamtedDeliverFee?.estimatedDeliveryFee?.currencyIsoCode}{' '}
+                    {
+                      estimatedDeliveryFee?.data?.estimatedDeliveryFee
+                        ?.currencyIsoCode
+                    }{' '}
                     {formatAmount(
-                      estiamtedDeliverFee?.estimatedDeliveryFee?.value ?? '0',
+                      estimatedDeliveryFee?.data?.estimatedDeliveryFee?.value ??
+                        0,
+
                       {
                         decimalPlaces: 2,
                       },
@@ -406,7 +418,8 @@ export default function Checkout() {
                     {formatAmount(
                       (
                         (subtotal ?? 0) +
-                        (estiamtedDeliverFee?.estimatedDeliveryFee?.value ?? 0)
+                        (estimatedDeliveryFee?.data?.estimatedDeliveryFee
+                          ?.value ?? 0)
                       )?.toString() ?? '',
                       {
                         decimalPlaces: 2,
@@ -424,7 +437,7 @@ export default function Checkout() {
           style={[
             defaultStyles.button,
             defaultStyles.primaryButton,
-            (loading || totalQuantityForFee === 0) && defaultStyles.greyButton, 
+            (loading || totalQuantityForFee === 0) && defaultStyles.greyButton,
           ]}
           loading={loading}
           disabled={loading || totalQuantityForFee === 0}
@@ -435,7 +448,7 @@ export default function Checkout() {
             {formatAmount(
               (
                 (subtotal ?? 0) +
-                (estiamtedDeliverFee?.estimatedDeliveryFee?.value ?? 0)
+                (estimatedDeliveryFee?.data?.estimatedDeliveryFee?.value ?? 0)
               )?.toString() ?? '',
               {
                 decimalPlaces: 2,
