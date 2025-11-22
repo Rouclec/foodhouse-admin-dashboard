@@ -5,8 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"math"
 	"net/http"
+	"net/http/httputil"
 	"strings"
 
 	"github.com/rs/zerolog"
@@ -57,11 +59,11 @@ type InitiatePaymentResponse struct {
 
 type InitiateWithdrawalRequest struct {
 	Amount           string `json:"amount"`
-	Currency         string  `json:"currency"`
-	SubscriberMsisdn string  `json:"subscriberMsisdn"`
-	Descrtiption     string  `json:"description"`
-	OrderId          string  `json:"orderId"`
-	NotifUrl         string  `json:"notifUrl"`
+	Currency         string `json:"currency"`
+	SubscriberMsisdn string `json:"subscriberMsisdn"`
+	Descrtiption     string `json:"description"`
+	OrderId          string `json:"orderId"`
+	NotifUrl         string `json:"notifUrl"`
 }
 
 type InitiateWithdrawalResponse struct {
@@ -174,6 +176,8 @@ func (tp *TrustPayWayProvider) WithdrawFunds(ctx context.Context, to string, amo
 
 	loginResponse, err := tp.authenticate(ctx)
 
+	tp.Logger.Debug().Msgf("login response %v", loginResponse)
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to authenticate request %v", err)
 	}
@@ -204,7 +208,23 @@ func (tp *TrustPayWayProvider) WithdrawFunds(ctx context.Context, to string, amo
 	req.Header.Set("Authorization", "Bearer "+loginResponse.AccessToken)
 	req.Header.Set("Content-Type", "application/json")
 
+	// Read and reset the body to allow DumpRequestOut and still send the request
+	if req.Body != nil {
+		bodyBytes, _ := io.ReadAll(req.Body)
+		req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes)) // reset so the client can still send it
+	}
+
+	// Dump the full request (method, URL, headers, body)
+	dump, err := httputil.DumpRequestOut(req, true)
+	if err != nil {
+		tp.Logger.Error().Err(err).Msg("failed to dump HTTP request")
+	} else {
+		tp.Logger.Debug().Msgf("FULL HTTP REQUEST:\n%s", dump)
+	}
+
+	// Then send the request as usual
 	resp, err := tp.Client.Do(req)
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
