@@ -176,14 +176,19 @@ func (i *Impl) SendSignupSmsOtp(ctx context.Context, req *usersgrpc.SendSignupSm
 // The following block details the steps to hash and salt the password.
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if !CheckPasswordHash(password, string(bytes)) {
+	if !CheckPasswordHash(password, string(bytes), nil) {
 		return "", fmt.Errorf("hashing password failed")
 	}
 	return string(bytes), err
 }
 
-func CheckPasswordHash(password, hash string) bool {
+func CheckPasswordHash(password, hash string, logger *zerolog.Logger) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+
+	if logger != nil {
+		logger.Debug().Msgf("error comparing password %v", err)
+	}
+
 	return err == nil
 }
 
@@ -621,8 +626,10 @@ func (i *Impl) validateAuthFactor(ctx context.Context, authFactor *usersgrpc.Aut
 		return i.validateEmailPassword(ctx, authFactor)
 	case usersgrpc.FactorType_FACTOR_TYPE_EMAIL_PHONE_PASSWORD:
 		if strings.Contains(authFactor.GetId(), "@") {
+			i.logger.Debug().Msgf("Email factor from email phone")
 			return i.validateEmailPassword(ctx, authFactor)
 		}
+		i.logger.Debug().Msgf("Phone factor from email phone")
 		return i.validatePhonePassword(ctx, authFactor)
 
 	case usersgrpc.FactorType_FACTOR_TYPE_UNSPECIFIED:
@@ -638,7 +645,8 @@ func (i *Impl) validateEmailPassword(ctx context.Context, authFactor *usersgrpc.
 		return "", status.Errorf(codes.NotFound, "User not found: %v", err)
 	}
 
-	if !CheckPasswordHash(authFactor.GetSecretValue(), user.Password) {
+	i.logger.Debug().Msgf("user password log: %v", user.Password)
+	if !CheckPasswordHash(authFactor.GetSecretValue(), user.Password, &i.logger) {
 		return "", status.Error(codes.Unauthenticated, "Invalid password")
 	}
 
@@ -651,7 +659,7 @@ func (i *Impl) validatePhonePassword(ctx context.Context, authFactor *usersgrpc.
 		return "", status.Errorf(codes.NotFound, "User not found: %v", err)
 	}
 
-	if !CheckPasswordHash(authFactor.GetSecretValue(), user.Password) {
+	if !CheckPasswordHash(authFactor.GetSecretValue(), user.Password, &i.logger) {
 		return "", status.Error(codes.Unauthenticated, "Invalid password")
 	}
 
