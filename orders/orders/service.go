@@ -57,7 +57,7 @@ const (
 
 	RefundPercentage = 0.95
 
-	FarmersPercentage = 0.00
+	FarmersPercentage = 1.00
 
 	// agent commission 30% * 20%.
 	ReferralCommissionPercentage = 0.06
