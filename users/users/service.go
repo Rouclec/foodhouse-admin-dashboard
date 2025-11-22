@@ -183,6 +183,7 @@ func HashPassword(password string) (string, error) {
 }
 
 func CheckPasswordHash(password, hash string, logger *zerolog.Logger) bool {
+	logger.Debug().Msgf("hash and password: %v, %v", []byte(hash), []byte(password))
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 
 	if logger != nil {
