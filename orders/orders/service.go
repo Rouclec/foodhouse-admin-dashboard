@@ -374,7 +374,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 		if shouldSendReceipt {
 			i.logger.Debug().Msgf("should send receipt")
 
-			// fetch the user and get their email
+			// fetch the user and get their email.
 			// NB: don't fail if receipt can't be sent.
 			user, _ := i.userService.GetUserByID(ctx, &usersgrpc.GetUserByIDRequest{
 				UserId: *order.CreatedBy,
