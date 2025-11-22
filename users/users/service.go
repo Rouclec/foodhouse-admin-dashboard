@@ -176,19 +176,14 @@ func (i *Impl) SendSignupSmsOtp(ctx context.Context, req *usersgrpc.SendSignupSm
 // The following block details the steps to hash and salt the password.
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if !CheckPasswordHash(password, string(bytes), nil) {
+	if !CheckPasswordHash(password, string(bytes)) {
 		return "", fmt.Errorf("hashing password failed")
 	}
 	return string(bytes), err
 }
 
-func CheckPasswordHash(password, hash string, logger *zerolog.Logger) bool {
-	logger.Debug().Msgf("hash and password: %v, %v", []byte(hash), []byte(password))
+func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-
-	if logger != nil {
-		logger.Debug().Msgf("error comparing password %v", err)
-	}
 
 	return err == nil
 }
@@ -647,7 +642,7 @@ func (i *Impl) validateEmailPassword(ctx context.Context, authFactor *usersgrpc.
 	}
 
 	i.logger.Debug().Msgf("user password log: %v", user.Password)
-	if !CheckPasswordHash(authFactor.GetSecretValue(), user.Password, &i.logger) {
+	if !CheckPasswordHash(authFactor.GetSecretValue(), user.Password) {
 		return "", status.Error(codes.Unauthenticated, "Invalid password")
 	}
 
@@ -660,7 +655,7 @@ func (i *Impl) validatePhonePassword(ctx context.Context, authFactor *usersgrpc.
 		return "", status.Errorf(codes.NotFound, "User not found: %v", err)
 	}
 
-	if !CheckPasswordHash(authFactor.GetSecretValue(), user.Password, &i.logger) {
+	if !CheckPasswordHash(authFactor.GetSecretValue(), user.Password) {
 		return "", status.Error(codes.Unauthenticated, "Invalid password")
 	}
 
