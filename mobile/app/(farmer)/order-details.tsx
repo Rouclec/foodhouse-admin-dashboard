@@ -167,13 +167,7 @@ export default function OrderDetails() {
   });
 
   const insets = useSafeAreaInsets();
-  const productPrice = productData?.product?.amount?.value ?? 0;
   const orderQuantity = parseInt(itemQuantity, 10);
-  const currency =
-    productData?.product?.amount?.currencyIsoCode ??
-    orderDetails?.sumTotal?.currencyIsoCode;
-
-  const calculatedDisplayPrice = productPrice * orderQuantity * 0.9;
 
   if (isOrderDetailsLoading || isProductLoading) {
     return (

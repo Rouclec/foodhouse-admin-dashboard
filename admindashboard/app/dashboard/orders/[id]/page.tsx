@@ -186,15 +186,6 @@ export default function OrderDetailsPage() {
       ) != -1, // only enable this query when the order has been confirmed, else, avoid unneccesary call
   });
 
-  const { data: productData, isLoading: isProductDataLoading } = useQuery({
-    ...productsGetProductOptions({
-      path: {
-        productId: orderDetailsData?.order?.product ?? "",
-      },
-    }),
-    enabled: !!orderDetailsData?.order?.product,
-  });
-
   const { mutateAsync: approveOrder } = useMutation({
     ...ordersApproveOrderMutation(),
     onSuccess: async () => {
@@ -318,7 +309,6 @@ export default function OrderDetailsPage() {
     isFarmerDataLoading ||
     isUserDataLoading ||
     isAgentDataLoading ||
-    isProductDataLoading ||
     isApproverLoading ||
     isConfirmerLoading
   ) {
@@ -519,30 +509,39 @@ export default function OrderDetailsPage() {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      <tr key={productData?.product?.id ?? ""}>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {productData?.product?.name}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 text-right">
-                          {orderDetailsData?.order.quantity}{" "}
-                          {productData?.product?.unitType?.replace("per_", "")}
-                          {parseInt(orderDetailsData?.order.quantity ?? "") >
-                            1 && "s"}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 text-right">
-                          {formatCurrency(
-                            productData?.product?.amount?.value ?? 0,
-                            productData?.product?.amount?.currencyIsoCode ?? ""
-                          )}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">
-                          {formatCurrency(
-                            (productData?.product?.amount?.value ?? 0) *
-                              parseInt(orderDetailsData?.order?.quantity ?? ""),
-                            productData?.product?.amount?.currencyIsoCode ?? ""
-                          )}
-                        </td>
-                      </tr>
+                      {orderDetailsData?.order?.orderItems?.map(
+                        (item, inxex) => {
+                          return (
+                            <tr key={item?.productId ?? ""}>
+                              <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {item?.productName}
+                              </td>
+                              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 text-right">
+                                {item?.quantity}{" "}
+                                {item?.unitType?.replace("per_", "")}
+                                {parseInt(item?.quantity ?? "") > 1 && "s"}
+                              </td>
+                              {/* <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 text-right">
+                                {formatCurrency(
+                                  productData?.product?.amount?.value ?? 0,
+                                  productData?.product?.amount
+                                    ?.currencyIsoCode ?? ""
+                                )}
+                              </td> */}
+                              {/* <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">
+                                {formatCurrency(
+                                  (productData?.product?.amount?.value ?? 0) *
+                                    parseInt(
+                                      orderDetailsData?.order?.quantity ?? ""
+                                    ),
+                                  productData?.product?.amount
+                                    ?.currencyIsoCode ?? ""
+                                )}
+                              </td> */}
+                            </tr>
+                          );
+                        }
+                      )}
                     </tbody>
                     <tfoot className="bg-gray-50">
                       <tr>
@@ -554,9 +553,9 @@ export default function OrderDetailsPage() {
                         </td>
                         <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right">
                           {formatCurrency(
-                            (productData?.product?.amount?.value ?? 0) *
-                              parseInt(orderDetailsData?.order?.quantity ?? ""),
-                            productData?.product?.amount?.currencyIsoCode ?? ""
+                            orderDetailsData?.order?.sumTotal?.value ?? "",
+                            orderDetailsData?.order?.sumTotal
+                              ?.currencyIsoCode ?? ""
                           )}
                         </td>
                       </tr>
@@ -575,7 +574,7 @@ export default function OrderDetailsPage() {
                           )}
                         </td>
                       </tr>
-                      <tr>
+                      {/* <tr>
                         <td
                           colSpan={3}
                           className="px-4 py-3 text-sm font-medium text-gray-900 text-right"
@@ -592,7 +591,7 @@ export default function OrderDetailsPage() {
                             orderDetailsData?.order.price?.currencyIsoCode ?? ""
                           )}
                         </td>
-                      </tr>
+                      </tr> */}
 
                       <tr>
                         <td
@@ -603,10 +602,11 @@ export default function OrderDetailsPage() {
                         </td>
                         <td className="px-4 py-3 text-sm font-bold text-gray-900 text-right">
                           {formatCurrency(
-                            (orderDetailsData?.order?.price?.value ?? 0) +
+                            (orderDetailsData?.order?.sumTotal?.value ?? 0) +
                               (orderDetailsData?.order?.deliveryFee?.value ??
                                 0),
-                            orderDetailsData?.order.price?.currencyIsoCode ?? ""
+                            orderDetailsData?.order.sumTotal?.currencyIsoCode ??
+                              ""
                           )}
                         </td>
                       </tr>

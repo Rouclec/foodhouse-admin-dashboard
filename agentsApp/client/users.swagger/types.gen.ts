@@ -28,6 +28,8 @@ export type UsersCompleteRegistrationBody = {
     address?: string;
     profileImage?: string;
     locationCoordinates?: typesPoint;
+    referredBy?: string;
+    phoneNumber?: string;
 };
 
 export type UsersCreateSubscriptionBody = {
@@ -41,6 +43,7 @@ export type UsersCreateSubscriptionBody = {
 export type UsersGrantAdminBody = {
     phoneNumber?: string;
     residenceCountryIsoCode?: string;
+    password?: string;
 };
 
 export type UsersGrantAgentBody = {
@@ -48,6 +51,8 @@ export type UsersGrantAgentBody = {
     residenceCountryIsoCode?: string;
     address?: string;
     email?: string;
+    password?: string;
+    role?: usersgrpcUserRole;
 };
 
 export type usersgrpcActivateUserSubscriptionResponse = unknown;
@@ -107,7 +112,7 @@ export type usersgrpcDeleteUserPaymentMethodResponse = {
 
 export type usersgrpcDeleteUserSubscriptionResponse = unknown;
 
-export type usersgrpcFactorType = 'FACTOR_TYPE_UNSPECIFIED' | 'FACTOR_TYPE_EMAIL_PASSWORD' | 'FACTOR_TYPE_SMS_OTP' | 'FACTOR_TYPE_EMAIL_OTP' | 'FACTOR_TYPE_EMAIL_PHONE_PASSWORD';
+export type usersgrpcFactorType = 'FACTOR_TYPE_UNSPECIFIED' | 'FACTOR_TYPE_EMAIL_PASSWORD' | 'FACTOR_TYPE_SMS_OTP' | 'FACTOR_TYPE_EMAIL_OTP' | 'FACTOR_TYPE_EMAIL_PHONE_PASSWORD' | 'FACTOR_TYPE_GOOGLE' | 'FACTOR_TYPE_APPLE';
 
 export type usersgrpcFarmerWithRating = {
     user?: usersgrpcUser;
@@ -122,6 +127,10 @@ export type usersgrpcGetFarmerByIDResponse = {
 export type usersgrpcGetPublicUserResponse = {
     name?: string;
     profileImage?: string;
+};
+
+export type usersgrpcGetReferralByReferredIdResponse = {
+    referral?: usersgrpcReferral;
 };
 
 export type usersgrpcGetUserActiveSubscriptionResponse = {
@@ -169,7 +178,7 @@ export type usersgrpcListFarmersReivewsResponse = {
 
 export type usersgrpcListFarmersResponse = {
     farmers?: Array<usersgrpcFarmerWithRating>;
-    nextKey?: number;
+    nextKey?: string;
 };
 
 export type usersgrpcListSubscriptionsResponse = {
@@ -181,7 +190,11 @@ export type usersgrpcListUsersResponse = {
     nextKey?: string;
 };
 
-export type usersgrpcOtpIntent = 'OTP_INTENT_UNSPECIFIED' | 'OTP_INTENT_LOGIN' | 'OTP_INTENT_RESET_PASSWORD' | 'OTP_INTENT_SIGNUP';
+export type usersgrpcNotifyFarmerResponse = {
+    success?: boolean;
+};
+
+export type usersgrpcOtpIntent = 'OTP_INTENT_UNSPECIFIED' | 'OTP_INTENT_LOGIN' | 'OTP_INTENT_RESET_PASSWORD' | 'OTP_INTENT_SIGNUP' | 'OTP_INTENT_VERIFY_EMAIL';
 
 export type usersgrpcPaymentMethod = {
     method?: string;
@@ -189,6 +202,13 @@ export type usersgrpcPaymentMethod = {
 };
 
 export type usersgrpcReactivateUserResponse = unknown;
+
+export type usersgrpcReferral = {
+    id?: string;
+    referrerId?: string;
+    referredId?: string;
+    createdAt?: string;
+};
 
 export type usersgrpcRefreshAccessTokenRequest = {
     refreshToken?: string;
@@ -303,6 +323,7 @@ export type usersgrpcUser = {
     createdAt?: string;
     updatedAt?: string;
     status?: usersgrpcUserStatus;
+    referralCode?: string;
 };
 
 export type usersgrpcUserPaymentMethod = {
@@ -312,7 +333,7 @@ export type usersgrpcUserPaymentMethod = {
     createdAt?: string;
 };
 
-export type usersgrpcUserRole = 'USER_ROLE_UNSPECIFIED' | 'USER_ROLE_FARMER' | 'USER_ROLE_BUYER' | 'USER_ROLE_ADMIN' | 'USER_ROLE_AGENT';
+export type usersgrpcUserRole = 'USER_ROLE_UNSPECIFIED' | 'USER_ROLE_FARMER' | 'USER_ROLE_BUYER' | 'USER_ROLE_ADMIN' | 'USER_ROLE_AGENT' | 'USER_ROLE_MARKETING_AGENT';
 
 export type usersgrpcUserStatus = 'UserStatus_UNSPECIFIED' | 'UserStatus_SUSPENDED' | 'UserStatus_ACTIVE';
 
@@ -326,7 +347,7 @@ export type usersgrpcUserSubscription = {
     expiresAt?: string;
 };
 
-export type usersgrpcUserType = 'USER_TYPE_UNSPECIFIED' | 'USER_TYPE_FARMER' | 'USER_TYPE_BUYER' | 'USER_TYPE_AGENT';
+export type usersgrpcUserType = 'USER_TYPE_UNSPECIFIED' | 'USER_TYPE_FARMER' | 'USER_TYPE_BUYER';
 
 export type usersgrpcVerifyOtpRequest = {
     authFactor?: usersgrpcAuthFactor;
@@ -334,6 +355,15 @@ export type usersgrpcVerifyOtpRequest = {
 
 export type usersgrpcVerifyOtpResponse = {
     valid?: boolean;
+};
+
+export type UsersOAuthBody = {
+    factor?: {
+        type?: usersgrpcFactorType;
+        secretValue?: string;
+    };
+    user?: usersgrpcUser;
+    userType?: usersgrpcUserType;
 };
 
 export type UsersReactivateUserBody = unknown;
@@ -436,7 +466,7 @@ export type UsersListUsersData = {
          * Key for pagination, indicating where to start the list
          */
         startKey?: string;
-        userRole?: 'USER_ROLE_UNSPECIFIED' | 'USER_ROLE_FARMER' | 'USER_ROLE_BUYER' | 'USER_ROLE_ADMIN' | 'USER_ROLE_AGENT';
+        userRole?: 'USER_ROLE_UNSPECIFIED' | 'USER_ROLE_FARMER' | 'USER_ROLE_BUYER' | 'USER_ROLE_ADMIN' | 'USER_ROLE_AGENT' | 'USER_ROLE_MARKETING_AGENT';
         userStatus?: 'UserStatus_UNSPECIFIED' | 'UserStatus_SUSPENDED' | 'UserStatus_ACTIVE';
     };
 };
@@ -479,6 +509,21 @@ export type UsersSuspendUserData = {
 export type UsersSuspendUserResponse = (usersgrpcSuspendUserResponse);
 
 export type UsersSuspendUserError = (rpcStatus);
+
+export type UsersOAuthData = {
+    body: UsersOAuthBody;
+    path: {
+        /**
+         * for OTPs this will be a request_id, for email_password this
+         * will be the email address
+         */
+        'factor.id': string;
+    };
+};
+
+export type UsersOAuthResponse = (usersgrpcAuthenticateResponse);
+
+export type UsersOAuthError = (rpcStatus);
 
 export type UsersRevokeRefreshTokenData = {
     body: usersgrpcRevokeRefreshTokenRequest;
@@ -608,7 +653,8 @@ export type UsersListFarmersData = {
     query?: {
         count?: number;
         searchKey?: string;
-        startKey?: number;
+        sortCreatedAtDesc?: boolean;
+        startKey?: string;
         userStatus?: 'UserStatus_UNSPECIFIED' | 'UserStatus_SUSPENDED' | 'UserStatus_ACTIVE';
     };
 };

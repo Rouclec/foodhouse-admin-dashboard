@@ -2,9 +2,9 @@
 
 import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
-import type { ProductsCreateCategoryData, ProductsCreateCategoryError, ProductsCreateCategoryResponse, ProductsCreatePriceTypeData, ProductsCreatePriceTypeError, ProductsCreatePriceTypeResponse, ProductsCreateProductNameData, ProductsCreateProductNameError, ProductsCreateProductNameResponse, ProductsDeleteCategoryData, ProductsDeleteCategoryError, ProductsDeleteCategoryResponse, ProductsUpdateCategoryData, ProductsUpdateCategoryError, ProductsUpdateCategoryResponse, ProductsDeleteProductNameData, ProductsDeleteProductNameError, ProductsDeleteProductNameResponse, ProductsDeletePriceTypeData, ProductsDeletePriceTypeError, ProductsDeletePriceTypeResponse, ProductsListPriceTypesData, ProductsListProductNamesData, ProductsListProductsData, ProductsGetProductData, ProductsListFarmerProductsData, ProductsCreateProductData, ProductsCreateProductError, ProductsCreateProductResponse, ProductsDeleteProductData, ProductsDeleteProductError, ProductsDeleteProductResponse, ProductsGetFarmerProductData, ProductsUpdateProductData, ProductsUpdateProductError, ProductsUpdateProductResponse } from '../types.gen';
+import type { ProductsCreateCategoryData, ProductsCreateCategoryError, ProductsCreateCategoryResponse, ProductsCreatePriceTypeData, ProductsCreatePriceTypeError, ProductsCreatePriceTypeResponse, ProductsCreateProductNameData, ProductsCreateProductNameError, ProductsCreateProductNameResponse, ProductsDeleteCategoryData, ProductsDeleteCategoryError, ProductsDeleteCategoryResponse, ProductsUpdateCategoryData, ProductsUpdateCategoryError, ProductsUpdateCategoryResponse, ProductsDeleteProductNameData, ProductsDeleteProductNameError, ProductsDeleteProductNameResponse, ProductsDeletePriceTypeData, ProductsDeletePriceTypeError, ProductsDeletePriceTypeResponse, ProductsPublishProductData, ProductsPublishProductError, ProductsPublishProductResponse, ProductsUnPublishProductData, ProductsUnPublishProductError, ProductsUnPublishProductResponse, ProductsListPriceTypesData, ProductsListProductNamesData, ProductsListProductsData, ProductsGetProductData, ProductsListFarmerProductsData, ProductsCreateProductData, ProductsCreateProductError, ProductsCreateProductResponse, ProductsDeleteProductData, ProductsDeleteProductError, ProductsDeleteProductResponse, ProductsGetFarmerProductData, ProductsUpdateProductData, ProductsUpdateProductError, ProductsUpdateProductResponse } from '../types.gen';
 import type { AxiosError } from 'axios';
-import { client, productsCreateCategory, productsCreatePriceType, productsCreateProductName, productsDeleteCategory, productsUpdateCategory, productsDeleteProductName, productsDeletePriceType, productsListCategories, productsHealthCheck, productsListPriceTypes, productsListProductNames, productsListProducts, productsGetProduct, productsListFarmerProducts, productsCreateProduct, productsDeleteProduct, productsGetFarmerProduct, productsUpdateProduct } from '../sdk.gen';
+import { client, productsCreateCategory, productsCreatePriceType, productsCreateProductName, productsDeleteCategory, productsUpdateCategory, productsDeleteProductName, productsDeletePriceType, productsPublishProduct, productsUnPublishProduct, productsListCategories, productsHealthCheck, productsListPriceTypes, productsListProductNames, productsListProducts, productsGetProduct, productsListFarmerProducts, productsCreateProduct, productsDeleteProduct, productsGetFarmerProduct, productsUpdateProduct } from '../sdk.gen';
 
 type QueryKey<TOptions extends OptionsLegacyParser> = [
     Pick<TOptions, 'baseURL' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -178,6 +178,34 @@ export const productsDeletePriceTypeMutation = (options?: Partial<OptionsLegacyP
     const mutationOptions: UseMutationOptions<ProductsDeletePriceTypeResponse, AxiosError<ProductsDeletePriceTypeError>, OptionsLegacyParser<ProductsDeletePriceTypeData>> = {
         mutationFn: async (localOptions) => {
             const { data } = await productsDeletePriceType({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const productsPublishProductMutation = (options?: Partial<OptionsLegacyParser<ProductsPublishProductData>>) => {
+    const mutationOptions: UseMutationOptions<ProductsPublishProductResponse, AxiosError<ProductsPublishProductError>, OptionsLegacyParser<ProductsPublishProductData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await productsPublishProduct({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const productsUnPublishProductMutation = (options?: Partial<OptionsLegacyParser<ProductsUnPublishProductData>>) => {
+    const mutationOptions: UseMutationOptions<ProductsUnPublishProductResponse, AxiosError<ProductsUnPublishProductError>, OptionsLegacyParser<ProductsUnPublishProductData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await productsUnPublishProduct({
                 ...options,
                 ...localOptions,
                 throwOnError: true

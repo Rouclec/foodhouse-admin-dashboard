@@ -13,24 +13,12 @@ import { Colors } from "@/constants";
 import i18n from "@/i18n";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { ordersGetOrderDetailsOptions } from "@/client/orders.swagger/@tanstack/react-query.gen";
-import { useQuery } from "@tanstack/react-query";
 
 const HOUR_OF_DAY = new Date().getHours();
 
 export default function Orders() {
   const { user } = useContext(Context) as ContextType;
   const [searchQuery, setSearchQuery] = useState("");
-
-  const { data: userData } = useQuery({
-    ...ordersGetOrderDetailsOptions({
-      path: {
-        orderNumber: "",
-        userId: user?.userId ?? "",
-      },
-    }),
-    enabled: !!user,
-  });
 
   return (
     <KeyboardAvoidingView

@@ -1,7 +1,8 @@
 import Colors from "@/constants/Colors";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { FC, useContext, useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
   ScrollView,
@@ -9,59 +10,66 @@ import {
   View,
 } from "react-native";
 import { Appbar, Button, Icon, Snackbar, Text } from "react-native-paper";
+
 import { PaperOtpInput } from "react-native-paper-otp-input";
 
 import {
+  usersAuthenticateMutation,
+  usersGetUserByIdOptions,
+  usersSendSignupSmsOtpMutation,
   usersSendSmsOtpMutation,
-  usersVerifyOtpMutation,
 } from "@/client/users.swagger/@tanstack/react-query.gen";
-import {
-  defaultStyles,
-  forgotPasswordVerifyOtpStyles as styles,
-} from "@/styles";
-import { delay } from "@/utils";
-import { useMutation } from "@tanstack/react-query";
+import { defaultStyles, verifyOtpStyles as styles } from "@/styles";
+import { delay, storeData, updateAuthHeader } from "@/utils";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Context, ContextType } from "../_layout";
 import i18n from "@/i18n";
 
-export default function ForgotPasswordEmailOtp() {
+const SignInVerifyOtpScreen: FC = () => {
   const { requestId, phoneNumber } = useLocalSearchParams();
-
   const [requestIdState, setRequestIdState] = useState<string>(
     (requestId as string) ?? ""
   );
 
-  const [phoneState] = useState(phoneNumber);
-
   const router = useRouter();
   const [currentTimeLeft, setCurrentTimeLeft] = useState(120);
-  const [retries, setReties] = useState(0);
+  const [, setRetries] = useState(0);
   const [timeLeft, setTimeLeft] = useState(currentTimeLeft);
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [shouldNavigate, setShouldNavigate] = useState(false);
+  const [navigationData, setNavigationData] = useState<{
+    role?: string;
+    isProfileComplete: boolean;
+  }>({ isProfileComplete: false });
+
   const [errorMessage, setErrorMessage] = useState<string>();
   const [error, setError] = useState(false);
+  const [userId, setUserId] = useState<string>();
+  const { role } = useContext(Context) as ContextType;
+
+  const { setUser } = useContext(Context) as ContextType;
 
   const handleVerifyOtp = async () => {
     try {
       setLoading(true);
       await mutateAsync({
         body: {
-          authFactor: {
-            id: requestIdState,
-            type: "FACTOR_TYPE_SMS_OTP",
-            secretValue: otp,
-          },
-        },
-      });
-      router.push({
-        pathname: "/(auth)/(forgot-password)/create-new-password",
-        params: {
-          requestId: requestIdState,
-          otp,
+          factors: [
+            {
+              type: "FACTOR_TYPE_SMS_OTP",
+              secretValue: otp,
+              id: requestIdState as string,
+            },
+          ],
         },
       });
     } catch (error) {
       console.error("Error verifying otp", error);
+      setError(true);
+      await delay(5000);
+      setError(false);
     } finally {
       setLoading(false);
     }
@@ -69,19 +77,21 @@ export default function ForgotPasswordEmailOtp() {
 
   const handleResendOTP = async () => {
     try {
-      setCurrentTimeLeft((prev) => prev + (retries + 1) * 60);
-      setReties((prev) => prev + 1);
-      setLoading(true);
+      setRetries((prev) => {
+        const newRetries = prev + 1;
+        setCurrentTimeLeft((prevTimeLeft) => prevTimeLeft + newRetries * 60);
+        return newRetries;
+      });
+      setIsResending(true);
       await resendOtp({
         body: {
-          phoneNumber: phoneState as string,
-          intent: "OTP_INTENT_RESET_PASSWORD",
+          phoneNumber: phoneNumber as string,
         },
       });
     } catch (error) {
-      console.error("Error sending email otp: ", error);
+      console.error("Error signing up: ", error);
     } finally {
-      setLoading(false);
+      setIsResending(false);
     }
   };
 
@@ -92,11 +102,11 @@ export default function ForgotPasswordEmailOtp() {
       setTimeLeft((prevTime) => prevTime - 1);
     }, 1000);
 
-    return () => clearInterval(timer); // Cleanup interval on component unmount
+    return () => clearInterval(timer);
   }, [timeLeft]);
 
   const { mutateAsync } = useMutation({
-    ...usersVerifyOtpMutation(),
+    ...usersAuthenticateMutation(),
     onError: async (error) => {
       setErrorMessage(() => {
         const errorData = error?.response?.data;
@@ -109,7 +119,6 @@ export default function ForgotPasswordEmailOtp() {
 
         if (typeof errorData === "string") {
           try {
-            // Extract only the first JSON object
             const firstObject = JSON.parse(
               (errorData as string).match(/\{.*?\}/s)?.[0] || "{}"
             );
@@ -125,13 +134,21 @@ export default function ForgotPasswordEmailOtp() {
       await delay(5000);
       setError(false);
     },
-    onSuccess: () => {
+    onSuccess: async (data) => {
       setTimeLeft(0);
+      updateAuthHeader(data.tokens?.accessToken!);
+      await storeData("@userId", data?.userId);
+      await storeData("@refreshToken", data?.tokens?.refreshToken);
+      setUserId(data?.userId);
+      setUser({
+        userId: data.userId,
+        phoneNumber: phoneNumber as string,
+      });
     },
   });
 
   useEffect(() => {
-    setTimeLeft((prev) => (prev === currentTimeLeft ? prev : currentTimeLeft));
+    setTimeLeft(currentTimeLeft);
   }, [currentTimeLeft]);
 
   const { mutateAsync: resendOtp } = useMutation({
@@ -148,7 +165,6 @@ export default function ForgotPasswordEmailOtp() {
 
         if (typeof errorData === "string") {
           try {
-            // Extract only the first JSON object
             const firstObject = JSON.parse(
               (errorData as string).match(/\{.*?\}/s)?.[0] || "{}"
             );
@@ -169,6 +185,30 @@ export default function ForgotPasswordEmailOtp() {
     },
   });
 
+  const { data: userData } = useQuery({
+    ...usersGetUserByIdOptions({
+      path: {
+        userId: userId ?? "",
+      },
+    }),
+    enabled: !!userId,
+  });
+
+  useEffect(() => {
+    if (userData?.user) {
+      setUser(userData.user);
+
+      setShouldNavigate(true);
+    }
+  }, [userData, setUser]);
+
+  useEffect(() => {
+    if (shouldNavigate) {
+      router.replace("/(tabs)/(index)");
+      setShouldNavigate(false);
+    }
+  }, [shouldNavigate, navigationData, router]);
+
   return (
     <>
       <KeyboardAvoidingView
@@ -185,90 +225,84 @@ export default function ForgotPasswordEmailOtp() {
               <Icon source={"arrow-left"} size={24} />
             </TouchableOpacity>
             <Text variant="titleMedium" style={defaultStyles.heading}>
-              {i18n.t("(auth).(forgot-password).verify-otp.forgotPassword")}
+              {i18n.t("(auth).verifyOtp.verifyNumber")}
             </Text>
             <View />
           </Appbar.Header>
-          <View style={styles.directionContainer}>
-            <Text style={styles.direction}>
-              {i18n.t("(auth).(forgot-password).verify-otp.aCodeHasBeenSentTo")}{" "}
-              {phoneNumber}
+          <View style={styles.headingTextContainer}>
+            <Text style={styles.subHeadingText}>
+              {i18n.t("(auth).verifyOtp.codeSent")} {phoneNumber}
             </Text>
           </View>
-          <ScrollView
-            contentContainerStyle={defaultStyles.scrollContainer}
-            showsVerticalScrollIndicator={false}
-            nestedScrollEnabled={true}
-            keyboardShouldPersistTaps="handled"
-          >
+          <ScrollView style={styles.scrollView}>
             <View style={styles.otpContainer}>
               <PaperOtpInput
                 maxLength={4}
                 onPinChange={(pin) => {
                   setOtp(pin);
-                  if (pin.length === 6) {
+                  if (pin.length === 4) {
                     Keyboard.dismiss();
                   }
                 }}
-                otpTextStyle={styles.otpText}
-                otpBoxStyle={styles.otpBox}
-                otpBorderFocusedColor={Colors.primary[300]}
+                otpBoxStyle={styles.otpBoxStyle}
+                otpBorderFocusedColor={Colors.primary[500]}
                 otpBorderColor={Colors.grey["border"]}
               />
-              <View style={styles.resendTextContainer}>
-                <TouchableOpacity
-                  onPress={handleResendOTP}
-                  disabled={timeLeft > 0}
-                >
-                  <Text style={timeLeft > 0 ? styles.text : styles.link}>
-                    {i18n.t("(auth).(forgot-password).verify-otp.resendCode")}
-                    {timeLeft > 0 && (
-                      <Text style={styles.link}>
-                        {" "}
-                        {i18n.t("(auth).(forgot-password).verify-otp.in")}{" "}
-                        {Math.floor(timeLeft / 60).toLocaleString("en-US", {
-                          minimumIntegerDigits: 2,
-                          useGrouping: false,
-                        })}
-                        :
-                        {Math.ceil(timeLeft % 60).toLocaleString("en-US", {
-                          minimumIntegerDigits: 2,
-                          useGrouping: false,
-                        })}
-                      </Text>
-                    )}
-                  </Text>
-                </TouchableOpacity>
-              </View>
             </View>
+            <TouchableOpacity
+              onPress={handleResendOTP}
+              style={styles.resendTextContainer}
+              disabled={timeLeft > 0}
+            >
+              {isResending ? (
+                <ActivityIndicator color={Colors.primary[500]} />
+              ) : (
+                <Text style={timeLeft > 0 ? styles.text : styles.link}>
+                  {i18n.t("(auth).verifyOtp.resendCode")}{" "}
+                  {timeLeft > 0 && (
+                    <Text style={styles.text}>
+                      {i18n.t("(auth).verifyOtp.in")}{" "}
+                      {Math.floor(timeLeft / 60).toLocaleString("en-US", {
+                        minimumIntegerDigits: 2,
+                        useGrouping: false,
+                      })}
+                      :
+                      {Math.ceil(timeLeft % 60).toLocaleString("en-US", {
+                        minimumIntegerDigits: 2,
+                        useGrouping: false,
+                      })}
+                    </Text>
+                  )}
+                </Text>
+              )}
+            </TouchableOpacity>
           </ScrollView>
         </View>
-        <View style={defaultStyles.bottomButtonContainer}>
-          <Button
-            mode="contained"
-            textColor={Colors.light["0"]}
-            buttonColor={Colors.primary["500"]}
-            style={defaultStyles.button}
-            disabled={otp.length < 4 || loading}
-            loading={loading}
-            onPress={handleVerifyOtp}
-          >
-            <Text style={defaultStyles.buttonText}>
-              {i18n.t("(auth).(forgot-password).verify-otp.verifyOtp")}
-            </Text>
-          </Button>
-        </View>
       </KeyboardAvoidingView>
-
+      <View style={defaultStyles.bottomButtonContainer}>
+        <Button
+          mode="contained"
+          textColor={Colors.light["0"]}
+          buttonColor={Colors.primary["500"]}
+          style={defaultStyles.button}
+          disabled={otp.length < 4 || loading}
+          loading={loading}
+          onPress={handleVerifyOtp}
+          labelStyle={styles.dialogLabel}
+        >
+          Verify
+        </Button>
+      </View>
       <Snackbar
         visible={error}
-        testID="otp_error_toast"
         onDismiss={() => {}}
         duration={3000}
-        style={defaultStyles.snackbar}
+        style={styles.snackbar}
       >
-        <Text style={defaultStyles.errorText}>{errorMessage}</Text>
+        <Text style={styles.errorText}>{errorMessage}</Text>
       </Snackbar>
     </>
   );
-}
+};
+
+export default SignInVerifyOtpScreen;

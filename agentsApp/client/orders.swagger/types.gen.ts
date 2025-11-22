@@ -2,6 +2,10 @@
 
 export type OrdersApproveOrderBody = unknown;
 
+export type OrdersBulkSettleCommissionsBody = {
+    commissionIds?: Array<(string)>;
+};
+
 export type OrdersConfirmDeliveryBody = unknown;
 
 export type OrdersCreateDeliveryPointBody = {
@@ -11,13 +15,17 @@ export type OrdersCreateDeliveryPointBody = {
 };
 
 export type OrdersCreateOrderBody = {
-    productId?: string;
-    quantity?: string;
+    orderItems?: Array<ordersgrpcOrderItem>;
     deliveryLocation?: typesPoint;
 };
 
 export type OrdersDispatchOrderBody = {
     payoutPhoneNumber?: string;
+};
+
+export type OrdersEstimateDeliveryFeeBody = {
+    orderItems?: Array<ordersgrpcOrderItem>;
+    deliveryLocation?: typesPoint;
 };
 
 export type ordersgrpcAccount = {
@@ -27,11 +35,44 @@ export type ordersgrpcAccount = {
 
 export type ordersgrpcApproveOrderResponse = unknown;
 
+export type ordersgrpcBulkSettleCommissionsResponse = {
+    message?: string;
+};
+
 export type ordersgrpcCheckPaymentStatusResponse = {
     status?: ordersgrpcPaymentStatus;
 };
 
+export type ordersgrpcCommission = {
+    id?: string;
+    referrerId?: string;
+    refferedId?: string;
+    orderNumber?: string;
+    commissionAmount?: typesAmount;
+    paidAt?: string;
+    paymentReference?: string;
+    createdAt?: string;
+};
+
 export type ordersgrpcConfirmDeliveryResponse = unknown;
+
+export type ordersgrpcConfirmPaymentRequest = {
+    status?: string;
+    reference?: string;
+    amount?: string;
+    currency?: string;
+    operator?: string;
+    code?: string;
+    operatorReference?: string;
+    signature?: string;
+    endpoint?: string;
+    /**
+     * The reference on the platform that initiated the transaction.
+     */
+    externalReference?: string;
+    phoneNumber?: string;
+    orderId?: string;
+};
 
 export type ordersgrpcConfirmPaymentResponse = unknown;
 
@@ -54,6 +95,10 @@ export type ordersgrpcDeliveryPoint = {
 };
 
 export type ordersgrpcDispatchOrderResponse = unknown;
+
+export type ordersgrpcEstimateDeliveryFeeResponse = {
+    estimatedDeliveryFee?: typesAmount;
+};
 
 export type ordersgrpcFarmerEarningsData = {
     date?: string;
@@ -81,6 +126,10 @@ export type ordersgrpcInitiatePaymentResponse = {
     payment?: ordersgrpcPayment;
 };
 
+export type ordersgrpcListCommissionsByReferrerResponse = {
+    commissions?: Array<ordersgrpcCommission>;
+};
+
 export type ordersgrpcListDeliveryCitiesResponse = {
     cities?: Array<(string)>;
     nextKey?: string;
@@ -106,6 +155,10 @@ export type ordersgrpcListPaymentsResponse = {
     nextKey?: string;
 };
 
+export type ordersgrpcListTotalCommissionAmountByReferrerResponse = {
+    commissions?: Array<typesAmount>;
+};
+
 export type ordersgrpcListUserOrdersResponse = {
     orders?: Array<ordersgrpcOrder>;
     nextKey?: string;
@@ -114,19 +167,20 @@ export type ordersgrpcListUserOrdersResponse = {
 export type ordersgrpcOrder = {
     orderNumber?: string;
     deliveryLocation?: typesPoint;
-    price?: typesAmount;
+    sumTotal?: typesAmount;
     status?: ordersgrpcOrderStatus;
     rating?: number;
     review?: string;
-    product?: string;
+    orderItems?: Array<ordersgrpcOrderItem>;
     createdBy?: string;
     createdAt?: string;
     updatedAt?: string;
     secretKey?: string;
     productOwner?: string;
     payoutPhoneNumber?: string;
-    quantity?: string;
     dispatchedBy?: string;
+    deliveryFee?: typesAmount;
+    totalItems?: number;
 };
 
 export type ordersgrpcOrderAuditLog = {
@@ -136,6 +190,15 @@ export type ordersgrpcOrderAuditLog = {
     reason?: string;
     before?: ordersgrpcOrder;
     after?: ordersgrpcOrder;
+};
+
+export type ordersgrpcOrderItem = {
+    productId?: string;
+    quantity?: string;
+    productImage?: string;
+    productName?: string;
+    productUnitPrice?: typesAmount;
+    unitType?: string;
 };
 
 export type ordersgrpcOrderStatus = 'OrderStatus_UNSPECIFIED' | 'OrderStatus_CREATED' | 'OrderStatus_PAYMENT_SUCCESSFUL' | 'OrderStatus_PAYMENT_FAILED' | 'OrderStatus_IN_TRANSIT' | 'OrderStatus_DELIVERED' | 'OrderStatus_APPROVED' | 'OrderStatus_REJECTED';
@@ -151,13 +214,16 @@ export type ordersgrpcPayment = {
     updatedAt?: string;
     status?: ordersgrpcPaymentStatus;
     account?: ordersgrpcAccount;
+    type?: ordersgrpcPaymentType;
 };
 
-export type ordersgrpcPaymentEntity = 'PaymentEntity_UNSPECIFIED' | 'PaymentEntity_ORDER' | 'PaymentEntity_SUBSCRIPTION';
+export type ordersgrpcPaymentEntity = 'PaymentEntity_UNSPECIFIED' | 'PaymentEntity_ORDER' | 'PaymentEntity_SUBSCRIPTION' | 'PaymentEntity_COMMISSION' | 'PaymentEntity_REFUND';
 
-export type ordersgrpcPaymentMethodType = 'PaymentMethodType_UNSPECIFIED' | 'PaymentMethodType_MOBILE_MONEY' | 'PaymentMethodType_ORANGE_MONEY' | 'PaymentMethodType_CREDIT_CARD';
+export type ordersgrpcPaymentMethodType = 'PaymentMethodType_UNSPECIFIED' | 'PaymentMethodType_MOBILE_MONEY' | 'PaymentMethodType_ORANGE_MONEY' | 'PaymentMethodType_CREDIT_CARD' | 'PaymentMethodType_ACCOUNT_BALANCE';
 
 export type ordersgrpcPaymentStatus = 'PaymentStatus_UNSPECIFIED' | 'PaymentStatus_INITIATED' | 'PaymentStatus_COMPLETED' | 'PaymentStatus_FAILED' | 'PaymentStatus_CANCELED';
+
+export type ordersgrpcPaymentType = 'PaymentType_UNSPECIFIED' | 'PaymentType_CREDIT' | 'PaymentType_DEBIT';
 
 export type ordersgrpcRejectOrderResponse = unknown;
 
@@ -209,6 +275,45 @@ export type typesPoint = {
     address?: string;
 };
 
+export type OrdersBulkSettleCommissionsData = {
+    body: OrdersBulkSettleCommissionsBody;
+    path: {
+        adminUserId: string;
+    };
+};
+
+export type OrdersBulkSettleCommissionsResponse = (ordersgrpcBulkSettleCommissionsResponse);
+
+export type OrdersBulkSettleCommissionsError = (rpcStatus);
+
+export type OrdersListCommissionsByReferrerData = {
+    path: {
+        adminUserId: string;
+        referrerId: string;
+    };
+    query?: {
+        isPaid?: boolean;
+    };
+};
+
+export type OrdersListCommissionsByReferrerResponse = (ordersgrpcListCommissionsByReferrerResponse);
+
+export type OrdersListCommissionsByReferrerError = (rpcStatus);
+
+export type OrdersListTotalComissionAmountByReferrerData = {
+    path: {
+        adminUserId: string;
+        referrerId: string;
+    };
+    query?: {
+        isPaid?: boolean;
+    };
+};
+
+export type OrdersListTotalComissionAmountByReferrerResponse = (ordersgrpcListTotalCommissionAmountByReferrerResponse);
+
+export type OrdersListTotalComissionAmountByReferrerError = (rpcStatus);
+
 export type OrdersCreateDeliveryPointData = {
     body: OrdersCreateDeliveryPointBody;
     path: {
@@ -252,8 +357,9 @@ export type OrdersListPaymentsData = {
     };
     query?: {
         count?: number;
-        paymentEntity?: 'PaymentEntity_UNSPECIFIED' | 'PaymentEntity_ORDER' | 'PaymentEntity_SUBSCRIPTION';
+        paymentEntity?: 'PaymentEntity_UNSPECIFIED' | 'PaymentEntity_ORDER' | 'PaymentEntity_SUBSCRIPTION' | 'PaymentEntity_COMMISSION' | 'PaymentEntity_REFUND';
         paymentStatus?: 'PaymentStatus_UNSPECIFIED' | 'PaymentStatus_INITIATED' | 'PaymentStatus_COMPLETED' | 'PaymentStatus_FAILED' | 'PaymentStatus_CANCELED';
+        paymentType?: 'PaymentType_UNSPECIFIED' | 'PaymentType_CREDIT' | 'PaymentType_DEBIT';
         searchKey?: string;
         startKey?: string;
     };
@@ -287,52 +393,7 @@ export type OrdersUpdateDeliveryPointResponse = (ordersgrpcUpdateDeliveryPointRe
 export type OrdersUpdateDeliveryPointError = (rpcStatus);
 
 export type OrdersConfirmPaymentData = {
-    query?: {
-        /**
-         * "Transaction amount",
-         */
-        amount?: string;
-        /**
-         * "CamPay Reference",
-         */
-        code?: string;
-        /**
-         * "Transaction currency",
-         */
-        currency?: string;
-        /**
-         * "collect" or "withdraw". This shows the kind of
-         */
-        endpoint?: string;
-        /**
-         * The reference on the platform that initiated the transaction.
-         */
-        externalReference?: string;
-        /**
-         * "MTN or ORANGE",
-         */
-        operator?: string;
-        /**
-         * "Mobile Operator Reference"
-         */
-        operatorReference?: string;
-        /**
-         * The phone number that initiated the transaction
-         */
-        phoneNumber?: string;
-        /**
-         * "Reference of the transaction. A valid UUID4",
-         */
-        reference?: string;
-        /**
-         * "jwt token. You can validate this request that is coming from
-         */
-        signature?: string;
-        /**
-         * "SUCCESSFUL" or "FAILED",
-         */
-        status?: string;
-    };
+    body: ordersgrpcConfirmPaymentRequest;
 };
 
 export type OrdersConfirmPaymentResponse = (ordersgrpcConfirmPaymentResponse);
@@ -385,6 +446,17 @@ export type OrdersCreateOrderData = {
 export type OrdersCreateOrderResponse = (ordersgrpcCreateOrderResponse);
 
 export type OrdersCreateOrderError = (rpcStatus);
+
+export type OrdersEstimateDeliveryFeeData = {
+    body: OrdersEstimateDeliveryFeeBody;
+    path: {
+        userId: string;
+    };
+};
+
+export type OrdersEstimateDeliveryFeeResponse = (ordersgrpcEstimateDeliveryFeeResponse);
+
+export type OrdersEstimateDeliveryFeeError = (rpcStatus);
 
 export type OrdersInitiatePaymentData = {
     body: OrdersInitiatePaymentBody;

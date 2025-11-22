@@ -182,15 +182,15 @@ const OrderRow: FC<OrderRowProps> = ({ order }) => {
         </Badge>
         <div className="md:hidden mt-1 text-xs font-medium">
           {formatCurrency(
-            (order?.price?.value ?? 0) + (order?.deliveryFee?.value ?? 0),
-            order.price?.currencyIsoCode ?? ""
+            (order?.sumTotal?.value ?? 0) + (order?.deliveryFee?.value ?? 0),
+            order.sumTotal?.currencyIsoCode ?? ""
           )}
         </div>
       </TableCell>
       <TableCell className="hidden md:table-cell">
         {formatCurrency(
-          (order?.price?.value ?? 0) + (order?.deliveryFee?.value ?? 0),
-          order?.price?.currencyIsoCode ?? ""
+          (order?.sumTotal?.value ?? 0) + (order?.deliveryFee?.value ?? 0),
+          order?.sumTotal?.currencyIsoCode ?? ""
         )}
       </TableCell>
       <TableCell className="hidden lg:table-cell">

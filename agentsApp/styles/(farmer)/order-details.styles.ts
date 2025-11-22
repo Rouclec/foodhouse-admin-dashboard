@@ -1,11 +1,24 @@
 import { Colors } from "@/constants";
-import { StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
+
+const { width } = Dimensions.get("window");
 
 export const orderDetailsStyles = StyleSheet.create({
   productImage: {
     width: 102,
     height: 102,
     borderRadius: 12,
+  },
+  uploadButtonText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  dialogActions: {
+    paddingVertical: 12,
+    alignItems: "center",
+    justifyContent: "center",
   },
   orderDetailsContainer: {
     flexShrink: 1,
@@ -17,7 +30,11 @@ export const orderDetailsStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  primaryText: { fontSize: 16, color: Colors.primary[500] },
+  primaryText: {
+    fontSize: 16,
+    color: Colors.primary[500],
+    textAlign: "center",
+  },
   mainContainer: {
     paddingVertical: 24,
   },
@@ -44,5 +61,16 @@ export const orderDetailsStyles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
+  },
+  dialogContainer: {
+    backgroundColor: Colors.light["10"],
+    borderRadius: 16,
+    position: "relative",
+    rowGap: 0,
+    paddingVertical: 4,
+    width: width * 0.84,
+    alignSelf: "center",
+    marginHorizontal: 8,
+    overflow: "hidden",
   },
 });

@@ -111,7 +111,7 @@ const OrderItem: FC<OrderItemProps> = ({ order }) => {
   const { data: productData, isLoading: isProductDataLoading } = useQuery({
     ...productsGetProductOptions({
       path: {
-        productId: order?.product ?? "",
+        productId: order?.orderItems?.[0]?.productId ?? "",
       },
     }),
   });
@@ -144,11 +144,18 @@ const OrderItem: FC<OrderItemProps> = ({ order }) => {
         <div className="flex items-center space-x-8">
           <div>
             <p className="text-sm text-gray-600">
-              {formatAmount(order?.quantity ?? "", { decimalPlaces: 0 })}{" "}
+              {formatAmount(order?.orderItems?.[0]?.quantity ?? "", {
+                decimalPlaces: 0,
+              })}{" "}
               {productData?.product?.unitType?.replace("per_", "")}
-              {parseInt(order?.quantity ?? "") > 1 && "s"}
+              {parseInt(order?.orderItems?.[0]?.quantity ?? "") > 1 && "s"}
             </p>
             <p className="text-sm font-medium">{productData?.product?.name}</p>
+            {(order?.totalItems ?? 0) - 1 > 1 && (
+              <p className="text-sm text-gray-600">
+                +{(order?.totalItems ?? 0) - 1} more items
+              </p>
+            )}
           </div>
           <div>
             <p className="text-sm text-gray-600">Order number</p>
@@ -176,8 +183,8 @@ const OrderItem: FC<OrderItemProps> = ({ order }) => {
         </Badge>
         <p className="font-medium text-gray-900">
           {formatCurrency(
-            (order?.price?.value ?? 0) + (order?.deliveryFee?.value ?? 0),
-            order?.price?.currencyIsoCode ?? ""
+            (order?.sumTotal?.value ?? 0) + (order?.deliveryFee?.value ?? 0),
+            order?.sumTotal?.currencyIsoCode ?? ""
           )}
         </p>
       </div>

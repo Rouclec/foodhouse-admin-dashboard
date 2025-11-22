@@ -7,16 +7,18 @@ export type ProductsCreateCategoryBody = {
 export type ProductsCreatePriceTypeBody = {
     name?: string;
     categoryId?: string;
+    deliveryFeePerUnit?: typesAmount;
 };
 
 export type ProductsCreateProductBody = {
     categoryId?: string;
     name?: string;
-    unitType?: string;
+    unitTypeId?: string;
     amount?: typesAmount;
     description?: string;
     image?: string;
     wholeSale?: boolean;
+    deliveryFeePerUnit?: typesAmount;
 };
 
 export type ProductsCreateProductNameBody = {
@@ -55,6 +57,11 @@ export type productsgrpcDeleteProductNameResponse = unknown;
 
 export type productsgrpcDeleteProductResponse = {
     message?: string;
+};
+
+export type productsgrpcGetDeliveryFeeResponse = {
+    amount?: typesAmount;
+    farmerId?: string;
 };
 
 export type productsgrpcGetFarmerProductResponse = {
@@ -98,6 +105,7 @@ export type productsgrpcPriceType = {
     name?: string;
     slug?: string;
     categoryId?: string;
+    deliveryFeePerUnit?: typesAmount;
 };
 
 export type productsgrpcProduct = {
@@ -111,6 +119,8 @@ export type productsgrpcProduct = {
     createdBy?: string;
     createdAt?: string;
     updatedAt?: string;
+    deliveryFeePerUnit?: typesAmount;
+    isApproved?: boolean;
 };
 
 export type productsgrpcProductName = {
@@ -118,6 +128,8 @@ export type productsgrpcProductName = {
     slug?: string;
     categoryId?: string;
 };
+
+export type productsgrpcPublishProductResponse = unknown;
 
 export type productsgrpcStatItem = {
     title?: string;
@@ -130,11 +142,17 @@ export type productsgrpcSumProductAmountsResponse = {
     total?: number;
 };
 
+export type productsgrpcUnPublishProductResponse = unknown;
+
 export type productsgrpcUpdateCategoryResponse = unknown;
 
 export type productsgrpcUpdateProductResponse = {
     message?: string;
 };
+
+export type ProductsPublishProductBody = unknown;
+
+export type ProductsUnPublishProductBody = unknown;
 
 export type ProductsUpdateCategoryBody = {
     name?: string;
@@ -163,6 +181,12 @@ export type rpcStatus = {
 export type typesAmount = {
     value?: number;
     currencyIsoCode?: string;
+};
+
+export type typesPoint = {
+    lon?: number;
+    lat?: number;
+    address?: string;
 };
 
 export type ProductsCreateCategoryData = {
@@ -243,6 +267,30 @@ export type ProductsDeletePriceTypeResponse = (productsgrpcDeletePriceTypeRespon
 
 export type ProductsDeletePriceTypeError = (rpcStatus);
 
+export type ProductsPublishProductData = {
+    body: ProductsPublishProductBody;
+    path: {
+        productId: string;
+        userId: string;
+    };
+};
+
+export type ProductsPublishProductResponse = (productsgrpcPublishProductResponse);
+
+export type ProductsPublishProductError = (rpcStatus);
+
+export type ProductsUnPublishProductData = {
+    body: ProductsUnPublishProductBody;
+    path: {
+        productId: string;
+        userId: string;
+    };
+};
+
+export type ProductsUnPublishProductResponse = (productsgrpcUnPublishProductResponse);
+
+export type ProductsUnPublishProductError = (rpcStatus);
+
 export type ProductsListCategoriesResponse = (productsgrpcListCategoriesResponse);
 
 export type ProductsListCategoriesError = (rpcStatus);
@@ -276,12 +324,16 @@ export type ProductsListProductsData = {
         categoryId?: string;
         count?: number;
         createdBy?: string;
+        isApproved?: boolean;
         'maxAmount.currencyIsoCode'?: string;
         'maxAmount.value'?: number;
         'minAmount.currencyIsoCode'?: string;
         'minAmount.value'?: number;
         search?: string;
         startKey?: string;
+        'userLocation.address'?: string;
+        'userLocation.lat'?: number;
+        'userLocation.lon'?: number;
     };
 };
 

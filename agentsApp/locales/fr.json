@@ -6,32 +6,33 @@
   "(auth)": {
     "index": {
       "welcomeTo": "Bienvenue à",
-      "discoverFresh": "Découvrez des produits locaux frais et des articles essentiels livrés directement à votre porte, tout en soutenant notre communauté d'agriculteurs et de vendeurs locaux qui proposent leurs meilleurs produits à un public plus large.",
+      "discoverFresh": "Découvrez des produits locaux frais et des articles essentiels livrés directement à votre porte, tout en soutenant notre communauté d'agriculteurs et de vendeurs locaux qui offrent leurs meilleurs produits à un public plus large.",
       "continue": "Continuer"
     },
     "onboarding": {
       "1": {
-        "title": "Achetez frais, achetez pas cher",
-        "description": "Profitez de produits frais de la ferme à des prix abordables. En supprimant les intermédiaires, nous vous permettons d'acheter directement auprès des agriculteurs et d’économiser sur chaque achat sans compromettre la qualité."
+        "title": "Achetez Frais, Achetez Bon Marché",
+        "description": "Directement de la ferme, à prix avantageux. Achetez directement, économisez plus, sans compromis."
       },
       "2": {
-        "title": "Mangez frais, grandissez fort",
-        "description": "Mangez frais, grandissez fort. Alimentez votre corps avec les ingrédients les plus frais. Nos agriculteurs fournissent des produits riches en nutriments qui vous aident à rester en bonne santé et fort, pour un mode de vie sain pour vous et votre famille. Commencez dès maintenant."
+        "title": "Mangez frais, Grandissez fort",
+        "description": "Nourrissez votre corps avec de vrais aliments. Cultivés à la ferme, riches en nutriments, adaptés à toute la famille."
       },
       "3": {
-        "title": "Mangez sain, vivez plus longtemps",
-        "description": "Priorisez votre santé avec la fraîcheur de la ferme à votre table. Notre plateforme propose des options alimentaires saines et biologiques qui favorisent une vie plus longue et plus saine. Commencez votre chemin vers une meilleure vie dès aujourd’hui !"
+        "title": "Mangez sainement, Vivez plus longtemps",
+        "description": "Mangez sainement. Vivez mieux, des produits biologiques pour une vie plus saine."
       },
-      "getStarted": "Commencer"
+      "getStarted": "Commencer",
+      "next": "Suivant"
     },
     "login": {
       "anUnknownError": "Une erreur inconnue s'est produite",
       "errorParsing": "Erreur lors de l'analyse de la réponse d'erreur : ",
-      "emailRequired": "L'adresse e-mail est requise",
-      "invalidEmail": "Veuillez entrer une adresse e-mail valide",
+      "emailRequired": "L'email ou le numéro de téléphone est requis",
+      "invalidEmail": "Veuillez entrer un email valide",
       "passwordRequired": "Le mot de passe est requis",
       "loginTo": "Connectez-vous à votre compte",
-      "email": "E-mail",
+      "email": "Email ou numéro de téléphone",
       "password": "Mot de passe",
       "forgotPassword": "Mot de passe oublié ?",
       "login": "Connexion",
@@ -40,10 +41,77 @@
       "dontHaveAnAccount": "Vous n'avez pas de compte ?",
       "registerNow": "Inscrivez-vous maintenant"
     },
+    "verifyOtp": {
+      "verifyNumber": "Vérifiez votre numéro de téléphone",
+      "codeSent": "Le code a été envoyé à",
+      "verify": "vérifier",
+      "phoneNumberVerified": "Numéro de téléphone vérifié !",
+      "setupProfile": "Vous pouvez maintenant configurer le profil de votre agriculteur",
+      "continue": "continuer",
+      "resendCode": "Renvoyer le code",
+      "in": "dans"
+    },
+    "profile": {
+      "completeRegistration": "Compléter l'inscription",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "email": "Email",
+      "address": "Adresse",
+      "unknownError": "Une erreur inconnue s'est produite",
+      "congratulations": "Félicitations",
+      "registrationCompleteMessage": "Votre compte est prêt à être utilisé, vous serez redirigé vers la page d'accueil dans quelques secondes",
+      "referralCode": "Code de parrainage",
+      "profileImageRequired": "L'image de profil est requise",
+      "selectAValidAddress": "Veuillez sélectionner une adresse valide",
+      "firstNameRequired": "Le prénom est requis",
+      "enterValidEmail": "Veuillez entrer un e-mail valide",
+      "doYouHaveAReferralCode": "Avez-vous un code de parrainage ?",
+      "pleaseSelectThisOption": "Veuillez sélectionner cette option"
+    },
+    "variety": {
+      "description": "Bienvenue sur l'application Food House ! Choisissez votre variété et explorez une large gamme de produits adaptés à vos préférences.",
+      "header": "Choisissez votre variété"
+    },
+    "(forgot-password)": {
+      "index": {
+        "forgotPassword": "Mot de passe oublié",
+        "enterYourPhoneNumber": "Entrez votre numéro de téléphone pour réinitialiser votre mot de passe. Nous vous enverrons un code OTP pour vérification.",
+        "email": "Email",
+        "enterEmail": "Entrez votre email",
+        "invalidEmail": "Veuillez entrer un email valide",
+        "continue": "Continuer",
+        "unknownError": "Une erreur inconnue s'est produite"
+      },
+      "verify-otp": {
+        "forgotPassword": "Mot de passe oublié",
+        "aCodeHasBeenSentTo": "Un code a été envoyé à ",
+        "resendCode": "Renvoyer le code",
+        "in": "dans",
+        "verifyOtp": "Vérifier le code OTP"
+      },
+      "create-new-password": {
+        "createNewPassword": "Créer un nouveau mot de passe",
+        "password": "Mot de passe",
+        "confirmPassword": "Confirmez le mot de passe",
+        "passwordMustBe": "Le mot de passe doit contenir au moins 12 caractères",
+        "passwordsDoNot": "Les mots de passe ne correspondent pas",
+        "continue": "Continuer",
+        "yourPasswordHasBeenReset": "Votre mot de passe a été réinitialisé avec succès. Vous serez redirigé vers la page de connexion dans quelques secondes.",
+        "unknownError": "Une erreur inconnue s'est produite",
+        "passwordReset": "Réinitialisation du mot de passe!"
+      }
+    },
+    "location": {
+      "title": "Accès à la localisation requis",
+      "body": "Nous ne pouvons pas accéder à votre position. Veuillez activer les services de localisation dans les paramètres de votre appareil pour continuer. Cela nous aide à afficher des informations précises et à améliorer votre expérience.",
+      "tail": "Astuce : Allez dans Paramètres → Applications → [foodhouse] → Autorisations → Localisation, et activez-la.",
+      "button1": "Ouvrir les paramètres",
+      "button2": "Annuler"
+    },
     "register": {
       "createAccount": "Créer un compte",
-      "RegisterNewAccount": "Enregistrer un nouveau compte",
-      "description": "Qu'est-ce qui vous décrit le mieux ?",
+      "registerNewAccount": "Enregistrer un nouveau compte",
+      "description": "Quelle option vous décrit le mieux ?",
       "buyer": "Acheteur",
       "seller": "Agriculteur ou Vendeur",
       "button": "Suivant",
@@ -52,24 +120,13 @@
     },
     "createAccount": {
       "farmerAccount": "Créer un compte agriculteur",
+      "buyerAccount": "Créer un compte acheteur",
       "createPassword": "Créer un mot de passe",
-      "createAccount": "Créer un compte"
-    },
-    "verifyOtp": {
-      "verifyNumber": "Vérifiez votre numéro de téléphone",
-      "codeSent": "Le code a été envoyé à",
-      "verify": "vérifier",
-      "phoneNumberVerified": "Numéro de téléphone vérifié !",
-      "setupProfile": "Vous pouvez maintenant configurer le profil de l'agriculteur",
-      "continue": "continuer",
-      "resendCode": "Renvoyer le code dans"
-    },
-    "profile": {
-      "completeRegistration": "Terminer l'inscription",
-      "firstName": "Prénom",
-      "lastName": "Nom de famille",
-      "email": "E-mail",
-      "address": "Adresse"
+      "createAccount": "Créer un compte",
+      "enterEmail": "Entrez votre email",
+      "reEnterPassword": "Ressaisissez votre mot de passe",
+      "placeholder": "Le mot de passe doit contenir au moins 12 caractères",
+      "passwordMustBe": "Le mot de passe doit contenir au moins 12 caractères"
     },
     "(subsciption-flow)": {
       "index": {
@@ -77,13 +134,33 @@
         "subtitle": "Accès illimité",
         "benefit1": "Profitez de notre application sans publicités ni restrictions",
         "benefit2": "Appels illimités avec le système",
-        "benefit3": "Suivi de commande facile",
+        "benefit3": "Suivi facile des commandes",
         "button1": "Passer",
-        "button2": "S’abonner maintenant",
+        "button2": "S'abonner maintenant",
         "duration1": "1 mois",
         "duration2": "6 mois",
         "duration3": "12 mois",
         "description": "Payez une fois, annulez à tout moment"
+      },
+      "payment-method": {
+        "description": "Pour continuer, veuillez ajouter vos méthodes de paiement."
+      },
+      "account": {
+        "heading": "Effectuer le paiement",
+        "details": "Entrez votre numéro de téléphone pour initier le paiement",
+        "button": "Suivant",
+        "mtn": "Numéro de compte MTN Mobile Money",
+        "orange": "Entrez votre numéro Orange Money",
+        "cardDetails": "Détails de la carte Mastercard",
+        "cardNumber": "Entrez votre numéro de carte",
+        "cardholderName": "Nom du titulaire",
+        "cvv": "code CVV",
+        "paymentSuccessful": "Paiement réussi",
+        "paymentCompleteMessage": "Votre paiement a été effectué avec succès",
+        "paymentFailed": "Paiement échoué",
+        "paymentFailedMessage": "Votre paiement n'a pas été effectué avec succès",
+        "instructionMoMo": "Composez le *126# pour confirmer votre paiement",
+        "instructionOM": "Composez le #150*50# pour confirmer votre paiement"
       }
     }
   },

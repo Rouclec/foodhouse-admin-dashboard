@@ -12,15 +12,15 @@
     "onboarding": {
       "1": {
         "title": "Buy Fresh, Buy Cheap",
-        "description": "Enjoy farm-fresh product at affordable prices. We make it easy for you to buy directly from farmers and save on every purchase without compromising on quality"
+        "description": "Fresh from the farm, priced for you. Buy direct, save more, no compromise."
       },
       "2": {
         "title": "Eat fresh, Grow strong",
-        "description": "Eat Fresh, Grow strong Fuel your body. Our farmers provide nutrient-rich produce that help you stay healthy, supporting a wholesome lifestyle for you and your family."
+        "description": "Nourish your body with real food. Farm-grown, nutrient-rich, and family-friendly."
       },
       "3": {
         "title": "Eat healthy, Live Longer",
-        "description": "Prioritize your health with farm-to-table freshness. Our platform offers healthy, organic food options that promote a longer healthier life. Start your journey to better living today!"
+        "description": "Eat clean. Live well, organic produce that supports a healthier life."
       },
       "getStarted": "Get Started",
       "next": "Next"
@@ -39,7 +39,8 @@
       "or": "or",
       "continueWith": "Continue with",
       "dontHaveAnAccount": "Don't have an account?",
-      "registerNow": "Register Now"
+      "registerNow": "Register Now",
+      "invalidUser": "Invalid user"
     },
     "verifyOtp": {
       "verifyNumber": "Verify your phone number",
@@ -48,7 +49,8 @@
       "phoneNumberVerified": "Phone Number verified!",
       "setupProfile": "You can now proceed to setup your Farmer's Profile",
       "continue": "continue",
-      "resendCode": "Resend code in"
+      "resendCode": "Resend code",
+      "in": "in"
     },
     "profile": {
       "completeRegistration": "Complete Registration",
@@ -58,7 +60,14 @@
       "address": "Address",
       "unknownError": "An unknown error occured",
       "congratulations": "Congratulations",
-      "registrationCompleteMessage": "Your account is ready to use, you will be redirected to the home page in a few seconds"
+      "registrationCompleteMessage": "Your account is ready to use, you will be redirected to the home page in a few seconds",
+      "referralCode": "Referral Code",
+      "profileImageRequired": "Profile image is required",
+      "selectAValidAddress": "Please select a valid address",
+      "firstNameRequired": "First name is required",
+      "enterValidEmail": "Please enter a valid email",
+      "doYouHaveAReferralCode": "Do you have a referral code?",
+      "pleaseSelectThisOption": "Please select this option"
     },
     "variety": {
       "description": "Welcome to Food House app! Choose Your Variety and explore a wide range of products tailored to your preferences.",
@@ -80,19 +89,17 @@
         "resendCode": "Resend code",
         "in": "in",
         "verifyOtp": "Verify otp"
-      },
-      "create-new-password": {
-        "createNewPassword": "Create new password",
-        "password": "Password",
-        "confirmPassword": "Confirm password",
-        "passwordMustBe": "Password must be at least 12 characters",
-        "passwordsDoNot": "Passwords do not match",
-        "continue": "Continue",
-        "yourPasswordHasBeenReset": "Your password has been reset successfully. You will be redirected to the login page in a few seconds.",
-        "unknownError": "An unknown error occured",
-        "passwordReset": "Password Reset!"
       }
     },
+
+    "location": {
+      "title": "Location Access Needed",
+      "body": "We’re unable to access your location. Please enable location services in your device settings to continue. This helps us show accurate information and improve your experience.",
+      "tail": "Tip: Go to Settings → Apps → [foodhouse] → Permissions → Location, and turn it ON.",
+      "button2": "Open Settings",
+      "button1": "Cancel"
+    },
+
     "register": {
       "createAccount": "Create Account",
       "registerNewAccount": "Register New Account",
