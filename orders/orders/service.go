@@ -1575,7 +1575,7 @@ type ProductQuantity struct {
 
 type Group struct {
 	GroupDate pgtype.Timestamptz `json:"group_date"`
-	Products  []ProductQuantity  `json:"products"`
+	SumTotal  float64            `json:"sum_total"`
 }
 
 func GetFilterContext(filter ordersgrpc.FilterType) (FilterContext, error) {
@@ -1608,21 +1608,25 @@ func GetFilterContext(filter ordersgrpc.FilterType) (FilterContext, error) {
 }
 
 // GetFarmerEarnings implements ordersgrpc.OrdersServer.
-func (i *Impl) GetFarmerEarnings(ctx context.Context,
-	req *ordersgrpc.GetFarmerEarningsRequest) (
-	*ordersgrpc.GetFarmerEarningsResponse, error) {
+func (i *Impl) GetFarmerEarnings(
+	ctx context.Context,
+	req *ordersgrpc.GetFarmerEarningsRequest,
+) (*ordersgrpc.GetFarmerEarningsResponse, error) {
 
 	filterCtx, err := GetFilterContext(req.GetFilter())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error getting context %v", err)
 	}
 
-	i.logger.Debug().Msgf("filter conext %v", filterCtx)
 	var rawResults []Group
+
+	// ----------------------------
+	// Fetch SQL grouped by interval
+	// ----------------------------
 
 	switch filterCtx.GroupBy {
 	case GroupByDay:
-		results, err := i.repo.Do().GetOrdersGroupedByDay(ctx, sqlc.GetOrdersGroupedByDayParams{
+		rows, err := i.repo.Do().GetOrdersGroupedByDay(ctx, sqlc.GetOrdersGroupedByDayParams{
 			ProductOwner: &req.FarmerId,
 			Status:       ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String(),
 			UpdatedAt: pgtype.Timestamptz{
@@ -1637,21 +1641,18 @@ func (i *Impl) GetFarmerEarnings(ctx context.Context,
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "error getting earnings by day: %v", err)
 		}
-		rawResults = make([]Group, len(results))
-		for i, r := range results {
-			var products []ProductQuantity
-			err := json.Unmarshal(r.Products, &products)
-			if err != nil {
-				return nil, status.Errorf(codes.Internal, "failed to parse product group: %v", err)
-			}
+
+		rawResults = make([]Group, len(rows))
+
+		for i, r := range rows {
 			rawResults[i] = Group{
 				GroupDate: pgtype.Timestamptz{Valid: true, Time: r.GroupDate},
-				Products:  products,
+				SumTotal:  *r.SumTotal,
 			}
 		}
 
 	case GroupByMonth:
-		results, err := i.repo.Do().GetOrdersGroupedByMonth(ctx, sqlc.GetOrdersGroupedByMonthParams{
+		rows, err := i.repo.Do().GetOrdersGroupedByMonth(ctx, sqlc.GetOrdersGroupedByMonthParams{
 			ProductOwner: &req.FarmerId,
 			Status:       ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String(),
 			UpdatedAt: pgtype.Timestamptz{
@@ -1664,23 +1665,19 @@ func (i *Impl) GetFarmerEarnings(ctx context.Context,
 			},
 		})
 		if err != nil {
-			return nil, status.Errorf(codes.Internal, "error getting earnings by day: %v", err)
+			return nil, status.Errorf(codes.Internal, "error getting earnings by month: %v", err)
 		}
-		rawResults = make([]Group, len(results))
-		for i, r := range results {
-			var products []ProductQuantity
-			err := json.Unmarshal(r.Products, &products)
-			if err != nil {
-				return nil, status.Errorf(codes.Internal, "failed to parse product group: %v", err)
-			}
+
+		rawResults = make([]Group, len(rows))
+		for i, r := range rows {
 			rawResults[i] = Group{
 				GroupDate: pgtype.Timestamptz{Valid: true, Time: r.GroupDate},
-				Products:  products,
+				SumTotal:  *r.SumTotal,
 			}
 		}
 
 	case GroupByYear:
-		results, err := i.repo.Do().GetOrdersGroupedByYear(ctx, sqlc.GetOrdersGroupedByYearParams{
+		rows, err := i.repo.Do().GetOrdersGroupedByYear(ctx, sqlc.GetOrdersGroupedByYearParams{
 			ProductOwner: &req.FarmerId,
 			Status:       ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String(),
 			UpdatedAt: pgtype.Timestamptz{
@@ -1693,65 +1690,43 @@ func (i *Impl) GetFarmerEarnings(ctx context.Context,
 			},
 		})
 		if err != nil {
-			return nil, status.Errorf(codes.Internal, "error getting earnings by day: %v", err)
+			return nil, status.Errorf(codes.Internal, "error getting earnings by year: %v", err)
 		}
-		rawResults = make([]Group, len(results))
-		for i, r := range results {
-			var products []ProductQuantity
-			err := json.Unmarshal(r.Products, &products)
-			if err != nil {
-				return nil, status.Errorf(codes.Internal, "failed to parse product group: %v", err)
-			}
+
+		rawResults = make([]Group, len(rows))
+		for i, r := range rows {
 			rawResults[i] = Group{
 				GroupDate: pgtype.Timestamptz{Valid: true, Time: r.GroupDate},
-				Products:  products,
+				SumTotal:  *r.SumTotal,
 			}
 		}
 	}
 
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error getting earnings by group: %v", err)
-	}
+	// ----------------------------
+	// Group by date bucket
+	// ----------------------------
+	grouped := make(map[string]float64)
 
-	i.logger.Debug().Msgf("Raw results :%v", rawResults)
-
-	// Group by date string
-	grouped := make(map[string][]ProductQuantity)
 	for _, row := range rawResults {
 		key := row.GroupDate.Time.Format(filterCtx.Format)
-		grouped[key] = append(grouped[key], row.Products...)
+		grouped[key] += row.SumTotal
 	}
 
-	i.logger.Debug().Msgf("Groupped results: %v", grouped)
-
-	// Call ProductService for each group
+	// ----------------------------
+	// Compute earnings (no product service)
+	// ----------------------------
 	results := make([]*ordersgrpc.FarmerEarningsData, 0, len(grouped))
-	for dateStr, productQuantities := range grouped {
-		var productIDs []string
-		var quantities []int64
 
-		for _, pq := range productQuantities {
-			productIDs = append(productIDs, pq.ProductID)
-			quantities = append(quantities, pq.Quantity)
-		}
-
-		res, err := i.productService.SumProductAmounts(ctx, &productsgrpc.SumProductAmountsRequest{
-			ProductIds: productIDs,
-			Quantities: quantities,
-		})
-		if err != nil {
-			return nil, status.Errorf(codes.Internal, "error getting total earning from products: %v", err)
-		}
-
+	for dateStr, total := range grouped {
+		earnings := total * FarmersPercentage
 		results = append(results, &ordersgrpc.FarmerEarningsData{
 			Date:  dateStr,
-			Value: res.Total,
+			Value: earnings,
 		})
 	}
 
+	// Fill missing dates (unchanged)
 	results = fillMissingDates(results, filterCtx)
-
-	i.logger.Debug().Msgf("Final results: %v", results)
 
 	return &ordersgrpc.GetFarmerEarningsResponse{Data: results}, nil
 }

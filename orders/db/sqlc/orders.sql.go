@@ -336,16 +336,9 @@ func (q *Queries) GetOrderStatsBetweenDates(ctx context.Context, arg GetOrderSta
 const getOrdersGroupedByDay = `-- name: GetOrdersGroupedByDay :many
 SELECT 
   DATE_TRUNC('day', o.updated_at)::timestamptz AS group_date,
-  JSON_AGG(
-    JSON_BUILD_OBJECT(
-      'product', oi.product,
-      'quantity', oi.quantity,
-      'unit_type', oi.unit_type
-    )
-  ) AS products
+  price_value as sum_total,
+  price_currency as currency
 FROM orders o
-JOIN order_items oi
-  ON o.order_number = oi.order_number
 WHERE o.product_owner = $1
   AND o.status = $2
   AND o.updated_at BETWEEN $3 AND $4
@@ -362,7 +355,8 @@ type GetOrdersGroupedByDayParams struct {
 
 type GetOrdersGroupedByDayRow struct {
 	GroupDate time.Time `json:"group_date"`
-	Products  []byte    `json:"products"`
+	SumTotal  *float64  `json:"sum_total"`
+	Currency  *string   `json:"currency"`
 }
 
 func (q *Queries) GetOrdersGroupedByDay(ctx context.Context, arg GetOrdersGroupedByDayParams) ([]GetOrdersGroupedByDayRow, error) {
@@ -379,7 +373,7 @@ func (q *Queries) GetOrdersGroupedByDay(ctx context.Context, arg GetOrdersGroupe
 	items := []GetOrdersGroupedByDayRow{}
 	for rows.Next() {
 		var i GetOrdersGroupedByDayRow
-		if err := rows.Scan(&i.GroupDate, &i.Products); err != nil {
+		if err := rows.Scan(&i.GroupDate, &i.SumTotal, &i.Currency); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -393,16 +387,9 @@ func (q *Queries) GetOrdersGroupedByDay(ctx context.Context, arg GetOrdersGroupe
 const getOrdersGroupedByMonth = `-- name: GetOrdersGroupedByMonth :many
 SELECT 
   DATE_TRUNC('month', o.updated_at)::timestamptz AS group_date,
-  JSON_AGG(
-    JSON_BUILD_OBJECT(
-      'product', oi.product,
-      'quantity', oi.quantity,
-      'unit_type', oi.unit_type
-    )
-  ) AS products
+  price_value as sum_total,
+  price_currency as currency
 FROM orders o
-JOIN order_items oi
-  ON o.order_number = oi.order_number
 WHERE o.product_owner = $1
   AND o.status = $2
   AND o.updated_at BETWEEN $3 AND $4
@@ -419,7 +406,8 @@ type GetOrdersGroupedByMonthParams struct {
 
 type GetOrdersGroupedByMonthRow struct {
 	GroupDate time.Time `json:"group_date"`
-	Products  []byte    `json:"products"`
+	SumTotal  *float64  `json:"sum_total"`
+	Currency  *string   `json:"currency"`
 }
 
 func (q *Queries) GetOrdersGroupedByMonth(ctx context.Context, arg GetOrdersGroupedByMonthParams) ([]GetOrdersGroupedByMonthRow, error) {
@@ -436,7 +424,7 @@ func (q *Queries) GetOrdersGroupedByMonth(ctx context.Context, arg GetOrdersGrou
 	items := []GetOrdersGroupedByMonthRow{}
 	for rows.Next() {
 		var i GetOrdersGroupedByMonthRow
-		if err := rows.Scan(&i.GroupDate, &i.Products); err != nil {
+		if err := rows.Scan(&i.GroupDate, &i.SumTotal, &i.Currency); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -450,16 +438,9 @@ func (q *Queries) GetOrdersGroupedByMonth(ctx context.Context, arg GetOrdersGrou
 const getOrdersGroupedByYear = `-- name: GetOrdersGroupedByYear :many
 SELECT 
   DATE_TRUNC('year', o.updated_at)::timestamptz AS group_date,
-  JSON_AGG(
-    JSON_BUILD_OBJECT(
-      'product', oi.product,
-      'quantity', oi.quantity,
-      'unit_type', oi.unit_type
-    )
-  ) AS products
+  price_value as sum_total,
+  price_currency as currency
 FROM orders o
-JOIN order_items oi
-  ON o.order_number = oi.order_number
 WHERE o.product_owner = $1
   AND o.status = $2
   AND o.updated_at BETWEEN $3 AND $4
@@ -476,7 +457,8 @@ type GetOrdersGroupedByYearParams struct {
 
 type GetOrdersGroupedByYearRow struct {
 	GroupDate time.Time `json:"group_date"`
-	Products  []byte    `json:"products"`
+	SumTotal  *float64  `json:"sum_total"`
+	Currency  *string   `json:"currency"`
 }
 
 func (q *Queries) GetOrdersGroupedByYear(ctx context.Context, arg GetOrdersGroupedByYearParams) ([]GetOrdersGroupedByYearRow, error) {
@@ -493,7 +475,7 @@ func (q *Queries) GetOrdersGroupedByYear(ctx context.Context, arg GetOrdersGroup
 	items := []GetOrdersGroupedByYearRow{}
 	for rows.Next() {
 		var i GetOrdersGroupedByYearRow
-		if err := rows.Scan(&i.GroupDate, &i.Products); err != nil {
+		if err := rows.Scan(&i.GroupDate, &i.SumTotal, &i.Currency); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

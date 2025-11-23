@@ -210,16 +210,9 @@ UPDATE payments SET status = $2, updated_at = now() WHERE id = $1;
 -- name: GetOrdersGroupedByDay :many
 SELECT 
   DATE_TRUNC('day', o.updated_at)::timestamptz AS group_date,
-  JSON_AGG(
-    JSON_BUILD_OBJECT(
-      'product', oi.product,
-      'quantity', oi.quantity,
-      'unit_type', oi.unit_type
-    )
-  ) AS products
+  price_value as sum_total,
+  price_currency as currency
 FROM orders o
-JOIN order_items oi
-  ON o.order_number = oi.order_number
 WHERE o.product_owner = $1
   AND o.status = $2
   AND o.updated_at BETWEEN $3 AND $4
@@ -229,16 +222,9 @@ ORDER BY group_date;
 -- name: GetOrdersGroupedByMonth :many
 SELECT 
   DATE_TRUNC('month', o.updated_at)::timestamptz AS group_date,
-  JSON_AGG(
-    JSON_BUILD_OBJECT(
-      'product', oi.product,
-      'quantity', oi.quantity,
-      'unit_type', oi.unit_type
-    )
-  ) AS products
+  price_value as sum_total,
+  price_currency as currency
 FROM orders o
-JOIN order_items oi
-  ON o.order_number = oi.order_number
 WHERE o.product_owner = $1
   AND o.status = $2
   AND o.updated_at BETWEEN $3 AND $4
@@ -248,16 +234,9 @@ ORDER BY group_date;
 -- name: GetOrdersGroupedByYear :many
 SELECT 
   DATE_TRUNC('year', o.updated_at)::timestamptz AS group_date,
-  JSON_AGG(
-    JSON_BUILD_OBJECT(
-      'product', oi.product,
-      'quantity', oi.quantity,
-      'unit_type', oi.unit_type
-    )
-  ) AS products
+  price_value as sum_total,
+  price_currency as currency
 FROM orders o
-JOIN order_items oi
-  ON o.order_number = oi.order_number
 WHERE o.product_owner = $1
   AND o.status = $2
   AND o.updated_at BETWEEN $3 AND $4
