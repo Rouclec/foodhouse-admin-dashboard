@@ -1653,7 +1653,7 @@ func (i *Impl) GetFarmerEarnings(
 		for i, r := range rows {
 			rawResults[i] = Group{
 				GroupDate: pgtype.Timestamptz{Valid: true, Time: r.GroupDate},
-				SumTotal:  *r.SumTotal,
+				SumTotal:  r.SumTotal,
 			}
 		}
 
@@ -1682,7 +1682,7 @@ func (i *Impl) GetFarmerEarnings(
 		for i, r := range rows {
 			rawResults[i] = Group{
 				GroupDate: pgtype.Timestamptz{Valid: true, Time: r.GroupDate},
-				SumTotal:  *r.SumTotal,
+				SumTotal:  r.SumTotal,
 			}
 		}
 
@@ -1711,7 +1711,7 @@ func (i *Impl) GetFarmerEarnings(
 		for i, r := range rows {
 			rawResults[i] = Group{
 				GroupDate: pgtype.Timestamptz{Valid: true, Time: r.GroupDate},
-				SumTotal:  *r.SumTotal,
+				SumTotal:  r.SumTotal,
 			}
 		}
 
