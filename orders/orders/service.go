@@ -580,6 +580,7 @@ func (i *Impl) CreateOrder(ctx context.Context, req *ordersgrpc.CreateOrderReque
 	}
 
 	var productInfos []ProductInfo
+	var farmerID string // will store the first product's created_by
 
 	items := req.GetOrderItems()
 
@@ -589,6 +590,17 @@ func (i *Impl) CreateOrder(ctx context.Context, req *ordersgrpc.CreateOrderReque
 		})
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "error fetching product %v", err)
+		}
+
+		p := prod.GetProduct()
+
+		// If this is the first product, record the farmer ID
+		if farmerID == "" {
+			farmerID = p.GetCreatedBy()
+		} else if p.GetCreatedBy() != farmerID {
+			// Found mismatch → reject
+			return nil, status.Error(codes.InvalidArgument,
+				"A single order cannot contain products from different farmers")
 		}
 
 		productInfos = append(productInfos, ProductInfo{

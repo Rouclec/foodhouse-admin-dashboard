@@ -3478,6 +3478,11 @@ expo-image-picker@^16.1.4:
   dependencies:
     expo-image-loader "~5.1.0"
 
+expo-image@^3.0.10:
+  version "3.0.10"
+  resolved "https://registry.yarnpkg.com/expo-image/-/expo-image-3.0.10.tgz#a589098c3688d76c6e238ae90e1efc06ac4902b0"
+  integrity sha512-i4qNCEf9Ur7vDqdfDdFfWnNCAF2efDTdahuDy9iELPS2nzMKBLeeGA2KxYEPuRylGCS96Rwm+SOZJu6INc2ADQ==
+
 expo-intent-launcher@^12.1.5:
   version "12.1.5"
   resolved "https://registry.yarnpkg.com/expo-intent-launcher/-/expo-intent-launcher-12.1.5.tgz#ed3051292b33e131535d9b35ca20b48cf56d1364"

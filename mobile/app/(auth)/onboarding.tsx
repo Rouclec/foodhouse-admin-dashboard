@@ -1,11 +1,6 @@
-import React, { useRef, useState } from "react";
-import {
-  View,
-  Image,
-  useWindowDimensions,
-  Pressable,
-} from "react-native";
-import { useRouter } from "expo-router";
+import React, { useRef, useState } from 'react';
+import { View, useWindowDimensions, Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
 import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
@@ -13,31 +8,32 @@ import Animated, {
   interpolate,
   Extrapolation,
   runOnJS,
-} from "react-native-reanimated";
-import { defaultStyles, onboardingStyles } from "@/styles";
-import { Text, Button } from "react-native-paper";
-import i18n from "@/i18n";
-import { Colors } from "@/constants";
-import { storeData } from "@/utils";
+} from 'react-native-reanimated';
+import { defaultStyles, onboardingStyles } from '@/styles';
+import { Text, Button } from 'react-native-paper';
+import i18n from '@/i18n';
+import { Colors } from '@/constants';
+import { storeData } from '@/utils';
+import { Image } from 'expo-image';
 
 const onboardingSlides = [
   {
     id: 1,
-    image: require("@/assets/images/onboarding1.jpg"),
-    title: i18n.t("(auth).onboarding.1.title"),
-    description: i18n.t("(auth).onboarding.1.description"),
+    image: require('@/assets/images/onboarding1.jpg'),
+    title: i18n.t('(auth).onboarding.1.title'),
+    description: i18n.t('(auth).onboarding.1.description'),
   },
   {
     id: 2,
-    image: require("@/assets/images/onboarding2.jpg"),
-    title: i18n.t("(auth).onboarding.2.title"),
-    description: i18n.t("(auth).onboarding.2.description"),
+    image: require('@/assets/images/onboarding2.jpg'),
+    title: i18n.t('(auth).onboarding.2.title'),
+    description: i18n.t('(auth).onboarding.2.description'),
   },
   {
     id: 3,
-    image: require("@/assets/images/onboarding3.png"),
-    title: i18n.t("(auth).onboarding.3.title"),
-    description: i18n.t("(auth).onboarding.3.description"),
+    image: require('@/assets/images/onboarding3.png'),
+    title: i18n.t('(auth).onboarding.3.title'),
+    description: i18n.t('(auth).onboarding.3.description'),
   },
 ];
 
@@ -50,7 +46,7 @@ export default function OnboardingScreen() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const scrollHandler = useAnimatedScrollHandler({
-    onScroll: (event) => {
+    onScroll: event => {
       scrollX.value = event.contentOffset.x;
       const index = Math.round(event.contentOffset.x / width);
       runOnJS(setCurrentSlide)(index);
@@ -64,8 +60,8 @@ export default function OnboardingScreen() {
         animated: true,
       });
     } else {
-      await storeData("@hasOnboarded", true);
-      router.replace("/login");
+      await storeData('@hasOnboarded', true);
+      router.replace('/login');
     }
   };
 
@@ -83,15 +79,21 @@ export default function OnboardingScreen() {
         showsHorizontalScrollIndicator={false}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
-        contentContainerStyle={{ flexGrow: 1 }}
-      >
-        {onboardingSlides.map((slide) => (
+        contentContainerStyle={{ flexGrow: 1 }}>
+        {onboardingSlides.map(slide => (
           <View
             key={slide.id}
-            style={{ width, justifyContent: "center", alignItems: "center" }}
-          >
+            style={{ width, justifyContent: 'center', alignItems: 'center' }}>
             <View style={onboardingStyles.imageContainer}>
-              <Image source={slide.image} style={onboardingStyles.image} />
+              <Image
+                source={slide.image}
+                style={onboardingStyles.image}
+                placeholder={{
+                  uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+                }} // Optional placeholder
+                contentFit="cover"
+                transition={1000}
+              />
             </View>
             <View style={onboardingStyles.textContainer}>
               <Text style={onboardingStyles.title}>{slide.title}</Text>
@@ -112,13 +114,13 @@ export default function OnboardingScreen() {
                 scrollX.value,
                 inputRange,
                 [10, 30, 10],
-                Extrapolation.CLAMP
+                Extrapolation.CLAMP,
               );
               const opacity = interpolate(
                 scrollX.value,
                 inputRange,
                 [0.5, 1, 0.5],
-                Extrapolation.CLAMP
+                Extrapolation.CLAMP,
               );
 
               return {
@@ -138,19 +140,17 @@ export default function OnboardingScreen() {
         </View>
         <View style={defaultStyles.bottomButtonContainer}>
           {currentSlide === onboardingSlides.length - 1 && (
-          <Button
-            mode="contained"
-            buttonColor={Colors.primary["500"]}
-            onPress={handleNext}
-            style={defaultStyles.button}
-          >
-            <Text style={defaultStyles.buttonText}>
-              {i18n.t("(auth).onboarding.getStarted")}
-            </Text>
-          </Button>
-        )}
+            <Button
+              mode="contained"
+              buttonColor={Colors.primary['500']}
+              onPress={handleNext}
+              style={defaultStyles.button}>
+              <Text style={defaultStyles.buttonText}>
+                {i18n.t('(auth).onboarding.getStarted')}
+              </Text>
+            </Button>
+          )}
         </View>
-        
       </View>
     </View>
   );

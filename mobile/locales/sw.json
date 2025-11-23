@@ -3,6 +3,7 @@
   "language": "Lugha",
   "suggested": "Ilivyopendekezwa",
   "others": "Wengine",
+  "orderCannotContain": "Agizo moja haliwezi kuwa na bidhaa kutoka kwa wakulima tofauti",
   "(auth)": {
     "index": {
       "welcomeTo": "Karibu kwa",

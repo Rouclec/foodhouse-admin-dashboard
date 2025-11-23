@@ -3,6 +3,7 @@
   "language": "Langue",
   "suggested": "Suggéré",
   "others": "Autres",
+  "orderCannotContain": "Une seule commande ne peut pas contenir des produits de différents agriculteurs",
   "(auth)": {
     "index": {
       "welcomeTo": "Bienvenue à",

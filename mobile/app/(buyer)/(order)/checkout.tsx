@@ -10,7 +10,6 @@ import {
   KeyboardAvoidingView,
   TouchableOpacity,
   ScrollView,
-  Image,
 } from 'react-native';
 import { Chase } from 'react-native-animated-spinkit';
 import {
@@ -23,14 +22,12 @@ import {
 } from 'react-native-paper';
 import { checkoutStyles as styles } from '@/styles';
 import { formatAmount } from '@/utils/amountFormater';
-import {
-  ordersCreateOrderMutation,
-  ordersEstimateDeliveryFeeOptions,
-} from '@/client/orders.swagger/@tanstack/react-query.gen';
+import { ordersCreateOrderMutation } from '@/client/orders.swagger/@tanstack/react-query.gen';
 import { Context, ContextType } from '@/app/_layout';
 import { delay } from '@/utils';
 import { CartItem } from '@/utils/types';
 import { ordersEstimateDeliveryFee } from '@/client/orders.swagger';
+import { Image } from 'expo-image';
 
 export default function Checkout() {
   const router = useRouter();
@@ -277,7 +274,12 @@ export default function Checkout() {
               {i18n.t('(buyer).(order).checkout.shippingAddress')}
             </Text>
 
-            <View style={[styles.orderDetailsContainer, styles.flexRow]}>
+            <View
+              style={[
+                styles.orderDetailsContainer,
+                styles.flexRow,
+                styles.marginTop16
+              ]}>
               <View style={styles.outterLocationIconContainer}>
                 <View style={styles.innerLocationIconContainer}>
                   <Icon
@@ -312,6 +314,11 @@ export default function Checkout() {
                   <Image
                     source={{ uri: item.image }}
                     style={styles.productImage}
+                    placeholder={{
+                      uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+                    }} // Optional placeholder
+                    contentFit="cover"
+                    transition={500}
                   />
                   <View style={styles.rightContainer}>
                     <Text variant="titleMedium" numberOfLines={1}>
@@ -375,7 +382,12 @@ export default function Checkout() {
                 </View>
               ))}
 
-              <View style={[styles.orderDetailsContainer, styles.flexColumn]}>
+              <View
+                style={[
+                  styles.orderDetailsContainer,
+                  styles.flexColumn,
+                  styles.marginTop16,
+                ]}>
                 <View style={styles.rowItem}>
                   <Text style={styles.textSmall}>
                     {i18n.t('(buyer).(order).checkout.amount')}

@@ -3,6 +3,7 @@
   "language": "Language",
   "suggested": "Suggested",
   "others": "Others",
+  "orderCannotContain": "A single order cannot contain products from different farmers",
   "(auth)": {
     "index": {
       "welcomeTo": "Welcome To",
@@ -90,16 +91,15 @@
         "in": "in",
         "verifyOtp": "Verify otp"
       }
-     
     },
 
-     "location": {
-        "title": "Location Access Needed",
-        "body": "We’re unable to access your location. Please enable location services in your device settings to continue. This helps us show accurate information and improve your experience.",
-        "tail": "Tip: Go to Settings → Apps → [foodhouse] → Permissions → Location, and turn it ON.",
-        "button2": "Open Settings",
-        "button1":"Cancel"
-      },
+    "location": {
+      "title": "Location Access Needed",
+      "body": "We’re unable to access your location. Please enable location services in your device settings to continue. This helps us show accurate information and improve your experience.",
+      "tail": "Tip: Go to Settings → Apps → [foodhouse] → Permissions → Location, and turn it ON.",
+      "button2": "Open Settings",
+      "button1": "Cancel"
+    },
 
     "register": {
       "createAccount": "Create Account",

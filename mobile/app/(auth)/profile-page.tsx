@@ -1,11 +1,5 @@
 import React, { useContext, useState, useRef, useEffect } from 'react';
-import {
-  KeyboardAvoidingView,
-  TouchableOpacity,
-  View,
-  Image,
-  ScrollView,
-} from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import {
   Appbar,
   Icon,
@@ -29,6 +23,7 @@ import i18n from '@/i18n';
 import { Dropdown, ImagePicker } from '@/components';
 import { Chase } from 'react-native-animated-spinkit';
 import { Colors, emailRegex } from '@/constants';
+import { Image } from 'expo-image';
 
 import {
   GooglePlacesAutocomplete,
@@ -64,7 +59,6 @@ const ProfilePage = () => {
 
   const [referralCode, setReferralCode] = useState<string>();
   const [checkError, setCheckError] = useState(false);
-  
 
   const { mutateAsync: updateUserRegistration } = useMutation({
     ...usersCompleteRegistrationMutation(),
@@ -138,7 +132,6 @@ const ProfilePage = () => {
           return;
         }
       }
-      
 
       const data: UsersCompleteRegistrationBody = {
         firstName,
@@ -150,7 +143,6 @@ const ProfilePage = () => {
         locationCoordinates: locationCoordinates ?? undefined,
         referredBy: referralCode,
       };
-      
 
       await updateUserRegistration({
         body: data,
@@ -219,6 +211,11 @@ const ProfilePage = () => {
               <Image
                 source={{ uri: profileImage.uri }}
                 style={signupStyles.profileImage}
+                placeholder={{
+                  uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+                }} // Optional placeholder
+                contentFit="cover"
+                transition={1000}
               />
             ) : (
               <View style={signupStyles.addImageContainer}>
@@ -479,6 +476,11 @@ const ProfilePage = () => {
             <Image
               source={require('@/assets/images/success.png')}
               style={defaultStyles.successImage}
+              placeholder={{
+                uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+              }} // Optional placeholder
+              contentFit="cover"
+              transition={1000}
             />
           </Dialog.Content>
           <Dialog.Content>

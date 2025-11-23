@@ -1,7 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useContext, useEffect, useState } from 'react';
 import {
-  Image,
   ImageBackground,
   KeyboardAvoidingView,
   SafeAreaView,
@@ -21,6 +20,8 @@ import { productsGetProductOptions } from '@/client/products.swagger/@tanstack/r
 import { usersGetFarmerByIdOptions } from '@/client/users.swagger/@tanstack/react-query.gen';
 import { formatAmount } from '@/utils/amountFormater';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Image } from 'expo-image';
+import { StyleSheet } from 'react-native';
 
 export default function ProductDetails() {
   const { user, productId, setProductId, addToCart, cartItems } = useContext(
@@ -66,26 +67,35 @@ export default function ProductDetails() {
 
   const insets = useSafeAreaInsets();
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!data?.product) return;
-    const productExists = cartItems.some(item => item.id === data.product!.id);
+    try {
+      const productExists = cartItems.some(
+        item => item.id === data.product!.id,
+      );
 
-    if (productExists) {
-      setSnackbarMessage(i18n.t('This item is already in your cart.'));
+      if (productExists) {
+        setSnackbarMessage(i18n.t('This item is already in your cart.'));
+        setSnackbarAction('info');
+        setSnackbarVisible(true);
+        return;
+      }
+
+      await addToCart(data.product);
+
+      setSnackbarMessage(i18n.t('Item added to cart!'));
+      setSnackbarAction('success');
+      setSnackbarVisible(true);
+
+      setTimeout(() => {
+        router.replace('/(buyer)/(index)');
+      }, 1500);
+    } catch (error) {
+      setSnackbarMessage(error as string);
       setSnackbarAction('info');
       setSnackbarVisible(true);
       return;
     }
-
-    addToCart(data.product);
-
-    setSnackbarMessage(i18n.t('Item added to cart!'));
-    setSnackbarAction('success');
-    setSnackbarVisible(true);
-
-    setTimeout(() => {
-      router.replace('/(buyer)/(index)');
-    }, 1500);
   };
 
   if (isLoading) {
@@ -158,10 +168,11 @@ export default function ProductDetails() {
             paddingBottom: insets.bottom,
           },
         ]}>
-        <ImageBackground
-          source={{ uri: data?.product?.image }}
-          style={styles.imageBackground}
-          resizeMethod="auto">
+        <View style={styles.imageBackground}>
+          <Image
+            source={{ uri: data?.product?.image }}
+            style={StyleSheet.absoluteFillObject}
+          />
           <Appbar.Header
             style={[defaultStyles.appHeader, styles.bgTransparent]}>
             <TouchableOpacity
@@ -170,7 +181,7 @@ export default function ProductDetails() {
               <Icon source={'arrow-left'} size={24} color={Colors.light[10]} />
             </TouchableOpacity>
           </Appbar.Header>
-        </ImageBackground>
+        </View>
         <ScrollView
           contentContainerStyle={defaultStyles.scrollContainer}
           showsVerticalScrollIndicator={false}
@@ -199,17 +210,13 @@ export default function ProductDetails() {
               </Text>
               <View style={styles.farmerDetailscontainer}>
                 <View style={styles.farmerProfileImageContainer}>
-                  {farmer?.user?.profileImage ? (
-                    <Image
-                      source={{ uri: farmer?.user?.profileImage }}
-                      style={styles.profileImage}
-                    />
-                  ) : (
-                    <Image
-                      source={require('@/assets/images/avatar.png')}
-                      style={styles.avatar}
-                    />
-                  )}
+                  <Image
+                    source={{ uri: farmer?.user?.profileImage }}
+                    style={styles.profileImage}
+                    placeholder={require('@/assets/images/avatar.png')} // Optional placeholder
+                    contentFit="cover"
+                    transition={500}
+                  />
                 </View>
                 <View style={styles.nameAndCheckContainer}>
                   <Text variant="titleMedium" style={styles.farmerName}>
