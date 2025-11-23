@@ -105,11 +105,7 @@ export default function BuyerProducts() {
     ...productsListCategoriesOptions(),
     placeholderData: keepPreviousData,
   });
-  const {
-    isLoading: isProductsLoading,
-    data,
-    refetch,
-  } = useQuery({
+  const { isLoading: isProductsLoading, data } = useQuery({
     ...productsListProductsOptions({
       path: {
         userId: user?.userId ?? '',
@@ -132,15 +128,9 @@ export default function BuyerProducts() {
     }),
     enabled: !!userLocation,
     placeholderData: keepPreviousData,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
   });
-
-  const isFocused = useIsFocused();
-
-  useEffect(() => {
-    if (isFocused) {
-      refetch();
-    }
-  }, [isFocused]);
 
   // control variables for filter container.
   const sheetRef = useRef<FilterBottomSheetRef>(null);
@@ -359,7 +349,7 @@ export default function BuyerProducts() {
             style={[styles.title, styles.marginHorizontal24]}>
             {i18n.t('(buyer).(index).products.products')}
           </Text>
-          {isProductsLoading && !data ? (
+          {isProductsLoading ? (
             <View style={[defaultStyles.container, defaultStyles.center]}>
               <Chase size={56} color={Colors.primary[500]} />
             </View>

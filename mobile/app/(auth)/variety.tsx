@@ -53,9 +53,9 @@ const VarietyPage = () => {
     });
   };
 
-  const handleContinue = () => {
-    router.push("/(auth)/subscribe");
-  };
+  // const handleContinue = () => {
+  //   router.push("/(auth)/subscribe");
+  // };
 
   return (
     <>
@@ -122,7 +122,7 @@ const VarietyPage = () => {
           <View style={defaultStyles.bottomButtonContainer}>
             <Button
               mode="contained"
-              onPress={handleContinue}
+              // onPress={handleContinue}
               style={defaultStyles.primaryButton}
             >
               <Text style={defaultStyles.buttonText}>

@@ -8,8 +8,7 @@ export const checkoutStyles = StyleSheet.create({
     marginBottom: 96,
   },
   orderContainer: {
-    marginTop: 8,
-    rowGap: 16,
+    marginTop: 24,
   },
   orderDetailsContainer: {
     backgroundColor: Colors.light[10],
@@ -62,6 +61,7 @@ export const checkoutStyles = StyleSheet.create({
     justifyContent: 'space-between',
     columnGap: 16,
   },
+  marginTop16: { marginTop: 16 },
   outterLocationIconContainer: {
     width: 52,
     height: 52,

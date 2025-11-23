@@ -23,6 +23,7 @@ import { RelativePathString } from 'expo-router';
 import { ExternalPathString } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { productsgrpcProduct } from '@/client/products.swagger';
+import i18n from '@/i18n';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -54,6 +55,7 @@ export type CartItem = {
   quantity: number;
   currency?: string;
   unitType?: string;
+  createdBy?: string;
 };
 
 const client = new QueryClient();
@@ -214,35 +216,47 @@ function RootLayoutNav() {
   }
 
   const addToCart = async (product: productsgrpcProduct) => {
-    setContextInfo(prevState => {
-      const updatedCart = [...prevState.cartItems];
+    return new Promise<void>((resolve, reject) => {
+      setContextInfo(prevState => {
+        const existingItems = prevState.cartItems;
 
-      const existingIndex = updatedCart.findIndex(
-        item => item.id === product.id,
-      );
+        if (existingItems.length > 0) {
+          const existingFarmer = existingItems[0].createdBy;
+          const newFarmer = product.createdBy;
 
-      if (existingIndex > -1) {
-        updatedCart[existingIndex].quantity += 1;
-      } else {
-        updatedCart.push({
-          id: product.id ?? '',
-          name: product.name ?? '',
-          price: product.amount?.value || 0,
-          image: product.image,
-          currency: product.amount?.currencyIsoCode || 'XAF',
-          quantity: 1,
-          unitType: product.unitType,
-        });
-      }
+          if (existingFarmer && newFarmer && existingFarmer !== newFarmer) {
+            // ❗ Reject instead of throwing
+            reject(i18n.t('orderCannotContain'));
+            return prevState; // ← do NOT update state
+          }
+        }
 
-      AsyncStorage.setItem('user_cart', JSON.stringify(updatedCart)).catch(
-        err => console.error('Error saving cart', err),
-      );
+        // --- SAFE TO UPDATE ---
+        const updatedCart = [...existingItems];
+        const existingIndex = updatedCart.findIndex(
+          item => item.id === product.id,
+        );
 
-      return {
-        ...prevState,
-        cartItems: updatedCart,
-      };
+        if (existingIndex > -1) {
+          updatedCart[existingIndex].quantity += 1;
+        } else {
+          updatedCart.push({
+            id: product.id ?? '',
+            name: product.name ?? '',
+            price: product.amount?.value || 0,
+            image: product.image,
+            currency: product.amount?.currencyIsoCode || 'XAF',
+            quantity: 1,
+            unitType: product.unitType,
+            createdBy: product.createdBy,
+          });
+        }
+
+        AsyncStorage.setItem('user_cart', JSON.stringify(updatedCart));
+        resolve();
+
+        return { ...prevState, cartItems: updatedCart };
+      });
     });
   };
 
