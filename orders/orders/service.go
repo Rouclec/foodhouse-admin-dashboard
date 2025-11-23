@@ -53,11 +53,11 @@ const (
 
 	TPWPaymentStatusFailed = "FAILED"
 
-	TotalPercentage = 1.10
+	TotalPercentage = 1.00
 
 	RefundPercentage = 0.95
 
-	FarmersPercentage = 0.9
+	FarmersPercentage = 1.00
 
 	// agent commission 30% * 20%.
 	ReferralCommissionPercentage = 0.06
@@ -407,7 +407,8 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 
 		if shouldSendReceipt {
 
-			// Get user (non-fatal on failure)
+			// fetch the user and get their email.
+			// NB: don't fail if receipt can't be sent.
 			user, _ := i.userService.GetUserByID(ctx, &usersgrpc.GetUserByIDRequest{
 				UserId: *order.CreatedBy,
 			})

@@ -184,6 +184,7 @@ func HashPassword(password string) (string, error) {
 
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+
 	return err == nil
 }
 
@@ -621,8 +622,10 @@ func (i *Impl) validateAuthFactor(ctx context.Context, authFactor *usersgrpc.Aut
 		return i.validateEmailPassword(ctx, authFactor)
 	case usersgrpc.FactorType_FACTOR_TYPE_EMAIL_PHONE_PASSWORD:
 		if strings.Contains(authFactor.GetId(), "@") {
+			i.logger.Debug().Msgf("Email factor from email phone")
 			return i.validateEmailPassword(ctx, authFactor)
 		}
+		i.logger.Debug().Msgf("Phone factor from email phone")
 		return i.validatePhonePassword(ctx, authFactor)
 
 	case usersgrpc.FactorType_FACTOR_TYPE_UNSPECIFIED:
@@ -638,6 +641,7 @@ func (i *Impl) validateEmailPassword(ctx context.Context, authFactor *usersgrpc.
 		return "", status.Errorf(codes.NotFound, "User not found: %v", err)
 	}
 
+	i.logger.Debug().Msgf("user password log: %v", user.Password)
 	if !CheckPasswordHash(authFactor.GetSecretValue(), user.Password) {
 		return "", status.Error(codes.Unauthenticated, "Invalid password")
 	}
