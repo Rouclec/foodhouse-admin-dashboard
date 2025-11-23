@@ -640,6 +640,25 @@ export default function OrderDetailsPage() {
           <CardContent>
             <div className="space-y-6">
               <ol className="relative border-l border-gray-200 ml-3">
+                {/* Only show "Awaiting next update" if order not in terminating state */}
+                {orderDetailsData.order.status !== "OrderStatus_DELIVERED" &&
+                  orderDetailsData?.order?.status !==
+                    "OrderStatus_PAYMENT_FAILED" &&
+                  orderDetailsData?.order?.status !==
+                    "OrderStatus_REJECTED" && (
+                    <li className="mb-6 ml-6">
+                      <span className="absolute flex items-center justify-center w-6 h-6 rounded-full -left-3 ring-8 ring-white bg-gray-100">
+                        <AlertCircle className="w-3 h-3 text-gray-500" />
+                      </span>
+                      <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 border-dashed">
+                        <p className="text-sm font-normal text-gray-500">
+                          Awaiting next update...
+                        </p>
+                      </div>
+                    </li>
+                  )}
+
+                {/* Sorted audit logs */}
                 {[...(orderDetailsData?.auditLog ?? [])]
                   .sort(
                     (a, b) =>
@@ -713,22 +732,6 @@ export default function OrderDetailsPage() {
                       </div>
                     </li>
                   ))}
-                {orderDetailsData.order.status !== "OrderStatus_DELIVERED" &&
-                  orderDetailsData?.order?.status !==
-                    "OrderStatus_PAYMENT_FAILED" &&
-                  orderDetailsData?.order?.status !==
-                    "OrderStatus_REJECTED" && (
-                    <li className="ml-6">
-                      <span className="absolute flex items-center justify-center w-6 h-6 rounded-full -left-3 ring-8 ring-white bg-gray-100">
-                        <AlertCircle className="w-3 h-3 text-gray-500" />
-                      </span>
-                      <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 border-dashed">
-                        <p className="text-sm font-normal text-gray-500">
-                          Awaiting next update...
-                        </p>
-                      </div>
-                    </li>
-                  )}
               </ol>
             </div>
           </CardContent>
