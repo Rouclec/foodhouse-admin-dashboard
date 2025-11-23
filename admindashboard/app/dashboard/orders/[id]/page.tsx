@@ -640,72 +640,79 @@ export default function OrderDetailsPage() {
           <CardContent>
             <div className="space-y-6">
               <ol className="relative border-l border-gray-200 ml-3">
-                {orderDetailsData?.auditLog?.map((log, index) => (
-                  <li key={log.action} className="mb-6 ml-6">
-                    <span
-                      className={`absolute flex items-center justify-center w-6 h-6 rounded-full -left-3 ring-8 ring-white ${
-                        index === 0 ? "bg-green-200" : "bg-blue-200"
-                      }`}
-                    >
-                      {index === 0 ? (
-                        <CheckCircle2 className="w-3 h-3 text-green-600" />
-                      ) : (
-                        <Clock className="w-3 h-3 text-blue-600" />
-                      )}
-                    </span>
-                    <div className="p-3 bg-white rounded-lg border border-gray-200 shadow-sm">
-                      <div className="flex justify-between items-center mb-1">
-                        <Badge className={getStatusColor(log.after?.status)}>
-                          {log.after?.status
-                            ?.replace("OrderStatus_", "")
-                            .split("_")
-                            .join(" ")
-                            .trim()}
-                        </Badge>
-                        <time className="text-xs text-gray-500">
-                          {formatDate(log.timestamp)}
-                        </time>
+                {[...(orderDetailsData?.auditLog ?? [])]
+                  .sort(
+                    (a, b) =>
+                      new Date(b?.timestamp ?? "").getTime() -
+                      new Date(a?.timestamp ?? "").getTime()
+                  )
+                  .map((log, index) => (
+                    <li key={log.action} className="mb-6 ml-6">
+                      <span
+                        className={`absolute flex items-center justify-center w-6 h-6 rounded-full -left-3 ring-8 ring-white ${
+                          index === 0 ? "bg-green-200" : "bg-blue-200"
+                        }`}
+                      >
+                        {index === 0 ? (
+                          <CheckCircle2 className="w-3 h-3 text-green-600" />
+                        ) : (
+                          <Clock className="w-3 h-3 text-blue-600" />
+                        )}
+                      </span>
+                      <div className="p-3 bg-white rounded-lg border border-gray-200 shadow-sm">
+                        <div className="flex justify-between items-center mb-1">
+                          <Badge className={getStatusColor(log.after?.status)}>
+                            {log.after?.status
+                              ?.replace("OrderStatus_", "")
+                              .split("_")
+                              .join(" ")
+                              .trim()}
+                          </Badge>
+                          <time className="text-xs text-gray-500">
+                            {formatDate(log.timestamp)}
+                          </time>
+                        </div>
+                        <p className="text-sm font-normal text-gray-700">
+                          {log.reason}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          By:{" "}
+                          {log.after?.status === "OrderStatus_CREATED"
+                            ? `${userData?.user?.firstName} ${userData?.user?.lastName}`
+                            : log.after?.status === "OrderStatus_APPROVED" ||
+                              log.after?.status === "OrderStatus_REJECTED"
+                            ? `${approver?.user?.firstName} ${
+                                approver?.user?.lastName
+                              } ${
+                                approver?.user?.userId !==
+                                farmerData?.user?.userId
+                                  ? `(${approver?.user?.role?.replace(
+                                      "USER_ROLE_",
+                                      ""
+                                    )})`
+                                  : ""
+                              } `
+                            : log.after?.status === "OrderStatus_IN_TRANSIT"
+                            ? `${agentData?.user?.firstName ?? "-"} ${
+                                agentData?.user?.lastName ?? "-"
+                              }`
+                            : log.after?.status === "OrderStatus_DELIVERED"
+                            ? `${confirmer?.user?.firstName} ${
+                                confirmer?.user?.lastName
+                              } ${
+                                confirmer?.user?.userId !==
+                                userData?.user?.userId
+                                  ? `(${approver?.user?.role?.replace(
+                                      "USER_ROLE_",
+                                      ""
+                                    )})`
+                                  : ""
+                              } `
+                            : log.actor}
+                        </p>
                       </div>
-                      <p className="text-sm font-normal text-gray-700">
-                        {log.reason}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        By:{" "}
-                        {log.after?.status === "OrderStatus_CREATED"
-                          ? `${userData?.user?.firstName} ${userData?.user?.lastName}`
-                          : log.after?.status === "OrderStatus_APPROVED" ||
-                            log.after?.status === "OrderStatus_REJECTED"
-                          ? `${approver?.user?.firstName} ${
-                              approver?.user?.lastName
-                            } ${
-                              approver?.user?.userId !==
-                              farmerData?.user?.userId
-                                ? `(${approver?.user?.role?.replace(
-                                    "USER_ROLE_",
-                                    ""
-                                  )})`
-                                : ""
-                            } `
-                          : log.after?.status === "OrderStatus_IN_TRANSIT"
-                          ? `${agentData?.user?.firstName ?? "-"} ${
-                              agentData?.user?.lastName ?? "-"
-                            }`
-                          : log.after?.status === "OrderStatus_DELIVERED"
-                          ? `${confirmer?.user?.firstName} ${
-                              confirmer?.user?.lastName
-                            } ${
-                              confirmer?.user?.userId !== userData?.user?.userId
-                                ? `(${approver?.user?.role?.replace(
-                                    "USER_ROLE_",
-                                    ""
-                                  )})`
-                                : ""
-                            } `
-                          : log.actor}
-                      </p>
-                    </div>
-                  </li>
-                ))}
+                    </li>
+                  ))}
                 {orderDetailsData.order.status !== "OrderStatus_DELIVERED" &&
                   orderDetailsData?.order?.status !==
                     "OrderStatus_PAYMENT_FAILED" &&
