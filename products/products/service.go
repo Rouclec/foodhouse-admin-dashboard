@@ -215,37 +215,43 @@ func GetAllowedRegions(region string) []string {
 // Returns nil for unrestricted (admin), empty slice for blocked access, or allowed region list.
 func (i *Impl) DetermineAllowedRegions(ctx context.Context, logger *zerolog.Logger, userLoc *types.Point) []string {
 
-	// Case 1: No location → block access
-	if userLoc == nil {
-		logger.Debug().Msg("no user location → block access")
-		return []string{}
-	}
-
-	// Case 2: Admin override → unrestricted
+	// Allowing all regions
 	if userLoc.GetLat() == AdminOverrideLat && userLoc.GetLon() == AdminOverrideLon {
 		logger.Debug().Msg("admin override → unrestricted view")
 		return []string{"__ADMIN_OVERRIDE__"}
 	}
 
+	// Case 1: No location → block access
+	// if userLoc == nil {
+	// 	logger.Debug().Msg("no user location → block access")
+	// 	return []string{}
+	// }
+
+	// Case 2: Admin override → unrestricted
+	// if userLoc.GetLat() == AdminOverrideLat && userLoc.GetLon() == AdminOverrideLon {
+	// 	logger.Debug().Msg("admin override → unrestricted view")
+	// 	return []string{"__ADMIN_OVERRIDE__"}
+	// }
+
 	// Case 3: Normal user → region lookup
-	region, err := i.repo.Do().GetRegionName(ctx, sqlc.GetRegionNameParams{
-		Lon: userLoc.GetLon(),
-		Lat: userLoc.GetLat(),
-	})
-	if err != nil {
-		logger.Warn().Err(err).Msg("failed to get region name")
-		return []string{}
-	}
+	// region, err := i.repo.Do().GetRegionName(ctx, sqlc.GetRegionNameParams{
+	// 	Lon: userLoc.GetLon(),
+	// 	Lat: userLoc.GetLat(),
+	// })
+	// if err != nil {
+	// 	logger.Warn().Err(err).Msg("failed to get region name")
+	// 	return []string{}
+	// }
 
-	allowedRegions := GetAllowedRegions(region)
+	// allowedRegions := GetAllowedRegions(region)
 
-	// Case 4: Unmapped region → block
-	if len(allowedRegions) == 0 {
-		logger.Debug().Msg("no mapped regions → block access")
-		return []string{}
-	}
+	// // Case 4: Unmapped region → block
+	// if len(allowedRegions) == 0 {
+	// 	logger.Debug().Msg("no mapped regions → block access")
+	// 	return []string{}
+	// }
 
-	return allowedRegions
+	// return allowedRegions
 }
 
 // ListProducts implements productsgrpc.ProductsServer.

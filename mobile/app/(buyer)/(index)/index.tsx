@@ -50,43 +50,47 @@ export default function BuyerProducts() {
   const [minAmount, setMinAmount] = useState<string>();
   const [maxAmount, setMaxAmount] = useState<string>();
   const [showLocationModal, setShowLocationModal] = useState(false);
+  // const [settingUp, setSettingUp] = useState(true);
 
-  const [userLocation, setUserLocation] = useState<{
-    lat: number;
-    lon: number;
-  } | null>(null);
-  const [locationError, setLocationError] = useState<string | null>(null);
+  // const [userLocation, setUserLocation] = useState<{
+  //   lat: number;
+  //   lon: number;
+  // } | null>(null);
+  // const [locationError, setLocationError] = useState<string | null>(null);
   const userCurrency =
     countries.find(country => country.code === user?.residenceCountryIsoCode)
       ?.currency_code ?? CAMEROON.currency_code;
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          setLocationError(i18n.t('(buyer).(index).products.permissionDenied'));
-          setShowLocationModal(true);
+  // useEffect(() => {
+  //   (async () => {
+  //     try {
+  //       setSettingUp(true);
+  //       const { status } = await Location.requestForegroundPermissionsAsync();
+  //       if (status !== 'granted') {
+  //         setLocationError(i18n.t('(buyer).(index).products.permissionDenied'));
+  //         setShowLocationModal(true);
 
-          return;
-        }
+  //         return;
+  //       }
 
-        const location = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.High,
-        });
+  //       const location = await Location.getCurrentPositionAsync({
+  //         accuracy: Location.Accuracy.High,
+  //       });
 
-        setUserLocation({
-          lat: location.coords.latitude,
-          lon: location.coords.longitude,
-        });
-      } catch (error) {
-        console.warn('Error getting location:', error);
-        setLocationError(
-          i18n.t('(buyer).i(ndex).products.couldNotGetLocation'),
-        );
-      }
-    })();
-  }, []);
+  //       setUserLocation({
+  //         lat: location.coords.latitude,
+  //         lon: location.coords.longitude,
+  //       });
+  //     } catch (error) {
+  //       console.warn('Error getting location:', error);
+  //       setLocationError(
+  //         i18n.t('(buyer).i(ndex).products.couldNotGetLocation'),
+  //       );
+  //     } finally {
+  //       setSettingUp(false);
+  //     }
+  //   })();
+  // }, []);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -117,8 +121,8 @@ export default function BuyerProducts() {
         'minAmount.currencyIsoCode': userCurrency,
         'minAmount.value': minAmount ? parseFloat(minAmount ?? '') : undefined,
 
-        'userLocation.lat': userLocation?.lat,
-        'userLocation.lon': userLocation?.lon,
+        'userLocation.lat': 1.1,
+        'userLocation.lon': 1.1,
 
         categoryId: selectedCategoryId,
         search: debounceQuery,
@@ -126,7 +130,7 @@ export default function BuyerProducts() {
         isApproved: true,
       },
     }),
-    enabled: !!userLocation,
+    // enabled: !!userLocation,
     placeholderData: keepPreviousData,
     refetchOnWindowFocus: false,
     staleTime: 5 * 60 * 1000,
