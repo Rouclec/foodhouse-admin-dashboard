@@ -32,11 +32,9 @@ import { useRouter } from 'expo-router';
 import { CAMEROON, Colors, countries } from '@/constants';
 import { Chase } from 'react-native-animated-spinkit';
 import { FilterBottomSheet, Product } from '@/components';
-import { useIsFocused } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
 import { FilterBottomSheetRef } from '@/components/(buyer)/(index)/FilterBottomSheet';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
-import * as Location from 'expo-location';
 
 const HOUR_OF_DAY = new Date().getHours();
 const { width } = Dimensions.get('window');
