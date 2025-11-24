@@ -216,10 +216,8 @@ func GetAllowedRegions(region string) []string {
 func (i *Impl) DetermineAllowedRegions(ctx context.Context, logger *zerolog.Logger, userLoc *types.Point) []string {
 
 	// Allowing all regions
-	if userLoc.GetLat() == AdminOverrideLat && userLoc.GetLon() == AdminOverrideLon {
-		logger.Debug().Msg("admin override → unrestricted view")
-		return []string{"__ADMIN_OVERRIDE__"}
-	}
+	logger.Debug().Msg("allowing all regions")
+	return []string{"__ADMIN_OVERRIDE__"}
 
 	// Case 1: No location → block access
 	// if userLoc == nil {
