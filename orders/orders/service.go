@@ -1613,10 +1613,14 @@ func (i *Impl) GetFarmerEarnings(
 	req *ordersgrpc.GetFarmerEarningsRequest,
 ) (*ordersgrpc.GetFarmerEarningsResponse, error) {
 
+	i.logger.Debug().Msgf("Filter from request: %v", req.GetFilter())
+
 	filterCtx, err := GetFilterContext(req.GetFilter())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error getting context %v", err)
 	}
+
+	i.logger.Debug().Msgf("Filter ctx: %v", filterCtx)
 
 	var rawResults []Group
 
@@ -1642,14 +1646,18 @@ func (i *Impl) GetFarmerEarnings(
 			return nil, status.Errorf(codes.Internal, "error getting earnings by day: %v", err)
 		}
 
+		i.logger.Debug().Msgf("sqlc rows: %v", rows)
+
 		rawResults = make([]Group, len(rows))
 
 		for i, r := range rows {
 			rawResults[i] = Group{
 				GroupDate: pgtype.Timestamptz{Valid: true, Time: r.GroupDate},
-				SumTotal:  *r.SumTotal,
+				SumTotal:  r.SumTotal,
 			}
 		}
+
+		i.logger.Debug().Msgf("raw results: %v", rawResults)
 
 	case GroupByMonth:
 		rows, err := i.repo.Do().GetOrdersGroupedByMonth(ctx, sqlc.GetOrdersGroupedByMonthParams{
@@ -1668,13 +1676,17 @@ func (i *Impl) GetFarmerEarnings(
 			return nil, status.Errorf(codes.Internal, "error getting earnings by month: %v", err)
 		}
 
+		i.logger.Debug().Msgf("sqlc rows: %v", rows)
+
 		rawResults = make([]Group, len(rows))
 		for i, r := range rows {
 			rawResults[i] = Group{
 				GroupDate: pgtype.Timestamptz{Valid: true, Time: r.GroupDate},
-				SumTotal:  *r.SumTotal,
+				SumTotal:  r.SumTotal,
 			}
 		}
+
+		i.logger.Debug().Msgf("raw sqlc: %v", rawResults)
 
 	case GroupByYear:
 		rows, err := i.repo.Do().GetOrdersGroupedByYear(ctx, sqlc.GetOrdersGroupedByYearParams{
@@ -1693,13 +1705,17 @@ func (i *Impl) GetFarmerEarnings(
 			return nil, status.Errorf(codes.Internal, "error getting earnings by year: %v", err)
 		}
 
+		i.logger.Debug().Msgf("sqlc rows: %v", rows)
+
 		rawResults = make([]Group, len(rows))
 		for i, r := range rows {
 			rawResults[i] = Group{
 				GroupDate: pgtype.Timestamptz{Valid: true, Time: r.GroupDate},
-				SumTotal:  *r.SumTotal,
+				SumTotal:  r.SumTotal,
 			}
 		}
+
+		i.logger.Debug().Msgf("raw results: %v", rawResults)
 	}
 
 	// ----------------------------
@@ -1712,6 +1728,7 @@ func (i *Impl) GetFarmerEarnings(
 		grouped[key] += row.SumTotal
 	}
 
+	i.logger.Debug().Msgf("grouped : %v", grouped)
 	// ----------------------------
 	// Compute earnings (no product service)
 	// ----------------------------
@@ -1725,8 +1742,12 @@ func (i *Impl) GetFarmerEarnings(
 		})
 	}
 
+	i.logger.Debug().Msgf("results: %v", results)
+
 	// Fill missing dates (unchanged)
 	results = fillMissingDates(results, filterCtx)
+
+	i.logger.Debug().Msgf("final results: %v", results)
 
 	return &ordersgrpc.GetFarmerEarningsResponse{Data: results}, nil
 }

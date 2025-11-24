@@ -336,13 +336,13 @@ func (q *Queries) GetOrderStatsBetweenDates(ctx context.Context, arg GetOrderSta
 const getOrdersGroupedByDay = `-- name: GetOrdersGroupedByDay :many
 SELECT 
   DATE_TRUNC('day', o.updated_at)::timestamptz AS group_date,
-  price_value as sum_total,
-  price_currency as currency
+  COALESCE(SUM(o.price_value), 0)::float8 AS sum_total,
+  o.price_currency AS currency
 FROM orders o
 WHERE o.product_owner = $1
   AND o.status = $2
   AND o.updated_at BETWEEN $3 AND $4
-GROUP BY group_date
+GROUP BY group_date, o.price_currency
 ORDER BY group_date
 `
 
@@ -355,7 +355,7 @@ type GetOrdersGroupedByDayParams struct {
 
 type GetOrdersGroupedByDayRow struct {
 	GroupDate time.Time `json:"group_date"`
-	SumTotal  *float64  `json:"sum_total"`
+	SumTotal  float64   `json:"sum_total"`
 	Currency  *string   `json:"currency"`
 }
 
@@ -387,13 +387,13 @@ func (q *Queries) GetOrdersGroupedByDay(ctx context.Context, arg GetOrdersGroupe
 const getOrdersGroupedByMonth = `-- name: GetOrdersGroupedByMonth :many
 SELECT 
   DATE_TRUNC('month', o.updated_at)::timestamptz AS group_date,
-  price_value as sum_total,
-  price_currency as currency
+  COALESCE(SUM(o.price_value), 0)::float8 AS sum_total,
+  o.price_currency AS currency
 FROM orders o
 WHERE o.product_owner = $1
   AND o.status = $2
   AND o.updated_at BETWEEN $3 AND $4
-GROUP BY group_date
+GROUP BY group_date, o.price_currency
 ORDER BY group_date
 `
 
@@ -406,7 +406,7 @@ type GetOrdersGroupedByMonthParams struct {
 
 type GetOrdersGroupedByMonthRow struct {
 	GroupDate time.Time `json:"group_date"`
-	SumTotal  *float64  `json:"sum_total"`
+	SumTotal  float64   `json:"sum_total"`
 	Currency  *string   `json:"currency"`
 }
 
@@ -438,13 +438,13 @@ func (q *Queries) GetOrdersGroupedByMonth(ctx context.Context, arg GetOrdersGrou
 const getOrdersGroupedByYear = `-- name: GetOrdersGroupedByYear :many
 SELECT 
   DATE_TRUNC('year', o.updated_at)::timestamptz AS group_date,
-  price_value as sum_total,
-  price_currency as currency
+  COALESCE(SUM(o.price_value), 0)::float8 AS sum_total,
+  o.price_currency AS currency
 FROM orders o
 WHERE o.product_owner = $1
   AND o.status = $2
   AND o.updated_at BETWEEN $3 AND $4
-GROUP BY group_date
+GROUP BY group_date, o.price_currency
 ORDER BY group_date
 `
 
@@ -457,7 +457,7 @@ type GetOrdersGroupedByYearParams struct {
 
 type GetOrdersGroupedByYearRow struct {
 	GroupDate time.Time `json:"group_date"`
-	SumTotal  *float64  `json:"sum_total"`
+	SumTotal  float64   `json:"sum_total"`
 	Currency  *string   `json:"currency"`
 }
 
