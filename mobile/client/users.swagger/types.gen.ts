@@ -106,6 +106,8 @@ export type usersgrpcDeleteSubscriptionResponse = {
     message?: string;
 };
 
+export type usersgrpcDeleteUserAccountResponse = unknown;
+
 export type usersgrpcDeleteUserPaymentMethodResponse = {
     message?: string;
 };
@@ -631,6 +633,16 @@ export type UsersCompleteRegistrationData = {
 export type UsersCompleteRegistrationResponse = (usersgrpcCompleteRegistrationResponse);
 
 export type UsersCompleteRegistrationError = (rpcStatus);
+
+export type UsersDeleteUserAccountData = {
+    path: {
+        userId: string;
+    };
+};
+
+export type UsersDeleteUserAccountResponse = (usersgrpcDeleteUserAccountResponse);
+
+export type UsersDeleteUserAccountError = (rpcStatus);
 
 export type UsersDeleteUserPaymentMethodData = {
     path: {

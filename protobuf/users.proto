@@ -500,6 +500,9 @@ message NotifyFarmerRequest {
 
 message NotifyFarmerResponse { bool success = 1; }
 
+message DeleteUserAccountRequest { string user_id = 1; }
+message DeleteUserAccountResponse {}
+
 service Users {
 
   rpc SendSignupSmsOtp(SendSignupSmsOtpRequest)
@@ -762,4 +765,11 @@ service Users {
       returns (GetReferralByReferredIdResponse) {}
 
   rpc NotifyFarmer(NotifyFarmerRequest) returns (NotifyFarmerResponse);
+
+  rpc DeleteUserAccount(DeleteUserAccountRequest)
+      returns (DeleteUserAccountResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/delete-user-account"
+    };
+  }
 }

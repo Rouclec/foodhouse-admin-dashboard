@@ -1999,3 +1999,10 @@ func (i *Impl) NotifyFarmer(
 	i.logger.Info().Str("farmer_id", req.GetFarmerUserId()).Msg("Successfully sent order notification SMS")
 	return &usersgrpc.NotifyFarmerResponse{Success: true}, nil
 }
+
+// DeleteUserAccount implements usersgrpc.UsersServer.
+func (i *Impl) DeleteUserAccount(context.Context,
+	*usersgrpc.DeleteUserAccountRequest) (
+	*usersgrpc.DeleteUserAccountResponse, error) {
+	panic("unimplemented")
+}
