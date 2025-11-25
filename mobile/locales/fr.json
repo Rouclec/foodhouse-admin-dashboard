@@ -250,14 +250,19 @@
         "heading6": "Conditions générales",
         "heading7": "Politique de confidentialité",
         "heading8": "À propos de Foodhouse",
-        "heading9": "Demande de suppression de compte",
+        "heading9": "Suppression de compte",
         "english": "Anglais (US)",
         "french": "Français",
         "swahili": "Swahili",
         "header": "Suggestions",
         "language": "Langue",
         "chat": "Chat sur Whatsapp",
-        "contactUs": "Contactez-nous"
+        "contactUs": "Contactez-nous",
+        "deleteModalTitle": "Confirmer la suppression du compte",
+        "deleteModalBody1": "Êtes-vous sûr de vouloir supprimer votre compte ?",
+        "deleteModalBody2": "AVERTISSEMENT : Une fois supprimé, vous perdrez l'accès à l'application et vos informations seront entièrement supprimées de la plateforme dans un délai de 90 jours.",
+        "deleteModalCancel": "Annuler",
+        "deleteModalConfirm": "Supprimer le compte"
       },
       "(personal-info)": {
         "heading": "Informations personnelles",

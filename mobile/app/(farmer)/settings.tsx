@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   View,
   ScrollView,
@@ -9,7 +9,16 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Appbar, Text, List, Divider, Icon } from 'react-native-paper';
+import {
+  Appbar,
+  Text,
+  List,
+  Divider,
+  Icon,
+  Portal,
+  Dialog,
+  Button,
+} from 'react-native-paper';
 import {
   defaultStyles,
   profileFlowStyles,
@@ -22,35 +31,76 @@ import { Colors } from '@/constants';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Context, ContextType } from '../_layout';
 
+import { useMutation } from '@tanstack/react-query';
+import { clearStorage, readData, updateAuthHeader } from '@/utils';
+import { usersRevokeRefreshTokenMutation } from '@/client/users.swagger/@tanstack/react-query.gen';
+
 export default function SettingsPage() {
   const router = useRouter();
-  const { user } = useContext(Context) as ContextType;
 
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
+  const { user, setUser } = useContext(Context) as ContextType;
+  const [loading, setLoading] = useState(false);
   const insets = useSafeAreaInsets();
-  if (!user || !user.phoneNumber) {
-    Alert.alert('Error', 'User phone number not available.');
-    return;
-  }
-  const MESSAGE = `Hello Foodhouse Admin, I want to delete my account. My phone number is ${user.phoneNumber}`;
-  const WHATSAPP_NUMBER = process.env.EXPO_PUBLIC_PHONE_NUMBER;
 
-  const openWhatsApp = async () => {
-    if (!WHATSAPP_NUMBER) {
-      Alert.alert('Error', 'WhatsApp number not found.');
+  const { mutate: revokeRefreshTokenMutation } = useMutation({
+    ...usersRevokeRefreshTokenMutation(),
+    onError: async error => {
+      console.error('Error logging out during cleanup:', error);
+    },
+  });
+
+  const deleteAccountMutation = useMutation({
+    ...deleteAccountOptions(),
+
+    onSuccess: async () => {
+      try {
+        setLoading(true);
+
+        const refreshToken = await readData('@refreshToken');
+        if (refreshToken) {
+          revokeRefreshTokenMutation({
+            body: { refreshToken },
+          });
+        }
+
+        clearStorage();
+        updateAuthHeader('');
+        setUser(undefined);
+
+        router.replace('/(auth)/login');
+
+      
+      } catch (error) {
+        console.error({ error }, 'Error during post-deletion cleanup process');
+      } finally {
+        setLoading(false);
+      }
+    },
+
+    onError: error => {
+      console.error('Account Deletion Failed:', error);
+      Alert.alert(
+        'Deletion Failed',
+        error instanceof Error
+          ? error.message
+          : 'An unknown error occurred while trying to delete your account.',
+      );
+    },
+  });
+
+  const handleDeleteAccount = () => {
+    if (!user?.userId) {
+      Alert.alert('Error', 'User ID is missing. Cannot delete account.');
       return;
     }
 
-    const url = `https://wa.me/${WHATSAPP_NUMBER.replace(
-      '+',
-      '',
-    )}?text=${encodeURIComponent(MESSAGE)}`;
-    const supported = await Linking.canOpenURL(url);
+    setShowDeleteAccountModal(false);
 
-    if (supported) {
-      await Linking.openURL(url);
-    } else {
-      Alert.alert('Error', 'WhatsApp is not installed on your device.');
-    }
+    const request = new DeleteUserAccountRequest();
+    request.setUserId(user.userId);
+
+    deleteAccountMutation.mutate(request);
   };
 
   return (
@@ -198,7 +248,8 @@ export default function SettingsPage() {
                 <Divider style={profileFlowStyles.divider} />
                 <TouchableOpacity
                   style={styles.navigationItem}
-                  onPress={openWhatsApp}>
+                  onPress={() => setShowDeleteAccountModal(true)}
+                  disabled={deleteAccountMutation.isPending}>
                   <View style={styles.navigationContent}>
                     <View style={profileFlowStyles.dangerContainer}>
                       <FontAwesome
@@ -208,7 +259,9 @@ export default function SettingsPage() {
                       />
                     </View>
                     <Text style={styles.logout}>
-                      {i18n.t('(farmer).(profile-flow).(settings).heading9')}{' '}
+                      {deleteAccountMutation.isPending
+                        ? 'Deleting...'
+                        : i18n.t('(farmer).(profile-flow).(settings).heading9')}
                     </Text>
                   </View>
                 </TouchableOpacity>
@@ -217,6 +270,55 @@ export default function SettingsPage() {
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
+
+      <Portal>
+        <Dialog
+          visible={showDeleteAccountModal}
+          onDismiss={() => setShowDeleteAccountModal(false)}
+          style={defaultStyles.location}>
+          <Dialog.Title style={defaultStyles.headText}>
+            {i18n.t('(farmer).(profile-flow).(settings).deleteModalTitle')}
+          </Dialog.Title>
+          <Dialog.Content>
+            <Text style={defaultStyles.bodyText}>
+              {i18n.t('(farmer).(profile-flow).(settings).deleteModalBody1')}
+            </Text>
+            <Text
+              style={[
+                defaultStyles.bodyText,
+                { marginTop: 10, fontWeight: 'bold' },
+              ]}>
+              {i18n.t('(farmer).(profile-flow).(settings).deleteModalBody2')}
+            </Text>
+          </Dialog.Content>
+
+          <Dialog.Actions style={defaultStyles.actions}>
+            <Button
+              style={[defaultStyles.button, defaultStyles.halfContainer]}
+              textColor={Colors.primary[500]}
+              onPress={() => setShowDeleteAccountModal(false)}
+              disabled={deleteAccountMutation.isPending}>
+              {i18n.t('(farmer).(profile-flow).(settings).deleteModalCancel')}
+            </Button>
+            <Button
+              style={[
+                defaultStyles.button,
+                defaultStyles.primaryButton,
+                { backgroundColor: Colors.error },
+              ]}
+              textColor={Colors.light['10']}
+              onPress={handleDeleteAccount}
+              loading={deleteAccountMutation.isPending}
+              disabled={deleteAccountMutation.isPending}>
+              {deleteAccountMutation.isPending
+                ? 'Deleting...'
+                : i18n.t(
+                    '(farmer).(profile-flow).(settings).deleteModalConfirm',
+                  )}
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </>
   );
 }

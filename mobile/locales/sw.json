@@ -246,14 +246,19 @@
         "heading6": "Masharti na vigezo",
         "heading7": "Sera ya usiri",
         "heading8": "Kuhusu Foodhouse",
-        "heading9": "Omba kufuta akaunti",
+        "heading9": "Futa Akaunti",
         "english": "Kiingereza (US)",
         "french": "Kifaransa",
         "swahili": "Kiswahili",
         "header": "Mapendekezo",
         "language": "Lugha",
         "chat": "Chat kwenye Whatsapp",
-        "contactUs": "Wasiliana nasi"
+        "contactUs": "Wasiliana nasi",
+        "deleteModalTitle": "Thibitisha Kufuta Akaunti",
+        "deleteModalBody1": "Je, una uhakika unataka kufuta akaunti yako?",
+        "deleteModalBody2": "ONYO: Mara tu ikifutwa, utapoteza ufikiaji wa programu, na taarifa zako zitafutwa kabisa kwenye mfumo ndani ya siku 90.",
+        "deleteModalCancel": "Ghairi",
+        "deleteModalConfirm": "Futa Akaunti"
       },
       "(personal-info)": {
         "heading": "Taarifa binafsi",
