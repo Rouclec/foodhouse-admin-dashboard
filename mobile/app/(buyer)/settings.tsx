@@ -8,7 +8,16 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Appbar, Text, List, Divider, Icon, Portal, Button, Dialog } from 'react-native-paper';
+import {
+  Appbar,
+  Text,
+  List,
+  Divider,
+  Icon,
+  Portal,
+  Button,
+  Dialog,
+} from 'react-native-paper';
 import {
   defaultStyles,
   profileFlowStyles,
@@ -21,77 +30,87 @@ import { Colors } from '@/constants';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Context, ContextType } from '../_layout';
 import { clearStorage, readData, updateAuthHeader } from '@/utils';
-import { useMutation } from '@tanstack/react-query';
-import { usersRevokeRefreshTokenMutation } from '@/client/users.swagger/@tanstack/react-query.gen';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import {
+  usersDeleteUserAccountOptions,
+  usersRevokeRefreshTokenMutation,
+} from '@/client/users.swagger/@tanstack/react-query.gen';
 
 export default function SettingsPage() {
   const router = useRouter();
   const { user, setUser } = useContext(Context) as ContextType;
   const [loading, setLoading] = useState(false);
-    const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
 
   const insets = useSafeAreaInsets();
- 
-  
-    const { mutate: revokeRefreshTokenMutation } = useMutation({
-      ...usersRevokeRefreshTokenMutation(),
-      onError: async error => {
-        console.error('Error logging out during cleanup:', error);
-      },
+
+  const { mutate: revokeRefreshTokenMutation } = useMutation({
+    ...usersRevokeRefreshTokenMutation(),
+    onError: async error => {
+      console.error('Error logging out during cleanup:', error);
+    },
+  });
+
+  const { refetch: executeDeleteAccount, isFetching: deletingAccount } =
+    useQuery({
+      ...usersDeleteUserAccountOptions({
+        path: {
+          userId: user?.userId ?? "",
+        },
+      }),
+      enabled: false,
     });
-  
-    const deleteAccountMutation = useMutation({
-      ...deleteAccountOptions(),
-  
-      onSuccess: async () => {
-        try {
-          setLoading(true);
-  
-          const refreshToken = await readData('@refreshToken');
-          if (refreshToken) {
-            revokeRefreshTokenMutation({
-              body: { refreshToken },
-            });
-          }
-  
-          clearStorage();
-          updateAuthHeader('');
-          setUser(undefined);
-  
-          router.replace('/(auth)/login');
-  
-        
-        } catch (error) {
-          console.error({ error }, 'Error during post-deletion cleanup process');
-        } finally {
-          setLoading(false);
-        }
-      },
-  
-      onError: error => {
-        console.error('Account Deletion Failed:', error);
-        Alert.alert(
-          'Deletion Failed',
-          error instanceof Error
-            ? error.message
-            : 'An unknown error occurred while trying to delete your account.',
-        );
-      },
-    });
-  
-    const handleDeleteAccount = () => {
-      if (!user?.userId) {
-        Alert.alert('Error', 'User ID is missing. Cannot delete account.');
-        return;
+
+  const handlePostDeletionCleanup = async () => {
+    try {
+      setLoading(true);
+
+      const refreshToken = await readData('@refreshToken');
+      if (refreshToken) {
+        revokeRefreshTokenMutation({
+          body: { refreshToken },
+        });
       }
-  
-      setShowDeleteAccountModal(false);
-  
-      const request = new DeleteUserAccountRequest();
-      request.setUserId(user.userId);
-  
-      deleteAccountMutation.mutate(request);
-    };
+
+      clearStorage();
+      updateAuthHeader('');
+      setUser(undefined);
+
+      router.replace('/(auth)/login');
+    } catch (error) {
+      console.error('Error during post-deletion cleanup process:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user?.userId) {
+      Alert.alert('Error', 'User ID is missing. Cannot delete account.');
+      return;
+    }
+
+    setShowDeleteAccountModal(false);
+
+    try {
+      const result = await executeDeleteAccount();
+      console.log('Delete result:', result);
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      await handlePostDeletionCleanup();
+    } catch (error) {
+      console.error('Account Deletion Failed:', error);
+      Alert.alert(
+        'Deletion Failed',
+        error instanceof Error
+          ? error.message
+          : 'An unknown error occurred while trying to delete your account.',
+      );
+    }
+  };
 
   return (
     <>
@@ -237,10 +256,10 @@ export default function SettingsPage() {
                 </TouchableOpacity>
 
                 <Divider style={profileFlowStyles.divider} />
-               <TouchableOpacity
+                <TouchableOpacity
                   style={styles.navigationItem}
                   onPress={() => setShowDeleteAccountModal(true)}
-                  disabled={deleteAccountMutation.isPending}>
+                  disabled={deletingAccount}>
                   <View style={styles.navigationContent}>
                     <View style={profileFlowStyles.dangerContainer}>
                       <FontAwesome
@@ -249,8 +268,9 @@ export default function SettingsPage() {
                         color={Colors.error}
                       />
                     </View>
+
                     <Text style={styles.logout}>
-                      {deleteAccountMutation.isPending
+                      {deletingAccount
                         ? 'Deleting...'
                         : i18n.t('(farmer).(profile-flow).(settings).heading9')}
                     </Text>
@@ -262,55 +282,57 @@ export default function SettingsPage() {
         </View>
       </KeyboardAvoidingView>
 
+      <Portal>
+        <Dialog
+          visible={showDeleteAccountModal}
+          onDismiss={() => setShowDeleteAccountModal(false)}
+          style={defaultStyles.location}>
+          <Dialog.Title style={defaultStyles.headText}>
+            {i18n.t('(farmer).(profile-flow).(settings).deleteModalTitle')}
+          </Dialog.Title>
+          <Dialog.Content>
+            <Text style={defaultStyles.bodyText}>
+              {i18n.t('(farmer).(profile-flow).(settings).deleteModalBody1')}
+            </Text>
+            <Text
+              style={[
+                defaultStyles.bodyText,
+                { marginTop: 10, fontWeight: 'bold' },
+              ]}>
+              {i18n.t('(farmer).(profile-flow).(settings).deleteModalBody2')}
+            </Text>
+          </Dialog.Content>
 
-            <Portal>
-              <Dialog
-                visible={showDeleteAccountModal}
-                onDismiss={() => setShowDeleteAccountModal(false)}
-                style={defaultStyles.location}>
-                <Dialog.Title style={defaultStyles.headText}>
-                  {i18n.t('(farmer).(profile-flow).(settings).deleteModalTitle')}
-                </Dialog.Title>
-                <Dialog.Content>
-                  <Text style={defaultStyles.bodyText}>
-                    {i18n.t('(farmer).(profile-flow).(settings).deleteModalBody1')}
-                  </Text>
-                  <Text
-                    style={[
-                      defaultStyles.bodyText,
-                      { marginTop: 10, fontWeight: 'bold' },
-                    ]}>
-                    {i18n.t('(farmer).(profile-flow).(settings).deleteModalBody2')}
-                  </Text>
-                </Dialog.Content>
-      
-                <Dialog.Actions style={defaultStyles.actions}>
-                  <Button
-                    style={[defaultStyles.button, defaultStyles.halfContainer]}
-                    textColor={Colors.primary[500]}
-                    onPress={() => setShowDeleteAccountModal(false)}
-                    disabled={deleteAccountMutation.isPending}>
-                    {i18n.t('(farmer).(profile-flow).(settings).deleteModalCancel')}
-                  </Button>
-                  <Button
-                    style={[
-                      defaultStyles.button,
-                      defaultStyles.primaryButton,
-                      { backgroundColor: Colors.error },
-                    ]}
-                    textColor={Colors.light['10']}
-                    onPress={handleDeleteAccount}
-                    loading={deleteAccountMutation.isPending}
-                    disabled={deleteAccountMutation.isPending}>
-                    {deleteAccountMutation.isPending
-                      ? 'Deleting...'
-                      : i18n.t(
-                          '(farmer).(profile-flow).(settings).deleteModalConfirm',
-                        )}
-                  </Button>
-                </Dialog.Actions>
-              </Dialog>
-            </Portal>
+          <Dialog.Actions style={defaultStyles.actions}>
+            <Button
+              style={[defaultStyles.button, defaultStyles.halfContainer]}
+              textColor={Colors.primary[500]}
+              onPress={() => setShowDeleteAccountModal(false)}
+              disabled={deletingAccount} 
+            >
+              {i18n.t('(farmer).(profile-flow).(settings).deleteModalCancel')}
+            </Button>
+
+            <Button
+              style={[
+                defaultStyles.button,
+                defaultStyles.primaryButton,
+                { backgroundColor: Colors.error },
+              ]}
+              textColor={Colors.light['10']}
+              onPress={handleDeleteAccount}
+              loading={deletingAccount} 
+              disabled={deletingAccount} 
+            >
+              {deletingAccount
+                ? 'Deleting...'
+                : i18n.t(
+                    '(farmer).(profile-flow).(settings).deleteModalConfirm',
+                  )}
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </>
   );
 }

@@ -4,7 +4,6 @@ import {
   ScrollView,
   Linking,
   TouchableOpacity,
-  Image,
   KeyboardAvoidingView,
   Alert,
 } from 'react-native';
@@ -31,9 +30,9 @@ import { Colors } from '@/constants';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Context, ContextType } from '../_layout';
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { clearStorage, readData, updateAuthHeader } from '@/utils';
-import { usersRevokeRefreshTokenMutation } from '@/client/users.swagger/@tanstack/react-query.gen';
+import { usersDeleteUserAccountOptions, usersRevokeRefreshTokenMutation } from '@/client/users.swagger/@tanstack/react-query.gen';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -50,46 +49,40 @@ export default function SettingsPage() {
     },
   });
 
-  const deleteAccountMutation = useMutation({
-    ...deleteAccountOptions(),
+  const { refetch: executeDeleteAccount, isFetching: deletingAccount } =
+    useQuery({
+      ...usersDeleteUserAccountOptions({
+        path: {
+          userId: user?.userId ?? '',
+        },
+      }),
+      enabled: false,
+    });
 
-    onSuccess: async () => {
-      try {
-        setLoading(true);
+  const handlePostDeletionCleanup = async () => {
+    try {
+      setLoading(true);
 
-        const refreshToken = await readData('@refreshToken');
-        if (refreshToken) {
-          revokeRefreshTokenMutation({
-            body: { refreshToken },
-          });
-        }
-
-        clearStorage();
-        updateAuthHeader('');
-        setUser(undefined);
-
-        router.replace('/(auth)/login');
-
-      
-      } catch (error) {
-        console.error({ error }, 'Error during post-deletion cleanup process');
-      } finally {
-        setLoading(false);
+      const refreshToken = await readData('@refreshToken');
+      if (refreshToken) {
+        revokeRefreshTokenMutation({
+          body: { refreshToken },
+        });
       }
-    },
 
-    onError: error => {
-      console.error('Account Deletion Failed:', error);
-      Alert.alert(
-        'Deletion Failed',
-        error instanceof Error
-          ? error.message
-          : 'An unknown error occurred while trying to delete your account.',
-      );
-    },
-  });
+      clearStorage();
+      updateAuthHeader('');
+      setUser(undefined);
 
-  const handleDeleteAccount = () => {
+      router.replace('/(auth)/login');
+    } catch (error) {
+      console.error('Error during post-deletion cleanup process:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
     if (!user?.userId) {
       Alert.alert('Error', 'User ID is missing. Cannot delete account.');
       return;
@@ -97,10 +90,24 @@ export default function SettingsPage() {
 
     setShowDeleteAccountModal(false);
 
-    const request = new DeleteUserAccountRequest();
-    request.setUserId(user.userId);
+    try {
+      const result = await executeDeleteAccount();
+      console.log('Delete result:', result);
 
-    deleteAccountMutation.mutate(request);
+      if (result.error) {
+        throw result.error;
+      }
+
+      await handlePostDeletionCleanup();
+    } catch (error) {
+      console.error('Account Deletion Failed:', error);
+      Alert.alert(
+        'Deletion Failed',
+        error instanceof Error
+          ? error.message
+          : 'An unknown error occurred while trying to delete your account.',
+      );
+    }
   };
 
   return (
@@ -249,7 +256,7 @@ export default function SettingsPage() {
                 <TouchableOpacity
                   style={styles.navigationItem}
                   onPress={() => setShowDeleteAccountModal(true)}
-                  disabled={deleteAccountMutation.isPending}>
+                  disabled={deletingAccount}>
                   <View style={styles.navigationContent}>
                     <View style={profileFlowStyles.dangerContainer}>
                       <FontAwesome
@@ -258,8 +265,9 @@ export default function SettingsPage() {
                         color={Colors.error}
                       />
                     </View>
+
                     <Text style={styles.logout}>
-                      {deleteAccountMutation.isPending
+                      {deletingAccount
                         ? 'Deleting...'
                         : i18n.t('(farmer).(profile-flow).(settings).heading9')}
                     </Text>
@@ -297,9 +305,10 @@ export default function SettingsPage() {
               style={[defaultStyles.button, defaultStyles.halfContainer]}
               textColor={Colors.primary[500]}
               onPress={() => setShowDeleteAccountModal(false)}
-              disabled={deleteAccountMutation.isPending}>
+              disabled={deletingAccount}>
               {i18n.t('(farmer).(profile-flow).(settings).deleteModalCancel')}
             </Button>
+
             <Button
               style={[
                 defaultStyles.button,
@@ -308,9 +317,9 @@ export default function SettingsPage() {
               ]}
               textColor={Colors.light['10']}
               onPress={handleDeleteAccount}
-              loading={deleteAccountMutation.isPending}
-              disabled={deleteAccountMutation.isPending}>
-              {deleteAccountMutation.isPending
+              loading={deletingAccount}
+              disabled={deletingAccount}>
+              {deletingAccount
                 ? 'Deleting...'
                 : i18n.t(
                     '(farmer).(profile-flow).(settings).deleteModalConfirm',
