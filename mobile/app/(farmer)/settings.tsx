@@ -19,6 +19,7 @@ import {
   Button,
 } from 'react-native-paper';
 import {
+  buyerProductsStyles,
   defaultStyles,
   profileFlowStyles,
   signupStyles,
@@ -32,7 +33,10 @@ import { Context, ContextType } from '../_layout';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { clearStorage, readData, updateAuthHeader } from '@/utils';
-import { usersDeleteUserAccountOptions, usersRevokeRefreshTokenMutation } from '@/client/users.swagger/@tanstack/react-query.gen';
+import {
+  usersDeleteUserAccountOptions,
+  usersRevokeRefreshTokenMutation,
+} from '@/client/users.swagger/@tanstack/react-query.gen';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -92,7 +96,6 @@ export default function SettingsPage() {
 
     try {
       const result = await executeDeleteAccount();
-      console.log('Delete result:', result);
 
       if (result.error) {
         throw result.error;
@@ -283,47 +286,51 @@ export default function SettingsPage() {
         <Dialog
           visible={showDeleteAccountModal}
           onDismiss={() => setShowDeleteAccountModal(false)}
-          style={defaultStyles.location}>
-          <Dialog.Title style={defaultStyles.headText}>
+          style={[defaultStyles.location, defaultStyles.rowGap]}>
+          <Icon source="alert" color={Colors.error} size={50} />
+          <Dialog.Title style={[defaultStyles.headText, defaultStyles.errorText]}>
             {i18n.t('(farmer).(profile-flow).(settings).deleteModalTitle')}
           </Dialog.Title>
           <Dialog.Content>
-            <Text style={defaultStyles.bodyText}>
-              {i18n.t('(farmer).(profile-flow).(settings).deleteModalBody1')}
-            </Text>
-            <Text
-              style={[
-                defaultStyles.bodyText,
-                { marginTop: 10, fontWeight: 'bold' },
-              ]}>
+           
+            <Text style={[defaultStyles.bodyText, { marginTop: 10 }]}>
               {i18n.t('(farmer).(profile-flow).(settings).deleteModalBody2')}
             </Text>
           </Dialog.Content>
 
           <Dialog.Actions style={defaultStyles.actions}>
             <Button
-              style={[defaultStyles.button, defaultStyles.halfContainer]}
-              textColor={Colors.primary[500]}
+              style={[
+                defaultStyles.button,
+               defaultStyles.dangerButtongrey,
+                buyerProductsStyles.halfButton,
+              ]}
+              
               onPress={() => setShowDeleteAccountModal(false)}
-              disabled={deletingAccount}>
-              {i18n.t('(farmer).(profile-flow).(settings).deleteModalCancel')}
+              disabled={deletingAccount}
+              >
+              <Text style={[defaultStyles.buttonText,{color: Colors.error}]}>
+                {i18n.t('(farmer).(profile-flow).(settings).deleteModalCancel')}
+              </Text>
             </Button>
 
             <Button
               style={[
                 defaultStyles.button,
-                defaultStyles.primaryButton,
-                { backgroundColor: Colors.error },
+                defaultStyles.dangerButton,
+                buyerProductsStyles.halfButton,
+                
               ]}
-              textColor={Colors.light['10']}
               onPress={handleDeleteAccount}
               loading={deletingAccount}
               disabled={deletingAccount}>
-              {deletingAccount
-                ? 'Deleting...'
-                : i18n.t(
-                    '(farmer).(profile-flow).(settings).deleteModalConfirm',
-                  )}
+              <Text style={defaultStyles.buttonText}>
+                {deletingAccount
+                  ? 'Deleting...'
+                  : i18n.t(
+                      '(farmer).(profile-flow).(settings).deleteModalConfirm',
+                    )}
+              </Text>
             </Button>
           </Dialog.Actions>
         </Dialog>

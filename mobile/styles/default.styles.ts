@@ -87,6 +87,9 @@ export const defaultStyles = StyleSheet.create({
   errorDarkText: {
     color: Colors.errorDark,
   },
+  dangerButton: {
+    backgroundColor: Colors.error
+  },
   flex: {
     flex: 1,
   },
@@ -135,7 +138,7 @@ export const defaultStyles = StyleSheet.create({
     rowGap: 12,
   },
   button: {
-    // flexWrap: "wrap",
+    
     justifyContent: 'center',
     borderRadius: 100,
     minHeight: 48,
@@ -381,6 +384,9 @@ export const defaultStyles = StyleSheet.create({
     borderRadius: 48,
     rowGap: 8,
   },
+  rowGap: {
+    rowGap: 0,
+  },
   actions: {
     width: '100%',
     flexDirection: 'row',
@@ -388,6 +394,10 @@ export const defaultStyles = StyleSheet.create({
   },
 
   headText: {
-    color: Colors.error,
+    color: Colors.primary["500"],
   },
+
+  dangerButtongrey: {
+    backgroundColor: Colors.errorlight,
+  }
 });
