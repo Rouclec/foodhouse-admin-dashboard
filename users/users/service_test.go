@@ -480,6 +480,108 @@ func TestGetUserByID(t *testing.T) {
 	}
 }
 
+func TestDeleteUserAccount(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	logger := zerolog.New(os.Stdout)
+	testUserID := "testUserId"
+
+	testCases := map[string]struct {
+		setupMocks    func(mockRepo *mocks.MockUsersRepo, mockQuerier *sqlc_mocks.MockQuerier)
+		request       *usersgrpc.DeleteUserAccountRequest
+		expectedError error
+		expectedResp  *usersgrpc.DeleteUserAccountResponse
+	}{
+		"Successful Delete": {
+			setupMocks: func(mockRepo *mocks.MockUsersRepo, mockQuerier *sqlc_mocks.MockQuerier) {
+
+				// Mock Begin() with a TxMock (matching your existing pattern)
+				mockRepo.EXPECT().
+					Begin(gomock.Any()).
+					Times(1).
+					Return(mockQuerier, &sqlc_mocks.TxMock{}, nil)
+
+				// User exists
+				mockQuerier.EXPECT().
+					GetUserForUpdate(gomock.Any(), testUserID).
+					Return(sqlc.User{ID: testUserID}, nil)
+
+				// Successful delete
+				mockQuerier.EXPECT().
+					DeleteUser(gomock.Any(), testUserID).
+					Return(nil)
+			},
+			request:       &usersgrpc.DeleteUserAccountRequest{UserId: testUserID},
+			expectedError: nil,
+			expectedResp:  &usersgrpc.DeleteUserAccountResponse{},
+		},
+
+		"User Not Found": {
+			setupMocks: func(mockRepo *mocks.MockUsersRepo, mockQuerier *sqlc_mocks.MockQuerier) {
+
+				mockRepo.EXPECT().
+					Begin(gomock.Any()).
+					Times(1).
+					Return(mockQuerier, &sqlc_mocks.TxMock{}, nil)
+
+				// GetUserForUpdate fails
+				mockQuerier.EXPECT().
+					GetUserForUpdate(gomock.Any(), testUserID).
+					Return(sqlc.User{}, fmt.Errorf("not found"))
+			},
+			request:       &usersgrpc.DeleteUserAccountRequest{UserId: testUserID},
+			expectedError: fmt.Errorf("user not found"),
+			expectedResp:  nil,
+		},
+
+		"DeleteUser Fails": {
+			setupMocks: func(mockRepo *mocks.MockUsersRepo, mockQuerier *sqlc_mocks.MockQuerier) {
+
+				mockRepo.EXPECT().
+					Begin(gomock.Any()).
+					Times(1).
+					Return(mockQuerier, &sqlc_mocks.TxMock{}, nil)
+
+				mockQuerier.EXPECT().
+					GetUserForUpdate(gomock.Any(), testUserID).
+					Return(sqlc.User{ID: testUserID}, nil)
+
+				mockQuerier.EXPECT().
+					DeleteUser(gomock.Any(), testUserID).
+					Return(fmt.Errorf("db error"))
+			},
+			request:       &usersgrpc.DeleteUserAccountRequest{UserId: testUserID},
+			expectedError: fmt.Errorf("cannot deleted user"),
+			expectedResp:  nil,
+		},
+	}
+
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			mockRepo := mocks.NewMockUsersRepo(ctrl)
+			mockQuerier := sqlc_mocks.NewMockQuerier(ctrl)
+
+			// as in your example
+			mockRepo.EXPECT().Do().Return(mockQuerier).AnyTimes()
+			tc.setupMocks(mockRepo, mockQuerier)
+
+			usersService := users.NewUsers(mockRepo, logger, nil, nil, nil, false)
+
+			resp, err := usersService.DeleteUserAccount(context.Background(), tc.request)
+
+			if tc.expectedError != nil {
+				require.Error(t, err)
+				require.ErrorContains(t, err, tc.expectedError.Error())
+				require.Nil(t, resp)
+			} else {
+				require.NoError(t, err)
+				require.NotNil(t, resp)
+			}
+		})
+	}
+}
+
 func TestCompleteRegistration(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()

@@ -13,7 +13,7 @@ import (
 )
 
 const countUsers = `-- name: CountUsers :one
-SELECT COUNT(*) FROM users WHERE created_at >= $1 AND created_at < $2
+SELECT COUNT(*) FROM users WHERE created_at >= $1 AND created_at < $2 AND delete_requested_at IS NULL AND deleted_at IS NULL
 `
 
 type CountUsersParams struct {
@@ -31,7 +31,7 @@ func (q *Queries) CountUsers(ctx context.Context, arg CountUsersParams) (int64, 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (phone_number, email, "password", first_name, last_name, residence_country_iso_code, "address", location_coordinates, profile_image, "role", user_status)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'UserStatus_ACTIVE')
-RETURNING id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code
+RETURNING id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code, delete_requested_at, deleted_at
 `
 
 type CreateUserParams struct {
@@ -77,12 +77,17 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.UpdatedAt,
 		&i.UserStatus,
 		&i.ReferralCode,
+		&i.DeleteRequestedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const deleteUser = `-- name: DeleteUser :exec
-DELETE FROM users where id = $1
+UPDATE users
+SET delete_requested_at = NOW(),
+    deleted_at = NOW() + INTERVAL '90 days'
+WHERE id = $1
 `
 
 func (q *Queries) DeleteUser(ctx context.Context, id string) error {
@@ -91,7 +96,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id string) error {
 }
 
 const getFarmer = `-- name: GetFarmer :one
-SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code FROM users WHERE id = $1 AND role = 'USER_ROLE_FARMER'
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code, delete_requested_at, deleted_at FROM users WHERE id = $1 AND role = 'USER_ROLE_FARMER'
 `
 
 func (q *Queries) GetFarmer(ctx context.Context, id string) (User, error) {
@@ -113,12 +118,14 @@ func (q *Queries) GetFarmer(ctx context.Context, id string) (User, error) {
 		&i.UpdatedAt,
 		&i.UserStatus,
 		&i.ReferralCode,
+		&i.DeleteRequestedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code FROM users WHERE id = $1
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code, delete_requested_at, deleted_at FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
@@ -140,12 +147,14 @@ func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
 		&i.UpdatedAt,
 		&i.UserStatus,
 		&i.ReferralCode,
+		&i.DeleteRequestedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code FROM users WHERE email = $1
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code, delete_requested_at, deleted_at FROM users WHERE email = $1 AND delete_requested_at IS NULL AND deleted_at IS NULL
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email *string) (User, error) {
@@ -167,12 +176,14 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email *string) (User, erro
 		&i.UpdatedAt,
 		&i.UserStatus,
 		&i.ReferralCode,
+		&i.DeleteRequestedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getUserByNationalNumber = `-- name: GetUserByNationalNumber :one
-SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code, delete_requested_at, deleted_at
 FROM users
 WHERE 
   phone_number = $1::TEXT
@@ -202,12 +213,14 @@ func (q *Queries) GetUserByNationalNumber(ctx context.Context, nationalNumber st
 		&i.UpdatedAt,
 		&i.UserStatus,
 		&i.ReferralCode,
+		&i.DeleteRequestedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getUserByPhoneNumber = `-- name: GetUserByPhoneNumber :one
-SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code FROM users WHERE phone_number = $1
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code, delete_requested_at, deleted_at FROM users WHERE phone_number = $1 AND delete_requested_at IS NULL AND deleted_at IS NULL
 `
 
 func (q *Queries) GetUserByPhoneNumber(ctx context.Context, phoneNumber string) (User, error) {
@@ -229,14 +242,19 @@ func (q *Queries) GetUserByPhoneNumber(ctx context.Context, phoneNumber string) 
 		&i.UpdatedAt,
 		&i.UserStatus,
 		&i.ReferralCode,
+		&i.DeleteRequestedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getUserByReferralCode = `-- name: GetUserByReferralCode :one
-SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code FROM users WHERE referral_code = $1
+
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code, delete_requested_at, deleted_at FROM users WHERE referral_code = $1
 `
 
+// -- name: DeleteUser :exec
+// DELETE FROM users where id = $1;
 func (q *Queries) GetUserByReferralCode(ctx context.Context, referralCode string) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByReferralCode, referralCode)
 	var i User
@@ -256,12 +274,14 @@ func (q *Queries) GetUserByReferralCode(ctx context.Context, referralCode string
 		&i.UpdatedAt,
 		&i.UserStatus,
 		&i.ReferralCode,
+		&i.DeleteRequestedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getUserForUpdate = `-- name: GetUserForUpdate :one
-SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code FROM users WHERE id = $1 FOR UPDATE
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code, delete_requested_at, deleted_at FROM users WHERE id = $1 AND delete_requested_at IS NULL AND deleted_at IS NULL FOR UPDATE
 `
 
 func (q *Queries) GetUserForUpdate(ctx context.Context, id string) (User, error) {
@@ -283,6 +303,8 @@ func (q *Queries) GetUserForUpdate(ctx context.Context, id string) (User, error)
 		&i.UpdatedAt,
 		&i.UserStatus,
 		&i.ReferralCode,
+		&i.DeleteRequestedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
@@ -381,6 +403,7 @@ WHERE
         )
     )
     )
+    AND delete_requested_at IS NULL AND deleted_at IS NULL
 ORDER BY
     COALESCE(fr.average_rating, 0) DESC,
     CASE WHEN $3 THEN f.created_at END DESC,
@@ -449,7 +472,7 @@ func (q *Queries) ListFarmersByRating(ctx context.Context, arg ListFarmersByRati
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code
+SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code, delete_requested_at, deleted_at
 FROM users 
 WHERE
     ( $2::TEXT = 'UserStatus_UNSPECIFIED' OR (user_status = $2::TEXT) )
@@ -467,6 +490,7 @@ WHERE
         )
     )
     AND created_at < $5::timestamptz
+    AND delete_requested_at IS NULL AND deleted_at IS NULL
 ORDER BY created_at DESC
 LIMIT $1
 `
@@ -510,6 +534,8 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 			&i.UpdatedAt,
 			&i.UserStatus,
 			&i.ReferralCode,
+			&i.DeleteRequestedAt,
+			&i.DeletedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -550,8 +576,9 @@ SET
     ($1,         $2,        $3,    $4,        $5,                   $6,            $7,           now())
 WHERE
     id = $8
+AND delete_requested_at IS NULL AND deleted_at IS NULL
 RETURNING
-    id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code
+    id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code, delete_requested_at, deleted_at
 `
 
 type UpdateUserParams struct {
@@ -593,12 +620,14 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.UpdatedAt,
 		&i.UserStatus,
 		&i.ReferralCode,
+		&i.DeleteRequestedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const updateUserPassword = `-- name: UpdateUserPassword :exec
-UPDATE users SET password = $1 WHERE id = $2
+UPDATE users SET password = $1 WHERE id = $2 AND delete_requested_at IS NULL AND deleted_at IS NULL
 `
 
 type UpdateUserPasswordParams struct {
@@ -612,7 +641,7 @@ func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPassword
 }
 
 const updateUserRole = `-- name: UpdateUserRole :exec
-UPDATE users SET role = $1 WHERE id = $2
+UPDATE users SET role = $1 WHERE id = $2 AND delete_requested_at IS NULL AND deleted_at IS NULL
 `
 
 type UpdateUserRoleParams struct {

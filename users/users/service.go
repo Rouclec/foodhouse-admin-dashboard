@@ -2001,8 +2001,39 @@ func (i *Impl) NotifyFarmer(
 }
 
 // DeleteUserAccount implements usersgrpc.UsersServer.
-func (i *Impl) DeleteUserAccount(context.Context,
-	*usersgrpc.DeleteUserAccountRequest) (
+func (i *Impl) DeleteUserAccount(ctx context.Context,
+	req *usersgrpc.DeleteUserAccountRequest) (
 	*usersgrpc.DeleteUserAccountResponse, error) {
-	panic("unimplemented")
+
+	querier, tx, err := i.repo.Begin(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)
+	}
+
+	// Proper rollback handling
+	defer func() {
+		err = tx.Rollback(ctx)
+		if err != nil && !errors.Is(err, sql.ErrTxDone) {
+			i.logger.Err(err).Msgf("Failed to rollback transaction: %v", req)
+		}
+	}()
+
+	_, err = querier.GetUserForUpdate(ctx, req.GetUserId())
+
+	if err != nil {
+		return nil, status.Error(codes.NotFound, "user not found")
+	}
+
+	err = querier.DeleteUser(ctx, req.GetUserId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "cannot deleted user. reason: %v", err)
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
+	}
+
+	return &usersgrpc.DeleteUserAccountResponse{}, nil
 }

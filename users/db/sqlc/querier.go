@@ -39,6 +39,8 @@ type Querier interface {
 	GetUserByEmail(ctx context.Context, email *string) (User, error)
 	GetUserByNationalNumber(ctx context.Context, nationalNumber string) (User, error)
 	GetUserByPhoneNumber(ctx context.Context, phoneNumber string) (User, error)
+	// -- name: DeleteUser :exec
+	// DELETE FROM users where id = $1;
 	GetUserByReferralCode(ctx context.Context, referralCode string) (User, error)
 	GetUserForUpdate(ctx context.Context, id string) (User, error)
 	GetUserPaymentMethodsByUserID(ctx context.Context, userID string) ([]UserPaymentMethod, error)

@@ -174,6 +174,45 @@ func TestUserLifecycle(t *testing.T) {
 	})
 	require.NoErrorf(t, err, "failed to count users: %v", err)
 	assert.Equalf(t, int64(1), count, "count should be 1")
+
+	err = userRepo.Do().DeleteUser(ctx, createdUser.ID)
+	require.NoErrorf(t, err, "failed to delete user: %v", err)
+
+	// Fetch raw user (ignores delete filters)
+	deletedUser, err := userRepo.Do().GetUser(ctx, createdUser.ID)
+	require.NoError(t, err)
+
+	assert.NotNil(t, deletedUser.DeleteRequestedAt, "delete_requested_at should be set")
+	assert.NotNil(t, deletedUser.DeletedAt, "deleted_at should be set")
+	assert.WithinDuration(
+		t,
+		deletedUser.DeletedAt.Time,
+		time.Now().Add(90*24*time.Hour),
+		time.Hour,
+		"deleted_at should be ~90 days from now",
+	)
+
+	// -----------------------------------------------------------------------------
+	// ENSURE USER CANNOT BE FETCHED NORMALLY
+	//
+	//	GetUser → should return sql.ErrNoRows
+	//
+	// -----------------------------------------------------------------------------
+	_, err = userRepo.Do().GetUserByPhoneNumber(ctx, deletedUser.PhoneNumber) // your normal GetUser
+	require.Error(t, err, "deleted users must not be returned by GetUser")
+
+	// -----------------------------------------------------------------------------
+	// ENSURE USER IS NOT LISTED IN ListUsers
+	// -----------------------------------------------------------------------------
+	users, err := userRepo.Do().ListUsers(ctx, sqlc.ListUsersParams{})
+	require.NoError(t, err)
+	assert.Len(t, users, 0, "deleted user should not appear in ListUsers")
+
+	// -----------------------------------------------------------------------------
+	// ENSURE USER CANNOT BE UPDATED
+	// -----------------------------------------------------------------------------
+	_, err = userRepo.Do().UpdateUser(ctx, updateUser)
+	require.Error(t, err, "deleted users must not be updatable")
 }
 
 func TestSentOtpLifeCycle(t *testing.T) {

@@ -71,6 +71,8 @@ type User struct {
 	UpdatedAt               pgtype.Timestamptz `json:"updated_at"`
 	UserStatus              string             `json:"user_status"`
 	ReferralCode            string             `json:"referral_code"`
+	DeleteRequestedAt       pgtype.Timestamptz `json:"delete_requested_at"`
+	DeletedAt               pgtype.Timestamptz `json:"deleted_at"`
 }
 
 type UserPaymentMethod struct {
