@@ -2004,7 +2004,6 @@ func (i *Impl) NotifyFarmer(
 func (i *Impl) DeleteUserAccount(ctx context.Context,
 	req *usersgrpc.DeleteUserAccountRequest) (
 	*usersgrpc.DeleteUserAccountResponse, error) {
-
 	querier, tx, err := i.repo.Begin(ctx)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)

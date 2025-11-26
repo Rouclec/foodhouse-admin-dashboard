@@ -495,7 +495,6 @@ func TestDeleteUserAccount(t *testing.T) {
 	}{
 		"Successful Delete": {
 			setupMocks: func(mockRepo *mocks.MockUsersRepo, mockQuerier *sqlc_mocks.MockQuerier) {
-
 				// Mock Begin() with a TxMock (matching your existing pattern)
 				mockRepo.EXPECT().
 					Begin(gomock.Any()).
@@ -519,7 +518,6 @@ func TestDeleteUserAccount(t *testing.T) {
 
 		"User Not Found": {
 			setupMocks: func(mockRepo *mocks.MockUsersRepo, mockQuerier *sqlc_mocks.MockQuerier) {
-
 				mockRepo.EXPECT().
 					Begin(gomock.Any()).
 					Times(1).
@@ -537,7 +535,6 @@ func TestDeleteUserAccount(t *testing.T) {
 
 		"DeleteUser Fails": {
 			setupMocks: func(mockRepo *mocks.MockUsersRepo, mockQuerier *sqlc_mocks.MockQuerier) {
-
 				mockRepo.EXPECT().
 					Begin(gomock.Any()).
 					Times(1).
