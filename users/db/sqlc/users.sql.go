@@ -375,14 +375,17 @@ WHERE
         LOWER(f.first_name) LIKE LOWER('%' || $5 || '%')
         OR LOWER(f.last_name) LIKE LOWER('%' || $5 || '%')
         OR LOWER(f.email) LIKE LOWER('%' || $5 || '%')
-        OR LOWER(f.phone_number) LIKE LOWER('%' || $5 || '%')
+        OR   (
+                RIGHT(phone_number, CHAR_LENGTH($6::TEXT)) = $6::TEXT
+                AND CHAR_LENGTH(phone_number) - CHAR_LENGTH($6::TEXT) BETWEEN 1 AND 5 -- ensures a valid country code
+              )
     )
     )
 ORDER BY
     COALESCE(fr.average_rating, 0) DESC,
     CASE WHEN $3 THEN f.created_at END DESC,
     CASE WHEN NOT $3 THEN f.created_at END ASC
-LIMIT $6
+LIMIT $7
 `
 
 type ListFarmersByRatingParams struct {
@@ -391,6 +394,7 @@ type ListFarmersByRatingParams struct {
 	SortCreatedAtDesc   interface{} `json:"sort_created_at_desc"`
 	CursorCreatedAt     time.Time   `json:"cursor_created_at"`
 	SearchKey           interface{} `json:"search_key"`
+	NationalNumber      string      `json:"national_number"`
 	Count               int32       `json:"count"`
 }
 
@@ -414,6 +418,7 @@ func (q *Queries) ListFarmersByRating(ctx context.Context, arg ListFarmersByRati
 		arg.SortCreatedAtDesc,
 		arg.CursorCreatedAt,
 		arg.SearchKey,
+		arg.NationalNumber,
 		arg.Count,
 	)
 	if err != nil {
@@ -457,7 +462,10 @@ WHERE
             LOWER(first_name) LIKE LOWER('%' || $4 || '%')
             OR LOWER(last_name) LIKE LOWER('%' || $4 || '%')
             OR LOWER(email) LIKE LOWER('%' || $4 || '%')
-            OR LOWER(f.phone_number) LIKE LOWER('%' || $4 || '%')
+            OR   (
+                    RIGHT(phone_number, CHAR_LENGTH($4::TEXT)) = $4::TEXT
+                    AND CHAR_LENGTH(phone_number) - CHAR_LENGTH($4::TEXT) BETWEEN 1 AND 5 -- ensures a valid country code
+                  )
         )
     )
     AND created_at < $5::timestamptz

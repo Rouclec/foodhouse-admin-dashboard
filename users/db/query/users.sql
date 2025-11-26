@@ -111,7 +111,10 @@ WHERE
         LOWER(f.first_name) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
         OR LOWER(f.last_name) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
         OR LOWER(f.email) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
-        OR LOWER(f.phone_number) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
+        OR   (
+                RIGHT(phone_number, CHAR_LENGTH(sqlc.arg(national_number)::TEXT)) = sqlc.arg(national_number)::TEXT
+                AND CHAR_LENGTH(phone_number) - CHAR_LENGTH(sqlc.arg(national_number)::TEXT) BETWEEN 1 AND 5 -- ensures a valid country code
+              )
     )
     )
 ORDER BY
@@ -132,7 +135,10 @@ WHERE
             LOWER(first_name) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
             OR LOWER(last_name) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
             OR LOWER(email) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
-            OR LOWER(f.phone_number) LIKE LOWER('%' || sqlc.arg(search_key) || '%')
+            OR   (
+                    RIGHT(phone_number, CHAR_LENGTH(sqlc.arg(search_key)::TEXT)) = sqlc.arg(search_key)::TEXT
+                    AND CHAR_LENGTH(phone_number) - CHAR_LENGTH(sqlc.arg(search_key)::TEXT) BETWEEN 1 AND 5 -- ensures a valid country code
+                  )
         )
     )
     AND created_at < sqlc.arg(before)::timestamptz
