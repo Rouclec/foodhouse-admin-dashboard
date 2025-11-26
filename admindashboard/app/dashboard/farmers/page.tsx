@@ -108,9 +108,11 @@ export default function FarmersPage() {
       default:
         return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
-  const handleDisableFarmer = async (farmer: usersgrpcUser | undefined): Promise<void> => {
+  const handleDisableFarmer = async (
+    farmer: usersgrpcUser | undefined
+  ): Promise<void> => {
     try {
       setSuspendingFarmer(farmer?.userId);
       setLoading(true);
@@ -285,7 +287,7 @@ export default function FarmersPage() {
                           {farmer?.user?.firstName} {farmer?.user?.lastName}
                         </p>
                         <p className="text-sm text-gray-600">
-                          {farmer?.user?.email}
+                          {farmer?.user?.phoneNumber}
                         </p>
                       </div>
                     </TableCell>

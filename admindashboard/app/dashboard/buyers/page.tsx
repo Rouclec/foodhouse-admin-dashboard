@@ -281,7 +281,7 @@ export default function Buysers() {
                         <p className="font-medium">
                           {user?.firstName} {user?.lastName}
                         </p>
-                        <p className="text-sm text-gray-600">{user?.email}</p>
+                        <p className="text-sm text-gray-600">{user?.phoneNumber}</p>
                       </div>
                     </TableCell>
                     <TableCell className="hidden lg:table-cell">
