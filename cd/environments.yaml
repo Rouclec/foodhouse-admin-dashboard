@@ -6,7 +6,7 @@
   
 - envId: testing
   name: Testing
-  gitRefName: release/added-logs-to-farmer-earning 
+  gitRefName: release/search-user-by-phone
   awsAccountId: 841306720336
   domainName: foodhousetesting.xyz
 
