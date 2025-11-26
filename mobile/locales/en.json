@@ -243,14 +243,20 @@
         "heading6": "Terms and conditions",
         "heading7": "Privacy Policy",
         "heading8": "About Foodhouse",
-        "heading9": "Request to delete account",
+        "heading9": "Delete Account",
         "english": "English (US)",
         "french": "French",
         "swahili": "Swahili",
         "header": "Suggested",
         "language": "Language",
         "chat": "Chat on Whatsapp",
-        "contactUs": "Contact Us"
+        "contactUs": "Contact Us",
+        "deleteModalTitle": "Confirm Account Deletion",
+        "deleteModalBody1": "Are you sure you want to delete your account?",
+        "deleteModalBody2": "WARNING: Once deleted, you will lose access to the app, and your information will be fully deleted from the platform within 90 days.",
+        "deleteModalCancel": "cancel",
+        "deleteModalConfirm": "Delete Account"
+
       },
       "(personal-info)": {
         "heading": "Personal Information",

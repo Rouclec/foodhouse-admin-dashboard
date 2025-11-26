@@ -50,6 +50,7 @@ export default {
   error: "#EF0000",
   errorDark: "#a10202",
   err: "#FF5A5F14",
+  errorlight: "#EF00001A",
   primary: {
     "50": "#6DCD471F",
     "300": "#D8FFC9",
