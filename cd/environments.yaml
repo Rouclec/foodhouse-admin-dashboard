@@ -6,7 +6,7 @@
   
 - envId: testing
   name: Testing
-  gitRefName: release/search-user-by-phone
+  gitRefName: release/testing/v5
   awsAccountId: 841306720336
   domainName: foodhousetesting.xyz
 
