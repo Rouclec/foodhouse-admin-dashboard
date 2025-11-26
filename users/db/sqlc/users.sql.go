@@ -375,6 +375,7 @@ WHERE
         LOWER(f.first_name) LIKE LOWER('%' || $5 || '%')
         OR LOWER(f.last_name) LIKE LOWER('%' || $5 || '%')
         OR LOWER(f.email) LIKE LOWER('%' || $5 || '%')
+        OR LOWER(f.phone_number) LIKE LOWER('%' || $5 || '%')
     )
     )
 ORDER BY
@@ -456,6 +457,7 @@ WHERE
             LOWER(first_name) LIKE LOWER('%' || $4 || '%')
             OR LOWER(last_name) LIKE LOWER('%' || $4 || '%')
             OR LOWER(email) LIKE LOWER('%' || $4 || '%')
+            OR LOWER(f.phone_number) LIKE LOWER('%' || $4 || '%')
         )
     )
     AND created_at < $5::timestamptz
