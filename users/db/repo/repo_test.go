@@ -206,7 +206,7 @@ func TestUserLifecycle(t *testing.T) {
 	// -----------------------------------------------------------------------------
 	users, err := userRepo.Do().ListUsers(ctx, sqlc.ListUsersParams{})
 	require.NoError(t, err)
-	assert.Len(t, users, 0, "deleted user should not appear in ListUsers")
+	assert.Empty(t, users, "deleted user should not appear in ListUsers")
 
 	// -----------------------------------------------------------------------------
 	// ENSURE USER CANNOT BE UPDATED
