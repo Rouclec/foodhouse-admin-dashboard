@@ -193,7 +193,6 @@ export default function BuyerProducts() {
     useState<string>();
   const [filterSelectedRating, setFilterSelectedRating] = useState<number>();
 
- 
   const plans = [
     {
       id: '1',
@@ -201,8 +200,8 @@ export default function BuyerProducts() {
       discount: '10% off',
       categories: 5,
       delivery: '1 free delivery',
-      packageAmount: '30.000XAF', 
-      deliveryAmount: '45.000XAF', 
+      packageAmount: '30.000XAF',
+      deliveryAmount: '45.000XAF',
     },
     {
       id: '2',
@@ -210,8 +209,8 @@ export default function BuyerProducts() {
       discount: '15% off',
       categories: 10,
       delivery: '1 free delivery',
-      packageAmount: '70.000XAF', 
-      deliveryAmount: '$90.000XAF', 
+      packageAmount: '70.000XAF',
+      deliveryAmount: '$90.000XAF',
     },
     {
       id: '3',
@@ -219,8 +218,8 @@ export default function BuyerProducts() {
       discount: '20% off',
       categories: 20,
       delivery: '1 free delivery',
-      packageAmount: '150,000XAF', 
-      deliveryAmount: '180,000XAF', 
+      packageAmount: '150,000XAF',
+      deliveryAmount: '180,000XAF',
     },
     {
       id: '4',
@@ -228,12 +227,11 @@ export default function BuyerProducts() {
       discount: 'Custom',
       categories: 50,
       delivery: '1 free delivery',
-      packageAmount: '90,000XAF', 
-      deliveryAmount: '180,000XAF', 
+      packageAmount: '90,000XAF',
+      deliveryAmount: '180,000XAF',
     },
   ];
 
- 
   const PackageCard = ({ item }) => (
     <View style={styles.packageContainer}>
       <View style={styles.headerRow}>
@@ -338,27 +336,8 @@ export default function BuyerProducts() {
                       />
 
                       {cartCount > 0 && (
-                        <View
-                          style={{
-                            position: 'absolute',
-                            top: -14,
-                            right: -14,
-                            backgroundColor: Colors.primary[500],
-                            borderRadius: 28,
-                            width: 24,
-                            height: 24,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            borderWidth: 1.5,
-                            borderColor: 'white',
-                          }}>
-                          <Text
-                            style={{
-                              color: Colors.light[10],
-                              fontSize: 14,
-                              fontWeight: 'bold',
-                              textAlign: 'center',
-                            }}>
+                        <View style={defaultStyles.cardContainer}>
+                          <Text style={defaultStyles.cardText}>
                             {cartCount}
                           </Text>
                         </View>
@@ -534,10 +513,14 @@ export default function BuyerProducts() {
           <View style={styles.subscriptionContainer}>
             <View style={styles.package}>
               <Text variant="titleMedium" style={[styles.title]}>
-                {' '}
-                Our packages for you{' '}
+              
+                Our packages for you
               </Text>
-              <Text style={[styles.title1]}>See All</Text>
+              <TouchableOpacity
+                onPress={() => router.push('../(payment)/subscription')}>
+               
+                <Text style={[styles.title1]}>See All</Text>
+              </TouchableOpacity>
             </View>
 
             <ScrollView

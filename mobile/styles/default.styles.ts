@@ -88,7 +88,7 @@ export const defaultStyles = StyleSheet.create({
     color: Colors.errorDark,
   },
   dangerButton: {
-    backgroundColor: Colors.error
+    backgroundColor: Colors.error,
   },
   flex: {
     flex: 1,
@@ -109,13 +109,12 @@ export const defaultStyles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     paddingBottom: 32,
-    
   },
   bottomButtonContainer: {
     // position: "absolute",
     alignSelf: 'center',
     bottom: 0,
-    
+
     // backgroundColor: "transparent",
     // height: 96,
     height: 'auto',
@@ -138,7 +137,6 @@ export const defaultStyles = StyleSheet.create({
     rowGap: 12,
   },
   button: {
-    
     justifyContent: 'center',
     borderRadius: 100,
     minHeight: 48,
@@ -394,10 +392,24 @@ export const defaultStyles = StyleSheet.create({
   },
 
   headText: {
-    color: Colors.primary["500"],
+    color: Colors.primary['500'],
   },
 
   dangerButtongrey: {
     backgroundColor: Colors.errorlight,
-  }
+  },
+  cardContainer: {
+    position: 'absolute',
+    top: -14,
+    right: -14,
+    backgroundColor: Colors.primary[500],
+    borderRadius: 28,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: 'white',
+  },
+  cardText: {},
 });

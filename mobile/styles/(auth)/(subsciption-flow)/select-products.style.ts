@@ -1,0 +1,208 @@
+import Colors from '@/constants/Colors';
+import { StyleSheet } from 'react-native';
+
+export const selectProductsStyles = StyleSheet.create({
+  appHeader: {
+    backgroundColor: Colors.light[10],
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    columnGap: 24,
+    paddingHorizontal: 12,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.dark[10],
+  },
+  scrollView: {
+    flex: 1,
+    backgroundColor: Colors.light[10],
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 100,
+  },
+  budgetCard: {
+    backgroundColor: Colors.light[10],
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: Colors.grey.e5,
+  },
+  budgetHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  budgetLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.dark[10],
+  },
+  budgetAmount: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.dark[10],
+  },
+  progressBar: {
+    height: 8,
+    backgroundColor: Colors.grey.e5,
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: Colors.primary[500],
+    borderRadius: 4,
+  },
+  remainingText: {
+    fontSize: 12,
+    color: Colors.primary[500],
+  },
+  deliveryTabs: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+  },
+  deliveryTab: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: Colors.grey.f8,
+    alignItems: 'center',
+  },
+  deliveryTabActive: {
+    backgroundColor: Colors.primary[500],
+  },
+  deliveryTabText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.grey[61],
+  },
+  deliveryTabTextActive: {
+    color: Colors.light[10],
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: Colors.dark[10],
+    marginBottom: 12,
+    marginTop: 8,
+  },
+  productCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: Colors.light[10],
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: Colors.grey.e5,
+  },
+  productInfo: {
+    flex: 1,
+  },
+  productName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.dark[10],
+    marginBottom: 4,
+  },
+  productPrice: {
+    fontSize: 12,
+    color: Colors.grey[61],
+  },
+  productUnit: {
+    fontSize: 12,
+    color: Colors.grey[61],
+    marginBottom: 4,
+  },
+  productPriceGreen: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.primary[500],
+  },
+  quantityControl: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  quantityButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 6,
+    backgroundColor: Colors.grey.f8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quantityButtonGreen: {
+    width: 32,
+    height: 32,
+    borderRadius: 6,
+    backgroundColor: Colors.primary[500],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quantityText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.dark[10],
+    minWidth: 24,
+    textAlign: 'center',
+  },
+  availableProductCard: {
+    backgroundColor: Colors.light[10],
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: Colors.grey.e5,
+  },
+  categoryBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: Colors.primary[50],
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  categoryText: {
+    fontSize: 12,
+    color: Colors.primary[500],
+    fontWeight: '500',
+  },
+  productRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  addButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: Colors.primary[500],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  footer: {
+    backgroundColor: Colors.light[10],
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: Colors.grey.e5,
+  },
+  continueButton: {
+    backgroundColor: Colors.primary[500],
+    borderRadius: 8,
+  },
+  continueButtonLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});
