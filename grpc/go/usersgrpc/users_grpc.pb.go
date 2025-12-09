@@ -19,47 +19,35 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Users_SendSignupSmsOtp_FullMethodName              = "/usersgrpc.Users/SendSignupSmsOtp"
-	Users_Signup_FullMethodName                        = "/usersgrpc.Users/Signup"
-	Users_GetUserByID_FullMethodName                   = "/usersgrpc.Users/GetUserByID"
-	Users_GetFarmerByID_FullMethodName                 = "/usersgrpc.Users/GetFarmerByID"
-	Users_CompleteRegistration_FullMethodName          = "/usersgrpc.Users/CompleteRegistration"
-	Users_HealthCheck_FullMethodName                   = "/usersgrpc.Users/HealthCheck"
-	Users_RefreshAccessToken_FullMethodName            = "/usersgrpc.Users/RefreshAccessToken"
-	Users_Authenticate_FullMethodName                  = "/usersgrpc.Users/Authenticate"
-	Users_OAuth_FullMethodName                         = "/usersgrpc.Users/OAuth"
-	Users_SendEmailOtp_FullMethodName                  = "/usersgrpc.Users/SendEmailOtp"
-	Users_SendSmsOtp_FullMethodName                    = "/usersgrpc.Users/SendSmsOtp"
-	Users_ChangePassword_FullMethodName                = "/usersgrpc.Users/ChangePassword"
-	Users_RevokeRefreshToken_FullMethodName            = "/usersgrpc.Users/RevokeRefreshToken"
-	Users_VerifyOtp_FullMethodName                     = "/usersgrpc.Users/VerifyOtp"
-	Users_LastOtpForFactor_FullMethodName              = "/usersgrpc.Users/LastOtpForFactor"
-	Users_GrantAdmin_FullMethodName                    = "/usersgrpc.Users/GrantAdmin"
-	Users_GrantAgent_FullMethodName                    = "/usersgrpc.Users/GrantAgent"
-	Users_ListUsers_FullMethodName                     = "/usersgrpc.Users/ListUsers"
-	Users_CreateSubscription_FullMethodName            = "/usersgrpc.Users/CreateSubscription"
-	Users_UpdateSubscription_FullMethodName            = "/usersgrpc.Users/UpdateSubscription"
-	Users_DeleteSubscription_FullMethodName            = "/usersgrpc.Users/DeleteSubscription"
-	Users_Subscribe_FullMethodName                     = "/usersgrpc.Users/Subscribe"
-	Users_ActivateUserSubscription_FullMethodName      = "/usersgrpc.Users/ActivateUserSubscription"
-	Users_DeleteUserSubscription_FullMethodName        = "/usersgrpc.Users/DeleteUserSubscription"
-	Users_GetUserSubscriptions_FullMethodName          = "/usersgrpc.Users/GetUserSubscriptions"
-	Users_GetUserActiveSubscription_FullMethodName     = "/usersgrpc.Users/GetUserActiveSubscription"
-	Users_GetUserSubscriptionByID_FullMethodName       = "/usersgrpc.Users/GetUserSubscriptionByID"
-	Users_GetUserPaymentMethodsByUserID_FullMethodName = "/usersgrpc.Users/GetUserPaymentMethodsByUserID"
-	Users_DeleteUserPaymentMethod_FullMethodName       = "/usersgrpc.Users/DeleteUserPaymentMethod"
-	Users_ListSubscriptions_FullMethodName             = "/usersgrpc.Users/ListSubscriptions"
-	Users_GetPublicUser_FullMethodName                 = "/usersgrpc.Users/GetPublicUser"
-	Users_ReviewFarmer_FullMethodName                  = "/usersgrpc.Users/ReviewFarmer"
-	Users_ListFarmersReivews_FullMethodName            = "/usersgrpc.Users/ListFarmersReivews"
-	Users_ListFarmers_FullMethodName                   = "/usersgrpc.Users/ListFarmers"
-	Users_GetUserStats_FullMethodName                  = "/usersgrpc.Users/GetUserStats"
-	Users_SuspendUser_FullMethodName                   = "/usersgrpc.Users/SuspendUser"
-	Users_ReactivateUser_FullMethodName                = "/usersgrpc.Users/ReactivateUser"
-	Users_DeleteAgent_FullMethodName                   = "/usersgrpc.Users/DeleteAgent"
-	Users_GetReferralByReferredID_FullMethodName       = "/usersgrpc.Users/GetReferralByReferredID"
-	Users_NotifyFarmer_FullMethodName                  = "/usersgrpc.Users/NotifyFarmer"
-	Users_DeleteUserAccount_FullMethodName             = "/usersgrpc.Users/DeleteUserAccount"
+	Users_SendSignupSmsOtp_FullMethodName        = "/usersgrpc.Users/SendSignupSmsOtp"
+	Users_Signup_FullMethodName                  = "/usersgrpc.Users/Signup"
+	Users_GetUserByID_FullMethodName             = "/usersgrpc.Users/GetUserByID"
+	Users_GetFarmerByID_FullMethodName           = "/usersgrpc.Users/GetFarmerByID"
+	Users_CompleteRegistration_FullMethodName    = "/usersgrpc.Users/CompleteRegistration"
+	Users_HealthCheck_FullMethodName             = "/usersgrpc.Users/HealthCheck"
+	Users_RefreshAccessToken_FullMethodName      = "/usersgrpc.Users/RefreshAccessToken"
+	Users_Authenticate_FullMethodName            = "/usersgrpc.Users/Authenticate"
+	Users_OAuth_FullMethodName                   = "/usersgrpc.Users/OAuth"
+	Users_SendEmailOtp_FullMethodName            = "/usersgrpc.Users/SendEmailOtp"
+	Users_SendSmsOtp_FullMethodName              = "/usersgrpc.Users/SendSmsOtp"
+	Users_ChangePassword_FullMethodName          = "/usersgrpc.Users/ChangePassword"
+	Users_RevokeRefreshToken_FullMethodName      = "/usersgrpc.Users/RevokeRefreshToken"
+	Users_VerifyOtp_FullMethodName               = "/usersgrpc.Users/VerifyOtp"
+	Users_LastOtpForFactor_FullMethodName        = "/usersgrpc.Users/LastOtpForFactor"
+	Users_GrantAdmin_FullMethodName              = "/usersgrpc.Users/GrantAdmin"
+	Users_GrantAgent_FullMethodName              = "/usersgrpc.Users/GrantAgent"
+	Users_ListUsers_FullMethodName               = "/usersgrpc.Users/ListUsers"
+	Users_GetPublicUser_FullMethodName           = "/usersgrpc.Users/GetPublicUser"
+	Users_ReviewFarmer_FullMethodName            = "/usersgrpc.Users/ReviewFarmer"
+	Users_ListFarmersReivews_FullMethodName      = "/usersgrpc.Users/ListFarmersReivews"
+	Users_ListFarmers_FullMethodName             = "/usersgrpc.Users/ListFarmers"
+	Users_GetUserStats_FullMethodName            = "/usersgrpc.Users/GetUserStats"
+	Users_SuspendUser_FullMethodName             = "/usersgrpc.Users/SuspendUser"
+	Users_ReactivateUser_FullMethodName          = "/usersgrpc.Users/ReactivateUser"
+	Users_DeleteAgent_FullMethodName             = "/usersgrpc.Users/DeleteAgent"
+	Users_GetReferralByReferredID_FullMethodName = "/usersgrpc.Users/GetReferralByReferredID"
+	Users_NotifyFarmer_FullMethodName            = "/usersgrpc.Users/NotifyFarmer"
+	Users_DeleteUserAccount_FullMethodName       = "/usersgrpc.Users/DeleteUserAccount"
 )
 
 // UsersClient is the client API for Users service.
@@ -84,18 +72,6 @@ type UsersClient interface {
 	GrantAdmin(ctx context.Context, in *GrantAdminRequest, opts ...grpc.CallOption) (*GrantAdminResponse, error)
 	GrantAgent(ctx context.Context, in *GrantAgentRequest, opts ...grpc.CallOption) (*GrantAgentResponse, error)
 	ListUsers(ctx context.Context, in *ListUsersRequest, opts ...grpc.CallOption) (*ListUsersResponse, error)
-	CreateSubscription(ctx context.Context, in *CreateSubscriptionRequest, opts ...grpc.CallOption) (*CreateSubscriptionResponse, error)
-	UpdateSubscription(ctx context.Context, in *UpdateSubscriptionRequest, opts ...grpc.CallOption) (*UpdateSubscriptionResponse, error)
-	DeleteSubscription(ctx context.Context, in *DeleteSubscriptionRequst, opts ...grpc.CallOption) (*DeleteSubscriptionResponse, error)
-	Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (*SubscribeResponse, error)
-	ActivateUserSubscription(ctx context.Context, in *ActivateUserSubscriptionRequest, opts ...grpc.CallOption) (*ActivateUserSubscriptionResponse, error)
-	DeleteUserSubscription(ctx context.Context, in *DeleteUserSubscriptionRequest, opts ...grpc.CallOption) (*DeleteUserSubscriptionResponse, error)
-	GetUserSubscriptions(ctx context.Context, in *GetUserSubscriptionsRequest, opts ...grpc.CallOption) (*GetUserSubscriptionsResponse, error)
-	GetUserActiveSubscription(ctx context.Context, in *GetUserActiveSubscriptionRequest, opts ...grpc.CallOption) (*GetUserActiveSubscriptionResponse, error)
-	GetUserSubscriptionByID(ctx context.Context, in *GetUserSubscriptionByIDRequest, opts ...grpc.CallOption) (*GetUserSubscriptionByIDResponse, error)
-	GetUserPaymentMethodsByUserID(ctx context.Context, in *GetUserPaymentMethodsByUserIDRequest, opts ...grpc.CallOption) (*GetUserPaymentMethodsByUserIDResponse, error)
-	DeleteUserPaymentMethod(ctx context.Context, in *DeleteUserPaymentMethodRequest, opts ...grpc.CallOption) (*DeleteUserPaymentMethodResponse, error)
-	ListSubscriptions(ctx context.Context, in *ListSubscriptionsRequest, opts ...grpc.CallOption) (*ListSubscriptionsResponse, error)
 	GetPublicUser(ctx context.Context, in *GetPublicUserRequest, opts ...grpc.CallOption) (*GetPublicUserResponse, error)
 	ReviewFarmer(ctx context.Context, in *ReviewFarmerRequest, opts ...grpc.CallOption) (*ReviewFarmerResponse, error)
 	ListFarmersReivews(ctx context.Context, in *ListFarmersReviewsRequest, opts ...grpc.CallOption) (*ListFarmersReivewsResponse, error)
@@ -297,126 +273,6 @@ func (c *usersClient) ListUsers(ctx context.Context, in *ListUsersRequest, opts 
 	return out, nil
 }
 
-func (c *usersClient) CreateSubscription(ctx context.Context, in *CreateSubscriptionRequest, opts ...grpc.CallOption) (*CreateSubscriptionResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateSubscriptionResponse)
-	err := c.cc.Invoke(ctx, Users_CreateSubscription_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *usersClient) UpdateSubscription(ctx context.Context, in *UpdateSubscriptionRequest, opts ...grpc.CallOption) (*UpdateSubscriptionResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateSubscriptionResponse)
-	err := c.cc.Invoke(ctx, Users_UpdateSubscription_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *usersClient) DeleteSubscription(ctx context.Context, in *DeleteSubscriptionRequst, opts ...grpc.CallOption) (*DeleteSubscriptionResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteSubscriptionResponse)
-	err := c.cc.Invoke(ctx, Users_DeleteSubscription_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *usersClient) Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (*SubscribeResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SubscribeResponse)
-	err := c.cc.Invoke(ctx, Users_Subscribe_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *usersClient) ActivateUserSubscription(ctx context.Context, in *ActivateUserSubscriptionRequest, opts ...grpc.CallOption) (*ActivateUserSubscriptionResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ActivateUserSubscriptionResponse)
-	err := c.cc.Invoke(ctx, Users_ActivateUserSubscription_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *usersClient) DeleteUserSubscription(ctx context.Context, in *DeleteUserSubscriptionRequest, opts ...grpc.CallOption) (*DeleteUserSubscriptionResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteUserSubscriptionResponse)
-	err := c.cc.Invoke(ctx, Users_DeleteUserSubscription_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *usersClient) GetUserSubscriptions(ctx context.Context, in *GetUserSubscriptionsRequest, opts ...grpc.CallOption) (*GetUserSubscriptionsResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetUserSubscriptionsResponse)
-	err := c.cc.Invoke(ctx, Users_GetUserSubscriptions_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *usersClient) GetUserActiveSubscription(ctx context.Context, in *GetUserActiveSubscriptionRequest, opts ...grpc.CallOption) (*GetUserActiveSubscriptionResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetUserActiveSubscriptionResponse)
-	err := c.cc.Invoke(ctx, Users_GetUserActiveSubscription_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *usersClient) GetUserSubscriptionByID(ctx context.Context, in *GetUserSubscriptionByIDRequest, opts ...grpc.CallOption) (*GetUserSubscriptionByIDResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetUserSubscriptionByIDResponse)
-	err := c.cc.Invoke(ctx, Users_GetUserSubscriptionByID_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *usersClient) GetUserPaymentMethodsByUserID(ctx context.Context, in *GetUserPaymentMethodsByUserIDRequest, opts ...grpc.CallOption) (*GetUserPaymentMethodsByUserIDResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetUserPaymentMethodsByUserIDResponse)
-	err := c.cc.Invoke(ctx, Users_GetUserPaymentMethodsByUserID_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *usersClient) DeleteUserPaymentMethod(ctx context.Context, in *DeleteUserPaymentMethodRequest, opts ...grpc.CallOption) (*DeleteUserPaymentMethodResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteUserPaymentMethodResponse)
-	err := c.cc.Invoke(ctx, Users_DeleteUserPaymentMethod_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *usersClient) ListSubscriptions(ctx context.Context, in *ListSubscriptionsRequest, opts ...grpc.CallOption) (*ListSubscriptionsResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListSubscriptionsResponse)
-	err := c.cc.Invoke(ctx, Users_ListSubscriptions_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *usersClient) GetPublicUser(ctx context.Context, in *GetPublicUserRequest, opts ...grpc.CallOption) (*GetPublicUserResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetPublicUserResponse)
@@ -549,18 +405,6 @@ type UsersServer interface {
 	GrantAdmin(context.Context, *GrantAdminRequest) (*GrantAdminResponse, error)
 	GrantAgent(context.Context, *GrantAgentRequest) (*GrantAgentResponse, error)
 	ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error)
-	CreateSubscription(context.Context, *CreateSubscriptionRequest) (*CreateSubscriptionResponse, error)
-	UpdateSubscription(context.Context, *UpdateSubscriptionRequest) (*UpdateSubscriptionResponse, error)
-	DeleteSubscription(context.Context, *DeleteSubscriptionRequst) (*DeleteSubscriptionResponse, error)
-	Subscribe(context.Context, *SubscribeRequest) (*SubscribeResponse, error)
-	ActivateUserSubscription(context.Context, *ActivateUserSubscriptionRequest) (*ActivateUserSubscriptionResponse, error)
-	DeleteUserSubscription(context.Context, *DeleteUserSubscriptionRequest) (*DeleteUserSubscriptionResponse, error)
-	GetUserSubscriptions(context.Context, *GetUserSubscriptionsRequest) (*GetUserSubscriptionsResponse, error)
-	GetUserActiveSubscription(context.Context, *GetUserActiveSubscriptionRequest) (*GetUserActiveSubscriptionResponse, error)
-	GetUserSubscriptionByID(context.Context, *GetUserSubscriptionByIDRequest) (*GetUserSubscriptionByIDResponse, error)
-	GetUserPaymentMethodsByUserID(context.Context, *GetUserPaymentMethodsByUserIDRequest) (*GetUserPaymentMethodsByUserIDResponse, error)
-	DeleteUserPaymentMethod(context.Context, *DeleteUserPaymentMethodRequest) (*DeleteUserPaymentMethodResponse, error)
-	ListSubscriptions(context.Context, *ListSubscriptionsRequest) (*ListSubscriptionsResponse, error)
 	GetPublicUser(context.Context, *GetPublicUserRequest) (*GetPublicUserResponse, error)
 	ReviewFarmer(context.Context, *ReviewFarmerRequest) (*ReviewFarmerResponse, error)
 	ListFarmersReivews(context.Context, *ListFarmersReviewsRequest) (*ListFarmersReivewsResponse, error)
@@ -635,42 +479,6 @@ func (UnimplementedUsersServer) GrantAgent(context.Context, *GrantAgentRequest) 
 }
 func (UnimplementedUsersServer) ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListUsers not implemented")
-}
-func (UnimplementedUsersServer) CreateSubscription(context.Context, *CreateSubscriptionRequest) (*CreateSubscriptionResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateSubscription not implemented")
-}
-func (UnimplementedUsersServer) UpdateSubscription(context.Context, *UpdateSubscriptionRequest) (*UpdateSubscriptionResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateSubscription not implemented")
-}
-func (UnimplementedUsersServer) DeleteSubscription(context.Context, *DeleteSubscriptionRequst) (*DeleteSubscriptionResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteSubscription not implemented")
-}
-func (UnimplementedUsersServer) Subscribe(context.Context, *SubscribeRequest) (*SubscribeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Subscribe not implemented")
-}
-func (UnimplementedUsersServer) ActivateUserSubscription(context.Context, *ActivateUserSubscriptionRequest) (*ActivateUserSubscriptionResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ActivateUserSubscription not implemented")
-}
-func (UnimplementedUsersServer) DeleteUserSubscription(context.Context, *DeleteUserSubscriptionRequest) (*DeleteUserSubscriptionResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteUserSubscription not implemented")
-}
-func (UnimplementedUsersServer) GetUserSubscriptions(context.Context, *GetUserSubscriptionsRequest) (*GetUserSubscriptionsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserSubscriptions not implemented")
-}
-func (UnimplementedUsersServer) GetUserActiveSubscription(context.Context, *GetUserActiveSubscriptionRequest) (*GetUserActiveSubscriptionResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserActiveSubscription not implemented")
-}
-func (UnimplementedUsersServer) GetUserSubscriptionByID(context.Context, *GetUserSubscriptionByIDRequest) (*GetUserSubscriptionByIDResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserSubscriptionByID not implemented")
-}
-func (UnimplementedUsersServer) GetUserPaymentMethodsByUserID(context.Context, *GetUserPaymentMethodsByUserIDRequest) (*GetUserPaymentMethodsByUserIDResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserPaymentMethodsByUserID not implemented")
-}
-func (UnimplementedUsersServer) DeleteUserPaymentMethod(context.Context, *DeleteUserPaymentMethodRequest) (*DeleteUserPaymentMethodResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteUserPaymentMethod not implemented")
-}
-func (UnimplementedUsersServer) ListSubscriptions(context.Context, *ListSubscriptionsRequest) (*ListSubscriptionsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListSubscriptions not implemented")
 }
 func (UnimplementedUsersServer) GetPublicUser(context.Context, *GetPublicUserRequest) (*GetPublicUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPublicUser not implemented")
@@ -1050,222 +858,6 @@ func _Users_ListUsers_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Users_CreateSubscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateSubscriptionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UsersServer).CreateSubscription(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Users_CreateSubscription_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServer).CreateSubscription(ctx, req.(*CreateSubscriptionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Users_UpdateSubscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateSubscriptionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UsersServer).UpdateSubscription(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Users_UpdateSubscription_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServer).UpdateSubscription(ctx, req.(*UpdateSubscriptionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Users_DeleteSubscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteSubscriptionRequst)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UsersServer).DeleteSubscription(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Users_DeleteSubscription_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServer).DeleteSubscription(ctx, req.(*DeleteSubscriptionRequst))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Users_Subscribe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SubscribeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UsersServer).Subscribe(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Users_Subscribe_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServer).Subscribe(ctx, req.(*SubscribeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Users_ActivateUserSubscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ActivateUserSubscriptionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UsersServer).ActivateUserSubscription(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Users_ActivateUserSubscription_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServer).ActivateUserSubscription(ctx, req.(*ActivateUserSubscriptionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Users_DeleteUserSubscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteUserSubscriptionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UsersServer).DeleteUserSubscription(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Users_DeleteUserSubscription_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServer).DeleteUserSubscription(ctx, req.(*DeleteUserSubscriptionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Users_GetUserSubscriptions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUserSubscriptionsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UsersServer).GetUserSubscriptions(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Users_GetUserSubscriptions_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServer).GetUserSubscriptions(ctx, req.(*GetUserSubscriptionsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Users_GetUserActiveSubscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUserActiveSubscriptionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UsersServer).GetUserActiveSubscription(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Users_GetUserActiveSubscription_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServer).GetUserActiveSubscription(ctx, req.(*GetUserActiveSubscriptionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Users_GetUserSubscriptionByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUserSubscriptionByIDRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UsersServer).GetUserSubscriptionByID(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Users_GetUserSubscriptionByID_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServer).GetUserSubscriptionByID(ctx, req.(*GetUserSubscriptionByIDRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Users_GetUserPaymentMethodsByUserID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUserPaymentMethodsByUserIDRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UsersServer).GetUserPaymentMethodsByUserID(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Users_GetUserPaymentMethodsByUserID_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServer).GetUserPaymentMethodsByUserID(ctx, req.(*GetUserPaymentMethodsByUserIDRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Users_DeleteUserPaymentMethod_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteUserPaymentMethodRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UsersServer).DeleteUserPaymentMethod(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Users_DeleteUserPaymentMethod_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServer).DeleteUserPaymentMethod(ctx, req.(*DeleteUserPaymentMethodRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Users_ListSubscriptions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListSubscriptionsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UsersServer).ListSubscriptions(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Users_ListSubscriptions_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServer).ListSubscriptions(ctx, req.(*ListSubscriptionsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Users_GetPublicUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetPublicUserRequest)
 	if err := dec(in); err != nil {
@@ -1542,54 +1134,6 @@ var Users_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListUsers",
 			Handler:    _Users_ListUsers_Handler,
-		},
-		{
-			MethodName: "CreateSubscription",
-			Handler:    _Users_CreateSubscription_Handler,
-		},
-		{
-			MethodName: "UpdateSubscription",
-			Handler:    _Users_UpdateSubscription_Handler,
-		},
-		{
-			MethodName: "DeleteSubscription",
-			Handler:    _Users_DeleteSubscription_Handler,
-		},
-		{
-			MethodName: "Subscribe",
-			Handler:    _Users_Subscribe_Handler,
-		},
-		{
-			MethodName: "ActivateUserSubscription",
-			Handler:    _Users_ActivateUserSubscription_Handler,
-		},
-		{
-			MethodName: "DeleteUserSubscription",
-			Handler:    _Users_DeleteUserSubscription_Handler,
-		},
-		{
-			MethodName: "GetUserSubscriptions",
-			Handler:    _Users_GetUserSubscriptions_Handler,
-		},
-		{
-			MethodName: "GetUserActiveSubscription",
-			Handler:    _Users_GetUserActiveSubscription_Handler,
-		},
-		{
-			MethodName: "GetUserSubscriptionByID",
-			Handler:    _Users_GetUserSubscriptionByID_Handler,
-		},
-		{
-			MethodName: "GetUserPaymentMethodsByUserID",
-			Handler:    _Users_GetUserPaymentMethodsByUserID_Handler,
-		},
-		{
-			MethodName: "DeleteUserPaymentMethod",
-			Handler:    _Users_DeleteUserPaymentMethod_Handler,
-		},
-		{
-			MethodName: "ListSubscriptions",
-			Handler:    _Users_ListSubscriptions_Handler,
 		},
 		{
 			MethodName: "GetPublicUser",

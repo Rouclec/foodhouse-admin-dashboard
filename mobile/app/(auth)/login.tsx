@@ -6,8 +6,6 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   ScrollView,
-  Alert,
-  Platform,
 } from 'react-native';
 import { Appbar, Icon, Snackbar, TextInput } from 'react-native-paper';
 import { Link, router } from 'expo-router';

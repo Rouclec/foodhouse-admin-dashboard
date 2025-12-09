@@ -138,6 +138,44 @@
         ]
       }
     },
+    "/v1/admin/{adminUserId}/orders/create-subscription-plan": {
+      "post": {
+        "operationId": "Orders_CreateSubscriptionPlan",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcCreateSubscriptionPlanResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/OrdersCreateSubscriptionPlanBody"
+            }
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/admin/{userId}/orders/create-delivery-point": {
       "post": {
         "operationId": "Orders_CreateDeliveryPoint",
@@ -887,6 +925,44 @@
         ]
       }
     },
+    "/v1/users/{userId}/orders/subscribe": {
+      "post": {
+        "operationId": "Orders_Subscribe",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcSubscribeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/OrdersSubscribeBody"
+            }
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/users/{userId}/orders/{orderId}/approve-order": {
       "put": {
         "operationId": "Orders_ApproveOrder",
@@ -1185,6 +1261,32 @@
         }
       }
     },
+    "OrdersCreateSubscriptionPlanBody": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "amount": {
+          "$ref": "#/definitions/typesAmount"
+        },
+        "duration": {
+          "type": "string",
+          "format": "int64",
+          "title": "duration in weeks"
+        },
+        "subscriptionItems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ordersgrpcSubscriptionItem"
+          }
+        }
+      }
+    },
     "OrdersDispatchOrderBody": {
       "type": "object",
       "properties": {
@@ -1229,6 +1331,14 @@
       "type": "object",
       "properties": {
         "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "OrdersSubscribeBody": {
+      "type": "object",
+      "properties": {
+        "subscriptionPlanId": {
           "type": "string"
         }
       }
@@ -1381,6 +1491,14 @@
       "properties": {
         "order": {
           "$ref": "#/definitions/ordersgrpcOrder"
+        }
+      }
+    },
+    "ordersgrpcCreateSubscriptionPlanResponse": {
+      "type": "object",
+      "properties": {
+        "subscriptionPlan": {
+          "$ref": "#/definitions/ordersgrpcSubscription"
         }
       }
     },
@@ -1663,6 +1781,13 @@
         "totalItems": {
           "type": "integer",
           "format": "int32"
+        },
+        "userSubscriptionId": {
+          "type": "string"
+        },
+        "expectedDeliveryDate": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
@@ -1836,8 +1961,119 @@
         }
       }
     },
+    "ordersgrpcSubscribeResponse": {
+      "type": "object",
+      "properties": {
+        "subscription": {
+          "$ref": "#/definitions/ordersgrpcUserSubscription"
+        }
+      }
+    },
+    "ordersgrpcSubscription": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "amount": {
+          "$ref": "#/definitions/typesAmount"
+        },
+        "duration": {
+          "type": "string",
+          "format": "int64",
+          "title": "duration in weeks"
+        },
+        "subscriptionItems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ordersgrpcSubscriptionItem"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "ordersgrpcSubscriptionItem": {
+      "type": "object",
+      "properties": {
+        "productId": {
+          "type": "string"
+        },
+        "quantity": {
+          "type": "string",
+          "format": "int64"
+        },
+        "productImage": {
+          "type": "string"
+        },
+        "productName": {
+          "type": "string"
+        },
+        "productUnitPrice": {
+          "$ref": "#/definitions/typesAmount"
+        },
+        "unitType": {
+          "type": "string"
+        },
+        "subscriptionId": {
+          "type": "string"
+        }
+      }
+    },
     "ordersgrpcUpdateDeliveryPointResponse": {
       "type": "object"
+    },
+    "ordersgrpcUserSubscription": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "subscriptionPlanId": {
+          "type": "string"
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "progress": {
+          "type": "number",
+          "format": "double"
+        },
+        "amount": {
+          "$ref": "#/definitions/typesAmount"
+        },
+        "publicId": {
+          "type": "string"
+        }
+      }
     },
     "protobufAny": {
       "type": "object",

@@ -325,199 +325,199 @@ func TestRefreshTokens(t *testing.T) {
 		"RevokedAt should be valid (ie the token should be revoked)")
 }
 
-func TestSubscriptionLifecycle(t *testing.T) {
-	migrationPath := "../migrations"
+// func TestSubscriptionLifecycle(t *testing.T) {
+// 	migrationPath := "../migrations"
 
-	logger := zerolog.New(os.Stderr).With().Timestamp().Caller().Logger()
+// 	logger := zerolog.New(os.Stderr).With().Timestamp().Caller().Logger()
 
-	err := repo.Migrate(databaseURL, migrationPath, logger)
-	handleFatalError(err, "Could not migrate database")
-	defer repo.MigrateDown(databaseURL, migrationPath, logger)
+// 	err := repo.Migrate(databaseURL, migrationPath, logger)
+// 	handleFatalError(err, "Could not migrate database")
+// 	defer repo.MigrateDown(databaseURL, migrationPath, logger)
 
-	subscriptionRepo := repo.NewUsersRepo(pool)
-	ctx := context.Background()
+// 	subscriptionRepo := repo.NewUsersRepo(pool)
+// 	ctx := context.Background()
 
-	// Variables for subscription
-	title := "Premium Plan"
-	description := "Access to premium features"
-	amount := float64(1999)
-	currency := "USD"
+// 	// Variables for subscription
+// 	title := "Premium Plan"
+// 	description := "Access to premium features"
+// 	amount := float64(1999)
+// 	currency := "USD"
 
-	// Create a subscription
-	createdSubscription, err := subscriptionRepo.Do().CreateSubscription(ctx, sqlc.CreateSubscriptionParams{
-		Title:       title,
-		Description: description,
-		Duration: pgtype.Interval{
-			Microseconds: 30 * 24 * time.Hour.Microseconds(), // 30 days in microseconds
-			Valid:        true,                               // Mark it as valid
-		}, // Convert "1 month" to microseconds
-		Amount:          amount,
-		CurrencyIsoCode: currency,
-	})
-	require.NoErrorf(t, err, "failed to create subscription: %v", err)
-	assert.NotEmptyf(t, createdSubscription.ID, "subscription ID should not be empty")
-	assert.Equalf(t, title, createdSubscription.Title, "title should be equal")
-	assert.InDeltaf(t, amount, createdSubscription.Amount, 0.01, "amount should be equal")
+// 	// Create a subscription
+// 	createdSubscription, err := subscriptionRepo.Do().CreateSubscription(ctx, sqlc.CreateSubscriptionParams{
+// 		Title:       title,
+// 		Description: description,
+// 		Duration: pgtype.Interval{
+// 			Microseconds: 30 * 24 * time.Hour.Microseconds(), // 30 days in microseconds
+// 			Valid:        true,                               // Mark it as valid
+// 		}, // Convert "1 month" to microseconds
+// 		Amount:          amount,
+// 		CurrencyIsoCode: currency,
+// 	})
+// 	require.NoErrorf(t, err, "failed to create subscription: %v", err)
+// 	assert.NotEmptyf(t, createdSubscription.ID, "subscription ID should not be empty")
+// 	assert.Equalf(t, title, createdSubscription.Title, "title should be equal")
+// 	assert.InDeltaf(t, amount, createdSubscription.Amount, 0.01, "amount should be equal")
 
-	// Get subscription by ID
-	fetchedSubscription, err := subscriptionRepo.Do().GetSubscriptionByID(ctx, createdSubscription.ID)
-	require.NoErrorf(t, err, "failed to fetch subscription by ID: %v", err)
-	assert.Equalf(t, createdSubscription.ID, fetchedSubscription.ID, "subscription ID should be equal")
+// 	// Get subscription by ID
+// 	fetchedSubscription, err := subscriptionRepo.Do().GetSubscriptionByID(ctx, createdSubscription.ID)
+// 	require.NoErrorf(t, err, "failed to fetch subscription by ID: %v", err)
+// 	assert.Equalf(t, createdSubscription.ID, fetchedSubscription.ID, "subscription ID should be equal")
 
-	// Update subscription
-	updatedSubscription, err := subscriptionRepo.Do().UpdateSubscription(ctx, sqlc.UpdateSubscriptionParams{
-		ID:          createdSubscription.ID,
-		Title:       "Updated Premium Plan",
-		Description: "Updated access to premium features",
-		Duration: pgtype.Interval{
-			Microseconds: 30 * 24 * time.Hour.Microseconds(), // 30 days in microseconds
-			Valid:        true,                               // Mark it as valid
-		}, // Convert "3 months" to microseconds
-		Amount:          2999,
-		CurrencyIsoCode: "EUR",
-	})
-	require.NoErrorf(t, err, "failed to update subscription: %v", err)
-	assert.Equalf(t, "Updated Premium Plan", updatedSubscription.Title, "updated title should be equal")
-	assert.InDeltaf(t, float64(2999), updatedSubscription.Amount, 0.01, "updated amount should be equal")
+// 	// Update subscription
+// 	updatedSubscription, err := subscriptionRepo.Do().UpdateSubscription(ctx, sqlc.UpdateSubscriptionParams{
+// 		ID:          createdSubscription.ID,
+// 		Title:       "Updated Premium Plan",
+// 		Description: "Updated access to premium features",
+// 		Duration: pgtype.Interval{
+// 			Microseconds: 30 * 24 * time.Hour.Microseconds(), // 30 days in microseconds
+// 			Valid:        true,                               // Mark it as valid
+// 		}, // Convert "3 months" to microseconds
+// 		Amount:          2999,
+// 		CurrencyIsoCode: "EUR",
+// 	})
+// 	require.NoErrorf(t, err, "failed to update subscription: %v", err)
+// 	assert.Equalf(t, "Updated Premium Plan", updatedSubscription.Title, "updated title should be equal")
+// 	assert.InDeltaf(t, float64(2999), updatedSubscription.Amount, 0.01, "updated amount should be equal")
 
-	// Delete subscription
-	err = subscriptionRepo.Do().DeleteSubscription(ctx, createdSubscription.ID)
-	require.NoErrorf(t, err, "failed to delete subscription: %v", err)
+// 	// Delete subscription
+// 	err = subscriptionRepo.Do().DeleteSubscription(ctx, createdSubscription.ID)
+// 	require.NoErrorf(t, err, "failed to delete subscription: %v", err)
 
-	// Attempt to fetch deleted subscription
-	_, err = subscriptionRepo.Do().GetSubscriptionByID(ctx, createdSubscription.ID)
-	require.Error(t, err, "expected error when fetching deleted subscription")
-}
+// 	// Attempt to fetch deleted subscription
+// 	_, err = subscriptionRepo.Do().GetSubscriptionByID(ctx, createdSubscription.ID)
+// 	require.Error(t, err, "expected error when fetching deleted subscription")
+// }
 
-func TestUserSubscriptionLifecycle(t *testing.T) {
-	migrationPath := "../migrations"
+// func TestUserSubscriptionLifecycle(t *testing.T) {
+// 	migrationPath := "../migrations"
 
-	logger := zerolog.New(os.Stderr).With().Timestamp().Caller().Logger()
+// 	logger := zerolog.New(os.Stderr).With().Timestamp().Caller().Logger()
 
-	err := repo.Migrate(databaseURL, migrationPath, logger)
-	handleFatalError(err, "Could not migrate database")
-	defer repo.MigrateDown(databaseURL, migrationPath, logger)
+// 	err := repo.Migrate(databaseURL, migrationPath, logger)
+// 	handleFatalError(err, "Could not migrate database")
+// 	defer repo.MigrateDown(databaseURL, migrationPath, logger)
 
-	repo := repo.NewUsersRepo(pool)
-	ctx := context.Background()
+// 	repo := repo.NewUsersRepo(pool)
+// 	ctx := context.Background()
 
-	// Variables for user and subscription
-	user := sqlc.CreateUserParams{
-		Role:        "USER_ROLE_FARMER",
-		PhoneNumber: "+23767777777",
-	}
-	createdUser, err := repo.Do().CreateUser(ctx, user)
-	require.NoErrorf(t, err, "failed to create user: %v", err)
+// 	// Variables for user and subscription
+// 	user := sqlc.CreateUserParams{
+// 		Role:        "USER_ROLE_FARMER",
+// 		PhoneNumber: "+23767777777",
+// 	}
+// 	createdUser, err := repo.Do().CreateUser(ctx, user)
+// 	require.NoErrorf(t, err, "failed to create user: %v", err)
 
-	logger.Debug().Msgf("Duration: %v", pgtype.Interval{
-		Microseconds: 30 * 24 * time.Hour.Microseconds(), // 30 days in microseconds
-		Valid:        true,                               // Mark it as valid
-	})
+// 	logger.Debug().Msgf("Duration: %v", pgtype.Interval{
+// 		Microseconds: 30 * 24 * time.Hour.Microseconds(), // 30 days in microseconds
+// 		Valid:        true,                               // Mark it as valid
+// 	})
 
-	subscription := sqlc.CreateSubscriptionParams{
-		Title:       "Basic Plan",
-		Description: "Basic access",
-		Duration: pgtype.Interval{
-			Microseconds: 30 * 24 * time.Hour.Microseconds(), // 30 days in microseconds
-			Valid:        true,                               // Mark it as valid
-		}, // Convert "1 month" to microseconds
-		Amount:          1000,
-		CurrencyIsoCode: "USD",
-	}
-	createdSubscription, err := repo.Do().CreateSubscription(ctx, subscription)
-	require.NoErrorf(t, err, "failed to create subscription: %v", err)
+// 	subscription := sqlc.CreateSubscriptionParams{
+// 		Title:       "Basic Plan",
+// 		Description: "Basic access",
+// 		Duration: pgtype.Interval{
+// 			Microseconds: 30 * 24 * time.Hour.Microseconds(), // 30 days in microseconds
+// 			Valid:        true,                               // Mark it as valid
+// 		}, // Convert "1 month" to microseconds
+// 		Amount:          1000,
+// 		CurrencyIsoCode: "USD",
+// 	}
+// 	createdSubscription, err := repo.Do().CreateSubscription(ctx, subscription)
+// 	require.NoErrorf(t, err, "failed to create subscription: %v", err)
 
-	// Assuming the subscription duration is in days (microseconds)
-	subscriptionDuration := createdSubscription.Duration
+// 	// Assuming the subscription duration is in days (microseconds)
+// 	subscriptionDuration := createdSubscription.Duration
 
-	// Convert the microseconds in the interval to time.Duration
-	duration := time.Duration(subscriptionDuration.Microseconds) * time.Microsecond
+// 	// Convert the microseconds in the interval to time.Duration
+// 	duration := time.Duration(subscriptionDuration.Microseconds) * time.Microsecond
 
-	// Calculate the expiration date: current time + interval (30 days in this case)
-	expirationDate := time.Now().Add(duration)
+// 	// Calculate the expiration date: current time + interval (30 days in this case)
+// 	expirationDate := time.Now().Add(duration)
 
-	logger.Debug().Msgf("Expiration date %v", expirationDate)
-	// Create user subscription
-	userSubscription, err := repo.Do().CreateUserSubscription(ctx, sqlc.CreateUserSubscriptionParams{
-		UserID:         createdUser.ID,
-		SubscriptionID: createdSubscription.ID,
-		Active:         true,
-		ExpiresAt:      expirationDate,
-	})
-	require.NoErrorf(t, err, "failed to create user subscription: %v", err)
-	assert.NotEmptyf(t, userSubscription.ID, "user subscription ID should not be empty")
-	assert.Equalf(t, createdUser.ID, userSubscription.UserID, "user ID should be equal")
-	assert.Equalf(t, createdSubscription.ID, userSubscription.SubscriptionID, "subscription ID should be equal")
+// 	logger.Debug().Msgf("Expiration date %v", expirationDate)
+// 	// Create user subscription
+// 	userSubscription, err := repo.Do().CreateUserSubscription(ctx, sqlc.CreateUserSubscriptionParams{
+// 		UserID:         createdUser.ID,
+// 		SubscriptionID: createdSubscription.ID,
+// 		Active:         true,
+// 		ExpiresAt:      expirationDate,
+// 	})
+// 	require.NoErrorf(t, err, "failed to create user subscription: %v", err)
+// 	assert.NotEmptyf(t, userSubscription.ID, "user subscription ID should not be empty")
+// 	assert.Equalf(t, createdUser.ID, userSubscription.UserID, "user ID should be equal")
+// 	assert.Equalf(t, createdSubscription.ID, userSubscription.SubscriptionID, "subscription ID should be equal")
 
-	// Get user subscriptions
-	allUserSubscriptions, err := repo.Do().GetAllUserSubscriptions(ctx)
-	require.NoErrorf(t, err, "failed to fetch all user subscriptions: %v", err)
-	assert.NotEmptyf(t, allUserSubscriptions, "should have at least one user subscription")
+// 	// Get user subscriptions
+// 	allUserSubscriptions, err := repo.Do().GetAllUserSubscriptions(ctx)
+// 	require.NoErrorf(t, err, "failed to fetch all user subscriptions: %v", err)
+// 	assert.NotEmptyf(t, allUserSubscriptions, "should have at least one user subscription")
 
-	// Get user subscription by ID
-	fetchedUserSubscription, err := repo.Do().GetUserSubscriptionByID(ctx, userSubscription.ID)
-	require.NoErrorf(t, err, "failed to fetch user subscription by ID: %v", err)
-	assert.Equalf(t, userSubscription.ID, fetchedUserSubscription.ID, "user subscription ID should be equal")
+// 	// Get user subscription by ID
+// 	fetchedUserSubscription, err := repo.Do().GetUserSubscriptionByID(ctx, userSubscription.ID)
+// 	require.NoErrorf(t, err, "failed to fetch user subscription by ID: %v", err)
+// 	assert.Equalf(t, userSubscription.ID, fetchedUserSubscription.ID, "user subscription ID should be equal")
 
-	// Activate user subscription
-	err = repo.Do().ActivateUserSubscription(ctx, userSubscription.ID)
-	require.NoErrorf(t, err, "failed to activate user subscription: %v", err)
-	activatedUserSubscription, err := repo.Do().GetUserSubscriptionByID(ctx, userSubscription.ID)
-	require.NoErrorf(t, err, "failed to fetch activated user subscription: %v", err)
-	assert.Truef(t, activatedUserSubscription.Active, "user subscription should be active")
-}
+// 	// Activate user subscription
+// 	err = repo.Do().ActivateUserSubscription(ctx, userSubscription.ID)
+// 	require.NoErrorf(t, err, "failed to activate user subscription: %v", err)
+// 	activatedUserSubscription, err := repo.Do().GetUserSubscriptionByID(ctx, userSubscription.ID)
+// 	require.NoErrorf(t, err, "failed to fetch activated user subscription: %v", err)
+// 	assert.Truef(t, activatedUserSubscription.Active, "user subscription should be active")
+// }
 
-func TestUsersPaymentMethodsLifecycle(t *testing.T) {
-	migrationPath := "../migrations"
+// func TestUsersPaymentMethodsLifecycle(t *testing.T) {
+// 	migrationPath := "../migrations"
 
-	logger := zerolog.New(os.Stderr).With().Timestamp().Caller().Logger()
+// 	logger := zerolog.New(os.Stderr).With().Timestamp().Caller().Logger()
 
-	err := repo.Migrate(databaseURL, migrationPath, logger)
-	handleFatalError(err, "Could not migrate database")
-	defer repo.MigrateDown(databaseURL, migrationPath, logger)
+// 	err := repo.Migrate(databaseURL, migrationPath, logger)
+// 	handleFatalError(err, "Could not migrate database")
+// 	defer repo.MigrateDown(databaseURL, migrationPath, logger)
 
-	ctx := context.Background()
+// 	ctx := context.Background()
 
-	// Setup: Variables for the test
-	method := "Credit Card"
-	methodID := "cc-12345"
+// 	// Setup: Variables for the test
+// 	method := "Credit Card"
+// 	methodID := "cc-12345"
 
-	// Initialize repo and logger
-	userRepo := repo.NewUsersRepo(pool)
+// 	// Initialize repo and logger
+// 	userRepo := repo.NewUsersRepo(pool)
 
-	// Variables for user and subscription
-	user := sqlc.CreateUserParams{
-		Role:        "USER_ROLE_FARMER",
-		PhoneNumber: "+23767777777",
-	}
-	createdUser, err := userRepo.Do().CreateUser(ctx, user)
-	require.NoErrorf(t, err, "failed to create user: %v", err)
+// 	// Variables for user and subscription
+// 	user := sqlc.CreateUserParams{
+// 		Role:        "USER_ROLE_FARMER",
+// 		PhoneNumber: "+23767777777",
+// 	}
+// 	createdUser, err := userRepo.Do().CreateUser(ctx, user)
+// 	require.NoErrorf(t, err, "failed to create user: %v", err)
 
-	// Step 1: Create a user payment method
-	createRequest := sqlc.CreateUserPaymentMethodParams{
-		UserID:   createdUser.ID,
-		Method:   method,
-		MethodID: &methodID,
-	}
-	createdUserPaymentMethod, err := userRepo.Do().CreateUserPaymentMethod(ctx, createRequest)
-	require.NoErrorf(t, err, "failed to create user payment method: %v", err)
-	assert.NotEmptyf(t, createdUserPaymentMethod.ID, "user payment method ID should not be empty")
-	assert.Equalf(t, createdUser.ID, createdUserPaymentMethod.UserID, "user ID should match")
-	assert.Equalf(t, method, createdUserPaymentMethod.Method, "payment method should match")
-	assert.Equalf(t, &methodID, createdUserPaymentMethod.MethodID, "method ID should match")
+// 	// Step 1: Create a user payment method
+// 	createRequest := sqlc.CreateUserPaymentMethodParams{
+// 		UserID:   createdUser.ID,
+// 		Method:   method,
+// 		MethodID: &methodID,
+// 	}
+// 	createdUserPaymentMethod, err := userRepo.Do().CreateUserPaymentMethod(ctx, createRequest)
+// 	require.NoErrorf(t, err, "failed to create user payment method: %v", err)
+// 	assert.NotEmptyf(t, createdUserPaymentMethod.ID, "user payment method ID should not be empty")
+// 	assert.Equalf(t, createdUser.ID, createdUserPaymentMethod.UserID, "user ID should match")
+// 	assert.Equalf(t, method, createdUserPaymentMethod.Method, "payment method should match")
+// 	assert.Equalf(t, &methodID, createdUserPaymentMethod.MethodID, "method ID should match")
 
-	// Step 2: Get the user payment methods by user ID
-	userPaymentMethods, err := userRepo.Do().GetUserPaymentMethodsByUserID(ctx, createdUser.ID)
-	require.NoErrorf(t, err, "failed to get user payment methods: %v", err)
-	assert.NotEmptyf(t, userPaymentMethods, "should get at least one payment method")
-	assert.Equalf(t, createdUser.ID, userPaymentMethods[0].UserID, "user ID should match")
+// 	// Step 2: Get the user payment methods by user ID
+// 	userPaymentMethods, err := userRepo.Do().GetUserPaymentMethodsByUserID(ctx, createdUser.ID)
+// 	require.NoErrorf(t, err, "failed to get user payment methods: %v", err)
+// 	assert.NotEmptyf(t, userPaymentMethods, "should get at least one payment method")
+// 	assert.Equalf(t, createdUser.ID, userPaymentMethods[0].UserID, "user ID should match")
 
-	// Step 3: Delete the user payment method by ID
-	err = userRepo.Do().DeleteUserPaymentMethod(ctx, createdUserPaymentMethod.ID)
-	require.NoErrorf(t, err, "failed to delete user payment method: %v", err)
+// 	// Step 3: Delete the user payment method by ID
+// 	err = userRepo.Do().DeleteUserPaymentMethod(ctx, createdUserPaymentMethod.ID)
+// 	require.NoErrorf(t, err, "failed to delete user payment method: %v", err)
 
-	// Step 4: Try fetching the user payment methods again to confirm deletion
-	userPaymentMethods, err = userRepo.Do().GetUserPaymentMethodsByUserID(ctx, createdUser.ID)
-	require.NoErrorf(t, err, "failed to get user payment methods: %v", err)
-	assert.Emptyf(t, userPaymentMethods, "user payment methods should be empty after deletion")
-}
+// 	// Step 4: Try fetching the user payment methods again to confirm deletion
+// 	userPaymentMethods, err = userRepo.Do().GetUserPaymentMethodsByUserID(ctx, createdUser.ID)
+// 	require.NoErrorf(t, err, "failed to get user payment methods: %v", err)
+// 	assert.Emptyf(t, userPaymentMethods, "user payment methods should be empty after deletion")
+// }

@@ -19,6 +19,14 @@ export type OrdersCreateOrderBody = {
     deliveryLocation?: typesPoint;
 };
 
+export type OrdersCreateSubscriptionPlanBody = {
+    title?: string;
+    description?: string;
+    amount?: typesAmount;
+    duration?: string;
+    subscriptionItems?: Array<ordersgrpcSubscriptionItem>;
+};
+
 export type OrdersDispatchOrderBody = {
     payoutPhoneNumber?: string;
 };
@@ -82,6 +90,10 @@ export type ordersgrpcCreateDeliveryPointResponse = {
 
 export type ordersgrpcCreateOrderResponse = {
     order?: ordersgrpcOrder;
+};
+
+export type ordersgrpcCreateSubscriptionPlanResponse = {
+    subscriptionPlan?: ordersgrpcSubscription;
 };
 
 export type ordersgrpcDeleteDeliveryPointResponse = unknown;
@@ -181,6 +193,8 @@ export type ordersgrpcOrder = {
     dispatchedBy?: string;
     deliveryFee?: typesAmount;
     totalItems?: number;
+    userSubscriptionId?: string;
+    expectedDeliveryDate?: string;
 };
 
 export type ordersgrpcOrderAuditLog = {
@@ -235,7 +249,45 @@ export type ordersgrpcStatItem = {
     currency?: string;
 };
 
+export type ordersgrpcSubscribeResponse = {
+    subscription?: ordersgrpcUserSubscription;
+};
+
+export type ordersgrpcSubscription = {
+    id?: string;
+    title?: string;
+    description?: string;
+    amount?: typesAmount;
+    duration?: string;
+    subscriptionItems?: Array<ordersgrpcSubscriptionItem>;
+    createdAt?: string;
+    updatedAt?: string;
+};
+
+export type ordersgrpcSubscriptionItem = {
+    productId?: string;
+    quantity?: string;
+    productImage?: string;
+    productName?: string;
+    productUnitPrice?: typesAmount;
+    unitType?: string;
+    subscriptionId?: string;
+};
+
 export type ordersgrpcUpdateDeliveryPointResponse = unknown;
+
+export type ordersgrpcUserSubscription = {
+    id?: string;
+    userId?: string;
+    subscriptionPlanId?: string;
+    active?: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+    expiresAt?: string;
+    progress?: number;
+    amount?: typesAmount;
+    publicId?: string;
+};
 
 export type OrdersInitiatePaymentBody = {
     paymentEntity?: ordersgrpcPaymentEntity;
@@ -246,6 +298,10 @@ export type OrdersInitiatePaymentBody = {
 
 export type OrdersRejectOrderBody = {
     reason?: string;
+};
+
+export type OrdersSubscribeBody = {
+    subscriptionPlanId?: string;
 };
 
 export type OrdersUpdateDeliveryPointBody = {
@@ -313,6 +369,17 @@ export type OrdersListTotalComissionAmountByReferrerData = {
 export type OrdersListTotalComissionAmountByReferrerResponse = (ordersgrpcListTotalCommissionAmountByReferrerResponse);
 
 export type OrdersListTotalComissionAmountByReferrerError = (rpcStatus);
+
+export type OrdersCreateSubscriptionPlanData = {
+    body: OrdersCreateSubscriptionPlanBody;
+    path: {
+        adminUserId: string;
+    };
+};
+
+export type OrdersCreateSubscriptionPlanResponse = (ordersgrpcCreateSubscriptionPlanResponse);
+
+export type OrdersCreateSubscriptionPlanError = (rpcStatus);
 
 export type OrdersCreateDeliveryPointData = {
     body: OrdersCreateDeliveryPointBody;
@@ -513,6 +580,17 @@ export type OrdersListUserOrdersData = {
 export type OrdersListUserOrdersResponse = (ordersgrpcListUserOrdersResponse);
 
 export type OrdersListUserOrdersError = (rpcStatus);
+
+export type OrdersSubscribeData = {
+    body: OrdersSubscribeBody;
+    path: {
+        userId: string;
+    };
+};
+
+export type OrdersSubscribeResponse = (ordersgrpcSubscribeResponse);
+
+export type OrdersSubscribeError = (rpcStatus);
 
 export type OrdersApproveOrderData = {
     body: OrdersApproveOrderBody;

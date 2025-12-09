@@ -5,8 +5,6 @@
 package sqlc
 
 import (
-	"time"
-
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -46,15 +44,6 @@ type SentOtp struct {
 	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
 }
 
-type Subscription struct {
-	ID              string          `json:"id"`
-	Title           string          `json:"title"`
-	Description     string          `json:"description"`
-	Duration        pgtype.Interval `json:"duration"`
-	Amount          float64         `json:"amount"`
-	CurrencyIsoCode string          `json:"currency_iso_code"`
-}
-
 type User struct {
 	ID                      string             `json:"id"`
 	Role                    string             `json:"role"`
@@ -73,21 +62,4 @@ type User struct {
 	ReferralCode            string             `json:"referral_code"`
 	DeleteRequestedAt       pgtype.Timestamptz `json:"delete_requested_at"`
 	DeletedAt               pgtype.Timestamptz `json:"deleted_at"`
-}
-
-type UserPaymentMethod struct {
-	ID       string  `json:"id"`
-	UserID   string  `json:"user_id"`
-	Method   string  `json:"method"`
-	MethodID *string `json:"method_id"`
-}
-
-type UserSubscription struct {
-	ID             string             `json:"id"`
-	UserID         string             `json:"user_id"`
-	SubscriptionID string             `json:"subscription_id"`
-	Active         bool               `json:"active"`
-	CreatedAt      pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
-	ExpiresAt      time.Time          `json:"expires_at"`
 }

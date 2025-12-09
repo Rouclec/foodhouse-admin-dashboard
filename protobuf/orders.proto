@@ -54,6 +54,8 @@ message Order {
   string dispatched_by = 14;
   types.Amount delivery_fee = 15;
   int32 total_items = 16;
+  optional string user_subscription_id = 17;
+  optional google.protobuf.Timestamp expected_delivery_date = 18;
 }
 
 message OrderAuditLog {
@@ -395,6 +397,60 @@ message EstimateDeliveryFeeRequest {
 
 message EstimateDeliveryFeeResponse { types.Amount estimated_delivery_fee = 1; }
 
+message SubscriptionItem {
+  string product_id = 2;
+  int64 quantity = 3;
+  string product_image = 4;
+  string product_name = 5;
+  types.Amount product_unit_price = 6;
+  string unit_type = 7;
+  string subscription_id = 8;
+}
+
+message Subscription {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  types.Amount amount = 4;
+  // duration in weeks
+  int64 duration = 5;
+  repeated SubscriptionItem subscription_items = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+message UserSubscription {
+  string id = 1;
+  string user_id = 2;
+  string subscription_plan_id = 3;
+  bool active = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+  google.protobuf.Timestamp expires_at = 7;
+  double progress = 8;
+  types.Amount amount = 9;
+  string public_id = 10;
+}
+
+message CreateSubscriptionPlanRequest {
+  string title = 2;
+  string description = 3;
+  types.Amount amount = 4;
+  // duration in weeks
+  int64 duration = 5;
+  repeated SubscriptionItem subscription_items = 6;
+  string admin_user_id = 7;
+}
+
+message CreateSubscriptionPlanResponse { Subscription subscription_plan = 1; }
+
+message SubscribeRequest {
+  string user_id = 1;
+  string subscription_plan_id = 2;
+}
+
+message SubscribeResponse { UserSubscription subscription = 1; }
+
 service Orders {
 
   rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {
@@ -573,6 +629,21 @@ service Orders {
       returns (EstimateDeliveryFeeResponse) {
     option (google.api.http) = {
       post : "/v1/users/{user_id}/orders/estimate-delivery-fee"
+      body : "*"
+    };
+  }
+
+  rpc CreateSubscriptionPlan(CreateSubscriptionPlanRequest)
+      returns (CreateSubscriptionPlanResponse) {
+    option (google.api.http) = {
+      post : "/v1/admin/{admin_user_id}/orders/create-subscription-plan"
+      body : "*"
+    };
+  }
+
+  rpc Subscribe(SubscribeRequest) returns (SubscribeResponse) {
+    option (google.api.http) = {
+      post : "/v1/users/{user_id}/orders/subscribe"
       body : "*"
     };
   }

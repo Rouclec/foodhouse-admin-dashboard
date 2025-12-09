@@ -498,39 +498,29 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 		return &ordersgrpc.ConfirmPaymentResponse{}, nil
 	}
 
-	// case for when payment is for a user subscription
+	// case for when payment is for a subscription
 	if payment.PaymentEntity == ordersgrpc.PaymentEntity_PaymentEntity_SUBSCRIPTION.String() {
-		i.logger.Debug().Msgf("user subscription id %v", payment.EntityID)
 
-		if req.GetStatus() != TPWPaymentStatusCompleted {
-			_, err := i.userService.DeleteUserSubscription(ctx, &usersgrpc.DeleteUserSubscriptionRequest{
-				UserSubscriptionId: payment.EntityID,
-			})
+		// _, err := querier.GetUserSubscriptionByPublicID(ctx, payment.EntityID)
 
-			if err != nil {
-				return nil, status.Errorf(codes.Internal, "error confirming payment %v", err)
-			}
+		// if err != nil {
+		// 	i.logger.Debug().Msgf("error getting subscription for payment with ref %v, why: %v", payment.ID, err)
+		// 	return nil, status.Errorf(codes.Internal, "error getting subscription for payment with ref %v, why: %v", payment.ID, err)
+		// }
 
-			err = querier.UpdatePaymentStatus(ctx, sqlc.UpdatePaymentStatusParams{
-				ID:     payment.ID,
-				Status: ordersgrpc.PaymentStatus_PaymentStatus_FAILED.String(),
-			})
+		var updatedPaymentStatus ordersgrpc.PaymentStatus
+		var shouldActivateSubscription = false
 
-			if err != nil {
-				i.logger.Debug().Msgf("Error updating payment status %v", err)
-				return nil, status.Errorf(codes.Internal, "error updating payment status %v", err)
-			}
-
-			err = tx.Commit(ctx)
-			if err != nil {
-				return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
-			}
-			return &ordersgrpc.ConfirmPaymentResponse{}, nil
+		if req.GetStatus() == TPWPaymentStatusCompleted {
+			updatedPaymentStatus = ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED
+			shouldActivateSubscription = true
+		} else {
+			updatedPaymentStatus = ordersgrpc.PaymentStatus_PaymentStatus_FAILED
 		}
 
 		err = querier.UpdatePaymentStatus(ctx, sqlc.UpdatePaymentStatusParams{
 			ID:     payment.ID,
-			Status: ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED.String(),
+			Status: updatedPaymentStatus.String(),
 		})
 
 		if err != nil {
@@ -538,12 +528,11 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 			return nil, status.Errorf(codes.Internal, "error updating payment status %v", err)
 		}
 
-		_, err = i.userService.ActivateUserSubscription(ctx, &usersgrpc.ActivateUserSubscriptionRequest{
-			UserSubscriptionId: payment.EntityID,
-		})
-
-		if err != nil {
-			return nil, status.Errorf(codes.Internal, "error confirming payment %v", err)
+		if shouldActivateSubscription {
+			newErr := querier.ActivateUserSubscription(ctx, payment.EntityID)
+			if newErr != nil {
+				return nil, status.Errorf(codes.Internal, "error activating subscription: %v", newErr)
+			}
 		}
 
 		err = tx.Commit(ctx)
@@ -552,7 +541,6 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 		}
 
 		return &ordersgrpc.ConfirmPaymentResponse{}, nil
-
 	}
 
 	return &ordersgrpc.ConfirmPaymentResponse{}, nil
@@ -1160,6 +1148,17 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 		// Fix: totalPrice is a *float64, but *order.PriceValue + *order.DeliveryFeeAmount is a float64.
 		// So, create a new variable to hold the sum and take its address.
 		sum := *order.PriceValue + *order.DeliveryFeeAmount
+		totalPrice = &sum
+
+	}
+
+	if req.GetPaymentEntity() == ordersgrpc.PaymentEntity_PaymentEntity_SUBSCRIPTION {
+		subscription, newErr := querier.GetUserSubscriptionByPublicID(ctx, req.GetEntityId())
+		if newErr != nil {
+			return nil, status.Errorf(codes.Internal, "error getting subscription for payment %v", newErr)
+		}
+
+		sum := float64(subscription.Amount)
 		totalPrice = &sum
 
 	}
@@ -2312,5 +2311,150 @@ func (i *Impl) EstimateDeliveryFee(ctx context.Context,
 
 	return &ordersgrpc.EstimateDeliveryFeeResponse{
 		EstimatedDeliveryFee: deliveryFee.GetAmount(),
+	}, nil
+}
+
+// CreateSubscriptionPlan implements ordersgrpc.OrdersServer.
+func (i *Impl) CreateSubscriptionPlan(
+	ctx context.Context,
+	req *ordersgrpc.CreateSubscriptionPlanRequest) (
+	*ordersgrpc.CreateSubscriptionPlanResponse, error) {
+	querier, tx, err := i.repo.Begin(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)
+	}
+	defer func() {
+		err := tx.Rollback(ctx)
+		if err != nil && !errors.Is(err, sql.ErrTxDone) {
+			i.logger.Err(err).Msgf("Failed to rollback transaction")
+		}
+	}()
+
+	// 1. Create the subscription
+	subscription, err := querier.CreateSubscription(ctx, sqlc.CreateSubscriptionParams{
+		Title:           req.GetTitle(),
+		Description:     req.GetDescription(),
+		Amount:          int64(req.GetAmount().GetValue()),
+		CurrencyIsoCode: req.GetAmount().GetCurrencyIsoCode(),
+		Duration:        pgtype.Interval{Microseconds: req.GetDuration() * 24 * 60 * 60 * OneMillion, Valid: true},
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error creating subscription plan: %v", err)
+	}
+
+	subItems := make([]*ordersgrpc.SubscriptionItem, len(req.GetSubscriptionItems()))
+
+	// create the subscription items
+	for _, si := range req.GetSubscriptionItems() {
+		// fetch the product
+		product, err := i.productService.GetProduct(ctx, &productsgrpc.GetProductRequest{ProductId: si.ProductId})
+
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error fetching product for subscription item: %v", err)
+		}
+
+		_, err = querier.CreateSubscriptionItem(ctx, sqlc.CreateSubscriptionItemParams{
+			SubscriptionID: subscription.ID,
+			Product:        si.ProductId,
+			Quantity:       int32(si.Quantity),
+			UnitType:       product.GetProduct().GetUnitType(),
+		})
+
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error creating subscription item: %v", err)
+		}
+
+		subItems = append(subItems, &ordersgrpc.SubscriptionItem{
+			ProductId:        si.ProductId,
+			ProductImage:     product.GetProduct().GetImage(),
+			ProductName:      product.GetProduct().GetName(),
+			ProductUnitPrice: product.GetProduct().GetAmount(),
+			UnitType:         product.GetProduct().GetUnitType(),
+			SubscriptionId:   subscription.ID,
+		})
+	}
+
+	// 7. Commit transaction.
+	if err := tx.Commit(ctx); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
+	}
+
+	totalDays := int64(subscription.Duration.Months)*30 +
+		int64(subscription.Duration.Days) +
+		subscription.Duration.Microseconds/(24*60*60*OneMillion)
+
+	return &ordersgrpc.CreateSubscriptionPlanResponse{
+		SubscriptionPlan: &ordersgrpc.Subscription{
+			Id:          subscription.ID,
+			Description: subscription.Description,
+			Title:       subscription.Title,
+			Duration:    int64(math.Round(float64(totalDays) / 4)),
+			Amount: &types.Amount{
+				Value:           float64(subscription.Amount),
+				CurrencyIsoCode: subscription.CurrencyIsoCode,
+			},
+			CreatedAt:         timestamppb.New(subscription.CreatedAt.Time),
+			UpdatedAt:         timestamppb.New(subscription.UpdatedAt.Time),
+			SubscriptionItems: subItems,
+		},
+	}, nil
+}
+
+// Subscribe implements ordersgrpc.OrdersServer.
+func (i *Impl) Subscribe(
+	ctx context.Context,
+	req *ordersgrpc.SubscribeRequest) (
+	*ordersgrpc.SubscribeResponse, error) {
+	querier, tx, err := i.repo.Begin(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)
+	}
+
+	// Proper rollback handling
+	defer func() {
+		err = tx.Rollback(ctx)
+		if err != nil && !errors.Is(err, sql.ErrTxDone) {
+			i.logger.Err(err).Msgf("Failed to rollback transaction: %v", req)
+		}
+	}()
+
+	subscriptionPlan, err := querier.GetSubscriptionByID(ctx, req.GetSubscriptionPlanId())
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal,
+			"error fetching subscription plan with id %v, reason: %v",
+			req.GetSubscriptionPlanId(), err)
+	}
+
+	subscription, err := querier.CreateUserSubscription(ctx,
+		sqlc.CreateUserSubscriptionParams{
+			UserID:          req.GetUserId(),
+			SubscriptionID:  req.GetSubscriptionPlanId(),
+			Active:          false,
+			Amount:          subscriptionPlan.Amount,
+			CurrencyIsoCode: subscriptionPlan.CurrencyIsoCode,
+		})
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
+	}
+
+	return &ordersgrpc.SubscribeResponse{
+		Subscription: &ordersgrpc.UserSubscription{
+			Id:                 fmt.Sprintf("%d", subscription.ID),
+			PublicId:           subscription.PublicID,
+			UserId:             subscription.UserID,
+			SubscriptionPlanId: subscription.SubscriptionID,
+			Active:             subscription.Active,
+			CreatedAt:          timestamppb.New(subscription.CreatedAt.Time),
+			UpdatedAt:          timestamppb.New(subscription.UpdatedAt.Time),
+			Progress:           *subscription.Progress,
+			Amount: &types.Amount{
+				Value:           float64(subscription.Amount),
+				CurrencyIsoCode: subscription.CurrencyIsoCode,
+			},
+		},
 	}, nil
 }

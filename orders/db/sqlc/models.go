@@ -30,23 +30,25 @@ type DeliveryPoint struct {
 }
 
 type Order struct {
-	OrderNumber         int64              `json:"order_number"`
-	DeliveryLocation    pgtype.Point       `json:"delivery_location"`
-	PriceValue          *float64           `json:"price_value"`
-	PriceCurrency       *string            `json:"price_currency"`
-	Status              string             `json:"status"`
-	Rating              pgtype.Numeric     `json:"rating"`
-	Review              string             `json:"review"`
-	CreatedBy           *string            `json:"created_by"`
-	CreatedAt           pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
-	SecretKey           *string            `json:"secret_key"`
-	ProductOwner        *string            `json:"product_owner"`
-	PayoutPhoneNumber   *string            `json:"payout_phone_number"`
-	DeliveryAddress     string             `json:"delivery_address"`
-	DispatchedBy        *string            `json:"dispatched_by"`
-	DeliveryFeeAmount   *float64           `json:"delivery_fee_amount"`
-	DeliveryFeeCurrency *string            `json:"delivery_fee_currency"`
+	OrderNumber          int64              `json:"order_number"`
+	DeliveryLocation     pgtype.Point       `json:"delivery_location"`
+	PriceValue           *float64           `json:"price_value"`
+	PriceCurrency        *string            `json:"price_currency"`
+	Status               string             `json:"status"`
+	Rating               pgtype.Numeric     `json:"rating"`
+	Review               string             `json:"review"`
+	CreatedBy            *string            `json:"created_by"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	SecretKey            *string            `json:"secret_key"`
+	ProductOwner         *string            `json:"product_owner"`
+	PayoutPhoneNumber    *string            `json:"payout_phone_number"`
+	DeliveryAddress      string             `json:"delivery_address"`
+	DispatchedBy         *string            `json:"dispatched_by"`
+	DeliveryFeeAmount    *float64           `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency  *string            `json:"delivery_fee_currency"`
+	UserSubscriptionID   *int64             `json:"user_subscription_id"`
+	ExpectedDeliveryDate pgtype.Timestamptz `json:"expected_delivery_date"`
 }
 
 type OrderItem struct {
@@ -82,4 +84,37 @@ type Payment struct {
 	Method         string             `json:"method"`
 	AccountNumber  string             `json:"account_number"`
 	Type           string             `json:"type"`
+}
+
+type Subscription struct {
+	ID              string             `json:"id"`
+	Title           string             `json:"title"`
+	Description     string             `json:"description"`
+	Duration        pgtype.Interval    `json:"duration"`
+	Amount          int64              `json:"amount"`
+	CurrencyIsoCode string             `json:"currency_iso_code"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+}
+
+type SubscriptionItem struct {
+	ID             string `json:"id"`
+	SubscriptionID string `json:"subscription_id"`
+	Product        string `json:"product"`
+	Quantity       int32  `json:"quantity"`
+	UnitType       string `json:"unit_type"`
+}
+
+type UserSubscription struct {
+	ID              int64              `json:"id"`
+	PublicID        string             `json:"public_id"`
+	UserID          string             `json:"user_id"`
+	SubscriptionID  string             `json:"subscription_id"`
+	Active          bool               `json:"active"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	ExpiresAt       pgtype.Timestamptz `json:"expires_at"`
+	Progress        *float64           `json:"progress"`
+	Amount          int64              `json:"amount"`
+	CurrencyIsoCode string             `json:"currency_iso_code"`
 }

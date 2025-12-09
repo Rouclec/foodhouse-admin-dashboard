@@ -38,7 +38,7 @@ export default function Login() {
   const [firebaseUserId, setFirebaseUserId] = useState<string>();
   const { user, setUser } = useContext(Context) as ContextType;
 
-  const { data: userData } = useQuery({
+  const { data: userData,  } = useQuery({
     ...usersGetUserByIdOptions({
       path: {
         userId: userId ?? "",

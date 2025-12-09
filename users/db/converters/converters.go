@@ -18,28 +18,6 @@ func derefString(s *string) string {
 	return ""
 }
 
-func SqlcToProtoSubscriptions(sqlcSubscriptions []sqlc.Subscription) ([]*usersgrpc.Subscription, error) {
-	protoSubscriptions := make([]*usersgrpc.Subscription, len(sqlcSubscriptions))
-
-	for i, sc := range sqlcSubscriptions {
-		totalDays := int64(sc.Duration.Months)*30 +
-			int64(sc.Duration.Days) +
-			sc.Duration.Microseconds/(24*60*60*OneMillion)
-
-		protoSubscriptions[i] = &usersgrpc.Subscription{
-			Id:          sc.ID,
-			Title:       sc.Title,
-			Description: sc.Description,
-			Amount: &types.Amount{
-				Value:           sc.Amount,
-				CurrencyIsoCode: sc.CurrencyIsoCode,
-			},
-			Duration: totalDays,
-		}
-	}
-	return protoSubscriptions, nil
-}
-
 func SqlcToProtoReviews(sqlcReviews []sqlc.FarmersReview) ([]*usersgrpc.Review, error) {
 	protoReviews := make([]*usersgrpc.Review, len(sqlcReviews))
 

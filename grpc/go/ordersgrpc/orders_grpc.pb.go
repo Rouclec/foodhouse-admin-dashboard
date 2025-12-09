@@ -44,6 +44,8 @@ const (
 	Orders_ListTotalComissionAmountByReferrer_FullMethodName = "/ordersgrpc.Orders/ListTotalComissionAmountByReferrer"
 	Orders_BulkSettleCommissions_FullMethodName              = "/ordersgrpc.Orders/BulkSettleCommissions"
 	Orders_EstimateDeliveryFee_FullMethodName                = "/ordersgrpc.Orders/EstimateDeliveryFee"
+	Orders_CreateSubscriptionPlan_FullMethodName             = "/ordersgrpc.Orders/CreateSubscriptionPlan"
+	Orders_Subscribe_FullMethodName                          = "/ordersgrpc.Orders/Subscribe"
 )
 
 // OrdersClient is the client API for Orders service.
@@ -75,6 +77,8 @@ type OrdersClient interface {
 	ListTotalComissionAmountByReferrer(ctx context.Context, in *ListTotalComissionAmountByReferrerRequest, opts ...grpc.CallOption) (*ListTotalCommissionAmountByReferrerResponse, error)
 	BulkSettleCommissions(ctx context.Context, in *BulkSettleCommissionsRequest, opts ...grpc.CallOption) (*BulkSettleCommissionsResponse, error)
 	EstimateDeliveryFee(ctx context.Context, in *EstimateDeliveryFeeRequest, opts ...grpc.CallOption) (*EstimateDeliveryFeeResponse, error)
+	CreateSubscriptionPlan(ctx context.Context, in *CreateSubscriptionPlanRequest, opts ...grpc.CallOption) (*CreateSubscriptionPlanResponse, error)
+	Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (*SubscribeResponse, error)
 }
 
 type ordersClient struct {
@@ -335,6 +339,26 @@ func (c *ordersClient) EstimateDeliveryFee(ctx context.Context, in *EstimateDeli
 	return out, nil
 }
 
+func (c *ordersClient) CreateSubscriptionPlan(ctx context.Context, in *CreateSubscriptionPlanRequest, opts ...grpc.CallOption) (*CreateSubscriptionPlanResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateSubscriptionPlanResponse)
+	err := c.cc.Invoke(ctx, Orders_CreateSubscriptionPlan_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ordersClient) Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (*SubscribeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SubscribeResponse)
+	err := c.cc.Invoke(ctx, Orders_Subscribe_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrdersServer is the server API for Orders service.
 // All implementations must embed UnimplementedOrdersServer
 // for forward compatibility.
@@ -364,6 +388,8 @@ type OrdersServer interface {
 	ListTotalComissionAmountByReferrer(context.Context, *ListTotalComissionAmountByReferrerRequest) (*ListTotalCommissionAmountByReferrerResponse, error)
 	BulkSettleCommissions(context.Context, *BulkSettleCommissionsRequest) (*BulkSettleCommissionsResponse, error)
 	EstimateDeliveryFee(context.Context, *EstimateDeliveryFeeRequest) (*EstimateDeliveryFeeResponse, error)
+	CreateSubscriptionPlan(context.Context, *CreateSubscriptionPlanRequest) (*CreateSubscriptionPlanResponse, error)
+	Subscribe(context.Context, *SubscribeRequest) (*SubscribeResponse, error)
 	mustEmbedUnimplementedOrdersServer()
 }
 
@@ -448,6 +474,12 @@ func (UnimplementedOrdersServer) BulkSettleCommissions(context.Context, *BulkSet
 }
 func (UnimplementedOrdersServer) EstimateDeliveryFee(context.Context, *EstimateDeliveryFeeRequest) (*EstimateDeliveryFeeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EstimateDeliveryFee not implemented")
+}
+func (UnimplementedOrdersServer) CreateSubscriptionPlan(context.Context, *CreateSubscriptionPlanRequest) (*CreateSubscriptionPlanResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateSubscriptionPlan not implemented")
+}
+func (UnimplementedOrdersServer) Subscribe(context.Context, *SubscribeRequest) (*SubscribeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Subscribe not implemented")
 }
 func (UnimplementedOrdersServer) mustEmbedUnimplementedOrdersServer() {}
 func (UnimplementedOrdersServer) testEmbeddedByValue()                {}
@@ -920,6 +952,42 @@ func _Orders_EstimateDeliveryFee_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Orders_CreateSubscriptionPlan_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateSubscriptionPlanRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).CreateSubscriptionPlan(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_CreateSubscriptionPlan_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).CreateSubscriptionPlan(ctx, req.(*CreateSubscriptionPlanRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orders_Subscribe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SubscribeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).Subscribe(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_Subscribe_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).Subscribe(ctx, req.(*SubscribeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Orders_ServiceDesc is the grpc.ServiceDesc for Orders service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1026,6 +1094,14 @@ var Orders_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "EstimateDeliveryFee",
 			Handler:    _Orders_EstimateDeliveryFee_Handler,
+		},
+		{
+			MethodName: "CreateSubscriptionPlan",
+			Handler:    _Orders_CreateSubscriptionPlan_Handler,
+		},
+		{
+			MethodName: "Subscribe",
+			Handler:    _Orders_Subscribe_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

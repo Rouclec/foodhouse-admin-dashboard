@@ -9,7 +9,6 @@ import (
 )
 
 type Querier interface {
-	ActivateUserSubscription(ctx context.Context, id string) error
 	CountReferralsByReferrer(ctx context.Context, referrerID string) (int64, error)
 	CountSentOtpsToFactorToday(ctx context.Context, factor string) (int64, error)
 	CountUsers(ctx context.Context, arg CountUsersParams) (int64, error)
@@ -17,25 +16,15 @@ type Querier interface {
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) error
 	CreateReview(ctx context.Context, arg CreateReviewParams) (FarmersReview, error)
 	CreateSentOtp(ctx context.Context, arg CreateSentOtpParams) (SentOtp, error)
-	CreateSubscription(ctx context.Context, arg CreateSubscriptionParams) (Subscription, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
-	CreateUserPaymentMethod(ctx context.Context, arg CreateUserPaymentMethodParams) (UserPaymentMethod, error)
-	CreateUserSubscription(ctx context.Context, arg CreateUserSubscriptionParams) (UserSubscription, error)
-	DeleteSubscription(ctx context.Context, id string) error
 	DeleteUser(ctx context.Context, id string) error
-	DeleteUserPaymentMethod(ctx context.Context, id string) error
-	DeleteUserSubscription(ctx context.Context, id string) error
-	GetAllUserSubscriptions(ctx context.Context) ([]UserSubscription, error)
 	GetFarmer(ctx context.Context, id string) (User, error)
 	GetFarmerRating(ctx context.Context, farmerID string) (float64, error)
 	GetLatestSentOtpByFactor(ctx context.Context, arg GetLatestSentOtpByFactorParams) ([]SentOtp, error)
 	GetReferralByReferredID(ctx context.Context, referredID string) (Referral, error)
 	GetRefreshToken(ctx context.Context, token string) (RefreshToken, error)
 	GetSentOtpByRequestId(ctx context.Context, requestID string) (SentOtp, error)
-	GetSubscriptionByID(ctx context.Context, id string) (Subscription, error)
-	GetSubscriptionForUpdate(ctx context.Context, id string) (Subscription, error)
 	GetUser(ctx context.Context, id string) (User, error)
-	GetUserActiveSubscription(ctx context.Context, userID string) (UserSubscription, error)
 	GetUserByEmail(ctx context.Context, email *string) (User, error)
 	GetUserByNationalNumber(ctx context.Context, nationalNumber string) (User, error)
 	GetUserByPhoneNumber(ctx context.Context, phoneNumber string) (User, error)
@@ -43,18 +32,14 @@ type Querier interface {
 	// DELETE FROM users where id = $1;
 	GetUserByReferralCode(ctx context.Context, referralCode string) (User, error)
 	GetUserForUpdate(ctx context.Context, id string) (User, error)
-	GetUserPaymentMethodsByUserID(ctx context.Context, userID string) ([]UserPaymentMethod, error)
 	GetUserStatsBetweenDates(ctx context.Context, arg GetUserStatsBetweenDatesParams) (GetUserStatsBetweenDatesRow, error)
-	GetUserSubscriptionByID(ctx context.Context, id string) (UserSubscription, error)
 	ListFarmerReviews(ctx context.Context, arg ListFarmerReviewsParams) ([]FarmersReview, error)
 	ListFarmersByRating(ctx context.Context, arg ListFarmersByRatingParams) ([]ListFarmersByRatingRow, error)
-	ListSubsriptions(ctx context.Context) ([]Subscription, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
 	ReactivateUser(ctx context.Context, id string) error
 	RevokeRefreshToken(ctx context.Context, token string) error
 	SuspendUser(ctx context.Context, id string) error
 	UpdateSentOtp(ctx context.Context, arg UpdateSentOtpParams) error
-	UpdateSubscription(ctx context.Context, arg UpdateSubscriptionParams) (Subscription, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error
 	UpdateUserRole(ctx context.Context, arg UpdateUserRoleParams) error

@@ -9,6 +9,7 @@ import (
 )
 
 type Querier interface {
+	ActivateUserSubscription(ctx context.Context, publicID string) error
 	AggregateCommissionByReferrer(ctx context.Context, arg AggregateCommissionByReferrerParams) ([]AggregateCommissionByReferrerRow, error)
 	BulkSettleCommissions(ctx context.Context, arg BulkSettleCommissionsParams) error
 	BulkUpdateCommissionsPaymentReference(ctx context.Context, arg BulkUpdateCommissionsPaymentReferenceParams) error
@@ -19,7 +20,13 @@ type Querier interface {
 	CreateOrderAuditLog(ctx context.Context, arg CreateOrderAuditLogParams) error
 	CreateOrderItem(ctx context.Context, arg CreateOrderItemParams) error
 	CreatePayment(ctx context.Context, arg CreatePaymentParams) (Payment, error)
+	CreateSubscription(ctx context.Context, arg CreateSubscriptionParams) (Subscription, error)
+	CreateSubscriptionItem(ctx context.Context, arg CreateSubscriptionItemParams) (SubscriptionItem, error)
+	CreateUserSubscription(ctx context.Context, arg CreateUserSubscriptionParams) (UserSubscription, error)
 	DeleteDeliveryPoint(ctx context.Context, id string) error
+	DeleteSubscription(ctx context.Context, id string) error
+	DeleteSubscriptionItem(ctx context.Context, id string) error
+	GetAllUserSubscriptions(ctx context.Context) ([]UserSubscription, error)
 	GetCommissionsByIDsForUpdate(ctx context.Context, commissionIds []string) ([]Commission, error)
 	GetOrderByOrderNumber(ctx context.Context, orderNumber int64) (GetOrderByOrderNumberRow, error)
 	GetOrderItemsByOrderNumber(ctx context.Context, orderNumber int32) ([]OrderItem, error)
@@ -30,19 +37,25 @@ type Querier interface {
 	GetPaymentByEntity(ctx context.Context, arg GetPaymentByEntityParams) (Payment, error)
 	GetPaymentById(ctx context.Context, id string) (Payment, error)
 	GetPaymentStatsBetweenDates(ctx context.Context, arg GetPaymentStatsBetweenDatesParams) (float64, error)
+	GetSubscriptionByID(ctx context.Context, id string) (Subscription, error)
+	GetSubscriptionForUpdate(ctx context.Context, id string) (Subscription, error)
 	GetUserOrderBySecretKey(ctx context.Context, secretKey *string) (GetUserOrderBySecretKeyRow, error)
+	GetUserSubscriptionByID(ctx context.Context, id int64) (UserSubscription, error)
+	GetUserSubscriptionByPublicID(ctx context.Context, publicID string) (UserSubscription, error)
 	ListCommissionsByReferrer(ctx context.Context, arg ListCommissionsByReferrerParams) ([]Commission, error)
 	ListDeliveryPoints(ctx context.Context, arg ListDeliveryPointsParams) ([]DeliveryPoint, error)
 	ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersParams) ([]ListFarmerOrdersRow, error)
 	ListOrderAuditLogs(ctx context.Context, orderNumber int64) ([]OrdersAudit, error)
 	ListOrders(ctx context.Context, arg ListOrdersParams) ([]ListOrdersRow, error)
 	ListPayments(ctx context.Context, arg ListPaymentsParams) ([]Payment, error)
+	ListSubsriptions(ctx context.Context) ([]Subscription, error)
 	ListUniqueCities(ctx context.Context) ([]string, error)
 	ListUserOrders(ctx context.Context, arg ListUserOrdersParams) ([]ListUserOrdersRow, error)
 	ReviewOrder(ctx context.Context, arg ReviewOrderParams) error
 	UpdateDeliveryPoint(ctx context.Context, arg UpdateDeliveryPointParams) error
 	UpdateOrderStatus(ctx context.Context, arg UpdateOrderStatusParams) error
 	UpdatePaymentStatus(ctx context.Context, arg UpdatePaymentStatusParams) error
+	UpdateSubscription(ctx context.Context, arg UpdateSubscriptionParams) (Subscription, error)
 }
 
 var _ Querier = (*Queries)(nil)

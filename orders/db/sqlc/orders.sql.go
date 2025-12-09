@@ -26,7 +26,9 @@ INSERT INTO orders (
     review,
     delivery_address,
     delivery_fee_amount,
-    delivery_fee_currency
+    delivery_fee_currency,
+    user_subscription_id,
+    expected_delivery_date
 )
 VALUES (
     $1::point,    -- Enforcing as POINT (casting delivery_location)
@@ -41,23 +43,27 @@ VALUES (
     '', -- Default review
     $9::text,
     $10::float,
-    $11::varchar(3)
+    $11::varchar(3),
+    $12,
+    $13
 )
-RETURNING order_number, delivery_location, price_value, price_currency, status, rating, review, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, dispatched_by, delivery_fee_amount, delivery_fee_currency
+RETURNING order_number, delivery_location, price_value, price_currency, status, rating, review, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, dispatched_by, delivery_fee_amount, delivery_fee_currency, user_subscription_id, expected_delivery_date
 `
 
 type CreateOrderParams struct {
-	DeliveryLocation    pgtype.Point `json:"delivery_location"`
-	PriceValue          float64      `json:"price_value"`
-	PriceCurrency       string       `json:"price_currency"`
-	Status              string       `json:"status"`
-	CreatedBy           string       `json:"created_by"`
-	SecretKey           string       `json:"secret_key"`
-	ProductOwner        string       `json:"product_owner"`
-	PayoutPhoneNumber   string       `json:"payout_phone_number"`
-	DeliveryAddress     string       `json:"delivery_address"`
-	DeliveryFeeAmount   float64      `json:"delivery_fee_amount"`
-	DeliveryFeeCurrency string       `json:"delivery_fee_currency"`
+	DeliveryLocation     pgtype.Point       `json:"delivery_location"`
+	PriceValue           float64            `json:"price_value"`
+	PriceCurrency        string             `json:"price_currency"`
+	Status               string             `json:"status"`
+	CreatedBy            string             `json:"created_by"`
+	SecretKey            string             `json:"secret_key"`
+	ProductOwner         string             `json:"product_owner"`
+	PayoutPhoneNumber    string             `json:"payout_phone_number"`
+	DeliveryAddress      string             `json:"delivery_address"`
+	DeliveryFeeAmount    float64            `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency  string             `json:"delivery_fee_currency"`
+	UserSubscriptionID   *int64             `json:"user_subscription_id"`
+	ExpectedDeliveryDate pgtype.Timestamptz `json:"expected_delivery_date"`
 }
 
 func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error) {
@@ -73,6 +79,8 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 		arg.DeliveryAddress,
 		arg.DeliveryFeeAmount,
 		arg.DeliveryFeeCurrency,
+		arg.UserSubscriptionID,
+		arg.ExpectedDeliveryDate,
 	)
 	var i Order
 	err := row.Scan(
@@ -93,6 +101,8 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 		&i.DispatchedBy,
 		&i.DeliveryFeeAmount,
 		&i.DeliveryFeeCurrency,
+		&i.UserSubscriptionID,
+		&i.ExpectedDeliveryDate,
 	)
 	return i, err
 }
@@ -214,7 +224,7 @@ func (q *Queries) CreatePayment(ctx context.Context, arg CreatePaymentParams) (P
 
 const getOrderByOrderNumber = `-- name: GetOrderByOrderNumber :one
 SELECT 
-    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency,
+    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date,
     COALESCE(
         JSON_AGG(
             JSON_BUILD_OBJECT(
@@ -233,24 +243,26 @@ GROUP BY o.order_number
 `
 
 type GetOrderByOrderNumberRow struct {
-	OrderNumber         int64              `json:"order_number"`
-	DeliveryLocation    pgtype.Point       `json:"delivery_location"`
-	PriceValue          *float64           `json:"price_value"`
-	PriceCurrency       *string            `json:"price_currency"`
-	Status              string             `json:"status"`
-	Rating              pgtype.Numeric     `json:"rating"`
-	Review              string             `json:"review"`
-	CreatedBy           *string            `json:"created_by"`
-	CreatedAt           pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
-	SecretKey           *string            `json:"secret_key"`
-	ProductOwner        *string            `json:"product_owner"`
-	PayoutPhoneNumber   *string            `json:"payout_phone_number"`
-	DeliveryAddress     string             `json:"delivery_address"`
-	DispatchedBy        *string            `json:"dispatched_by"`
-	DeliveryFeeAmount   *float64           `json:"delivery_fee_amount"`
-	DeliveryFeeCurrency *string            `json:"delivery_fee_currency"`
-	Items               interface{}        `json:"items"`
+	OrderNumber          int64              `json:"order_number"`
+	DeliveryLocation     pgtype.Point       `json:"delivery_location"`
+	PriceValue           *float64           `json:"price_value"`
+	PriceCurrency        *string            `json:"price_currency"`
+	Status               string             `json:"status"`
+	Rating               pgtype.Numeric     `json:"rating"`
+	Review               string             `json:"review"`
+	CreatedBy            *string            `json:"created_by"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	SecretKey            *string            `json:"secret_key"`
+	ProductOwner         *string            `json:"product_owner"`
+	PayoutPhoneNumber    *string            `json:"payout_phone_number"`
+	DeliveryAddress      string             `json:"delivery_address"`
+	DispatchedBy         *string            `json:"dispatched_by"`
+	DeliveryFeeAmount    *float64           `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency  *string            `json:"delivery_fee_currency"`
+	UserSubscriptionID   *int64             `json:"user_subscription_id"`
+	ExpectedDeliveryDate pgtype.Timestamptz `json:"expected_delivery_date"`
+	Items                interface{}        `json:"items"`
 }
 
 func (q *Queries) GetOrderByOrderNumber(ctx context.Context, orderNumber int64) (GetOrderByOrderNumberRow, error) {
@@ -274,6 +286,8 @@ func (q *Queries) GetOrderByOrderNumber(ctx context.Context, orderNumber int64) 
 		&i.DispatchedBy,
 		&i.DeliveryFeeAmount,
 		&i.DeliveryFeeCurrency,
+		&i.UserSubscriptionID,
+		&i.ExpectedDeliveryDate,
 		&i.Items,
 	)
 	return i, err
@@ -573,7 +587,7 @@ func (q *Queries) GetPaymentStatsBetweenDates(ctx context.Context, arg GetPaymen
 
 const getUserOrderBySecretKey = `-- name: GetUserOrderBySecretKey :one
 SELECT 
-    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency,
+    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date,
     COALESCE(
         JSON_AGG(
             JSON_BUILD_OBJECT(
@@ -592,24 +606,26 @@ GROUP BY o.order_number
 `
 
 type GetUserOrderBySecretKeyRow struct {
-	OrderNumber         int64              `json:"order_number"`
-	DeliveryLocation    pgtype.Point       `json:"delivery_location"`
-	PriceValue          *float64           `json:"price_value"`
-	PriceCurrency       *string            `json:"price_currency"`
-	Status              string             `json:"status"`
-	Rating              pgtype.Numeric     `json:"rating"`
-	Review              string             `json:"review"`
-	CreatedBy           *string            `json:"created_by"`
-	CreatedAt           pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
-	SecretKey           *string            `json:"secret_key"`
-	ProductOwner        *string            `json:"product_owner"`
-	PayoutPhoneNumber   *string            `json:"payout_phone_number"`
-	DeliveryAddress     string             `json:"delivery_address"`
-	DispatchedBy        *string            `json:"dispatched_by"`
-	DeliveryFeeAmount   *float64           `json:"delivery_fee_amount"`
-	DeliveryFeeCurrency *string            `json:"delivery_fee_currency"`
-	Items               interface{}        `json:"items"`
+	OrderNumber          int64              `json:"order_number"`
+	DeliveryLocation     pgtype.Point       `json:"delivery_location"`
+	PriceValue           *float64           `json:"price_value"`
+	PriceCurrency        *string            `json:"price_currency"`
+	Status               string             `json:"status"`
+	Rating               pgtype.Numeric     `json:"rating"`
+	Review               string             `json:"review"`
+	CreatedBy            *string            `json:"created_by"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	SecretKey            *string            `json:"secret_key"`
+	ProductOwner         *string            `json:"product_owner"`
+	PayoutPhoneNumber    *string            `json:"payout_phone_number"`
+	DeliveryAddress      string             `json:"delivery_address"`
+	DispatchedBy         *string            `json:"dispatched_by"`
+	DeliveryFeeAmount    *float64           `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency  *string            `json:"delivery_fee_currency"`
+	UserSubscriptionID   *int64             `json:"user_subscription_id"`
+	ExpectedDeliveryDate pgtype.Timestamptz `json:"expected_delivery_date"`
+	Items                interface{}        `json:"items"`
 }
 
 func (q *Queries) GetUserOrderBySecretKey(ctx context.Context, secretKey *string) (GetUserOrderBySecretKeyRow, error) {
@@ -633,6 +649,8 @@ func (q *Queries) GetUserOrderBySecretKey(ctx context.Context, secretKey *string
 		&i.DispatchedBy,
 		&i.DeliveryFeeAmount,
 		&i.DeliveryFeeCurrency,
+		&i.UserSubscriptionID,
+		&i.ExpectedDeliveryDate,
 		&i.Items,
 	)
 	return i, err
@@ -640,7 +658,7 @@ func (q *Queries) GetUserOrderBySecretKey(ctx context.Context, secretKey *string
 
 const listFarmerOrders = `-- name: ListFarmerOrders :many
 SELECT 
-    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency,
+    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date,
     COALESCE(oi_count.total_items, 0)::int AS total_items,
     oi_preview.product AS preview_product,
     oi_preview.quantity AS preview_quantity
@@ -678,26 +696,28 @@ type ListFarmerOrdersParams struct {
 }
 
 type ListFarmerOrdersRow struct {
-	OrderNumber         int64              `json:"order_number"`
-	DeliveryLocation    pgtype.Point       `json:"delivery_location"`
-	PriceValue          *float64           `json:"price_value"`
-	PriceCurrency       *string            `json:"price_currency"`
-	Status              string             `json:"status"`
-	Rating              pgtype.Numeric     `json:"rating"`
-	Review              string             `json:"review"`
-	CreatedBy           *string            `json:"created_by"`
-	CreatedAt           pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
-	SecretKey           *string            `json:"secret_key"`
-	ProductOwner        *string            `json:"product_owner"`
-	PayoutPhoneNumber   *string            `json:"payout_phone_number"`
-	DeliveryAddress     string             `json:"delivery_address"`
-	DispatchedBy        *string            `json:"dispatched_by"`
-	DeliveryFeeAmount   *float64           `json:"delivery_fee_amount"`
-	DeliveryFeeCurrency *string            `json:"delivery_fee_currency"`
-	TotalItems          int32              `json:"total_items"`
-	PreviewProduct      string             `json:"preview_product"`
-	PreviewQuantity     int32              `json:"preview_quantity"`
+	OrderNumber          int64              `json:"order_number"`
+	DeliveryLocation     pgtype.Point       `json:"delivery_location"`
+	PriceValue           *float64           `json:"price_value"`
+	PriceCurrency        *string            `json:"price_currency"`
+	Status               string             `json:"status"`
+	Rating               pgtype.Numeric     `json:"rating"`
+	Review               string             `json:"review"`
+	CreatedBy            *string            `json:"created_by"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	SecretKey            *string            `json:"secret_key"`
+	ProductOwner         *string            `json:"product_owner"`
+	PayoutPhoneNumber    *string            `json:"payout_phone_number"`
+	DeliveryAddress      string             `json:"delivery_address"`
+	DispatchedBy         *string            `json:"dispatched_by"`
+	DeliveryFeeAmount    *float64           `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency  *string            `json:"delivery_fee_currency"`
+	UserSubscriptionID   *int64             `json:"user_subscription_id"`
+	ExpectedDeliveryDate pgtype.Timestamptz `json:"expected_delivery_date"`
+	TotalItems           int32              `json:"total_items"`
+	PreviewProduct       string             `json:"preview_product"`
+	PreviewQuantity      int32              `json:"preview_quantity"`
 }
 
 func (q *Queries) ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersParams) ([]ListFarmerOrdersRow, error) {
@@ -733,6 +753,8 @@ func (q *Queries) ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersPara
 			&i.DispatchedBy,
 			&i.DeliveryFeeAmount,
 			&i.DeliveryFeeCurrency,
+			&i.UserSubscriptionID,
+			&i.ExpectedDeliveryDate,
 			&i.TotalItems,
 			&i.PreviewProduct,
 			&i.PreviewQuantity,
@@ -782,7 +804,7 @@ func (q *Queries) ListOrderAuditLogs(ctx context.Context, orderNumber int64) ([]
 
 const listOrders = `-- name: ListOrders :many
 SELECT 
-    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency,
+    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date,
     COALESCE(oi_count.total_items, 0)::int AS total_items,
     oi_preview.product AS preview_product,
     oi_preview.quantity AS preview_quantity
@@ -818,26 +840,28 @@ type ListOrdersParams struct {
 }
 
 type ListOrdersRow struct {
-	OrderNumber         int64              `json:"order_number"`
-	DeliveryLocation    pgtype.Point       `json:"delivery_location"`
-	PriceValue          *float64           `json:"price_value"`
-	PriceCurrency       *string            `json:"price_currency"`
-	Status              string             `json:"status"`
-	Rating              pgtype.Numeric     `json:"rating"`
-	Review              string             `json:"review"`
-	CreatedBy           *string            `json:"created_by"`
-	CreatedAt           pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
-	SecretKey           *string            `json:"secret_key"`
-	ProductOwner        *string            `json:"product_owner"`
-	PayoutPhoneNumber   *string            `json:"payout_phone_number"`
-	DeliveryAddress     string             `json:"delivery_address"`
-	DispatchedBy        *string            `json:"dispatched_by"`
-	DeliveryFeeAmount   *float64           `json:"delivery_fee_amount"`
-	DeliveryFeeCurrency *string            `json:"delivery_fee_currency"`
-	TotalItems          int32              `json:"total_items"`
-	PreviewProduct      string             `json:"preview_product"`
-	PreviewQuantity     int32              `json:"preview_quantity"`
+	OrderNumber          int64              `json:"order_number"`
+	DeliveryLocation     pgtype.Point       `json:"delivery_location"`
+	PriceValue           *float64           `json:"price_value"`
+	PriceCurrency        *string            `json:"price_currency"`
+	Status               string             `json:"status"`
+	Rating               pgtype.Numeric     `json:"rating"`
+	Review               string             `json:"review"`
+	CreatedBy            *string            `json:"created_by"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	SecretKey            *string            `json:"secret_key"`
+	ProductOwner         *string            `json:"product_owner"`
+	PayoutPhoneNumber    *string            `json:"payout_phone_number"`
+	DeliveryAddress      string             `json:"delivery_address"`
+	DispatchedBy         *string            `json:"dispatched_by"`
+	DeliveryFeeAmount    *float64           `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency  *string            `json:"delivery_fee_currency"`
+	UserSubscriptionID   *int64             `json:"user_subscription_id"`
+	ExpectedDeliveryDate pgtype.Timestamptz `json:"expected_delivery_date"`
+	TotalItems           int32              `json:"total_items"`
+	PreviewProduct       string             `json:"preview_product"`
+	PreviewQuantity      int32              `json:"preview_quantity"`
 }
 
 func (q *Queries) ListOrders(ctx context.Context, arg ListOrdersParams) ([]ListOrdersRow, error) {
@@ -872,6 +896,8 @@ func (q *Queries) ListOrders(ctx context.Context, arg ListOrdersParams) ([]ListO
 			&i.DispatchedBy,
 			&i.DeliveryFeeAmount,
 			&i.DeliveryFeeCurrency,
+			&i.UserSubscriptionID,
+			&i.ExpectedDeliveryDate,
 			&i.TotalItems,
 			&i.PreviewProduct,
 			&i.PreviewQuantity,
@@ -959,7 +985,7 @@ func (q *Queries) ListPayments(ctx context.Context, arg ListPaymentsParams) ([]P
 
 const listUserOrders = `-- name: ListUserOrders :many
 SELECT 
-  o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency,
+  o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date,
   COALESCE(oi_count.total_items, 0)::int AS total_items,
   oi_preview.product AS preview_product,
   oi_preview.quantity AS preview_quantity
@@ -1003,26 +1029,28 @@ type ListUserOrdersParams struct {
 }
 
 type ListUserOrdersRow struct {
-	OrderNumber         int64              `json:"order_number"`
-	DeliveryLocation    pgtype.Point       `json:"delivery_location"`
-	PriceValue          *float64           `json:"price_value"`
-	PriceCurrency       *string            `json:"price_currency"`
-	Status              string             `json:"status"`
-	Rating              pgtype.Numeric     `json:"rating"`
-	Review              string             `json:"review"`
-	CreatedBy           *string            `json:"created_by"`
-	CreatedAt           pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
-	SecretKey           *string            `json:"secret_key"`
-	ProductOwner        *string            `json:"product_owner"`
-	PayoutPhoneNumber   *string            `json:"payout_phone_number"`
-	DeliveryAddress     string             `json:"delivery_address"`
-	DispatchedBy        *string            `json:"dispatched_by"`
-	DeliveryFeeAmount   *float64           `json:"delivery_fee_amount"`
-	DeliveryFeeCurrency *string            `json:"delivery_fee_currency"`
-	TotalItems          int32              `json:"total_items"`
-	PreviewProduct      string             `json:"preview_product"`
-	PreviewQuantity     int32              `json:"preview_quantity"`
+	OrderNumber          int64              `json:"order_number"`
+	DeliveryLocation     pgtype.Point       `json:"delivery_location"`
+	PriceValue           *float64           `json:"price_value"`
+	PriceCurrency        *string            `json:"price_currency"`
+	Status               string             `json:"status"`
+	Rating               pgtype.Numeric     `json:"rating"`
+	Review               string             `json:"review"`
+	CreatedBy            *string            `json:"created_by"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	SecretKey            *string            `json:"secret_key"`
+	ProductOwner         *string            `json:"product_owner"`
+	PayoutPhoneNumber    *string            `json:"payout_phone_number"`
+	DeliveryAddress      string             `json:"delivery_address"`
+	DispatchedBy         *string            `json:"dispatched_by"`
+	DeliveryFeeAmount    *float64           `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency  *string            `json:"delivery_fee_currency"`
+	UserSubscriptionID   *int64             `json:"user_subscription_id"`
+	ExpectedDeliveryDate pgtype.Timestamptz `json:"expected_delivery_date"`
+	TotalItems           int32              `json:"total_items"`
+	PreviewProduct       string             `json:"preview_product"`
+	PreviewQuantity      int32              `json:"preview_quantity"`
 }
 
 func (q *Queries) ListUserOrders(ctx context.Context, arg ListUserOrdersParams) ([]ListUserOrdersRow, error) {
@@ -1058,6 +1086,8 @@ func (q *Queries) ListUserOrders(ctx context.Context, arg ListUserOrdersParams) 
 			&i.DispatchedBy,
 			&i.DeliveryFeeAmount,
 			&i.DeliveryFeeCurrency,
+			&i.UserSubscriptionID,
+			&i.ExpectedDeliveryDate,
 			&i.TotalItems,
 			&i.PreviewProduct,
 			&i.PreviewQuantity,

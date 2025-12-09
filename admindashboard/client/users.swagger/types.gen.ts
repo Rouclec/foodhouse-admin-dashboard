@@ -10,11 +10,6 @@ export type rpcStatus = {
     details?: Array<protobufAny>;
 };
 
-export type typesAmount = {
-    value?: number;
-    currencyIsoCode?: string;
-};
-
 export type typesPoint = {
     lon?: number;
     lat?: number;
@@ -32,14 +27,6 @@ export type UsersCompleteRegistrationBody = {
     phoneNumber?: string;
 };
 
-export type UsersCreateSubscriptionBody = {
-    title?: string;
-    description?: string;
-    duration?: string;
-    amount?: number;
-    currencyIsoCode?: string;
-};
-
 export type UsersGrantAdminBody = {
     phoneNumber?: string;
     residenceCountryIsoCode?: string;
@@ -54,8 +41,6 @@ export type UsersGrantAgentBody = {
     password?: string;
     role?: usersgrpcUserRole;
 };
-
-export type usersgrpcActivateUserSubscriptionResponse = unknown;
 
 /**
  * Request and response messages for gRPC methods.
@@ -96,23 +81,9 @@ export type usersgrpcCompleteRegistrationResponse = {
     message?: string;
 };
 
-export type usersgrpcCreateSubscriptionResponse = {
-    subscription?: usersgrpcSubscription;
-};
-
 export type usersgrpcDeleteAgentResponse = unknown;
 
-export type usersgrpcDeleteSubscriptionResponse = {
-    message?: string;
-};
-
 export type usersgrpcDeleteUserAccountResponse = unknown;
-
-export type usersgrpcDeleteUserPaymentMethodResponse = {
-    message?: string;
-};
-
-export type usersgrpcDeleteUserSubscriptionResponse = unknown;
 
 export type usersgrpcFactorType = 'FACTOR_TYPE_UNSPECIFIED' | 'FACTOR_TYPE_EMAIL_PASSWORD' | 'FACTOR_TYPE_SMS_OTP' | 'FACTOR_TYPE_EMAIL_OTP' | 'FACTOR_TYPE_EMAIL_PHONE_PASSWORD' | 'FACTOR_TYPE_GOOGLE' | 'FACTOR_TYPE_APPLE';
 
@@ -135,28 +106,12 @@ export type usersgrpcGetReferralByReferredIdResponse = {
     referral?: usersgrpcReferral;
 };
 
-export type usersgrpcGetUserActiveSubscriptionResponse = {
-    userSubscription?: usersgrpcUserSubscription;
-};
-
 export type usersgrpcGetUserByIDResponse = {
     user?: usersgrpcUser;
 };
 
-export type usersgrpcGetUserPaymentMethodsByUserIDResponse = {
-    userPaymentMethods?: Array<usersgrpcUserPaymentMethod>;
-};
-
 export type usersgrpcGetUserStatsResponse = {
     data?: Array<usersgrpcStatItem>;
-};
-
-export type usersgrpcGetUserSubscriptionByIDResponse = {
-    userSubscription?: usersgrpcUserSubscription;
-};
-
-export type usersgrpcGetUserSubscriptionsResponse = {
-    userSubscriptions?: Array<usersgrpcUserSubscription>;
 };
 
 export type usersgrpcGrantAdminResponse = {
@@ -183,10 +138,6 @@ export type usersgrpcListFarmersResponse = {
     nextKey?: string;
 };
 
-export type usersgrpcListSubscriptionsResponse = {
-    subscriptions?: Array<usersgrpcSubscription>;
-};
-
 export type usersgrpcListUsersResponse = {
     users?: Array<usersgrpcUser>;
     nextKey?: string;
@@ -197,11 +148,6 @@ export type usersgrpcNotifyFarmerResponse = {
 };
 
 export type usersgrpcOtpIntent = 'OTP_INTENT_UNSPECIFIED' | 'OTP_INTENT_LOGIN' | 'OTP_INTENT_RESET_PASSWORD' | 'OTP_INTENT_SIGNUP' | 'OTP_INTENT_VERIFY_EMAIL';
-
-export type usersgrpcPaymentMethod = {
-    method?: string;
-    methodId?: string;
-};
 
 export type usersgrpcReactivateUserResponse = unknown;
 
@@ -288,27 +234,11 @@ export type usersgrpcStatItem = {
     description?: string;
 };
 
-export type usersgrpcSubscribeResponse = {
-    userSubscription?: usersgrpcUserSubscription;
-};
-
-export type usersgrpcSubscription = {
-    id?: string;
-    title?: string;
-    description?: string;
-    duration?: string;
-    amount?: typesAmount;
-};
-
 export type usersgrpcSuspendUserResponse = unknown;
 
 export type usersgrpcTokens = {
     accessToken?: string;
     refreshToken?: string;
-};
-
-export type usersgrpcUpdateSubscriptionResponse = {
-    subscription?: usersgrpcSubscription;
 };
 
 export type usersgrpcUser = {
@@ -328,26 +258,9 @@ export type usersgrpcUser = {
     referralCode?: string;
 };
 
-export type usersgrpcUserPaymentMethod = {
-    id?: string;
-    userId?: string;
-    paymentMethod?: usersgrpcPaymentMethod;
-    createdAt?: string;
-};
-
 export type usersgrpcUserRole = 'USER_ROLE_UNSPECIFIED' | 'USER_ROLE_FARMER' | 'USER_ROLE_BUYER' | 'USER_ROLE_ADMIN' | 'USER_ROLE_AGENT' | 'USER_ROLE_MARKETING_AGENT';
 
 export type usersgrpcUserStatus = 'UserStatus_UNSPECIFIED' | 'UserStatus_SUSPENDED' | 'UserStatus_ACTIVE';
-
-export type usersgrpcUserSubscription = {
-    id?: string;
-    subscription?: usersgrpcSubscription;
-    userId?: string;
-    active?: boolean;
-    createdAt?: string;
-    updatedAt?: string;
-    expiresAt?: string;
-};
 
 export type usersgrpcUserType = 'USER_TYPE_UNSPECIFIED' | 'USER_TYPE_FARMER' | 'USER_TYPE_BUYER';
 
@@ -378,56 +291,7 @@ export type UsersReviewFarmerBody = {
     comment?: string;
 };
 
-export type UsersSubscribeBody = {
-    subscriptionId?: string;
-    amount?: number;
-    currencyIsoCode?: string;
-    paymentMethod?: usersgrpcPaymentMethod;
-};
-
 export type UsersSuspendUserBody = unknown;
-
-export type UsersUpdateSubscriptionBody = {
-    title?: string;
-    description?: string;
-    duration?: string;
-    amount?: number;
-    currencyIsoCode?: string;
-};
-
-export type UsersCreateSubscriptionData = {
-    body: UsersCreateSubscriptionBody;
-    path: {
-        adminUserId: string;
-    };
-};
-
-export type UsersCreateSubscriptionResponse = (usersgrpcCreateSubscriptionResponse);
-
-export type UsersCreateSubscriptionError = (rpcStatus);
-
-export type UsersDeleteSubscriptionData = {
-    path: {
-        adminUserId: string;
-        subscriptionId: string;
-    };
-};
-
-export type UsersDeleteSubscriptionResponse = (usersgrpcDeleteSubscriptionResponse);
-
-export type UsersDeleteSubscriptionError = (rpcStatus);
-
-export type UsersUpdateSubscriptionData = {
-    body: UsersUpdateSubscriptionBody;
-    path: {
-        adminUserId: string;
-        subscriptionId: string;
-    };
-};
-
-export type UsersUpdateSubscriptionResponse = (usersgrpcUpdateSubscriptionResponse);
-
-export type UsersUpdateSubscriptionError = (rpcStatus);
 
 export type UsersGrantAdminData = {
     body: UsersGrantAdminBody;
@@ -644,20 +508,6 @@ export type UsersDeleteUserAccountResponse = (usersgrpcDeleteUserAccountResponse
 
 export type UsersDeleteUserAccountError = (rpcStatus);
 
-export type UsersDeleteUserPaymentMethodData = {
-    path: {
-        paymentMethodId: string;
-        /**
-         * UUID as string
-         */
-        userId: string;
-    };
-};
-
-export type UsersDeleteUserPaymentMethodResponse = (usersgrpcDeleteUserPaymentMethodResponse);
-
-export type UsersDeleteUserPaymentMethodError = (rpcStatus);
-
 export type UsersListFarmersData = {
     path: {
         userId: string;
@@ -713,71 +563,6 @@ export type UsersReviewFarmerData = {
 export type UsersReviewFarmerResponse = (usersgrpcReviewFarmerResponse);
 
 export type UsersReviewFarmerError = (rpcStatus);
-
-export type UsersSubscribeData = {
-    body: UsersSubscribeBody;
-    path: {
-        userId: string;
-    };
-};
-
-export type UsersSubscribeResponse = (usersgrpcSubscribeResponse);
-
-export type UsersSubscribeError = (rpcStatus);
-
-export type UsersGetUserActiveSubscriptionData = {
-    path: {
-        userId: string;
-    };
-};
-
-export type UsersGetUserActiveSubscriptionResponse = (usersgrpcGetUserActiveSubscriptionResponse);
-
-export type UsersGetUserActiveSubscriptionError = (rpcStatus);
-
-export type UsersGetUserSubscriptionsData = {
-    path: {
-        userId: string;
-    };
-};
-
-export type UsersGetUserSubscriptionsResponse = (usersgrpcGetUserSubscriptionsResponse);
-
-export type UsersGetUserSubscriptionsError = (rpcStatus);
-
-export type UsersListSubscriptionsData = {
-    path: {
-        userId: string;
-    };
-};
-
-export type UsersListSubscriptionsResponse = (usersgrpcListSubscriptionsResponse);
-
-export type UsersListSubscriptionsError = (rpcStatus);
-
-export type UsersGetUserSubscriptionByIdData = {
-    path: {
-        userId: string;
-        userSubscriptionId: string;
-    };
-};
-
-export type UsersGetUserSubscriptionByIdResponse = (usersgrpcGetUserSubscriptionByIDResponse);
-
-export type UsersGetUserSubscriptionByIdError = (rpcStatus);
-
-export type UsersGetUserPaymentMethodsByUserIdData = {
-    path: {
-        /**
-         * UUID as string
-         */
-        userId: string;
-    };
-};
-
-export type UsersGetUserPaymentMethodsByUserIdResponse = (usersgrpcGetUserPaymentMethodsByUserIDResponse);
-
-export type UsersGetUserPaymentMethodsByUserIdError = (rpcStatus);
 
 export type UsersGetFarmerByIdData = {
     path: {

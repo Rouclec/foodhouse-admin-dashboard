@@ -12,7 +12,9 @@ INSERT INTO orders (
     review,
     delivery_address,
     delivery_fee_amount,
-    delivery_fee_currency
+    delivery_fee_currency,
+    user_subscription_id,
+    expected_delivery_date
 )
 VALUES (
     sqlc.arg(delivery_location)::point,    -- Enforcing as POINT (casting delivery_location)
@@ -27,7 +29,9 @@ VALUES (
     '', -- Default review
     sqlc.arg(delivery_address)::text,
     sqlc.arg(delivery_fee_amount)::float,
-    sqlc.arg(delivery_fee_currency)::varchar(3)
+    sqlc.arg(delivery_fee_currency)::varchar(3),
+    sqlc.arg(user_subscription_id),
+    sqlc.arg(expected_delivery_date)
 )
 RETURNING *;
 
