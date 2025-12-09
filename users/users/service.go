@@ -947,7 +947,6 @@ func (i *Impl) GrantAdmin(
 	}, nil
 }
 
-
 // ListUsers implements usersgrpc.UsersServer.
 func (i *Impl) ListUsers(ctx context.Context,
 	req *usersgrpc.ListUsersRequest) (
