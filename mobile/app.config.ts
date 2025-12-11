@@ -26,8 +26,6 @@ export default function ({ config }: ConfigContext): ExpoConfig {
       permissions: [
         'android.permission.CAMERA',
         'android.permission.ACCESS_FINE_LOCATION',
-        'android.permission.READ_MEDIA_IMAGES',
-        'android.permission.READ_MEDIA_VIDEO',
       ],
       edgeToEdgeEnabled: true,
       config: {
