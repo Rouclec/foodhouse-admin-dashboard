@@ -35,7 +35,9 @@
       "package": "com.foodhousecmr.foodhouse",
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.ACCESS_FINE_LOCATION"
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO"
       ],
       "googleMaps": {
         "apiKey": "AIzaSyDuGdaHFlh9PRpIcFTAltiEYQ6UHdpnTxo"
@@ -78,7 +80,8 @@
             "buildToolsVersion": "35.0.0"
           }
         }
-      ]
+      ],
+      "./plugins/withAndroid15Compatibility.cjs"
     ],
     "experiments": {
       "typedRoutes": true
