@@ -1,5 +1,7 @@
 import { Colors } from '@/constants';
 import { Dimensions, StyleSheet } from 'react-native';
+const screenWidth = Dimensions.get('window').width;
+
 
 const { width } = Dimensions.get('window');
 export const buyerProductsStyles = StyleSheet.create({
@@ -67,7 +69,7 @@ export const buyerProductsStyles = StyleSheet.create({
     marginLeft: 0,
   },
   title: {
-    marginTop: 24,
+    marginTop: 18,
     fontSize: 20,
     fontWeight: 'bold',
   },
@@ -246,5 +248,85 @@ export const buyerProductsStyles = StyleSheet.create({
   },
   ratingText: {
     fontSize: 16,
+  },
+
+  subscriptionContainer: {
+    
+    
+    margin:  16,
+    rowGap: 12,
+    paddingBottom: 8,
+  },
+  package: {
+    flexDirection: 'row',
+
+    justifyContent: 'space-between',
+    alignItems: 'center',
+
+    // marginBottom: 8,
+  },
+ scrollViewContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between', 
+    //paddingHorizontal: 10,
+  },
+  packageContainer: {
+    width: screenWidth * 0.60,
+    backgroundColor: Colors.grey['200'],
+    borderRadius: 10,
+    padding: 15,
+    marginHorizontal: 8,
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: Colors.secondary['100']
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  discountBadge: {
+    backgroundColor: Colors.primary['500'],
+    borderRadius: 24,
+    height: 26,
+    width: 54,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  discountText: {
+    fontSize: 12,
+    color: Colors.light['10'],
+  },
+  tierTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  detailsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between', // Aligns content to opposite sides
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  categoryInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  detailText: {
+    marginLeft: 5,
+    fontSize: 14,
+  },
+  amountText: {
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+
+  title1: {
+    marginTop: 18,
+    fontSize: 16,
+    color: Colors.primary['500'],
+    marginRight: 8,
   },
 });

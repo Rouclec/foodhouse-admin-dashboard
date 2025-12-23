@@ -30,6 +30,7 @@ export default {
     f8: "#F8F8F8",
     "75": "#757575",
     e00: "#F8FFF5",
+    "200": "#F9FFEF",
   },
   dark: {
     "0.8": "#000000CC",
@@ -65,6 +66,7 @@ export default {
   },
   secondary: {
     "500": "#65DCAC",
+    "100": "#8DC53D33",
   },
   success: "#006C4D",
   border: "#777585",

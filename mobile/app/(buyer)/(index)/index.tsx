@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Linking,
   SafeAreaView,
+  ScrollView,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -26,9 +27,9 @@ import {
   ActivityIndicator,
   Button,
   Dialog,
-  Icon,
   Portal,
   Text,
+  Icon,
   TextInput,
 } from 'react-native-paper';
 import i18n from '@/i18n';
@@ -191,6 +192,87 @@ export default function BuyerProducts() {
   const [filterSelectedMaxValue, setFilterSelectedMaxValue] =
     useState<string>();
   const [filterSelectedRating, setFilterSelectedRating] = useState<number>();
+
+ 
+  const plans = [
+    {
+      id: '1',
+      title: 'Household Tier',
+      discount: '10% off',
+      categories: 5,
+      delivery: '1 free delivery',
+      packageAmount: '30.000XAF', 
+      deliveryAmount: '45.000XAF', 
+    },
+    {
+      id: '2',
+      title: 'Standard Tier',
+      discount: '15% off',
+      categories: 10,
+      delivery: '1 free delivery',
+      packageAmount: '70.000XAF', 
+      deliveryAmount: '$90.000XAF', 
+    },
+    {
+      id: '3',
+      title: 'Premium Tier',
+      discount: '20% off',
+      categories: 20,
+      delivery: '1 free delivery',
+      packageAmount: '150,000XAF', 
+      deliveryAmount: '180,000XAF', 
+    },
+    {
+      id: '4',
+      title: 'Enterprise Tier',
+      discount: 'Custom',
+      categories: 50,
+      delivery: '1 free delivery',
+      packageAmount: '90,000XAF', 
+      deliveryAmount: '180,000XAF', 
+    },
+  ];
+
+ 
+  const PackageCard = ({ item }) => (
+    <View style={styles.packageContainer}>
+      <View style={styles.headerRow}>
+        <View style={styles.discountBadge}>
+          <Text style={styles.discountText}>{item.discount}</Text>
+        </View>
+        <Icon source="chevron-right" size={24} color={Colors.primary[500]} />
+      </View>
+
+      {/* Title */}
+      <Text style={styles.tierTitle}>{item.title}</Text>
+
+      {/* Categories Row */}
+      <View style={styles.detailsRow}>
+        <View style={styles.categoryInfo}>
+          <Icon source="check" size={24} color={Colors.primary[500]} />
+          <Text style={styles.detailText}>{item.categories} categories</Text>
+        </View>
+        {/* Package Amount */}
+        <Text style={[styles.amountText, { color: Colors.primary['500'] }]}>
+          {item.packageAmount}
+        </Text>
+      </View>
+
+      {/* Delivery Row (New) */}
+      <View style={styles.detailsRow}>
+        <View style={styles.categoryInfo}>
+          <Icon
+            source="truck-delivery-outline"
+            size={24}
+            color={Colors.primary[500]}
+          />
+          <Text style={styles.detailText}>{item.delivery}</Text>
+        </View>
+        {/* Delivery Amount */}
+        <Text style={styles.amountText}>{item.deliveryAmount}</Text>
+      </View>
+    </View>
+  );
 
   return (
     <>
@@ -448,6 +530,26 @@ export default function BuyerProducts() {
                 )}
               </>
             )}
+
+          <View style={styles.subscriptionContainer}>
+            <View style={styles.package}>
+              <Text variant="titleMedium" style={[styles.title]}>
+                {' '}
+                Our packages for you{' '}
+              </Text>
+              <Text style={[styles.title1]}>See All</Text>
+            </View>
+
+            <ScrollView
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.scrollViewContent}>
+              {plans.map(item => (
+                <PackageCard key={item.id} item={item} />
+              ))}
+            </ScrollView>
+          </View>
+
           <Text
             variant="titleMedium"
             style={[styles.title, styles.marginHorizontal24]}>
