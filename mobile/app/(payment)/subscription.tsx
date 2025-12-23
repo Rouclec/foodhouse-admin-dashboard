@@ -1,63 +1,33 @@
 import { KeyboardAvoidingView, SafeAreaView, ScrollView, TouchableOpacity, View } from 'react-native';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { defaultStyles, selectionSubscriptionStyles as styles } from '@/styles';
 import { Image } from 'expo-image';
 import { Text, Button, Icon } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants';
-
-type Plan = {
-  id: string;
-  badge: string;
-  name: string;
-  categories: number;
-  freeDelivery: boolean;
-  price: string;
-  pricePerMonth: string;
-};
-
-const plans: Plan[] = [
-  {
-    id: 'household',
-    badge: '10% off',
-    name: 'Household Tier',
-    categories: 4,
-    freeDelivery: true,
-    price: '30,000',
-    pricePerMonth: '30,000',
-  },
-  {
-    id: 'small',
-    badge: '10% off',
-    name: 'Small Business Tier',
-    categories: 8,
-    freeDelivery: true,
-    price: '70,000',
-    pricePerMonth: '70,000',
-  },
-  {
-    id: 'medium',
-    badge: '10% off',
-    name: 'Medium Business Tier',
-    categories: 12,
-    freeDelivery: true,
-    price: '180,000',
-    pricePerMonth: '180,000',
-  },
-  {
-    id: 'corporate',
-    badge: '10% off',
-    name: 'Corporate Tier',
-    categories: 0,
-    freeDelivery: true,
-    price: '0',
-    pricePerMonth: '0',
-  },
-];
+import { useQuery } from '@tanstack/react-query';
+import { ordersListSubscriptionPlansOptions } from '@/client/orders.swagger/@tanstack/react-query.gen';
+import { ordersgrpcSubscription } from '@/client/orders.swagger';
+import { Context, ContextType } from '@/app/_layout';
+import { Chase } from 'react-native-animated-spinkit';
 
 export default function Subscriptions() {
-  const [selectedPlan, setSelectedPlan] = useState<string>('household');
+  const [selectedPlan, setSelectedPlan] = useState<string>();
   const router = useRouter();
+  const { user } = useContext(Context) as ContextType;
+
+  const {
+    data: subscriptionPlansData,
+    isLoading: isSubscriptionPlansLoading,
+  } = useQuery({
+    ...ordersListSubscriptionPlansOptions({
+      path: {
+        adminUserId: user?.userId ?? '',
+      },
+    }),
+  });
+
+  const plans = subscriptionPlansData?.subscriptionPlans || [];
 
   return (
     <View style={defaultStyles.flex}>
@@ -115,37 +85,46 @@ export default function Subscriptions() {
               Pick a ready-made package based on your needs
             </Text>
 
-            {plans.map((plan) => (
-              <TouchableOpacity
-                key={plan.id}
-                style={styles.planCard}
-                onPress={() => setSelectedPlan(plan.id)}>
-                <View style={styles.planHeader}>
-                  <View style={styles.planHeaderLeft}>
-                    <View style={styles.planBadge}>
-                      <Text style={styles.planBadgeText}>{plan.badge}</Text>
+            {isSubscriptionPlansLoading ? (
+              <View style={[defaultStyles.center, { marginVertical: 40 }]}>
+                <Chase size={32} color={Colors.primary[500]} />
+              </View>
+            ) : (
+              plans.map((plan) => (
+                <TouchableOpacity
+                  key={plan.id}
+                  style={styles.planCard}
+                  onPress={() => router.push({
+                    pathname: '/(payment)/subscription-checkout',
+                    params: { planId: plan.id }
+                  })}>
+                  <View style={styles.planHeader}>
+                    <View style={styles.planHeaderLeft}>
+                      <View style={styles.planBadge}>
+                        <Text style={styles.planBadgeText}>{plan.description || 'Special Offer'}</Text>
+                      </View>
+                      <Text style={styles.planDuration}>{plan.estimatedDeliveryTimeDays || 'N/A'} Days Delivery</Text>
                     </View>
-                    <Text style={styles.planDuration}>10 Days Delivery</Text>
+                    <Icon source="chevron-right" size={24} color={Colors.primary[500]} />
                   </View>
-                  <Icon source="chevron-right" size={24} color={Colors.primary[500]} />
-                </View>
-                <Text style={styles.planName}>{plan.name}</Text>
-                <View style={styles.planDetailsRow}>
-                  <View style={styles.planDetailItem}>
-                    <Icon source="check" size={24} color={Colors.primary[500]} />
-                    <Text style={styles.planDetailText}>{plan.categories} categories</Text>
+                  <Text style={styles.planName}>{plan.title}</Text>
+                  <View style={styles.planDetailsRow}>
+                    <View style={styles.planDetailItem}>
+                      <Icon source="check" size={24} color={Colors.primary[500]} />
+                      <Text style={styles.planDetailText}>{plan.subscriptionItems?.length || 0} items</Text>
+                    </View>
+                    <Text style={styles.planPrice}>{plan.amount?.value?.toLocaleString()} {plan.amount?.currencyIsoCode}</Text>
                   </View>
-                  <Text style={styles.planPrice}>{plan.price} XAF</Text>
-                </View>
-                <View style={styles.planDetailsRow}>
-                  <View style={styles.planDetailItem}>
-                    <Icon source="truck-delivery-outline" size={24} color={Colors.primary[500]} />
-                    <Text style={styles.planDetailText}>1 free delivery</Text>
+                  <View style={styles.planDetailsRow}>
+                    <View style={styles.planDetailItem}>
+                      <Icon source="truck-delivery-outline" size={24} color={Colors.primary[500]} />
+                      <Text style={styles.planDetailText}>1 free delivery</Text>
+                    </View>
+                    <Text style={styles.planPricePerMonth}>{plan.duration} weeks</Text>
                   </View>
-                  <Text style={styles.planPricePerMonth}>{plan.pricePerMonth} XAF</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
+                </TouchableOpacity>
+              ))
+            )}
           </View>
           
         </ScrollView>

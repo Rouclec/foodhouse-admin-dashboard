@@ -193,50 +193,14 @@ export default function BuyerProducts() {
     useState<string>();
   const [filterSelectedRating, setFilterSelectedRating] = useState<number>();
 
-  const plans = [
-    {
-      id: '1',
-      title: 'Household Tier',
-      discount: '10% off',
-      categories: 5,
-      delivery: '1 free delivery',
-      packageAmount: '30.000XAF',
-      deliveryAmount: '45.000XAF',
-    },
-    {
-      id: '2',
-      title: 'Standard Tier',
-      discount: '15% off',
-      categories: 10,
-      delivery: '1 free delivery',
-      packageAmount: '70.000XAF',
-      deliveryAmount: '$90.000XAF',
-    },
-    {
-      id: '3',
-      title: 'Premium Tier',
-      discount: '20% off',
-      categories: 20,
-      delivery: '1 free delivery',
-      packageAmount: '150,000XAF',
-      deliveryAmount: '180,000XAF',
-    },
-    {
-      id: '4',
-      title: 'Enterprise Tier',
-      discount: 'Custom',
-      categories: 50,
-      delivery: '1 free delivery',
-      packageAmount: '90,000XAF',
-      deliveryAmount: '180,000XAF',
-    },
-  ];
+  const plans = subscriptionPlansData?.subscriptionPlans || [];
+  
 
-  const PackageCard = ({ item }) => (
+  const PackageCard = ({ item }: { item: ordersgrpcSubscription }) => (
     <View style={styles.packageContainer}>
       <View style={styles.headerRow}>
         <View style={styles.discountBadge}>
-          <Text style={styles.discountText}>{item.discount}</Text>
+          <Text style={styles.discountText}>{item.description || 'Special Offer'}</Text>
         </View>
         <Icon source="chevron-right" size={24} color={Colors.primary[500]} />
       </View>
@@ -248,15 +212,15 @@ export default function BuyerProducts() {
       <View style={styles.detailsRow}>
         <View style={styles.categoryInfo}>
           <Icon source="check" size={24} color={Colors.primary[500]} />
-          <Text style={styles.detailText}>{item.categories} categories</Text>
+          <Text style={styles.detailText}>{item.subscriptionItems?.length || 0} items</Text>
         </View>
         {/* Package Amount */}
         <Text style={[styles.amountText, { color: Colors.primary['500'] }]}>
-          {item.packageAmount}
+          {item.amount?.value?.toLocaleString()} {item.amount?.currencyIsoCode}
         </Text>
       </View>
 
-      {/* Delivery Row (New) */}
+      {/* Delivery Row */}
       <View style={styles.detailsRow}>
         <View style={styles.categoryInfo}>
           <Icon
@@ -264,10 +228,10 @@ export default function BuyerProducts() {
             size={24}
             color={Colors.primary[500]}
           />
-          <Text style={styles.detailText}>{item.delivery}</Text>
+          <Text style={styles.detailText}>{item.estimatedDeliveryTimeDays || 'N/A'} days delivery</Text>
         </View>
-        {/* Delivery Amount */}
-        <Text style={styles.amountText}>{item.deliveryAmount}</Text>
+        {/* Duration */}
+        <Text style={styles.amountText}>{item.duration} weeks</Text>
       </View>
     </View>
   );
