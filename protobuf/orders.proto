@@ -467,9 +467,7 @@ message UpdateSubscriptionPlanRequest {
 
 message UpdateSubscriptionPlanResponse { Subscription subscription_plan = 1; }
 
-message ListSubscriptionPlansRequest {
-  string admin_user_id = 1;
-}
+message ListSubscriptionPlansRequest { string admin_user_id = 1; }
 
 message ListSubscriptionPlansResponse {
   repeated Subscription subscription_plans = 1;
@@ -506,9 +504,7 @@ message ListOrdersDueSoonRequest {
   int64 days = 2; // Number of days to look ahead
 }
 
-message ListOrdersDueSoonResponse {
-  repeated Order orders = 1;
-}
+message ListOrdersDueSoonResponse { repeated Order orders = 1; }
 
 message CreateCustomSubscriptionRequest {
   string user_id = 1;
@@ -518,9 +514,7 @@ message CreateCustomSubscriptionRequest {
   types.Point delivery_location = 5;
 }
 
-message CreateCustomSubscriptionResponse {
-  UserSubscription subscription = 1;
-}
+message CreateCustomSubscriptionResponse { UserSubscription subscription = 1; }
 
 service Orders {
 
@@ -715,7 +709,8 @@ service Orders {
   rpc UpdateSubscriptionPlan(UpdateSubscriptionPlanRequest)
       returns (UpdateSubscriptionPlanResponse) {
     option (google.api.http) = {
-      put : "/v1/admin/{admin_user_id}/orders/{subscription_plan_id}/update-subscription-plan"
+      put : "/v1/admin/{admin_user_id}/orders/{subscription_plan_id}/"
+            "update-subscription-plan"
       body : "*"
     };
   }
