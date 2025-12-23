@@ -37,6 +37,7 @@ import {
   Tractor,
   Users,
   TrendingUp,
+  Repeat,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -83,6 +84,11 @@ const menuItems: Array<{
         title: "Subscriptions",
         url: "/dashboard/subscriptions",
         icon: CreditCard,
+      },
+      {
+        title: "Active Subscriptions",
+        url: "/dashboard/active-subscriptions",
+        icon: Repeat,
       },
       { title: "Products", url: "/dashboard/products", icon: Package },
     ],

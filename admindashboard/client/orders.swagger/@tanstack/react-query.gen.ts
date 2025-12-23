@@ -2,9 +2,9 @@
 
 import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
-import type { OrdersBulkSettleCommissionsData, OrdersBulkSettleCommissionsError, OrdersBulkSettleCommissionsResponse, OrdersListCommissionsByReferrerData, OrdersListTotalComissionAmountByReferrerData, OrdersCreateSubscriptionPlanData, OrdersCreateSubscriptionPlanError, OrdersCreateSubscriptionPlanResponse, OrdersListOrdersDueSoonData, OrdersCreateDeliveryPointData, OrdersCreateDeliveryPointError, OrdersCreateDeliveryPointResponse, OrdersGetAdminStatsData, OrdersListOrdersData, OrdersListPaymentsData, OrdersDeleteDeliveryPointData, OrdersDeleteDeliveryPointError, OrdersDeleteDeliveryPointResponse, OrdersUpdateDeliveryPointData, OrdersUpdateDeliveryPointError, OrdersUpdateDeliveryPointResponse, OrdersConfirmPaymentData, OrdersConfirmPaymentError, OrdersConfirmPaymentResponse, OrdersGetFarmerEarningsData, OrdersListFarmerOrdersData, OrdersCreateCustomSubscriptionData, OrdersCreateCustomSubscriptionError, OrdersCreateCustomSubscriptionResponse, OrdersCreateOrderData, OrdersCreateOrderError, OrdersCreateOrderResponse, OrdersEstimateDeliveryFeeData, OrdersEstimateDeliveryFeeError, OrdersEstimateDeliveryFeeResponse, OrdersInitiatePaymentData, OrdersInitiatePaymentError, OrdersInitiatePaymentResponse, OrdersListDeliveryCitiesData, OrdersListDeliveryPointsData, OrdersListUserOrdersData, OrdersSubscribeData, OrdersSubscribeError, OrdersSubscribeResponse, OrdersListUserSubscriptionsData, OrdersGetUserSubscriptionDetailsData, OrdersApproveOrderData, OrdersApproveOrderError, OrdersApproveOrderResponse, OrdersRejectOrderData, OrdersRejectOrderError, OrdersRejectOrderResponse, OrdersDispatchOrderData, OrdersDispatchOrderError, OrdersDispatchOrderResponse, OrdersGetOrderDetailsData, OrdersCheckPaymentStatusData, OrdersConfirmDeliveryData, OrdersConfirmDeliveryError, OrdersConfirmDeliveryResponse } from '../types.gen';
+import type { OrdersBulkSettleCommissionsData, OrdersBulkSettleCommissionsError, OrdersBulkSettleCommissionsResponse, OrdersListCommissionsByReferrerData, OrdersListTotalComissionAmountByReferrerData, OrdersCreateSubscriptionPlanData, OrdersCreateSubscriptionPlanError, OrdersCreateSubscriptionPlanResponse, OrdersListOrdersDueSoonData, OrdersListSubscriptionPlansData, OrdersUpdateSubscriptionPlanData, OrdersUpdateSubscriptionPlanError, OrdersUpdateSubscriptionPlanResponse, OrdersCreateDeliveryPointData, OrdersCreateDeliveryPointError, OrdersCreateDeliveryPointResponse, OrdersGetAdminStatsData, OrdersListOrdersData, OrdersListPaymentsData, OrdersDeleteDeliveryPointData, OrdersDeleteDeliveryPointError, OrdersDeleteDeliveryPointResponse, OrdersUpdateDeliveryPointData, OrdersUpdateDeliveryPointError, OrdersUpdateDeliveryPointResponse, OrdersConfirmPaymentData, OrdersConfirmPaymentError, OrdersConfirmPaymentResponse, OrdersGetFarmerEarningsData, OrdersListFarmerOrdersData, OrdersCreateCustomSubscriptionData, OrdersCreateCustomSubscriptionError, OrdersCreateCustomSubscriptionResponse, OrdersCreateOrderData, OrdersCreateOrderError, OrdersCreateOrderResponse, OrdersEstimateDeliveryFeeData, OrdersEstimateDeliveryFeeError, OrdersEstimateDeliveryFeeResponse, OrdersInitiatePaymentData, OrdersInitiatePaymentError, OrdersInitiatePaymentResponse, OrdersListDeliveryCitiesData, OrdersListDeliveryPointsData, OrdersListUserOrdersData, OrdersSubscribeData, OrdersSubscribeError, OrdersSubscribeResponse, OrdersListUserSubscriptionsData, OrdersGetUserSubscriptionDetailsData, OrdersApproveOrderData, OrdersApproveOrderError, OrdersApproveOrderResponse, OrdersRejectOrderData, OrdersRejectOrderError, OrdersRejectOrderResponse, OrdersDispatchOrderData, OrdersDispatchOrderError, OrdersDispatchOrderResponse, OrdersGetOrderDetailsData, OrdersCheckPaymentStatusData, OrdersConfirmDeliveryData, OrdersConfirmDeliveryError, OrdersConfirmDeliveryResponse } from '../types.gen';
 import type { AxiosError } from 'axios';
-import { client, ordersBulkSettleCommissions, ordersListCommissionsByReferrer, ordersListTotalComissionAmountByReferrer, ordersCreateSubscriptionPlan, ordersListOrdersDueSoon, ordersCreateDeliveryPoint, ordersGetAdminStats, ordersListOrders, ordersListPayments, ordersDeleteDeliveryPoint, ordersUpdateDeliveryPoint, ordersConfirmPayment, ordersHealthCheck, ordersGetFarmerEarnings, ordersListFarmerOrders, ordersCreateCustomSubscription, ordersCreateOrder, ordersEstimateDeliveryFee, ordersInitiatePayment, ordersListDeliveryCities, ordersListDeliveryPoints, ordersListUserOrders, ordersSubscribe, ordersListUserSubscriptions, ordersGetUserSubscriptionDetails, ordersApproveOrder, ordersRejectOrder, ordersDispatchOrder, ordersGetOrderDetails, ordersCheckPaymentStatus, ordersConfirmDelivery } from '../sdk.gen';
+import { client, ordersBulkSettleCommissions, ordersListCommissionsByReferrer, ordersListTotalComissionAmountByReferrer, ordersCreateSubscriptionPlan, ordersListOrdersDueSoon, ordersListSubscriptionPlans, ordersUpdateSubscriptionPlan, ordersCreateDeliveryPoint, ordersGetAdminStats, ordersListOrders, ordersListPayments, ordersDeleteDeliveryPoint, ordersUpdateDeliveryPoint, ordersConfirmPayment, ordersHealthCheck, ordersGetFarmerEarnings, ordersListFarmerOrders, ordersCreateCustomSubscription, ordersCreateOrder, ordersEstimateDeliveryFee, ordersInitiatePayment, ordersListDeliveryCities, ordersListDeliveryPoints, ordersListUserOrders, ordersSubscribe, ordersListUserSubscriptions, ordersGetUserSubscriptionDetails, ordersApproveOrder, ordersRejectOrder, ordersDispatchOrder, ordersGetOrderDetails, ordersCheckPaymentStatus, ordersConfirmDelivery } from '../sdk.gen';
 
 type QueryKey<TOptions extends OptionsLegacyParser> = [
     Pick<TOptions, 'baseURL' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -154,6 +154,39 @@ export const ordersListOrdersDueSoonOptions = (options: OptionsLegacyParser<Orde
         },
         queryKey: ordersListOrdersDueSoonQueryKey(options)
     });
+};
+
+export const ordersListSubscriptionPlansQueryKey = (options: OptionsLegacyParser<OrdersListSubscriptionPlansData>) => [
+    createQueryKey('ordersListSubscriptionPlans', options)
+];
+
+export const ordersListSubscriptionPlansOptions = (options: OptionsLegacyParser<OrdersListSubscriptionPlansData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await ordersListSubscriptionPlans({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: ordersListSubscriptionPlansQueryKey(options)
+    });
+};
+
+export const ordersUpdateSubscriptionPlanMutation = (options?: Partial<OptionsLegacyParser<OrdersUpdateSubscriptionPlanData>>) => {
+    const mutationOptions: UseMutationOptions<OrdersUpdateSubscriptionPlanResponse, AxiosError<OrdersUpdateSubscriptionPlanError>, OptionsLegacyParser<OrdersUpdateSubscriptionPlanData>> = {
+        mutationFn: async (localOptions) => {
+            const { data } = await ordersUpdateSubscriptionPlan({
+                ...options,
+                ...localOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
 };
 
 export const ordersCreateDeliveryPointQueryKey = (options: OptionsLegacyParser<OrdersCreateDeliveryPointData>) => [

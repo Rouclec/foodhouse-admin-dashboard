@@ -87,14 +87,15 @@ type Payment struct {
 }
 
 type Subscription struct {
-	ID              string             `json:"id"`
-	Title           string             `json:"title"`
-	Description     string             `json:"description"`
-	Duration        pgtype.Interval    `json:"duration"`
-	Amount          int64              `json:"amount"`
-	CurrencyIsoCode string             `json:"currency_iso_code"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	ID                    string             `json:"id"`
+	Title                 string             `json:"title"`
+	Description           string             `json:"description"`
+	Duration              pgtype.Interval    `json:"duration"`
+	Amount                int64              `json:"amount"`
+	CurrencyIsoCode       string             `json:"currency_iso_code"`
+	CreatedAt             pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt             pgtype.Timestamptz `json:"updated_at"`
+	EstimatedDeliveryTime pgtype.Interval    `json:"estimated_delivery_time"`
 }
 
 type SubscriptionItem struct {

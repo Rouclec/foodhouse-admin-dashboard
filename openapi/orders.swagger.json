@@ -214,6 +214,80 @@
         ]
       }
     },
+    "/v1/admin/{adminUserId}/orders/list-subscription-plans": {
+      "get": {
+        "operationId": "Orders_ListSubscriptionPlans",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcListSubscriptionPlansResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/v1/admin/{adminUserId}/orders/{subscriptionPlanId}/update-subscription-plan": {
+      "put": {
+        "operationId": "Orders_UpdateSubscriptionPlan",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcUpdateSubscriptionPlanResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "subscriptionPlanId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/OrdersUpdateSubscriptionPlanBody"
+            }
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/admin/{userId}/orders/create-delivery-point": {
       "post": {
         "operationId": "Orders_CreateDeliveryPoint",
@@ -1533,6 +1607,37 @@
         }
       }
     },
+    "OrdersUpdateSubscriptionPlanBody": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "amount": {
+          "$ref": "#/definitions/typesAmount"
+        },
+        "duration": {
+          "type": "string",
+          "format": "int64",
+          "title": "duration in weeks"
+        },
+        "subscriptionItems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ordersgrpcSubscriptionItem"
+          }
+        },
+        "estimatedDeliveryTimeDays": {
+          "type": "string",
+          "format": "int64",
+          "title": "estimated_delivery_time in days"
+        }
+      }
+    },
     "ordersgrpcAccount": {
       "type": "object",
       "properties": {
@@ -1907,6 +2012,18 @@
         }
       }
     },
+    "ordersgrpcListSubscriptionPlansResponse": {
+      "type": "object",
+      "properties": {
+        "subscriptionPlans": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ordersgrpcSubscription"
+          }
+        }
+      }
+    },
     "ordersgrpcListTotalCommissionAmountByReferrerResponse": {
       "type": "object",
       "properties": {
@@ -2226,6 +2343,11 @@
         "updatedAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "estimatedDeliveryTimeDays": {
+          "type": "string",
+          "format": "int64",
+          "title": "estimated_delivery_time in days"
         }
       }
     },
@@ -2258,6 +2380,14 @@
     },
     "ordersgrpcUpdateDeliveryPointResponse": {
       "type": "object"
+    },
+    "ordersgrpcUpdateSubscriptionPlanResponse": {
+      "type": "object",
+      "properties": {
+        "subscriptionPlan": {
+          "$ref": "#/definitions/ordersgrpcSubscription"
+        }
+      }
     },
     "ordersgrpcUserSubscription": {
       "type": "object",

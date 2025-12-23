@@ -45,6 +45,8 @@ const (
 	Orders_BulkSettleCommissions_FullMethodName              = "/ordersgrpc.Orders/BulkSettleCommissions"
 	Orders_EstimateDeliveryFee_FullMethodName                = "/ordersgrpc.Orders/EstimateDeliveryFee"
 	Orders_CreateSubscriptionPlan_FullMethodName             = "/ordersgrpc.Orders/CreateSubscriptionPlan"
+	Orders_UpdateSubscriptionPlan_FullMethodName             = "/ordersgrpc.Orders/UpdateSubscriptionPlan"
+	Orders_ListSubscriptionPlans_FullMethodName              = "/ordersgrpc.Orders/ListSubscriptionPlans"
 	Orders_Subscribe_FullMethodName                          = "/ordersgrpc.Orders/Subscribe"
 	Orders_ListUserSubscriptions_FullMethodName              = "/ordersgrpc.Orders/ListUserSubscriptions"
 	Orders_GetUserSubscriptionDetails_FullMethodName         = "/ordersgrpc.Orders/GetUserSubscriptionDetails"
@@ -82,6 +84,8 @@ type OrdersClient interface {
 	BulkSettleCommissions(ctx context.Context, in *BulkSettleCommissionsRequest, opts ...grpc.CallOption) (*BulkSettleCommissionsResponse, error)
 	EstimateDeliveryFee(ctx context.Context, in *EstimateDeliveryFeeRequest, opts ...grpc.CallOption) (*EstimateDeliveryFeeResponse, error)
 	CreateSubscriptionPlan(ctx context.Context, in *CreateSubscriptionPlanRequest, opts ...grpc.CallOption) (*CreateSubscriptionPlanResponse, error)
+	UpdateSubscriptionPlan(ctx context.Context, in *UpdateSubscriptionPlanRequest, opts ...grpc.CallOption) (*UpdateSubscriptionPlanResponse, error)
+	ListSubscriptionPlans(ctx context.Context, in *ListSubscriptionPlansRequest, opts ...grpc.CallOption) (*ListSubscriptionPlansResponse, error)
 	Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (*SubscribeResponse, error)
 	ListUserSubscriptions(ctx context.Context, in *ListUserSubscriptionsRequest, opts ...grpc.CallOption) (*ListUserSubscriptionsResponse, error)
 	GetUserSubscriptionDetails(ctx context.Context, in *GetUserSubscriptionDetailsRequest, opts ...grpc.CallOption) (*GetUserSubscriptionDetailsResponse, error)
@@ -357,6 +361,26 @@ func (c *ordersClient) CreateSubscriptionPlan(ctx context.Context, in *CreateSub
 	return out, nil
 }
 
+func (c *ordersClient) UpdateSubscriptionPlan(ctx context.Context, in *UpdateSubscriptionPlanRequest, opts ...grpc.CallOption) (*UpdateSubscriptionPlanResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateSubscriptionPlanResponse)
+	err := c.cc.Invoke(ctx, Orders_UpdateSubscriptionPlan_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ordersClient) ListSubscriptionPlans(ctx context.Context, in *ListSubscriptionPlansRequest, opts ...grpc.CallOption) (*ListSubscriptionPlansResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListSubscriptionPlansResponse)
+	err := c.cc.Invoke(ctx, Orders_ListSubscriptionPlans_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *ordersClient) Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (*SubscribeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(SubscribeResponse)
@@ -437,6 +461,8 @@ type OrdersServer interface {
 	BulkSettleCommissions(context.Context, *BulkSettleCommissionsRequest) (*BulkSettleCommissionsResponse, error)
 	EstimateDeliveryFee(context.Context, *EstimateDeliveryFeeRequest) (*EstimateDeliveryFeeResponse, error)
 	CreateSubscriptionPlan(context.Context, *CreateSubscriptionPlanRequest) (*CreateSubscriptionPlanResponse, error)
+	UpdateSubscriptionPlan(context.Context, *UpdateSubscriptionPlanRequest) (*UpdateSubscriptionPlanResponse, error)
+	ListSubscriptionPlans(context.Context, *ListSubscriptionPlansRequest) (*ListSubscriptionPlansResponse, error)
 	Subscribe(context.Context, *SubscribeRequest) (*SubscribeResponse, error)
 	ListUserSubscriptions(context.Context, *ListUserSubscriptionsRequest) (*ListUserSubscriptionsResponse, error)
 	GetUserSubscriptionDetails(context.Context, *GetUserSubscriptionDetailsRequest) (*GetUserSubscriptionDetailsResponse, error)
@@ -529,6 +555,12 @@ func (UnimplementedOrdersServer) EstimateDeliveryFee(context.Context, *EstimateD
 }
 func (UnimplementedOrdersServer) CreateSubscriptionPlan(context.Context, *CreateSubscriptionPlanRequest) (*CreateSubscriptionPlanResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateSubscriptionPlan not implemented")
+}
+func (UnimplementedOrdersServer) UpdateSubscriptionPlan(context.Context, *UpdateSubscriptionPlanRequest) (*UpdateSubscriptionPlanResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateSubscriptionPlan not implemented")
+}
+func (UnimplementedOrdersServer) ListSubscriptionPlans(context.Context, *ListSubscriptionPlansRequest) (*ListSubscriptionPlansResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListSubscriptionPlans not implemented")
 }
 func (UnimplementedOrdersServer) Subscribe(context.Context, *SubscribeRequest) (*SubscribeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Subscribe not implemented")
@@ -1034,6 +1066,42 @@ func _Orders_CreateSubscriptionPlan_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Orders_UpdateSubscriptionPlan_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateSubscriptionPlanRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).UpdateSubscriptionPlan(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_UpdateSubscriptionPlan_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).UpdateSubscriptionPlan(ctx, req.(*UpdateSubscriptionPlanRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orders_ListSubscriptionPlans_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListSubscriptionPlansRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).ListSubscriptionPlans(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_ListSubscriptionPlans_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).ListSubscriptionPlans(ctx, req.(*ListSubscriptionPlansRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Orders_Subscribe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SubscribeRequest)
 	if err := dec(in); err != nil {
@@ -1234,6 +1302,14 @@ var Orders_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateSubscriptionPlan",
 			Handler:    _Orders_CreateSubscriptionPlan_Handler,
+		},
+		{
+			MethodName: "UpdateSubscriptionPlan",
+			Handler:    _Orders_UpdateSubscriptionPlan_Handler,
+		},
+		{
+			MethodName: "ListSubscriptionPlans",
+			Handler:    _Orders_ListSubscriptionPlans_Handler,
 		},
 		{
 			MethodName: "Subscribe",

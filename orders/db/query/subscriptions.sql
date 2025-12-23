@@ -1,6 +1,6 @@
 -- name: CreateSubscription :one
-INSERT INTO subscriptions (title, "description", duration, amount, currency_iso_code)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO subscriptions (title, "description", duration, amount, currency_iso_code, estimated_delivery_time)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING *;
 
 -- name: CreateSubscriptionItem :one
@@ -14,10 +14,15 @@ DELETE FROM subscription_items where id = $1;
 -- name: UpdateSubscription :one
 UPDATE subscriptions
 SET
-    (title, "description", duration, amount, currency_iso_code) =
-    ($1, $2, $3, $4, $5)
+    title = COALESCE(sqlc.narg('title'), title),
+    "description" = COALESCE(sqlc.narg('description'), "description"),
+    duration = COALESCE(sqlc.narg('duration'), duration),
+    amount = COALESCE(sqlc.narg('amount'), amount),
+    currency_iso_code = COALESCE(sqlc.narg('currency_iso_code'), currency_iso_code),
+    estimated_delivery_time = COALESCE(sqlc.narg('estimated_delivery_time'), estimated_delivery_time),
+    updated_at = now()
 WHERE
-    id = $6
+    id = sqlc.arg('id')
 RETURNING *;
 
 -- name: DeleteSubscription :exec

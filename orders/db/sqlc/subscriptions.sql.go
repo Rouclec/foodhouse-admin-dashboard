@@ -23,17 +23,18 @@ func (q *Queries) ActivateUserSubscription(ctx context.Context, publicID string)
 }
 
 const createSubscription = `-- name: CreateSubscription :one
-INSERT INTO subscriptions (title, "description", duration, amount, currency_iso_code)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id, title, description, duration, amount, currency_iso_code, created_at, updated_at
+INSERT INTO subscriptions (title, "description", duration, amount, currency_iso_code, estimated_delivery_time)
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING id, title, description, duration, amount, currency_iso_code, created_at, updated_at, estimated_delivery_time
 `
 
 type CreateSubscriptionParams struct {
-	Title           string          `json:"title"`
-	Description     string          `json:"description"`
-	Duration        pgtype.Interval `json:"duration"`
-	Amount          int64           `json:"amount"`
-	CurrencyIsoCode string          `json:"currency_iso_code"`
+	Title                 string          `json:"title"`
+	Description           string          `json:"description"`
+	Duration              pgtype.Interval `json:"duration"`
+	Amount                int64           `json:"amount"`
+	CurrencyIsoCode       string          `json:"currency_iso_code"`
+	EstimatedDeliveryTime pgtype.Interval `json:"estimated_delivery_time"`
 }
 
 func (q *Queries) CreateSubscription(ctx context.Context, arg CreateSubscriptionParams) (Subscription, error) {
@@ -43,6 +44,7 @@ func (q *Queries) CreateSubscription(ctx context.Context, arg CreateSubscription
 		arg.Duration,
 		arg.Amount,
 		arg.CurrencyIsoCode,
+		arg.EstimatedDeliveryTime,
 	)
 	var i Subscription
 	err := row.Scan(
@@ -54,6 +56,7 @@ func (q *Queries) CreateSubscription(ctx context.Context, arg CreateSubscription
 		&i.CurrencyIsoCode,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.EstimatedDeliveryTime,
 	)
 	return i, err
 }
@@ -195,7 +198,7 @@ func (q *Queries) GetAllUserSubscriptions(ctx context.Context) ([]UserSubscripti
 }
 
 const getSubscriptionByID = `-- name: GetSubscriptionByID :one
-SELECT id, title, description, duration, amount, currency_iso_code, created_at, updated_at FROM subscriptions WHERE id = $1
+SELECT id, title, description, duration, amount, currency_iso_code, created_at, updated_at, estimated_delivery_time FROM subscriptions WHERE id = $1
 `
 
 func (q *Queries) GetSubscriptionByID(ctx context.Context, id string) (Subscription, error) {
@@ -210,12 +213,13 @@ func (q *Queries) GetSubscriptionByID(ctx context.Context, id string) (Subscript
 		&i.CurrencyIsoCode,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.EstimatedDeliveryTime,
 	)
 	return i, err
 }
 
 const getSubscriptionForUpdate = `-- name: GetSubscriptionForUpdate :one
-SELECT id, title, description, duration, amount, currency_iso_code, created_at, updated_at FROM subscriptions WHERE id = $1 FOR UPDATE
+SELECT id, title, description, duration, amount, currency_iso_code, created_at, updated_at, estimated_delivery_time FROM subscriptions WHERE id = $1 FOR UPDATE
 `
 
 func (q *Queries) GetSubscriptionForUpdate(ctx context.Context, id string) (Subscription, error) {
@@ -230,6 +234,7 @@ func (q *Queries) GetSubscriptionForUpdate(ctx context.Context, id string) (Subs
 		&i.CurrencyIsoCode,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.EstimatedDeliveryTime,
 	)
 	return i, err
 }
@@ -450,7 +455,7 @@ func (q *Queries) ListOrdersDueSoon(ctx context.Context, days int32) ([]ListOrde
 }
 
 const listSubsriptions = `-- name: ListSubsriptions :many
-SELECT id, title, description, duration, amount, currency_iso_code, created_at, updated_at FROM subscriptions ORDER BY amount ASC
+SELECT id, title, description, duration, amount, currency_iso_code, created_at, updated_at, estimated_delivery_time FROM subscriptions ORDER BY amount ASC
 `
 
 func (q *Queries) ListSubsriptions(ctx context.Context) ([]Subscription, error) {
@@ -471,6 +476,7 @@ func (q *Queries) ListSubsriptions(ctx context.Context) ([]Subscription, error) 
 			&i.CurrencyIsoCode,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.EstimatedDeliveryTime,
 		); err != nil {
 			return nil, err
 		}
@@ -524,20 +530,26 @@ func (q *Queries) ListUserSubscriptionsByUserID(ctx context.Context, userID stri
 const updateSubscription = `-- name: UpdateSubscription :one
 UPDATE subscriptions
 SET
-    (title, "description", duration, amount, currency_iso_code) =
-    ($1, $2, $3, $4, $5)
+    title = COALESCE($1, title),
+    "description" = COALESCE($2, "description"),
+    duration = COALESCE($3, duration),
+    amount = COALESCE($4, amount),
+    currency_iso_code = COALESCE($5, currency_iso_code),
+    estimated_delivery_time = COALESCE($6, estimated_delivery_time),
+    updated_at = now()
 WHERE
-    id = $6
-RETURNING id, title, description, duration, amount, currency_iso_code, created_at, updated_at
+    id = $7
+RETURNING id, title, description, duration, amount, currency_iso_code, created_at, updated_at, estimated_delivery_time
 `
 
 type UpdateSubscriptionParams struct {
-	Title           string          `json:"title"`
-	Description     string          `json:"description"`
-	Duration        pgtype.Interval `json:"duration"`
-	Amount          int64           `json:"amount"`
-	CurrencyIsoCode string          `json:"currency_iso_code"`
-	ID              string          `json:"id"`
+	Title                 *string         `json:"title"`
+	Description           string          `json:"description"`
+	Duration              pgtype.Interval `json:"duration"`
+	Amount                *int64          `json:"amount"`
+	CurrencyIsoCode       *string         `json:"currency_iso_code"`
+	EstimatedDeliveryTime pgtype.Interval `json:"estimated_delivery_time"`
+	ID                    string          `json:"id"`
 }
 
 func (q *Queries) UpdateSubscription(ctx context.Context, arg UpdateSubscriptionParams) (Subscription, error) {
@@ -547,6 +559,7 @@ func (q *Queries) UpdateSubscription(ctx context.Context, arg UpdateSubscription
 		arg.Duration,
 		arg.Amount,
 		arg.CurrencyIsoCode,
+		arg.EstimatedDeliveryTime,
 		arg.ID,
 	)
 	var i Subscription
@@ -559,6 +572,7 @@ func (q *Queries) UpdateSubscription(ctx context.Context, arg UpdateSubscription
 		&i.CurrencyIsoCode,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.EstimatedDeliveryTime,
 	)
 	return i, err
 }

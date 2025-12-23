@@ -266,11 +266,11 @@ func (i *Impl) CreateCustomSubscription(
 
 	// Create user subscription (custom subscription, no subscription_id references a plan)
 	subscription, err := querier.CreateUserSubscription(ctx, sqlc.CreateUserSubscriptionParams{
-		UserID:                req.GetUserId(),
-		SubscriptionID:        "", // Empty for custom subscriptions
-		Active:                false, // Will be activated after payment
-		Amount:                int64(req.GetBudget().GetValue()),
-		CurrencyIsoCode:       req.GetBudget().GetCurrencyIsoCode(),
+		UserID:          req.GetUserId(),
+		SubscriptionID:  "",    // Empty for custom subscriptions
+		Active:          false, // Will be activated after payment
+		Amount:          int64(req.GetBudget().GetValue()),
+		CurrencyIsoCode: req.GetBudget().GetCurrencyIsoCode(),
 		EstimatedDeliveryTime: pgtype.Interval{
 			Microseconds: int64(estimatedDays) * 24 * 60 * 60 * OneMillion,
 			Days:         int32(estimatedDays % 30),
@@ -299,3 +299,200 @@ func (i *Impl) CreateCustomSubscription(
 	}, nil
 }
 
+// UpdateSubscriptionPlan implements ordersgrpc.OrdersServer.
+func (i *Impl) UpdateSubscriptionPlan(
+	ctx context.Context,
+	req *ordersgrpc.UpdateSubscriptionPlanRequest) (
+	*ordersgrpc.UpdateSubscriptionPlanResponse, error) {
+
+	querier, tx, err := i.repo.Begin(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)
+	}
+	defer func() {
+		err := tx.Rollback(ctx)
+		if err != nil && !errors.Is(err, sql.ErrTxDone) {
+			i.logger.Err(err).Msgf("Failed to rollback transaction")
+		}
+	}()
+
+	// Get existing subscription
+	existing, err := querier.GetSubscriptionByID(ctx, req.GetSubscriptionPlanId())
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "subscription plan not found: %v", err)
+	}
+
+	// Prepare update parameters - use existing values if not provided
+	var title *string
+	if req.Title != nil {
+		titleStr := *req.Title
+		title = &titleStr
+	}
+
+	description := existing.Description
+	if req.Description != nil {
+		description = *req.Description
+	}
+
+	duration := existing.Duration
+	if req.Duration != nil {
+		duration = pgtype.Interval{
+			Microseconds: *req.Duration * 7 * 24 * 60 * 60 * converters.OneMillion,
+			Valid:        true,
+		}
+	}
+
+	var amount *int64
+	if req.Amount != nil {
+		amountVal := int64(req.Amount.GetValue())
+		amount = &amountVal
+	}
+
+	var currencyIsoCode *string
+	if req.Amount != nil {
+		currStr := req.Amount.GetCurrencyIsoCode()
+		currencyIsoCode = &currStr
+	}
+
+	estimatedDeliveryTime := existing.EstimatedDeliveryTime
+	if req.EstimatedDeliveryTimeDays != nil && *req.EstimatedDeliveryTimeDays > 0 {
+		estimatedDeliveryTime = pgtype.Interval{
+			Days:  int32(*req.EstimatedDeliveryTimeDays),
+			Valid: true,
+		}
+	}
+
+	// Update subscription
+	updated, err := querier.UpdateSubscription(ctx, sqlc.UpdateSubscriptionParams{
+		Title:                 title,
+		Description:           description,
+		Duration:              duration,
+		Amount:                amount,
+		CurrencyIsoCode:       currencyIsoCode,
+		EstimatedDeliveryTime: estimatedDeliveryTime,
+		ID:                    req.GetSubscriptionPlanId(),
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error updating subscription plan: %v", err)
+	}
+
+	// Handle subscription items if provided
+	var subItems []*ordersgrpc.SubscriptionItem
+	if len(req.GetSubscriptionItems()) > 0 {
+		// Delete existing items
+		existingItems, err := querier.GetSubscriptionItemsBySubscriptionID(ctx, req.GetSubscriptionPlanId())
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error fetching existing subscription items: %v", err)
+		}
+
+		for _, item := range existingItems {
+			err := querier.DeleteSubscriptionItem(ctx, item.ID)
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "error deleting subscription item: %v", err)
+			}
+		}
+
+		// Create new items
+		for _, si := range req.GetSubscriptionItems() {
+			product, err := i.productService.GetProduct(ctx, &productsgrpc.GetProductRequest{ProductId: si.ProductId})
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "error fetching product for subscription item: %v", err)
+			}
+
+			_, err = querier.CreateSubscriptionItem(ctx, sqlc.CreateSubscriptionItemParams{
+				SubscriptionID: req.GetSubscriptionPlanId(),
+				Product:        si.ProductId,
+				Quantity:       int32(si.Quantity),
+				UnitType:       product.GetProduct().GetUnitType(),
+			})
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "error creating subscription item: %v", err)
+			}
+
+			subItems = append(subItems, &ordersgrpc.SubscriptionItem{
+				ProductId:        si.ProductId,
+				ProductImage:     product.GetProduct().GetImage(),
+				ProductName:      product.GetProduct().GetName(),
+				ProductUnitPrice: product.GetProduct().GetAmount(),
+				UnitType:         product.GetProduct().GetUnitType(),
+				SubscriptionId:   req.GetSubscriptionPlanId(),
+			})
+		}
+	} else {
+		// Fetch existing items
+		existingItems, err := querier.GetSubscriptionItemsBySubscriptionID(ctx, req.GetSubscriptionPlanId())
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error fetching subscription items: %v", err)
+		}
+
+		for _, item := range existingItems {
+			product, err := i.productService.GetProduct(ctx, &productsgrpc.GetProductRequest{ProductId: item.Product})
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "error fetching product: %v", err)
+			}
+
+			subItems = append(subItems, &ordersgrpc.SubscriptionItem{
+				ProductId:        item.Product,
+				ProductImage:     product.GetProduct().GetImage(),
+				ProductName:      product.GetProduct().GetName(),
+				ProductUnitPrice: product.GetProduct().GetAmount(),
+				UnitType:         item.UnitType,
+				SubscriptionId:   req.GetSubscriptionPlanId(),
+			})
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
+	}
+
+	return &ordersgrpc.UpdateSubscriptionPlanResponse{
+		SubscriptionPlan: converters.SqlcSubscriptionToProto(updated, subItems),
+	}, nil
+}
+
+// ListSubscriptionPlans implements ordersgrpc.OrdersServer.
+func (i *Impl) ListSubscriptionPlans(
+	ctx context.Context,
+	req *ordersgrpc.ListSubscriptionPlansRequest) (
+	*ordersgrpc.ListSubscriptionPlansResponse, error) {
+
+	subscriptions, err := i.repo.Do().ListSubsriptions(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error listing subscription plans: %v", err)
+	}
+
+	result := make([]*ordersgrpc.Subscription, 0, len(subscriptions))
+	for _, sub := range subscriptions {
+		// Fetch subscription items
+		items, err := i.repo.Do().GetSubscriptionItemsBySubscriptionID(ctx, sub.ID)
+		if err != nil {
+			i.logger.Err(err).Msgf("error fetching subscription items for %s", sub.ID)
+			continue
+		}
+
+		subItems := make([]*ordersgrpc.SubscriptionItem, 0, len(items))
+		for _, item := range items {
+			product, err := i.productService.GetProduct(ctx, &productsgrpc.GetProductRequest{ProductId: item.Product})
+			if err != nil {
+				i.logger.Err(err).Msgf("error fetching product %s for subscription item", item.Product)
+				continue
+			}
+
+			subItems = append(subItems, &ordersgrpc.SubscriptionItem{
+				ProductId:        item.Product,
+				ProductImage:     product.GetProduct().GetImage(),
+				ProductName:      product.GetProduct().GetName(),
+				ProductUnitPrice: product.GetProduct().GetAmount(),
+				UnitType:         item.UnitType,
+				SubscriptionId:   sub.ID,
+			})
+		}
+
+		result = append(result, converters.SqlcSubscriptionToProto(sub, subItems))
+	}
+
+	return &ordersgrpc.ListSubscriptionPlansResponse{
+		SubscriptionPlans: result,
+	}, nil
+}

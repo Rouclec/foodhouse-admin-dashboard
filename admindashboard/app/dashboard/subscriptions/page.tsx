@@ -45,6 +45,8 @@ import { Context, ContextType } from "@/app/contexts/QueryProvider";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   ordersCreateSubscriptionPlanMutation,
+  ordersListSubscriptionPlansOptions,
+  ordersUpdateSubscriptionPlanMutation,
 } from "@/client/orders.swagger/@tanstack/react-query.gen";
 import { ordersgrpcSubscription } from "@/client/orders.swagger";
 import { formatCurrency } from "@/utils";
@@ -55,11 +57,17 @@ export default function SubscriptionsPage() {
   const { user } = useContext(Context) as ContextType;
   const [loading, setLoading] = useState(false);
 
-  // TODO: Add ListSubscriptionPlans endpoint in orders service
-  // For now, using empty data - subscription plans list needs to be implemented
-  const subscriptionsData = { subscriptions: [] };
-  const isSubscriptionsLoading = false;
-  const refetch = () => {};
+  const {
+    data: subscriptionsData,
+    isLoading: isSubscriptionsLoading,
+    refetch,
+  } = useQuery({
+    ...ordersListSubscriptionPlansOptions({
+      path: {
+        adminUserId: user?.userId ?? "",
+      },
+    }),
+  });
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSubscription, setEditingSubscription] =
@@ -86,39 +94,66 @@ export default function SubscriptionsPage() {
 
     try {
       setLoading(true);
-      // For now, only support creating new subscription plans
-      // TODO: Add update/delete endpoints in orders service
-      await createSubscription({
-        body: {
-          title: formData?.name,
-          description: formData?.description,
-          duration: parseInt(formData?.duration ?? "0"), // duration in weeks
-          amount: {
-            value: parseFloat(formData?.amount ?? ""),
-            currencyIsoCode: formData?.currency,
+      if (editingSubscription) {
+        // Update existing subscription
+        await updateSubscription({
+          body: {
+            title: formData?.name,
+            description: formData?.description,
+            duration: formData?.duration ? formData.duration : undefined, // duration in weeks (as string)
+            amount: {
+              value: parseFloat(formData?.amount ?? ""),
+              currencyIsoCode: formData?.currency,
+            },
+            subscriptionItems: [], // TODO: Add subscription items UI
+            estimatedDeliveryTimeDays: formData?.estimatedDeliveryTimeDays
+              ? formData.estimatedDeliveryTimeDays
+              : undefined,
           },
-          subscriptionItems: [], // TODO: Add subscription items UI
-          estimatedDeliveryTimeDays: formData?.estimatedDeliveryTimeDays 
-            ? parseInt(formData.estimatedDeliveryTimeDays)
-            : undefined,
-        },
-        path: {
-          adminUserId: user?.userId ?? "",
-        },
-      });
+          path: {
+            adminUserId: user?.userId ?? "",
+            subscriptionPlanId: editingSubscription.id ?? "",
+          },
+        });
+      } else {
+        // Create new subscription
+        await createSubscription({
+          body: {
+            title: formData?.name,
+            description: formData?.description,
+            duration: formData?.duration || "0", // duration in weeks (as string)
+            amount: {
+              value: parseFloat(formData?.amount ?? ""),
+              currencyIsoCode: formData?.currency,
+            },
+            subscriptionItems: [], // TODO: Add subscription items UI
+            estimatedDeliveryTimeDays: formData?.estimatedDeliveryTimeDays
+              ? formData.estimatedDeliveryTimeDays
+              : undefined,
+          },
+          path: {
+            adminUserId: user?.userId ?? "",
+          },
+        });
+      }
     } catch (error) {
-      console.error({ error }, "creating subscription plan");
+      console.error({ error }, editingSubscription ? "updating" : "creating subscription plan");
     } finally {
       setLoading(false);
     }
   };
 
   const handleEdit = (subscription: ordersgrpcSubscription) => {
-    // TODO: Implement edit when UpdateSubscriptionPlan endpoint is added
-    toast({
-      title: "Edit not available",
-      description: "Subscription plan editing will be available soon.",
+    setEditingSubscription(subscription);
+    setFormData({
+      name: subscription?.title ?? "",
+      amount: subscription?.amount?.value?.toString() ?? "",
+      currency: subscription?.amount?.currencyIsoCode ?? "XAF",
+      description: subscription?.description ?? "",
+      duration: subscription?.duration?.toString() ?? "",
+      estimatedDeliveryTimeDays: subscription?.estimatedDeliveryTimeDays?.toString() ?? "",
     });
+    setIsDialogOpen(true);
   };
 
   const handleDelete = (subscription: ordersgrpcSubscription) => {
@@ -156,21 +191,23 @@ export default function SubscriptionsPage() {
         description: "",
         currency: "XAF",
         duration: "",
+        estimatedDeliveryTimeDays: "",
       });
       setEditingSubscription(undefined);
       setIsDialogOpen(false);
+      refetch();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Error creating subscription",
         description:
-          error?.response?.data?.message ?? "An unkonwn error occured",
+          error?.response?.data?.message ?? "An unknown error occurred",
       });
     },
   });
 
   const { mutateAsync: updateSubscription } = useMutation({
-    ...usersUpdateSubscriptionMutation(),
+    ...ordersUpdateSubscriptionPlanMutation(),
     onSuccess: () => {
       toast({
         title: "Subscription updated",
@@ -183,15 +220,17 @@ export default function SubscriptionsPage() {
         description: "",
         currency: "XAF",
         duration: "",
+        estimatedDeliveryTimeDays: "",
       });
       setEditingSubscription(undefined);
       setIsDialogOpen(false);
+      refetch();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Error updating subscription",
         description:
-          error?.response?.data?.message ?? "An unkonwn error occured",
+          error?.response?.data?.message ?? "An unknown error occurred",
       });
     },
   });
@@ -359,10 +398,9 @@ export default function SubscriptionsPage() {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className={`${
-                      loading &&
+                    className={`${loading &&
                       "bg-gray-500 hover:bg-grey-500 hover:cursor-not-allowed bg-opacity-80"
-                    }`}
+                      }`}
                   >
                     {editingSubscription
                       ? "Update Subscription"
@@ -385,7 +423,7 @@ export default function SubscriptionsPage() {
             </CardTitle>
             <CardDescription>
               Total subscription types:{" "}
-              {subscriptionsData?.subscriptions?.length ?? 0}
+              {subscriptionsData?.subscriptionPlans?.length ?? 0}
             </CardDescription>
           </CardHeader>
           <CardContent className="overflow-x-auto">
@@ -404,13 +442,12 @@ export default function SubscriptionsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {subscriptionsData?.subscriptions?.map((subscription) => (
+                {subscriptionsData?.subscriptionPlans?.map((subscription) => (
                   <TableRow key={subscription?.id}>
                     <TableCell className="font-medium">
                       {subscription?.title}
                       <div className="md:hidden mt-1 text-xs text-gray-500">
-                        {Math.round(parseInt(subscription.duration ?? "0") / 7)}{" "}
-                        weeks
+                        {subscription?.duration ?? 0} weeks
                       </div>
                     </TableCell>
                     <TableCell>
@@ -422,8 +459,7 @@ export default function SubscriptionsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      {Math.round(parseInt(subscription.duration ?? "0") / 7)}{" "}
-                      weeks
+                      {subscription?.duration ?? 0} weeks
                     </TableCell>
                     <TableCell className="hidden lg:table-cell">
                       {"Admin"}
@@ -434,8 +470,7 @@ export default function SubscriptionsPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleEdit(subscription)}
-                          disabled
-                          title="Edit functionality coming soon"
+                          title="Edit subscription"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -454,6 +489,11 @@ export default function SubscriptionsPage() {
                 ))}
               </TableBody>
             </Table>
+            {subscriptionsData?.subscriptionPlans?.length === 0 && !isSubscriptionsLoading && (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No subscription plans found</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

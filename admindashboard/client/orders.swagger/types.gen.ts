@@ -188,6 +188,10 @@ export type ordersgrpcListPaymentsResponse = {
     nextKey?: string;
 };
 
+export type ordersgrpcListSubscriptionPlansResponse = {
+    subscriptionPlans?: Array<ordersgrpcSubscription>;
+};
+
 export type ordersgrpcListTotalCommissionAmountByReferrerResponse = {
     commissions?: Array<typesAmount>;
 };
@@ -287,6 +291,7 @@ export type ordersgrpcSubscription = {
     subscriptionItems?: Array<ordersgrpcSubscriptionItem>;
     createdAt?: string;
     updatedAt?: string;
+    estimatedDeliveryTimeDays?: string;
 };
 
 export type ordersgrpcSubscriptionItem = {
@@ -300,6 +305,10 @@ export type ordersgrpcSubscriptionItem = {
 };
 
 export type ordersgrpcUpdateDeliveryPointResponse = unknown;
+
+export type ordersgrpcUpdateSubscriptionPlanResponse = {
+    subscriptionPlan?: ordersgrpcSubscription;
+};
 
 export type ordersgrpcUserSubscription = {
     id?: string;
@@ -336,6 +345,15 @@ export type OrdersUpdateDeliveryPointBody = {
     address?: typesPoint;
     city?: string;
     deliveryPointName?: string;
+};
+
+export type OrdersUpdateSubscriptionPlanBody = {
+    title?: string;
+    description?: string;
+    amount?: typesAmount;
+    duration?: string;
+    subscriptionItems?: Array<ordersgrpcSubscriptionItem>;
+    estimatedDeliveryTimeDays?: string;
 };
 
 export type protobufAny = {
@@ -424,6 +442,28 @@ export type OrdersListOrdersDueSoonData = {
 export type OrdersListOrdersDueSoonResponse = (ordersgrpcListOrdersDueSoonResponse);
 
 export type OrdersListOrdersDueSoonError = (rpcStatus);
+
+export type OrdersListSubscriptionPlansData = {
+    path: {
+        adminUserId: string;
+    };
+};
+
+export type OrdersListSubscriptionPlansResponse = (ordersgrpcListSubscriptionPlansResponse);
+
+export type OrdersListSubscriptionPlansError = (rpcStatus);
+
+export type OrdersUpdateSubscriptionPlanData = {
+    body: OrdersUpdateSubscriptionPlanBody;
+    path: {
+        adminUserId: string;
+        subscriptionPlanId: string;
+    };
+};
+
+export type OrdersUpdateSubscriptionPlanResponse = (ordersgrpcUpdateSubscriptionPlanResponse);
+
+export type OrdersUpdateSubscriptionPlanError = (rpcStatus);
 
 export type OrdersCreateDeliveryPointData = {
     body: OrdersCreateDeliveryPointBody;

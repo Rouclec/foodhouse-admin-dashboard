@@ -2539,12 +2539,21 @@ func (i *Impl) CreateSubscriptionPlan(
 	}()
 
 	// 1. Create the subscription
+	var estimatedDeliveryTime pgtype.Interval
+	if req.EstimatedDeliveryTimeDays != nil && *req.EstimatedDeliveryTimeDays > 0 {
+		estimatedDeliveryTime = pgtype.Interval{
+			Days:  int32(*req.EstimatedDeliveryTimeDays),
+			Valid: true,
+		}
+	}
+
 	subscription, err := querier.CreateSubscription(ctx, sqlc.CreateSubscriptionParams{
-		Title:           req.GetTitle(),
-		Description:     req.GetDescription(),
-		Amount:          int64(req.GetAmount().GetValue()),
-		CurrencyIsoCode: req.GetAmount().GetCurrencyIsoCode(),
-		Duration:        pgtype.Interval{Microseconds: req.GetDuration() * 24 * 60 * 60 * OneMillion, Valid: true},
+		Title:                 req.GetTitle(),
+		Description:           req.GetDescription(),
+		Amount:                int64(req.GetAmount().GetValue()),
+		CurrencyIsoCode:       req.GetAmount().GetCurrencyIsoCode(),
+		Duration:              pgtype.Interval{Microseconds: req.GetDuration() * 7 * 24 * 60 * 60 * OneMillion, Valid: true}, // duration is in weeks
+		EstimatedDeliveryTime: estimatedDeliveryTime,
 	})
 
 	if err != nil {
@@ -2588,24 +2597,8 @@ func (i *Impl) CreateSubscriptionPlan(
 		return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
 	}
 
-	totalDays := int64(subscription.Duration.Months)*30 +
-		int64(subscription.Duration.Days) +
-		subscription.Duration.Microseconds/(24*60*60*OneMillion)
-
 	return &ordersgrpc.CreateSubscriptionPlanResponse{
-		SubscriptionPlan: &ordersgrpc.Subscription{
-			Id:          subscription.ID,
-			Description: subscription.Description,
-			Title:       subscription.Title,
-			Duration:    int64(math.Round(float64(totalDays) / 4)),
-			Amount: &types.Amount{
-				Value:           float64(subscription.Amount),
-				CurrencyIsoCode: subscription.CurrencyIsoCode,
-			},
-			CreatedAt:         timestamppb.New(subscription.CreatedAt.Time),
-			UpdatedAt:         timestamppb.New(subscription.UpdatedAt.Time),
-			SubscriptionItems: subItems,
-		},
+		SubscriptionPlan: converters.SqlcSubscriptionToProto(subscription, subItems),
 	}, nil
 }
 

@@ -417,6 +417,8 @@ message Subscription {
   repeated SubscriptionItem subscription_items = 6;
   google.protobuf.Timestamp created_at = 7;
   google.protobuf.Timestamp updated_at = 8;
+  // estimated_delivery_time in days
+  optional int64 estimated_delivery_time_days = 9;
 }
 
 message UserSubscription {
@@ -449,6 +451,29 @@ message CreateSubscriptionPlanRequest {
 }
 
 message CreateSubscriptionPlanResponse { Subscription subscription_plan = 1; }
+
+message UpdateSubscriptionPlanRequest {
+  string subscription_plan_id = 1;
+  optional string title = 2;
+  optional string description = 3;
+  optional types.Amount amount = 4;
+  // duration in weeks
+  optional int64 duration = 5;
+  repeated SubscriptionItem subscription_items = 6;
+  string admin_user_id = 7;
+  // estimated_delivery_time in days
+  optional int64 estimated_delivery_time_days = 8;
+}
+
+message UpdateSubscriptionPlanResponse { Subscription subscription_plan = 1; }
+
+message ListSubscriptionPlansRequest {
+  string admin_user_id = 1;
+}
+
+message ListSubscriptionPlansResponse {
+  repeated Subscription subscription_plans = 1;
+}
 
 message SubscribeRequest {
   string user_id = 1;
@@ -684,6 +709,21 @@ service Orders {
     option (google.api.http) = {
       post : "/v1/admin/{admin_user_id}/orders/create-subscription-plan"
       body : "*"
+    };
+  }
+
+  rpc UpdateSubscriptionPlan(UpdateSubscriptionPlanRequest)
+      returns (UpdateSubscriptionPlanResponse) {
+    option (google.api.http) = {
+      put : "/v1/admin/{admin_user_id}/orders/{subscription_plan_id}/update-subscription-plan"
+      body : "*"
+    };
+  }
+
+  rpc ListSubscriptionPlans(ListSubscriptionPlansRequest)
+      returns (ListSubscriptionPlansResponse) {
+    option (google.api.http) = {
+      get : "/v1/admin/{admin_user_id}/orders/list-subscription-plans"
     };
   }
 

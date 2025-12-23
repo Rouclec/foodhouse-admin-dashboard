@@ -3,6 +3,7 @@ package converters
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 
 	"github.com/foodhouse/foodhouseapp/grpc/go/ordersgrpc"
 	"github.com/foodhouse/foodhouseapp/grpc/go/types"
@@ -11,6 +12,8 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
+
+const OneMillion = 1000000
 
 func derefFloat(f *float64) float64 {
 	if f != nil {
@@ -483,7 +486,6 @@ func SqlcUserSubscriptionToProto(sub sqlc.UserSubscription) *ordersgrpc.UserSubs
 
 	var estimatedDeliveryTimeDays *int64
 	if sub.EstimatedDeliveryTime.Valid {
-		const OneMillion = 1000000
 		totalDays := int64(sub.EstimatedDeliveryTime.Months)*30 +
 			int64(sub.EstimatedDeliveryTime.Days) +
 			sub.EstimatedDeliveryTime.Microseconds/(24*60*60*OneMillion)
@@ -518,6 +520,44 @@ func SqlcUserSubscriptionToProto(sub sqlc.UserSubscription) *ordersgrpc.UserSubs
 	}
 	if sub.DailyDeliveryLimit != nil {
 		result.DailyDeliveryLimit = sub.DailyDeliveryLimit
+	}
+
+	return result
+}
+
+func SqlcSubscriptionToProto(sub sqlc.Subscription, items []*ordersgrpc.SubscriptionItem) *ordersgrpc.Subscription {
+	totalDays := int64(sub.Duration.Months)*30 +
+		int64(sub.Duration.Days) +
+		sub.Duration.Microseconds/(24*60*60*OneMillion)
+
+	var estimatedDeliveryTimeDays *int64
+	if sub.EstimatedDeliveryTime.Valid {
+		totalEstDays := int64(sub.EstimatedDeliveryTime.Months)*30 +
+			int64(sub.EstimatedDeliveryTime.Days) +
+			sub.EstimatedDeliveryTime.Microseconds/(24*60*60*OneMillion)
+		estimatedDeliveryTimeDays = &totalEstDays
+	}
+
+	result := &ordersgrpc.Subscription{
+		Id:          sub.ID,
+		Title:       sub.Title,
+		Description: sub.Description,
+		Duration:    int64(math.Round(float64(totalDays) / 7)), // Convert days to weeks
+		Amount: &types.Amount{
+			Value:           float64(sub.Amount),
+			CurrencyIsoCode: sub.CurrencyIsoCode,
+		},
+		SubscriptionItems: items,
+	}
+
+	if sub.CreatedAt.Valid {
+		result.CreatedAt = timestamppb.New(sub.CreatedAt.Time)
+	}
+	if sub.UpdatedAt.Valid {
+		result.UpdatedAt = timestamppb.New(sub.UpdatedAt.Time)
+	}
+	if estimatedDeliveryTimeDays != nil {
+		result.EstimatedDeliveryTimeDays = estimatedDeliveryTimeDays
 	}
 
 	return result
