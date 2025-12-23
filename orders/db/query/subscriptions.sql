@@ -4,9 +4,9 @@ VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING *;
 
 -- name: CreateSubscriptionItem :one
-INSERT INTO subscription_items (subscription_id, product, quantity, unit_type)
-values ($1, $2, $3, $4)
-RETURNING *;
+INSERT INTO subscription_items (subscription_id, product, quantity, unit_type, order_index)
+values ($1, $2, $3, $4, $5)
+RETURNING id, subscription_id, product, quantity, unit_type, order_index;
 
 -- name: DeleteSubscriptionItem :exec
 DELETE FROM subscription_items where id = $1;
@@ -58,7 +58,7 @@ SET active = true, updated_at = now()
 WHERE public_id = $1;
 
 -- name: GetSubscriptionItemsBySubscriptionID :many
-SELECT * FROM subscription_items WHERE subscription_id = $1;
+SELECT * FROM subscription_items WHERE subscription_id = $1 ORDER BY order_index ASC, id ASC;
 
 -- name: ListUserSubscriptionsByUserID :many
 SELECT * FROM user_subscriptions WHERE user_id = $1 ORDER BY created_at DESC;
@@ -90,3 +90,22 @@ ORDER BY o.expected_delivery_date ASC;
 
 -- name: GetUserSubscriptionsBySubscriptionID :many
 SELECT * FROM user_subscriptions WHERE subscription_id = $1;
+
+-- name: ListAllActiveUserSubscriptions :many
+SELECT 
+    us.id, us.public_id, us.user_id, us.subscription_id, us.active, us.created_at, us.updated_at, us.expires_at, us.progress, us.amount, us.currency_iso_code, us.estimated_delivery_time, us.is_custom, us.daily_delivery_limit,
+    MIN(o.expected_delivery_date)::timestamptz as soonest_delivery_date
+FROM user_subscriptions us
+LEFT JOIN orders o ON o.user_subscription_id = us.id
+    AND o.status NOT IN ('OrderStatus_DELIVERED', 'OrderStatus_REJECTED', 'OrderStatus_CANCELLED')
+    AND o.expected_delivery_date IS NOT NULL
+WHERE us.active = true 
+GROUP BY us.id, us.public_id, us.user_id, us.subscription_id, us.active, us.created_at, us.updated_at, us.expires_at, us.progress, us.amount, us.currency_iso_code, us.estimated_delivery_time, us.is_custom, us.daily_delivery_limit
+ORDER BY 
+    CASE 
+        WHEN MIN(o.expected_delivery_date) IS NULL THEN 1
+        WHEN MIN(o.expected_delivery_date) < NOW() THEN 0
+        ELSE 2
+    END,
+    MIN(o.expected_delivery_date) ASC NULLS LAST,
+    us.created_at DESC;

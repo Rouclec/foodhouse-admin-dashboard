@@ -7,6 +7,7 @@ package sqlc
 
 import (
 	"context"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -62,9 +63,9 @@ func (q *Queries) CreateSubscription(ctx context.Context, arg CreateSubscription
 }
 
 const createSubscriptionItem = `-- name: CreateSubscriptionItem :one
-INSERT INTO subscription_items (subscription_id, product, quantity, unit_type)
-values ($1, $2, $3, $4)
-RETURNING id, subscription_id, product, quantity, unit_type
+INSERT INTO subscription_items (subscription_id, product, quantity, unit_type, order_index)
+values ($1, $2, $3, $4, $5)
+RETURNING id, subscription_id, product, quantity, unit_type, order_index
 `
 
 type CreateSubscriptionItemParams struct {
@@ -72,6 +73,7 @@ type CreateSubscriptionItemParams struct {
 	Product        string `json:"product"`
 	Quantity       int32  `json:"quantity"`
 	UnitType       string `json:"unit_type"`
+	OrderIndex     int32  `json:"order_index"`
 }
 
 func (q *Queries) CreateSubscriptionItem(ctx context.Context, arg CreateSubscriptionItemParams) (SubscriptionItem, error) {
@@ -80,6 +82,7 @@ func (q *Queries) CreateSubscriptionItem(ctx context.Context, arg CreateSubscrip
 		arg.Product,
 		arg.Quantity,
 		arg.UnitType,
+		arg.OrderIndex,
 	)
 	var i SubscriptionItem
 	err := row.Scan(
@@ -88,6 +91,7 @@ func (q *Queries) CreateSubscriptionItem(ctx context.Context, arg CreateSubscrip
 		&i.Product,
 		&i.Quantity,
 		&i.UnitType,
+		&i.OrderIndex,
 	)
 	return i, err
 }
@@ -240,7 +244,7 @@ func (q *Queries) GetSubscriptionForUpdate(ctx context.Context, id string) (Subs
 }
 
 const getSubscriptionItemsBySubscriptionID = `-- name: GetSubscriptionItemsBySubscriptionID :many
-SELECT id, subscription_id, product, quantity, unit_type FROM subscription_items WHERE subscription_id = $1
+SELECT id, subscription_id, product, quantity, unit_type, order_index FROM subscription_items WHERE subscription_id = $1 ORDER BY order_index ASC, id ASC
 `
 
 func (q *Queries) GetSubscriptionItemsBySubscriptionID(ctx context.Context, subscriptionID string) ([]SubscriptionItem, error) {
@@ -258,6 +262,7 @@ func (q *Queries) GetSubscriptionItemsBySubscriptionID(ctx context.Context, subs
 			&i.Product,
 			&i.Quantity,
 			&i.UnitType,
+			&i.OrderIndex,
 		); err != nil {
 			return nil, err
 		}
@@ -349,6 +354,80 @@ func (q *Queries) GetUserSubscriptionsBySubscriptionID(ctx context.Context, subs
 			&i.EstimatedDeliveryTime,
 			&i.IsCustom,
 			&i.DailyDeliveryLimit,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listAllActiveUserSubscriptions = `-- name: ListAllActiveUserSubscriptions :many
+SELECT 
+    us.id, us.public_id, us.user_id, us.subscription_id, us.active, us.created_at, us.updated_at, us.expires_at, us.progress, us.amount, us.currency_iso_code, us.estimated_delivery_time, us.is_custom, us.daily_delivery_limit,
+    MIN(o.expected_delivery_date)::timestamptz as soonest_delivery_date
+FROM user_subscriptions us
+LEFT JOIN orders o ON o.user_subscription_id = us.id
+    AND o.status NOT IN ('OrderStatus_DELIVERED', 'OrderStatus_REJECTED', 'OrderStatus_CANCELLED')
+    AND o.expected_delivery_date IS NOT NULL
+WHERE us.active = true 
+GROUP BY us.id, us.public_id, us.user_id, us.subscription_id, us.active, us.created_at, us.updated_at, us.expires_at, us.progress, us.amount, us.currency_iso_code, us.estimated_delivery_time, us.is_custom, us.daily_delivery_limit
+ORDER BY 
+    CASE 
+        WHEN MIN(o.expected_delivery_date) IS NULL THEN 1
+        WHEN MIN(o.expected_delivery_date) < NOW() THEN 0
+        ELSE 2
+    END,
+    MIN(o.expected_delivery_date) ASC NULLS LAST,
+    us.created_at DESC
+`
+
+type ListAllActiveUserSubscriptionsRow struct {
+	ID                    int64              `json:"id"`
+	PublicID              string             `json:"public_id"`
+	UserID                string             `json:"user_id"`
+	SubscriptionID        string             `json:"subscription_id"`
+	Active                bool               `json:"active"`
+	CreatedAt             pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt             pgtype.Timestamptz `json:"updated_at"`
+	ExpiresAt             pgtype.Timestamptz `json:"expires_at"`
+	Progress              *float64           `json:"progress"`
+	Amount                int64              `json:"amount"`
+	CurrencyIsoCode       string             `json:"currency_iso_code"`
+	EstimatedDeliveryTime pgtype.Interval    `json:"estimated_delivery_time"`
+	IsCustom              bool               `json:"is_custom"`
+	DailyDeliveryLimit    *int64             `json:"daily_delivery_limit"`
+	SoonestDeliveryDate   time.Time          `json:"soonest_delivery_date"`
+}
+
+func (q *Queries) ListAllActiveUserSubscriptions(ctx context.Context) ([]ListAllActiveUserSubscriptionsRow, error) {
+	rows, err := q.db.Query(ctx, listAllActiveUserSubscriptions)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListAllActiveUserSubscriptionsRow{}
+	for rows.Next() {
+		var i ListAllActiveUserSubscriptionsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.PublicID,
+			&i.UserID,
+			&i.SubscriptionID,
+			&i.Active,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.ExpiresAt,
+			&i.Progress,
+			&i.Amount,
+			&i.CurrencyIsoCode,
+			&i.EstimatedDeliveryTime,
+			&i.IsCustom,
+			&i.DailyDeliveryLimit,
+			&i.SoonestDeliveryDate,
 		); err != nil {
 			return nil, err
 		}

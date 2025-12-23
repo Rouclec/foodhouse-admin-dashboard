@@ -11,8 +11,9 @@ export type OrdersConfirmDeliveryBody = unknown;
 export type OrdersCreateCustomSubscriptionBody = {
     budget?: typesAmount;
     subscriptionItems?: Array<ordersgrpcSubscriptionItem>;
-    dailyDeliveryLimit?: string;
+    maxAmountPerOrder?: string;
     deliveryLocation?: typesPoint;
+    estimatedDeliveryTimeDays?: string;
 };
 
 export type OrdersCreateDeliveryPointBody = {
@@ -153,6 +154,10 @@ export type ordersgrpcHealthCheckResponse = unknown;
 
 export type ordersgrpcInitiatePaymentResponse = {
     payment?: ordersgrpcPayment;
+};
+
+export type ordersgrpcListAllActiveSubscriptionsResponse = {
+    subscriptions?: Array<ordersgrpcUserSubscription>;
 };
 
 export type ordersgrpcListCommissionsByReferrerResponse = {
@@ -302,6 +307,11 @@ export type ordersgrpcSubscriptionItem = {
     productUnitPrice?: typesAmount;
     unitType?: string;
     subscriptionId?: string;
+    /**
+     * order_index indicates which order (delivery) this item belongs to.
+     * 0 = first order, 1 = second order, etc. Defaults to 0 for single-order subscriptions.
+     */
+    orderIndex?: number;
 };
 
 export type ordersgrpcUpdateDeliveryPointResponse = unknown;
@@ -324,6 +334,7 @@ export type ordersgrpcUserSubscription = {
     estimatedDeliveryTimeDays?: string;
     isCustom?: boolean;
     dailyDeliveryLimit?: string;
+    soonestDeliveryDate?: string;
 };
 
 export type OrdersInitiatePaymentBody = {
@@ -376,6 +387,22 @@ export type typesPoint = {
     lat?: number;
     address?: string;
 };
+
+export type OrdersListAllActiveSubscriptionsData = {
+    path: {
+        adminUserId: string;
+    };
+    query?: {
+        /**
+         * Optional: filter by active status (defaults to true if not specified)
+         */
+        activeOnly?: boolean;
+    };
+};
+
+export type OrdersListAllActiveSubscriptionsResponse = (ordersgrpcListAllActiveSubscriptionsResponse);
+
+export type OrdersListAllActiveSubscriptionsError = (rpcStatus);
 
 export type OrdersBulkSettleCommissionsData = {
     body: OrdersBulkSettleCommissionsBody;
@@ -554,6 +581,16 @@ export type OrdersConfirmPaymentError = (rpcStatus);
 export type OrdersHealthCheckResponse = (ordersgrpcHealthCheckResponse);
 
 export type OrdersHealthCheckError = (rpcStatus);
+
+export type OrdersListSubscriptionPlans2Data = {
+    query?: {
+        adminUserId?: string;
+    };
+};
+
+export type OrdersListSubscriptionPlans2Response = (ordersgrpcListSubscriptionPlansResponse);
+
+export type OrdersListSubscriptionPlans2Error = (rpcStatus);
 
 export type OrdersGetFarmerEarningsData = {
     path: {

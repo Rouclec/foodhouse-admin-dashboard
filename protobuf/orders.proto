@@ -405,6 +405,9 @@ message SubscriptionItem {
   types.Amount product_unit_price = 6;
   string unit_type = 7;
   string subscription_id = 8;
+  // order_index indicates which order (delivery) this item belongs to.
+  // 0 = first order, 1 = second order, etc. Defaults to 0 for single-order subscriptions.
+  int32 order_index = 9;
 }
 
 message Subscription {
@@ -436,6 +439,8 @@ message UserSubscription {
   optional int64 estimated_delivery_time_days = 11;
   bool is_custom = 12;
   optional int64 daily_delivery_limit = 13;
+  // The soonest expected delivery date from associated orders (for admin sorting/coloring)
+  optional google.protobuf.Timestamp soonest_delivery_date = 14;
 }
 
 message CreateSubscriptionPlanRequest {
@@ -499,6 +504,16 @@ message GetUserSubscriptionDetailsResponse {
   repeated Order orders = 2;
 }
 
+message ListAllActiveSubscriptionsRequest {
+  string admin_user_id = 1;
+  // Optional: filter by active status (defaults to true if not specified)
+  optional bool active_only = 2;
+}
+
+message ListAllActiveSubscriptionsResponse {
+  repeated UserSubscription subscriptions = 1;
+}
+
 message ListOrdersDueSoonRequest {
   string admin_user_id = 1;
   int64 days = 2; // Number of days to look ahead
@@ -510,8 +525,11 @@ message CreateCustomSubscriptionRequest {
   string user_id = 1;
   types.Amount budget = 2;
   repeated SubscriptionItem subscription_items = 3;
-  int64 daily_delivery_limit = 4; // Daily delivery limit in cents
+  // Maximum amount per order (in cents). Default 5000000 (50k XAF) if not specified
+  optional int64 max_amount_per_order = 4; 
   types.Point delivery_location = 5;
+  // estimated_delivery_time in days - will be automatically calculated based on number of orders
+  optional int64 estimated_delivery_time_days = 6;
 }
 
 message CreateCustomSubscriptionResponse { UserSubscription subscription = 1; }
@@ -719,6 +737,9 @@ service Orders {
       returns (ListSubscriptionPlansResponse) {
     option (google.api.http) = {
       get : "/v1/admin/{admin_user_id}/orders/list-subscription-plans"
+      additional_bindings {
+        get : "/v1/public/orders/list-subscription-plans"
+      }
     };
   }
 
@@ -740,6 +761,13 @@ service Orders {
       returns (GetUserSubscriptionDetailsResponse) {
     option (google.api.http) = {
       get : "/v1/users/{user_id}/orders/subscriptions/{subscription_id}"
+    };
+  }
+
+  rpc ListAllActiveSubscriptions(ListAllActiveSubscriptionsRequest)
+      returns (ListAllActiveSubscriptionsResponse) {
+    option (google.api.http) = {
+      get : "/v1/admin/{admin_user_id}/orders/all-active-subscriptions"
     };
   }
 

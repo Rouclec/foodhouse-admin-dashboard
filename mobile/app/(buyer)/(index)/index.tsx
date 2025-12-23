@@ -16,6 +16,10 @@ import {
   productsListCategoriesOptions,
   productsListProductsOptions,
 } from '@/client/products.swagger/@tanstack/react-query.gen';
+import {
+  ordersListSubscriptionPlansOptions,
+} from '@/client/orders.swagger/@tanstack/react-query.gen';
+import { ordersgrpcSubscription } from '@/client/orders.swagger';
 import { useContext } from 'react';
 import { Context, ContextType } from '@/app/_layout';
 import {
@@ -106,6 +110,18 @@ export default function BuyerProducts() {
   const { data: categories, isLoading: isCategoriesLoading } = useQuery({
     ...productsListCategoriesOptions(),
     placeholderData: keepPreviousData,
+  });
+
+  // Fetch subscription plans for the slider
+  const {
+    data: subscriptionPlansData,
+    isLoading: isSubscriptionPlansLoading,
+  } = useQuery({
+    ...ordersListSubscriptionPlansOptions({
+      path: {
+        adminUserId: user?.userId ?? '', // Can be any user ID, endpoint doesn't check admin status
+      },
+    }),
   });
   const { isLoading: isProductsLoading, data } = useQuery({
     ...productsListProductsOptions({
@@ -284,6 +300,121 @@ export default function BuyerProducts() {
               </View>
             </SafeAreaView>
           </View>
+          {/* Subscription Plans Slider */}
+          {subscriptionPlansData?.subscriptionPlans &&
+            subscriptionPlansData.subscriptionPlans.length > 0 && (
+              <>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    paddingHorizontal: 24,
+                    marginTop: 16,
+                  }}>
+                  <Text variant="titleMedium" style={[styles.title]}>
+                    Subscription Plans
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => router.push('/(buyer)/subscription-plans')}>
+                    <Text
+                      style={{
+                        color: Colors.primary[500],
+                        fontSize: 14,
+                        fontWeight: '600',
+                      }}>
+                      More
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                {isSubscriptionPlansLoading ? (
+                  <View style={defaultStyles.center}>
+                    <Chase size={24} color={Colors.primary[500]} />
+                  </View>
+                ) : (
+                  <View style={[styles.flatListContainer, { marginBottom: 8 }]}>
+                    <FlatList
+                      horizontal
+                      data={subscriptionPlansData.subscriptionPlans.slice(0, 4)}
+                      contentContainerStyle={[
+                        styles.horizontailFlatListContent,
+                        styles.paddingRight24,
+                      ]}
+                      showsHorizontalScrollIndicator={false}
+                      style={[styles.horizontalFlatList, styles.paddingLeft24]}
+                      keyExtractor={(item, index) =>
+                        item?.id ?? index.toString()
+                      }
+                      renderItem={({ item }) => {
+                        const plan = item as ordersgrpcSubscription;
+                        return (
+                          <TouchableOpacity
+                            style={[
+                              {
+                                backgroundColor: Colors.light[10],
+                                borderRadius: 12,
+                                padding: 16,
+                                marginRight: 12,
+                                width: width * 0.7,
+                                borderWidth: 1,
+                                borderColor: Colors.grey['f8'],
+                              },
+                            ]}
+                            onPress={() =>
+                              router.push({
+                                pathname: '/(buyer)/subscription-plans',
+                                params: { planId: plan?.id },
+                              })
+                            }>
+                            <Text
+                              style={{
+                                fontSize: 16,
+                                fontWeight: '600',
+                                color: Colors.dark[10],
+                                marginBottom: 4,
+                              }}>
+                              {plan?.title}
+                            </Text>
+                            <Text
+                              style={{
+                                fontSize: 12,
+                                color: Colors.light['10.87'],
+                                marginBottom: 8,
+                              }}
+                              numberOfLines={2}>
+                              {plan?.description}
+                            </Text>
+                            <Text
+                              style={{
+                                fontSize: 18,
+                                fontWeight: '700',
+                                color: Colors.primary[500],
+                              }}>
+                              {plan?.amount?.currencyIsoCode}{' '}
+                              {plan?.amount?.value?.toLocaleString()}
+                            </Text>
+                            {plan?.subscriptionItems &&
+                              plan.subscriptionItems.length > 0 && (
+                                <Text
+                                  style={{
+                                    fontSize: 11,
+                                    color: Colors.light['10.87'],
+                                    marginTop: 4,
+                                  }}>
+                                  {plan.subscriptionItems.length} product
+                                  {plan.subscriptionItems.length !== 1
+                                    ? 's'
+                                    : ''}
+                                </Text>
+                              )}
+                          </TouchableOpacity>
+                        );
+                      }}
+                    />
+                  </View>
+                )}
+              </>
+            )}
           <Text
             variant="titleMedium"
             style={[styles.title, styles.marginHorizontal24]}>

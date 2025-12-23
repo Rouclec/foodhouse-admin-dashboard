@@ -104,6 +104,8 @@ type SubscriptionItem struct {
 	Product        string `json:"product"`
 	Quantity       int32  `json:"quantity"`
 	UnitType       string `json:"unit_type"`
+	// Index indicating which order (delivery) this item belongs to. 0 = first order, 1 = second order, etc.
+	OrderIndex int32 `json:"order_index"`
 }
 
 type UserSubscription struct {

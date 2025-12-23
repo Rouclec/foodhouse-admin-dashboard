@@ -558,6 +558,21 @@ func (mr *MockQuerierMockRecorder) GetUserSubscriptionsBySubscriptionID(ctx, sub
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserSubscriptionsBySubscriptionID", reflect.TypeOf((*MockQuerier)(nil).GetUserSubscriptionsBySubscriptionID), ctx, subscriptionID)
 }
 
+// ListAllActiveUserSubscriptions mocks base method.
+func (m *MockQuerier) ListAllActiveUserSubscriptions(ctx context.Context) ([]sqlc.ListAllActiveUserSubscriptionsRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListAllActiveUserSubscriptions", ctx)
+	ret0, _ := ret[0].([]sqlc.ListAllActiveUserSubscriptionsRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListAllActiveUserSubscriptions indicates an expected call of ListAllActiveUserSubscriptions.
+func (mr *MockQuerierMockRecorder) ListAllActiveUserSubscriptions(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAllActiveUserSubscriptions", reflect.TypeOf((*MockQuerier)(nil).ListAllActiveUserSubscriptions), ctx)
+}
+
 // ListCommissionsByReferrer mocks base method.
 func (m *MockQuerier) ListCommissionsByReferrer(ctx context.Context, arg sqlc.ListCommissionsByReferrerParams) ([]sqlc.Commission, error) {
 	m.ctrl.T.Helper()

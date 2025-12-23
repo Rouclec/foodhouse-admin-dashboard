@@ -42,7 +42,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, CreditCard, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Context, ContextType } from "@/app/contexts/QueryProvider";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ordersCreateSubscriptionPlanMutation,
   ordersListSubscriptionPlansOptions,
@@ -50,11 +50,18 @@ import {
 } from "@/client/orders.swagger/@tanstack/react-query.gen";
 import { ordersgrpcSubscription } from "@/client/orders.swagger";
 import { formatCurrency } from "@/utils";
+import {
+  productsListProductsOptions,
+} from "@/client/products.swagger/@tanstack/react-query.gen";
+import { productsgrpcProduct } from "@/client/products.swagger";
+import { productsGetProduct } from "@/client/products.swagger/sdk.gen";
+import { X } from "lucide-react";
 
 const currencies = ["XAF", "TZS", "USD"];
 
 export default function SubscriptionsPage() {
   const { user } = useContext(Context) as ContextType;
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
 
   const {
@@ -87,6 +94,38 @@ export default function SubscriptionsPage() {
     duration: "",
     estimatedDeliveryTimeDays: "",
   });
+
+  // Subscription items state: each item has productId, quantity, orderIndex
+  type SubscriptionItem = {
+    productId: string;
+    quantity: number;
+    orderIndex: number;
+    product?: productsgrpcProduct; // Enriched product data
+  };
+  const [subscriptionItems, setSubscriptionItems] = useState<SubscriptionItem[]>([]);
+  const [selectedProductId, setSelectedProductId] = useState<string>("");
+  const [selectedQuantity, setSelectedQuantity] = useState<string>("1");
+  const [selectedOrderIndex, setSelectedOrderIndex] = useState<number>(0);
+
+  // Fetch products for selection
+  const {
+    data: productsData,
+    isLoading: isProductsLoading,
+  } = useQuery({
+    ...productsListProductsOptions({
+      path: {
+        userId: user?.userId ?? "",
+      },
+      query: {
+        count: 100, // Get enough products to choose from
+        isApproved: true, // Only show approved products
+        "userLocation.address": "",
+        "userLocation.lat": 999.0,
+        "userLocation.lon": 999.0,
+      },
+    }),
+  });
+
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -105,7 +144,11 @@ export default function SubscriptionsPage() {
               value: parseFloat(formData?.amount ?? ""),
               currencyIsoCode: formData?.currency,
             },
-            subscriptionItems: [], // TODO: Add subscription items UI
+            subscriptionItems: subscriptionItems.map((item) => ({
+              productId: item.productId,
+              quantity: item.quantity.toString(),
+              orderIndex: item.orderIndex,
+            })),
             estimatedDeliveryTimeDays: formData?.estimatedDeliveryTimeDays
               ? formData.estimatedDeliveryTimeDays
               : undefined,
@@ -126,7 +169,11 @@ export default function SubscriptionsPage() {
               value: parseFloat(formData?.amount ?? ""),
               currencyIsoCode: formData?.currency,
             },
-            subscriptionItems: [], // TODO: Add subscription items UI
+            subscriptionItems: subscriptionItems.map((item) => ({
+              productId: item.productId,
+              quantity: item.quantity.toString(),
+              orderIndex: item.orderIndex,
+            })),
             estimatedDeliveryTimeDays: formData?.estimatedDeliveryTimeDays
               ? formData.estimatedDeliveryTimeDays
               : undefined,
@@ -143,7 +190,7 @@ export default function SubscriptionsPage() {
     }
   };
 
-  const handleEdit = (subscription: ordersgrpcSubscription) => {
+  const handleEdit = async (subscription: ordersgrpcSubscription) => {
     setEditingSubscription(subscription);
     setFormData({
       name: subscription?.title ?? "",
@@ -153,6 +200,39 @@ export default function SubscriptionsPage() {
       duration: subscription?.duration?.toString() ?? "",
       estimatedDeliveryTimeDays: subscription?.estimatedDeliveryTimeDays?.toString() ?? "",
     });
+
+    // Load subscription items and fetch product details
+    const subscriptionItemsData = subscription?.subscriptionItems ?? [];
+
+    // Fetch all products in parallel
+    const productPromises = subscriptionItemsData.map(async (si) => {
+      try {
+        const { data } = await productsGetProduct({
+          path: {
+            productId: si?.productId ?? "",
+          },
+          throwOnError: false,
+        });
+        return {
+          productId: si?.productId ?? "",
+          quantity: typeof si?.quantity === 'string' ? parseInt(si.quantity) : (si?.quantity ?? 1),
+          orderIndex: si?.orderIndex ?? 0,
+          product: data?.product as productsgrpcProduct,
+        };
+      } catch (error) {
+        console.error(`Error fetching product ${si?.productId}:`, error);
+        // Return item without product data if fetch fails
+        return {
+          productId: si?.productId ?? "",
+          quantity: typeof si?.quantity === 'string' ? parseInt(si.quantity) : (si?.quantity ?? 1),
+          orderIndex: si?.orderIndex ?? 0,
+          product: undefined,
+        };
+      }
+    });
+
+    const fetchedItems = await Promise.all(productPromises);
+    setSubscriptionItems(fetchedItems);
     setIsDialogOpen(true);
   };
 
@@ -174,6 +254,10 @@ export default function SubscriptionsPage() {
       duration: "",
       estimatedDeliveryTimeDays: "",
     });
+    setSubscriptionItems([]);
+    setSelectedProductId("");
+    setSelectedQuantity("1");
+    setSelectedOrderIndex(0);
     setIsDialogOpen(true);
   };
 
@@ -193,6 +277,10 @@ export default function SubscriptionsPage() {
         duration: "",
         estimatedDeliveryTimeDays: "",
       });
+      setSubscriptionItems([]);
+      setSelectedProductId("");
+      setSelectedQuantity("1");
+      setSelectedOrderIndex(0);
       setEditingSubscription(undefined);
       setIsDialogOpen(false);
       refetch();
@@ -222,6 +310,10 @@ export default function SubscriptionsPage() {
         duration: "",
         estimatedDeliveryTimeDays: "",
       });
+      setSubscriptionItems([]);
+      setSelectedProductId("");
+      setSelectedQuantity("1");
+      setSelectedOrderIndex(0);
       setEditingSubscription(undefined);
       setIsDialogOpen(false);
       refetch();
@@ -256,12 +348,12 @@ export default function SubscriptionsPage() {
                 Add Subscription
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-h-[90vh] flex flex-col min-w-[600px] max-w-[800px] w-full">
               <DialogHeader>
                 <DialogTitle>
                   {editingSubscription
-                    ? "Edit Subscription"
-                    : "Create New Subscription"}
+                    ? "Edit Subscription Plan"
+                    : "Create New Subscription Plan"}
                 </DialogTitle>
                 <DialogDescription>
                   {editingSubscription
@@ -269,8 +361,8 @@ export default function SubscriptionsPage() {
                     : "Add a new subscription type for users."}
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleSubmit}>
-                <div className="space-y-4 py-4">
+              <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+                <div className="space-y-4 py-4 px-1 overflow-y-auto flex-1">
                   <div className="space-y-2">
                     <Label htmlFor="name">Subscription Name</Label>
                     <Input
@@ -285,10 +377,10 @@ export default function SubscriptionsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="name">Description</Label>
+                    <Label htmlFor="description">Description</Label>
                     <Input
-                      id="name"
-                      placeholder="e.g. Access to basic features"
+                      id="description"
+                      placeholder="e.g., Weekly delivery of fresh vegetables"
                       value={formData.description}
                       onChange={(e) =>
                         setFormData({ ...formData, description: e.target.value })
@@ -367,6 +459,194 @@ export default function SubscriptionsPage() {
                     </div>
                   </div>
 
+                  {/* Subscription Products Section */}
+                  <div className="space-y-4 border-t pt-4">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-base font-semibold">
+                        Subscription Products
+                      </Label>
+                    </div>
+
+                    {/* Add Product Form */}
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-3">
+                      <div className="grid grid-cols-12 gap-2">
+                        <div className="col-span-5">
+                          <Label className="text-xs mb-1 block">Product</Label>
+                          <Select
+                            value={selectedProductId}
+                            onValueChange={setSelectedProductId}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select product" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {productsData?.products
+                                ?.filter(
+                                  (p) =>
+                                    !subscriptionItems.some(
+                                      (si) => si.productId === p?.id
+                                    )
+                                )
+                                .map((product) => (
+                                  <SelectItem
+                                    key={product?.id}
+                                    value={product?.id ?? ""}
+                                  >
+                                    {product?.name}
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="col-span-2">
+                          <Label className="text-xs mb-1 block">Quantity</Label>
+                          <Input
+                            type="number"
+                            min="1"
+                            placeholder="Qty"
+                            value={selectedQuantity}
+                            onChange={(e) =>
+                              setSelectedQuantity(e.target.value)
+                            }
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <Label className="text-xs mb-1 block">Order #</Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            placeholder="0"
+                            value={selectedOrderIndex.toString()}
+                            onChange={(e) =>
+                              setSelectedOrderIndex(
+                                parseInt(e.target.value) || 0
+                              )
+                            }
+                          />
+                        </div>
+                        <div className="col-span-3 flex items-end">
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              if (
+                                selectedProductId &&
+                                selectedQuantity &&
+                                parseInt(selectedQuantity) > 0
+                              ) {
+                                const product = productsData?.products?.find(
+                                  (p) => p?.id === selectedProductId
+                                );
+                                setSubscriptionItems([
+                                  ...subscriptionItems,
+                                  {
+                                    productId: selectedProductId,
+                                    quantity: parseInt(selectedQuantity),
+                                    orderIndex: selectedOrderIndex,
+                                    product: product,
+                                  },
+                                ]);
+                                setSelectedProductId("");
+                                setSelectedQuantity("1");
+                              }
+                            }}
+                            disabled={!selectedProductId || !selectedQuantity}
+                            className="w-full"
+                          >
+                            Add
+                          </Button>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        <strong>Tip:</strong> Products with the same Order # (e.g., all "0") will be delivered in a single order.
+                        Use different Order #s (0, 1, 2...) to split delivery across multiple orders.
+                      </p>
+                    </div>
+
+                    {/* Products List grouped by order */}
+                    {subscriptionItems.length > 0 && (
+                      <div className="space-y-3">
+                        {Array.from(
+                          new Set(
+                            subscriptionItems.map((si) => si.orderIndex)
+                          )
+                        )
+                          .sort((a, b) => a - b)
+                          .map((orderIdx) => {
+                            const itemsInOrder = subscriptionItems.filter(
+                              (si) => si.orderIndex === orderIdx
+                            );
+                            return (
+                              <div
+                                key={orderIdx}
+                                className="border rounded-lg p-3"
+                              >
+                                <div className="flex items-center justify-between mb-2">
+                                  <Label className="font-semibold">
+                                    Order #{orderIdx + 1} Delivery
+                                  </Label>
+                                  <Badge variant="outline">
+                                    {itemsInOrder.length} product
+                                    {itemsInOrder.length !== 1 ? "s" : ""}
+                                  </Badge>
+                                </div>
+                                <div className="space-y-2">
+                                  {itemsInOrder.map((item, idx) => {
+                                    const fullItem = subscriptionItems.findIndex(
+                                      (si) =>
+                                        si.productId === item.productId &&
+                                        si.orderIndex === item.orderIndex
+                                    );
+                                    return (
+                                      <div
+                                        key={`${item.productId}-${idx}`}
+                                        className="flex items-center justify-between p-2 bg-white rounded border"
+                                      >
+                                        <div className="flex-1">
+                                          <span className="font-medium">
+                                            {item.product?.name ??
+                                              item.productId}
+                                          </span>
+                                          <span className="text-sm text-muted-foreground ml-2">
+                                            x{item.quantity}
+                                          </span>
+                                          {item.product?.amount && (
+                                            <span className="text-sm text-muted-foreground ml-2">
+                                              (
+                                              {formatCurrency(
+                                                (item.product.amount.value ?? 0) *
+                                                item.quantity,
+                                                item.product.amount
+                                                  .currencyIsoCode ?? "XAF"
+                                              )}
+                                              )
+                                            </span>
+                                          )}
+                                        </div>
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => {
+                                            setSubscriptionItems(
+                                              subscriptionItems.filter(
+                                                (_, i) => i !== fullItem
+                                              )
+                                            );
+                                          }}
+                                        >
+                                          <X className="h-4 w-4" />
+                                        </Button>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    )}
+                  </div>
+
                   {formData.amount &&
                     formData.currency &&
                     formData.duration && (
@@ -386,7 +666,7 @@ export default function SubscriptionsPage() {
                       </div>
                     )}
                 </div>
-                <DialogFooter>
+                <DialogFooter className="mt-4 border-t pt-4">
                   <Button
                     type="button"
                     variant="outline"

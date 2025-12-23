@@ -50,6 +50,7 @@ const (
 	Orders_Subscribe_FullMethodName                          = "/ordersgrpc.Orders/Subscribe"
 	Orders_ListUserSubscriptions_FullMethodName              = "/ordersgrpc.Orders/ListUserSubscriptions"
 	Orders_GetUserSubscriptionDetails_FullMethodName         = "/ordersgrpc.Orders/GetUserSubscriptionDetails"
+	Orders_ListAllActiveSubscriptions_FullMethodName         = "/ordersgrpc.Orders/ListAllActiveSubscriptions"
 	Orders_ListOrdersDueSoon_FullMethodName                  = "/ordersgrpc.Orders/ListOrdersDueSoon"
 	Orders_CreateCustomSubscription_FullMethodName           = "/ordersgrpc.Orders/CreateCustomSubscription"
 )
@@ -89,6 +90,7 @@ type OrdersClient interface {
 	Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (*SubscribeResponse, error)
 	ListUserSubscriptions(ctx context.Context, in *ListUserSubscriptionsRequest, opts ...grpc.CallOption) (*ListUserSubscriptionsResponse, error)
 	GetUserSubscriptionDetails(ctx context.Context, in *GetUserSubscriptionDetailsRequest, opts ...grpc.CallOption) (*GetUserSubscriptionDetailsResponse, error)
+	ListAllActiveSubscriptions(ctx context.Context, in *ListAllActiveSubscriptionsRequest, opts ...grpc.CallOption) (*ListAllActiveSubscriptionsResponse, error)
 	ListOrdersDueSoon(ctx context.Context, in *ListOrdersDueSoonRequest, opts ...grpc.CallOption) (*ListOrdersDueSoonResponse, error)
 	CreateCustomSubscription(ctx context.Context, in *CreateCustomSubscriptionRequest, opts ...grpc.CallOption) (*CreateCustomSubscriptionResponse, error)
 }
@@ -411,6 +413,16 @@ func (c *ordersClient) GetUserSubscriptionDetails(ctx context.Context, in *GetUs
 	return out, nil
 }
 
+func (c *ordersClient) ListAllActiveSubscriptions(ctx context.Context, in *ListAllActiveSubscriptionsRequest, opts ...grpc.CallOption) (*ListAllActiveSubscriptionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListAllActiveSubscriptionsResponse)
+	err := c.cc.Invoke(ctx, Orders_ListAllActiveSubscriptions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *ordersClient) ListOrdersDueSoon(ctx context.Context, in *ListOrdersDueSoonRequest, opts ...grpc.CallOption) (*ListOrdersDueSoonResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListOrdersDueSoonResponse)
@@ -466,6 +478,7 @@ type OrdersServer interface {
 	Subscribe(context.Context, *SubscribeRequest) (*SubscribeResponse, error)
 	ListUserSubscriptions(context.Context, *ListUserSubscriptionsRequest) (*ListUserSubscriptionsResponse, error)
 	GetUserSubscriptionDetails(context.Context, *GetUserSubscriptionDetailsRequest) (*GetUserSubscriptionDetailsResponse, error)
+	ListAllActiveSubscriptions(context.Context, *ListAllActiveSubscriptionsRequest) (*ListAllActiveSubscriptionsResponse, error)
 	ListOrdersDueSoon(context.Context, *ListOrdersDueSoonRequest) (*ListOrdersDueSoonResponse, error)
 	CreateCustomSubscription(context.Context, *CreateCustomSubscriptionRequest) (*CreateCustomSubscriptionResponse, error)
 	mustEmbedUnimplementedOrdersServer()
@@ -570,6 +583,9 @@ func (UnimplementedOrdersServer) ListUserSubscriptions(context.Context, *ListUse
 }
 func (UnimplementedOrdersServer) GetUserSubscriptionDetails(context.Context, *GetUserSubscriptionDetailsRequest) (*GetUserSubscriptionDetailsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserSubscriptionDetails not implemented")
+}
+func (UnimplementedOrdersServer) ListAllActiveSubscriptions(context.Context, *ListAllActiveSubscriptionsRequest) (*ListAllActiveSubscriptionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListAllActiveSubscriptions not implemented")
 }
 func (UnimplementedOrdersServer) ListOrdersDueSoon(context.Context, *ListOrdersDueSoonRequest) (*ListOrdersDueSoonResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListOrdersDueSoon not implemented")
@@ -1156,6 +1172,24 @@ func _Orders_GetUserSubscriptionDetails_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Orders_ListAllActiveSubscriptions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAllActiveSubscriptionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).ListAllActiveSubscriptions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_ListAllActiveSubscriptions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).ListAllActiveSubscriptions(ctx, req.(*ListAllActiveSubscriptionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Orders_ListOrdersDueSoon_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListOrdersDueSoonRequest)
 	if err := dec(in); err != nil {
@@ -1322,6 +1356,10 @@ var Orders_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserSubscriptionDetails",
 			Handler:    _Orders_GetUserSubscriptionDetails_Handler,
+		},
+		{
+			MethodName: "ListAllActiveSubscriptions",
+			Handler:    _Orders_ListAllActiveSubscriptions_Handler,
 		},
 		{
 			MethodName: "ListOrdersDueSoon",

@@ -44,6 +44,7 @@ type Querier interface {
 	GetUserSubscriptionByID(ctx context.Context, id int64) (UserSubscription, error)
 	GetUserSubscriptionByPublicID(ctx context.Context, publicID string) (UserSubscription, error)
 	GetUserSubscriptionsBySubscriptionID(ctx context.Context, subscriptionID string) ([]UserSubscription, error)
+	ListAllActiveUserSubscriptions(ctx context.Context) ([]ListAllActiveUserSubscriptionsRow, error)
 	ListCommissionsByReferrer(ctx context.Context, arg ListCommissionsByReferrerParams) ([]Commission, error)
 	ListDeliveryPoints(ctx context.Context, arg ListDeliveryPointsParams) ([]DeliveryPoint, error)
 	ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersParams) ([]ListFarmerOrdersRow, error)

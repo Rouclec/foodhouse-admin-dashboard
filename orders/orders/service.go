@@ -964,12 +964,13 @@ func (i *Impl) createOrdersFromSubscription(
 		}
 	}
 
-	// For regular subscriptions, create all orders with the same delivery date
-	// For custom subscriptions, we need to group by daily limit (this will be implemented after custom subscription support)
-
-	// Group items by farmer (orders must be from same farmer)
-	farmerItems := make(map[string][]sqlc.SubscriptionItem)
-	var productInfos []ProductInfo
+	// Group items by (farmer_id, order_index) combination
+	// Key format: "farmerID:orderIndex"
+	type orderGroupKey struct {
+		farmerID   string
+		orderIndex int32
+	}
+	orderGroups := make(map[orderGroupKey][]sqlc.SubscriptionItem)
 
 	for _, item := range subscriptionItems {
 		prod, err := i.productService.GetProduct(ctx, &productsgrpc.GetProductRequest{
@@ -981,20 +982,44 @@ func (i *Impl) createOrdersFromSubscription(
 
 		p := prod.GetProduct()
 		farmerID := p.GetCreatedBy()
+		orderIdx := item.OrderIndex // OrderIndex is now a direct int32
 
-		if _, exists := farmerItems[farmerID]; !exists {
-			farmerItems[farmerID] = []sqlc.SubscriptionItem{}
+		key := orderGroupKey{
+			farmerID:   farmerID,
+			orderIndex: orderIdx,
 		}
-		farmerItems[farmerID] = append(farmerItems[farmerID], item)
 
-		productInfos = append(productInfos, ProductInfo{
-			Product:  p,
-			Quantity: int64(item.Quantity),
-		})
+		orderGroups[key] = append(orderGroups[key], item)
 	}
 
-	// Create one order per farmer
-	for farmerID, items := range farmerItems {
+	// Calculate delivery date increment per order (default 3 days between orders)
+	deliveryDateIncrement := 3
+	if userSubscription.EstimatedDeliveryTime.Valid {
+		estimatedDays := int64(userSubscription.EstimatedDeliveryTime.Microseconds/(24*60*60*OneMillion)) +
+			int64(userSubscription.EstimatedDeliveryTime.Days) +
+			int64(userSubscription.EstimatedDeliveryTime.Months)*30
+		if estimatedDays > 0 {
+			// Distribute estimated days across order indices
+			// Find max order index
+			maxOrderIndex := int32(0)
+			for key := range orderGroups {
+				if key.orderIndex > maxOrderIndex {
+					maxOrderIndex = key.orderIndex
+				}
+			}
+			if maxOrderIndex > 0 {
+				deliveryDateIncrement = int(estimatedDays) / int(maxOrderIndex+1)
+			}
+		}
+	}
+
+	// Create one order per (farmer_id, order_index) group
+	for key, items := range orderGroups {
+		farmerID := key.farmerID
+		orderIndex := key.orderIndex
+
+		// Calculate delivery date: base date + (order_index * increment)
+		orderDeliveryDate := baseDeliveryDate.AddDate(0, 0, int(orderIndex)*deliveryDateIncrement)
 		// Calculate total amount for this farmer's items
 		var totalAmount float64
 		var currency string
@@ -1053,7 +1078,7 @@ func (i *Impl) createOrdersFromSubscription(
 			DeliveryFeeCurrency: deliveryFee.EstimatedDeliveryFee.CurrencyIsoCode,
 			UserSubscriptionID:  &userSubscription.ID,
 			ExpectedDeliveryDate: pgtype.Timestamptz{
-				Time:  baseDeliveryDate,
+				Time:  orderDeliveryDate,
 				Valid: true,
 			},
 		})
@@ -2571,11 +2596,14 @@ func (i *Impl) CreateSubscriptionPlan(
 			return nil, status.Errorf(codes.Internal, "error fetching product for subscription item: %v", err)
 		}
 
+		orderIndex := si.GetOrderIndex() // OrderIndex is now a direct int32
+
 		_, err = querier.CreateSubscriptionItem(ctx, sqlc.CreateSubscriptionItemParams{
 			SubscriptionID: subscription.ID,
 			Product:        si.ProductId,
 			Quantity:       int32(si.Quantity),
 			UnitType:       product.GetProduct().GetUnitType(),
+			OrderIndex:     orderIndex,
 		})
 
 		if err != nil {
@@ -2589,6 +2617,7 @@ func (i *Impl) CreateSubscriptionPlan(
 			ProductUnitPrice: product.GetProduct().GetAmount(),
 			UnitType:         product.GetProduct().GetUnitType(),
 			SubscriptionId:   subscription.ID,
+			OrderIndex:       si.GetOrderIndex(), // OrderIndex is now a direct int32
 		})
 	}
 
