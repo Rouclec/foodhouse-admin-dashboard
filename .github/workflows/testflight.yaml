@@ -145,4 +145,4 @@ jobs:
           EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}
           EXPO_APPLE_ID: ${{ secrets.EXPO_APPLE_ID }}
         working-directory: agentsApp
-        run: eas build --platform ios --profile preview --auto-submit --non-interactive --no-wait
+        run: eas build --platform ios --profile preview --auto-submit --non-interactive --no-wait --clear-cache

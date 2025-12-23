@@ -44,16 +44,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Context, ContextType } from "@/app/contexts/QueryProvider";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
-  usersCreateSubscriptionMutation,
-  usersDeleteSubscriptionMutation,
-  usersListSubscriptionsOptions,
-  usersUpdateSubscriptionMutation,
-} from "@/client/users.swagger/@tanstack/react-query.gen";
-import { usersgrpcSubscription } from "@/client/users.swagger";
-import { useConfirmDelete } from "@/hooks/use-confirm-delete";
-import { useQueryLoading } from "@/hooks/use-query-loading";
+  ordersCreateSubscriptionPlanMutation,
+} from "@/client/orders.swagger/@tanstack/react-query.gen";
+import { ordersgrpcSubscription } from "@/client/orders.swagger";
 import { formatCurrency } from "@/utils";
-import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 
 const currencies = ["XAF", "TZS", "USD"];
 
@@ -61,21 +55,15 @@ export default function SubscriptionsPage() {
   const { user } = useContext(Context) as ContextType;
   const [loading, setLoading] = useState(false);
 
-  const {
-    data: subscriptionsData,
-    isLoading: isSubscriptionsLoading,
-    refetch,
-  } = useQuery({
-    ...usersListSubscriptionsOptions({
-      path: {
-        userId: user?.userId ?? "",
-      },
-    }),
-  });
+  // TODO: Add ListSubscriptionPlans endpoint in orders service
+  // For now, using empty data - subscription plans list needs to be implemented
+  const subscriptionsData = { subscriptions: [] };
+  const isSubscriptionsLoading = false;
+  const refetch = () => {};
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSubscription, setEditingSubscription] =
-    useState<usersgrpcSubscription>();
+    useState<ordersgrpcSubscription>();
 
   const [deletingSubscriptionId, setDeletingSubscriptionId] =
     useState<string>();
@@ -89,6 +77,7 @@ export default function SubscriptionsPage() {
     description: "",
     currency: "XAF",
     duration: "",
+    estimatedDeliveryTimeDays: "",
   });
   const { toast } = useToast();
 
@@ -97,63 +86,47 @@ export default function SubscriptionsPage() {
 
     try {
       setLoading(true);
-      if (editingSubscription) {
-        // Update existing subscription
-        await updateSubscription({
-          body: {
-            title: formData?.name,
-            description: formData?.description,
-            duration: (parseInt(formData?.duration ?? "0") * 7).toString(),
-            amount: parseFloat(formData?.amount ?? ""),
+      // For now, only support creating new subscription plans
+      // TODO: Add update/delete endpoints in orders service
+      await createSubscription({
+        body: {
+          title: formData?.name,
+          description: formData?.description,
+          duration: parseInt(formData?.duration ?? "0"), // duration in weeks
+          amount: {
+            value: parseFloat(formData?.amount ?? ""),
             currencyIsoCode: formData?.currency,
           },
-          path: {
-            adminUserId: user?.userId ?? "",
-            subscriptionId: editingSubscription?.id ?? "",
-          },
-        });
-      } else {
-        // Create new subscription
-        await createSubscription({
-          body: {
-            title: formData?.name,
-            description: formData?.description,
-            duration: (parseInt(formData?.duration ?? "0") * 7).toString(),
-            amount: parseFloat(formData?.amount ?? ""),
-            currencyIsoCode: formData?.currency,
-          },
-          path: {
-            adminUserId: user?.userId ?? "",
-          },
-        });
-      }
-
-      refetch();
+          subscriptionItems: [], // TODO: Add subscription items UI
+          estimatedDeliveryTimeDays: formData?.estimatedDeliveryTimeDays 
+            ? parseInt(formData.estimatedDeliveryTimeDays)
+            : undefined,
+        },
+        path: {
+          adminUserId: user?.userId ?? "",
+        },
+      });
     } catch (error) {
-      console.error({ error }, "creating or updating subscription");
+      console.error({ error }, "creating subscription plan");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEdit = (subscription: usersgrpcSubscription) => {
-    setEditingSubscription(subscription);
-    setFormData({
-      name: subscription.title ?? "",
-      description: subscription?.description ?? "",
-      amount: (subscription?.amount?.value ?? 0)?.toString(),
-      currency: subscription?.amount?.currencyIsoCode ?? "",
-      duration: Math.round(
-        parseInt(subscription?.duration ?? "0") / 7
-      ).toString(),
+  const handleEdit = (subscription: ordersgrpcSubscription) => {
+    // TODO: Implement edit when UpdateSubscriptionPlan endpoint is added
+    toast({
+      title: "Edit not available",
+      description: "Subscription plan editing will be available soon.",
     });
-    setIsDialogOpen(true);
   };
 
-  const handleDelete = (subscription: usersgrpcSubscription) => {
-    setDeletingSubscriptionId(subscription?.id);
-    setDeletingSubscriptionTitle(subscription?.title);
-    confirmDelete.openDialog();
+  const handleDelete = (subscription: ordersgrpcSubscription) => {
+    // TODO: Implement delete when DeleteSubscriptionPlan endpoint is added
+    toast({
+      title: "Delete not available",
+      description: "Subscription plan deletion will be available soon.",
+    });
   };
 
   const openCreateDialog = () => {
@@ -164,12 +137,13 @@ export default function SubscriptionsPage() {
       currency: "XAF",
       description: "",
       duration: "",
+      estimatedDeliveryTimeDays: "",
     });
     setIsDialogOpen(true);
   };
 
   const { mutateAsync: createSubscription } = useMutation({
-    ...usersCreateSubscriptionMutation(),
+    ...ordersCreateSubscriptionPlanMutation(),
     onSuccess: () => {
       toast({
         title: "Subscription created",
@@ -222,45 +196,7 @@ export default function SubscriptionsPage() {
     },
   });
 
-  // Confirm delete hook
-  const confirmDelete = useConfirmDelete({
-    onDelete: async () => {
-      setLoading(true);
-      if (deletingSubscriptionId) {
-        await deleteSubscription({
-          path: {
-            adminUserId: user?.userId ?? "",
-            subscriptionId: deletingSubscriptionId ?? "",
-          },
-        });
-      }
-      setLoading(false);
-    },
-    itemType: deletingSubscriptionTitle,
-    description: "Are you sure you want to delete this subscription?",
-  });
-
-  useQueryLoading(isSubscriptionsLoading);
-
-  const { mutateAsync: deleteSubscription } = useMutation({
-    ...usersDeleteSubscriptionMutation(),
-    onSuccess: () => {
-      setDeletingSubscriptionTitle(undefined);
-      setDeletingSubscriptionId(undefined);
-      toast({
-        title: "Subscription deleted",
-        description: "Subscription has been successfully deleted.",
-      });
-      refetch();
-    },
-    onError: (error) => {
-      toast({
-        title: "Error deleting subscription",
-        description:
-          error?.response?.data?.message ?? "An unkonwn error occured",
-      });
-    },
-  });
+  // TODO: Re-enable delete when DeleteSubscriptionPlan endpoint is added
 
   return (
     <>
@@ -359,18 +295,37 @@ export default function SubscriptionsPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="duration">Duration (weeks)</Label>
-                    <Input
-                      id="duration"
-                      type="number"
-                      placeholder="4"
-                      value={formData.duration}
-                      onChange={(e) =>
-                        setFormData({ ...formData, duration: e.target.value })
-                      }
-                      required
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="duration">Duration (weeks)</Label>
+                      <Input
+                        id="duration"
+                        type="number"
+                        placeholder="4"
+                        value={formData.duration}
+                        onChange={(e) =>
+                          setFormData({ ...formData, duration: e.target.value })
+                        }
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="estimatedDeliveryTimeDays">
+                        Estimated Delivery Time (days)
+                      </Label>
+                      <Input
+                        id="estimatedDeliveryTimeDays"
+                        type="number"
+                        placeholder="7"
+                        value={formData.estimatedDeliveryTimeDays}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            estimatedDeliveryTimeDays: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
                   </div>
 
                   {formData.amount &&
@@ -381,6 +336,13 @@ export default function SubscriptionsPage() {
                           <strong>Preview:</strong>{" "}
                           {formatCurrency(formData.amount, formData.currency)}{" "}
                           for {formData.duration} weeks
+                          {formData.estimatedDeliveryTimeDays && (
+                            <span>
+                              {" "}
+                              • Delivery in ~{formData.estimatedDeliveryTimeDays}{" "}
+                              days
+                            </span>
+                          )}
                         </p>
                       </div>
                     )}
@@ -472,6 +434,8 @@ export default function SubscriptionsPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleEdit(subscription)}
+                          disabled
+                          title="Edit functionality coming soon"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -479,6 +443,8 @@ export default function SubscriptionsPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleDelete(subscription)}
+                          disabled
+                          title="Delete functionality coming soon"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -491,11 +457,6 @@ export default function SubscriptionsPage() {
           </CardContent>
         </Card>
       </div>
-      <ConfirmDeleteDialog
-        {...confirmDelete.dialogProps}
-        itemName={deletingSubscriptionTitle}
-        isLoading={loading}
-      />
     </>
   );
 }

@@ -8,6 +8,13 @@ export type OrdersBulkSettleCommissionsBody = {
 
 export type OrdersConfirmDeliveryBody = unknown;
 
+export type OrdersCreateCustomSubscriptionBody = {
+    budget?: typesAmount;
+    subscriptionItems?: Array<ordersgrpcSubscriptionItem>;
+    dailyDeliveryLimit?: string;
+    deliveryLocation?: typesPoint;
+};
+
 export type OrdersCreateDeliveryPointBody = {
     address?: typesPoint;
     city?: string;
@@ -25,6 +32,7 @@ export type OrdersCreateSubscriptionPlanBody = {
     amount?: typesAmount;
     duration?: string;
     subscriptionItems?: Array<ordersgrpcSubscriptionItem>;
+    estimatedDeliveryTimeDays?: string;
 };
 
 export type OrdersDispatchOrderBody = {
@@ -84,6 +92,10 @@ export type ordersgrpcConfirmPaymentRequest = {
 
 export type ordersgrpcConfirmPaymentResponse = unknown;
 
+export type ordersgrpcCreateCustomSubscriptionResponse = {
+    subscription?: ordersgrpcUserSubscription;
+};
+
 export type ordersgrpcCreateDeliveryPointResponse = {
     deliveryPoint?: ordersgrpcDeliveryPoint;
 };
@@ -132,6 +144,11 @@ export type ordersgrpcGetOrderDetailsResponse = {
     auditLog?: Array<ordersgrpcOrderAuditLog>;
 };
 
+export type ordersgrpcGetUserSubscriptionDetailsResponse = {
+    subscription?: ordersgrpcUserSubscription;
+    orders?: Array<ordersgrpcOrder>;
+};
+
 export type ordersgrpcHealthCheckResponse = unknown;
 
 export type ordersgrpcInitiatePaymentResponse = {
@@ -157,6 +174,10 @@ export type ordersgrpcListFarmerOrdersResponse = {
     nextKey?: string;
 };
 
+export type ordersgrpcListOrdersDueSoonResponse = {
+    orders?: Array<ordersgrpcOrder>;
+};
+
 export type ordersgrpcListOrdersResponse = {
     orders?: Array<ordersgrpcOrder>;
     nextKey?: string;
@@ -174,6 +195,10 @@ export type ordersgrpcListTotalCommissionAmountByReferrerResponse = {
 export type ordersgrpcListUserOrdersResponse = {
     orders?: Array<ordersgrpcOrder>;
     nextKey?: string;
+};
+
+export type ordersgrpcListUserSubscriptionsResponse = {
+    subscriptions?: Array<ordersgrpcUserSubscription>;
 };
 
 export type ordersgrpcOrder = {
@@ -287,6 +312,9 @@ export type ordersgrpcUserSubscription = {
     progress?: number;
     amount?: typesAmount;
     publicId?: string;
+    estimatedDeliveryTimeDays?: string;
+    isCustom?: boolean;
+    dailyDeliveryLimit?: string;
 };
 
 export type OrdersInitiatePaymentBody = {
@@ -380,6 +408,22 @@ export type OrdersCreateSubscriptionPlanData = {
 export type OrdersCreateSubscriptionPlanResponse = (ordersgrpcCreateSubscriptionPlanResponse);
 
 export type OrdersCreateSubscriptionPlanError = (rpcStatus);
+
+export type OrdersListOrdersDueSoonData = {
+    path: {
+        adminUserId: string;
+    };
+    query?: {
+        /**
+         * Number of days to look ahead
+         */
+        days?: string;
+    };
+};
+
+export type OrdersListOrdersDueSoonResponse = (ordersgrpcListOrdersDueSoonResponse);
+
+export type OrdersListOrdersDueSoonError = (rpcStatus);
 
 export type OrdersCreateDeliveryPointData = {
     body: OrdersCreateDeliveryPointBody;
@@ -503,6 +547,17 @@ export type OrdersListFarmerOrdersResponse = (ordersgrpcListFarmerOrdersResponse
 
 export type OrdersListFarmerOrdersError = (rpcStatus);
 
+export type OrdersCreateCustomSubscriptionData = {
+    body: OrdersCreateCustomSubscriptionBody;
+    path: {
+        userId: string;
+    };
+};
+
+export type OrdersCreateCustomSubscriptionResponse = (ordersgrpcCreateCustomSubscriptionResponse);
+
+export type OrdersCreateCustomSubscriptionError = (rpcStatus);
+
 export type OrdersCreateOrderData = {
     body: OrdersCreateOrderBody;
     path: {
@@ -591,6 +646,30 @@ export type OrdersSubscribeData = {
 export type OrdersSubscribeResponse = (ordersgrpcSubscribeResponse);
 
 export type OrdersSubscribeError = (rpcStatus);
+
+export type OrdersListUserSubscriptionsData = {
+    path: {
+        userId: string;
+    };
+    query?: {
+        activeOnly?: boolean;
+    };
+};
+
+export type OrdersListUserSubscriptionsResponse = (ordersgrpcListUserSubscriptionsResponse);
+
+export type OrdersListUserSubscriptionsError = (rpcStatus);
+
+export type OrdersGetUserSubscriptionDetailsData = {
+    path: {
+        subscriptionId: string;
+        userId: string;
+    };
+};
+
+export type OrdersGetUserSubscriptionDetailsResponse = (ordersgrpcGetUserSubscriptionDetailsResponse);
+
+export type OrdersGetUserSubscriptionDetailsError = (rpcStatus);
 
 export type OrdersApproveOrderData = {
     body: OrdersApproveOrderBody;

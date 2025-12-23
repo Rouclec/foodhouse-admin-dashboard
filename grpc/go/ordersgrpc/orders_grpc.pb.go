@@ -46,6 +46,10 @@ const (
 	Orders_EstimateDeliveryFee_FullMethodName                = "/ordersgrpc.Orders/EstimateDeliveryFee"
 	Orders_CreateSubscriptionPlan_FullMethodName             = "/ordersgrpc.Orders/CreateSubscriptionPlan"
 	Orders_Subscribe_FullMethodName                          = "/ordersgrpc.Orders/Subscribe"
+	Orders_ListUserSubscriptions_FullMethodName              = "/ordersgrpc.Orders/ListUserSubscriptions"
+	Orders_GetUserSubscriptionDetails_FullMethodName         = "/ordersgrpc.Orders/GetUserSubscriptionDetails"
+	Orders_ListOrdersDueSoon_FullMethodName                  = "/ordersgrpc.Orders/ListOrdersDueSoon"
+	Orders_CreateCustomSubscription_FullMethodName           = "/ordersgrpc.Orders/CreateCustomSubscription"
 )
 
 // OrdersClient is the client API for Orders service.
@@ -79,6 +83,10 @@ type OrdersClient interface {
 	EstimateDeliveryFee(ctx context.Context, in *EstimateDeliveryFeeRequest, opts ...grpc.CallOption) (*EstimateDeliveryFeeResponse, error)
 	CreateSubscriptionPlan(ctx context.Context, in *CreateSubscriptionPlanRequest, opts ...grpc.CallOption) (*CreateSubscriptionPlanResponse, error)
 	Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (*SubscribeResponse, error)
+	ListUserSubscriptions(ctx context.Context, in *ListUserSubscriptionsRequest, opts ...grpc.CallOption) (*ListUserSubscriptionsResponse, error)
+	GetUserSubscriptionDetails(ctx context.Context, in *GetUserSubscriptionDetailsRequest, opts ...grpc.CallOption) (*GetUserSubscriptionDetailsResponse, error)
+	ListOrdersDueSoon(ctx context.Context, in *ListOrdersDueSoonRequest, opts ...grpc.CallOption) (*ListOrdersDueSoonResponse, error)
+	CreateCustomSubscription(ctx context.Context, in *CreateCustomSubscriptionRequest, opts ...grpc.CallOption) (*CreateCustomSubscriptionResponse, error)
 }
 
 type ordersClient struct {
@@ -359,6 +367,46 @@ func (c *ordersClient) Subscribe(ctx context.Context, in *SubscribeRequest, opts
 	return out, nil
 }
 
+func (c *ordersClient) ListUserSubscriptions(ctx context.Context, in *ListUserSubscriptionsRequest, opts ...grpc.CallOption) (*ListUserSubscriptionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListUserSubscriptionsResponse)
+	err := c.cc.Invoke(ctx, Orders_ListUserSubscriptions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ordersClient) GetUserSubscriptionDetails(ctx context.Context, in *GetUserSubscriptionDetailsRequest, opts ...grpc.CallOption) (*GetUserSubscriptionDetailsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetUserSubscriptionDetailsResponse)
+	err := c.cc.Invoke(ctx, Orders_GetUserSubscriptionDetails_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ordersClient) ListOrdersDueSoon(ctx context.Context, in *ListOrdersDueSoonRequest, opts ...grpc.CallOption) (*ListOrdersDueSoonResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListOrdersDueSoonResponse)
+	err := c.cc.Invoke(ctx, Orders_ListOrdersDueSoon_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ordersClient) CreateCustomSubscription(ctx context.Context, in *CreateCustomSubscriptionRequest, opts ...grpc.CallOption) (*CreateCustomSubscriptionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateCustomSubscriptionResponse)
+	err := c.cc.Invoke(ctx, Orders_CreateCustomSubscription_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrdersServer is the server API for Orders service.
 // All implementations must embed UnimplementedOrdersServer
 // for forward compatibility.
@@ -390,6 +438,10 @@ type OrdersServer interface {
 	EstimateDeliveryFee(context.Context, *EstimateDeliveryFeeRequest) (*EstimateDeliveryFeeResponse, error)
 	CreateSubscriptionPlan(context.Context, *CreateSubscriptionPlanRequest) (*CreateSubscriptionPlanResponse, error)
 	Subscribe(context.Context, *SubscribeRequest) (*SubscribeResponse, error)
+	ListUserSubscriptions(context.Context, *ListUserSubscriptionsRequest) (*ListUserSubscriptionsResponse, error)
+	GetUserSubscriptionDetails(context.Context, *GetUserSubscriptionDetailsRequest) (*GetUserSubscriptionDetailsResponse, error)
+	ListOrdersDueSoon(context.Context, *ListOrdersDueSoonRequest) (*ListOrdersDueSoonResponse, error)
+	CreateCustomSubscription(context.Context, *CreateCustomSubscriptionRequest) (*CreateCustomSubscriptionResponse, error)
 	mustEmbedUnimplementedOrdersServer()
 }
 
@@ -480,6 +532,18 @@ func (UnimplementedOrdersServer) CreateSubscriptionPlan(context.Context, *Create
 }
 func (UnimplementedOrdersServer) Subscribe(context.Context, *SubscribeRequest) (*SubscribeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Subscribe not implemented")
+}
+func (UnimplementedOrdersServer) ListUserSubscriptions(context.Context, *ListUserSubscriptionsRequest) (*ListUserSubscriptionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListUserSubscriptions not implemented")
+}
+func (UnimplementedOrdersServer) GetUserSubscriptionDetails(context.Context, *GetUserSubscriptionDetailsRequest) (*GetUserSubscriptionDetailsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserSubscriptionDetails not implemented")
+}
+func (UnimplementedOrdersServer) ListOrdersDueSoon(context.Context, *ListOrdersDueSoonRequest) (*ListOrdersDueSoonResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListOrdersDueSoon not implemented")
+}
+func (UnimplementedOrdersServer) CreateCustomSubscription(context.Context, *CreateCustomSubscriptionRequest) (*CreateCustomSubscriptionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateCustomSubscription not implemented")
 }
 func (UnimplementedOrdersServer) mustEmbedUnimplementedOrdersServer() {}
 func (UnimplementedOrdersServer) testEmbeddedByValue()                {}
@@ -988,6 +1052,78 @@ func _Orders_Subscribe_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Orders_ListUserSubscriptions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListUserSubscriptionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).ListUserSubscriptions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_ListUserSubscriptions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).ListUserSubscriptions(ctx, req.(*ListUserSubscriptionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orders_GetUserSubscriptionDetails_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserSubscriptionDetailsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).GetUserSubscriptionDetails(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_GetUserSubscriptionDetails_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).GetUserSubscriptionDetails(ctx, req.(*GetUserSubscriptionDetailsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orders_ListOrdersDueSoon_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListOrdersDueSoonRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).ListOrdersDueSoon(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_ListOrdersDueSoon_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).ListOrdersDueSoon(ctx, req.(*ListOrdersDueSoonRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orders_CreateCustomSubscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateCustomSubscriptionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).CreateCustomSubscription(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_CreateCustomSubscription_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).CreateCustomSubscription(ctx, req.(*CreateCustomSubscriptionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Orders_ServiceDesc is the grpc.ServiceDesc for Orders service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1102,6 +1238,22 @@ var Orders_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Subscribe",
 			Handler:    _Orders_Subscribe_Handler,
+		},
+		{
+			MethodName: "ListUserSubscriptions",
+			Handler:    _Orders_ListUserSubscriptions_Handler,
+		},
+		{
+			MethodName: "GetUserSubscriptionDetails",
+			Handler:    _Orders_GetUserSubscriptionDetails_Handler,
+		},
+		{
+			MethodName: "ListOrdersDueSoon",
+			Handler:    _Orders_ListOrdersDueSoon_Handler,
+		},
+		{
+			MethodName: "CreateCustomSubscription",
+			Handler:    _Orders_CreateCustomSubscription_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

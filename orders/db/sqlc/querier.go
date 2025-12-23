@@ -39,18 +39,22 @@ type Querier interface {
 	GetPaymentStatsBetweenDates(ctx context.Context, arg GetPaymentStatsBetweenDatesParams) (float64, error)
 	GetSubscriptionByID(ctx context.Context, id string) (Subscription, error)
 	GetSubscriptionForUpdate(ctx context.Context, id string) (Subscription, error)
+	GetSubscriptionItemsBySubscriptionID(ctx context.Context, subscriptionID string) ([]SubscriptionItem, error)
 	GetUserOrderBySecretKey(ctx context.Context, secretKey *string) (GetUserOrderBySecretKeyRow, error)
 	GetUserSubscriptionByID(ctx context.Context, id int64) (UserSubscription, error)
 	GetUserSubscriptionByPublicID(ctx context.Context, publicID string) (UserSubscription, error)
+	GetUserSubscriptionsBySubscriptionID(ctx context.Context, subscriptionID string) ([]UserSubscription, error)
 	ListCommissionsByReferrer(ctx context.Context, arg ListCommissionsByReferrerParams) ([]Commission, error)
 	ListDeliveryPoints(ctx context.Context, arg ListDeliveryPointsParams) ([]DeliveryPoint, error)
 	ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersParams) ([]ListFarmerOrdersRow, error)
 	ListOrderAuditLogs(ctx context.Context, orderNumber int64) ([]OrdersAudit, error)
 	ListOrders(ctx context.Context, arg ListOrdersParams) ([]ListOrdersRow, error)
+	ListOrdersDueSoon(ctx context.Context, days int32) ([]ListOrdersDueSoonRow, error)
 	ListPayments(ctx context.Context, arg ListPaymentsParams) ([]Payment, error)
 	ListSubsriptions(ctx context.Context) ([]Subscription, error)
 	ListUniqueCities(ctx context.Context) ([]string, error)
 	ListUserOrders(ctx context.Context, arg ListUserOrdersParams) ([]ListUserOrdersRow, error)
+	ListUserSubscriptionsByUserID(ctx context.Context, userID string) ([]UserSubscription, error)
 	ReviewOrder(ctx context.Context, arg ReviewOrderParams) error
 	UpdateDeliveryPoint(ctx context.Context, arg UpdateDeliveryPointParams) error
 	UpdateOrderStatus(ctx context.Context, arg UpdateOrderStatusParams) error

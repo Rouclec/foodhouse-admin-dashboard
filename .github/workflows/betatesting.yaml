@@ -109,4 +109,4 @@ jobs:
       # The app will not be released without manual action
       - name: Build and Submit
         working-directory: agentsApp
-        run: eas build --platform android --profile preview --auto-submit --non-interactive --no-wait
+        run: eas build --platform android --profile preview --auto-submit --non-interactive --no-wait --clear-cache

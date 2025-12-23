@@ -176,6 +176,44 @@
         ]
       }
     },
+    "/v1/admin/{adminUserId}/orders/due-soon": {
+      "get": {
+        "operationId": "Orders_ListOrdersDueSoon",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcListOrdersDueSoonResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "days",
+            "description": "Number of days to look ahead",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/admin/{userId}/orders/create-delivery-point": {
       "post": {
         "operationId": "Orders_CreateDeliveryPoint",
@@ -650,6 +688,44 @@
         ]
       }
     },
+    "/v1/users/{userId}/orders/create-custom-subscription": {
+      "post": {
+        "operationId": "Orders_CreateCustomSubscription",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcCreateCustomSubscriptionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/OrdersCreateCustomSubscriptionBody"
+            }
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/users/{userId}/orders/create-order": {
       "post": {
         "operationId": "Orders_CreateOrder",
@@ -963,6 +1039,78 @@
         ]
       }
     },
+    "/v1/users/{userId}/orders/subscriptions": {
+      "get": {
+        "operationId": "Orders_ListUserSubscriptions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcListUserSubscriptionsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "activeOnly",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/v1/users/{userId}/orders/subscriptions/{subscriptionId}": {
+      "get": {
+        "operationId": "Orders_GetUserSubscriptionDetails",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcGetUserSubscriptionDetailsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "subscriptionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/users/{userId}/orders/{orderId}/approve-order": {
       "put": {
         "operationId": "Orders_ApproveOrder",
@@ -1232,6 +1380,29 @@
     "OrdersConfirmDeliveryBody": {
       "type": "object"
     },
+    "OrdersCreateCustomSubscriptionBody": {
+      "type": "object",
+      "properties": {
+        "budget": {
+          "$ref": "#/definitions/typesAmount"
+        },
+        "subscriptionItems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ordersgrpcSubscriptionItem"
+          }
+        },
+        "dailyDeliveryLimit": {
+          "type": "string",
+          "format": "int64",
+          "title": "Daily delivery limit in cents"
+        },
+        "deliveryLocation": {
+          "$ref": "#/definitions/typesPoint"
+        }
+      }
+    },
     "OrdersCreateDeliveryPointBody": {
       "type": "object",
       "properties": {
@@ -1284,6 +1455,11 @@
             "type": "object",
             "$ref": "#/definitions/ordersgrpcSubscriptionItem"
           }
+        },
+        "estimatedDeliveryTimeDays": {
+          "type": "string",
+          "format": "int64",
+          "title": "estimated_delivery_time in days"
         }
       }
     },
@@ -1478,6 +1654,14 @@
     "ordersgrpcConfirmPaymentResponse": {
       "type": "object"
     },
+    "ordersgrpcCreateCustomSubscriptionResponse": {
+      "type": "object",
+      "properties": {
+        "subscription": {
+          "$ref": "#/definitions/ordersgrpcUserSubscription"
+        }
+      }
+    },
     "ordersgrpcCreateDeliveryPointResponse": {
       "type": "object",
       "properties": {
@@ -1599,6 +1783,21 @@
         }
       }
     },
+    "ordersgrpcGetUserSubscriptionDetailsResponse": {
+      "type": "object",
+      "properties": {
+        "subscription": {
+          "$ref": "#/definitions/ordersgrpcUserSubscription"
+        },
+        "orders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ordersgrpcOrder"
+          }
+        }
+      }
+    },
     "ordersgrpcHealthCheckResponse": {
       "type": "object"
     },
@@ -1666,6 +1865,18 @@
         }
       }
     },
+    "ordersgrpcListOrdersDueSoonResponse": {
+      "type": "object",
+      "properties": {
+        "orders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ordersgrpcOrder"
+          }
+        }
+      }
+    },
     "ordersgrpcListOrdersResponse": {
       "type": "object",
       "properties": {
@@ -1720,6 +1931,18 @@
         },
         "nextKey": {
           "type": "string"
+        }
+      }
+    },
+    "ordersgrpcListUserSubscriptionsResponse": {
+      "type": "object",
+      "properties": {
+        "subscriptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ordersgrpcUserSubscription"
+          }
         }
       }
     },
@@ -2072,6 +2295,18 @@
         },
         "publicId": {
           "type": "string"
+        },
+        "estimatedDeliveryTimeDays": {
+          "type": "string",
+          "format": "int64",
+          "title": "estimated_delivery_time in days"
+        },
+        "isCustom": {
+          "type": "boolean"
+        },
+        "dailyDeliveryLimit": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },

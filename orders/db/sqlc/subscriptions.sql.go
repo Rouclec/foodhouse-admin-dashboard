@@ -90,17 +90,20 @@ func (q *Queries) CreateSubscriptionItem(ctx context.Context, arg CreateSubscrip
 }
 
 const createUserSubscription = `-- name: CreateUserSubscription :one
-INSERT INTO user_subscriptions (user_id, subscription_id, active, amount, currency_iso_code)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id, public_id, user_id, subscription_id, active, created_at, updated_at, expires_at, progress, amount, currency_iso_code
+INSERT INTO user_subscriptions (user_id, subscription_id, active, amount, currency_iso_code, estimated_delivery_time, is_custom, daily_delivery_limit)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING id, public_id, user_id, subscription_id, active, created_at, updated_at, expires_at, progress, amount, currency_iso_code, estimated_delivery_time, is_custom, daily_delivery_limit
 `
 
 type CreateUserSubscriptionParams struct {
-	UserID          string `json:"user_id"`
-	SubscriptionID  string `json:"subscription_id"`
-	Active          bool   `json:"active"`
-	Amount          int64  `json:"amount"`
-	CurrencyIsoCode string `json:"currency_iso_code"`
+	UserID                string          `json:"user_id"`
+	SubscriptionID        string          `json:"subscription_id"`
+	Active                bool            `json:"active"`
+	Amount                int64           `json:"amount"`
+	CurrencyIsoCode       string          `json:"currency_iso_code"`
+	EstimatedDeliveryTime pgtype.Interval `json:"estimated_delivery_time"`
+	IsCustom              bool            `json:"is_custom"`
+	DailyDeliveryLimit    *int64          `json:"daily_delivery_limit"`
 }
 
 func (q *Queries) CreateUserSubscription(ctx context.Context, arg CreateUserSubscriptionParams) (UserSubscription, error) {
@@ -110,6 +113,9 @@ func (q *Queries) CreateUserSubscription(ctx context.Context, arg CreateUserSubs
 		arg.Active,
 		arg.Amount,
 		arg.CurrencyIsoCode,
+		arg.EstimatedDeliveryTime,
+		arg.IsCustom,
+		arg.DailyDeliveryLimit,
 	)
 	var i UserSubscription
 	err := row.Scan(
@@ -124,6 +130,9 @@ func (q *Queries) CreateUserSubscription(ctx context.Context, arg CreateUserSubs
 		&i.Progress,
 		&i.Amount,
 		&i.CurrencyIsoCode,
+		&i.EstimatedDeliveryTime,
+		&i.IsCustom,
+		&i.DailyDeliveryLimit,
 	)
 	return i, err
 }
@@ -147,7 +156,7 @@ func (q *Queries) DeleteSubscriptionItem(ctx context.Context, id string) error {
 }
 
 const getAllUserSubscriptions = `-- name: GetAllUserSubscriptions :many
-SELECT id, public_id, user_id, subscription_id, active, created_at, updated_at, expires_at, progress, amount, currency_iso_code FROM user_subscriptions
+SELECT id, public_id, user_id, subscription_id, active, created_at, updated_at, expires_at, progress, amount, currency_iso_code, estimated_delivery_time, is_custom, daily_delivery_limit FROM user_subscriptions
 `
 
 func (q *Queries) GetAllUserSubscriptions(ctx context.Context) ([]UserSubscription, error) {
@@ -171,6 +180,9 @@ func (q *Queries) GetAllUserSubscriptions(ctx context.Context) ([]UserSubscripti
 			&i.Progress,
 			&i.Amount,
 			&i.CurrencyIsoCode,
+			&i.EstimatedDeliveryTime,
+			&i.IsCustom,
+			&i.DailyDeliveryLimit,
 		); err != nil {
 			return nil, err
 		}
@@ -222,8 +234,38 @@ func (q *Queries) GetSubscriptionForUpdate(ctx context.Context, id string) (Subs
 	return i, err
 }
 
+const getSubscriptionItemsBySubscriptionID = `-- name: GetSubscriptionItemsBySubscriptionID :many
+SELECT id, subscription_id, product, quantity, unit_type FROM subscription_items WHERE subscription_id = $1
+`
+
+func (q *Queries) GetSubscriptionItemsBySubscriptionID(ctx context.Context, subscriptionID string) ([]SubscriptionItem, error) {
+	rows, err := q.db.Query(ctx, getSubscriptionItemsBySubscriptionID, subscriptionID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []SubscriptionItem{}
+	for rows.Next() {
+		var i SubscriptionItem
+		if err := rows.Scan(
+			&i.ID,
+			&i.SubscriptionID,
+			&i.Product,
+			&i.Quantity,
+			&i.UnitType,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUserSubscriptionByID = `-- name: GetUserSubscriptionByID :one
-SELECT id, public_id, user_id, subscription_id, active, created_at, updated_at, expires_at, progress, amount, currency_iso_code FROM user_subscriptions WHERE id = $1
+SELECT id, public_id, user_id, subscription_id, active, created_at, updated_at, expires_at, progress, amount, currency_iso_code, estimated_delivery_time, is_custom, daily_delivery_limit FROM user_subscriptions WHERE id = $1
 `
 
 func (q *Queries) GetUserSubscriptionByID(ctx context.Context, id int64) (UserSubscription, error) {
@@ -241,12 +283,15 @@ func (q *Queries) GetUserSubscriptionByID(ctx context.Context, id int64) (UserSu
 		&i.Progress,
 		&i.Amount,
 		&i.CurrencyIsoCode,
+		&i.EstimatedDeliveryTime,
+		&i.IsCustom,
+		&i.DailyDeliveryLimit,
 	)
 	return i, err
 }
 
 const getUserSubscriptionByPublicID = `-- name: GetUserSubscriptionByPublicID :one
-SELECT id, public_id, user_id, subscription_id, active, created_at, updated_at, expires_at, progress, amount, currency_iso_code FROM user_subscriptions WHERE public_id = $1
+SELECT id, public_id, user_id, subscription_id, active, created_at, updated_at, expires_at, progress, amount, currency_iso_code, estimated_delivery_time, is_custom, daily_delivery_limit FROM user_subscriptions WHERE public_id = $1
 `
 
 func (q *Queries) GetUserSubscriptionByPublicID(ctx context.Context, publicID string) (UserSubscription, error) {
@@ -264,8 +309,144 @@ func (q *Queries) GetUserSubscriptionByPublicID(ctx context.Context, publicID st
 		&i.Progress,
 		&i.Amount,
 		&i.CurrencyIsoCode,
+		&i.EstimatedDeliveryTime,
+		&i.IsCustom,
+		&i.DailyDeliveryLimit,
 	)
 	return i, err
+}
+
+const getUserSubscriptionsBySubscriptionID = `-- name: GetUserSubscriptionsBySubscriptionID :many
+SELECT id, public_id, user_id, subscription_id, active, created_at, updated_at, expires_at, progress, amount, currency_iso_code, estimated_delivery_time, is_custom, daily_delivery_limit FROM user_subscriptions WHERE subscription_id = $1
+`
+
+func (q *Queries) GetUserSubscriptionsBySubscriptionID(ctx context.Context, subscriptionID string) ([]UserSubscription, error) {
+	rows, err := q.db.Query(ctx, getUserSubscriptionsBySubscriptionID, subscriptionID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []UserSubscription{}
+	for rows.Next() {
+		var i UserSubscription
+		if err := rows.Scan(
+			&i.ID,
+			&i.PublicID,
+			&i.UserID,
+			&i.SubscriptionID,
+			&i.Active,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.ExpiresAt,
+			&i.Progress,
+			&i.Amount,
+			&i.CurrencyIsoCode,
+			&i.EstimatedDeliveryTime,
+			&i.IsCustom,
+			&i.DailyDeliveryLimit,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listOrdersDueSoon = `-- name: ListOrdersDueSoon :many
+SELECT 
+    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date,
+    COALESCE(oi_count.total_items, 0)::int AS total_items,
+    oi_preview.product AS preview_product,
+    oi_preview.quantity AS preview_quantity
+FROM orders o
+LEFT JOIN LATERAL (
+    SELECT product, quantity
+    FROM order_items
+    WHERE order_number = o.order_number
+    LIMIT 1
+) AS oi_preview ON TRUE
+LEFT JOIN (
+    SELECT order_number, COUNT(*) AS total_items
+    FROM order_items
+    GROUP BY order_number
+) AS oi_count ON oi_count.order_number = o.order_number
+WHERE 
+    o.expected_delivery_date IS NOT NULL
+    AND o.expected_delivery_date >= NOW()
+    AND o.expected_delivery_date <= NOW() + ($1::int || ' days')::interval
+    AND o.status NOT IN ('OrderStatus_DELIVERED', 'OrderStatus_REJECTED', 'OrderStatus_CANCELLED')
+ORDER BY o.expected_delivery_date ASC
+`
+
+type ListOrdersDueSoonRow struct {
+	OrderNumber          int64              `json:"order_number"`
+	DeliveryLocation     pgtype.Point       `json:"delivery_location"`
+	PriceValue           *float64           `json:"price_value"`
+	PriceCurrency        *string            `json:"price_currency"`
+	Status               string             `json:"status"`
+	Rating               pgtype.Numeric     `json:"rating"`
+	Review               string             `json:"review"`
+	CreatedBy            *string            `json:"created_by"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	SecretKey            *string            `json:"secret_key"`
+	ProductOwner         *string            `json:"product_owner"`
+	PayoutPhoneNumber    *string            `json:"payout_phone_number"`
+	DeliveryAddress      string             `json:"delivery_address"`
+	DispatchedBy         *string            `json:"dispatched_by"`
+	DeliveryFeeAmount    *float64           `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency  *string            `json:"delivery_fee_currency"`
+	UserSubscriptionID   *int64             `json:"user_subscription_id"`
+	ExpectedDeliveryDate pgtype.Timestamptz `json:"expected_delivery_date"`
+	TotalItems           int32              `json:"total_items"`
+	PreviewProduct       string             `json:"preview_product"`
+	PreviewQuantity      int32              `json:"preview_quantity"`
+}
+
+func (q *Queries) ListOrdersDueSoon(ctx context.Context, days int32) ([]ListOrdersDueSoonRow, error) {
+	rows, err := q.db.Query(ctx, listOrdersDueSoon, days)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListOrdersDueSoonRow{}
+	for rows.Next() {
+		var i ListOrdersDueSoonRow
+		if err := rows.Scan(
+			&i.OrderNumber,
+			&i.DeliveryLocation,
+			&i.PriceValue,
+			&i.PriceCurrency,
+			&i.Status,
+			&i.Rating,
+			&i.Review,
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.SecretKey,
+			&i.ProductOwner,
+			&i.PayoutPhoneNumber,
+			&i.DeliveryAddress,
+			&i.DispatchedBy,
+			&i.DeliveryFeeAmount,
+			&i.DeliveryFeeCurrency,
+			&i.UserSubscriptionID,
+			&i.ExpectedDeliveryDate,
+			&i.TotalItems,
+			&i.PreviewProduct,
+			&i.PreviewQuantity,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listSubsriptions = `-- name: ListSubsriptions :many
@@ -290,6 +471,45 @@ func (q *Queries) ListSubsriptions(ctx context.Context) ([]Subscription, error) 
 			&i.CurrencyIsoCode,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listUserSubscriptionsByUserID = `-- name: ListUserSubscriptionsByUserID :many
+SELECT id, public_id, user_id, subscription_id, active, created_at, updated_at, expires_at, progress, amount, currency_iso_code, estimated_delivery_time, is_custom, daily_delivery_limit FROM user_subscriptions WHERE user_id = $1 ORDER BY created_at DESC
+`
+
+func (q *Queries) ListUserSubscriptionsByUserID(ctx context.Context, userID string) ([]UserSubscription, error) {
+	rows, err := q.db.Query(ctx, listUserSubscriptionsByUserID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []UserSubscription{}
+	for rows.Next() {
+		var i UserSubscription
+		if err := rows.Scan(
+			&i.ID,
+			&i.PublicID,
+			&i.UserID,
+			&i.SubscriptionID,
+			&i.Active,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.ExpiresAt,
+			&i.Progress,
+			&i.Amount,
+			&i.CurrencyIsoCode,
+			&i.EstimatedDeliveryTime,
+			&i.IsCustom,
+			&i.DailyDeliveryLimit,
 		); err != nil {
 			return nil, err
 		}

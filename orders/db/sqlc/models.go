@@ -106,15 +106,18 @@ type SubscriptionItem struct {
 }
 
 type UserSubscription struct {
-	ID              int64              `json:"id"`
-	PublicID        string             `json:"public_id"`
-	UserID          string             `json:"user_id"`
-	SubscriptionID  string             `json:"subscription_id"`
-	Active          bool               `json:"active"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
-	ExpiresAt       pgtype.Timestamptz `json:"expires_at"`
-	Progress        *float64           `json:"progress"`
-	Amount          int64              `json:"amount"`
-	CurrencyIsoCode string             `json:"currency_iso_code"`
+	ID                    int64              `json:"id"`
+	PublicID              string             `json:"public_id"`
+	UserID                string             `json:"user_id"`
+	SubscriptionID        string             `json:"subscription_id"`
+	Active                bool               `json:"active"`
+	CreatedAt             pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt             pgtype.Timestamptz `json:"updated_at"`
+	ExpiresAt             pgtype.Timestamptz `json:"expires_at"`
+	Progress              *float64           `json:"progress"`
+	Amount                int64              `json:"amount"`
+	CurrencyIsoCode       string             `json:"currency_iso_code"`
+	EstimatedDeliveryTime pgtype.Interval    `json:"estimated_delivery_time"`
+	IsCustom              bool               `json:"is_custom"`
+	DailyDeliveryLimit    *int64             `json:"daily_delivery_limit"`
 }

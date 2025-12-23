@@ -501,12 +501,12 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 	// case for when payment is for a subscription
 	if payment.PaymentEntity == ordersgrpc.PaymentEntity_PaymentEntity_SUBSCRIPTION.String() {
 
-		// _, err := querier.GetUserSubscriptionByPublicID(ctx, payment.EntityID)
+		userSubscription, err := querier.GetUserSubscriptionByPublicID(ctx, payment.EntityID)
 
-		// if err != nil {
-		// 	i.logger.Debug().Msgf("error getting subscription for payment with ref %v, why: %v", payment.ID, err)
-		// 	return nil, status.Errorf(codes.Internal, "error getting subscription for payment with ref %v, why: %v", payment.ID, err)
-		// }
+		if err != nil {
+			i.logger.Debug().Msgf("error getting subscription for payment with ref %v, why: %v", payment.ID, err)
+			return nil, status.Errorf(codes.Internal, "error getting subscription for payment with ref %v, why: %v", payment.ID, err)
+		}
 
 		var updatedPaymentStatus ordersgrpc.PaymentStatus
 		var shouldActivateSubscription = false
@@ -529,9 +529,17 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 		}
 
 		if shouldActivateSubscription {
-			newErr := querier.ActivateUserSubscription(ctx, payment.EntityID)
-			if newErr != nil {
-				return nil, status.Errorf(codes.Internal, "error activating subscription: %v", newErr)
+			// Activate the subscription
+			err = querier.ActivateUserSubscription(ctx, payment.EntityID)
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "error activating subscription: %v", err)
+			}
+
+			// Create orders from subscription items
+			err = i.createOrdersFromSubscription(ctx, userSubscription, querier)
+			if err != nil {
+				i.logger.Error().Err(err).Msg("error creating orders from subscription")
+				return nil, status.Errorf(codes.Internal, "error creating orders from subscription: %v", err)
 			}
 		}
 
@@ -887,6 +895,206 @@ func decodeOrderItems(raw interface{}) ([]sqlc.OrderItem, error) {
 	}
 
 	return items, nil
+}
+
+// createOrdersFromSubscription creates orders from subscription items when payment is confirmed
+func (i *Impl) createOrdersFromSubscription(
+	ctx context.Context,
+	userSubscription sqlc.UserSubscription,
+	querier sqlc.Querier,
+) error {
+	// Get user's location for delivery
+	user, err := i.userService.GetUserByID(ctx, &usersgrpc.GetUserByIDRequest{
+		UserId: userSubscription.UserID,
+	})
+	if err != nil {
+		return fmt.Errorf("error getting user: %w", err)
+	}
+
+	if user.GetUser() == nil || user.GetUser().LocationCoordinates == nil {
+		return fmt.Errorf("user location not found")
+	}
+
+	userLocation := user.GetUser().LocationCoordinates
+	userAddress := user.GetUser().GetAddress()
+
+	// Get subscription items
+	subscriptionItems, err := querier.GetSubscriptionItemsBySubscriptionID(ctx, userSubscription.SubscriptionID)
+	if err != nil {
+		return fmt.Errorf("error getting subscription items: %w", err)
+	}
+
+	if len(subscriptionItems) == 0 {
+		return fmt.Errorf("no subscription items found")
+	}
+
+	// Get subscription plan to check if it's custom
+	subscriptionPlan, err := querier.GetSubscriptionByID(ctx, userSubscription.SubscriptionID)
+	if err != nil {
+		return fmt.Errorf("error getting subscription plan: %w", err)
+	}
+
+	// Check if this is a custom subscription (we'll use a flag in user_subscriptions after sqlc regenerate)
+	// For now, we'll determine based on whether subscription_id is NULL or a special value
+	// This will need to be updated after we add is_custom field support
+
+	// Calculate expected delivery date based on estimated_delivery_time
+	baseDeliveryDate := time.Now()
+
+	if userSubscription.EstimatedDeliveryTime.Valid {
+		// estimated_delivery_time is an interval, add it to now
+		estimatedDays := int64(userSubscription.EstimatedDeliveryTime.Microseconds/(24*60*60*OneMillion)) +
+			int64(userSubscription.EstimatedDeliveryTime.Days) +
+			int64(userSubscription.EstimatedDeliveryTime.Months)*30
+		if estimatedDays > 0 {
+			baseDeliveryDate = time.Now().AddDate(0, 0, int(estimatedDays))
+		} else {
+			baseDeliveryDate = time.Now().AddDate(0, 0, 7)
+		}
+	} else {
+		// Fallback to subscription plan duration
+		totalDays := int64(subscriptionPlan.Duration.Months)*30 +
+			int64(subscriptionPlan.Duration.Days) +
+			subscriptionPlan.Duration.Microseconds/(24*60*60*OneMillion)
+		if totalDays > 0 {
+			baseDeliveryDate = time.Now().AddDate(0, 0, int(totalDays))
+		} else {
+			// Default to 7 days if not specified
+			baseDeliveryDate = time.Now().AddDate(0, 0, 7)
+		}
+	}
+
+	// For regular subscriptions, create all orders with the same delivery date
+	// For custom subscriptions, we need to group by daily limit (this will be implemented after custom subscription support)
+
+	// Group items by farmer (orders must be from same farmer)
+	farmerItems := make(map[string][]sqlc.SubscriptionItem)
+	var productInfos []ProductInfo
+
+	for _, item := range subscriptionItems {
+		prod, err := i.productService.GetProduct(ctx, &productsgrpc.GetProductRequest{
+			ProductId: item.Product,
+		})
+		if err != nil {
+			return fmt.Errorf("error fetching product %s: %w", item.Product, err)
+		}
+
+		p := prod.GetProduct()
+		farmerID := p.GetCreatedBy()
+
+		if _, exists := farmerItems[farmerID]; !exists {
+			farmerItems[farmerID] = []sqlc.SubscriptionItem{}
+		}
+		farmerItems[farmerID] = append(farmerItems[farmerID], item)
+
+		productInfos = append(productInfos, ProductInfo{
+			Product:  p,
+			Quantity: int64(item.Quantity),
+		})
+	}
+
+	// Create one order per farmer
+	for farmerID, items := range farmerItems {
+		// Calculate total amount for this farmer's items
+		var totalAmount float64
+		var currency string
+
+		for _, item := range items {
+			prod, err := i.productService.GetProduct(ctx, &productsgrpc.GetProductRequest{
+				ProductId: item.Product,
+			})
+			if err != nil {
+				return fmt.Errorf("error fetching product %s: %w", item.Product, err)
+			}
+			p := prod.GetProduct()
+			totalAmount += p.Amount.Value * float64(item.Quantity) * TotalPercentage
+			currency = p.Amount.CurrencyIsoCode
+		}
+
+		// Calculate delivery fee
+		orderItems := make([]*ordersgrpc.OrderItem, 0, len(items))
+		for _, item := range items {
+			orderItems = append(orderItems, &ordersgrpc.OrderItem{
+				ProductId: item.Product,
+				Quantity:  int64(item.Quantity),
+				UnitType:  item.UnitType,
+			})
+		}
+
+		deliveryFee, err := i.EstimateDeliveryFee(ctx, &ordersgrpc.EstimateDeliveryFeeRequest{
+			UserId:           userSubscription.UserID,
+			OrderItems:       orderItems,
+			DeliveryLocation: userLocation,
+		})
+		if err != nil {
+			return fmt.Errorf("error calculating delivery fee: %w", err)
+		}
+
+		// Generate secret key
+		secretKey, err := generateHexSecretKey(6)
+		if err != nil {
+			return fmt.Errorf("error generating secret key: %w", err)
+		}
+
+		// Create order
+		order, err := querier.CreateOrder(ctx, sqlc.CreateOrderParams{
+			DeliveryLocation: pgtype.Point{
+				P:     pgtype.Vec2{X: float64(userLocation.GetLon()), Y: float64(userLocation.GetLat())},
+				Valid: true,
+			},
+			PriceValue:          totalAmount,
+			PriceCurrency:       currency,
+			Status:              ordersgrpc.OrderStatus_OrderStatus_CREATED.String(),
+			CreatedBy:           userSubscription.UserID,
+			SecretKey:           secretKey,
+			ProductOwner:        farmerID,
+			DeliveryAddress:     userAddress,
+			DeliveryFeeAmount:   deliveryFee.EstimatedDeliveryFee.Value,
+			DeliveryFeeCurrency: deliveryFee.EstimatedDeliveryFee.CurrencyIsoCode,
+			UserSubscriptionID:  &userSubscription.ID,
+			ExpectedDeliveryDate: pgtype.Timestamptz{
+				Time:  baseDeliveryDate,
+				Valid: true,
+			},
+		})
+		if err != nil {
+			return fmt.Errorf("error creating order: %w", err)
+		}
+
+		// Create order items
+		for _, item := range items {
+			err := querier.CreateOrderItem(ctx, sqlc.CreateOrderItemParams{
+				OrderNumber: int32(order.OrderNumber),
+				Product:     item.Product,
+				Quantity:    item.Quantity,
+				UnitType:    item.UnitType,
+			})
+			if err != nil {
+				return fmt.Errorf("error creating order item: %w", err)
+			}
+		}
+
+		// Create audit log
+		afterBytes, err := protojson.Marshal(converters.SqlcOrderToProto(order))
+		if err != nil {
+			i.logger.Error().Err(err).Msg("failed to marshal order for audit log")
+		} else {
+			err = querier.CreateOrderAuditLog(ctx, sqlc.CreateOrderAuditLogParams{
+				OrderNumber:    order.OrderNumber,
+				EventTimestamp: pgtype.Timestamptz{Time: time.Now(), Valid: true},
+				Actor:          userSubscription.UserID,
+				Action:         "CreateOrderFromSubscription",
+				Reason:         fmt.Sprintf("Order created from subscription %s", userSubscription.PublicID),
+				Before:         nil,
+				After:          afterBytes,
+			})
+			if err != nil {
+				i.logger.Error().Err(err).Msg("error creating order audit log")
+			}
+		}
+	}
+
+	return nil
 }
 
 // GetOrderDetails implements ordersgrpc.OrdersServer.
@@ -2427,13 +2635,30 @@ func (i *Impl) Subscribe(
 			req.GetSubscriptionPlanId(), err)
 	}
 
+	// Convert subscription plan duration to estimated_delivery_time
+	var estimatedDeliveryTime pgtype.Interval
+	totalDays := int64(subscriptionPlan.Duration.Months)*30 +
+		int64(subscriptionPlan.Duration.Days) +
+		subscriptionPlan.Duration.Microseconds/(24*60*60*OneMillion)
+	if totalDays > 0 {
+		estimatedDeliveryTime = pgtype.Interval{
+			Microseconds: totalDays * 24 * 60 * 60 * OneMillion,
+			Days:         int32(totalDays % 30),
+			Months:       int32(totalDays / 30),
+			Valid:        true,
+		}
+	}
+
 	subscription, err := querier.CreateUserSubscription(ctx,
 		sqlc.CreateUserSubscriptionParams{
-			UserID:          req.GetUserId(),
-			SubscriptionID:  req.GetSubscriptionPlanId(),
-			Active:          false,
-			Amount:          subscriptionPlan.Amount,
-			CurrencyIsoCode: subscriptionPlan.CurrencyIsoCode,
+			UserID:                req.GetUserId(),
+			SubscriptionID:        req.GetSubscriptionPlanId(),
+			Active:                false,
+			Amount:                subscriptionPlan.Amount,
+			CurrencyIsoCode:       subscriptionPlan.CurrencyIsoCode,
+			EstimatedDeliveryTime: estimatedDeliveryTime,
+			IsCustom:              false,
+			DailyDeliveryLimit:    nil,
 		})
 
 	err = tx.Commit(ctx)
@@ -2442,19 +2667,6 @@ func (i *Impl) Subscribe(
 	}
 
 	return &ordersgrpc.SubscribeResponse{
-		Subscription: &ordersgrpc.UserSubscription{
-			Id:                 fmt.Sprintf("%d", subscription.ID),
-			PublicId:           subscription.PublicID,
-			UserId:             subscription.UserID,
-			SubscriptionPlanId: subscription.SubscriptionID,
-			Active:             subscription.Active,
-			CreatedAt:          timestamppb.New(subscription.CreatedAt.Time),
-			UpdatedAt:          timestamppb.New(subscription.UpdatedAt.Time),
-			Progress:           *subscription.Progress,
-			Amount: &types.Amount{
-				Value:           float64(subscription.Amount),
-				CurrencyIsoCode: subscription.CurrencyIsoCode,
-			},
-		},
+		Subscription: converters.SqlcUserSubscriptionToProto(subscription),
 	}, nil
 }

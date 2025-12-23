@@ -475,6 +475,54 @@ func stringFromInt64(num int64) string {
 	return fmt.Sprintf("%d", num)
 }
 
+func SqlcUserSubscriptionToProto(sub sqlc.UserSubscription) *ordersgrpc.UserSubscription {
+	progress := 0.0
+	if sub.Progress != nil {
+		progress = *sub.Progress
+	}
+
+	var estimatedDeliveryTimeDays *int64
+	if sub.EstimatedDeliveryTime.Valid {
+		const OneMillion = 1000000
+		totalDays := int64(sub.EstimatedDeliveryTime.Months)*30 +
+			int64(sub.EstimatedDeliveryTime.Days) +
+			sub.EstimatedDeliveryTime.Microseconds/(24*60*60*OneMillion)
+		estimatedDeliveryTimeDays = &totalDays
+	}
+
+	result := &ordersgrpc.UserSubscription{
+		Id:                 fmt.Sprintf("%d", sub.ID),
+		PublicId:           sub.PublicID,
+		UserId:             sub.UserID,
+		SubscriptionPlanId: sub.SubscriptionID,
+		Active:             sub.Active,
+		Progress:           progress,
+		Amount: &types.Amount{
+			Value:           float64(sub.Amount),
+			CurrencyIsoCode: sub.CurrencyIsoCode,
+		},
+		IsCustom: sub.IsCustom,
+	}
+
+	if sub.CreatedAt.Valid {
+		result.CreatedAt = timestamppb.New(sub.CreatedAt.Time)
+	}
+	if sub.UpdatedAt.Valid {
+		result.UpdatedAt = timestamppb.New(sub.UpdatedAt.Time)
+	}
+	if sub.ExpiresAt.Valid {
+		result.ExpiresAt = timestamppb.New(sub.ExpiresAt.Time)
+	}
+	if estimatedDeliveryTimeDays != nil {
+		result.EstimatedDeliveryTimeDays = estimatedDeliveryTimeDays
+	}
+	if sub.DailyDeliveryLimit != nil {
+		result.DailyDeliveryLimit = sub.DailyDeliveryLimit
+	}
+
+	return result
+}
+
 func SqlcToProtoOrderLog(sqlcOrderAuditLog sqlc.OrdersAudit) (*ordersgrpc.OrderAuditLog, error) {
 	var before *ordersgrpc.Order
 	if sqlcOrderAuditLog.Before != nil {

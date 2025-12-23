@@ -430,6 +430,10 @@ message UserSubscription {
   double progress = 8;
   types.Amount amount = 9;
   string public_id = 10;
+  // estimated_delivery_time in days
+  optional int64 estimated_delivery_time_days = 11;
+  bool is_custom = 12;
+  optional int64 daily_delivery_limit = 13;
 }
 
 message CreateSubscriptionPlanRequest {
@@ -440,6 +444,8 @@ message CreateSubscriptionPlanRequest {
   int64 duration = 5;
   repeated SubscriptionItem subscription_items = 6;
   string admin_user_id = 7;
+  // estimated_delivery_time in days
+  optional int64 estimated_delivery_time_days = 8;
 }
 
 message CreateSubscriptionPlanResponse { Subscription subscription_plan = 1; }
@@ -450,6 +456,46 @@ message SubscribeRequest {
 }
 
 message SubscribeResponse { UserSubscription subscription = 1; }
+
+message ListUserSubscriptionsRequest {
+  string user_id = 1;
+  optional bool active_only = 2;
+}
+
+message ListUserSubscriptionsResponse {
+  repeated UserSubscription subscriptions = 1;
+}
+
+message GetUserSubscriptionDetailsRequest {
+  string user_id = 1;
+  string subscription_id = 2;
+}
+
+message GetUserSubscriptionDetailsResponse {
+  UserSubscription subscription = 1;
+  repeated Order orders = 2;
+}
+
+message ListOrdersDueSoonRequest {
+  string admin_user_id = 1;
+  int64 days = 2; // Number of days to look ahead
+}
+
+message ListOrdersDueSoonResponse {
+  repeated Order orders = 1;
+}
+
+message CreateCustomSubscriptionRequest {
+  string user_id = 1;
+  types.Amount budget = 2;
+  repeated SubscriptionItem subscription_items = 3;
+  int64 daily_delivery_limit = 4; // Daily delivery limit in cents
+  types.Point delivery_location = 5;
+}
+
+message CreateCustomSubscriptionResponse {
+  UserSubscription subscription = 1;
+}
 
 service Orders {
 
@@ -644,6 +690,35 @@ service Orders {
   rpc Subscribe(SubscribeRequest) returns (SubscribeResponse) {
     option (google.api.http) = {
       post : "/v1/users/{user_id}/orders/subscribe"
+      body : "*"
+    };
+  }
+
+  rpc ListUserSubscriptions(ListUserSubscriptionsRequest)
+      returns (ListUserSubscriptionsResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/orders/subscriptions"
+    };
+  }
+
+  rpc GetUserSubscriptionDetails(GetUserSubscriptionDetailsRequest)
+      returns (GetUserSubscriptionDetailsResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/orders/subscriptions/{subscription_id}"
+    };
+  }
+
+  rpc ListOrdersDueSoon(ListOrdersDueSoonRequest)
+      returns (ListOrdersDueSoonResponse) {
+    option (google.api.http) = {
+      get : "/v1/admin/{admin_user_id}/orders/due-soon"
+    };
+  }
+
+  rpc CreateCustomSubscription(CreateCustomSubscriptionRequest)
+      returns (CreateCustomSubscriptionResponse) {
+    option (google.api.http) = {
+      post : "/v1/users/{user_id}/orders/create-custom-subscription"
       body : "*"
     };
   }

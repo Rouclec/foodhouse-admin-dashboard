@@ -31,7 +31,10 @@ import { Search, MessageCircle, ShoppingCart, Eye } from "lucide-react";
 import { CursorPagination } from "@/components/ui/cursor-pagination";
 import { useCursorPagination } from "@/hooks/use-cursor-pagination";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ordersListOrdersOptions } from "@/client/orders.swagger/@tanstack/react-query.gen";
+import {
+  ordersListOrdersOptions,
+  ordersListOrdersDueSoonOptions,
+} from "@/client/orders.swagger/@tanstack/react-query.gen";
 import { Context, ContextType } from "@/app/contexts/QueryProvider";
 import {
   ordersgrpcOrder,
@@ -76,8 +79,30 @@ const STATUS_FILTERS: Array<{
 type OrderRowProps = {
   order: ordersgrpcOrder;
 };
+// Helper function to get days until delivery
+const getDaysUntilDelivery = (
+  expectedDeliveryDate: string | undefined
+): number | null => {
+  if (!expectedDeliveryDate) return null;
+  const deliveryDate = moment(expectedDeliveryDate);
+  const now = moment();
+  const daysUntil = deliveryDate.diff(now, "days");
+  return daysUntil;
+};
+
+// Helper function to get color class based on days until delivery
+const getDueSoonColor = (daysUntil: number | null): string => {
+  if (daysUntil === null) return "";
+  if (daysUntil < 0) return "bg-red-500 text-white"; // Overdue
+  if (daysUntil <= 1) return "bg-red-100 text-red-800"; // Due today/tomorrow
+  if (daysUntil <= 3) return "bg-orange-100 text-orange-800"; // Due in 2-3 days
+  if (daysUntil <= 7) return "bg-yellow-100 text-yellow-800"; // Due in 4-7 days
+  return ""; // More than 7 days - no special color
+};
+
 const OrderRow: FC<OrderRowProps> = ({ order }) => {
   const router = useRouter();
+  const daysUntilDelivery = getDaysUntilDelivery(order?.expectedDeliveryDate);
 
   const { data: userData, isLoading: isUserDataLoading } = useQuery({
     ...usersGetUserByIdOptions({
@@ -153,9 +178,29 @@ const OrderRow: FC<OrderRowProps> = ({ order }) => {
   }
 
   return (
-    <TableRow key={order.orderNumber}>
+    <TableRow
+      key={order.orderNumber}
+      className={
+        daysUntilDelivery !== null && daysUntilDelivery <= 7
+          ? "bg-yellow-50 border-l-4 border-yellow-400"
+          : ""
+      }
+    >
       <TableCell className="font-medium">
-        {order.orderNumber}
+        <div className="flex items-center gap-2">
+          {order.orderNumber}
+          {daysUntilDelivery !== null && daysUntilDelivery <= 7 && (
+            <Badge className={getDueSoonColor(daysUntilDelivery)}>
+              {daysUntilDelivery < 0
+                ? `${Math.abs(daysUntilDelivery)}d overdue`
+                : daysUntilDelivery === 0
+                ? "Due today"
+                : daysUntilDelivery === 1
+                ? "Due tomorrow"
+                : `Due in ${daysUntilDelivery}d`}
+            </Badge>
+          )}
+        </div>
         <div className="sm:hidden mt-1 text-xs text-gray-500">
           {userData?.user?.firstName} {userData?.user?.lastName}
         </div>
@@ -237,6 +282,21 @@ export default function OrdersPage() {
     ordersgrpcOrderStatus | string
   >(STATUS_FILTERS[0].value);
 
+  // Fetch orders due soon (within 7 days)
+  const {
+    data: dueSoonOrdersData,
+    isLoading: isDueSoonLoading,
+  } = useQuery({
+    ...ordersListOrdersDueSoonOptions({
+      path: {
+        adminUserId: user?.userId ?? "",
+      },
+      query: {
+        days: "7",
+      },
+    }),
+  });
+
   const {
     data: ordersData,
     isLoading: isOrdersLoading,
@@ -265,7 +325,8 @@ export default function OrdersPage() {
     placeholderData: keepPreviousData,
   });
 
-  useQueryLoading(isOrdersLoading);
+
+  useQueryLoading(isOrdersLoading || isDueSoonLoading);
 
   const handleNextPage = () => {
     // Only proceed if nextKey exists and is not empty
@@ -343,13 +404,64 @@ export default function OrdersPage() {
         </CardContent>
       </Card>
 
-      {/* Orders Table */}
+      {/* Due Soon Orders Section */}
+      {dueSoonOrdersData?.orders && dueSoonOrdersData.orders.length > 0 && (
+        <Card className="border-orange-200 bg-orange-50/50">
+          <CardHeader>
+            <CardTitle className="text-orange-900">
+              ⚠️ Orders Due Soon ({dueSoonOrdersData.orders.length})
+            </CardTitle>
+            <CardDescription>
+              Orders that need attention - sorted by delivery date
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>
+                    Order N<sup>o</sup>
+                  </TableHead>
+                  <TableHead className="hidden sm:table-cell">
+                    Customer
+                  </TableHead>
+                  <TableHead className="hidden md:table-cell">Farmer</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="hidden md:table-cell">Amount</TableHead>
+                  <TableHead className="hidden lg:table-cell">Expected Delivery</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {dueSoonOrdersData.orders
+                  .sort((a, b) => {
+                    const aDays = getDaysUntilDelivery(a?.expectedDeliveryDate);
+                    const bDays = getDaysUntilDelivery(b?.expectedDeliveryDate);
+                    if (aDays === null && bDays === null) return 0;
+                    if (aDays === null) return 1;
+                    if (bDays === null) return -1;
+                    return aDays - bDays;
+                  })
+                  .map((order) => (
+                    <OrderRow key={order.orderNumber ?? ""} order={order} />
+                  ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* All Orders Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Orders</CardTitle>
+          <CardTitle>All Orders</CardTitle>
           <CardDescription>
-            Showing {ordersData?.orders?.length} of {ordersData?.orders?.length}{" "}
-            order{(ordersData?.orders?.length ?? 0) > 1 && "s"}
+            Showing {ordersData?.orders?.length ?? 0} order{(ordersData?.orders?.length ?? 0) !== 1 && "s"}
+            {dueSoonOrdersData?.orders && dueSoonOrdersData.orders.length > 0 && (
+              <span className="ml-2">
+                ({dueSoonOrdersData.orders.length} due soon highlighted above)
+              </span>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent className="overflow-x-auto">

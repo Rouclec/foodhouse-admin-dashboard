@@ -32,5 +32,5 @@ CREATE TABLE user_subscriptions (
 );
 
 ALTER TABLE orders 
-ADD COLUMN user_subscription_id BIGSERIAL default NULL,
+ADD COLUMN user_subscription_id BIGINT default NULL,
 ADD COLUMN expected_delivery_date timestamptz default NULL;
