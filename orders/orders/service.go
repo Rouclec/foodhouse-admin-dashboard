@@ -239,9 +239,18 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 		}
 	}()
 
+
+	var paymentEntity ordersgrpc.PaymentEntity
+
+	if (strings.HasPrefix(req.GetOrderId(), "subscription") ){
+		paymentEntity = ordersgrpc.PaymentEntity_PaymentEntity_SUBSCRIPTION
+	} else {
+		paymentEntity = ordersgrpc.PaymentEntity_PaymentEntity_ORDER
+	}
+
 	payment, err := querier.GetPaymentByEntity(ctx, sqlc.GetPaymentByEntityParams{
 		// req.GetReference(),
-		PaymentEntity: ordersgrpc.PaymentEntity_PaymentEntity_ORDER.String(), // TODO: assuming that we only need this webhook for orders.
+		PaymentEntity: paymentEntity.String(),
 		EntityID:      req.GetOrderId(),
 	})
 
@@ -1455,8 +1464,8 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 		})
 
 		if confirmErr != nil {
-			i.logger.Debug().Msgf("error processing payment: ", confirmErr)
-			return nil, status.Errorf(codes.Internal, "error processing payment: ", confirmErr)
+			i.logger.Debug().Msgf("error processing payment: %v", confirmErr)
+			return nil, status.Errorf(codes.Internal, "error processing payment: %v", confirmErr)
 		}
 	}
 

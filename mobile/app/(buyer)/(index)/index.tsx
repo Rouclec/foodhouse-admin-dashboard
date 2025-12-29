@@ -43,6 +43,24 @@ import MultiSlider from '@ptomasroos/react-native-multi-slider';
 const HOUR_OF_DAY = new Date().getHours();
 const { width } = Dimensions.get('window');
 
+function getPlanDiscountPercent(plan?: ordersgrpcSubscription): number | null {
+  const amount = plan?.amount?.value ?? 0;
+  if (!amount || amount <= 0) return null;
+
+  const base = (plan?.subscriptionItems ?? []).reduce((sum, item) => {
+    const qty = Number(item?.quantity ?? 0);
+    const unit = item?.productUnitPrice?.value ?? 0;
+    if (!Number.isFinite(qty) || !Number.isFinite(unit)) return sum;
+    return sum + unit * qty;
+  }, 0);
+
+  if (!base || base <= 0) return null;
+  if (amount >= base) return null;
+
+  const pct = Math.round(((base - amount) / base) * 100);
+  return pct >= 1 ? pct : null;
+}
+
 export default function BuyerProducts() {
   const [hasReachedEnd, setHasReachedEnd] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -335,9 +353,9 @@ export default function BuyerProducts() {
                   <View style={[styles.flatListContainer, { marginBottom: 8 }]}>
                     <FlatList
                       horizontal
-                      data={subscriptionPlansData.subscriptionPlans.slice(0, 4)}
+                      data={subscriptionPlansData.subscriptionPlans.slice(0, 2)}
                       contentContainerStyle={[
-                        styles.horizontailFlatListContent,
+                        { columnGap: 12, alignItems: 'flex-start', height: '100%' },
                         styles.paddingRight24,
                       ]}
                       showsHorizontalScrollIndicator={false}
@@ -347,66 +365,68 @@ export default function BuyerProducts() {
                       }
                       renderItem={({ item }) => {
                         const plan = item as ordersgrpcSubscription;
+                        const discountPct = getPlanDiscountPercent(plan);
+                        const cardWidth = Math.min(220, Math.round(width * 0.46));
                         return (
                           <TouchableOpacity
                             style={[
                               {
                                 backgroundColor: Colors.light[10],
                                 borderRadius: 12,
-                                padding: 16,
-                                marginRight: 12,
-                                width: width * 0.7,
+                                padding: 12,
+                                width: cardWidth,
                                 borderWidth: 1,
                                 borderColor: Colors.grey['f8'],
                               },
                             ]}
                             onPress={() =>
                               router.push({
-                                pathname: '/(buyer)/subscription-plans',
+                                pathname: '/(buyer)/subscription-plan-details',
                                 params: { planId: plan?.id },
                               })
                             }>
-                            <Text
+                            <View
                               style={{
-                                fontSize: 16,
-                                fontWeight: '600',
-                                color: Colors.dark[10],
-                                marginBottom: 4,
+                                flexDirection: 'row',
+                                alignItems: 'flex-start',
+                                justifyContent: 'space-between',
+                                gap: 8,
                               }}>
-                              {plan?.title}
-                            </Text>
-                            <Text
-                              style={{
-                                fontSize: 12,
-                                color: Colors.light['10.87'],
-                                marginBottom: 8,
-                              }}
-                              numberOfLines={2}>
-                              {plan?.description}
-                            </Text>
-                            <Text
-                              style={{
-                                fontSize: 18,
-                                fontWeight: '700',
-                                color: Colors.primary[500],
-                              }}>
-                              {plan?.amount?.currencyIsoCode}{' '}
-                              {plan?.amount?.value?.toLocaleString()}
-                            </Text>
-                            {plan?.subscriptionItems &&
-                              plan.subscriptionItems.length > 0 && (
-                                <Text
+                              <Text
+                                variant="bodyLarge"
+                                style={{ flex: 1, color: Colors.dark[10] }}
+                                numberOfLines={2}>
+                                {plan?.title ?? 'Subscription'}
+                              </Text>
+                              {discountPct !== null && (
+                                <View
                                   style={{
-                                    fontSize: 11,
-                                    color: Colors.light['10.87'],
-                                    marginTop: 4,
+                                    backgroundColor: Colors.primary[50],
+                                    borderColor: Colors.primary[500],
+                                    borderWidth: 1,
+                                    paddingHorizontal: 8,
+                                    paddingVertical: 4,
+                                    borderRadius: 999,
                                   }}>
-                                  {plan.subscriptionItems.length} product
-                                  {plan.subscriptionItems.length !== 1
-                                    ? 's'
-                                    : ''}
-                                </Text>
+                                  <Text
+                                    variant="bodySmall"
+                                    style={{
+                                      color: Colors.primary[500],
+                                      fontWeight: '700',
+                                    }}>
+                                    -{discountPct}%
+                                  </Text>
+                                </View>
                               )}
+                            </View>
+
+                            <Text
+                              variant="titleMedium"
+                              style={{ color: Colors.primary[500] }}
+                              numberOfLines={1}>
+                              {plan?.amount?.currencyIsoCode ?? 'XAF'}{' '}
+                              {(plan?.amount?.value ?? 0).toLocaleString()}
+                            </Text>
                           </TouchableOpacity>
                         );
                       }}

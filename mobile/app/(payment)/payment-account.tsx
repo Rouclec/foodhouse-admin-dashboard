@@ -48,7 +48,18 @@ const PaymentAccountPage = () => {
 
   const { paymentMethod } = params;
 
+  useEffect(() => {
+    if (paymentData) return;
+    setErrorMessage('Missing payment context. Please restart checkout/subscription flow.');
+    setError(true);
+  }, [paymentData]);
+
   const handleSubmit = async () => {
+    if (!paymentData?.entity || !paymentData?.entityId || !paymentData?.amount) {
+      setErrorMessage('Payment details are missing. Please restart checkout/subscription flow.');
+      setError(true);
+      return;
+    }
     if (!mobile.trim()) {
       setErrorMessage('Please enter your account number');
       setError(true);
