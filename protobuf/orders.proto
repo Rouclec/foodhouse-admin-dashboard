@@ -406,7 +406,8 @@ message SubscriptionItem {
   string unit_type = 7;
   string subscription_id = 8;
   // order_index indicates which order (delivery) this item belongs to.
-  // 0 = first order, 1 = second order, etc. Defaults to 0 for single-order subscriptions.
+  // 0 = first order, 1 = second order, etc. Defaults to 0 for single-order
+  // subscriptions.
   int32 order_index = 9;
 }
 
@@ -439,7 +440,8 @@ message UserSubscription {
   optional int64 estimated_delivery_time_days = 11;
   bool is_custom = 12;
   optional int64 daily_delivery_limit = 13;
-  // The soonest expected delivery date from associated orders (for admin sorting/coloring)
+  // The soonest expected delivery date from associated orders (for admin
+  // sorting/coloring)
   optional google.protobuf.Timestamp soonest_delivery_date = 14;
 }
 
@@ -525,10 +527,12 @@ message CreateCustomSubscriptionRequest {
   string user_id = 1;
   types.Amount budget = 2;
   repeated SubscriptionItem subscription_items = 3;
-  // Maximum amount per order (in cents). Default 5000000 (50k XAF) if not specified
-  optional int64 max_amount_per_order = 4; 
+  // Maximum amount per order (in cents). Default 5000000 (50k XAF) if not
+  // specified
+  optional int64 max_amount_per_order = 4;
   types.Point delivery_location = 5;
-  // estimated_delivery_time in days - will be automatically calculated based on number of orders
+  // estimated_delivery_time in days - will be automatically calculated based on
+  // number of orders
   optional int64 estimated_delivery_time_days = 6;
 }
 

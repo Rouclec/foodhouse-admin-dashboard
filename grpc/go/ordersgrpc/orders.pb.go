@@ -3943,7 +3943,8 @@ type SubscriptionItem struct {
 	UnitType         string        `protobuf:"bytes,7,opt,name=unit_type,json=unitType,proto3" json:"unit_type,omitempty"`
 	SubscriptionId   string        `protobuf:"bytes,8,opt,name=subscription_id,json=subscriptionId,proto3" json:"subscription_id,omitempty"`
 	// order_index indicates which order (delivery) this item belongs to.
-	// 0 = first order, 1 = second order, etc. Defaults to 0 for single-order subscriptions.
+	// 0 = first order, 1 = second order, etc. Defaults to 0 for single-order
+	// subscriptions.
 	OrderIndex int32 `protobuf:"varint,9,opt,name=order_index,json=orderIndex,proto3" json:"order_index,omitempty"`
 }
 
@@ -4163,7 +4164,8 @@ type UserSubscription struct {
 	EstimatedDeliveryTimeDays *int64 `protobuf:"varint,11,opt,name=estimated_delivery_time_days,json=estimatedDeliveryTimeDays,proto3,oneof" json:"estimated_delivery_time_days,omitempty"`
 	IsCustom                  bool   `protobuf:"varint,12,opt,name=is_custom,json=isCustom,proto3" json:"is_custom,omitempty"`
 	DailyDeliveryLimit        *int64 `protobuf:"varint,13,opt,name=daily_delivery_limit,json=dailyDeliveryLimit,proto3,oneof" json:"daily_delivery_limit,omitempty"`
-	// The soonest expected delivery date from associated orders (for admin sorting/coloring)
+	// The soonest expected delivery date from associated orders (for admin
+	// sorting/coloring)
 	SoonestDeliveryDate *timestamppb.Timestamp `protobuf:"bytes,14,opt,name=soonest_delivery_date,json=soonestDeliveryDate,proto3,oneof" json:"soonest_delivery_date,omitempty"`
 }
 
@@ -5180,10 +5182,12 @@ type CreateCustomSubscriptionRequest struct {
 	UserId            string              `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Budget            *types.Amount       `protobuf:"bytes,2,opt,name=budget,proto3" json:"budget,omitempty"`
 	SubscriptionItems []*SubscriptionItem `protobuf:"bytes,3,rep,name=subscription_items,json=subscriptionItems,proto3" json:"subscription_items,omitempty"`
-	// Maximum amount per order (in cents). Default 5000000 (50k XAF) if not specified
+	// Maximum amount per order (in cents). Default 5000000 (50k XAF) if not
+	// specified
 	MaxAmountPerOrder *int64       `protobuf:"varint,4,opt,name=max_amount_per_order,json=maxAmountPerOrder,proto3,oneof" json:"max_amount_per_order,omitempty"`
 	DeliveryLocation  *types.Point `protobuf:"bytes,5,opt,name=delivery_location,json=deliveryLocation,proto3" json:"delivery_location,omitempty"`
-	// estimated_delivery_time in days - will be automatically calculated based on number of orders
+	// estimated_delivery_time in days - will be automatically calculated based on
+	// number of orders
 	EstimatedDeliveryTimeDays *int64 `protobuf:"varint,6,opt,name=estimated_delivery_time_days,json=estimatedDeliveryTimeDays,proto3,oneof" json:"estimated_delivery_time_days,omitempty"`
 }
 

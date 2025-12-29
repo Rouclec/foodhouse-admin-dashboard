@@ -1507,7 +1507,7 @@
         "maxAmountPerOrder": {
           "type": "string",
           "format": "int64",
-          "title": "Maximum amount per order (in cents). Default 5000000 (50k XAF) if not specified"
+          "title": "Maximum amount per order (in cents). Default 5000000 (50k XAF) if not\nspecified"
         },
         "deliveryLocation": {
           "$ref": "#/definitions/typesPoint"
@@ -1515,7 +1515,7 @@
         "estimatedDeliveryTimeDays": {
           "type": "string",
           "format": "int64",
-          "title": "estimated_delivery_time in days - will be automatically calculated based on number of orders"
+          "title": "estimated_delivery_time in days - will be automatically calculated based on\nnumber of orders"
         }
       }
     },
@@ -2433,7 +2433,7 @@
         "orderIndex": {
           "type": "integer",
           "format": "int32",
-          "description": "order_index indicates which order (delivery) this item belongs to.\n0 = first order, 1 = second order, etc. Defaults to 0 for single-order subscriptions."
+          "description": "order_index indicates which order (delivery) this item belongs to.\n0 = first order, 1 = second order, etc. Defaults to 0 for single-order\nsubscriptions."
         }
       }
     },
@@ -2500,7 +2500,7 @@
         "soonestDeliveryDate": {
           "type": "string",
           "format": "date-time",
-          "title": "The soonest expected delivery date from associated orders (for admin sorting/coloring)"
+          "title": "The soonest expected delivery date from associated orders (for admin\nsorting/coloring)"
         }
       }
     },

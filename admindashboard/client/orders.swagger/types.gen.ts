@@ -309,7 +309,8 @@ export type ordersgrpcSubscriptionItem = {
     subscriptionId?: string;
     /**
      * order_index indicates which order (delivery) this item belongs to.
-     * 0 = first order, 1 = second order, etc. Defaults to 0 for single-order subscriptions.
+     * 0 = first order, 1 = second order, etc. Defaults to 0 for single-order
+     * subscriptions.
      */
     orderIndex?: number;
 };
