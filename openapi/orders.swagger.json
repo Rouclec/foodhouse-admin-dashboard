@@ -251,36 +251,6 @@
         ]
       }
     },
-    "/v1/admin/{adminUserId}/orders/list-subscription-plans": {
-      "get": {
-        "operationId": "Orders_ListSubscriptionPlans",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/ordersgrpcListSubscriptionPlansResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "adminUserId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Orders"
-        ]
-      }
-    },
     "/v1/admin/{adminUserId}/orders/{subscriptionPlanId}/update-subscription-plan": {
       "put": {
         "operationId": "Orders_UpdateSubscriptionPlan",
@@ -685,9 +655,9 @@
         ]
       }
     },
-    "/v1/public/orders/list-subscription-plans": {
+    "/v1/user/{userId}/orders/list-subscription-plans": {
       "get": {
-        "operationId": "Orders_ListSubscriptionPlans2",
+        "operationId": "Orders_ListSubscriptionPlans",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -704,9 +674,9 @@
         },
         "parameters": [
           {
-            "name": "adminUserId",
-            "in": "query",
-            "required": false,
+            "name": "userId",
+            "in": "path",
+            "required": true,
             "type": "string"
           }
         ],

@@ -472,7 +472,7 @@ message UpdateSubscriptionPlanRequest {
 
 message UpdateSubscriptionPlanResponse { Subscription subscription_plan = 1; }
 
-message ListSubscriptionPlansRequest { string admin_user_id = 1; }
+message ListSubscriptionPlansRequest { string user_id = 1; }
 
 message ListSubscriptionPlansResponse {
   repeated Subscription subscription_plans = 1;
@@ -736,10 +736,7 @@ service Orders {
   rpc ListSubscriptionPlans(ListSubscriptionPlansRequest)
       returns (ListSubscriptionPlansResponse) {
     option (google.api.http) = {
-      get : "/v1/admin/{admin_user_id}/orders/list-subscription-plans"
-      additional_bindings {
-        get : "/v1/public/orders/list-subscription-plans"
-      }
+      get : "/v1/user/{user_id}/orders/list-subscription-plans"
     };
   }
 

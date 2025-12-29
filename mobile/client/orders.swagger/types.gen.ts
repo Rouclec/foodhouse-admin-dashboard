@@ -470,16 +470,6 @@ export type OrdersListOrdersDueSoonResponse = (ordersgrpcListOrdersDueSoonRespon
 
 export type OrdersListOrdersDueSoonError = (rpcStatus);
 
-export type OrdersListSubscriptionPlansData = {
-    path: {
-        adminUserId: string;
-    };
-};
-
-export type OrdersListSubscriptionPlansResponse = (ordersgrpcListSubscriptionPlansResponse);
-
-export type OrdersListSubscriptionPlansError = (rpcStatus);
-
 export type OrdersUpdateSubscriptionPlanData = {
     body: OrdersUpdateSubscriptionPlanBody;
     path: {
@@ -582,15 +572,15 @@ export type OrdersHealthCheckResponse = (ordersgrpcHealthCheckResponse);
 
 export type OrdersHealthCheckError = (rpcStatus);
 
-export type OrdersListSubscriptionPlans2Data = {
-    query?: {
-        adminUserId?: string;
+export type OrdersListSubscriptionPlansData = {
+    path: {
+        userId: string;
     };
 };
 
-export type OrdersListSubscriptionPlans2Response = (ordersgrpcListSubscriptionPlansResponse);
+export type OrdersListSubscriptionPlansResponse = (ordersgrpcListSubscriptionPlansResponse);
 
-export type OrdersListSubscriptionPlans2Error = (rpcStatus);
+export type OrdersListSubscriptionPlansError = (rpcStatus);
 
 export type OrdersGetFarmerEarningsData = {
     path: {
