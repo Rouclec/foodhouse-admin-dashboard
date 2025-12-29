@@ -242,7 +242,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 
 	var paymentEntity ordersgrpc.PaymentEntity
 
-	if (strings.HasPrefix(req.GetOrderId(), "subscription") ){
+	if (strings.HasPrefix(req.GetOrderId(), "sub-") ){
 		paymentEntity = ordersgrpc.PaymentEntity_PaymentEntity_SUBSCRIPTION
 	} else {
 		paymentEntity = ordersgrpc.PaymentEntity_PaymentEntity_ORDER
