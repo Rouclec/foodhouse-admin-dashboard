@@ -239,10 +239,9 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 		}
 	}()
 
-
 	var paymentEntity ordersgrpc.PaymentEntity
 
-	if (strings.HasPrefix(req.GetOrderId(), "sub-") ){
+	if strings.HasPrefix(req.GetOrderId(), "sub-") {
 		paymentEntity = ordersgrpc.PaymentEntity_PaymentEntity_SUBSCRIPTION
 	} else {
 		paymentEntity = ordersgrpc.PaymentEntity_PaymentEntity_ORDER
@@ -1076,9 +1075,9 @@ func (i *Impl) createOrdersFromSubscription(
 				P:     pgtype.Vec2{X: float64(userLocation.GetLon()), Y: float64(userLocation.GetLat())},
 				Valid: true,
 			},
-			PriceValue:          totalAmount,
-			PriceCurrency:       currency,
-			Status:              ordersgrpc.OrderStatus_OrderStatus_CREATED.String(),
+			PriceValue:    totalAmount,
+			PriceCurrency: currency,
+			Status:              ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL.String(),
 			CreatedBy:           userSubscription.UserID,
 			SecretKey:           secretKey,
 			ProductOwner:        farmerID,
