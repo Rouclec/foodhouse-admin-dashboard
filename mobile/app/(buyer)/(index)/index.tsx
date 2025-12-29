@@ -119,7 +119,7 @@ export default function BuyerProducts() {
   } = useQuery({
     ...ordersListSubscriptionPlansOptions({
       path: {
-        adminUserId: user?.userId ?? '', // Can be any user ID, endpoint doesn't check admin status
+        userId: user?.userId ?? '',
       },
     }),
   });
@@ -197,8 +197,8 @@ export default function BuyerProducts() {
                         {HOUR_OF_DAY < 12
                           ? i18n.t('(buyer).(index).products.goodMorning')
                           : HOUR_OF_DAY < 17
-                          ? i18n.t('(buyer).(index).products.goodAfternoon')
-                          : i18n.t('(buyer).(index).products.goodEvening')}{' '}
+                            ? i18n.t('(buyer).(index).products.goodAfternoon')
+                            : i18n.t('(buyer).(index).products.goodEvening')}{' '}
                         👋
                       </Text>
                       <Text style={styles.nameText} variant="titleLarge">
@@ -459,7 +459,7 @@ export default function BuyerProducts() {
                       style={[
                         styles.categoryItem,
                         selectedCategoryId === item?.id &&
-                          styles.selectedCategoryItem,
+                        styles.selectedCategoryItem,
                       ]}
                       onPress={() => setSelectedCategoryId(item?.id)}>
                       <Text
@@ -578,7 +578,7 @@ export default function BuyerProducts() {
                         style={[
                           styles.categoryItem,
                           !filterSelectedCategoryId &&
-                            styles.selectedCategoryItem,
+                          styles.selectedCategoryItem,
                         ]}
                         onPress={() => setFilterSelectedCategoryId(undefined)}>
                         <Text
@@ -597,7 +597,7 @@ export default function BuyerProducts() {
                           style={[
                             styles.categoryItem,
                             filterSelectedCategoryId === item?.id &&
-                              styles.selectedCategoryItem,
+                            styles.selectedCategoryItem,
                           ]}
                           onPress={() => setFilterSelectedCategoryId(item?.id)}>
                           <Text
@@ -621,7 +621,7 @@ export default function BuyerProducts() {
                 {i18n.t('(buyer).(index).products.priceRange')}
               </Text>
               <MultiSlider
-                onValuesChangeStart={() => {}}
+                onValuesChangeStart={() => { }}
                 onValuesChangeFinish={e => {
                   setFilterSelectedMinValue(e[0].toString());
                   setFilterSelectedMaxValue(e[1].toString());
@@ -711,7 +711,7 @@ export default function BuyerProducts() {
                         style={[
                           styles.categoryItem,
                           filterSelectedRating === item &&
-                            styles.selectedCategoryItem,
+                          styles.selectedCategoryItem,
                         ]}
                         onPress={() => setFilterSelectedRating(item)}>
                         <Icon

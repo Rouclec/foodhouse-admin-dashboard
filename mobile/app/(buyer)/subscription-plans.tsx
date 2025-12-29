@@ -44,7 +44,7 @@ export default function SubscriptionPlans() {
   } = useQuery({
     ...ordersListSubscriptionPlansOptions({
       path: {
-        adminUserId: user?.userId ?? '', // Can be any user ID, endpoint doesn't check admin status
+        userId: user?.userId ?? '',
       },
     }),
   });
@@ -127,7 +127,7 @@ export default function SubscriptionPlans() {
               style={{
                 fontWeight: '700',
                 marginBottom: 8,
-                color: Colors.primary[700],
+                color: Colors.primary[500],
               }}>
               Create Custom Package
             </Text>
