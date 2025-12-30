@@ -212,23 +212,9 @@ export default function CreateCustomSubscription() {
     if (totals.remaining !== 0) return;
 
     try {
-      // Get delivery location from user's location or deliveryLocation context
-      let deliveryLocationPoint = null;
-      if (deliveryLocation?.region) {
-        deliveryLocationPoint = {
-          lat: deliveryLocation.region.latitude,
-          lon: deliveryLocation.region.longitude,
-        };
-      } else if (user?.locationCoordinates) {
-        deliveryLocationPoint = {
-          lat: user.locationCoordinates.lat ?? 0,
-          lon: user.locationCoordinates.lon ?? 0,
-        };
-      }
-
-      if (!deliveryLocationPoint) {
-        // Show error - user needs to set delivery location
-        alert('Please set your delivery location in your profile settings');
+      // Delivery location is required for subscriptions (reuse the pickup-point flow)
+      if (!deliveryLocation?.region) {
+        router.push('/(buyer)/(order)/select-pickup-point');
         return;
       }
 
@@ -252,8 +238,12 @@ export default function CreateCustomSubscription() {
             currencyIsoCode: 'XAF', // Default currency
           },
           subscriptionItems: subscriptionItems as any,
-          maxAmountPerOrder: MAX_AMOUNT_PER_ORDER_CENTS,
-          deliveryLocation: deliveryLocationPoint,
+          maxAmountPerOrder: MAX_AMOUNT_PER_ORDER_CENTS.toString(),
+          deliveryLocation: {
+            lat: deliveryLocation.region.latitude,
+            lon: deliveryLocation.region.longitude,
+            address: deliveryLocation.address || deliveryLocation.description,
+          },
         },
         path: {
           userId: user?.userId ?? '',

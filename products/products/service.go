@@ -276,7 +276,7 @@ func (i *Impl) ListProducts(ctx context.Context, req *productsgrpc.ListProductsR
 
 	allowedRegions := i.DetermineAllowedRegions(ctx, &i.logger, req.GetUserLocation())
 
-	i.logger.Debug().Msgf("allowed regions: ", allowedRegions)
+	i.logger.Debug().Msgf("allowed regions: %v", allowedRegions)
 
 	args := sqlc.ListProductsParams{
 		CategoryID:         req.GetCategoryId(),

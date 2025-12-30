@@ -911,7 +911,8 @@ func (i *Impl) createOrdersFromSubscription(
 	userSubscription sqlc.UserSubscription,
 	querier sqlc.Querier,
 ) error {
-	// Get user's location for delivery
+	// Get user's location for delivery (fallback for older subscriptions that
+	// don't have a subscription-specific delivery location yet).
 	user, err := i.userService.GetUserByID(ctx, &usersgrpc.GetUserByIDRequest{
 		UserId: userSubscription.UserID,
 	})
@@ -919,12 +920,33 @@ func (i *Impl) createOrdersFromSubscription(
 		return fmt.Errorf("error getting user: %w", err)
 	}
 
-	if user.GetUser() == nil || user.GetUser().LocationCoordinates == nil {
-		return fmt.Errorf("user location not found")
+	var fallbackUserLocation *types.Point
+	var fallbackUserAddress string
+	if user.GetUser() != nil {
+		fallbackUserLocation = user.GetUser().LocationCoordinates
+		fallbackUserAddress = user.GetUser().GetAddress()
 	}
 
-	userLocation := user.GetUser().LocationCoordinates
-	userAddress := user.GetUser().GetAddress()
+	// Prefer subscription delivery location if present, otherwise fall back to
+	// user profile location.
+	var deliveryLocation *types.Point
+	if userSubscription.DeliveryLocation.Valid {
+		deliveryLocation = &types.Point{
+			Lon: userSubscription.DeliveryLocation.P.X,
+			Lat: userSubscription.DeliveryLocation.P.Y,
+		}
+	} else {
+		deliveryLocation = fallbackUserLocation
+	}
+
+	deliveryAddress := userSubscription.DeliveryAddress
+	if deliveryAddress == "" {
+		deliveryAddress = fallbackUserAddress
+	}
+
+	if deliveryLocation == nil {
+		return fmt.Errorf("delivery location not found for subscription (and user profile has no location)")
+	}
 
 	// Get subscription items
 	subscriptionItems, err := querier.GetSubscriptionItemsBySubscriptionID(ctx, userSubscription.SubscriptionID)
@@ -1057,7 +1079,7 @@ func (i *Impl) createOrdersFromSubscription(
 		deliveryFee, err := i.EstimateDeliveryFee(ctx, &ordersgrpc.EstimateDeliveryFeeRequest{
 			UserId:           userSubscription.UserID,
 			OrderItems:       orderItems,
-			DeliveryLocation: userLocation,
+			DeliveryLocation: deliveryLocation,
 		})
 		if err != nil {
 			return fmt.Errorf("error calculating delivery fee: %w", err)
@@ -1072,16 +1094,16 @@ func (i *Impl) createOrdersFromSubscription(
 		// Create order
 		order, err := querier.CreateOrder(ctx, sqlc.CreateOrderParams{
 			DeliveryLocation: pgtype.Point{
-				P:     pgtype.Vec2{X: float64(userLocation.GetLon()), Y: float64(userLocation.GetLat())},
+				P:     pgtype.Vec2{X: float64(deliveryLocation.GetLon()), Y: float64(deliveryLocation.GetLat())},
 				Valid: true,
 			},
-			PriceValue:    totalAmount,
-			PriceCurrency: currency,
+			PriceValue:          totalAmount,
+			PriceCurrency:       currency,
 			Status:              ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL.String(),
 			CreatedBy:           userSubscription.UserID,
 			SecretKey:           secretKey,
 			ProductOwner:        farmerID,
-			DeliveryAddress:     userAddress,
+			DeliveryAddress:     deliveryAddress,
 			DeliveryFeeAmount:   deliveryFee.EstimatedDeliveryFee.Value,
 			DeliveryFeeCurrency: deliveryFee.EstimatedDeliveryFee.CurrencyIsoCode,
 			UserSubscriptionID:  &userSubscription.ID,
@@ -2679,6 +2701,16 @@ func (i *Impl) Subscribe(
 		}
 	}
 
+	if req.GetDeliveryLocation() == nil {
+		return nil, status.Error(codes.InvalidArgument, "delivery_location is required for subscription")
+	}
+
+	deliveryLoc := pgtype.Point{
+		P:     pgtype.Vec2{X: float64(req.GetDeliveryLocation().GetLon()), Y: float64(req.GetDeliveryLocation().GetLat())},
+		Valid: true,
+	}
+	deliveryAddr := req.GetDeliveryLocation().GetAddress()
+
 	subscription, err := querier.CreateUserSubscription(ctx,
 		sqlc.CreateUserSubscriptionParams{
 			UserID:                req.GetUserId(),
@@ -2689,6 +2721,8 @@ func (i *Impl) Subscribe(
 			EstimatedDeliveryTime: estimatedDeliveryTime,
 			IsCustom:              false,
 			DailyDeliveryLimit:    nil,
+			DeliveryLocation:      deliveryLoc,
+			DeliveryAddress:       deliveryAddr,
 		})
 
 	err = tx.Commit(ctx)
@@ -3098,6 +3132,15 @@ func (i *Impl) CreateCustomSubscription(
 	}
 
 	// Create user subscription (custom subscription, no subscription_id references a plan)
+	var deliveryLoc pgtype.Point
+	deliveryAddr := ""
+	if req.GetDeliveryLocation() != nil {
+		deliveryLoc = pgtype.Point{
+			P:     pgtype.Vec2{X: float64(req.GetDeliveryLocation().GetLon()), Y: float64(req.GetDeliveryLocation().GetLat())},
+			Valid: true,
+		}
+		deliveryAddr = req.GetDeliveryLocation().GetAddress()
+	}
 	subscription, err := querier.CreateUserSubscription(ctx, sqlc.CreateUserSubscriptionParams{
 		UserID:          req.GetUserId(),
 		SubscriptionID:  fmt.Sprintf("custom-%d", time.Now().UnixNano()), // Custom ID for custom subscriptions
@@ -3111,6 +3154,8 @@ func (i *Impl) CreateCustomSubscription(
 		IsCustom: true,
 		// Store max amount per order as daily delivery limit for backward compatibility
 		DailyDeliveryLimit: &maxAmountPerOrderCents,
+		DeliveryLocation:   deliveryLoc,
+		DeliveryAddress:    deliveryAddr,
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error creating custom subscription: %v", err)

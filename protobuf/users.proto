@@ -6,6 +6,7 @@ option go_package = "github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc";
 
 import "google/protobuf/timestamp.proto";
 import "google/api/annotations.proto";
+import "google/api/httpbody.proto";
 import "types/point.proto";
 import "types/amount.proto";
 
@@ -278,6 +279,19 @@ message ListUsersResponse {
   string next_key = 2;
 }
 
+// Export users as a PDF (admin use).
+// NOTE: This endpoint is intentionally unpaginated; it will iterate through all
+// pages server-side and return a single PDF.
+message ExportUsersPdfRequest {
+  string admin_user_id = 1;
+  // Filter by role (buyers vs farmers).
+  UserRole user_role = 2;
+  // Optional status filter.
+  UserStatus user_status = 3;
+  // Optional keyword search (name/email/phone).
+  string search = 4;
+}
+
 message GetPublicUserRequest { string user_id = 1; }
 
 message GetPublicUserResponse {
@@ -506,6 +520,12 @@ service Users {
   rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
     option (google.api.http) = {
       get : "/v1/admin/{admin_user_id}/users/list-users"
+    };
+  }
+
+  rpc ExportUsersPdf(ExportUsersPdfRequest) returns (google.api.HttpBody) {
+    option (google.api.http) = {
+      get : "/v1/admin/{admin_user_id}/users/export-pdf"
     };
   }
 

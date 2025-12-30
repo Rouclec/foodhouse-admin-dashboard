@@ -1632,6 +1632,9 @@
       "properties": {
         "subscriptionPlanId": {
           "type": "string"
+        },
+        "deliveryLocation": {
+          "$ref": "#/definitions/typesPoint"
         }
       }
     },
@@ -2501,6 +2504,10 @@
           "type": "string",
           "format": "date-time",
           "title": "The soonest expected delivery date from associated orders (for admin\nsorting/coloring)"
+        },
+        "deliveryLocation": {
+          "$ref": "#/definitions/typesPoint",
+          "description": "Delivery location chosen at subscription time; used as the default delivery\nlocation for all orders generated from this subscription."
         }
       }
     },

@@ -336,6 +336,11 @@ export type ordersgrpcUserSubscription = {
     isCustom?: boolean;
     dailyDeliveryLimit?: string;
     soonestDeliveryDate?: string;
+    /**
+     * Delivery location chosen at subscription time; used as the default delivery
+     * location for all orders generated from this subscription.
+     */
+    deliveryLocation?: typesPoint;
 };
 
 export type OrdersInitiatePaymentBody = {
@@ -351,6 +356,7 @@ export type OrdersRejectOrderBody = {
 
 export type OrdersSubscribeBody = {
     subscriptionPlanId?: string;
+    deliveryLocation?: typesPoint;
 };
 
 export type OrdersUpdateDeliveryPointBody = {

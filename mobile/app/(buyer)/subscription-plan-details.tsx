@@ -73,7 +73,7 @@ function groupItemsByDelivery(items: ordersgrpcSubscriptionItem[]) {
 export default function SubscriptionPlanDetails() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { user, setPaymentData } = useContext(Context) as ContextType;
+  const { user, deliveryLocation, setPaymentData } = useContext(Context) as ContextType;
   const planId = (params.planId as string | undefined) ?? '';
 
   const { data, isLoading } = useQuery({
@@ -98,9 +98,20 @@ export default function SubscriptionPlanDetails() {
 
   const handleSubscribe = async () => {
     if (!plan?.id) return;
+    if (!deliveryLocation?.region) {
+      router.push('/(buyer)/(order)/select-pickup-point');
+      return;
+    }
     try {
       const result = await subscribe({
-        body: { subscriptionPlanId: plan.id },
+        body: {
+          subscriptionPlanId: plan.id,
+          deliveryLocation: {
+            lon: deliveryLocation.region.longitude,
+            lat: deliveryLocation.region.latitude,
+            address: deliveryLocation.address || deliveryLocation.description,
+          },
+        },
         path: { userId: user?.userId ?? '' },
       });
 
@@ -256,15 +267,35 @@ export default function SubscriptionPlanDetails() {
           );
         }}
         ListFooterComponent={
-          <Button
-            mode="contained"
-            buttonColor={Colors.primary[500]}
-            style={{ borderRadius: 12, marginTop: 8 }}
-            loading={isSubscribing}
-            disabled={isSubscribing}
-            onPress={handleSubscribe}>
-            Subscribe & Pay
-          </Button>
+          <>
+            <Card style={{ marginBottom: 12, backgroundColor: Colors.light[10] }}>
+              <Card.Content>
+                <Text variant="titleMedium">Pickup point</Text>
+                <Text variant="bodySmall" style={{ color: Colors.light['10.87'], marginTop: 4 }}>
+                  {deliveryLocation?.description
+                    ? `${deliveryLocation.description}${deliveryLocation.address ? ` • ${deliveryLocation.address}` : ''}`
+                    : 'Choose where you want your deliveries to arrive.'}
+                </Text>
+                <Button
+                  mode="outlined"
+                  style={{ marginTop: 10, borderRadius: 12 }}
+                  textColor={Colors.primary[500]}
+                  onPress={() => router.push('/(buyer)/(order)/select-pickup-point')}>
+                  {deliveryLocation?.description ? 'Change pickup point' : 'Select pickup point'}
+                </Button>
+              </Card.Content>
+            </Card>
+
+            <Button
+              mode="contained"
+              buttonColor={Colors.primary[500]}
+              style={{ borderRadius: 12, marginTop: 8 }}
+              loading={isSubscribing}
+              disabled={isSubscribing || !deliveryLocation?.region}
+              onPress={handleSubscribe}>
+              Subscribe & Pay
+            </Button>
+          </>
         }
       />
     </SafeAreaView>

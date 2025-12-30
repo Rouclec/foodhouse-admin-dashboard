@@ -1,7 +1,7 @@
 "use client";
 
-import { useContext, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useContext, useMemo, useState } from "react";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -38,7 +38,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { usersGetUserByIdOptions } from "@/client/users.swagger/@tanstack/react-query.gen";
+import {
+  usersGetPublicUserOptions,
+  usersGetUserByIdOptions,
+} from "@/client/users.swagger/@tanstack/react-query.gen";
 
 export default function ActiveSubscriptionsPage() {
   const { user } = useContext(Context) as ContextType;
@@ -64,6 +67,32 @@ export default function ActiveSubscriptionsPage() {
     }),
   });
 
+  const subscriptionUserIds = useMemo(() => {
+    const ids = subscriptionsData?.subscriptions
+      ?.map((s) => s.userId)
+      .filter((id): id is string => !!id) ?? [];
+    return Array.from(new Set(ids));
+  }, [subscriptionsData?.subscriptions]);
+
+  const publicUsers = useQueries({
+    queries: subscriptionUserIds.map((userId) => ({
+      ...usersGetPublicUserOptions({
+        path: { userId },
+      }),
+      enabled: !!userId,
+      staleTime: 5 * 60 * 1000,
+    })),
+  });
+
+  const userNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    subscriptionUserIds.forEach((id, idx) => {
+      const name = publicUsers[idx]?.data?.name;
+      if (name) map.set(id, name);
+    });
+    return map;
+  }, [publicUsers, subscriptionUserIds]);
+
   const {
     data: subscriptionDetailsData,
     isLoading: isSubscriptionDetailsLoading,
@@ -71,10 +100,10 @@ export default function ActiveSubscriptionsPage() {
     ...ordersGetUserSubscriptionDetailsOptions({
       path: {
         userId: selectedSubscription?.userId ?? "",
-        subscriptionId: selectedSubscription?.publicId ?? "",
+        subscriptionId: selectedSubscription?.id ?? "",
       },
     }),
-    enabled: !!selectedSubscription?.publicId && isDetailsDialogOpen,
+    enabled: !!selectedSubscription?.id && isDetailsDialogOpen,
   });
 
   const { data: userData } = useQuery({
@@ -128,7 +157,7 @@ export default function ActiveSubscriptionsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
             Active Subscriptions
@@ -149,7 +178,7 @@ export default function ActiveSubscriptionsPage() {
             Track subscription progress and delivery status
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="overflow-x-auto">
           {isSubscriptionsLoading ? (
             <div className="flex justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
@@ -161,11 +190,11 @@ export default function ActiveSubscriptionsPage() {
                 <TableRow>
                   <TableHead>Subscription ID</TableHead>
                   <TableHead>User</TableHead>
-                  <TableHead>Amount</TableHead>
+                  <TableHead className="hidden md:table-cell">Amount</TableHead>
                   <TableHead>Soonest Delivery</TableHead>
-                  <TableHead>Progress</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Created</TableHead>
+                  <TableHead className="hidden lg:table-cell">Progress</TableHead>
+                  <TableHead className="hidden md:table-cell">Type</TableHead>
+                  <TableHead className="hidden xl:table-cell">Created</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -179,11 +208,26 @@ export default function ActiveSubscriptionsPage() {
                     <TableRow
                       key={subscription.publicId}
                       className={dueSoonColor || ""}>
-                      <TableCell className="font-mono text-sm">
+                      <TableCell className="font-mono text-sm max-w-[180px] truncate">
                         {subscription.publicId}
                       </TableCell>
-                      <TableCell>{subscription.userId}</TableCell>
                       <TableCell>
+                        <div className="min-w-[140px]">
+                          <div className="font-medium">
+                            {userNameById.get(subscription.userId ?? "") ??
+                              subscription.userId}
+                          </div>
+                          <div className="md:hidden mt-1">
+                            <Badge
+                              variant={
+                                subscription.isCustom ? "default" : "secondary"
+                              }>
+                              {subscription.isCustom ? "Custom" : "Plan"}
+                            </Badge>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
                         {formatCurrency(
                           subscription.amount?.value ?? 0,
                           subscription.amount?.currencyIsoCode ?? "XAF"
@@ -211,7 +255,7 @@ export default function ActiveSubscriptionsPage() {
                           <span className="text-gray-400">No pending orders</span>
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden lg:table-cell">
                         <div className="flex items-center gap-2">
                           <div className="flex-1 bg-gray-200 rounded-full h-2">
                             <div
@@ -228,7 +272,7 @@ export default function ActiveSubscriptionsPage() {
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden md:table-cell">
                         <Badge
                           variant={
                             subscription.isCustom ? "default" : "secondary"
@@ -236,7 +280,7 @@ export default function ActiveSubscriptionsPage() {
                           {subscription.isCustom ? "Custom" : "Plan"}
                         </Badge>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden xl:table-cell">
                         {formatDate(subscription.createdAt)}
                       </TableCell>
                       <TableCell>
@@ -245,7 +289,8 @@ export default function ActiveSubscriptionsPage() {
                           size="sm"
                           onClick={() => handleViewDetails(subscription)}>
                           <Eye className="h-4 w-4 mr-2" />
-                          View Details
+                          <span className="hidden sm:inline">View Details</span>
+                          <span className="sm:hidden">View</span>
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -284,7 +329,7 @@ export default function ActiveSubscriptionsPage() {
                   <CardTitle>Subscription Information</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-gray-600">Subscription ID</p>
                       <p className="font-mono text-sm">

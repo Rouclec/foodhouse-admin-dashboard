@@ -26,7 +26,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, UserX, MessageCircle, Tractor, UserCheck } from "lucide-react";
+import {
+  Download,
+  MessageCircle,
+  Search,
+  Tractor,
+  UserCheck,
+  UserX,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryLoading } from "@/hooks/use-query-loading";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
@@ -36,7 +43,7 @@ import {
   usersSuspendUserMutation,
 } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { Context, ContextType } from "@/app/contexts/QueryProvider";
-import { usersgrpcUser, usersgrpcUserStatus } from "@/client/users.swagger";
+import { usersExportUsersPdf, usersgrpcUser, usersgrpcUserStatus } from "@/client/users.swagger";
 import moment from "moment";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useCursorPagination } from "@/hooks/use-cursor-pagination";
@@ -63,6 +70,7 @@ const STATUS_FILTERS: Array<{
 export default function FarmersPage() {
   const { user } = useContext(Context) as ContextType;
   const [suspendingFarmer, setSuspendingFarmer] = useState<string>();
+  const [isExporting, setIsExporting] = useState(false);
 
   const pagination = useCursorPagination({
     initialStartKey: "",
@@ -198,6 +206,56 @@ export default function FarmersPage() {
     }
   };
 
+  const handleExportPdf = async () => {
+    try {
+      setIsExporting(true);
+
+      const { data } = await usersExportUsersPdf({
+        path: { adminUserId: user?.userId ?? "" },
+        query: {
+          userRole: "USER_ROLE_FARMER",
+          userStatus: statusFilter,
+          search: searchTerm,
+        },
+      });
+
+      const base64 = data?.data ?? "";
+      if (!base64) {
+        toast({
+          title: "Export failed",
+          description: "No PDF data was returned by the server.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+      const blob = new Blob([bytes], {
+        type: data?.contentType ?? "application/pdf",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `farmers-${moment().format("YYYYMMDD-HHmmss")}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error: any) {
+      toast({
+        title: "Export failed",
+        description:
+          error?.response?.data?.message ?? "An unknown error occured",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -209,6 +267,15 @@ export default function FarmersPage() {
             Manage farmers and their account status
           </p>
         </div>
+        <Button
+          variant="outline"
+          onClick={handleExportPdf}
+          disabled={isExporting}
+          title="Export farmers to PDF"
+        >
+          <Download className="h-4 w-4 mr-2" />
+          {isExporting ? "Exporting..." : "Export PDF"}
+        </Button>
       </div>
 
       {/* Filters */}

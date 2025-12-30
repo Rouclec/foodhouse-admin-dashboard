@@ -123,4 +123,6 @@ type UserSubscription struct {
 	EstimatedDeliveryTime pgtype.Interval    `json:"estimated_delivery_time"`
 	IsCustom              bool               `json:"is_custom"`
 	DailyDeliveryLimit    *int64             `json:"daily_delivery_limit"`
+	DeliveryLocation      pgtype.Point       `json:"delivery_location"`
+	DeliveryAddress       string             `json:"delivery_address"`
 }

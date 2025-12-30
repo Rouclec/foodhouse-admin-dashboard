@@ -97,9 +97,20 @@ func (q *Queries) CreateSubscriptionItem(ctx context.Context, arg CreateSubscrip
 }
 
 const createUserSubscription = `-- name: CreateUserSubscription :one
-INSERT INTO user_subscriptions (user_id, subscription_id, active, amount, currency_iso_code, estimated_delivery_time, is_custom, daily_delivery_limit)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-RETURNING id, public_id, user_id, subscription_id, active, created_at, updated_at, expires_at, progress, amount, currency_iso_code, estimated_delivery_time, is_custom, daily_delivery_limit
+INSERT INTO user_subscriptions (
+  user_id,
+  subscription_id,
+  active,
+  amount,
+  currency_iso_code,
+  estimated_delivery_time,
+  is_custom,
+  daily_delivery_limit,
+  delivery_location,
+  delivery_address
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+RETURNING id, public_id, user_id, subscription_id, active, created_at, updated_at, expires_at, progress, amount, currency_iso_code, estimated_delivery_time, is_custom, daily_delivery_limit, delivery_location, delivery_address
 `
 
 type CreateUserSubscriptionParams struct {
@@ -111,6 +122,8 @@ type CreateUserSubscriptionParams struct {
 	EstimatedDeliveryTime pgtype.Interval `json:"estimated_delivery_time"`
 	IsCustom              bool            `json:"is_custom"`
 	DailyDeliveryLimit    *int64          `json:"daily_delivery_limit"`
+	DeliveryLocation      pgtype.Point    `json:"delivery_location"`
+	DeliveryAddress       string          `json:"delivery_address"`
 }
 
 func (q *Queries) CreateUserSubscription(ctx context.Context, arg CreateUserSubscriptionParams) (UserSubscription, error) {
@@ -123,6 +136,8 @@ func (q *Queries) CreateUserSubscription(ctx context.Context, arg CreateUserSubs
 		arg.EstimatedDeliveryTime,
 		arg.IsCustom,
 		arg.DailyDeliveryLimit,
+		arg.DeliveryLocation,
+		arg.DeliveryAddress,
 	)
 	var i UserSubscription
 	err := row.Scan(
@@ -140,6 +155,8 @@ func (q *Queries) CreateUserSubscription(ctx context.Context, arg CreateUserSubs
 		&i.EstimatedDeliveryTime,
 		&i.IsCustom,
 		&i.DailyDeliveryLimit,
+		&i.DeliveryLocation,
+		&i.DeliveryAddress,
 	)
 	return i, err
 }
@@ -163,7 +180,7 @@ func (q *Queries) DeleteSubscriptionItem(ctx context.Context, id string) error {
 }
 
 const getAllUserSubscriptions = `-- name: GetAllUserSubscriptions :many
-SELECT id, public_id, user_id, subscription_id, active, created_at, updated_at, expires_at, progress, amount, currency_iso_code, estimated_delivery_time, is_custom, daily_delivery_limit FROM user_subscriptions
+SELECT id, public_id, user_id, subscription_id, active, created_at, updated_at, expires_at, progress, amount, currency_iso_code, estimated_delivery_time, is_custom, daily_delivery_limit, delivery_location, delivery_address FROM user_subscriptions
 `
 
 func (q *Queries) GetAllUserSubscriptions(ctx context.Context) ([]UserSubscription, error) {
@@ -190,6 +207,8 @@ func (q *Queries) GetAllUserSubscriptions(ctx context.Context) ([]UserSubscripti
 			&i.EstimatedDeliveryTime,
 			&i.IsCustom,
 			&i.DailyDeliveryLimit,
+			&i.DeliveryLocation,
+			&i.DeliveryAddress,
 		); err != nil {
 			return nil, err
 		}
@@ -275,7 +294,7 @@ func (q *Queries) GetSubscriptionItemsBySubscriptionID(ctx context.Context, subs
 }
 
 const getUserSubscriptionByID = `-- name: GetUserSubscriptionByID :one
-SELECT id, public_id, user_id, subscription_id, active, created_at, updated_at, expires_at, progress, amount, currency_iso_code, estimated_delivery_time, is_custom, daily_delivery_limit FROM user_subscriptions WHERE id = $1
+SELECT id, public_id, user_id, subscription_id, active, created_at, updated_at, expires_at, progress, amount, currency_iso_code, estimated_delivery_time, is_custom, daily_delivery_limit, delivery_location, delivery_address FROM user_subscriptions WHERE id = $1
 `
 
 func (q *Queries) GetUserSubscriptionByID(ctx context.Context, id int64) (UserSubscription, error) {
@@ -296,12 +315,14 @@ func (q *Queries) GetUserSubscriptionByID(ctx context.Context, id int64) (UserSu
 		&i.EstimatedDeliveryTime,
 		&i.IsCustom,
 		&i.DailyDeliveryLimit,
+		&i.DeliveryLocation,
+		&i.DeliveryAddress,
 	)
 	return i, err
 }
 
 const getUserSubscriptionByPublicID = `-- name: GetUserSubscriptionByPublicID :one
-SELECT id, public_id, user_id, subscription_id, active, created_at, updated_at, expires_at, progress, amount, currency_iso_code, estimated_delivery_time, is_custom, daily_delivery_limit FROM user_subscriptions WHERE public_id = $1
+SELECT id, public_id, user_id, subscription_id, active, created_at, updated_at, expires_at, progress, amount, currency_iso_code, estimated_delivery_time, is_custom, daily_delivery_limit, delivery_location, delivery_address FROM user_subscriptions WHERE public_id = $1
 `
 
 func (q *Queries) GetUserSubscriptionByPublicID(ctx context.Context, publicID string) (UserSubscription, error) {
@@ -322,12 +343,14 @@ func (q *Queries) GetUserSubscriptionByPublicID(ctx context.Context, publicID st
 		&i.EstimatedDeliveryTime,
 		&i.IsCustom,
 		&i.DailyDeliveryLimit,
+		&i.DeliveryLocation,
+		&i.DeliveryAddress,
 	)
 	return i, err
 }
 
 const getUserSubscriptionsBySubscriptionID = `-- name: GetUserSubscriptionsBySubscriptionID :many
-SELECT id, public_id, user_id, subscription_id, active, created_at, updated_at, expires_at, progress, amount, currency_iso_code, estimated_delivery_time, is_custom, daily_delivery_limit FROM user_subscriptions WHERE subscription_id = $1
+SELECT id, public_id, user_id, subscription_id, active, created_at, updated_at, expires_at, progress, amount, currency_iso_code, estimated_delivery_time, is_custom, daily_delivery_limit, delivery_location, delivery_address FROM user_subscriptions WHERE subscription_id = $1
 `
 
 func (q *Queries) GetUserSubscriptionsBySubscriptionID(ctx context.Context, subscriptionID string) ([]UserSubscription, error) {
@@ -354,6 +377,8 @@ func (q *Queries) GetUserSubscriptionsBySubscriptionID(ctx context.Context, subs
 			&i.EstimatedDeliveryTime,
 			&i.IsCustom,
 			&i.DailyDeliveryLimit,
+			&i.DeliveryLocation,
+			&i.DeliveryAddress,
 		); err != nil {
 			return nil, err
 		}
@@ -568,7 +593,7 @@ func (q *Queries) ListSubsriptions(ctx context.Context) ([]Subscription, error) 
 }
 
 const listUserSubscriptionsByUserID = `-- name: ListUserSubscriptionsByUserID :many
-SELECT id, public_id, user_id, subscription_id, active, created_at, updated_at, expires_at, progress, amount, currency_iso_code, estimated_delivery_time, is_custom, daily_delivery_limit FROM user_subscriptions WHERE user_id = $1 ORDER BY created_at DESC
+SELECT id, public_id, user_id, subscription_id, active, created_at, updated_at, expires_at, progress, amount, currency_iso_code, estimated_delivery_time, is_custom, daily_delivery_limit, delivery_location, delivery_address FROM user_subscriptions WHERE user_id = $1 ORDER BY created_at DESC
 `
 
 func (q *Queries) ListUserSubscriptionsByUserID(ctx context.Context, userID string) ([]UserSubscription, error) {
@@ -595,6 +620,8 @@ func (q *Queries) ListUserSubscriptionsByUserID(ctx context.Context, userID stri
 			&i.EstimatedDeliveryTime,
 			&i.IsCustom,
 			&i.DailyDeliveryLimit,
+			&i.DeliveryLocation,
+			&i.DeliveryAddress,
 		); err != nil {
 			return nil, err
 		}

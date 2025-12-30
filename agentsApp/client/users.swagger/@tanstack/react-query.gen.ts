@@ -2,9 +2,9 @@
 
 import type { OptionsLegacyParser } from '@hey-api/client-axios';
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
-import type { UsersGrantAdminData, UsersGrantAdminError, UsersGrantAdminResponse, UsersGrantAgentData, UsersGrantAgentError, UsersGrantAgentResponse, UsersListUsersData, UsersDeleteAgentData, UsersDeleteAgentError, UsersDeleteAgentResponse, UsersReactivateUserData, UsersReactivateUserError, UsersReactivateUserResponse, UsersSuspendUserData, UsersSuspendUserError, UsersSuspendUserResponse, UsersOAuthData, UsersOAuthError, UsersOAuthResponse, UsersRevokeRefreshTokenData, UsersRevokeRefreshTokenError, UsersRevokeRefreshTokenResponse, UsersAuthenticateData, UsersAuthenticateError, UsersAuthenticateResponse, UsersChangePasswordData, UsersChangePasswordError, UsersChangePasswordResponse, UsersLastOtpForFactorData, UsersRefreshAccessTokenData, UsersRefreshAccessTokenError, UsersRefreshAccessTokenResponse, UsersSendEmailOtpData, UsersSendEmailOtpError, UsersSendEmailOtpResponse, UsersSendSignupSmsOtpData, UsersSendSignupSmsOtpError, UsersSendSignupSmsOtpResponse, UsersSendSmsOtpData, UsersSendSmsOtpError, UsersSendSmsOtpResponse, UsersSignupData, UsersSignupError, UsersSignupResponse, UsersVerifyOtpData, UsersVerifyOtpError, UsersVerifyOtpResponse, UsersGetPublicUserData, UsersCompleteRegistrationData, UsersCompleteRegistrationError, UsersCompleteRegistrationResponse, UsersDeleteUserAccountData, UsersListFarmersData, UsersListFarmersReivewsData, UsersGetUserByIdData, UsersReviewFarmerData, UsersReviewFarmerError, UsersReviewFarmerResponse, UsersGetFarmerByIdData } from '../types.gen';
+import type { UsersExportUsersPdfData, UsersGrantAdminData, UsersGrantAdminError, UsersGrantAdminResponse, UsersGrantAgentData, UsersGrantAgentError, UsersGrantAgentResponse, UsersListUsersData, UsersDeleteAgentData, UsersDeleteAgentError, UsersDeleteAgentResponse, UsersReactivateUserData, UsersReactivateUserError, UsersReactivateUserResponse, UsersSuspendUserData, UsersSuspendUserError, UsersSuspendUserResponse, UsersOAuthData, UsersOAuthError, UsersOAuthResponse, UsersRevokeRefreshTokenData, UsersRevokeRefreshTokenError, UsersRevokeRefreshTokenResponse, UsersAuthenticateData, UsersAuthenticateError, UsersAuthenticateResponse, UsersChangePasswordData, UsersChangePasswordError, UsersChangePasswordResponse, UsersLastOtpForFactorData, UsersRefreshAccessTokenData, UsersRefreshAccessTokenError, UsersRefreshAccessTokenResponse, UsersSendEmailOtpData, UsersSendEmailOtpError, UsersSendEmailOtpResponse, UsersSendSignupSmsOtpData, UsersSendSignupSmsOtpError, UsersSendSignupSmsOtpResponse, UsersSendSmsOtpData, UsersSendSmsOtpError, UsersSendSmsOtpResponse, UsersSignupData, UsersSignupError, UsersSignupResponse, UsersVerifyOtpData, UsersVerifyOtpError, UsersVerifyOtpResponse, UsersGetPublicUserData, UsersCompleteRegistrationData, UsersCompleteRegistrationError, UsersCompleteRegistrationResponse, UsersDeleteUserAccountData, UsersListFarmersData, UsersListFarmersReivewsData, UsersGetUserByIdData, UsersReviewFarmerData, UsersReviewFarmerError, UsersReviewFarmerResponse, UsersGetFarmerByIdData } from '../types.gen';
+import { client, usersExportUsersPdf, usersGrantAdmin, usersGrantAgent, usersListUsers, usersDeleteAgent, usersReactivateUser, usersSuspendUser, usersOAuth, usersRevokeRefreshToken, usersAuthenticate, usersChangePassword, usersHealthCheck, usersLastOtpForFactor, usersRefreshAccessToken, usersSendEmailOtp, usersSendSignupSmsOtp, usersSendSmsOtp, usersSignup, usersVerifyOtp, usersGetPublicUser, usersCompleteRegistration, usersDeleteUserAccount, usersListFarmers, usersListFarmersReivews, usersGetUserById, usersReviewFarmer, usersGetFarmerById } from '../sdk.gen';
 import type { AxiosError } from 'axios';
-import { client, usersGrantAdmin, usersGrantAgent, usersListUsers, usersDeleteAgent, usersReactivateUser, usersSuspendUser, usersOAuth, usersRevokeRefreshToken, usersAuthenticate, usersChangePassword, usersHealthCheck, usersLastOtpForFactor, usersRefreshAccessToken, usersSendEmailOtp, usersSendSignupSmsOtp, usersSendSmsOtp, usersSignup, usersVerifyOtp, usersGetPublicUser, usersCompleteRegistration, usersDeleteUserAccount, usersListFarmers, usersListFarmersReivews, usersGetUserById, usersReviewFarmer, usersGetFarmerById } from '../sdk.gen';
 
 type QueryKey<TOptions extends OptionsLegacyParser> = [
     Pick<TOptions, 'baseURL' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -31,6 +31,25 @@ const createQueryKey = <TOptions extends OptionsLegacyParser>(id: string, option
         params.query = options.query;
     }
     return params;
+};
+
+export const usersExportUsersPdfQueryKey = (options: OptionsLegacyParser<UsersExportUsersPdfData>) => [
+    createQueryKey('usersExportUsersPdf', options)
+];
+
+export const usersExportUsersPdfOptions = (options: OptionsLegacyParser<UsersExportUsersPdfData>) => {
+    return queryOptions({
+        queryFn: async ({ queryKey, signal }) => {
+            const { data } = await usersExportUsersPdf({
+                ...options,
+                ...queryKey[0],
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: usersExportUsersPdfQueryKey(options)
+    });
 };
 
 export const usersGrantAdminQueryKey = (options: OptionsLegacyParser<UsersGrantAdminData>) => [

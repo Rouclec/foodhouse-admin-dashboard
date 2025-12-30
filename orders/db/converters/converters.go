@@ -521,6 +521,13 @@ func SqlcUserSubscriptionToProto(sub sqlc.UserSubscription) *ordersgrpc.UserSubs
 	if sub.DailyDeliveryLimit != nil {
 		result.DailyDeliveryLimit = sub.DailyDeliveryLimit
 	}
+	if sub.DeliveryLocation.Valid || sub.DeliveryAddress != "" {
+		result.DeliveryLocation = &types.Point{
+			Lon:     sub.DeliveryLocation.P.X,
+			Lat:     sub.DeliveryLocation.P.Y,
+			Address: sub.DeliveryAddress,
+		}
+	}
 
 	return result
 }

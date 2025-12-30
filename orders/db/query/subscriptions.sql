@@ -39,8 +39,19 @@ SELECT * FROM subscriptions ORDER BY amount ASC;
 
 
 -- name: CreateUserSubscription :one
-INSERT INTO user_subscriptions (user_id, subscription_id, active, amount, currency_iso_code, estimated_delivery_time, is_custom, daily_delivery_limit)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+INSERT INTO user_subscriptions (
+  user_id,
+  subscription_id,
+  active,
+  amount,
+  currency_iso_code,
+  estimated_delivery_time,
+  is_custom,
+  daily_delivery_limit,
+  delivery_location,
+  delivery_address
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 RETURNING *;
 
 -- name: GetAllUserSubscriptions :many

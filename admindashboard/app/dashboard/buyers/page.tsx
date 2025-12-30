@@ -26,7 +26,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, UserX, MessageCircle, UserCheck, Users } from "lucide-react";
+import {
+  Download,
+  MessageCircle,
+  Search,
+  UserCheck,
+  Users,
+  UserX,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryLoading } from "@/hooks/use-query-loading";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
@@ -36,7 +43,7 @@ import {
   usersSuspendUserMutation,
 } from "@/client/users.swagger/@tanstack/react-query.gen";
 import { Context, ContextType } from "@/app/contexts/QueryProvider";
-import { usersgrpcUser, usersgrpcUserStatus } from "@/client/users.swagger";
+import { usersExportUsersPdf, usersgrpcUser, usersgrpcUserStatus } from "@/client/users.swagger";
 import moment from "moment";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useCursorPagination } from "@/hooks/use-cursor-pagination";
@@ -63,6 +70,7 @@ const STATUS_FILTERS: Array<{
 export default function Buysers() {
   const { user } = useContext(Context) as ContextType;
   const [suspendingBuyer, setSuspendingBuyer] = useState<string>();
+  const [isExporting, setIsExporting] = useState(false);
 
   const pagination = useCursorPagination({
     pageSize: 10,
@@ -195,15 +203,75 @@ export default function Buysers() {
     }
   };
 
+  const handleExportPdf = async () => {
+    try {
+      setIsExporting(true);
+
+      const { data } = await usersExportUsersPdf({
+        path: { adminUserId: user?.userId ?? "" },
+        query: {
+          userRole: "USER_ROLE_BUYER",
+          userStatus: statusFilter,
+          search: searchTerm,
+        },
+      });
+
+      const base64 = data?.data ?? "";
+      if (!base64) {
+        toast({
+          title: "Export failed",
+          description: "No PDF data was returned by the server.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+      const blob = new Blob([bytes], {
+        type: data?.contentType ?? "application/pdf",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `buyers-${moment().format("YYYYMMDD-HHmmss")}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error: any) {
+      toast({
+        title: "Export failed",
+        description:
+          error?.response?.data?.message ?? "An unknown error occured",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Buyer Management</h1>
           <p className="text-gray-600">
             Manage buyers and their account status
           </p>
         </div>
+        <Button
+          variant="outline"
+          onClick={handleExportPdf}
+          disabled={isExporting}
+          title="Export buyers to PDF"
+          className="w-full sm:w-auto"
+        >
+          <Download className="h-4 w-4 mr-2" />
+          {isExporting ? "Exporting..." : "Export PDF"}
+        </Button>
       </div>
 
       {/* Filters */}
@@ -215,7 +283,7 @@ export default function Buysers() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex space-x-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -233,7 +301,7 @@ export default function Buysers() {
                 setStatusFilter(value as usersgrpcUserStatus)
               }
             >
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>

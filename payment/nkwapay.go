@@ -94,13 +94,11 @@ func NewNkwaPayProvider(apiKey string,
 }
 
 func (np *NkwaPayProvider) RequestPayment(ctx context.Context, from string, amount float64, currency string, description string, externalReference *string) (*string, error) {
-	network := DetectProvider(from)
-
-	if network == ProviderUnknown {
+	if DetectProvider(from) == ProviderUnknown {
 		return nil, fmt.Errorf("unknonwn provider for phone number %v", from)
 	}
 
-	url := fmt.Sprintf("%s/collect", np.BaseUrl, network)
+	url := fmt.Sprintf("%s/collect", np.BaseUrl)
 
 	requestBody := InitiateNkwaPaymentRequest{
 		Amount:      amount,

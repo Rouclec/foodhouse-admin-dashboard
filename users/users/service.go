@@ -1,6 +1,7 @@
 package users
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"errors"
@@ -13,8 +14,10 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/nyaruka/phonenumbers"
+	"github.com/phpdave11/gofpdf"
 	"github.com/rs/zerolog"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/genproto/googleapis/api/httpbody"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -998,6 +1001,124 @@ func (i *Impl) ListUsers(ctx context.Context,
 		NextKey: nextKey,
 	}, nil
 	// panic("unimplemented")
+}
+
+// ExportUsersPdf implements usersgrpc.UsersServer.
+func (i *Impl) ExportUsersPdf(ctx context.Context, req *usersgrpc.ExportUsersPdfRequest) (*httpbody.HttpBody, error) {
+	role := req.GetUserRole()
+	if role == usersgrpc.UserRole_USER_ROLE_UNSPECIFIED {
+		return nil, status.Error(codes.InvalidArgument, "user_role is required")
+	}
+
+	// Fetch all users by paging server-side.
+	const pageSize int32 = 500
+	before := time.Now().Add(time.Hour)
+	all := make([]sqlc.User, 0, 1024)
+
+	for loops := 0; loops < 200; loops++ { // hard safety cap
+		rows, err := i.repo.Do().ListUsers(ctx, sqlc.ListUsersParams{
+			UserStatus: req.GetUserStatus().String(),
+			SearchKey:  req.GetSearch(),
+			Limit:      pageSize,
+			Before:     before,
+			UserRole:   role.String(),
+		})
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error fetching users: %v", err)
+		}
+		if len(rows) == 0 {
+			break
+		}
+
+		all = append(all, rows...)
+
+		// If we got fewer than a page, we're done.
+		if len(rows) < int(pageSize) {
+			break
+		}
+
+		// Advance cursor.
+		last := rows[len(rows)-1]
+		if !last.CreatedAt.Valid {
+			break
+		}
+		// Prevent infinite loops if timestamps are identical.
+		if !last.CreatedAt.Time.Before(before) {
+			before = before.Add(-time.Millisecond)
+		} else {
+			before = last.CreatedAt.Time
+		}
+	}
+
+	// Build PDF.
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetTitle("Users Export", false)
+	pdf.SetAuthor("FoodHouse", false)
+	pdf.SetMargins(10, 12, 10)
+	pdf.AddPage()
+
+	title := fmt.Sprintf("Users Export — %s", strings.TrimPrefix(role.String(), "USER_ROLE_"))
+	pdf.SetFont("Arial", "B", 16)
+	pdf.CellFormat(0, 10, title, "", 1, "L", false, 0, "")
+
+	pdf.SetFont("Arial", "", 10)
+	pdf.CellFormat(0, 6, fmt.Sprintf("Generated: %s", time.Now().Format(time.RFC1123)), "", 1, "L", false, 0, "")
+	pdf.CellFormat(0, 6, fmt.Sprintf("Total: %d", len(all)), "", 1, "L", false, 0, "")
+	pdf.Ln(2)
+
+	// Table header
+	colW := []float64{45, 32, 45, 52, 18, 18} // Name, Phone, Email, Address, Status, Joined
+	headers := []string{"Name", "Phone", "Email", "Address", "Status", "Joined"}
+
+	drawHeader := func() {
+		pdf.SetFont("Arial", "B", 10)
+		pdf.SetFillColor(240, 240, 240)
+		for i := range headers {
+			pdf.CellFormat(colW[i], 7, headers[i], "1", 0, "L", true, 0, "")
+		}
+		pdf.Ln(-1)
+		pdf.SetFont("Arial", "", 9)
+		pdf.SetFillColor(255, 255, 255)
+	}
+	drawHeader()
+
+	rowH := 6.0
+	for _, u := range all {
+		// Page break handling
+		if pdf.GetY() > 280 {
+			pdf.AddPage()
+			drawHeader()
+		}
+
+		name := strings.TrimSpace(fmt.Sprintf("%s %s", safeString(u.FirstName), safeString(u.LastName)))
+		if name == "" {
+			name = u.ID
+		}
+		phone := u.PhoneNumber
+		email := safeString(u.Email)
+		address := safeString(u.Address)
+		statusStr := strings.TrimPrefix(u.UserStatus, "UserStatus_")
+		joined := ""
+		if u.CreatedAt.Valid {
+			joined = u.CreatedAt.Time.Format("2006-01-02")
+		}
+
+		values := []string{name, phone, email, address, statusStr, joined}
+		for i := range values {
+			pdf.CellFormat(colW[i], rowH, values[i], "1", 0, "L", false, 0, "")
+		}
+		pdf.Ln(-1)
+	}
+
+	buf := bytes.NewBuffer(nil)
+	if err := pdf.Output(buf); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to render pdf: %v", err)
+	}
+
+	return &httpbody.HttpBody{
+		ContentType: "application/pdf",
+		Data:        buf.Bytes(),
+	}, nil
 }
 
 // GetFarmerByID implements usersgrpc.UsersServer.

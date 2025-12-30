@@ -443,6 +443,9 @@ message UserSubscription {
   // The soonest expected delivery date from associated orders (for admin
   // sorting/coloring)
   optional google.protobuf.Timestamp soonest_delivery_date = 14;
+  // Delivery location chosen at subscription time; used as the default delivery
+  // location for all orders generated from this subscription.
+  types.Point delivery_location = 15;
 }
 
 message CreateSubscriptionPlanRequest {
@@ -483,6 +486,7 @@ message ListSubscriptionPlansResponse {
 message SubscribeRequest {
   string user_id = 1;
   string subscription_plan_id = 2;
+  types.Point delivery_location = 3;
 }
 
 message SubscribeResponse { UserSubscription subscription = 1; }
