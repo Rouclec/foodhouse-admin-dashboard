@@ -1,5 +1,11 @@
 import React, { useContext, useMemo } from 'react';
-import { FlatList, ImageBackground, SafeAreaView, TouchableOpacity, View } from 'react-native';
+import {
+  FlatList,
+  ImageBackground,
+  SafeAreaView,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Card, Button, Text } from 'react-native-paper';
@@ -12,7 +18,11 @@ import {
   ordersListSubscriptionPlansOptions,
   ordersSubscribeMutation,
 } from '@/client/orders.swagger/@tanstack/react-query.gen';
-import { ordersgrpcSubscription, ordersgrpcSubscriptionItem } from '@/client/orders.swagger';
+import {
+  ordersgrpcSubscription,
+  ordersgrpcSubscriptionItem,
+  typesAmount,
+} from '@/client/orders.swagger';
 import { RelativePathString } from 'expo-router';
 
 function isCustomSubscriptionPlan(plan?: ordersgrpcSubscription): boolean {
@@ -59,12 +69,17 @@ function getFirstDeliveryDate(now: Date) {
   const day = today.getDay(); // 0=Sun ... 6=Sat
   const daysUntilSaturday = (6 - day + 7) % 7;
   const comingSaturday = addDays(today, daysUntilSaturday);
-  const firstDelivery = daysUntilSaturday <= 3 ? comingSaturday : addDays(comingSaturday, 7);
+  const firstDelivery =
+    daysUntilSaturday <= 3 ? comingSaturday : addDays(comingSaturday, 7);
   return { firstDelivery, daysUntilSaturday };
 }
 
 function formatShortDate(date: Date) {
-  return date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  return date.toLocaleDateString(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  });
 }
 
 function groupItemsByDelivery(items: ordersgrpcSubscriptionItem[]) {
@@ -76,7 +91,10 @@ function groupItemsByDelivery(items: ordersgrpcSubscriptionItem[]) {
     groups.set(idx, arr);
   }
   const sorted = [...groups.entries()].sort((a, b) => a[0] - b[0]);
-  return sorted.map(([orderIndex, groupItems]) => ({ orderIndex, items: groupItems }));
+  return sorted.map(([orderIndex, groupItems]) => ({
+    orderIndex,
+    items: groupItems,
+  }));
 }
 
 export default function SubscriptionPlanDetails() {
@@ -93,15 +111,21 @@ export default function SubscriptionPlanDetails() {
   });
 
   const plan = useMemo(() => {
-    const plans = (data?.subscriptionPlans ?? []).filter(
-      (p) => !isCustomSubscriptionPlan(p as ordersgrpcSubscription)
-    );
-    return plans.find((p) => p?.id === planId) as ordersgrpcSubscription | undefined;
+    const plans = data?.subscriptionPlans ?? [];
+    return plans.find(p => p?.id === planId) as
+      | ordersgrpcSubscription
+      | undefined;
   }, [data?.subscriptionPlans, planId]);
 
   const discountPct = useMemo(() => getPlanDiscountPercent(plan), [plan]);
-  const deliveryGroups = useMemo(() => groupItemsByDelivery(plan?.subscriptionItems ?? []), [plan?.subscriptionItems]);
-  const { firstDelivery, daysUntilSaturday } = useMemo(() => getFirstDeliveryDate(new Date()), []);
+  const deliveryGroups = useMemo(
+    () => groupItemsByDelivery(plan?.subscriptionItems ?? []),
+    [plan?.subscriptionItems],
+  );
+  const { firstDelivery, daysUntilSaturday } = useMemo(
+    () => getFirstDeliveryDate(new Date()),
+    [],
+  );
 
   const { mutateAsync: subscribe, isPending: isSubscribing } = useMutation({
     ...ordersSubscribeMutation(),
@@ -137,7 +161,7 @@ export default function SubscriptionPlanDetails() {
         entity: 'PaymentEntity_SUBSCRIPTION',
         entityId: publicId,
         nextScreen: '/(buyer)/(index)' as RelativePathString,
-        amount: result?.subscription?.amount ?? plan?.amount,
+        amount: (result?.subscription?.amount ?? plan?.amount) as typesAmount,
       });
       router.push('/(payment)');
     } catch (e) {
@@ -157,7 +181,10 @@ export default function SubscriptionPlanDetails() {
     return (
       <SafeAreaView style={[defaultStyles.container, defaultStyles.center]}>
         <Text>Plan not found.</Text>
-        <Button mode="contained" onPress={() => router.back()} style={{ marginTop: 12 }}>
+        <Button
+          mode="contained"
+          onPress={() => router.back()}
+          style={{ marginTop: 12 }}>
           Go back
         </Button>
       </SafeAreaView>
@@ -165,7 +192,8 @@ export default function SubscriptionPlanDetails() {
   }
 
   return (
-    <SafeAreaView style={[defaultStyles.flex, { backgroundColor: Colors.light['bg'] }]}>
+    <SafeAreaView
+      style={[defaultStyles.flex, { backgroundColor: Colors.light['bg'] }]}>
       <ImageBackground
         source={require('@/assets/images/background-overlay-image.png')}
         resizeMode="cover"
@@ -192,10 +220,16 @@ export default function SubscriptionPlanDetails() {
         </TouchableOpacity>
 
         <View style={{ paddingBottom: 16 }}>
-          <Text variant="titleLarge" style={{ color: Colors.light[10], fontWeight: '800' }} numberOfLines={2}>
+          <Text
+            variant="titleLarge"
+            style={{ color: Colors.light[10], fontWeight: '800' }}
+            numberOfLines={2}>
             {plan.title ?? 'Subscription plan'}
           </Text>
-          <Text variant="bodySmall" style={{ color: 'rgba(255,255,255,0.85)' }} numberOfLines={2}>
+          <Text
+            variant="bodySmall"
+            style={{ color: 'rgba(255,255,255,0.85)' }}
+            numberOfLines={2}>
             {plan.description ?? ''}
           </Text>
         </View>
@@ -203,21 +237,38 @@ export default function SubscriptionPlanDetails() {
 
       <FlatList
         data={deliveryGroups}
-        keyExtractor={(g) => String(g.orderIndex)}
+        keyExtractor={g => String(g.orderIndex)}
         contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
         ListHeaderComponent={
           <>
-            <Card style={{ marginTop: -24, marginBottom: 16, backgroundColor: Colors.light[10] }}>
+            <Card
+              style={{
+                marginTop: -24,
+                marginBottom: 16,
+                backgroundColor: Colors.light[10],
+              }}>
               <Card.Content>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 12,
+                  }}>
                   <View style={{ flex: 1 }}>
-                    <Text variant="titleLarge" style={{ color: Colors.primary[500] }}>
-                      {plan.amount?.currencyIsoCode ?? 'XAF'} {(plan.amount?.value ?? 0).toLocaleString()}
+                    <Text
+                      variant="titleLarge"
+                      style={{ color: Colors.primary[500] }}>
+                      {plan.amount?.currencyIsoCode ?? 'XAF'}{' '}
+                      {(plan.amount?.value ?? 0).toLocaleString()}
                     </Text>
-                    <Text variant="bodySmall" style={{ color: Colors.light['10.87'] }}>
+                    <Text
+                      variant="bodySmall"
+                      style={{ color: Colors.light['10.87'] }}>
                       {discountPct !== null ? `Save ${discountPct}% • ` : ''}
                       {plan.duration ? `${plan.duration} weeks • ` : ''}
-                      {deliveryGroups.length} deliver{deliveryGroups.length === 1 ? 'y' : 'ies'}
+                      {deliveryGroups.length} deliver
+                      {deliveryGroups.length === 1 ? 'y' : 'ies'}
                     </Text>
                   </View>
                   {discountPct !== null && (
@@ -230,7 +281,12 @@ export default function SubscriptionPlanDetails() {
                         paddingVertical: 6,
                         borderRadius: 999,
                       }}>
-                      <Text variant="bodySmall" style={{ color: Colors.primary[500], fontWeight: '800' }}>
+                      <Text
+                        variant="bodySmall"
+                        style={{
+                          color: Colors.primary[500],
+                          fontWeight: '800',
+                        }}>
                         -{discountPct}%
                       </Text>
                     </View>
@@ -239,14 +295,21 @@ export default function SubscriptionPlanDetails() {
               </Card.Content>
             </Card>
 
-            <Card style={{ marginBottom: 16, backgroundColor: Colors.light[10] }}>
+            <Card
+              style={{ marginBottom: 16, backgroundColor: Colors.light[10] }}>
               <Card.Content>
                 <Text variant="titleMedium">Delivery schedule</Text>
-                <Text variant="bodySmall" style={{ color: Colors.light['10.87'], marginTop: 4 }}>
-                  Rule: if there are 3 days or less until Saturday, your first delivery is this Saturday; otherwise it’s next Saturday.
+                <Text
+                  variant="bodySmall"
+                  style={{ color: Colors.light['10.87'], marginTop: 4 }}>
+                  Rule: if there are 3 days or less until Saturday, your first
+                  delivery is this Saturday; otherwise it’s next Saturday.
                 </Text>
-                <Text variant="bodySmall" style={{ color: Colors.light['10.87'], marginTop: 8 }}>
-                  Today → Saturday in {daysUntilSaturday} day{daysUntilSaturday === 1 ? '' : 's'} • First delivery:{' '}
+                <Text
+                  variant="bodySmall"
+                  style={{ color: Colors.light['10.87'], marginTop: 8 }}>
+                  Today → Saturday in {daysUntilSaturday} day
+                  {daysUntilSaturday === 1 ? '' : 's'} • First delivery:{' '}
                   {formatShortDate(firstDelivery)}
                 </Text>
               </Card.Content>
@@ -260,18 +323,29 @@ export default function SubscriptionPlanDetails() {
         renderItem={({ item }) => {
           const deliveryDate = addDays(firstDelivery, item.orderIndex * 7);
           return (
-            <Card style={{ marginBottom: 12, backgroundColor: Colors.light[10] }}>
+            <Card
+              style={{ marginBottom: 12, backgroundColor: Colors.light[10] }}>
               <Card.Content>
                 <Text variant="titleMedium">
-                  Delivery #{item.orderIndex + 1} • {formatShortDate(deliveryDate)}
+                  Delivery #{item.orderIndex + 1} •{' '}
+                  {formatShortDate(deliveryDate)}
                 </Text>
                 <View style={{ marginTop: 8 }}>
                   {item.items.map((it, idx) => (
-                    <View key={`${it.productId ?? ''}-${idx}`} style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12, marginBottom: 6 }}>
+                    <View
+                      key={`${it.productId ?? ''}-${idx}`}
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        gap: 12,
+                        marginBottom: 6,
+                      }}>
                       <Text variant="bodySmall" style={{ flex: 1 }}>
                         {it.productName ?? 'Product'}
                       </Text>
-                      <Text variant="bodySmall" style={{ color: Colors.light['10.87'] }}>
+                      <Text
+                        variant="bodySmall"
+                        style={{ color: Colors.light['10.87'] }}>
                         x{it.quantity ?? '0'}
                       </Text>
                     </View>
@@ -335,5 +409,3 @@ export default function SubscriptionPlanDetails() {
     </SafeAreaView>
   );
 }
-
-

@@ -447,5 +447,44 @@
       "permissionDenied": "Permission Denied",
       "allowAccessToGallery": "Please allow access to gallery"
     }
-  }
+  },
+
+  "(subscription)": {
+    "planNotFound": "Plan not found",
+    "GoBack": "Go Back",
+    "OurPackages": "Our Packages for you",
+    "SeeAll": "See All",
+    "SubscriptionTitle": "Let FoodHouse do the shopping & delivery for you!",
+    "SubSubTitle": "Pick a package that fits your needs and get fresh produce delivered straight to your door- fast, easy and hassle-free",
+    "CustomPackage": "Customize Your Package",
+    "CustomizeText": " Pick your own products, set your budget, and choose when you'd like your deliveries. It's your call!",
+    "CustomizeButton": "Start Customizing",
+    "choosePlan": "Choose Your Plan",
+    "choosePlandesc": "Pick a ready-made package based on your needs",
+    "(packageDetails)": {
+      "header": "Package Details",
+      "order": "Order",
+      "desc1": "Designed for families, this package gives you fresh produce worth",
+      "desc2": "month, delivered right to your door. Perfect for monthly household provisions.",
+      "Categories": "Categories & Products",
+      "desc3": " Subscribe today and let FoodHouse handle your monthly shopping needs with reliable delivery and guaranteed freshness.",
+      "btn1": "Cancel",
+      "btn2": "Order Now"
+    },
+    "(order)": {
+      "checkout": "Checkout",
+      "order": "Order",
+      "Address": "Shipping Address",
+      "Home": "Home",
+      "Desc1": "Your order will be delivered within",
+      "desc2": "days after placement",
+      "Amount": "Amount",
+      "Delivery": "Delivery",
+      "Free": "Free",
+      "TransactionCharges": "Transaction Charges",
+      "ServiceFees": "Service Fee",
+      "btn1": "Confirm Payment",
+      "total": "Total"
+    }
+    }
 }

@@ -444,5 +444,44 @@
       "permissionDenied": "Ruhusa imekataliwa",
       "allowAccessToGallery": "Tafadhali ruhusu upatikanaji wa maktaba"
     }
+  },
+  "(subscription)": {
+  "planNotFound": "Mpango haujapatikana",
+  "GoBack": "Rudi nyuma",
+  "OurPackages": "Vifurushi vyetu kwa ajili yako",
+  "SeeAll": "Angalia vyote",
+  "SubscriptionTitle": "Acha FoodHouse ishughulikie ununuzi na usafirishaji wako!",
+  "SubSubTitle": "Chagua kifurushi kinachokufaa na upokee mazao mapya moja kwa moja mlangoni mwako — haraka, rahisi na bila usumbufu",
+  "CustomPackage": "Binafsisha kifurushi chako",
+  "CustomizeText": "Chagua bidhaa zako mwenyewe, weka bajeti yako na uchague ratiba ya usafirishaji. Uamuzi ni wako!",
+  "CustomizeButton": "Anza kubinafsisha",
+  "choosePlan": "Chagua mpango wako",
+  "choosePlandesc": "Chagua kifurushi kilicho tayari kulingana na mahitaji yako",
+  "(packageDetails)": {
+    "header": "Maelezo ya kifurushi",
+    "order": "Agizo",
+    "desc1": "Kimeundwa kwa ajili ya familia, kifurushi hiki kinakupa mazao mapya yenye thamani ya",
+    "desc2": "kwa mwezi, yakiletwa moja kwa moja hadi mlangoni mwako. Ni bora kwa mahitaji ya kaya ya kila mwezi.",
+    "Categories": "Kategoria na bidhaa",
+    "desc3": "Jiandikishe leo na uache FoodHouse ishughulikie ununuzi wako wa kila mwezi kwa usafirishaji wa kuaminika na ubora wa uhakika.",
+    "btn1": "Ghairi",
+    "btn2": "Agiza sasa"
+  },
+  "(order)": {
+    "checkout": "Malipo",
+    "order": "Agizo",
+    "Address": "Anwani ya usafirishaji",
+    "Home": "Nyumbani",
+    "Desc1": "Agizo lako litawasilishwa ndani ya siku",
+    "desc2": "baada ya kuthibitishwa",
+    "Amount": "Kiasi",
+    "Delivery": "Usafirishaji",
+    "Free": "Bure",
+    "TransactionCharges": "Gharama za muamala",
+    "ServiceFees": "Ada ya huduma",
+    "btn1": "Thibitisha malipo",
+    "total": "Jumla"
   }
+}
+
 }

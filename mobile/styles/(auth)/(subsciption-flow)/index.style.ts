@@ -49,7 +49,7 @@ export const selectionSubscriptionStyles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     bottom: 0,
-    width: 280,
+    width: 250,
     height: 280,
   },
   scrollView: {
@@ -65,8 +65,7 @@ export const selectionSubscriptionStyles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  iconContainer1
-  : {
+  iconContainer1: {
     backgroundColor: Colors.secondary['100'],
     height: 24,
     width: 24,
@@ -206,5 +205,60 @@ export const selectionSubscriptionStyles = StyleSheet.create({
   continueButtonLabel: {
     fontSize: 16,
     fontWeight: '600',
+  },
+
+  plansContainer: {
+    gap: 12,
+    paddingVertical: 8,
+  },
+
+  methodCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 14,
+    backgroundColor: '#F7F7FB',
+  },
+
+  methodInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1, 
+  },
+
+  planSelector: {
+    marginLeft: 'auto', 
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  methodIcon: {
+    width: 36,
+    height: 36,
+    resizeMode: 'contain',
+    marginRight: 12,
+  },
+
+  selectionCircle: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: '#C5C5D6',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  innerCircle: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#5B4FFF',
+  },
+
+  /* Optional: apply when selected */
+  selectedCard: {
+    backgroundColor: '#F0EEFF',
+    borderColor: '#5B4FFF',
   },
 });

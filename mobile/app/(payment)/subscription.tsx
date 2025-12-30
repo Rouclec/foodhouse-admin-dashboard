@@ -10,6 +10,7 @@ import { ordersListSubscriptionPlansOptions } from '@/client/orders.swagger/@tan
 import { ordersgrpcSubscription } from '@/client/orders.swagger';
 import { Context, ContextType } from '@/app/_layout';
 import { Chase } from 'react-native-animated-spinkit';
+import i18n from '@/i18n';
 
 export default function Subscriptions() {
   const [selectedPlan, setSelectedPlan] = useState<string>();
@@ -22,7 +23,7 @@ export default function Subscriptions() {
   } = useQuery({
     ...ordersListSubscriptionPlansOptions({
       path: {
-        adminUserId: user?.userId ?? '',
+        userId: user?.userId ?? '',
       },
     }),
   });
@@ -36,10 +37,10 @@ export default function Subscriptions() {
           <View style={styles.headerContent}>
             <View style={styles.headerTextContainer}>
               <Text variant="titleMedium"  style={styles.headerTitle}>
-                Let FoodHouse do the shopping & delivery for you!
+               {i18n.t('(subscription).SubscriptionTitle')}
               </Text>
               <Text style={styles.headerSubtitle}>
-                Pick a package that fits your needs and get fresh produce delivered straight to your door- fast, easy and hassle-free
+                {i18n.t('(subscription).SubSubTitle')}
               </Text>
             </View>
             <Image
@@ -63,10 +64,10 @@ export default function Subscriptions() {
               
               <View style={styles.customizeTextContainer}>
                 <Text  variant="titleMedium" style={styles.customizeTitle}>
-                  Customize Your Package
+                  {i18n.t('(subscription).CustomPackage')}
                 </Text>
                 <Text style={styles.customizeSubtitle}>
-                  Pick your own products, set your budget, and choose when you'd like your deliveries. It's your call!
+                  {i18n.t('(subscription).CustomizeText')}
                 </Text>
               </View>
             </View>
@@ -75,14 +76,14 @@ export default function Subscriptions() {
               style={styles.customizeButton}
               labelStyle={styles.customizeButtonLabel}
               onPress={() => router.push('/(payment)/custom-package')}>
-              Start Customizing 
+           {i18n.t('(subscription).CustomizeButton')}
             </Button>
           </View>
 
           <View style={styles.plansSection}>
-            <Text variant="titleMedium" style={styles.plansTitle}>Choose Your Plan</Text>
+            <Text variant="titleMedium" style={styles.plansTitle}>{i18n.t('(subscription).choosePlan')}</Text>
             <Text style={styles.plansSubtitle}>
-              Pick a ready-made package based on your needs
+             {i18n.t('(subscription).choosePlandesc')}
             </Text>
 
             {isSubscriptionPlansLoading ? (
@@ -95,7 +96,7 @@ export default function Subscriptions() {
                   key={plan.id}
                   style={styles.planCard}
                   onPress={() => router.push({
-                    pathname: '/(payment)/subscription-checkout',
+                    pathname: '/(payment)/package-details',
                     params: { planId: plan.id }
                   })}>
                   <View style={styles.planHeader}>

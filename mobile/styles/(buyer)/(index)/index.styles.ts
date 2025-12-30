@@ -253,13 +253,13 @@ export const buyerProductsStyles = StyleSheet.create({
   subscriptionContainer: {
     
     
-    margin:  16,
+    margin:  8,
     rowGap: 12,
     paddingBottom: 8,
   },
   package: {
     flexDirection: 'row',
-
+    paddingHorizontal: 8,
     justifyContent: 'space-between',
     alignItems: 'center',
 

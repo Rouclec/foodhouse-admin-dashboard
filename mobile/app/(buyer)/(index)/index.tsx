@@ -17,9 +17,7 @@ import {
   productsListCategoriesOptions,
   productsListProductsOptions,
 } from '@/client/products.swagger/@tanstack/react-query.gen';
-import {
-  ordersListSubscriptionPlansOptions,
-} from '@/client/orders.swagger/@tanstack/react-query.gen';
+import { ordersListSubscriptionPlansOptions } from '@/client/orders.swagger/@tanstack/react-query.gen';
 import { ordersgrpcSubscription } from '@/client/orders.swagger';
 import { useContext } from 'react';
 import { Context, ContextType } from '@/app/_layout';
@@ -141,21 +139,14 @@ export default function BuyerProducts() {
   });
 
   // Fetch subscription plans for the slider
-  const {
-    data: subscriptionPlansData,
-    isLoading: isSubscriptionPlansLoading,
-  } = useQuery({
-    ...ordersListSubscriptionPlansOptions({
-      path: {
-        userId: user?.userId ?? '',
-      },
-    }),
-  });
-
-  const visibleSubscriptionPlans = React.useMemo(() => {
-    const plans = subscriptionPlansData?.subscriptionPlans ?? [];
-    return plans.filter((p) => !isCustomSubscriptionPlan(p));
-  }, [subscriptionPlansData?.subscriptionPlans]);
+  const { data: subscriptionPlansData, isLoading: isSubscriptionPlansLoading } =
+    useQuery({
+      ...ordersListSubscriptionPlansOptions({
+        path: {
+          userId: user?.userId ?? '',
+        },
+      }),
+    });
   const { isLoading: isProductsLoading, data } = useQuery({
     ...productsListProductsOptions({
       path: {
@@ -194,46 +185,69 @@ export default function BuyerProducts() {
   const [filterSelectedRating, setFilterSelectedRating] = useState<number>();
 
   const plans = subscriptionPlansData?.subscriptionPlans || [];
-  
 
   const PackageCard = ({ item }: { item: ordersgrpcSubscription }) => (
-    <View style={styles.packageContainer}>
-      <View style={styles.headerRow}>
-        <View style={styles.discountBadge}>
-          <Text style={styles.discountText}>{item.description || 'Special Offer'}</Text>
+    <TouchableOpacity
+      key={item.id}
+      // style={styles.planCard}
+      onPress={() =>
+        router.push({
+          pathname: '/(payment)/package-details',
+          params: { planId: item.id },
+        })
+      }>
+      <View style={styles.packageContainer}>
+        <View style={styles.headerRow}>
+          <View style={styles.discountBadge}>
+            <Text style={styles.discountText}>
+              {item.description || 'Special Offer'}
+            </Text>
+          </View>
+          <Icon source="chevron-right" size={24} color={Colors.primary[500]} />
         </View>
-        <Icon source="chevron-right" size={24} color={Colors.primary[500]} />
-      </View>
+ <View style={styles.detailsRow}>
+   <Text style={styles.tierTitle}>{item.title}</Text>
+   <Text style={[styles.amountText, { color: Colors.primary['500'] }]}>
+            {item.amount?.value?.toLocaleString()}{' '}
+            {item.amount?.currencyIsoCode}
+          </Text>
 
-      {/* Title */}
-      <Text style={styles.tierTitle}>{item.title}</Text>
+ </View>
+        {/* Title */}
+        {/* <Text style={styles.tierTitle}>{item.title}</Text> */}
 
-      {/* Categories Row */}
-      <View style={styles.detailsRow}>
-        <View style={styles.categoryInfo}>
-          <Icon source="check" size={24} color={Colors.primary[500]} />
-          <Text style={styles.detailText}>{item.subscriptionItems?.length || 0} items</Text>
-        </View>
-        {/* Package Amount */}
-        <Text style={[styles.amountText, { color: Colors.primary['500'] }]}>
-          {item.amount?.value?.toLocaleString()} {item.amount?.currencyIsoCode}
-        </Text>
-      </View>
+        {/* Categories Row */}
+        {/* <View style={styles.detailsRow}>
+          <View style={styles.categoryInfo}>
+            <Icon source="check" size={24} color={Colors.primary[500]} />
+            <Text style={styles.detailText}>
+              {item.subscriptionItems?.length || 0} items
+            </Text>
+          </View> */}
+          {/* Package Amount */}
+          {/* <Text style={[styles.amountText, { color: Colors.primary['500'] }]}>
+            {item.amount?.value?.toLocaleString()}{' '}
+            {item.amount?.currencyIsoCode}
+          </Text>
+        </View> */}
 
-      {/* Delivery Row */}
-      <View style={styles.detailsRow}>
-        <View style={styles.categoryInfo}>
-          <Icon
-            source="truck-delivery-outline"
-            size={24}
-            color={Colors.primary[500]}
-          />
-          <Text style={styles.detailText}>{item.estimatedDeliveryTimeDays || 'N/A'} days delivery</Text>
-        </View>
-        {/* Duration */}
-        <Text style={styles.amountText}>{item.duration} weeks</Text>
+        {/* Delivery Row */}
+        {/* <View style={styles.detailsRow}>
+          <View style={styles.categoryInfo}>
+            <Icon
+              source="truck-delivery-outline"
+              size={24}
+              color={Colors.primary[500]}
+            />
+            <Text style={styles.detailText}>
+              {item.estimatedDeliveryTimeDays || 'N/A'} days delivery
+            </Text>
+          </View> */}
+          {/* Duration */}
+          {/* <Text style={styles.amountText}>{item.duration} weeks</Text>
+        </View> */}
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -273,8 +287,8 @@ export default function BuyerProducts() {
                         {HOUR_OF_DAY < 12
                           ? i18n.t('(buyer).(index).products.goodMorning')
                           : HOUR_OF_DAY < 17
-                            ? i18n.t('(buyer).(index).products.goodAfternoon')
-                            : i18n.t('(buyer).(index).products.goodEvening')}{' '}
+                          ? i18n.t('(buyer).(index).products.goodAfternoon')
+                          : i18n.t('(buyer).(index).products.goodEvening')}{' '}
                         👋
                       </Text>
                       <Text style={styles.nameText} variant="titleLarge">
@@ -358,7 +372,8 @@ export default function BuyerProducts() {
             </SafeAreaView>
           </View>
           {/* Subscription Plans Slider */}
-          {visibleSubscriptionPlans.length > 0 && (
+          {/* {subscriptionPlansData?.subscriptionPlans &&
+            subscriptionPlansData.subscriptionPlans.length > 0 && (
               <>
                 <View
                   style={{
@@ -393,7 +408,11 @@ export default function BuyerProducts() {
                       horizontal
                       data={visibleSubscriptionPlans.slice(0, 2)}
                       contentContainerStyle={[
-                        { columnGap: 12, alignItems: 'flex-start', height: '100%' },
+                        {
+                          columnGap: 12,
+                          alignItems: 'flex-start',
+                          height: '100%',
+                        },
                         styles.paddingRight24,
                       ]}
                       showsHorizontalScrollIndicator={false}
@@ -404,7 +423,10 @@ export default function BuyerProducts() {
                       renderItem={({ item }) => {
                         const plan = item as ordersgrpcSubscription;
                         const discountPct = getPlanDiscountPercent(plan);
-                        const cardWidth = Math.min(220, Math.round(width * 0.46));
+                        const cardWidth = Math.min(
+                          220,
+                          Math.round(width * 0.46),
+                        );
                         return (
                           <TouchableOpacity
                             style={[
@@ -472,18 +494,16 @@ export default function BuyerProducts() {
                   </View>
                 )}
               </>
-            )}
+            )} */}
 
           <View style={styles.subscriptionContainer}>
             <View style={styles.package}>
               <Text variant="titleMedium" style={[styles.title]}>
-              
-                Our packages for you
+                {i18n.t('(subscription).OurPackages')}
               </Text>
               <TouchableOpacity
                 onPress={() => router.push('../(payment)/subscription')}>
-               
-                <Text style={[styles.title1]}>See All</Text>
+                <Text style={[styles.title1]}>{i18n.t('(subscription).SeeAll')}</Text>
               </TouchableOpacity>
             </View>
 
@@ -541,7 +561,7 @@ export default function BuyerProducts() {
                       style={[
                         styles.categoryItem,
                         selectedCategoryId === item?.id &&
-                        styles.selectedCategoryItem,
+                          styles.selectedCategoryItem,
                       ]}
                       onPress={() => setSelectedCategoryId(item?.id)}>
                       <Text
@@ -660,7 +680,7 @@ export default function BuyerProducts() {
                         style={[
                           styles.categoryItem,
                           !filterSelectedCategoryId &&
-                          styles.selectedCategoryItem,
+                            styles.selectedCategoryItem,
                         ]}
                         onPress={() => setFilterSelectedCategoryId(undefined)}>
                         <Text
@@ -679,7 +699,7 @@ export default function BuyerProducts() {
                           style={[
                             styles.categoryItem,
                             filterSelectedCategoryId === item?.id &&
-                            styles.selectedCategoryItem,
+                              styles.selectedCategoryItem,
                           ]}
                           onPress={() => setFilterSelectedCategoryId(item?.id)}>
                           <Text
@@ -703,7 +723,7 @@ export default function BuyerProducts() {
                 {i18n.t('(buyer).(index).products.priceRange')}
               </Text>
               <MultiSlider
-                onValuesChangeStart={() => { }}
+                onValuesChangeStart={() => {}}
                 onValuesChangeFinish={e => {
                   setFilterSelectedMinValue(e[0].toString());
                   setFilterSelectedMaxValue(e[1].toString());
@@ -793,7 +813,7 @@ export default function BuyerProducts() {
                         style={[
                           styles.categoryItem,
                           filterSelectedRating === item &&
-                          styles.selectedCategoryItem,
+                            styles.selectedCategoryItem,
                         ]}
                         onPress={() => setFilterSelectedRating(item)}>
                         <Icon

@@ -22,17 +22,17 @@ export const subscriptionCheckoutStyles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 16,
+    // padding: 16,
   },
   section: {
-    backgroundColor: Colors.light[10],
+    // backgroundColor: Colors.light[10],
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: 'bold',
     color: Colors.dark[10],
     marginBottom: 12,
   },
@@ -139,14 +139,14 @@ export const subscriptionCheckoutStyles = StyleSheet.create({
     color: Colors.dark[10],
   },
   deliveryNote: {
-    backgroundColor: Colors.primary[50],
+    // backgroundColor: Colors.primary[50],
     padding: 12,
     borderRadius: 8,
     marginBottom: 16,
   },
   deliveryNoteText: {
-    fontSize: 12,
-    color: Colors.primary[700],
+    fontSize: 14,
+    color: Colors.primary[500],
     textAlign: 'center',
   },
   confirmButton: {
