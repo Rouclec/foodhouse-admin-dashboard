@@ -244,10 +244,10 @@ export default function ActiveSubscriptionsPage() {
                                 {daysUntilDelivery < 0
                                   ? `${Math.abs(daysUntilDelivery)} days overdue`
                                   : daysUntilDelivery === 0
-                                  ? "Due today"
-                                  : daysUntilDelivery === 1
-                                  ? "Due tomorrow"
-                                  : `Due in ${daysUntilDelivery} days`}
+                                    ? "Due today"
+                                    : daysUntilDelivery === 1
+                                      ? "Due tomorrow"
+                                      : `Due in ${daysUntilDelivery} days`}
                               </div>
                             )}
                           </div>
@@ -348,7 +348,7 @@ export default function ActiveSubscriptionsPage() {
                         {formatCurrency(
                           selectedSubscription?.amount?.value ?? 0,
                           selectedSubscription?.amount?.currencyIsoCode ??
-                            "XAF"
+                          "XAF"
                         )}
                       </p>
                     </div>
@@ -398,7 +398,7 @@ export default function ActiveSubscriptionsPage() {
                 </CardHeader>
                 <CardContent>
                   {subscriptionDetailsData?.orders &&
-                  subscriptionDetailsData.orders.length > 0 ? (
+                    subscriptionDetailsData.orders.length > 0 ? (
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -419,7 +419,7 @@ export default function ActiveSubscriptionsPage() {
                               <Badge
                                 variant={
                                   order.status ===
-                                  "OrderStatus_DELIVERED"
+                                    "OrderStatus_DELIVERED"
                                     ? "default"
                                     : "secondary"
                                 }>

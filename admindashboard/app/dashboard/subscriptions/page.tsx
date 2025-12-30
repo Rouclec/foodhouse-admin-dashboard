@@ -332,7 +332,7 @@ export default function SubscriptionsPage() {
   return (
     <>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
               Subscription Types
@@ -343,12 +343,12 @@ export default function SubscriptionsPage() {
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={openCreateDialog}>
+              <Button onClick={openCreateDialog} className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Subscription
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-h-[90vh] flex flex-col min-w-[600px] max-w-[800px] w-full">
+            <DialogContent className="max-h-[90vh] flex flex-col w-[95vw] sm:min-w-[600px] sm:max-w-[800px]">
               <DialogHeader>
                 <DialogTitle>
                   {editingSubscription

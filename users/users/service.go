@@ -1051,15 +1051,40 @@ func (i *Impl) ExportUsersPdf(ctx context.Context, req *usersgrpc.ExportUsersPdf
 	}
 
 	// Build PDF.
-	pdf := gofpdf.New("P", "mm", "A4", "")
-	pdf.SetTitle("Users Export", false)
+	// Use landscape A4 so the table has enough horizontal space.
+	pdf := gofpdf.New("L", "mm", "A4", "")
+	pdf.SetTitle("FoodHouse Users Export", false)
 	pdf.SetAuthor("FoodHouse", false)
-	pdf.SetMargins(10, 12, 10)
-	pdf.AddPage()
+	leftMargin, topMargin, rightMargin := 10.0, 12.0, 10.0
+	bottomMargin := 12.0
+	pdf.SetMargins(leftMargin, topMargin, rightMargin)
+	pdf.SetAutoPageBreak(true, bottomMargin)
 
-	title := fmt.Sprintf("Users Export — %s", strings.TrimPrefix(role.String(), "USER_ROLE_"))
-	pdf.SetFont("Arial", "B", 16)
-	pdf.CellFormat(0, 10, title, "", 1, "L", false, 0, "")
+	// Simple branded header (no custom font needed).
+	brandGreen := struct{ r, g, b int }{r: 0, g: 153, b: 74}
+	roleLabel := strings.TrimPrefix(role.String(), "USER_ROLE_")
+	pageW, pageH := pdf.GetPageSize()
+
+	pdf.SetHeaderFunc(func() {
+		// Green bar
+		pdf.SetFillColor(brandGreen.r, brandGreen.g, brandGreen.b)
+		pdf.Rect(0, 0, pageW, 18, "F")
+
+		pdf.SetTextColor(255, 255, 255)
+		pdf.SetFont("Arial", "B", 14)
+		pdf.SetXY(leftMargin, 6)
+		pdf.CellFormat(0, 6, "FoodHouse", "", 0, "L", false, 0, "")
+
+		pdf.SetFont("Arial", "", 11)
+		pdf.SetXY(leftMargin, 6)
+		pdf.CellFormat(pageW-leftMargin-rightMargin, 6, "Users Export - "+roleLabel, "", 0, "R", false, 0, "")
+
+		// Reset for body
+		pdf.SetTextColor(0, 0, 0)
+		pdf.Ln(10)
+	})
+
+	pdf.AddPage()
 
 	pdf.SetFont("Arial", "", 10)
 	pdf.CellFormat(0, 6, fmt.Sprintf("Generated: %s", time.Now().Format(time.RFC1123)), "", 1, "L", false, 0, "")
@@ -1067,7 +1092,9 @@ func (i *Impl) ExportUsersPdf(ctx context.Context, req *usersgrpc.ExportUsersPdf
 	pdf.Ln(2)
 
 	// Table header
-	colW := []float64{45, 32, 45, 52, 18, 18} // Name, Phone, Email, Address, Status, Joined
+	// Column widths must fit within printable width.
+	// Printable width on A4 landscape is ~297mm minus margins.
+	colW := []float64{55, 35, 62, 85, 20, 20} // Name, Phone, Email, Address, Status, Joined
 	headers := []string{"Name", "Phone", "Email", "Address", "Status", "Joined"}
 
 	drawHeader := func() {
@@ -1082,14 +1109,41 @@ func (i *Impl) ExportUsersPdf(ctx context.Context, req *usersgrpc.ExportUsersPdf
 	}
 	drawHeader()
 
-	rowH := 6.0
-	for _, u := range all {
-		// Page break handling
-		if pdf.GetY() > 280 {
+	lineH := 5.0
+
+	drawRow := func(values []string) {
+		// Split each cell into lines so we can compute row height.
+		lines := make([][][]byte, len(values))
+		maxLines := 1
+		for i, v := range values {
+			lines[i] = pdf.SplitLines([]byte(v), colW[i])
+			if len(lines[i]) > maxLines {
+				maxLines = len(lines[i])
+			}
+		}
+		rowH := float64(maxLines) * lineH
+
+		// Add a new page if this row would overflow.
+		if pdf.GetY()+rowH > pageH-bottomMargin {
 			pdf.AddPage()
 			drawHeader()
 		}
 
+		x0 := pdf.GetX()
+		y0 := pdf.GetY()
+
+		for i := range values {
+			x := x0
+			for j := 0; j < i; j++ {
+				x += colW[j]
+			}
+			pdf.SetXY(x, y0)
+			pdf.MultiCell(colW[i], lineH, values[i], "1", "L", false)
+		}
+		pdf.SetXY(x0, y0+rowH)
+	}
+
+	for _, u := range all {
 		name := strings.TrimSpace(fmt.Sprintf("%s %s", safeString(u.FirstName), safeString(u.LastName)))
 		if name == "" {
 			name = u.ID
@@ -1104,10 +1158,7 @@ func (i *Impl) ExportUsersPdf(ctx context.Context, req *usersgrpc.ExportUsersPdf
 		}
 
 		values := []string{name, phone, email, address, statusStr, joined}
-		for i := range values {
-			pdf.CellFormat(colW[i], rowH, values[i], "1", 0, "L", false, 0, "")
-		}
-		pdf.Ln(-1)
+		drawRow(values)
 	}
 
 	buf := bytes.NewBuffer(nil)

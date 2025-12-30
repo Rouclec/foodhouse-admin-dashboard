@@ -1,7 +1,6 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import {
   View,
-  ScrollView,
   TouchableOpacity,
   Image,
   KeyboardAvoidingView,
@@ -29,6 +28,7 @@ import { usersCompleteRegistrationMutation } from '@/client/users.swagger/@tanst
 import { delay, uploadImage, useCompressImage } from '@/utils';
 import { useMutation } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {
   GooglePlaceData,
   GooglePlaceDetail,
@@ -48,6 +48,9 @@ export default function PersonalInfo() {
   const router = useRouter();
   const { user, setUser } = useContext(Context) as ContextType;
   const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
+  const [lastSelectedAddress, setLastSelectedAddress] = useState<string | null>(
+    formData.locationCoordinates?.address ?? null,
+  );
 
   const [originalProfileImage, setOriginalProfileImage] = useState(
     user?.profileImage || '',
@@ -132,8 +135,10 @@ export default function PersonalInfo() {
         address: data.description,
       };
       newFormData.locationCoordinates = newLocation;
+      setLastSelectedAddress(data.description);
     } else {
       newFormData.locationCoordinates = null;
+      setLastSelectedAddress(null);
     }
     setFormData(newFormData);
   };
@@ -240,10 +245,12 @@ export default function PersonalInfo() {
             <View />
           </Appbar.Header>
 
-          <ScrollView
+          <KeyboardAwareScrollView
             contentContainerStyle={defaultStyles.scrollContainer}
-            horizontal={true}
-            nestedScrollEnabled={true}>
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            enableOnAndroid
+            nestedScrollEnabled>
             <View style={profileFlowStyles.navigateSection}>
               <View style={signupStyles.imageContainer}>
                 <TouchableOpacity
@@ -316,7 +323,6 @@ export default function PersonalInfo() {
                 <View style={loginstyles.inputs}>
                   <GooglePlacesAutocomplete
                     keyboardShouldPersistTaps="always"
-                    disableScroll
                     ref={googlePlacesAutoCompleteRef}
                     placeholder={i18n.t(
                       '(farmer).(profile-flow).(personal-info).address',
@@ -345,11 +351,8 @@ export default function PersonalInfo() {
                         borderRadius: 15,
                         marginTop: 5,
                         elevation: 3,
-                        height: 200,
-                        position: 'absolute',
-                        top: -216,
+                        maxHeight: 220,
                         zIndex: 99999,
-                        overflowX: 'hidden',
                       },
                       row: {
                         flexWrap: 'wrap', // <- allow wrapping
@@ -391,6 +394,10 @@ export default function PersonalInfo() {
                       value: formData.address,
                       onChangeText: text => {
                         handleInputChange('address', text);
+                        if (lastSelectedAddress && text !== lastSelectedAddress) {
+                          setLastSelectedAddress(null);
+                          handleInputChange('locationCoordinates', null);
+                        }
                       },
                       onFocus: () => {},
                       onBlur: () => {},
@@ -405,7 +412,7 @@ export default function PersonalInfo() {
                 </View>
               </View>
             </View>
-          </ScrollView>
+          </KeyboardAwareScrollView>
         </View>
       </KeyboardAvoidingView>
 

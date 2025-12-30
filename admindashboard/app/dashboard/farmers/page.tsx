@@ -210,6 +210,8 @@ export default function FarmersPage() {
     try {
       setIsExporting(true);
 
+      // grpc-gateway returns google.api.HttpBody as a *raw* response body (PDF
+      // bytes), not JSON. So we must request binary from axios.
       const { data } = await usersExportUsersPdf({
         path: { adminUserId: user?.userId ?? "" },
         query: {
@@ -217,25 +219,21 @@ export default function FarmersPage() {
           userStatus: statusFilter,
           search: searchTerm,
         },
-      });
+        // @hey-api/client-axios passes through axios config
+        responseType: "arraybuffer" as any,
+      } as any);
 
-      const base64 = data?.data ?? "";
-      if (!base64) {
+      const arrayBuffer = data as unknown as ArrayBuffer;
+      if (!arrayBuffer || (arrayBuffer as any).byteLength === 0) {
         toast({
           title: "Export failed",
-          description: "No PDF data was returned by the server.",
+          description: "The server returned an empty PDF.",
           variant: "destructive",
         });
         return;
       }
 
-      const binary = atob(base64);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-
-      const blob = new Blob([bytes], {
-        type: data?.contentType ?? "application/pdf",
-      });
+      const blob = new Blob([arrayBuffer], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -258,7 +256,7 @@ export default function FarmersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
             Farmer Management
@@ -272,6 +270,7 @@ export default function FarmersPage() {
           onClick={handleExportPdf}
           disabled={isExporting}
           title="Export farmers to PDF"
+          className="w-full sm:w-auto"
         >
           <Download className="h-4 w-4 mr-2" />
           {isExporting ? "Exporting..." : "Export PDF"}
@@ -287,7 +286,7 @@ export default function FarmersPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex space-x-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -305,7 +304,7 @@ export default function FarmersPage() {
                 setStatusFilter(value as usersgrpcUserStatus)
               }
             >
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>

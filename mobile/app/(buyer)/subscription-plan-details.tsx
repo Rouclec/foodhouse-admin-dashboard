@@ -99,7 +99,11 @@ export default function SubscriptionPlanDetails() {
   const handleSubscribe = async () => {
     if (!plan?.id) return;
     if (!deliveryLocation?.region) {
-      router.push('/(buyer)/(order)/select-pickup-point');
+      // Let user choose between pickup and home delivery (same flow as orders)
+      router.push({
+        pathname: '/(buyer)/(order)' as any,
+        params: { returnTo: `/(buyer)/subscription-plan-details?planId=${plan.id}` },
+      } as any);
       return;
     }
     try {
@@ -270,19 +274,38 @@ export default function SubscriptionPlanDetails() {
           <>
             <Card style={{ marginBottom: 12, backgroundColor: Colors.light[10] }}>
               <Card.Content>
-                <Text variant="titleMedium">Pickup point</Text>
+                <Text variant="titleMedium">Delivery method</Text>
                 <Text variant="bodySmall" style={{ color: Colors.light['10.87'], marginTop: 4 }}>
                   {deliveryLocation?.description
-                    ? `${deliveryLocation.description}${deliveryLocation.address ? ` • ${deliveryLocation.address}` : ''}`
-                    : 'Choose where you want your deliveries to arrive.'}
+                    ? `Selected: ${deliveryLocation.description}${deliveryLocation.address ? ` • ${deliveryLocation.address}` : ''}`
+                    : 'Choose pickup point or home delivery, then select your location.'}
                 </Text>
-                <Button
-                  mode="outlined"
-                  style={{ marginTop: 10, borderRadius: 12 }}
-                  textColor={Colors.primary[500]}
-                  onPress={() => router.push('/(buyer)/(order)/select-pickup-point')}>
-                  {deliveryLocation?.description ? 'Change pickup point' : 'Select pickup point'}
-                </Button>
+                <View style={{ flexDirection: 'row', gap: 10, marginTop: 10 }}>
+                  <Button
+                    mode="outlined"
+                    style={{ flex: 1, borderRadius: 12 }}
+                    textColor={Colors.primary[500]}
+                    onPress={() =>
+                      router.push({
+                        pathname: '/(buyer)/(order)/select-pickup-point' as any,
+                        params: { returnTo: `/(buyer)/subscription-plan-details?planId=${plan.id}` },
+                      } as any)
+                    }>
+                    Pickup point
+                  </Button>
+                  <Button
+                    mode="outlined"
+                    style={{ flex: 1, borderRadius: 12 }}
+                    textColor={Colors.primary[500]}
+                    onPress={() =>
+                      router.push({
+                        pathname: '/(buyer)/(order)/delivery-address' as any,
+                        params: { returnTo: `/(buyer)/subscription-plan-details?planId=${plan.id}` },
+                      } as any)
+                    }>
+                    Home delivery
+                  </Button>
+                </View>
               </Card.Content>
             </Card>
 

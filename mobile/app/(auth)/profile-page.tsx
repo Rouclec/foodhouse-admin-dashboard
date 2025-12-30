@@ -45,6 +45,9 @@ const ProfilePage = () => {
   const [locationCoordinates, setLocationCoordinates] = useState(
     user?.locationCoordinates,
   );
+  const [lastSelectedAddress, setLastSelectedAddress] = useState<string | null>(
+    user?.locationCoordinates?.address ?? null,
+  );
   const [loading, setLoading] = useState(false);
   const [profileImage, setProfileImage] = useState<
     ExpoImagePicker.ImagePickerAsset | undefined
@@ -167,6 +170,7 @@ const ProfilePage = () => {
     details: GooglePlaceDetail | null,
   ) => {
     setAddress(data.description);
+    setLastSelectedAddress(data.description);
     if (details?.geometry?.location) {
       setLocationCoordinates({
         lat: details.geometry.location.lat,
@@ -315,7 +319,6 @@ const ProfilePage = () => {
             <View style={defaultStyles.flex}>
               <GooglePlacesAutocomplete
                 keyboardShouldPersistTaps="always"
-                disableScroll
                 ref={googlePlacesAutoCompleteRef}
                 placeholder={i18n.t(
                   '(farmer).(profile-flow).(personal-info).address',
@@ -340,9 +343,7 @@ const ProfilePage = () => {
                     borderRadius: 15,
                     marginTop: 5,
                     elevation: 3,
-                    // position: 'absolute',
-                    // top: -216,
-                    height: 200, // scroll instead of pushing UI
+                    maxHeight: 220,
                     zIndex: 9999,
                   },
                   row: {
@@ -371,7 +372,13 @@ const ProfilePage = () => {
                 textInputProps={{
                   placeholderTextColor: Colors.grey['3c'],
                   value: address,
-                  onChangeText: text => setAddress(text),
+                  onChangeText: text => {
+                    setAddress(text);
+                    if (lastSelectedAddress && text !== lastSelectedAddress) {
+                      setLastSelectedAddress(null);
+                      setLocationCoordinates(undefined);
+                    }
+                  },
                 }}
                 onPress={(data, details) => handleAddressSelect(data, details)}
                 fetchDetails={true}
@@ -450,9 +457,7 @@ const ProfilePage = () => {
           ]}
           loading={loading}
           disabled={
-            // !firstName ||
-            // (user?.role === 'USER_ROLE_FARMER' &&
-            //   (!locationCoordinates || !profileImage)) ||
+            (!!address && !locationCoordinates) ||
             loading
           }
           onPress={handleComplete}>

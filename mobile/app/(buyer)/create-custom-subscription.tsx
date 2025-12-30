@@ -168,11 +168,11 @@ export default function CreateCustomSubscription() {
 
     setAllocations((prev) => {
       const getDeliveryTotal = (delivery: DeliveryAllocation) => {
-    let total = 0;
+        let total = 0;
         delivery.forEach(({ product, quantity }) => {
-      total += (product.amount?.value ?? 0) * quantity;
-    });
-    return total;
+          total += (product.amount?.value ?? 0) * quantity;
+        });
+        return total;
       };
       const getOverallTotal = (all: DeliveryAllocation[]) => all.reduce((sum, d) => sum + getDeliveryTotal(d), 0);
 
@@ -212,9 +212,13 @@ export default function CreateCustomSubscription() {
     if (totals.remaining !== 0) return;
 
     try {
-      // Delivery location is required for subscriptions (reuse the pickup-point flow)
+      // Delivery location is required for subscriptions (reuse the order flow:
+      // pickup vs home delivery).
       if (!deliveryLocation?.region) {
-        router.push('/(buyer)/(order)/select-pickup-point');
+        router.push({
+          pathname: '/(buyer)/(order)' as any,
+          params: { returnTo: '/(buyer)/create-custom-subscription' },
+        } as any);
         return;
       }
 
@@ -261,8 +265,8 @@ export default function CreateCustomSubscription() {
         amount: result?.subscription?.amount ?? {
           value: budgetXaf,
           currencyIsoCode: 'XAF',
-          },
-        });
+        },
+      });
       router.push('/(payment)');
     } catch (error) {
       console.error('Error creating custom subscription:', error);
@@ -295,7 +299,7 @@ export default function CreateCustomSubscription() {
           onPress={() => (step === 'budget' ? router.back() : setStep('budget'))}
           style={{ position: 'absolute', top: 16, left: 16, padding: 8 }}>
           <Feather name="arrow-left" size={24} color={Colors.light[10]} />
-          </TouchableOpacity>
+        </TouchableOpacity>
         <View style={{ paddingBottom: 16 }}>
           <Text variant="titleLarge" style={{ color: Colors.light[10], fontWeight: '800' }}>
             Custom plan
@@ -309,7 +313,7 @@ export default function CreateCustomSubscription() {
       {step === 'budget' && (
         <View style={{ padding: 16, paddingBottom: 32 }}>
           <Card style={{ marginTop: -24, backgroundColor: Colors.light[10] }}>
-          <Card.Content>
+            <Card.Content>
               <Text variant="titleMedium">Set your budget</Text>
               <Text variant="bodySmall" style={{ color: Colors.light['10.87'], marginTop: 4 }}>
                 Max budget: XAF {MAX_BUDGET_XAF.toLocaleString()} • Default: XAF {DEFAULT_BUDGET_XAF.toLocaleString()}
@@ -319,7 +323,7 @@ export default function CreateCustomSubscription() {
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                   <TouchableOpacity
                     onPress={() => setBudgetAndEnsureDeliveries(budgetXaf - 5_000)}
-              style={{
+                    style={{
                       width: 40,
                       height: 40,
                       borderRadius: 20,
@@ -331,12 +335,12 @@ export default function CreateCustomSubscription() {
                   </TouchableOpacity>
 
                   <View style={{ flex: 1 }}>
-            <TextInput
+                    <TextInput
                       mode="outlined"
-              label="Budget (XAF)"
+                      label="Budget (XAF)"
                       value={budgetText}
                       onChangeText={(t) => setBudgetText(t.replace(/[^0-9]/g, ''))}
-              keyboardType="numeric"
+                      keyboardType="numeric"
                       returnKeyType="done"
                       dense
                       onEndEditing={() => {
@@ -352,7 +356,7 @@ export default function CreateCustomSubscription() {
 
                   <TouchableOpacity
                     onPress={() => setBudgetAndEnsureDeliveries(budgetXaf + 5_000)}
-              style={{
+                    style={{
                       width: 40,
                       height: 40,
                       borderRadius: 20,
@@ -362,7 +366,7 @@ export default function CreateCustomSubscription() {
                     }}>
                     <Text variant="titleMedium" style={{ color: Colors.light[10] }}>
                       +
-            </Text>
+                    </Text>
                   </TouchableOpacity>
                 </View>
 
@@ -385,8 +389,8 @@ export default function CreateCustomSubscription() {
                   }}
                 />
               </View>
-          </Card.Content>
-        </Card>
+            </Card.Content>
+          </Card>
 
           <Card style={{ marginTop: 12, backgroundColor: Colors.light[10] }}>
             <Card.Content>
@@ -411,7 +415,7 @@ export default function CreateCustomSubscription() {
 
                 <Text variant="titleLarge" style={{ color: Colors.dark[10] }}>
                   {deliveriesCount}
-                  </Text>
+                </Text>
 
                 <TouchableOpacity
                   onPress={() => setDeliveriesCountSafe(deliveriesCount + 1)}
@@ -493,7 +497,7 @@ export default function CreateCustomSubscription() {
                 return (
                   <TouchableOpacity
                     onPress={() => setActiveDeliveryIdx(idx)}
-          style={{
+                    style={{
                       paddingHorizontal: 14,
                       paddingVertical: 10,
                       borderRadius: 999,
@@ -519,16 +523,16 @@ export default function CreateCustomSubscription() {
           {/* Products list for active delivery */}
           <Text variant="titleMedium" style={{ marginTop: 16, marginBottom: 12 }}>
             Select products for delivery {activeDeliveryIdx + 1}
-        </Text>
+          </Text>
 
-        {isProductsLoading ? (
-          <View style={defaultStyles.center}>
-            <Chase size={56} color={Colors.primary[500]} />
-          </View>
-        ) : (
-          <FlatList
+          {isProductsLoading ? (
+            <View style={defaultStyles.center}>
+              <Chase size={56} color={Colors.primary[500]} />
+            </View>
+          ) : (
+            <FlatList
               data={productsData?.products ?? []}
-            keyExtractor={(item, index) => item?.id ?? index.toString()}
+              keyExtractor={(item, index) => item?.id ?? index.toString()}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ paddingBottom: 16 }}
               ListEmptyComponent={
@@ -536,23 +540,23 @@ export default function CreateCustomSubscription() {
                   <Text style={defaultStyles.noItems}>No products available</Text>
                 </View>
               }
-            renderItem={({ item }) => {
-              const product = item as productsgrpcProduct;
+              renderItem={({ item }) => {
+                const product = item as productsgrpcProduct;
                 const productId = product.id ?? '';
                 const qty = allocations[activeDeliveryIdx]?.get(productId)?.quantity ?? 0;
                 const unit = product.amount?.value ?? 0;
                 const lineTotal = unit * qty;
-              return (
+                return (
                   <Card style={{ marginBottom: 12, backgroundColor: Colors.light[10] }}>
-                  <Card.Content>
+                    <Card.Content>
                       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                      <View style={{ flex: 1 }}>
+                        <View style={{ flex: 1 }}>
                           <Text variant="titleMedium" numberOfLines={1}>
-                          {product.name}
-                        </Text>
+                            {product.name}
+                          </Text>
                           <Text variant="bodySmall" style={{ color: Colors.light['10.87'], marginTop: 2 }}>
                             {product.amount?.currencyIsoCode ?? 'XAF'} {unit.toLocaleString()}
-                        </Text>
+                          </Text>
                         </View>
 
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -708,17 +712,59 @@ export default function CreateCustomSubscription() {
             }}
           />
 
+          <Card style={{ marginTop: 4, marginBottom: 12, backgroundColor: Colors.light[10] }}>
+            <Card.Content>
+              <Text variant="titleMedium">Delivery method</Text>
+              <Text variant="bodySmall" style={{ color: Colors.light['10.87'], marginTop: 4 }}>
+                {deliveryLocation?.description
+                  ? `Selected: ${deliveryLocation.description}${deliveryLocation.address ? ` • ${deliveryLocation.address}` : ''}`
+                  : 'Choose pickup point or home delivery, then select your location.'}
+              </Text>
+              <View style={{ flexDirection: 'row', gap: 10, marginTop: 10 }}>
+                <Button
+                  mode="outlined"
+                  style={{ flex: 1, borderRadius: 12 }}
+                  textColor={Colors.primary[500]}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/(buyer)/(order)/select-pickup-point' as any,
+                      params: { returnTo: '/(buyer)/create-custom-subscription' },
+                    } as any)
+                  }>
+                  Pickup point
+                </Button>
+                <Button
+                  mode="outlined"
+                  style={{ flex: 1, borderRadius: 12 }}
+                  textColor={Colors.primary[500]}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/(buyer)/(order)/delivery-address' as any,
+                      params: { returnTo: '/(buyer)/create-custom-subscription' },
+                    } as any)
+                  }>
+                  Home delivery
+                </Button>
+              </View>
+            </Card.Content>
+          </Card>
+
           <Button
             mode="contained"
             buttonColor={Colors.primary[500]}
             style={{ borderRadius: 12, marginTop: 8 }}
             loading={isCreating}
-            disabled={isCreating || totals.remaining !== 0 || totals.used <= 0}
+            disabled={
+              isCreating ||
+              totals.remaining !== 0 ||
+              totals.used <= 0 ||
+              !deliveryLocation?.region
+            }
             onPress={handleSubmit}>
             Proceed to pay
           </Button>
         </View>
-        )}
+      )}
 
       <Snackbar visible={!!snack} onDismiss={() => setSnack(null)} duration={2500}>
         {snack ?? ''}

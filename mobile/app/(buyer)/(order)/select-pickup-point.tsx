@@ -1,7 +1,7 @@
 import { Colors } from "@/constants";
 import i18n from "@/i18n";
 import { defaultStyles } from "@/styles";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useContext, useEffect, useState } from "react";
 import {
   FlatList,
@@ -23,6 +23,9 @@ export default function SelectPickupPoint() {
   ) as ContextType;
 
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const returnTo =
+    (params.returnTo as string | undefined) ?? "/(buyer)/(order)/checkout";
   const [loading, setLoading] = useState(false);
   const [city, setCity] = useState<string>();
   const [debounceQuery, setDebounceQuery] = useState<string>();
@@ -218,7 +221,7 @@ export default function SelectPickupPoint() {
       </KeyboardAvoidingView>
       <View style={defaultStyles.bottomButtonContainer}>
         <Button
-          onPress={() => router.push("/(buyer)/(order)/checkout")}
+          onPress={() => router.push(returnTo)}
           style={[
             defaultStyles.button,
             defaultStyles.primaryButton,
@@ -230,9 +233,11 @@ export default function SelectPickupPoint() {
           <View style={defaultStyles.innerButtonContainer}>
             <View>
               <Text variant="titleMedium" style={defaultStyles?.buttonText}>
-                {i18n.t(
-                  "(buyer).(order).select-pickup-point.proceedToCheckout"
-                )}
+                {returnTo.includes("subscription")
+                  ? "Continue"
+                  : i18n.t(
+                      "(buyer).(order).select-pickup-point.proceedToCheckout"
+                    )}
               </Text>
             </View>
 

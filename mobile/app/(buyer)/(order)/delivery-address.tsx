@@ -5,6 +5,7 @@ import { Colors } from '@/constants';
 import i18n from '@/i18n';
 import { defaultStyles } from '@/styles';
 import { useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   View,
@@ -12,6 +13,8 @@ import {
   ActivityIndicator,
   LayoutChangeEvent,
   Dimensions,
+  Keyboard,
+  Platform,
 } from 'react-native';
 import MapView, {
   Callout,
@@ -45,6 +48,9 @@ export default function DeliveryAddress() {
   const mapRef = useRef<MapView>(null);
   const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const returnTo =
+    (params.returnTo as string | undefined) ?? '/(buyer)/(order)/checkout';
 
   const sheetRef = useRef<FilterBottomSheetRef>(null);
   const [loadingLocation, setLoadingLocation] = useState(false);
@@ -58,6 +64,28 @@ export default function DeliveryAddress() {
   const { deliveryLocation, setDeliveryLocation } = useContext(
     Context,
   ) as ContextType;
+
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [addressQuery, setAddressQuery] = useState<string>(
+    deliveryLocation?.description ?? '',
+  );
+  const [lastSelectedDescription, setLastSelectedDescription] = useState<
+    string | null
+  >(deliveryLocation?.description ?? null);
+
+  useEffect(() => {
+    const showEvt = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvt = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSub = Keyboard.addListener(showEvt, e => {
+      setKeyboardHeight(e.endCoordinates?.height ?? 0);
+    });
+    const hideSub = Keyboard.addListener(hideEvt, () => setKeyboardHeight(0));
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const [currentLocation, setCurrentLocation] = useState<{
     description: string;
@@ -112,12 +140,17 @@ export default function DeliveryAddress() {
   }, [deliveryLocation, currentLocation]);
 
   useEffect(() => {
-    if (googlePlacesAutoCompleteRef?.current && deliveryLocation?.description) {
-      googlePlacesAutoCompleteRef.current.setAddressText(
-        deliveryLocation?.description,
-      );
+    // Keep the controlled input in sync if deliveryLocation is set externally
+    // (e.g., current location checkbox).
+    if (deliveryLocation?.description && deliveryLocation.description !== addressQuery) {
+      setAddressQuery(deliveryLocation.description);
+      setLastSelectedDescription(deliveryLocation.description);
     }
-  }, [deliveryLocation]);
+    if (!deliveryLocation && addressQuery !== '' && lastSelectedDescription !== null) {
+      setLastSelectedDescription(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deliveryLocation?.description]);
 
   return (
     <>
@@ -192,7 +225,9 @@ export default function DeliveryAddress() {
             ) : null}
           </MapView>
         </View>
-        <View style={[styles.sheetContainer]} onLayout={onBottomSheetLayout}>
+        <View
+          style={[styles.sheetContainer, { bottom: keyboardHeight }]}
+          onLayout={onBottomSheetLayout}>
           <View style={styles.notch} />
 
           <Text
@@ -216,9 +251,19 @@ export default function DeliveryAddress() {
                 }}
                 textInputProps={{
                   placeholderTextColor: Colors.grey['3c'],
+                  value: addressQuery,
+                  onChangeText: text => {
+                    setAddressQuery(text);
+                    if (lastSelectedDescription && text !== lastSelectedDescription) {
+                      setLastSelectedDescription(null);
+                      setDeliveryLocation(undefined);
+                    }
+                  },
                 }}
                 onPress={(data, details = null) => {
                   setLoadingLocation(false);
+                  setAddressQuery(data.description);
+                  setLastSelectedDescription(data.description);
                   setDeliveryLocation({
                     description: data.description,
                     address: data?.description,
@@ -262,12 +307,16 @@ export default function DeliveryAddress() {
                         deliveryLocation?.description
                       ) {
                         setDeliveryLocation(undefined);
+                        setLastSelectedDescription(null);
+                        setAddressQuery('');
                       } else if (currentLocation) {
                         setDeliveryLocation({
                           description: currentLocation?.description,
                           address: currentLocation?.description,
                           region: currentLocation?.region,
                         });
+                        setLastSelectedDescription(currentLocation.description);
+                        setAddressQuery(currentLocation.description);
                       }
                     }}
                   />
@@ -305,13 +354,15 @@ export default function DeliveryAddress() {
               ]}
               disabled={!deliveryLocation}
               contentStyle={[defaultStyles.center]}
-              onPress={() => router.push('/(buyer)/(order)/checkout')}>
+              onPress={() => router.push(returnTo)}>
               <View style={defaultStyles.innerButtonContainer}>
                 <View>
                   <Text variant="titleMedium" style={defaultStyles?.buttonText}>
-                    {i18n.t(
-                      '(buyer).(order).delivery-address.proceedToCheckout',
-                    )}
+                    {returnTo.includes('subscription')
+                      ? 'Continue'
+                      : i18n.t(
+                          '(buyer).(order).delivery-address.proceedToCheckout',
+                        )}
                   </Text>
                 </View>
 

@@ -207,6 +207,8 @@ export default function Buysers() {
     try {
       setIsExporting(true);
 
+      // grpc-gateway returns google.api.HttpBody as a *raw* response body (PDF
+      // bytes), not JSON. So we must request binary from axios.
       const { data } = await usersExportUsersPdf({
         path: { adminUserId: user?.userId ?? "" },
         query: {
@@ -214,25 +216,21 @@ export default function Buysers() {
           userStatus: statusFilter,
           search: searchTerm,
         },
-      });
+        // @hey-api/client-axios passes through axios config
+        responseType: "arraybuffer" as any,
+      } as any);
 
-      const base64 = data?.data ?? "";
-      if (!base64) {
+      const arrayBuffer = data as unknown as ArrayBuffer;
+      if (!arrayBuffer || (arrayBuffer as any).byteLength === 0) {
         toast({
           title: "Export failed",
-          description: "No PDF data was returned by the server.",
+          description: "The server returned an empty PDF.",
           variant: "destructive",
         });
         return;
       }
 
-      const binary = atob(base64);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-
-      const blob = new Blob([bytes], {
-        type: data?.contentType ?? "application/pdf",
-      });
+      const blob = new Blob([arrayBuffer], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
