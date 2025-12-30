@@ -35,7 +35,13 @@ SELECT * FROM subscriptions WHERE id = $1;
 SELECT * FROM subscriptions WHERE id = $1 FOR UPDATE;
 
 -- name: ListSubsriptions :many
-SELECT * FROM subscriptions ORDER BY amount ASC;
+SELECT *
+FROM subscriptions
+WHERE NOT (
+  lower(title) = 'custom subscription'
+  AND description LIKE 'Custom subscription for user %'
+)
+ORDER BY amount ASC;
 
 
 -- name: CreateUserSubscription :one

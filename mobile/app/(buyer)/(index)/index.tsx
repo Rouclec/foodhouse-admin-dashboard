@@ -61,6 +61,15 @@ function getPlanDiscountPercent(plan?: ordersgrpcSubscription): number | null {
   return pct >= 1 ? pct : null;
 }
 
+function isCustomSubscriptionPlan(plan?: ordersgrpcSubscription): boolean {
+  const title = (plan?.title ?? '').trim();
+  const description = plan?.description ?? '';
+  return (
+    title.toLowerCase() === 'custom subscription' &&
+    description.startsWith('Custom subscription for user ')
+  );
+}
+
 export default function BuyerProducts() {
   const [hasReachedEnd, setHasReachedEnd] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -141,6 +150,11 @@ export default function BuyerProducts() {
       },
     }),
   });
+
+  const visibleSubscriptionPlans = React.useMemo(() => {
+    const plans = subscriptionPlansData?.subscriptionPlans ?? [];
+    return plans.filter((p) => !isCustomSubscriptionPlan(p));
+  }, [subscriptionPlansData?.subscriptionPlans]);
   const { isLoading: isProductsLoading, data } = useQuery({
     ...productsListProductsOptions({
       path: {
@@ -319,8 +333,7 @@ export default function BuyerProducts() {
             </SafeAreaView>
           </View>
           {/* Subscription Plans Slider */}
-          {subscriptionPlansData?.subscriptionPlans &&
-            subscriptionPlansData.subscriptionPlans.length > 0 && (
+          {visibleSubscriptionPlans.length > 0 && (
               <>
                 <View
                   style={{
@@ -353,7 +366,7 @@ export default function BuyerProducts() {
                   <View style={[styles.flatListContainer, { marginBottom: 8 }]}>
                     <FlatList
                       horizontal
-                      data={subscriptionPlansData.subscriptionPlans.slice(0, 2)}
+                      data={visibleSubscriptionPlans.slice(0, 2)}
                       contentContainerStyle={[
                         { columnGap: 12, alignItems: 'flex-start', height: '100%' },
                         styles.paddingRight24,

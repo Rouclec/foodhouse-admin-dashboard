@@ -4,7 +4,7 @@ import { DialogFooter } from "@/components/ui/dialog";
 
 import type React from "react";
 
-import { useContext, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,6 +59,15 @@ import { X } from "lucide-react";
 
 const currencies = ["XAF", "TZS", "USD"];
 
+function isCustomSubscriptionPlan(plan?: ordersgrpcSubscription): boolean {
+  const title = (plan?.title ?? "").trim();
+  const description = plan?.description ?? "";
+  return (
+    title.toLowerCase() === "custom subscription" &&
+    description.startsWith("Custom subscription for user ")
+  );
+}
+
 export default function SubscriptionsPage() {
   const { user } = useContext(Context) as ContextType;
   const queryClient = useQueryClient();
@@ -75,6 +84,11 @@ export default function SubscriptionsPage() {
       },
     }),
   });
+
+  const subscriptionPlans = useMemo(() => {
+    const plans = subscriptionsData?.subscriptionPlans ?? [];
+    return plans.filter((p) => !isCustomSubscriptionPlan(p));
+  }, [subscriptionsData?.subscriptionPlans]);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSubscription, setEditingSubscription] =
@@ -703,7 +717,7 @@ export default function SubscriptionsPage() {
             </CardTitle>
             <CardDescription>
               Total subscription types:{" "}
-              {subscriptionsData?.subscriptionPlans?.length ?? 0}
+              {subscriptionPlans.length}
             </CardDescription>
           </CardHeader>
           <CardContent className="overflow-x-auto">
@@ -722,7 +736,7 @@ export default function SubscriptionsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {subscriptionsData?.subscriptionPlans?.map((subscription) => (
+                {subscriptionPlans.map((subscription) => (
                   <TableRow key={subscription?.id}>
                     <TableCell className="font-medium">
                       {subscription?.title}
@@ -769,7 +783,7 @@ export default function SubscriptionsPage() {
                 ))}
               </TableBody>
             </Table>
-            {subscriptionsData?.subscriptionPlans?.length === 0 && !isSubscriptionsLoading && (
+            {subscriptionPlans.length === 0 && !isSubscriptionsLoading && (
               <div className="text-center py-8">
                 <p className="text-muted-foreground">No subscription plans found</p>
               </div>

@@ -559,7 +559,7 @@ func (q *Queries) ListOrdersDueSoon(ctx context.Context, days int32) ([]ListOrde
 }
 
 const listSubsriptions = `-- name: ListSubsriptions :many
-SELECT id, title, description, duration, amount, currency_iso_code, created_at, updated_at, estimated_delivery_time FROM subscriptions ORDER BY amount ASC
+SELECT id, title, description, duration, amount, currency_iso_code, created_at, updated_at, estimated_delivery_time FROM subscriptions WHERE NOT (lower(title) = 'custom subscription' AND description LIKE 'Custom subscription for user %') ORDER BY amount ASC
 `
 
 func (q *Queries) ListSubsriptions(ctx context.Context) ([]Subscription, error) {

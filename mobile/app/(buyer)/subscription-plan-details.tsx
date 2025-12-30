@@ -15,6 +15,15 @@ import {
 import { ordersgrpcSubscription, ordersgrpcSubscriptionItem } from '@/client/orders.swagger';
 import { RelativePathString } from 'expo-router';
 
+function isCustomSubscriptionPlan(plan?: ordersgrpcSubscription): boolean {
+  const title = (plan?.title ?? '').trim();
+  const description = plan?.description ?? '';
+  return (
+    title.toLowerCase() === 'custom subscription' &&
+    description.startsWith('Custom subscription for user ')
+  );
+}
+
 function getPlanDiscountPercent(plan?: ordersgrpcSubscription): number | null {
   const amount = plan?.amount?.value ?? 0;
   if (!amount || amount <= 0) return null;
@@ -84,8 +93,10 @@ export default function SubscriptionPlanDetails() {
   });
 
   const plan = useMemo(() => {
-    const plans = data?.subscriptionPlans ?? [];
-    return plans.find(p => p?.id === planId) as ordersgrpcSubscription | undefined;
+    const plans = (data?.subscriptionPlans ?? []).filter(
+      (p) => !isCustomSubscriptionPlan(p as ordersgrpcSubscription)
+    );
+    return plans.find((p) => p?.id === planId) as ordersgrpcSubscription | undefined;
   }, [data?.subscriptionPlans, planId]);
 
   const discountPct = useMemo(() => getPlanDiscountPercent(plan), [plan]);

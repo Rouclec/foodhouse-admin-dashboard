@@ -23,6 +23,15 @@ import { Chase } from 'react-native-animated-spinkit';
 import { Feather } from '@expo/vector-icons';
 import i18n from '@/i18n';
 
+function isCustomSubscriptionPlan(plan?: ordersgrpcSubscription): boolean {
+  const title = (plan?.title ?? '').trim();
+  const description = plan?.description ?? '';
+  return (
+    title.toLowerCase() === 'custom subscription' &&
+    description.startsWith('Custom subscription for user ')
+  );
+}
+
 function getPlanDiscountPercent(plan?: ordersgrpcSubscription): number | null {
   const amount = plan?.amount?.value ?? 0;
   if (!amount || amount <= 0) return null;
@@ -67,6 +76,11 @@ export default function SubscriptionPlans() {
   const handleCreateCustom = () => {
     router.push('/(buyer)/create-custom-subscription');
   };
+
+  const visiblePlans = React.useMemo(() => {
+    const plans = subscriptionPlansData?.subscriptionPlans ?? [];
+    return plans.filter((p) => !isCustomSubscriptionPlan(p));
+  }, [subscriptionPlansData?.subscriptionPlans]);
 
   if (isSubscriptionPlansLoading) {
     return (
@@ -119,7 +133,7 @@ export default function SubscriptionPlans() {
       </ImageBackground>
 
       <FlatList
-        data={subscriptionPlansData?.subscriptionPlans ?? []}
+        data={visiblePlans}
         keyExtractor={(item, index) => item?.id ?? index.toString()}
         contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
         ListHeaderComponent={

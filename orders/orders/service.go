@@ -1209,9 +1209,6 @@ func (i *Impl) GetOrderDetails(ctx context.Context, req *ordersgrpc.GetOrderDeta
 
 	// 3. CONVERT ORDER + ITEMS TO PROTO.
 	protoOrder := converters.SqlcOrderByNumberToProto(sqlcOrder, i.logger)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error converting order to proto: %v", err)
-	}
 
 	return &ordersgrpc.GetOrderDetailsResponse{
 		Order:    protoOrder,
@@ -3131,7 +3128,24 @@ func (i *Impl) CreateCustomSubscription(
 		estimatedDays = int(*req.EstimatedDeliveryTimeDays)
 	}
 
-	// Create user subscription (custom subscription, no subscription_id references a plan)
+	// Create a real subscriptions row first.
+	// subscription_items.subscription_id has a FK to subscriptions(id), so custom subscriptions
+	// must still have a parent subscriptions record to attach items to.
+	customTitle := "Custom Subscription"
+	customDesc := fmt.Sprintf("Custom subscription for user %s", req.GetUserId())
+	subscriptionPlan, err := querier.CreateSubscription(ctx, sqlc.CreateSubscriptionParams{
+		Title:                 customTitle,
+		Description:           customDesc,
+		Amount:                int64(req.GetBudget().GetValue()),
+		CurrencyIsoCode:       req.GetBudget().GetCurrencyIsoCode(),
+		Duration:              pgtype.Interval{Microseconds: int64(estimatedDays) * 24 * 60 * 60 * OneMillion, Valid: true},
+		EstimatedDeliveryTime: pgtype.Interval{Days: int32(estimatedDays), Valid: true},
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error creating custom subscription plan: %v", err)
+	}
+
+	// Create user subscription and point it to the created subscriptionPlan.ID.
 	var deliveryLoc pgtype.Point
 	deliveryAddr := ""
 	if req.GetDeliveryLocation() != nil {
@@ -3143,8 +3157,8 @@ func (i *Impl) CreateCustomSubscription(
 	}
 	subscription, err := querier.CreateUserSubscription(ctx, sqlc.CreateUserSubscriptionParams{
 		UserID:          req.GetUserId(),
-		SubscriptionID:  fmt.Sprintf("custom-%d", time.Now().UnixNano()), // Custom ID for custom subscriptions
-		Active:          false,                                           // Will be activated after payment
+		SubscriptionID:  subscriptionPlan.ID,
+		Active:          false, // Will be activated after payment
 		Amount:          int64(req.GetBudget().GetValue()),
 		CurrencyIsoCode: req.GetBudget().GetCurrencyIsoCode(),
 		EstimatedDeliveryTime: pgtype.Interval{
@@ -3165,7 +3179,7 @@ func (i *Impl) CreateCustomSubscription(
 	for _, group := range orderGroups {
 		for _, itemWithProd := range group.items {
 			_, err = querier.CreateSubscriptionItem(ctx, sqlc.CreateSubscriptionItemParams{
-				SubscriptionID: subscription.SubscriptionID, // Use the custom subscription ID
+				SubscriptionID: subscriptionPlan.ID,
 				Product:        itemWithProd.item.GetProductId(),
 				Quantity:       int32(itemWithProd.item.GetQuantity()),
 				UnitType:       itemWithProd.product.GetUnitType(),
