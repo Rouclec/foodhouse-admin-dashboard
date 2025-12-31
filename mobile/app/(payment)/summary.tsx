@@ -1,29 +1,73 @@
 import { SafeAreaView, ScrollView, TouchableOpacity, View } from 'react-native';
-import React from 'react';
+import React, { useContext } from 'react';
 import { defaultStyles, summaryStyles as styles } from '@/styles';
 import { Text, Button, Icon, Appbar } from 'react-native-paper';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams, RelativePathString } from 'expo-router';
+import { useMutation } from '@tanstack/react-query';
+import { ordersCreateCustomSubscriptionMutation } from '@/client/orders.swagger/@tanstack/react-query.gen';
+import { Context, ContextType } from '@/app/_layout';
 import { Colors } from '@/constants';
+import { typesAmount } from '@/client/orders.swagger';
 
 export default function Summary() {
   const router = useRouter();
-
-  const deliveries = [
-    {
-      id: 1,
-      items: [{ name: 'Irish Potatoes', unit: '14x Kg Bag', price: 37500 }],
-      total: 37500,
-    },
-    {
-      id: 2,
-      items: [{ name: 'Irish Potatoes', unit: '14x Kg Bag', price: 37500 }],
-      total: 37500,
-    },
-  ];
-
-  const amount = 75000;
-  const discount = 7500;
-  const total = 67500;
+  const { budget, deliveries, selectedProducts, subscriptionItems } = useLocalSearchParams<{
+    budget: string;
+    deliveries: string;
+    selectedProducts: string;
+    subscriptionItems: string;
+  }>();
+  const { user, setPaymentData } = useContext(Context) as ContextType;
+  
+  const totalBudget = parseInt(budget || '75000');
+  const numDeliveries = parseInt(deliveries || '2');
+  const products = selectedProducts ? JSON.parse(selectedProducts) : [];
+  const items = subscriptionItems ? JSON.parse(subscriptionItems) : [];
+  
+  const { mutateAsync: createCustomSubscription, isPending } = useMutation({
+    ...ordersCreateCustomSubscriptionMutation(),
+  });
+  
+  const amount = products.reduce((sum: number, p: any) => sum + p.price * p.quantity, 0);
+  const discount = amount * 0.1;
+  const total = amount - discount;
+  
+  const handleConfirmPayment = async () => {
+    try {
+      const result = await createCustomSubscription({
+        body: {
+          budget: { value: totalBudget, currencyIsoCode: 'XAF' },
+          subscriptionItems: items,
+          maxAmountPerOrder: (totalBudget / numDeliveries).toString(),
+          estimatedDeliveryTimeDays: '7',
+        },
+        path: { userId: user?.userId ?? '' },
+      });
+      
+      const publicId = result?.subscription?.publicId ?? '';
+      if (!publicId) return;
+      
+      setPaymentData({
+        entity: 'PaymentEntity_SUBSCRIPTION',
+        entityId: publicId,
+        nextScreen: '/(buyer)/(index)' as RelativePathString,
+        amount: { value: total, currencyIsoCode: 'XAF' } as typesAmount,
+      });
+      router.push('/(payment)');
+    } catch (e) {
+      console.error('Error creating custom subscription:', e);
+    }
+  };
+  
+  const deliveriesData = Array.from({ length: numDeliveries }, (_, i) => ({
+    id: i + 1,
+    items: products.map((p: any) => ({
+      name: p.name,
+      unit: `${p.quantity}x ${p.unit}`,
+      price: p.price * p.quantity,
+    })),
+    total: amount / numDeliveries,
+  }));
 
   return (
     <View style={defaultStyles.flex}>
@@ -46,14 +90,14 @@ export default function Summary() {
         <View style={styles.packageCard}>
           <Text style={styles.packageTitle}>Custom Package</Text>
           <View style={styles.packageDetails}>
-            <Text style={styles.packageDetailText}>30 Items</Text>
+            <Text style={styles.packageDetailText}>{products.reduce((sum: number, p: any) => sum + p.quantity, 0)} Items</Text>
             <View style={styles.packageDivider} />
             <Icon source="truck-delivery" size={16} color={Colors.light[10]} />
-            <Text style={styles.packageDetailText}>2 Deliveries</Text>
+            <Text style={styles.packageDetailText}>{numDeliveries} Deliveries</Text>
           </View>
         </View>
 
-        {deliveries.map(delivery => (
+        {deliveriesData.map(delivery => (
           <View key={delivery.id} style={styles.deliverySection}>
             <View style={styles.deliveryHeader}>
               <Text style={styles.deliveryTitle}>Delivery {delivery.id}</Text>
@@ -105,7 +149,9 @@ export default function Summary() {
           mode="contained"
           style={[defaultStyles.button, defaultStyles.primaryButton]}
           contentStyle={[defaultStyles.center]}
-          onPress={() => {}}>
+          onPress={handleConfirmPayment}
+          loading={isPending}
+          disabled={isPending}>
           <Text variant="titleMedium" style={defaultStyles?.buttonText}>
             Confirm Payment
           </Text>

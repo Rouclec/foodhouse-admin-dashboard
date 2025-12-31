@@ -293,6 +293,7 @@ export const buyerProductsStyles = StyleSheet.create({
     width: 54,
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 4,
   },
 
   discountText: {

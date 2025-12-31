@@ -181,6 +181,20 @@ export const selectProductsStyles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 12,
+  },
+  productImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+  },
+  productImagePlaceholder: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: Colors.grey.f8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   addButton: {
     width: 40,

@@ -1,9 +1,13 @@
-import { SafeAreaView, ScrollView, TouchableOpacity, View, FlatList } from 'react-native';
-import React, { useState } from 'react';
+import { SafeAreaView, ScrollView, TouchableOpacity, View, FlatList, Image } from 'react-native';
+import React, { useState, useContext } from 'react';
 import { defaultStyles, selectProductsStyles as styles } from '@/styles';
 import { Text, Button, Icon, Appbar } from 'react-native-paper';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useQuery } from '@tanstack/react-query';
+import { productsListProductsOptions } from '@/client/products.swagger/@tanstack/react-query.gen';
+import { Context, ContextType } from '@/app/_layout';
 import { Colors } from '@/constants';
+import { Chase } from 'react-native-animated-spinkit';
 
 type Product = {
   id: string;
@@ -12,28 +16,52 @@ type Product = {
   price: number;
   unit: string;
   quantity: number;
+  image?: string;
 };
 
-const availableProducts: Product[] = [
-  { id: '1', name: 'Sweet Potatoes', category: 'Tubers', price: 2000, unit: 'kg Bag', quantity: 0 },
-  { id: '2', name: 'Cabbage', category: 'Vegetables', price: 1500, unit: 'kg Bag', quantity: 0 },
-];
-
 export default function SelectProducts() {
-  const [selectedProducts, setSelectedProducts] = useState<Product[]>([
-    { id: '0', name: 'Irish Potatoes', category: 'Tubers', price: 2500, unit: 'kg Bag', quantity: 14 },
-  ]);
-  const [products, setProducts] = useState(availableProducts);
-  const [activeDelivery, setActiveDelivery] = useState(1);
+  const { budget, deliveries } = useLocalSearchParams<{ budget: string; deliveries: string }>();
+  const { user } = useContext(Context) as ContextType;
   const router = useRouter();
-
+  
+  const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
+  const [activeDelivery, setActiveDelivery] = useState(1);
+  
+  const totalBudget = parseInt(budget || '75000');
+  const numDeliveries = parseInt(deliveries || '2');
+  const budgetPerDelivery = totalBudget / numDeliveries;
+  
+  const { data: productsData, isLoading } = useQuery({
+    ...productsListProductsOptions({
+      query: { isApproved: true, count: 50 },
+    }),
+  });
+  
+  const availableProducts = productsData?.products?.filter(
+    product => !selectedProducts.find(sp => sp.id === product.id)
+  ).map(product => ({
+    id: product.id || '',
+    name: product.name || '',
+    category: product.category?.name || '',
+    price: product.amount?.value || 0,
+    unit: product.unitType || '',
+    quantity: 0,
+    image: product.image || '',
+  })) || [];
+  
   const budgetUsed = selectedProducts.reduce((sum, p) => sum + p.price * p.quantity, 0);
-  const totalBudget = 37500;
   const remaining = totalBudget - budgetUsed;
+  
+  if (isLoading) {
+    return (
+      <View style={[defaultStyles.flex, defaultStyles.center]}>
+        <Chase size={32} color={Colors.primary[500]} />
+      </View>
+    );
+  }
 
   const addProduct = (product: Product) => {
     setSelectedProducts([...selectedProducts, { ...product, quantity: 1 }]);
-    setProducts(products.filter(p => p.id !== product.id));
   };
 
   const updateQuantity = (id: string, delta: number) => {
@@ -83,20 +111,16 @@ export default function SelectProducts() {
         </View>
 
         <View style={styles.deliveryTabs}>
-          <TouchableOpacity
-            style={[styles.deliveryTab, activeDelivery === 1 && styles.deliveryTabActive]}
-            onPress={() => setActiveDelivery(1)}>
-            <Text style={[styles.deliveryTabText, activeDelivery === 1 && styles.deliveryTabTextActive]}>
-              Delivery 1
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.deliveryTab, activeDelivery === 2 && styles.deliveryTabActive]}
-            onPress={() => setActiveDelivery(2)}>
-            <Text style={[styles.deliveryTabText, activeDelivery === 2 && styles.deliveryTabTextActive]}>
-              Delivery 2
-            </Text>
-          </TouchableOpacity>
+          {Array.from({ length: numDeliveries }, (_, i) => i + 1).map(deliveryNum => (
+            <TouchableOpacity
+              key={deliveryNum}
+              style={[styles.deliveryTab, activeDelivery === deliveryNum && styles.deliveryTabActive]}
+              onPress={() => setActiveDelivery(deliveryNum)}>
+              <Text style={[styles.deliveryTabText, activeDelivery === deliveryNum && styles.deliveryTabTextActive]}>
+                Delivery {deliveryNum}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
         <Text style={styles.sectionTitle}>Selected Items</Text>
@@ -125,12 +149,23 @@ export default function SelectProducts() {
         ))}
 
         <Text style={styles.sectionTitle}>Available Products</Text>
-        {products.map(product => (
+        {availableProducts.map(product => (
           <View key={product.id} style={styles.availableProductCard}>
             <View style={styles.categoryBadge}>
               <Text style={styles.categoryText}>{product.category}</Text>
             </View>
             <View style={styles.productRow}>
+              {product.image ? (
+                <Image 
+                  source={{ uri: product.image }} 
+                  style={styles.productImage}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View style={styles.productImagePlaceholder}>
+                  <Icon source="image" size={24} color={Colors.grey[61]} />
+                </View>
+              )}
               <View style={styles.productInfo}>
                 <Text style={styles.productName}>{product.name}</Text>
                 <Text style={styles.productUnit}>{product.unit}</Text>
@@ -153,7 +188,26 @@ export default function SelectProducts() {
           mode="contained"
           style={[defaultStyles.button, defaultStyles.primaryButton]}
                     contentStyle={[defaultStyles.center]}
-          onPress={() => router.push('/(payment)/summary')}>
+          onPress={() => {
+            const subscriptionItems = selectedProducts.map(product => ({
+              productId: product.id,
+              quantity: product.quantity.toString(),
+              productName: product.name,
+              productUnitPrice: { value: product.price, currencyIsoCode: 'XAF' },
+              unitType: product.unit,
+              orderIndex: 0,
+            }));
+            
+            router.push({
+              pathname: '/(payment)/summary',
+              params: {
+                budget,
+                deliveries,
+                selectedProducts: JSON.stringify(selectedProducts),
+                subscriptionItems: JSON.stringify(subscriptionItems),
+              },
+            });
+          }}>
           <Text variant="titleMedium" style={defaultStyles?.buttonText}>
                       View Summary
                     </Text>

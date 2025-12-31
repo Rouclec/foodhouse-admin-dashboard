@@ -97,11 +97,6 @@ export default function CustomPackage() {
               <Icon source="plus" size={20} color={Colors.light[10]} />
             </TouchableOpacity>
           </View>
-          <View style={styles.pricePerDelivery}>
-            <Text style={styles.pricePerDeliveryText}>
-              {pricePerDelivery.toLocaleString()} XAF per delivery
-            </Text>
-          </View>
         </View>
 
         <View style={styles.summarySection}>
@@ -131,7 +126,15 @@ export default function CustomPackage() {
           mode="contained"
           style={[defaultStyles.button, defaultStyles.primaryButton]}
           contentStyle={[defaultStyles.center]}
-          onPress={() => router.push('/(payment)/select-products')}>
+          onPress={() => {
+            router.push({
+              pathname: '/(payment)/select-products',
+              params: {
+                budget: monthlyBudget.toString(),
+                deliveries: deliveries.toString(),
+              },
+            });
+          }}>
           <Text variant="titleMedium" style={defaultStyles?.buttonText}>
             Continue to Products
           </Text>

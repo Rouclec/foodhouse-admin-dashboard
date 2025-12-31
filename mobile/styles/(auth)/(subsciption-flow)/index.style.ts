@@ -155,6 +155,7 @@ export const selectionSubscriptionStyles = StyleSheet.create({
     width: 54,
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 4,
   },
   planBadgeText: {
     fontSize: 12,

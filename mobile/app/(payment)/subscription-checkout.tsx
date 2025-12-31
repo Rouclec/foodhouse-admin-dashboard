@@ -57,7 +57,9 @@ export default function SubscriptionCheckout() {
     if (!plan?.id) return;
     try {
       const result = await subscribe({
-        body: { subscriptionPlanId: plan.id },
+        body: {
+          subscriptionPlanId: plan.id,
+        },
         path: { userId: user?.userId ?? '' },
       });
 
@@ -109,7 +111,9 @@ export default function SubscriptionCheckout() {
             style={subscriptionCheckoutStyles.content}
             showsVerticalScrollIndicator={false}>
             <View style={subscriptionCheckoutStyles.section}>
-              <Text style={subscriptionCheckoutStyles.sectionTitle}>{i18n.t('(subscription).(order).order')}</Text>
+              <Text style={subscriptionCheckoutStyles.sectionTitle}>
+                {i18n.t('(subscription).(order).order')}
+              </Text>
               <View style={subscriptionCheckoutStyles.planCard}>
                 <View style={subscriptionCheckoutStyles.planBadge}>
                   <Text style={subscriptionCheckoutStyles.planBadgeText}>
@@ -129,7 +133,7 @@ export default function SubscriptionCheckout() {
                 <View style={subscriptionCheckoutStyles.planDetail}>
                   <Icon source="check" size={16} color={Colors.primary[500]} />
                   <Text style={subscriptionCheckoutStyles.planDetailText}>
-                    {plan.subscriptionItems?.length || 0} Categories
+                    {plan.subscriptionItems?.length || 0} Products
                   </Text>
                 </View>
                 <View style={subscriptionCheckoutStyles.planDetail}>
@@ -155,7 +159,7 @@ export default function SubscriptionCheckout() {
                 </View>
                 <View style={subscriptionCheckoutStyles.addressText}>
                   <Text style={subscriptionCheckoutStyles.addressTitle}>
-                   {i18n.t('(subscription).(order).Home')}
+                    {i18n.t('(subscription).(order).Home')}
                   </Text>
                   <Text style={subscriptionCheckoutStyles.addressSubtitle}>
                     {user?.address || '6140 Sunbrook Park, PC 5679'}
@@ -170,14 +174,15 @@ export default function SubscriptionCheckout() {
             <View style={subscriptionCheckoutStyles.deliveryNote}>
               <Text style={subscriptionCheckoutStyles.deliveryNoteText}>
                 {i18n.t('(subscription).(order).Desc1')}{' '}
-                {plan.estimatedDeliveryTimeDays || 10} {i18n.t('(subscription).(order).desc2')}
+                {plan.estimatedDeliveryTimeDays || 10}{' '}
+                {i18n.t('(subscription).(order).desc2')}
               </Text>
             </View>
 
             <View style={subscriptionCheckoutStyles.section}>
               <View style={subscriptionCheckoutStyles.summaryRow}>
                 <Text style={subscriptionCheckoutStyles.summaryLabel}>
-                 {i18n.t('(subscription).(order).Amount')}
+                  {i18n.t('(subscription).(order).Amount')}
                 </Text>
                 <Text style={subscriptionCheckoutStyles.summaryValue}>
                   {plan.amount?.value?.toLocaleString()}{' '}
@@ -197,19 +202,22 @@ export default function SubscriptionCheckout() {
                   {i18n.t('(subscription).(order).TransactionCharges')}
                 </Text>
                 <Text style={subscriptionCheckoutStyles.summaryValue}>
-                   {i18n.t('(subscription).(order).Free')}
+                  {i18n.t('(subscription).(order).Free')}
                 </Text>
               </View>
               <View style={subscriptionCheckoutStyles.summaryRow}>
                 <Text style={subscriptionCheckoutStyles.summaryLabel}>
-                   {i18n.t('(subscription).(order).ServiceFees')}
+                  {i18n.t('(subscription).(order).ServiceFees')}
                 </Text>
                 <Text style={subscriptionCheckoutStyles.summaryValue}>
-                   {i18n.t('(subscription).(order).Free')}
+                  {i18n.t('(subscription).(order).Free')}
                 </Text>
               </View>
               <View style={subscriptionCheckoutStyles.totalRow}>
-                <Text style={subscriptionCheckoutStyles.totalLabel}> {i18n.t('(subscription).(order).total')}</Text>
+                <Text style={subscriptionCheckoutStyles.totalLabel}>
+                  {' '}
+                  {i18n.t('(subscription).(order).total')}
+                </Text>
                 <Text style={subscriptionCheckoutStyles.totalValue}>
                   {plan.amount?.value?.toLocaleString()}{' '}
                   {plan.amount?.currencyIsoCode}
@@ -220,8 +228,10 @@ export default function SubscriptionCheckout() {
             <Button
               mode="contained"
               style={[defaultStyles.button, defaultStyles.primaryButton]}
-              onPress={handleSubscribe}>
-               {i18n.t('(subscription).(order).btn1')}
+              onPress={handleSubscribe}
+              loading={isSubscribing}
+              disabled={isSubscribing}>
+              {i18n.t('(subscription).(order).btn1')}
             </Button>
           </ScrollView>
         </View>
