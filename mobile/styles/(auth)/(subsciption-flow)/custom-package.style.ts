@@ -3,7 +3,6 @@ import { StyleSheet } from 'react-native';
 
 export const customPackageStyles = StyleSheet.create({
   appHeader: {
-    backgroundColor: Colors.light[10],
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -17,7 +16,6 @@ export const customPackageStyles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    // backgroundColor: Colors.light[10],
   },
   scrollContent: {
     padding: 18,
@@ -62,7 +60,6 @@ export const customPackageStyles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 16,
     marginBottom: 12,
-   
   },
   controlButton: {
     width: 52,
@@ -84,7 +81,7 @@ export const customPackageStyles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-   
+
     paddingVertical: 8,
   },
   valueText: {
@@ -163,7 +160,6 @@ export const customPackageStyles = StyleSheet.create({
     color: Colors.primary[500],
   },
   footer: {
-    backgroundColor: Colors.light[10],
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderTopWidth: 1,
