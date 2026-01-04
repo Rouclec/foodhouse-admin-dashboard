@@ -475,6 +475,19 @@
     "btn1": "Annuler",
     "btn2": "Commander maintenant"
   },
+  "(customPackage)": {
+    "header": "Créer un forfait personnalisé",
+    "title": "Créez votre forfait personnalisé",
+    "subtitle": "Définissez votre budget et vos livraisons pour commencer vos achats personnalisés",
+    "monthlyBudget": "Budget mensuel",
+    "deliveriesPerMonth": "Livraisons par mois",
+    "delivery": "Livraison",
+    "deliveries": "Livraisons",
+    "totalBudget": "Budget total",
+    "discount": "Remise",
+    "total": "Total",
+    "continueToProducts": "Continuer vers les produits"
+  },
   "(order)": {
     "checkout": "Paiement",
     "order": "Commande",
@@ -489,7 +502,33 @@
     "ServiceFees": "Frais de service",
     "btn1": "Confirmer le paiement",
     "total": "Total"
+  },
+  "(selectProducts)": {
+    "header": "Sélectionner les produits",
+    "budgetUsed": "Budget utilisé",
+    "remaining": "Restant",
+    "delivery": "Livraison",
+    "selectedItems": "Articles sélectionnés",
+    "availableProducts": "Produits disponibles",
+    "viewSummary": "Voir le résumé"
+  },
+  "(summary)": {
+    "header": "Résumé",
+    "customPackage": "Forfait personnalisé",
+    "items": "Articles",
+    "deliveries": "Livraisons",
+    "delivery": "Livraison",
+    "paymentSummary": "Résumé du paiement",
+    "amount": "Montant",
+    "free": "Gratuit",
+    "discount": "Remise (10%)",
+    "total": "Total",
+    "confirmPayment": "Confirmer le paiement"
+  },
+  "(paymentMethods)": {
+    "header": "Méthodes de paiement",
+    "description": "Pour continuer, veuillez ajouter vos méthodes de paiement.",
+    "next": "Suivant"
   }
 }
-
 }

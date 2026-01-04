@@ -8,6 +8,7 @@ import { productsListProductsOptions } from '@/client/products.swagger/@tanstack
 import { Context, ContextType } from '@/app/_layout';
 import { Colors } from '@/constants';
 import { Chase } from 'react-native-animated-spinkit';
+import i18n from '@/i18n';
 
 type Product = {
   id: string;
@@ -81,7 +82,7 @@ export default function SelectProducts() {
           <Icon source={'arrow-left'} size={24} color={Colors.dark[0]} />
         </TouchableOpacity>
         <Text variant="titleMedium" style={styles.headerTitle}>
-          Select Products
+          {i18n.t('(subscription).(selectProducts).header')}
         </Text>
         <View style={{ width: 64 }} />
       </Appbar.Header>
@@ -92,7 +93,7 @@ export default function SelectProducts() {
         showsVerticalScrollIndicator={false}>
         <View style={styles.budgetCard}>
           <View style={styles.budgetHeader}>
-            <Text style={styles.budgetLabel}>Budget Used</Text>
+            <Text style={styles.budgetLabel}>{i18n.t('(subscription).(selectProducts).budgetUsed')}</Text>
             <Text style={styles.budgetAmount}>
               {budgetUsed.toLocaleString()} / {totalBudget.toLocaleString()} XAF
             </Text>
@@ -106,7 +107,7 @@ export default function SelectProducts() {
             />
           </View>
           <Text style={styles.remainingText}>
-            Remaining: {remaining.toLocaleString()} XAF
+            {i18n.t('(subscription).(selectProducts).remaining')}: {remaining.toLocaleString()} XAF
           </Text>
         </View>
 
@@ -117,13 +118,13 @@ export default function SelectProducts() {
               style={[styles.deliveryTab, activeDelivery === deliveryNum && styles.deliveryTabActive]}
               onPress={() => setActiveDelivery(deliveryNum)}>
               <Text style={[styles.deliveryTabText, activeDelivery === deliveryNum && styles.deliveryTabTextActive]}>
-                Delivery {deliveryNum}
+                {i18n.t('(subscription).(selectProducts).delivery')} {deliveryNum}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
 
-        <Text style={styles.sectionTitle}>Selected Items</Text>
+        <Text style={styles.sectionTitle}>{i18n.t('(subscription).(selectProducts).selectedItems')}</Text>
         {selectedProducts.map(product => (
           <View key={product.id} style={styles.productCard}>
             <View style={styles.productInfo}>
@@ -148,7 +149,7 @@ export default function SelectProducts() {
           </View>
         ))}
 
-        <Text style={styles.sectionTitle}>Available Products</Text>
+        <Text style={styles.sectionTitle}>{i18n.t('(subscription).(selectProducts).availableProducts')}</Text>
         {availableProducts.map(product => (
           <View key={product.id} style={styles.availableProductCard}>
             <View style={styles.categoryBadge}>
@@ -209,7 +210,7 @@ export default function SelectProducts() {
             });
           }}>
           <Text variant="titleMedium" style={defaultStyles?.buttonText}>
-                      View Summary
+                      {i18n.t('(subscription).(selectProducts).viewSummary')}
                     </Text>
         </Button>
       </SafeAreaView>

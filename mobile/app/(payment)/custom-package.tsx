@@ -4,6 +4,7 @@ import { defaultStyles, customPackageStyles as styles } from '@/styles';
 import { Text, Button, Icon, Appbar } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants';
+import i18n from '@/i18n';
 
 export default function CustomPackage() {
   const [monthlyBudget, setMonthlyBudget] = useState(75000);
@@ -24,7 +25,7 @@ export default function CustomPackage() {
           <Icon source={'arrow-left'} size={24} color={Colors.dark[0]} />
         </TouchableOpacity>
         <Text variant="titleMedium" style={styles.headerTitle}>
-          Build Custom Package
+          {i18n.t('(subscription).(customPackage).header')}
         </Text>
         <View style={{ width: 64 }} />
       </Appbar.Header>
@@ -35,16 +36,15 @@ export default function CustomPackage() {
         showsVerticalScrollIndicator={false}>
         <View style={styles.headerCard}>
           <Text variant="titleMedium" style={styles.headerCardTitle}>
-            Build Your Custom Package
+            {i18n.t('(subscription).(customPackage).title')}
           </Text>
           <Text style={styles.headerCardSubtitle}>
-            Set your budget and deliveries to get started with personalized
-            shopping
+            {i18n.t('(subscription).(customPackage).subtitle')}
           </Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Monthly Budget</Text>
+          <Text style={styles.sectionTitle}>{i18n.t('(subscription).(customPackage).monthlyBudget')}</Text>
           <View style={styles.controlRow}>
             <TouchableOpacity
               style={styles.controlButton}
@@ -78,7 +78,7 @@ export default function CustomPackage() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Deliveries Per Month</Text>
+          <Text style={styles.sectionTitle}>{i18n.t('(subscription).(customPackage).deliveriesPerMonth')}</Text>
           <View style={styles.controlRow}>
             <TouchableOpacity
               style={styles.controlButton}
@@ -88,7 +88,7 @@ export default function CustomPackage() {
             <View style={styles.valueContainer}>
               <Text style={styles.valueText}>{deliveries}</Text>
               <Text style={styles.valueSubtext}>
-                {deliveries === 1 ? 'Delivery' : 'Deliveries'}
+                {deliveries === 1 ? i18n.t('(subscription).(customPackage).delivery') : i18n.t('(subscription).(customPackage).deliveries')}
               </Text>
             </View>
             <TouchableOpacity
@@ -101,21 +101,21 @@ export default function CustomPackage() {
 
         <View style={styles.summarySection}>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Total Budget</Text>
+            <Text style={styles.summaryLabel}>{i18n.t('(subscription).(customPackage).totalBudget')}</Text>
             <Text style={styles.summaryValue}>
               {totalBudget.toLocaleString()} XAF
             </Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Deliveries</Text>
+            <Text style={styles.summaryLabel}>{i18n.t('(subscription).(customPackage).deliveries')}</Text>
             <Text style={styles.summaryValue}>{deliveries}x per month</Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Discount</Text>
+            <Text style={styles.summaryLabel}>{i18n.t('(subscription).(customPackage).discount')}</Text>
             <Text style={styles.summaryValue}>10% off</Text>
           </View>
           <View style={[styles.summaryRow, styles.totalRow]}>
-            <Text style={styles.totalLabel}>Total</Text>
+            <Text style={styles.totalLabel}>{i18n.t('(subscription).(customPackage).total')}</Text>
             <Text style={styles.totalValue}>{total.toLocaleString()} XAF</Text>
           </View>
         </View>
@@ -136,7 +136,7 @@ export default function CustomPackage() {
             });
           }}>
           <Text variant="titleMedium" style={defaultStyles?.buttonText}>
-            Continue to Products
+            {i18n.t('(subscription).(customPackage).continueToProducts')}
           </Text>
         </Button>
       </SafeAreaView>

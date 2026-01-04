@@ -8,6 +8,7 @@ import { ordersCreateCustomSubscriptionMutation } from '@/client/orders.swagger/
 import { Context, ContextType } from '@/app/_layout';
 import { Colors } from '@/constants';
 import { typesAmount } from '@/client/orders.swagger';
+import i18n from '@/i18n';
 
 export default function Summary() {
   const router = useRouter();
@@ -78,7 +79,7 @@ export default function Summary() {
           <Icon source={'arrow-left'} size={24} color={Colors.dark[0]} />
         </TouchableOpacity>
         <Text variant="titleMedium" style={styles.headerTitle}>
-          Summary
+          {i18n.t('(subscription).(summary).header')}
         </Text>
         <View style={{ width: 64 }} />
       </Appbar.Header>
@@ -88,19 +89,19 @@ export default function Summary() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <View style={styles.packageCard}>
-          <Text style={styles.packageTitle}>Custom Package</Text>
+          <Text style={styles.packageTitle}>{i18n.t('(subscription).(summary).customPackage')}</Text>
           <View style={styles.packageDetails}>
-            <Text style={styles.packageDetailText}>{products.reduce((sum: number, p: any) => sum + p.quantity, 0)} Items</Text>
+            <Text style={styles.packageDetailText}>{products.reduce((sum: number, p: any) => sum + p.quantity, 0)} {i18n.t('(subscription).(summary).items')}</Text>
             <View style={styles.packageDivider} />
             <Icon source="truck-delivery" size={16} color={Colors.light[10]} />
-            <Text style={styles.packageDetailText}>{numDeliveries} Deliveries</Text>
+            <Text style={styles.packageDetailText}>{numDeliveries} {i18n.t('(subscription).(summary).deliveries')}</Text>
           </View>
         </View>
 
         {deliveriesData.map(delivery => (
           <View key={delivery.id} style={styles.deliverySection}>
             <View style={styles.deliveryHeader}>
-              <Text style={styles.deliveryTitle}>Delivery {delivery.id}</Text>
+              <Text style={styles.deliveryTitle}>{i18n.t('(subscription).(summary).delivery')} {delivery.id}</Text>
               <Text style={styles.deliveryTotal}>
                 {delivery.total.toLocaleString()} XAF
               </Text>
@@ -120,25 +121,25 @@ export default function Summary() {
         ))}
 
         <View style={styles.paymentSection}>
-          <Text style={styles.paymentTitle}>Payment Summary</Text>
+          <Text style={styles.paymentTitle}>{i18n.t('(subscription).(summary).paymentSummary')}</Text>
           <View style={styles.paymentRow}>
-            <Text style={styles.paymentLabel}>Amount</Text>
+            <Text style={styles.paymentLabel}>{i18n.t('(subscription).(summary).amount')}</Text>
             <Text style={styles.paymentValue}>
               {amount.toLocaleString()} XAF
             </Text>
           </View>
           <View style={styles.paymentRow}>
-            <Text style={styles.paymentLabel}>Delivery</Text>
-            <Text style={styles.paymentValueFree}>Free</Text>
+            <Text style={styles.paymentLabel}>{i18n.t('(subscription).(order).Delivery')}</Text>
+            <Text style={styles.paymentValueFree}>{i18n.t('(subscription).(summary).free')}</Text>
           </View>
           <View style={styles.paymentRow}>
-            <Text style={styles.paymentLabel}>Discount (10%)</Text>
+            <Text style={styles.paymentLabel}>{i18n.t('(subscription).(summary).discount')}</Text>
             <Text style={styles.paymentValueDiscount}>
               -{discount.toLocaleString()} XAF
             </Text>
           </View>
           <View style={[styles.paymentRow, styles.totalRow]}>
-            <Text style={styles.totalLabel}>Total</Text>
+            <Text style={styles.totalLabel}>{i18n.t('(subscription).(summary).total')}</Text>
             <Text style={styles.totalValue}>{total.toLocaleString()} XAF</Text>
           </View>
         </View>
@@ -153,7 +154,7 @@ export default function Summary() {
           loading={isPending}
           disabled={isPending}>
           <Text variant="titleMedium" style={defaultStyles?.buttonText}>
-            Confirm Payment
+            {i18n.t('(subscription).(summary).confirmPayment')}
           </Text>
         </Button>
       </SafeAreaView>

@@ -461,6 +461,19 @@
     "CustomizeButton": "Start Customizing",
     "choosePlan": "Choose Your Plan",
     "choosePlandesc": "Pick a ready-made package based on your needs",
+    "(customPackage)": {
+      "header": "Build Custom Package",
+      "title": "Build Your Custom Package",
+      "subtitle": "Set your budget and deliveries to get started with personalized shopping",
+      "monthlyBudget": "Monthly Budget",
+      "deliveriesPerMonth": "Deliveries Per Month",
+      "delivery": "Delivery",
+      "deliveries": "Deliveries",
+      "totalBudget": "Total Budget",
+      "discount": "Discount",
+      "total": "Total",
+      "continueToProducts": "Continue to Products"
+    },
     "(packageDetails)": {
       "header": "Package Details",
       "order": "Order",
@@ -485,6 +498,33 @@
       "ServiceFees": "Service Fee",
       "btn1": "Confirm Payment",
       "total": "Total"
+    },
+    "(selectProducts)": {
+      "header": "Select Products",
+      "budgetUsed": "Budget Used",
+      "remaining": "Remaining",
+      "delivery": "Delivery",
+      "selectedItems": "Selected Items",
+      "availableProducts": "Available Products",
+      "viewSummary": "View Summary"
+    },
+    "(summary)": {
+      "header": "Summary",
+      "customPackage": "Custom Package",
+      "items": "Items",
+      "deliveries": "Deliveries",
+      "delivery": "Delivery",
+      "paymentSummary": "Payment Summary",
+      "amount": "Amount",
+      "free": "Free",
+      "discount": "Discount (10%)",
+      "total": "Total",
+      "confirmPayment": "Confirm Payment"
+    },
+    "(paymentMethods)": {
+      "header": "Payment Methods",
+      "description": "To proceed, please add your payment methods.",
+      "next": "Next"
     }
     }
 }
