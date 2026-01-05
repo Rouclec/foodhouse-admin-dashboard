@@ -274,42 +274,29 @@ export const buyerProductsStyles = StyleSheet.create({
     width: screenWidth * 0.60,
     backgroundColor: Colors.grey['200'],
     borderRadius: 10,
-    padding: 15,
-    marginHorizontal: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
     borderWidth: 1,
-    borderColor: Colors.secondary['100']
+    borderColor: Colors.secondary['100'],
   },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  discountBadge: {
-    backgroundColor: Colors.primary['500'],
-    borderRadius: 24,
-    height: 26,
-    width: 54,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 4,
-  },
-
-  discountText: {
-    fontSize: 12,
-    color: Colors.light['10'],
-  },
-  tierTitle: {
+  packageTitle: {
+    flex: 1,
     fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 15,
+    fontWeight: '600',
+    marginRight: 10,
   },
-  detailsRow: {
+  packageRight: {
     flexDirection: 'row',
-    justifyContent: 'space-between', // Aligns content to opposite sides
     alignItems: 'center',
-    marginBottom: 8,
+    columnGap: 6,
+    flexShrink: 0,
+  },
+  packageAmount: {
+    fontWeight: '700',
+    fontSize: 14,
   },
   categoryInfo: {
     flexDirection: 'row',
@@ -319,10 +306,7 @@ export const buyerProductsStyles = StyleSheet.create({
     marginLeft: 5,
     fontSize: 14,
   },
-  amountText: {
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
+  // amountText: { fontWeight: 'bold', fontSize: 14 },
 
   title1: {
     marginTop: 18,

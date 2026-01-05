@@ -201,9 +201,9 @@ export default function SelectProducts() {
         <Text style={styles.sectionTitle}>{i18n.t('(subscription).(selectProducts).availableProducts')}</Text>
         {availableProducts.map(product => (
           <View key={product.id} style={styles.availableProductCard}>
-            <View style={styles.categoryBadge}>
+            {/* <View style={styles.categoryBadge}>
               <Text style={styles.categoryText}>{product.category}</Text>
-            </View>
+            </View> */}
             <View style={styles.productRow}>
               {product.image ? (
                 <Image
@@ -218,9 +218,8 @@ export default function SelectProducts() {
               )}
               <View style={styles.productInfo}>
                 <Text style={styles.productName}>{product.name}</Text>
-                <Text style={styles.productUnit}>{product.unit}</Text>
                 <Text style={styles.productPriceGreen}>
-                  {product.price.toLocaleString()} XAF
+                  {product.price.toLocaleString()} XAF / <Text style={styles.productUnit}>{product.unit.replace("per_", "")}</Text>
                 </Text>
               </View>
               {(() => {

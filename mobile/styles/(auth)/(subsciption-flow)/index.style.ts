@@ -25,6 +25,12 @@ export const selectionSubscriptionStyles = StyleSheet.create({
     position: 'relative',
     minHeight: 200,
   },
+  backButtonSafeArea: {
+    position: 'absolute',
+    top: 0,
+    left: 8,
+    zIndex: 2,
+  },
   headerTextContainer: {
     zIndex: 1,
     paddingRight: 100,

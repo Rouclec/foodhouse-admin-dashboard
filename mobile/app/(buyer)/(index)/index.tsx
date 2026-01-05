@@ -197,23 +197,19 @@ export default function BuyerProducts() {
         })
       }>
       <View style={styles.packageContainer}>
-        <View style={styles.headerRow}>
-          <View style={styles.discountBadge}>
-            <Text style={styles.discountText}>
-              {item.description || 'Special Offer'}
-            </Text>
-          </View>
-          <Icon source="chevron-right" size={24} color={Colors.primary[500]} />
-        </View>
- <View style={styles.detailsRow}>
-   <Text style={styles.tierTitle}>{item.title}</Text>
-   <Text style={[styles.amountText, { color: Colors.primary['500'] }]}>
-            {item.amount?.value?.toLocaleString()}{' '}
-            {item.amount?.currencyIsoCode}
-          </Text>
+        <Text style={styles.packageTitle} numberOfLines={1} ellipsizeMode="tail">
+          {item.title}
+        </Text>
 
- </View>
-        
+        <View style={styles.packageRight}>
+          <Text style={[styles.packageAmount, { color: Colors.primary['500'] }]}>
+            {item.amount?.value != null
+              ? `${item.amount.value.toLocaleString()} ${item.amount.currencyIsoCode ?? ''
+                }`.trim()
+              : ''}
+          </Text>
+          <Icon source="chevron-right" size={20} color={Colors.primary[500]} />
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -255,8 +251,8 @@ export default function BuyerProducts() {
                         {HOUR_OF_DAY < 12
                           ? i18n.t('(buyer).(index).products.goodMorning')
                           : HOUR_OF_DAY < 17
-                          ? i18n.t('(buyer).(index).products.goodAfternoon')
-                          : i18n.t('(buyer).(index).products.goodEvening')}{' '}
+                            ? i18n.t('(buyer).(index).products.goodAfternoon')
+                            : i18n.t('(buyer).(index).products.goodEvening')}{' '}
                         👋
                       </Text>
                       <Text style={styles.nameText} variant="titleLarge">
@@ -339,7 +335,7 @@ export default function BuyerProducts() {
               </View>
             </SafeAreaView>
           </View>
-         
+
 
           <View style={styles.subscriptionContainer}>
             <View style={styles.package}>
@@ -406,7 +402,7 @@ export default function BuyerProducts() {
                       style={[
                         styles.categoryItem,
                         selectedCategoryId === item?.id &&
-                          styles.selectedCategoryItem,
+                        styles.selectedCategoryItem,
                       ]}
                       onPress={() => setSelectedCategoryId(item?.id)}>
                       <Text
@@ -525,7 +521,7 @@ export default function BuyerProducts() {
                         style={[
                           styles.categoryItem,
                           !filterSelectedCategoryId &&
-                            styles.selectedCategoryItem,
+                          styles.selectedCategoryItem,
                         ]}
                         onPress={() => setFilterSelectedCategoryId(undefined)}>
                         <Text
@@ -544,7 +540,7 @@ export default function BuyerProducts() {
                           style={[
                             styles.categoryItem,
                             filterSelectedCategoryId === item?.id &&
-                              styles.selectedCategoryItem,
+                            styles.selectedCategoryItem,
                           ]}
                           onPress={() => setFilterSelectedCategoryId(item?.id)}>
                           <Text
@@ -568,7 +564,7 @@ export default function BuyerProducts() {
                 {i18n.t('(buyer).(index).products.priceRange')}
               </Text>
               <MultiSlider
-                onValuesChangeStart={() => {}}
+                onValuesChangeStart={() => { }}
                 onValuesChangeFinish={e => {
                   setFilterSelectedMinValue(e[0].toString());
                   setFilterSelectedMaxValue(e[1].toString());
@@ -658,7 +654,7 @@ export default function BuyerProducts() {
                         style={[
                           styles.categoryItem,
                           filterSelectedRating === item &&
-                            styles.selectedCategoryItem,
+                          styles.selectedCategoryItem,
                         ]}
                         onPress={() => setFilterSelectedRating(item)}>
                         <Icon
