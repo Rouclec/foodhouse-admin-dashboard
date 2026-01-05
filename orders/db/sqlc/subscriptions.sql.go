@@ -466,7 +466,7 @@ func (q *Queries) ListAllActiveUserSubscriptions(ctx context.Context) ([]ListAll
 
 const listOrdersDueSoon = `-- name: ListOrdersDueSoon :many
 SELECT 
-    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date,
+    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.service_fee_amount, o.service_fee_currency, o.user_subscription_id, o.expected_delivery_date,
     COALESCE(oi_count.total_items, 0)::int AS total_items,
     oi_preview.product AS preview_product,
     oi_preview.quantity AS preview_quantity
@@ -508,6 +508,8 @@ type ListOrdersDueSoonRow struct {
 	DispatchedBy         *string            `json:"dispatched_by"`
 	DeliveryFeeAmount    *float64           `json:"delivery_fee_amount"`
 	DeliveryFeeCurrency  *string            `json:"delivery_fee_currency"`
+	ServiceFeeAmount     float64            `json:"service_fee_amount"`
+	ServiceFeeCurrency   string             `json:"service_fee_currency"`
 	UserSubscriptionID   *int64             `json:"user_subscription_id"`
 	ExpectedDeliveryDate pgtype.Timestamptz `json:"expected_delivery_date"`
 	TotalItems           int32              `json:"total_items"`
@@ -542,6 +544,8 @@ func (q *Queries) ListOrdersDueSoon(ctx context.Context, days int32) ([]ListOrde
 			&i.DispatchedBy,
 			&i.DeliveryFeeAmount,
 			&i.DeliveryFeeCurrency,
+			&i.ServiceFeeAmount,
+			&i.ServiceFeeCurrency,
 			&i.UserSubscriptionID,
 			&i.ExpectedDeliveryDate,
 			&i.TotalItems,
@@ -559,7 +563,13 @@ func (q *Queries) ListOrdersDueSoon(ctx context.Context, days int32) ([]ListOrde
 }
 
 const listSubsriptions = `-- name: ListSubsriptions :many
-SELECT id, title, description, duration, amount, currency_iso_code, created_at, updated_at, estimated_delivery_time FROM subscriptions WHERE NOT (lower(title) = 'custom subscription' AND description LIKE 'Custom subscription for user %') ORDER BY amount ASC
+SELECT id, title, description, duration, amount, currency_iso_code, created_at, updated_at, estimated_delivery_time
+FROM subscriptions
+WHERE NOT (
+  lower(title) = 'custom subscription'
+  AND description LIKE 'Custom subscription for user %'
+)
+ORDER BY amount ASC
 `
 
 func (q *Queries) ListSubsriptions(ctx context.Context) ([]Subscription, error) {

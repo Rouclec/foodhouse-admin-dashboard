@@ -97,6 +97,10 @@ func SqlcOrderBySecretKeyToProto(order sqlc.GetUserOrderBySecretKeyRow) *ordersg
 			Value:           derefFloat(order.DeliveryFeeAmount),
 			CurrencyIsoCode: derefString(order.DeliveryFeeCurrency),
 		},
+		ServiceFee: &types.Amount{
+			Value:           order.ServiceFeeAmount,
+			CurrencyIsoCode: order.ServiceFeeCurrency,
+		},
 		OrderItems: items,
 	}
 }
@@ -178,6 +182,10 @@ func SqlcOrderByNumberToProto(order sqlc.GetOrderByOrderNumberRow, logger zerolo
 			Value:           derefFloat(order.DeliveryFeeAmount),
 			CurrencyIsoCode: derefString(order.DeliveryFeeCurrency),
 		},
+		ServiceFee: &types.Amount{
+			Value:           order.ServiceFeeAmount,
+			CurrencyIsoCode: order.ServiceFeeCurrency,
+		},
 		OrderItems: items,
 	}
 }
@@ -244,6 +252,10 @@ func SqlcOrderRowToProto(order sqlc.ListOrdersRow) *ordersgrpc.Order {
 		DeliveryFee: &types.Amount{
 			Value:           derefFloat(order.DeliveryFeeAmount),
 			CurrencyIsoCode: derefString(order.DeliveryFeeCurrency),
+		},
+		ServiceFee: &types.Amount{
+			Value:           order.ServiceFeeAmount,
+			CurrencyIsoCode: order.ServiceFeeCurrency,
 		},
 		TotalItems: order.TotalItems,
 		OrderItems: previewItems,
@@ -313,6 +325,10 @@ func SqlcUserOrderRowToProto(order sqlc.ListUserOrdersRow) *ordersgrpc.Order {
 			Value:           derefFloat(order.DeliveryFeeAmount),
 			CurrencyIsoCode: derefString(order.DeliveryFeeCurrency),
 		},
+		ServiceFee: &types.Amount{
+			Value:           order.ServiceFeeAmount,
+			CurrencyIsoCode: order.ServiceFeeCurrency,
+		},
 		TotalItems: order.TotalItems,
 		OrderItems: previewItems,
 	}
@@ -381,6 +397,10 @@ func SqlcFarmerOrderRowToProto(order sqlc.ListFarmerOrdersRow) *ordersgrpc.Order
 			Value:           derefFloat(order.DeliveryFeeAmount),
 			CurrencyIsoCode: derefString(order.DeliveryFeeCurrency),
 		},
+		ServiceFee: &types.Amount{
+			Value:           order.ServiceFeeAmount,
+			CurrencyIsoCode: order.ServiceFeeCurrency,
+		},
 		TotalItems: order.TotalItems,
 		OrderItems: previewItems,
 	}
@@ -437,6 +457,10 @@ func SqlcOrderToProto(order sqlc.Order) *ordersgrpc.Order {
 		DeliveryFee: &types.Amount{
 			Value:           derefFloat(order.DeliveryFeeAmount),
 			CurrencyIsoCode: derefString(order.DeliveryFeeCurrency),
+		},
+		ServiceFee: &types.Amount{
+			Value:           order.ServiceFeeAmount,
+			CurrencyIsoCode: order.ServiceFeeCurrency,
 		},
 	}
 }

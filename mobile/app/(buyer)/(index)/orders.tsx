@@ -104,7 +104,8 @@ const OrderItem: FC<OrderItemProps> = ({ item, onPress }) => {
             {formatCurrency(
               (
                 Number(item?.sumTotal?.value ?? 0) +
-                Number(item?.deliveryFee?.value ?? 0)
+                Number(item?.deliveryFee?.value ?? 0) +
+                Number(item?.serviceFee?.value ?? 0)
               ).toFixed(2),
               item?.sumTotal?.currencyIsoCode ?? '',
             )}

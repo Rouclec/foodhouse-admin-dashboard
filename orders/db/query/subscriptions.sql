@@ -82,7 +82,7 @@ SELECT * FROM user_subscriptions WHERE user_id = $1 ORDER BY created_at DESC;
 
 -- name: ListOrdersDueSoon :many
 SELECT 
-    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date,
+    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.service_fee_amount, o.service_fee_currency, o.user_subscription_id, o.expected_delivery_date,
     COALESCE(oi_count.total_items, 0)::int AS total_items,
     oi_preview.product AS preview_product,
     oi_preview.quantity AS preview_quantity

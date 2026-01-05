@@ -49,6 +49,8 @@ type Order struct {
 	DeliveryFeeCurrency  *string            `json:"delivery_fee_currency"`
 	UserSubscriptionID   *int64             `json:"user_subscription_id"`
 	ExpectedDeliveryDate pgtype.Timestamptz `json:"expected_delivery_date"`
+	ServiceFeeAmount     float64            `json:"service_fee_amount"`
+	ServiceFeeCurrency   string             `json:"service_fee_currency"`
 }
 
 type OrderItem struct {

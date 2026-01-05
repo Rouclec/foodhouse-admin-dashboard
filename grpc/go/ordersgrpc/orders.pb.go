@@ -460,8 +460,10 @@ type Order struct {
 	TotalItems           int32                  `protobuf:"varint,16,opt,name=total_items,json=totalItems,proto3" json:"total_items,omitempty"`
 	UserSubscriptionId   *string                `protobuf:"bytes,17,opt,name=user_subscription_id,json=userSubscriptionId,proto3,oneof" json:"user_subscription_id,omitempty"`
 	ExpectedDeliveryDate *timestamppb.Timestamp `protobuf:"bytes,18,opt,name=expected_delivery_date,json=expectedDeliveryDate,proto3,oneof" json:"expected_delivery_date,omitempty"`
-	unknownFields        protoimpl.UnknownFields
-	sizeCache            protoimpl.SizeCache
+	// Flat platform fee charged on the order (excluded from farmer payout).
+	ServiceFee    *types.Amount `protobuf:"bytes,19,opt,name=service_fee,json=serviceFee,proto3" json:"service_fee,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Order) Reset() {
@@ -616,6 +618,13 @@ func (x *Order) GetUserSubscriptionId() string {
 func (x *Order) GetExpectedDeliveryDate() *timestamppb.Timestamp {
 	if x != nil {
 		return x.ExpectedDeliveryDate
+	}
+	return nil
+}
+
+func (x *Order) GetServiceFee() *types.Amount {
+	if x != nil {
+		return x.ServiceFee
 	}
 	return nil
 }
@@ -5280,7 +5289,7 @@ var file_orders_proto_rawDesc = []byte{
 	0x74, 0x79, 0x70, 0x65, 0x73, 0x2e, 0x41, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x52, 0x10, 0x70, 0x72,
 	0x6f, 0x64, 0x75, 0x63, 0x74, 0x55, 0x6e, 0x69, 0x74, 0x50, 0x72, 0x69, 0x63, 0x65, 0x12, 0x1b,
 	0x0a, 0x09, 0x75, 0x6e, 0x69, 0x74, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x18, 0x07, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x08, 0x75, 0x6e, 0x69, 0x74, 0x54, 0x79, 0x70, 0x65, 0x22, 0xed, 0x06, 0x0a, 0x05,
+	0x09, 0x52, 0x08, 0x75, 0x6e, 0x69, 0x74, 0x54, 0x79, 0x70, 0x65, 0x22, 0x9d, 0x07, 0x0a, 0x05,
 	0x4f, 0x72, 0x64, 0x65, 0x72, 0x12, 0x21, 0x0a, 0x0c, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x5f, 0x6e,
 	0x75, 0x6d, 0x62, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x6f, 0x72, 0x64,
 	0x65, 0x72, 0x4e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x12, 0x39, 0x0a, 0x11, 0x64, 0x65, 0x6c, 0x69,
@@ -5332,7 +5341,10 @@ var file_orders_proto_rawDesc = []byte{
 	0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
 	0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x48, 0x01, 0x52, 0x14,
 	0x65, 0x78, 0x70, 0x65, 0x63, 0x74, 0x65, 0x64, 0x44, 0x65, 0x6c, 0x69, 0x76, 0x65, 0x72, 0x79,
-	0x44, 0x61, 0x74, 0x65, 0x88, 0x01, 0x01, 0x42, 0x17, 0x0a, 0x15, 0x5f, 0x75, 0x73, 0x65, 0x72,
+	0x44, 0x61, 0x74, 0x65, 0x88, 0x01, 0x01, 0x12, 0x2e, 0x0a, 0x0b, 0x73, 0x65, 0x72, 0x76, 0x69,
+	0x63, 0x65, 0x5f, 0x66, 0x65, 0x65, 0x18, 0x13, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x74,
+	0x79, 0x70, 0x65, 0x73, 0x2e, 0x41, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x52, 0x0a, 0x73, 0x65, 0x72,
+	0x76, 0x69, 0x63, 0x65, 0x46, 0x65, 0x65, 0x42, 0x17, 0x0a, 0x15, 0x5f, 0x75, 0x73, 0x65, 0x72,
 	0x5f, 0x73, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64,
 	0x42, 0x19, 0x0a, 0x17, 0x5f, 0x65, 0x78, 0x70, 0x65, 0x63, 0x74, 0x65, 0x64, 0x5f, 0x64, 0x65,
 	0x6c, 0x69, 0x76, 0x65, 0x72, 0x79, 0x5f, 0x64, 0x61, 0x74, 0x65, 0x22, 0xe3, 0x01, 0x0a, 0x0d,
@@ -6580,157 +6592,158 @@ var file_orders_proto_depIdxs = []int32{
 	88,  // 6: ordersgrpc.Order.updated_at:type_name -> google.protobuf.Timestamp
 	86,  // 7: ordersgrpc.Order.delivery_fee:type_name -> types.Amount
 	88,  // 8: ordersgrpc.Order.expected_delivery_date:type_name -> google.protobuf.Timestamp
-	88,  // 9: ordersgrpc.OrderAuditLog.timestamp:type_name -> google.protobuf.Timestamp
-	7,   // 10: ordersgrpc.OrderAuditLog.before:type_name -> ordersgrpc.Order
-	7,   // 11: ordersgrpc.OrderAuditLog.after:type_name -> ordersgrpc.Order
-	6,   // 12: ordersgrpc.CreateOrderRequest.order_items:type_name -> ordersgrpc.OrderItem
-	87,  // 13: ordersgrpc.CreateOrderRequest.delivery_location:type_name -> types.Point
-	7,   // 14: ordersgrpc.CreateOrderResponse.order:type_name -> ordersgrpc.Order
-	7,   // 15: ordersgrpc.GetOrderDetailsResponse.order:type_name -> ordersgrpc.Order
-	8,   // 16: ordersgrpc.GetOrderDetailsResponse.audit_log:type_name -> ordersgrpc.OrderAuditLog
-	3,   // 17: ordersgrpc.Account.payment_method:type_name -> ordersgrpc.PaymentMethodType
-	2,   // 18: ordersgrpc.Payment.payment_entity:type_name -> ordersgrpc.PaymentEntity
-	86,  // 19: ordersgrpc.Payment.amount:type_name -> types.Amount
-	88,  // 20: ordersgrpc.Payment.created_at:type_name -> google.protobuf.Timestamp
-	88,  // 21: ordersgrpc.Payment.expires_at:type_name -> google.protobuf.Timestamp
-	88,  // 22: ordersgrpc.Payment.updated_at:type_name -> google.protobuf.Timestamp
-	1,   // 23: ordersgrpc.Payment.status:type_name -> ordersgrpc.PaymentStatus
-	13,  // 24: ordersgrpc.Payment.account:type_name -> ordersgrpc.Account
-	4,   // 25: ordersgrpc.Payment.type:type_name -> ordersgrpc.PaymentType
-	2,   // 26: ordersgrpc.InitiatePaymentRequest.payment_entity:type_name -> ordersgrpc.PaymentEntity
-	86,  // 27: ordersgrpc.InitiatePaymentRequest.amount:type_name -> types.Amount
-	13,  // 28: ordersgrpc.InitiatePaymentRequest.account:type_name -> ordersgrpc.Account
-	14,  // 29: ordersgrpc.InitiatePaymentResponse.payment:type_name -> ordersgrpc.Payment
-	1,   // 30: ordersgrpc.ListPaymentsRequest.payment_status:type_name -> ordersgrpc.PaymentStatus
-	2,   // 31: ordersgrpc.ListPaymentsRequest.payment_entity:type_name -> ordersgrpc.PaymentEntity
-	4,   // 32: ordersgrpc.ListPaymentsRequest.payment_type:type_name -> ordersgrpc.PaymentType
-	14,  // 33: ordersgrpc.ListPaymentsResponse.payments:type_name -> ordersgrpc.Payment
-	87,  // 34: ordersgrpc.DeliveryPoint.address:type_name -> types.Point
-	88,  // 35: ordersgrpc.DeliveryPoint.created_at:type_name -> google.protobuf.Timestamp
-	87,  // 36: ordersgrpc.CreateDeliveryPointRequest.address:type_name -> types.Point
-	29,  // 37: ordersgrpc.CreateDeliveryPointResponse.delivery_point:type_name -> ordersgrpc.DeliveryPoint
-	87,  // 38: ordersgrpc.UpdateDeliveryPointRequest.address:type_name -> types.Point
-	29,  // 39: ordersgrpc.ListDeliveryPointsResponse.delivery_points:type_name -> ordersgrpc.DeliveryPoint
-	0,   // 40: ordersgrpc.ListUserOrdersRequest.statuses:type_name -> ordersgrpc.OrderStatus
-	7,   // 41: ordersgrpc.ListUserOrdersResponse.orders:type_name -> ordersgrpc.Order
-	0,   // 42: ordersgrpc.ListFarmerOrdersRequest.statuses:type_name -> ordersgrpc.OrderStatus
-	7,   // 43: ordersgrpc.ListFarmerOrdersResponse.orders:type_name -> ordersgrpc.Order
-	0,   // 44: ordersgrpc.ListOrdersRequest.statuses:type_name -> ordersgrpc.OrderStatus
-	7,   // 45: ordersgrpc.ListOrdersResponse.orders:type_name -> ordersgrpc.Order
-	1,   // 46: ordersgrpc.CheckPaymentStatusResponse.status:type_name -> ordersgrpc.PaymentStatus
-	5,   // 47: ordersgrpc.GetFarmerEarningsRequest.filter:type_name -> ordersgrpc.FilterType
-	51,  // 48: ordersgrpc.GetFarmerEarningsResponse.data:type_name -> ordersgrpc.FarmerEarningsData
-	53,  // 49: ordersgrpc.GetAdminStatsResponse.data:type_name -> ordersgrpc.StatItem
-	86,  // 50: ordersgrpc.Commission.commission_amount:type_name -> types.Amount
-	88,  // 51: ordersgrpc.Commission.paid_at:type_name -> google.protobuf.Timestamp
-	88,  // 52: ordersgrpc.Commission.created_at:type_name -> google.protobuf.Timestamp
-	56,  // 53: ordersgrpc.ListCommissionsByReferrerResponse.commissions:type_name -> ordersgrpc.Commission
-	86,  // 54: ordersgrpc.ListTotalCommissionAmountByReferrerResponse.commissions:type_name -> types.Amount
-	6,   // 55: ordersgrpc.EstimateDeliveryFeeRequest.order_items:type_name -> ordersgrpc.OrderItem
-	87,  // 56: ordersgrpc.EstimateDeliveryFeeRequest.delivery_location:type_name -> types.Point
-	86,  // 57: ordersgrpc.EstimateDeliveryFeeResponse.estimated_delivery_fee:type_name -> types.Amount
-	86,  // 58: ordersgrpc.SubscriptionItem.product_unit_price:type_name -> types.Amount
-	86,  // 59: ordersgrpc.Subscription.amount:type_name -> types.Amount
-	65,  // 60: ordersgrpc.Subscription.subscription_items:type_name -> ordersgrpc.SubscriptionItem
-	88,  // 61: ordersgrpc.Subscription.created_at:type_name -> google.protobuf.Timestamp
-	88,  // 62: ordersgrpc.Subscription.updated_at:type_name -> google.protobuf.Timestamp
-	88,  // 63: ordersgrpc.UserSubscription.created_at:type_name -> google.protobuf.Timestamp
-	88,  // 64: ordersgrpc.UserSubscription.updated_at:type_name -> google.protobuf.Timestamp
-	88,  // 65: ordersgrpc.UserSubscription.expires_at:type_name -> google.protobuf.Timestamp
-	86,  // 66: ordersgrpc.UserSubscription.amount:type_name -> types.Amount
-	88,  // 67: ordersgrpc.UserSubscription.soonest_delivery_date:type_name -> google.protobuf.Timestamp
-	87,  // 68: ordersgrpc.UserSubscription.delivery_location:type_name -> types.Point
-	86,  // 69: ordersgrpc.CreateSubscriptionPlanRequest.amount:type_name -> types.Amount
-	65,  // 70: ordersgrpc.CreateSubscriptionPlanRequest.subscription_items:type_name -> ordersgrpc.SubscriptionItem
-	66,  // 71: ordersgrpc.CreateSubscriptionPlanResponse.subscription_plan:type_name -> ordersgrpc.Subscription
-	86,  // 72: ordersgrpc.UpdateSubscriptionPlanRequest.amount:type_name -> types.Amount
-	65,  // 73: ordersgrpc.UpdateSubscriptionPlanRequest.subscription_items:type_name -> ordersgrpc.SubscriptionItem
-	66,  // 74: ordersgrpc.UpdateSubscriptionPlanResponse.subscription_plan:type_name -> ordersgrpc.Subscription
-	66,  // 75: ordersgrpc.ListSubscriptionPlansResponse.subscription_plans:type_name -> ordersgrpc.Subscription
-	87,  // 76: ordersgrpc.SubscribeRequest.delivery_location:type_name -> types.Point
-	67,  // 77: ordersgrpc.SubscribeResponse.subscription:type_name -> ordersgrpc.UserSubscription
-	67,  // 78: ordersgrpc.ListUserSubscriptionsResponse.subscriptions:type_name -> ordersgrpc.UserSubscription
-	67,  // 79: ordersgrpc.GetUserSubscriptionDetailsResponse.subscription:type_name -> ordersgrpc.UserSubscription
-	7,   // 80: ordersgrpc.GetUserSubscriptionDetailsResponse.orders:type_name -> ordersgrpc.Order
-	67,  // 81: ordersgrpc.ListAllActiveSubscriptionsResponse.subscriptions:type_name -> ordersgrpc.UserSubscription
-	7,   // 82: ordersgrpc.ListOrdersDueSoonResponse.orders:type_name -> ordersgrpc.Order
-	86,  // 83: ordersgrpc.CreateCustomSubscriptionRequest.budget:type_name -> types.Amount
-	65,  // 84: ordersgrpc.CreateCustomSubscriptionRequest.subscription_items:type_name -> ordersgrpc.SubscriptionItem
-	87,  // 85: ordersgrpc.CreateCustomSubscriptionRequest.delivery_location:type_name -> types.Point
-	67,  // 86: ordersgrpc.CreateCustomSubscriptionResponse.subscription:type_name -> ordersgrpc.UserSubscription
-	9,   // 87: ordersgrpc.Orders.CreateOrder:input_type -> ordersgrpc.CreateOrderRequest
-	11,  // 88: ordersgrpc.Orders.GetOrderDetails:input_type -> ordersgrpc.GetOrderDetailsRequest
-	19,  // 89: ordersgrpc.Orders.ConfirmPayment:input_type -> ordersgrpc.ConfirmPaymentRequest
-	21,  // 90: ordersgrpc.Orders.DispatchOrder:input_type -> ordersgrpc.DispatchOrderRequest
-	23,  // 91: ordersgrpc.Orders.ConfirmDelivery:input_type -> ordersgrpc.ConfirmDeliveryRequest
-	25,  // 92: ordersgrpc.Orders.ApproveOrder:input_type -> ordersgrpc.ApproveOrderRequest
-	27,  // 93: ordersgrpc.Orders.RejectOrder:input_type -> ordersgrpc.RejectOrderRequest
-	40,  // 94: ordersgrpc.Orders.HealthCheck:input_type -> ordersgrpc.HealthCheckRequest
-	42,  // 95: ordersgrpc.Orders.ListUserOrders:input_type -> ordersgrpc.ListUserOrdersRequest
-	44,  // 96: ordersgrpc.Orders.ListFarmerOrders:input_type -> ordersgrpc.ListFarmerOrdersRequest
-	46,  // 97: ordersgrpc.Orders.ListOrders:input_type -> ordersgrpc.ListOrdersRequest
-	15,  // 98: ordersgrpc.Orders.InitiatePayment:input_type -> ordersgrpc.InitiatePaymentRequest
-	30,  // 99: ordersgrpc.Orders.CreateDeliveryPoint:input_type -> ordersgrpc.CreateDeliveryPointRequest
-	32,  // 100: ordersgrpc.Orders.UpdateDeliveryPoint:input_type -> ordersgrpc.UpdateDeliveryPointRequest
-	34,  // 101: ordersgrpc.Orders.DeleteDeliveryPoint:input_type -> ordersgrpc.DeleteDeliveryPointRequest
-	36,  // 102: ordersgrpc.Orders.ListDeliveryPoints:input_type -> ordersgrpc.ListDeliveryPointsRequest
-	54,  // 103: ordersgrpc.Orders.GetAdminStats:input_type -> ordersgrpc.GetAdminStatsRequest
-	38,  // 104: ordersgrpc.Orders.ListDeliveryCities:input_type -> ordersgrpc.ListDeliveryCitiesRequest
-	48,  // 105: ordersgrpc.Orders.CheckPaymentStatus:input_type -> ordersgrpc.CheckPaymentStatusRequest
-	50,  // 106: ordersgrpc.Orders.GetFarmerEarnings:input_type -> ordersgrpc.GetFarmerEarningsRequest
-	17,  // 107: ordersgrpc.Orders.ListPayments:input_type -> ordersgrpc.ListPaymentsRequest
-	57,  // 108: ordersgrpc.Orders.ListCommissionsByReferrer:input_type -> ordersgrpc.ListCommissionsByReferrerRequest
-	61,  // 109: ordersgrpc.Orders.ListTotalComissionAmountByReferrer:input_type -> ordersgrpc.ListTotalComissionAmountByReferrerRequest
-	59,  // 110: ordersgrpc.Orders.BulkSettleCommissions:input_type -> ordersgrpc.BulkSettleCommissionsRequest
-	63,  // 111: ordersgrpc.Orders.EstimateDeliveryFee:input_type -> ordersgrpc.EstimateDeliveryFeeRequest
-	68,  // 112: ordersgrpc.Orders.CreateSubscriptionPlan:input_type -> ordersgrpc.CreateSubscriptionPlanRequest
-	70,  // 113: ordersgrpc.Orders.UpdateSubscriptionPlan:input_type -> ordersgrpc.UpdateSubscriptionPlanRequest
-	72,  // 114: ordersgrpc.Orders.ListSubscriptionPlans:input_type -> ordersgrpc.ListSubscriptionPlansRequest
-	74,  // 115: ordersgrpc.Orders.Subscribe:input_type -> ordersgrpc.SubscribeRequest
-	76,  // 116: ordersgrpc.Orders.ListUserSubscriptions:input_type -> ordersgrpc.ListUserSubscriptionsRequest
-	78,  // 117: ordersgrpc.Orders.GetUserSubscriptionDetails:input_type -> ordersgrpc.GetUserSubscriptionDetailsRequest
-	80,  // 118: ordersgrpc.Orders.ListAllActiveSubscriptions:input_type -> ordersgrpc.ListAllActiveSubscriptionsRequest
-	82,  // 119: ordersgrpc.Orders.ListOrdersDueSoon:input_type -> ordersgrpc.ListOrdersDueSoonRequest
-	84,  // 120: ordersgrpc.Orders.CreateCustomSubscription:input_type -> ordersgrpc.CreateCustomSubscriptionRequest
-	10,  // 121: ordersgrpc.Orders.CreateOrder:output_type -> ordersgrpc.CreateOrderResponse
-	12,  // 122: ordersgrpc.Orders.GetOrderDetails:output_type -> ordersgrpc.GetOrderDetailsResponse
-	20,  // 123: ordersgrpc.Orders.ConfirmPayment:output_type -> ordersgrpc.ConfirmPaymentResponse
-	22,  // 124: ordersgrpc.Orders.DispatchOrder:output_type -> ordersgrpc.DispatchOrderResponse
-	24,  // 125: ordersgrpc.Orders.ConfirmDelivery:output_type -> ordersgrpc.ConfirmDeliveryResponse
-	26,  // 126: ordersgrpc.Orders.ApproveOrder:output_type -> ordersgrpc.ApproveOrderResponse
-	28,  // 127: ordersgrpc.Orders.RejectOrder:output_type -> ordersgrpc.RejectOrderResponse
-	41,  // 128: ordersgrpc.Orders.HealthCheck:output_type -> ordersgrpc.HealthCheckResponse
-	43,  // 129: ordersgrpc.Orders.ListUserOrders:output_type -> ordersgrpc.ListUserOrdersResponse
-	45,  // 130: ordersgrpc.Orders.ListFarmerOrders:output_type -> ordersgrpc.ListFarmerOrdersResponse
-	47,  // 131: ordersgrpc.Orders.ListOrders:output_type -> ordersgrpc.ListOrdersResponse
-	16,  // 132: ordersgrpc.Orders.InitiatePayment:output_type -> ordersgrpc.InitiatePaymentResponse
-	31,  // 133: ordersgrpc.Orders.CreateDeliveryPoint:output_type -> ordersgrpc.CreateDeliveryPointResponse
-	33,  // 134: ordersgrpc.Orders.UpdateDeliveryPoint:output_type -> ordersgrpc.UpdateDeliveryPointResponse
-	35,  // 135: ordersgrpc.Orders.DeleteDeliveryPoint:output_type -> ordersgrpc.DeleteDeliveryPointResponse
-	37,  // 136: ordersgrpc.Orders.ListDeliveryPoints:output_type -> ordersgrpc.ListDeliveryPointsResponse
-	55,  // 137: ordersgrpc.Orders.GetAdminStats:output_type -> ordersgrpc.GetAdminStatsResponse
-	39,  // 138: ordersgrpc.Orders.ListDeliveryCities:output_type -> ordersgrpc.ListDeliveryCitiesResponse
-	49,  // 139: ordersgrpc.Orders.CheckPaymentStatus:output_type -> ordersgrpc.CheckPaymentStatusResponse
-	52,  // 140: ordersgrpc.Orders.GetFarmerEarnings:output_type -> ordersgrpc.GetFarmerEarningsResponse
-	18,  // 141: ordersgrpc.Orders.ListPayments:output_type -> ordersgrpc.ListPaymentsResponse
-	58,  // 142: ordersgrpc.Orders.ListCommissionsByReferrer:output_type -> ordersgrpc.ListCommissionsByReferrerResponse
-	62,  // 143: ordersgrpc.Orders.ListTotalComissionAmountByReferrer:output_type -> ordersgrpc.ListTotalCommissionAmountByReferrerResponse
-	60,  // 144: ordersgrpc.Orders.BulkSettleCommissions:output_type -> ordersgrpc.BulkSettleCommissionsResponse
-	64,  // 145: ordersgrpc.Orders.EstimateDeliveryFee:output_type -> ordersgrpc.EstimateDeliveryFeeResponse
-	69,  // 146: ordersgrpc.Orders.CreateSubscriptionPlan:output_type -> ordersgrpc.CreateSubscriptionPlanResponse
-	71,  // 147: ordersgrpc.Orders.UpdateSubscriptionPlan:output_type -> ordersgrpc.UpdateSubscriptionPlanResponse
-	73,  // 148: ordersgrpc.Orders.ListSubscriptionPlans:output_type -> ordersgrpc.ListSubscriptionPlansResponse
-	75,  // 149: ordersgrpc.Orders.Subscribe:output_type -> ordersgrpc.SubscribeResponse
-	77,  // 150: ordersgrpc.Orders.ListUserSubscriptions:output_type -> ordersgrpc.ListUserSubscriptionsResponse
-	79,  // 151: ordersgrpc.Orders.GetUserSubscriptionDetails:output_type -> ordersgrpc.GetUserSubscriptionDetailsResponse
-	81,  // 152: ordersgrpc.Orders.ListAllActiveSubscriptions:output_type -> ordersgrpc.ListAllActiveSubscriptionsResponse
-	83,  // 153: ordersgrpc.Orders.ListOrdersDueSoon:output_type -> ordersgrpc.ListOrdersDueSoonResponse
-	85,  // 154: ordersgrpc.Orders.CreateCustomSubscription:output_type -> ordersgrpc.CreateCustomSubscriptionResponse
-	121, // [121:155] is the sub-list for method output_type
-	87,  // [87:121] is the sub-list for method input_type
-	87,  // [87:87] is the sub-list for extension type_name
-	87,  // [87:87] is the sub-list for extension extendee
-	0,   // [0:87] is the sub-list for field type_name
+	86,  // 9: ordersgrpc.Order.service_fee:type_name -> types.Amount
+	88,  // 10: ordersgrpc.OrderAuditLog.timestamp:type_name -> google.protobuf.Timestamp
+	7,   // 11: ordersgrpc.OrderAuditLog.before:type_name -> ordersgrpc.Order
+	7,   // 12: ordersgrpc.OrderAuditLog.after:type_name -> ordersgrpc.Order
+	6,   // 13: ordersgrpc.CreateOrderRequest.order_items:type_name -> ordersgrpc.OrderItem
+	87,  // 14: ordersgrpc.CreateOrderRequest.delivery_location:type_name -> types.Point
+	7,   // 15: ordersgrpc.CreateOrderResponse.order:type_name -> ordersgrpc.Order
+	7,   // 16: ordersgrpc.GetOrderDetailsResponse.order:type_name -> ordersgrpc.Order
+	8,   // 17: ordersgrpc.GetOrderDetailsResponse.audit_log:type_name -> ordersgrpc.OrderAuditLog
+	3,   // 18: ordersgrpc.Account.payment_method:type_name -> ordersgrpc.PaymentMethodType
+	2,   // 19: ordersgrpc.Payment.payment_entity:type_name -> ordersgrpc.PaymentEntity
+	86,  // 20: ordersgrpc.Payment.amount:type_name -> types.Amount
+	88,  // 21: ordersgrpc.Payment.created_at:type_name -> google.protobuf.Timestamp
+	88,  // 22: ordersgrpc.Payment.expires_at:type_name -> google.protobuf.Timestamp
+	88,  // 23: ordersgrpc.Payment.updated_at:type_name -> google.protobuf.Timestamp
+	1,   // 24: ordersgrpc.Payment.status:type_name -> ordersgrpc.PaymentStatus
+	13,  // 25: ordersgrpc.Payment.account:type_name -> ordersgrpc.Account
+	4,   // 26: ordersgrpc.Payment.type:type_name -> ordersgrpc.PaymentType
+	2,   // 27: ordersgrpc.InitiatePaymentRequest.payment_entity:type_name -> ordersgrpc.PaymentEntity
+	86,  // 28: ordersgrpc.InitiatePaymentRequest.amount:type_name -> types.Amount
+	13,  // 29: ordersgrpc.InitiatePaymentRequest.account:type_name -> ordersgrpc.Account
+	14,  // 30: ordersgrpc.InitiatePaymentResponse.payment:type_name -> ordersgrpc.Payment
+	1,   // 31: ordersgrpc.ListPaymentsRequest.payment_status:type_name -> ordersgrpc.PaymentStatus
+	2,   // 32: ordersgrpc.ListPaymentsRequest.payment_entity:type_name -> ordersgrpc.PaymentEntity
+	4,   // 33: ordersgrpc.ListPaymentsRequest.payment_type:type_name -> ordersgrpc.PaymentType
+	14,  // 34: ordersgrpc.ListPaymentsResponse.payments:type_name -> ordersgrpc.Payment
+	87,  // 35: ordersgrpc.DeliveryPoint.address:type_name -> types.Point
+	88,  // 36: ordersgrpc.DeliveryPoint.created_at:type_name -> google.protobuf.Timestamp
+	87,  // 37: ordersgrpc.CreateDeliveryPointRequest.address:type_name -> types.Point
+	29,  // 38: ordersgrpc.CreateDeliveryPointResponse.delivery_point:type_name -> ordersgrpc.DeliveryPoint
+	87,  // 39: ordersgrpc.UpdateDeliveryPointRequest.address:type_name -> types.Point
+	29,  // 40: ordersgrpc.ListDeliveryPointsResponse.delivery_points:type_name -> ordersgrpc.DeliveryPoint
+	0,   // 41: ordersgrpc.ListUserOrdersRequest.statuses:type_name -> ordersgrpc.OrderStatus
+	7,   // 42: ordersgrpc.ListUserOrdersResponse.orders:type_name -> ordersgrpc.Order
+	0,   // 43: ordersgrpc.ListFarmerOrdersRequest.statuses:type_name -> ordersgrpc.OrderStatus
+	7,   // 44: ordersgrpc.ListFarmerOrdersResponse.orders:type_name -> ordersgrpc.Order
+	0,   // 45: ordersgrpc.ListOrdersRequest.statuses:type_name -> ordersgrpc.OrderStatus
+	7,   // 46: ordersgrpc.ListOrdersResponse.orders:type_name -> ordersgrpc.Order
+	1,   // 47: ordersgrpc.CheckPaymentStatusResponse.status:type_name -> ordersgrpc.PaymentStatus
+	5,   // 48: ordersgrpc.GetFarmerEarningsRequest.filter:type_name -> ordersgrpc.FilterType
+	51,  // 49: ordersgrpc.GetFarmerEarningsResponse.data:type_name -> ordersgrpc.FarmerEarningsData
+	53,  // 50: ordersgrpc.GetAdminStatsResponse.data:type_name -> ordersgrpc.StatItem
+	86,  // 51: ordersgrpc.Commission.commission_amount:type_name -> types.Amount
+	88,  // 52: ordersgrpc.Commission.paid_at:type_name -> google.protobuf.Timestamp
+	88,  // 53: ordersgrpc.Commission.created_at:type_name -> google.protobuf.Timestamp
+	56,  // 54: ordersgrpc.ListCommissionsByReferrerResponse.commissions:type_name -> ordersgrpc.Commission
+	86,  // 55: ordersgrpc.ListTotalCommissionAmountByReferrerResponse.commissions:type_name -> types.Amount
+	6,   // 56: ordersgrpc.EstimateDeliveryFeeRequest.order_items:type_name -> ordersgrpc.OrderItem
+	87,  // 57: ordersgrpc.EstimateDeliveryFeeRequest.delivery_location:type_name -> types.Point
+	86,  // 58: ordersgrpc.EstimateDeliveryFeeResponse.estimated_delivery_fee:type_name -> types.Amount
+	86,  // 59: ordersgrpc.SubscriptionItem.product_unit_price:type_name -> types.Amount
+	86,  // 60: ordersgrpc.Subscription.amount:type_name -> types.Amount
+	65,  // 61: ordersgrpc.Subscription.subscription_items:type_name -> ordersgrpc.SubscriptionItem
+	88,  // 62: ordersgrpc.Subscription.created_at:type_name -> google.protobuf.Timestamp
+	88,  // 63: ordersgrpc.Subscription.updated_at:type_name -> google.protobuf.Timestamp
+	88,  // 64: ordersgrpc.UserSubscription.created_at:type_name -> google.protobuf.Timestamp
+	88,  // 65: ordersgrpc.UserSubscription.updated_at:type_name -> google.protobuf.Timestamp
+	88,  // 66: ordersgrpc.UserSubscription.expires_at:type_name -> google.protobuf.Timestamp
+	86,  // 67: ordersgrpc.UserSubscription.amount:type_name -> types.Amount
+	88,  // 68: ordersgrpc.UserSubscription.soonest_delivery_date:type_name -> google.protobuf.Timestamp
+	87,  // 69: ordersgrpc.UserSubscription.delivery_location:type_name -> types.Point
+	86,  // 70: ordersgrpc.CreateSubscriptionPlanRequest.amount:type_name -> types.Amount
+	65,  // 71: ordersgrpc.CreateSubscriptionPlanRequest.subscription_items:type_name -> ordersgrpc.SubscriptionItem
+	66,  // 72: ordersgrpc.CreateSubscriptionPlanResponse.subscription_plan:type_name -> ordersgrpc.Subscription
+	86,  // 73: ordersgrpc.UpdateSubscriptionPlanRequest.amount:type_name -> types.Amount
+	65,  // 74: ordersgrpc.UpdateSubscriptionPlanRequest.subscription_items:type_name -> ordersgrpc.SubscriptionItem
+	66,  // 75: ordersgrpc.UpdateSubscriptionPlanResponse.subscription_plan:type_name -> ordersgrpc.Subscription
+	66,  // 76: ordersgrpc.ListSubscriptionPlansResponse.subscription_plans:type_name -> ordersgrpc.Subscription
+	87,  // 77: ordersgrpc.SubscribeRequest.delivery_location:type_name -> types.Point
+	67,  // 78: ordersgrpc.SubscribeResponse.subscription:type_name -> ordersgrpc.UserSubscription
+	67,  // 79: ordersgrpc.ListUserSubscriptionsResponse.subscriptions:type_name -> ordersgrpc.UserSubscription
+	67,  // 80: ordersgrpc.GetUserSubscriptionDetailsResponse.subscription:type_name -> ordersgrpc.UserSubscription
+	7,   // 81: ordersgrpc.GetUserSubscriptionDetailsResponse.orders:type_name -> ordersgrpc.Order
+	67,  // 82: ordersgrpc.ListAllActiveSubscriptionsResponse.subscriptions:type_name -> ordersgrpc.UserSubscription
+	7,   // 83: ordersgrpc.ListOrdersDueSoonResponse.orders:type_name -> ordersgrpc.Order
+	86,  // 84: ordersgrpc.CreateCustomSubscriptionRequest.budget:type_name -> types.Amount
+	65,  // 85: ordersgrpc.CreateCustomSubscriptionRequest.subscription_items:type_name -> ordersgrpc.SubscriptionItem
+	87,  // 86: ordersgrpc.CreateCustomSubscriptionRequest.delivery_location:type_name -> types.Point
+	67,  // 87: ordersgrpc.CreateCustomSubscriptionResponse.subscription:type_name -> ordersgrpc.UserSubscription
+	9,   // 88: ordersgrpc.Orders.CreateOrder:input_type -> ordersgrpc.CreateOrderRequest
+	11,  // 89: ordersgrpc.Orders.GetOrderDetails:input_type -> ordersgrpc.GetOrderDetailsRequest
+	19,  // 90: ordersgrpc.Orders.ConfirmPayment:input_type -> ordersgrpc.ConfirmPaymentRequest
+	21,  // 91: ordersgrpc.Orders.DispatchOrder:input_type -> ordersgrpc.DispatchOrderRequest
+	23,  // 92: ordersgrpc.Orders.ConfirmDelivery:input_type -> ordersgrpc.ConfirmDeliveryRequest
+	25,  // 93: ordersgrpc.Orders.ApproveOrder:input_type -> ordersgrpc.ApproveOrderRequest
+	27,  // 94: ordersgrpc.Orders.RejectOrder:input_type -> ordersgrpc.RejectOrderRequest
+	40,  // 95: ordersgrpc.Orders.HealthCheck:input_type -> ordersgrpc.HealthCheckRequest
+	42,  // 96: ordersgrpc.Orders.ListUserOrders:input_type -> ordersgrpc.ListUserOrdersRequest
+	44,  // 97: ordersgrpc.Orders.ListFarmerOrders:input_type -> ordersgrpc.ListFarmerOrdersRequest
+	46,  // 98: ordersgrpc.Orders.ListOrders:input_type -> ordersgrpc.ListOrdersRequest
+	15,  // 99: ordersgrpc.Orders.InitiatePayment:input_type -> ordersgrpc.InitiatePaymentRequest
+	30,  // 100: ordersgrpc.Orders.CreateDeliveryPoint:input_type -> ordersgrpc.CreateDeliveryPointRequest
+	32,  // 101: ordersgrpc.Orders.UpdateDeliveryPoint:input_type -> ordersgrpc.UpdateDeliveryPointRequest
+	34,  // 102: ordersgrpc.Orders.DeleteDeliveryPoint:input_type -> ordersgrpc.DeleteDeliveryPointRequest
+	36,  // 103: ordersgrpc.Orders.ListDeliveryPoints:input_type -> ordersgrpc.ListDeliveryPointsRequest
+	54,  // 104: ordersgrpc.Orders.GetAdminStats:input_type -> ordersgrpc.GetAdminStatsRequest
+	38,  // 105: ordersgrpc.Orders.ListDeliveryCities:input_type -> ordersgrpc.ListDeliveryCitiesRequest
+	48,  // 106: ordersgrpc.Orders.CheckPaymentStatus:input_type -> ordersgrpc.CheckPaymentStatusRequest
+	50,  // 107: ordersgrpc.Orders.GetFarmerEarnings:input_type -> ordersgrpc.GetFarmerEarningsRequest
+	17,  // 108: ordersgrpc.Orders.ListPayments:input_type -> ordersgrpc.ListPaymentsRequest
+	57,  // 109: ordersgrpc.Orders.ListCommissionsByReferrer:input_type -> ordersgrpc.ListCommissionsByReferrerRequest
+	61,  // 110: ordersgrpc.Orders.ListTotalComissionAmountByReferrer:input_type -> ordersgrpc.ListTotalComissionAmountByReferrerRequest
+	59,  // 111: ordersgrpc.Orders.BulkSettleCommissions:input_type -> ordersgrpc.BulkSettleCommissionsRequest
+	63,  // 112: ordersgrpc.Orders.EstimateDeliveryFee:input_type -> ordersgrpc.EstimateDeliveryFeeRequest
+	68,  // 113: ordersgrpc.Orders.CreateSubscriptionPlan:input_type -> ordersgrpc.CreateSubscriptionPlanRequest
+	70,  // 114: ordersgrpc.Orders.UpdateSubscriptionPlan:input_type -> ordersgrpc.UpdateSubscriptionPlanRequest
+	72,  // 115: ordersgrpc.Orders.ListSubscriptionPlans:input_type -> ordersgrpc.ListSubscriptionPlansRequest
+	74,  // 116: ordersgrpc.Orders.Subscribe:input_type -> ordersgrpc.SubscribeRequest
+	76,  // 117: ordersgrpc.Orders.ListUserSubscriptions:input_type -> ordersgrpc.ListUserSubscriptionsRequest
+	78,  // 118: ordersgrpc.Orders.GetUserSubscriptionDetails:input_type -> ordersgrpc.GetUserSubscriptionDetailsRequest
+	80,  // 119: ordersgrpc.Orders.ListAllActiveSubscriptions:input_type -> ordersgrpc.ListAllActiveSubscriptionsRequest
+	82,  // 120: ordersgrpc.Orders.ListOrdersDueSoon:input_type -> ordersgrpc.ListOrdersDueSoonRequest
+	84,  // 121: ordersgrpc.Orders.CreateCustomSubscription:input_type -> ordersgrpc.CreateCustomSubscriptionRequest
+	10,  // 122: ordersgrpc.Orders.CreateOrder:output_type -> ordersgrpc.CreateOrderResponse
+	12,  // 123: ordersgrpc.Orders.GetOrderDetails:output_type -> ordersgrpc.GetOrderDetailsResponse
+	20,  // 124: ordersgrpc.Orders.ConfirmPayment:output_type -> ordersgrpc.ConfirmPaymentResponse
+	22,  // 125: ordersgrpc.Orders.DispatchOrder:output_type -> ordersgrpc.DispatchOrderResponse
+	24,  // 126: ordersgrpc.Orders.ConfirmDelivery:output_type -> ordersgrpc.ConfirmDeliveryResponse
+	26,  // 127: ordersgrpc.Orders.ApproveOrder:output_type -> ordersgrpc.ApproveOrderResponse
+	28,  // 128: ordersgrpc.Orders.RejectOrder:output_type -> ordersgrpc.RejectOrderResponse
+	41,  // 129: ordersgrpc.Orders.HealthCheck:output_type -> ordersgrpc.HealthCheckResponse
+	43,  // 130: ordersgrpc.Orders.ListUserOrders:output_type -> ordersgrpc.ListUserOrdersResponse
+	45,  // 131: ordersgrpc.Orders.ListFarmerOrders:output_type -> ordersgrpc.ListFarmerOrdersResponse
+	47,  // 132: ordersgrpc.Orders.ListOrders:output_type -> ordersgrpc.ListOrdersResponse
+	16,  // 133: ordersgrpc.Orders.InitiatePayment:output_type -> ordersgrpc.InitiatePaymentResponse
+	31,  // 134: ordersgrpc.Orders.CreateDeliveryPoint:output_type -> ordersgrpc.CreateDeliveryPointResponse
+	33,  // 135: ordersgrpc.Orders.UpdateDeliveryPoint:output_type -> ordersgrpc.UpdateDeliveryPointResponse
+	35,  // 136: ordersgrpc.Orders.DeleteDeliveryPoint:output_type -> ordersgrpc.DeleteDeliveryPointResponse
+	37,  // 137: ordersgrpc.Orders.ListDeliveryPoints:output_type -> ordersgrpc.ListDeliveryPointsResponse
+	55,  // 138: ordersgrpc.Orders.GetAdminStats:output_type -> ordersgrpc.GetAdminStatsResponse
+	39,  // 139: ordersgrpc.Orders.ListDeliveryCities:output_type -> ordersgrpc.ListDeliveryCitiesResponse
+	49,  // 140: ordersgrpc.Orders.CheckPaymentStatus:output_type -> ordersgrpc.CheckPaymentStatusResponse
+	52,  // 141: ordersgrpc.Orders.GetFarmerEarnings:output_type -> ordersgrpc.GetFarmerEarningsResponse
+	18,  // 142: ordersgrpc.Orders.ListPayments:output_type -> ordersgrpc.ListPaymentsResponse
+	58,  // 143: ordersgrpc.Orders.ListCommissionsByReferrer:output_type -> ordersgrpc.ListCommissionsByReferrerResponse
+	62,  // 144: ordersgrpc.Orders.ListTotalComissionAmountByReferrer:output_type -> ordersgrpc.ListTotalCommissionAmountByReferrerResponse
+	60,  // 145: ordersgrpc.Orders.BulkSettleCommissions:output_type -> ordersgrpc.BulkSettleCommissionsResponse
+	64,  // 146: ordersgrpc.Orders.EstimateDeliveryFee:output_type -> ordersgrpc.EstimateDeliveryFeeResponse
+	69,  // 147: ordersgrpc.Orders.CreateSubscriptionPlan:output_type -> ordersgrpc.CreateSubscriptionPlanResponse
+	71,  // 148: ordersgrpc.Orders.UpdateSubscriptionPlan:output_type -> ordersgrpc.UpdateSubscriptionPlanResponse
+	73,  // 149: ordersgrpc.Orders.ListSubscriptionPlans:output_type -> ordersgrpc.ListSubscriptionPlansResponse
+	75,  // 150: ordersgrpc.Orders.Subscribe:output_type -> ordersgrpc.SubscribeResponse
+	77,  // 151: ordersgrpc.Orders.ListUserSubscriptions:output_type -> ordersgrpc.ListUserSubscriptionsResponse
+	79,  // 152: ordersgrpc.Orders.GetUserSubscriptionDetails:output_type -> ordersgrpc.GetUserSubscriptionDetailsResponse
+	81,  // 153: ordersgrpc.Orders.ListAllActiveSubscriptions:output_type -> ordersgrpc.ListAllActiveSubscriptionsResponse
+	83,  // 154: ordersgrpc.Orders.ListOrdersDueSoon:output_type -> ordersgrpc.ListOrdersDueSoonResponse
+	85,  // 155: ordersgrpc.Orders.CreateCustomSubscription:output_type -> ordersgrpc.CreateCustomSubscriptionResponse
+	122, // [122:156] is the sub-list for method output_type
+	88,  // [88:122] is the sub-list for method input_type
+	88,  // [88:88] is the sub-list for extension type_name
+	88,  // [88:88] is the sub-list for extension extendee
+	0,   // [0:88] is the sub-list for field type_name
 }
 
 func init() { file_orders_proto_init() }

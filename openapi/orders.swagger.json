@@ -2185,6 +2185,10 @@
         "expectedDeliveryDate": {
           "type": "string",
           "format": "date-time"
+        },
+        "serviceFee": {
+          "$ref": "#/definitions/typesAmount",
+          "description": "Flat platform fee charged on the order (excluded from farmer payout)."
         }
       }
     },

@@ -1004,22 +1004,71 @@ func (i *Impl) ListUsers(ctx context.Context,
 }
 
 // ExportUsersPdf implements usersgrpc.UsersServer.
+//
+//nolint:gocognit // PDF export generation is inherently imperative and clearer as a single flow.
 func (i *Impl) ExportUsersPdf(ctx context.Context, req *usersgrpc.ExportUsersPdfRequest) (*httpbody.HttpBody, error) {
 	role := req.GetUserRole()
 	if role == usersgrpc.UserRole_USER_ROLE_UNSPECIFIED {
 		return nil, status.Error(codes.InvalidArgument, "user_role is required")
 	}
 
-	// Fetch all users by paging server-side.
-	const pageSize int32 = 500
-	before := time.Now().Add(time.Hour)
-	all := make([]sqlc.User, 0, 1024)
+	// NOTE: This method contains a lot of PDF layout / styling constants (millimeters, font sizes, colors),
+	// which are intentionally "magic numbers" dictated by the PDF library and desired visual output.
+	// Keep them centralized here.
+	const (
+		exportUsersPageSize    = int32(500) // PDF export paging constant (tuned for server-side export)
+		exportUsersMaxLoops    = 200        // hard safety cap to prevent infinite paging loops
+		exportUsersPreallocCap = 1024       // preallocation to reduce allocations for typical exports
 
-	for loops := 0; loops < 200; loops++ { // hard safety cap
+		pdfMarginLeft   = 10.0 // PDF layout constant (mm)
+		pdfMarginTop    = 12.0 // PDF layout constant (mm)
+		pdfMarginRight  = 10.0 // PDF layout constant (mm)
+		pdfMarginBottom = 12.0 // PDF layout constant (mm)
+
+		pdfHeaderBarHeight = 18.0 // PDF header bar height (mm)
+		pdfHeaderTextY     = 6.0  // PDF header baseline Y offset (mm)
+		pdfHeaderLineH     = 6.0  // PDF header line height (mm)
+		pdfHeaderLn        = 10.0 // PDF header spacing after header (mm)
+
+		pdfMetaFontSize = 10.0 // PDF font size
+		pdfMetaLineH    = 6.0  // PDF line height (mm)
+		pdfMetaLn       = 2.0  // PDF spacing between meta lines (mm)
+
+		pdfTitleFontSize    = 14.0 // PDF title font size
+		pdfSubtitleFontSize = 11.0 // PDF subtitle font size
+
+		brandGreenR = 0   // FoodHouse brand color
+		brandGreenG = 153 // FoodHouse brand color
+		brandGreenB = 74  // FoodHouse brand color
+
+		colorWhite = 255 // RGB white component for gofpdf
+		colorBlack = 0   // RGB black component for gofpdf
+
+		tableHeaderFill = 240 // light gray fill for header row
+
+		tableHeaderFontSz = 10.0 // table header font size
+		tableHeaderRowH   = 7.0  // table header row height (mm)
+		tableBodyFontSz   = 9.0  // table body font size
+		tableLineH        = 5.0  // table line height (mm)
+		tableHeaderLn     = -1.0 // gofpdf Ln(-1) resets to the beginning of the next line
+
+		colWName    = 55.0 // column width (mm)
+		colWPhone   = 35.0 // column width (mm)
+		colWEmail   = 62.0 // column width (mm)
+		colWAddress = 85.0 // column width (mm)
+		colWStatus  = 20.0 // column width (mm)
+		colWJoined  = 20.0 // column width (mm)
+	)
+
+	// Fetch all users by paging server-side.
+	before := time.Now().Add(time.Hour)
+	all := make([]sqlc.User, 0, exportUsersPreallocCap)
+
+	for range exportUsersMaxLoops { // hard safety cap
 		rows, err := i.repo.Do().ListUsers(ctx, sqlc.ListUsersParams{
 			UserStatus: req.GetUserStatus().String(),
 			SearchKey:  req.GetSearch(),
-			Limit:      pageSize,
+			Limit:      exportUsersPageSize,
 			Before:     before,
 			UserRole:   role.String(),
 		})
@@ -1033,7 +1082,7 @@ func (i *Impl) ExportUsersPdf(ctx context.Context, req *usersgrpc.ExportUsersPdf
 		all = append(all, rows...)
 
 		// If we got fewer than a page, we're done.
-		if len(rows) < int(pageSize) {
+		if len(rows) < int(exportUsersPageSize) {
 			break
 		}
 
@@ -1055,61 +1104,71 @@ func (i *Impl) ExportUsersPdf(ctx context.Context, req *usersgrpc.ExportUsersPdf
 	pdf := gofpdf.New("L", "mm", "A4", "")
 	pdf.SetTitle("FoodHouse Users Export", false)
 	pdf.SetAuthor("FoodHouse", false)
-	leftMargin, topMargin, rightMargin := 10.0, 12.0, 10.0
-	bottomMargin := 12.0
+	leftMargin, topMargin, rightMargin := pdfMarginLeft, pdfMarginTop, pdfMarginRight
+	bottomMargin := pdfMarginBottom
 	pdf.SetMargins(leftMargin, topMargin, rightMargin)
 	pdf.SetAutoPageBreak(true, bottomMargin)
 
 	// Simple branded header (no custom font needed).
-	brandGreen := struct{ r, g, b int }{r: 0, g: 153, b: 74}
+	brandGreen := struct{ r, g, b int }{r: brandGreenR, g: brandGreenG, b: brandGreenB}
 	roleLabel := strings.TrimPrefix(role.String(), "USER_ROLE_")
 	pageW, pageH := pdf.GetPageSize()
 
 	pdf.SetHeaderFunc(func() {
 		// Green bar
 		pdf.SetFillColor(brandGreen.r, brandGreen.g, brandGreen.b)
-		pdf.Rect(0, 0, pageW, 18, "F")
+		pdf.Rect(0, 0, pageW, pdfHeaderBarHeight, "F")
 
-		pdf.SetTextColor(255, 255, 255)
-		pdf.SetFont("Arial", "B", 14)
-		pdf.SetXY(leftMargin, 6)
-		pdf.CellFormat(0, 6, "FoodHouse", "", 0, "L", false, 0, "")
+		pdf.SetTextColor(colorWhite, colorWhite, colorWhite)
+		pdf.SetFont("Arial", "B", pdfTitleFontSize)
+		pdf.SetXY(leftMargin, pdfHeaderTextY)
+		pdf.CellFormat(0, pdfHeaderLineH, "FoodHouse", "", 0, "L", false, 0, "")
 
-		pdf.SetFont("Arial", "", 11)
-		pdf.SetXY(leftMargin, 6)
-		pdf.CellFormat(pageW-leftMargin-rightMargin, 6, "Users Export - "+roleLabel, "", 0, "R", false, 0, "")
+		pdf.SetFont("Arial", "", pdfSubtitleFontSize)
+		pdf.SetXY(leftMargin, pdfHeaderTextY)
+		pdf.CellFormat(pageW-leftMargin-rightMargin, pdfHeaderLineH, "Users Export - "+roleLabel, "", 0, "R", false, 0, "")
 
 		// Reset for body
-		pdf.SetTextColor(0, 0, 0)
-		pdf.Ln(10)
+		pdf.SetTextColor(colorBlack, colorBlack, colorBlack)
+		pdf.Ln(pdfHeaderLn)
 	})
 
 	pdf.AddPage()
 
-	pdf.SetFont("Arial", "", 10)
-	pdf.CellFormat(0, 6, fmt.Sprintf("Generated: %s", time.Now().Format(time.RFC1123)), "", 1, "L", false, 0, "")
-	pdf.CellFormat(0, 6, fmt.Sprintf("Total: %d", len(all)), "", 1, "L", false, 0, "")
-	pdf.Ln(2)
+	pdf.SetFont("Arial", "", pdfMetaFontSize)
+	generated := fmt.Sprintf("Generated: %s", time.Now().Format(time.RFC1123))
+	pdf.CellFormat(0, pdfMetaLineH, generated, "", 1, "L", false, 0, "")
+	total := fmt.Sprintf("Total: %d", len(all))
+	pdf.CellFormat(0, pdfMetaLineH, total, "", 1, "L", false, 0, "")
+	pdf.Ln(pdfMetaLn)
 
 	// Table header
 	// Column widths must fit within printable width.
 	// Printable width on A4 landscape is ~297mm minus margins.
-	colW := []float64{55, 35, 62, 85, 20, 20} // Name, Phone, Email, Address, Status, Joined
+	// Name, Phone, Email, Address, Status, Joined.
+	colW := []float64{
+		colWName,
+		colWPhone,
+		colWEmail,
+		colWAddress,
+		colWStatus,
+		colWJoined,
+	}
 	headers := []string{"Name", "Phone", "Email", "Address", "Status", "Joined"}
 
 	drawHeader := func() {
-		pdf.SetFont("Arial", "B", 10)
-		pdf.SetFillColor(240, 240, 240)
+		pdf.SetFont("Arial", "B", tableHeaderFontSz)
+		pdf.SetFillColor(tableHeaderFill, tableHeaderFill, tableHeaderFill)
 		for i := range headers {
-			pdf.CellFormat(colW[i], 7, headers[i], "1", 0, "L", true, 0, "")
+			pdf.CellFormat(colW[i], tableHeaderRowH, headers[i], "1", 0, "L", true, 0, "")
 		}
-		pdf.Ln(-1)
-		pdf.SetFont("Arial", "", 9)
-		pdf.SetFillColor(255, 255, 255)
+		pdf.Ln(tableHeaderLn)
+		pdf.SetFont("Arial", "", tableBodyFontSz)
+		pdf.SetFillColor(colorWhite, colorWhite, colorWhite)
 	}
 	drawHeader()
 
-	lineH := 5.0
+	lineH := tableLineH
 
 	drawRow := func(values []string) {
 		// Split each cell into lines so we can compute row height.
@@ -1134,7 +1193,7 @@ func (i *Impl) ExportUsersPdf(ctx context.Context, req *usersgrpc.ExportUsersPdf
 
 		for i := range values {
 			x := x0
-			for j := 0; j < i; j++ {
+			for j := range i {
 				x += colW[j]
 			}
 			pdf.SetXY(x, y0)

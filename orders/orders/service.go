@@ -63,6 +63,13 @@ const (
 	ReferralCommissionPercentage = 0.06
 
 	CENT = 100
+
+	ExtraFees = 100
+
+	// DefaultOrderServiceFeeAmountXAF is a flat platform fee charged on every order.
+	// It is NOT included in farmer payout calculations.
+	DefaultOrderServiceFeeAmountXAF = 100.00
+	DefaultOrderServiceFeeCurrency  = "XAF"
 )
 
 var supportedCurrencies = map[string]struct{}{
@@ -460,6 +467,15 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 				}
 
 				// 4. Prepare the receipt payload
+				var deliveryFeeValue float64
+				var deliveryFeeCurrency string
+				if order.DeliveryFeeAmount != nil {
+					deliveryFeeValue = *order.DeliveryFeeAmount
+				}
+				if order.DeliveryFeeCurrency != nil {
+					deliveryFeeCurrency = *order.DeliveryFeeCurrency
+				}
+
 				receiptData := email.ReceiptData{
 					ReceiptID:     GenerateReceiptNumber(order.OrderNumber),
 					Date:          time.Now(),
@@ -475,11 +491,11 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 					),
 					TransactionID: payment.ID,
 					Items:         receiptItems,
-					ServiceFee:    email.Amount{Value: 0, CurrencyIsoCode: *payment.AmountCurrency},
+					ServiceFee:    email.Amount{Value: order.ServiceFeeAmount, CurrencyIsoCode: order.ServiceFeeCurrency},
 					TransactionFee: email.Amount{
 						Value: 0, CurrencyIsoCode: *payment.AmountCurrency,
 					},
-					DeliveryFee: email.Amount{Value: 0, CurrencyIsoCode: "XAF"},
+					DeliveryFee: email.Amount{Value: deliveryFeeValue, CurrencyIsoCode: deliveryFeeCurrency},
 				}
 
 				// 5. Send email
@@ -644,6 +660,8 @@ func (i *Impl) CreateOrder(ctx context.Context, req *ordersgrpc.CreateOrderReque
 		DeliveryAddress:     req.GetDeliveryLocation().GetAddress(),
 		DeliveryFeeAmount:   deliveryFee.EstimatedDeliveryFee.Value,
 		DeliveryFeeCurrency: deliveryFee.EstimatedDeliveryFee.CurrencyIsoCode,
+		ServiceFeeAmount:    DefaultOrderServiceFeeAmountXAF,
+		ServiceFeeCurrency:  DefaultOrderServiceFeeCurrency,
 	}
 
 	i.logger.Debug().Msgf("argurments %v", args)
@@ -1106,6 +1124,8 @@ func (i *Impl) createOrdersFromSubscription(
 			DeliveryAddress:     deliveryAddress,
 			DeliveryFeeAmount:   deliveryFee.EstimatedDeliveryFee.Value,
 			DeliveryFeeCurrency: deliveryFee.EstimatedDeliveryFee.CurrencyIsoCode,
+			ServiceFeeAmount:    DefaultOrderServiceFeeAmountXAF,
+			ServiceFeeCurrency:  DefaultOrderServiceFeeCurrency,
 			UserSubscriptionID:  &userSubscription.ID,
 			ExpectedDeliveryDate: pgtype.Timestamptz{
 				Time:  orderDeliveryDate,
@@ -1407,7 +1427,7 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 
 		// Fix: totalPrice is a *float64, but *order.PriceValue + *order.DeliveryFeeAmount is a float64.
 		// So, create a new variable to hold the sum and take its address.
-		sum := *order.PriceValue + *order.DeliveryFeeAmount
+		sum := *order.PriceValue + *order.DeliveryFeeAmount + order.ServiceFeeAmount
 		totalPrice = &sum
 
 	}
@@ -2911,6 +2931,10 @@ func convertListOrdersDueSoonRowToProto(order sqlc.ListOrdersDueSoonRow) *orders
 		DeliveryFee: &types.Amount{
 			Value:           derefFloat(order.DeliveryFeeAmount),
 			CurrencyIsoCode: derefString(order.DeliveryFeeCurrency),
+		},
+		ServiceFee: &types.Amount{
+			Value:           order.ServiceFeeAmount,
+			CurrencyIsoCode: order.ServiceFeeCurrency,
 		},
 	}
 

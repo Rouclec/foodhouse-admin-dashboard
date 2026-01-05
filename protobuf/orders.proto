@@ -56,6 +56,8 @@ message Order {
   int32 total_items = 16;
   optional string user_subscription_id = 17;
   optional google.protobuf.Timestamp expected_delivery_date = 18;
+  // Flat platform fee charged on the order (excluded from farmer payout).
+  types.Amount service_fee = 19;
 }
 
 message OrderAuditLog {

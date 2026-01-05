@@ -226,6 +226,7 @@ export type ordersgrpcOrder = {
     payoutPhoneNumber?: string;
     dispatchedBy?: string;
     deliveryFee?: typesAmount;
+    serviceFee?: typesAmount;
     totalItems?: number;
     userSubscriptionId?: string;
     expectedDeliveryDate?: string;
