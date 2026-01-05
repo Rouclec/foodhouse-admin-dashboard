@@ -235,16 +235,17 @@ export default function SubscriptionCheckout() {
                 </Text>
               </View>
             </View>
-
+          </ScrollView>
+          <View style={defaultStyles.bottomButtonContainer}>
             <Button
               mode="contained"
-              style={[defaultStyles.button, defaultStyles.primaryButton]}
+              style={[defaultStyles.button, defaultStyles.primaryButton, isSubscribing && defaultStyles.greyButton]}
               onPress={handleSubscribe}
               loading={isSubscribing}
               disabled={isSubscribing}>
               {i18n.t('(subscription).(order).btn1')}
             </Button>
-          </ScrollView>
+          </View>
         </View>
         {/* </View> */}
       </KeyboardAvoidingView>

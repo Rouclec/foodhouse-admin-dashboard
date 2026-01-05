@@ -75,7 +75,7 @@ export default function TrackOrder() {
     onError: async error => {
       setError(
         error?.response?.data?.message ??
-          i18n.t('(buyer).(order).checkout.unknownError'),
+        i18n.t('(buyer).(order).checkout.unknownError'),
       );
       await delay(5000);
       setError(undefined);
@@ -277,6 +277,11 @@ export default function TrackOrder() {
                         i18n.t('(buyer).track-order.orderPlaced'),
                         i18n.t('(buyer).track-order.paymentDone'),
                       ];
+                    case 'CreateOrderFromSubscription':
+                      return [
+                        i18n.t('(buyer).track-order.orderPlaced'),
+                        i18n.t('(buyer).track-order.paymentDone'),
+                      ];
                     case 'ApproveOrder':
                       return [
                         i18n.t('(buyer).track-order.orderConfirmed'),
@@ -365,7 +370,7 @@ export default function TrackOrder() {
       {/* Snackbar Error */}
       <Snackbar
         visible={!!error}
-        onDismiss={() => {}}
+        onDismiss={() => { }}
         duration={3000}
         style={defaultStyles.snackbar}>
         <Text style={defaultStyles.errorText}>{error}</Text>

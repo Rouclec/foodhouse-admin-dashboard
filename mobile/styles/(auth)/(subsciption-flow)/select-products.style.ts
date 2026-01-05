@@ -8,7 +8,7 @@ export const selectProductsStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     columnGap: 24,
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
   },
   headerTitle: {
     fontSize: 18,

@@ -2802,11 +2802,53 @@ func (i *Impl) ListAllActiveSubscriptions(
 	}
 
 	const OneMillion = 1000000
+
+	// Preload orders per user so we can compute progress as:
+	// progress% = (# delivered orders for this subscription) / (total orders for this subscription) * 100
+	ordersByUserID := make(map[string][]sqlc.ListUserOrdersRow)
+	for _, row := range subscriptions {
+		uid := row.UserID
+		if uid == "" {
+			continue
+		}
+		if _, ok := ordersByUserID[uid]; ok {
+			continue
+		}
+		orders, err := i.repo.Do().ListUserOrders(ctx, sqlc.ListUserOrdersParams{
+			CreatedBy:        &uid,
+			IncludedStatuses: []string{}, // All statuses
+			CreatedBefore:    time.Time{},
+			SearchKey:        "",
+			Count:            10000,
+		})
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error listing orders for user %s: %v", uid, err)
+		}
+		ordersByUserID[uid] = orders
+	}
+
 	protoSubscriptions := make([]*ordersgrpc.UserSubscription, 0, len(subscriptions))
 	for _, row := range subscriptions {
 		// Convert row to UserSubscription proto
 		progress := 0.0
-		if row.Progress != nil {
+		// Prefer computed progress from orders; fall back to stored progress if no orders exist.
+		if userOrders, ok := ordersByUserID[row.UserID]; ok {
+			total := 0
+			delivered := 0
+			for _, o := range userOrders {
+				if o.UserSubscriptionID != nil && *o.UserSubscriptionID == row.ID {
+					total++
+					if o.Status == ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String() {
+						delivered++
+					}
+				}
+			}
+			if total > 0 {
+				progress = (float64(delivered) / float64(total)) * 100.0
+			} else if row.Progress != nil {
+				progress = *row.Progress
+			}
+		} else if row.Progress != nil {
 			progress = *row.Progress
 		}
 
@@ -3107,32 +3149,35 @@ func (i *Impl) CreateCustomSubscription(
 	if req.MaxAmountPerOrder != nil && *req.MaxAmountPerOrder > 0 {
 		maxAmountPerOrderCents = *req.MaxAmountPerOrder
 	}
-	maxAmountPerOrder := float64(maxAmountPerOrderCents) / 100.0 // Convert to currency units
 
-	// Automatically split items into orders based on max amount per order
-	// Items are assigned to orders (order_index) while keeping total <= maxAmountPerOrder
 	type orderGroup struct {
 		orderIndex int32
 		items      []itemWithProduct
 		total      float64
 	}
-	orderGroups := []orderGroup{{orderIndex: 0, items: []itemWithProduct{}, total: 0}}
-
-	currentGroup := &orderGroups[0]
+	// IMPORTANT: Do NOT auto-split items into orders based on max amount.
+	// The client provides order_index on each SubscriptionItem; we persist it as-is.
+	// Later, when orders are generated from the subscription, items with the same
+	// order_index are grouped into the same order.
+	groupMap := make(map[int32]*orderGroup)
+	maxOrderIndex := int32(0)
 	for _, itemWithProd := range itemsWithProducts {
-		// If adding this item would exceed the limit, start a new order group
-		if currentGroup.total+itemWithProd.amount > maxAmountPerOrder && len(currentGroup.items) > 0 {
-			newGroup := orderGroup{
-				orderIndex: int32(len(orderGroups)),
-				items:      []itemWithProduct{},
-				total:      0,
-			}
-			orderGroups = append(orderGroups, newGroup)
-			currentGroup = &orderGroups[len(orderGroups)-1]
+		oi := itemWithProd.item.GetOrderIndex() // defaults to 0 when omitted
+		if oi > maxOrderIndex {
+			maxOrderIndex = oi
 		}
+		g := groupMap[oi]
+		if g == nil {
+			g = &orderGroup{orderIndex: oi, items: []itemWithProduct{}, total: 0}
+			groupMap[oi] = g
+		}
+		g.items = append(g.items, itemWithProd)
+		g.total += itemWithProd.amount
+	}
 
-		currentGroup.items = append(currentGroup.items, itemWithProd)
-		currentGroup.total += itemWithProd.amount
+	orderGroups := make([]orderGroup, 0, len(groupMap))
+	for _, g := range groupMap {
+		orderGroups = append(orderGroups, *g)
 	}
 
 	// Validate total doesn't exceed budget
@@ -3146,7 +3191,9 @@ func (i *Impl) CreateCustomSubscription(
 	}
 
 	// Calculate estimated delivery time: 3 days between orders
-	numberOfOrders := len(orderGroups)
+	// Use max order index (+1) to represent the intended number of deliveries.
+	// Example: order indices 0,1,2 => 3 deliveries.
+	numberOfOrders := int(maxOrderIndex) + 1
 	estimatedDays := numberOfOrders * 3
 	if req.EstimatedDeliveryTimeDays != nil && *req.EstimatedDeliveryTimeDays > 0 {
 		estimatedDays = int(*req.EstimatedDeliveryTimeDays)

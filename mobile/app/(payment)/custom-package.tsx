@@ -121,7 +121,7 @@ export default function CustomPackage() {
         </View>
       </ScrollView>
 
-      <SafeAreaView style={styles.footer}>
+      <View style={defaultStyles.bottomButtonContainer}>
         <Button
           mode="contained"
           style={[defaultStyles.button, defaultStyles.primaryButton]}
@@ -139,7 +139,7 @@ export default function CustomPackage() {
             {i18n.t('(subscription).(customPackage).continueToProducts')}
           </Text>
         </Button>
-      </SafeAreaView>
+      </View>
     </View>
   );
 }

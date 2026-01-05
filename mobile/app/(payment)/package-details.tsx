@@ -131,7 +131,7 @@ export default function SubscriptionCheckout() {
 
                   style={subscriptionCheckoutStyles.summaryValue}>
                   {item.quantity}
-                  {''} {item.unitType}
+                  {''} {item.unitType?.replace("per_", "")}{parseInt(item.quantity ?? "") > 1 && "s"}
                 </Text>
               </View>
             ))}

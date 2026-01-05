@@ -12,42 +12,77 @@ import i18n from '@/i18n';
 
 export default function Summary() {
   const router = useRouter();
-  const { budget, deliveries, selectedProducts, subscriptionItems } = useLocalSearchParams<{
+  const { budget, deliveries, selectedProducts, selectedProductsByDelivery, subscriptionItems } = useLocalSearchParams<{
     budget: string;
     deliveries: string;
     selectedProducts: string;
+    selectedProductsByDelivery?: string;
     subscriptionItems: string;
   }>();
   const { user, setPaymentData } = useContext(Context) as ContextType;
-  
+
   const totalBudget = parseInt(budget || '75000');
   const numDeliveries = parseInt(deliveries || '2');
-  const products = selectedProducts ? JSON.parse(selectedProducts) : [];
-  const items = subscriptionItems ? JSON.parse(subscriptionItems) : [];
-  
+  const budgetPerDelivery = Math.floor(totalBudget / numDeliveries);
+  const productsFallback = selectedProducts ? JSON.parse(selectedProducts) : [];
+
+  const productsByDelivery: Record<number, any[]> = (() => {
+    if (selectedProductsByDelivery) {
+      try {
+        const raw = JSON.parse(selectedProductsByDelivery) as Record<string, any[]>;
+        const next: Record<number, any[]> = {};
+        Object.entries(raw ?? {}).forEach(([k, v]) => {
+          next[Number(k)] = Array.isArray(v) ? v : [];
+        });
+        return next;
+      } catch {
+        // fall through to fallback
+      }
+    }
+    // Backward-compat: old flow only had a single list, treat it as delivery 1.
+    return { 1: productsFallback };
+  })();
+
+  const allProducts = Object.values(productsByDelivery).flat();
+
+  const computedSubscriptionItems = Object.entries(productsByDelivery).flatMap(([deliveryNum, products]) => {
+    const orderIndex = Math.max(0, Number(deliveryNum) - 1);
+    return (products ?? []).map((p: any) => ({
+      productId: p.id,
+      quantity: (p.quantity ?? 0).toString(),
+      productName: p.name,
+      productUnitPrice: { value: p.price, currencyIsoCode: 'XAF' },
+      unitType: p.unit,
+      orderIndex,
+    }));
+  });
+
+  const items = subscriptionItems ? JSON.parse(subscriptionItems) : computedSubscriptionItems;
+
   const { mutateAsync: createCustomSubscription, isPending } = useMutation({
     ...ordersCreateCustomSubscriptionMutation(),
   });
-  
-  const amount = products.reduce((sum: number, p: any) => sum + p.price * p.quantity, 0);
+
+  const amount = allProducts.reduce((sum: number, p: any) => sum + p.price * p.quantity, 0);
   const discount = amount * 0.1;
   const total = amount - discount;
-  
+
   const handleConfirmPayment = async () => {
     try {
       const result = await createCustomSubscription({
         body: {
           budget: { value: totalBudget, currencyIsoCode: 'XAF' },
           subscriptionItems: items,
-          maxAmountPerOrder: (totalBudget / numDeliveries).toString(),
+          // Backend expects this value in cents (XAF * 100)
+          maxAmountPerOrder: (budgetPerDelivery * 100).toString(),
           estimatedDeliveryTimeDays: '7',
         },
         path: { userId: user?.userId ?? '' },
       });
-      
+
       const publicId = result?.subscription?.publicId ?? '';
       if (!publicId) return;
-      
+
       setPaymentData({
         entity: 'PaymentEntity_SUBSCRIPTION',
         entityId: publicId,
@@ -59,16 +94,24 @@ export default function Summary() {
       console.error('Error creating custom subscription:', e);
     }
   };
-  
-  const deliveriesData = Array.from({ length: numDeliveries }, (_, i) => ({
-    id: i + 1,
-    items: products.map((p: any) => ({
-      name: p.name,
-      unit: `${p.quantity}x ${p.unit}`,
-      price: p.price * p.quantity,
-    })),
-    total: amount / numDeliveries,
-  }));
+
+  const deliveriesData = Array.from({ length: numDeliveries }, (_, i) => {
+    const id = i + 1;
+    const deliveryProducts = productsByDelivery[id] ?? [];
+    const deliveryAmount = deliveryProducts.reduce(
+      (sum: number, p: any) => sum + p.price * p.quantity,
+      0,
+    );
+    return {
+      id,
+      items: deliveryProducts.map((p: any) => ({
+        name: p.name,
+        unit: `${p.quantity} ${p.unit.replace("per_", "")}${parseInt(p.quantity ?? '0') > 1 ? 's' : ''}`,
+        price: p.price * p.quantity,
+      })),
+      total: deliveryAmount,
+    };
+  });
 
   return (
     <View style={defaultStyles.flex}>
@@ -91,7 +134,7 @@ export default function Summary() {
         <View style={styles.packageCard}>
           <Text style={styles.packageTitle}>{i18n.t('(subscription).(summary).customPackage')}</Text>
           <View style={styles.packageDetails}>
-            <Text style={styles.packageDetailText}>{products.reduce((sum: number, p: any) => sum + p.quantity, 0)} {i18n.t('(subscription).(summary).items')}</Text>
+            <Text style={styles.packageDetailText}>{allProducts.reduce((sum: number, p: any) => sum + p.quantity, 0)} {i18n.t('(subscription).(summary).items')}</Text>
             <View style={styles.packageDivider} />
             <Icon source="truck-delivery" size={16} color={Colors.light[10]} />
             <Text style={styles.packageDetailText}>{numDeliveries} {i18n.t('(subscription).(summary).deliveries')}</Text>
@@ -145,10 +188,10 @@ export default function Summary() {
         </View>
       </ScrollView>
 
-      <SafeAreaView style={styles.footer}>
+      <View style={defaultStyles.bottomButtonContainer}>
         <Button
           mode="contained"
-          style={[defaultStyles.button, defaultStyles.primaryButton]}
+          style={[defaultStyles.button, defaultStyles.primaryButton, isPending && defaultStyles.greyButton]}
           contentStyle={[defaultStyles.center]}
           onPress={handleConfirmPayment}
           loading={isPending}
@@ -157,7 +200,7 @@ export default function Summary() {
             {i18n.t('(subscription).(summary).confirmPayment')}
           </Text>
         </Button>
-      </SafeAreaView>
+      </View>
     </View>
   );
 }

@@ -256,7 +256,6 @@
         "deleteModalBody2": "WARNING: Once deleted, you will lose access to the app, and your information will be fully deleted from the platform within 90 days.",
         "deleteModalCancel": "cancel",
         "deleteModalConfirm": "Delete Account"
-
       },
       "(personal-info)": {
         "heading": "Personal Information",
@@ -497,15 +496,18 @@
       "TransactionCharges": "Transaction Charges",
       "ServiceFees": "Service Fee",
       "freeDelivery": "1 Free Delivery",
-      "total": "Total"
+      "total": "Total",
+      "btn1": "Confirm Payment"
     },
     "(selectProducts)": {
       "header": "Select Products",
       "budgetUsed": "Budget Used",
       "remaining": "Remaining",
+      "leftoverOk": "It's okay if you don't use the full budget — you'll only pay for what you selected.",
       "delivery": "Delivery",
       "selectedItems": "Selected Items",
       "availableProducts": "Available Products",
+      "budgetExceeded": "This would exceed your delivery budget.",
       "viewSummary": "View Summary"
     },
     "(summary)": {
@@ -526,5 +528,5 @@
       "description": "To proceed, please add your payment methods.",
       "next": "Next"
     }
-    }
+  }
 }

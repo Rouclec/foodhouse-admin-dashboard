@@ -95,7 +95,7 @@ const PaymentMethodsPage = () => {
                     source={method.icon}
                     style={selectionSubscriptionStyles.methodIcon}
                   />
-                  <Text style={selectionSubscriptionStyles.planPrice}>
+                  <Text style={selectionSubscriptionStyles.methodName}>
                     {method.name}
                   </Text>
                   <View style={selectionSubscriptionStyles.planSelector}>

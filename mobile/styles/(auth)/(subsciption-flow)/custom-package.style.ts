@@ -16,6 +16,7 @@ export const customPackageStyles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    backgroundColor: Colors.light['bg'],
   },
   scrollContent: {
     padding: 18,
@@ -81,13 +82,13 @@ export const customPackageStyles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-
     paddingVertical: 8,
   },
   valueText: {
     fontSize: 30,
     fontWeight: 'bold',
     color: Colors.dark[10],
+    lineHeight: 0,
   },
   valueSubtext: {
     fontSize: 14,

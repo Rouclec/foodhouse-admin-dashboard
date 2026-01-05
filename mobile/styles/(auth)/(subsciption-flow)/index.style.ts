@@ -185,6 +185,10 @@ export const selectionSubscriptionStyles = StyleSheet.create({
     fontSize: 14,
     color: Colors.primary[500],
   },
+  methodName: {
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
   planPricePerMonth: {
     fontWeight: 'bold',
     fontSize: 14,
@@ -224,11 +228,11 @@ export const selectionSubscriptionStyles = StyleSheet.create({
   methodInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1, 
+    flex: 1,
   },
 
   planSelector: {
-    marginLeft: 'auto', 
+    marginLeft: 'auto',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -245,7 +249,7 @@ export const selectionSubscriptionStyles = StyleSheet.create({
     height: 22,
     borderRadius: 11,
     borderWidth: 2,
-    borderColor: '#C5C5D6',
+    borderColor: Colors.primary[500],
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -254,7 +258,7 @@ export const selectionSubscriptionStyles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#5B4FFF',
+    backgroundColor: Colors.primary[500],
   },
 
   /* Optional: apply when selected */
