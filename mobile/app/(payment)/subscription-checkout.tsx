@@ -27,7 +27,7 @@ import i18n from '@/i18n';
 export default function SubscriptionCheckout() {
   const router = useRouter();
   const { planId } = useLocalSearchParams<{ planId: string }>();
-  const { user, setPaymentData } = useContext(Context) as ContextType;
+  const { user, setPaymentData, deliveryLocation } = useContext(Context) as ContextType;
 
   const { data: subscriptionPlansData, isLoading } = useQuery({
     ...ordersListSubscriptionPlansOptions({
@@ -59,6 +59,11 @@ export default function SubscriptionCheckout() {
       const result = await subscribe({
         body: {
           subscriptionPlanId: plan.id,
+          deliveryLocation: {
+            lon: deliveryLocation?.region?.longitude || 0,
+            lat: deliveryLocation?.region?.latitude || 0,
+            address: deliveryLocation?.description || deliveryLocation?.address || user?.address || '6140 Sunbrook Park, PC 5679',
+          },
         },
         path: { userId: user?.userId ?? '' },
       });
@@ -143,7 +148,7 @@ export default function SubscriptionCheckout() {
                     color={Colors.primary[500]}
                   />
                   <Text style={subscriptionCheckoutStyles.planDetailText}>
-                    1 Free Delivery
+                    {i18n.t('(subscription).(order).freeDelivery')}
                   </Text>
                 </View>
               </View>
@@ -162,10 +167,16 @@ export default function SubscriptionCheckout() {
                     {i18n.t('(subscription).(order).Home')}
                   </Text>
                   <Text style={subscriptionCheckoutStyles.addressSubtitle}>
-                    {user?.address || '6140 Sunbrook Park, PC 5679'}
+                    {deliveryLocation?.description || deliveryLocation?.address || user?.address || '6140 Sunbrook Park, PC 5679'}
                   </Text>
                 </View>
-                <TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push({
+                      pathname: '/(buyer)/(order)' as any,
+                      params: { returnTo: `/(payment)/subscription-checkout?planId=${plan.id}` },
+                    } as any)
+                  }>
                   <Icon source="pencil" size={20} />
                 </TouchableOpacity>
               </View>

@@ -496,7 +496,7 @@
       "Free": "Free",
       "TransactionCharges": "Transaction Charges",
       "ServiceFees": "Service Fee",
-      "btn1": "Confirm Payment",
+      "freeDelivery": "1 Free Delivery",
       "total": "Total"
     },
     "(selectProducts)": {

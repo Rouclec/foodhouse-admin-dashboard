@@ -352,14 +352,14 @@ export default function BuyerProducts() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView
-              horizontal={true}
+            <FlatList
+              horizontal
+              data={plans}
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.scrollViewContent}>
-              {plans.map(item => (
-                <PackageCard key={item.id} item={item} />
-              ))}
-            </ScrollView>
+              contentContainerStyle={styles.scrollViewContent}
+              keyExtractor={(item, index) => item.id ?? index.toString()}
+              renderItem={({ item }) => <PackageCard item={item} />}
+            />
           </View>
 
           <Text

@@ -106,7 +106,7 @@ export default function Summary() {
                 {delivery.total.toLocaleString()} XAF
               </Text>
             </View>
-            {delivery.items.map((item, index) => (
+            {delivery.items.map((item: { name: string; unit: string; price: number }, index: number) => (
               <View key={index} style={styles.itemRow}>
                 <View>
                   <Text style={styles.itemName}>{item.name}</Text>
