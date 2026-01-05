@@ -1,7 +1,7 @@
 CREATE TABLE subscriptions (
     id varchar(36) PRIMARY KEY DEFAULT gen_random_uuid()::varchar(36),
     title varchar(20) NOT NULL,
-    "description" TYPE TEXT NOT NULL,
+    "description" TEXT NOT NULL,
     duration interval NOT NULL,
     amount bigint NOT NULL,
     currency_iso_code varchar(3) NOT NULL
