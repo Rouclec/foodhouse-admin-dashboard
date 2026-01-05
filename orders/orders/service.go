@@ -3415,6 +3415,7 @@ func (i *Impl) ListSubscriptionPlans(
 				ProductImage:     product.GetProduct().GetImage(),
 				ProductName:      product.GetProduct().GetName(),
 				ProductUnitPrice: product.GetProduct().GetAmount(),
+				Quantity:         int64(item.Quantity),
 				UnitType:         item.UnitType,
 				SubscriptionId:   sub.ID,
 				OrderIndex:       item.OrderIndex,

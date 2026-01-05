@@ -121,15 +121,13 @@ export default function SubscriptionCheckout() {
               {i18n.t('(subscription).(packageDetails).Categories')}
             </Text>
 
-            {plan.subscriptionItems?.map((item, index) => (
-              <View style={subscriptionCheckoutStyles.summaryRow}>
+            {plan.subscriptionItems?.map((item, _) => (
+              <View style={subscriptionCheckoutStyles.summaryRow} key={item.productId}>
                 <Text
-                  key={index}
                   style={subscriptionCheckoutStyles.summaryLabel}>
                   {item.productName}
                 </Text>
                 <Text
-                  key={item.productId}
 
                   style={subscriptionCheckoutStyles.summaryValue}>
                   {item.quantity}
@@ -140,45 +138,45 @@ export default function SubscriptionCheckout() {
 
             <View style={subscriptionCheckoutStyles.deliveryNote}>
               <Text style={subscriptionCheckoutStyles.deliveryNoteText}>
-                  {i18n.t('(subscription).(packageDetails).desc3')}
+                {i18n.t('(subscription).(packageDetails).desc3')}
               </Text>
             </View>
-            <View
-              style={
-                (defaultStyles.bottomButtonContainer, defaultStyles.actions)
-              }>
-              <Button
-                mode="contained"
-                style={[
-                  defaultStyles.button,
-                  defaultStyles.dangerButton,
-                  buyerProductsStyles.halfButton,
-                ]}
-                onPress={() => {
-                   router.push({
-                    pathname: '/(payment)/subscription',
-                    
-                  })
-                }}>
-                   {i18n.t('(subscription).(packageDetails).btn1')}
-              </Button>
-              <Button
-                mode="contained"
-                style={[
-                  defaultStyles.button,
-                  defaultStyles.primaryButton,
-                  buyerProductsStyles.halfButton,
-                ]}
-                onPress={() =>
-                  router.push({
-                    pathname: '/(payment)/subscription-checkout',
-                    params: { planId: plan.id },
-                  })
-                }>
-                {i18n.t('(subscription).(packageDetails).btn2')}
-              </Button>
-            </View>
           </ScrollView>
+          <View
+            style={
+              (defaultStyles.bottomButtonContainer, defaultStyles.actions)
+            }>
+            <Button
+              mode="contained"
+              style={[
+                defaultStyles.button,
+                defaultStyles.dangerButton,
+                buyerProductsStyles.halfButton,
+              ]}
+              onPress={() => {
+                router.push({
+                  pathname: '/(payment)/subscription',
+
+                })
+              }}>
+              {i18n.t('(subscription).(packageDetails).btn1')}
+            </Button>
+            <Button
+              mode="contained"
+              style={[
+                defaultStyles.button,
+                defaultStyles.primaryButton,
+                buyerProductsStyles.halfButton,
+              ]}
+              onPress={() =>
+                router.push({
+                  pathname: '/(payment)/subscription-checkout',
+                  params: { planId: plan.id },
+                })
+              }>
+              {i18n.t('(subscription).(packageDetails).btn2')}
+            </Button>
+          </View>
         </View>
       </KeyboardAvoidingView>
     </>
