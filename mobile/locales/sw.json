@@ -444,5 +444,84 @@
       "permissionDenied": "Ruhusa imekataliwa",
       "allowAccessToGallery": "Tafadhali ruhusu upatikanaji wa maktaba"
     }
+  },
+  "(subscription)": {
+  "planNotFound": "Mpango haujapatikana",
+  "GoBack": "Rudi nyuma",
+  "OurPackages": "Vifurushi vyetu kwa ajili yako",
+  "SeeAll": "Angalia vyote",
+  "SubscriptionTitle": "Acha FoodHouse ishughulikie ununuzi na usafirishaji wako!",
+  "SubSubTitle": "Chagua kifurushi kinachokufaa na upokee mazao mapya moja kwa moja mlangoni mwako — haraka, rahisi na bila usumbufu",
+  "CustomPackage": "Binafsisha kifurushi chako",
+  "CustomizeText": "Chagua bidhaa zako mwenyewe, weka bajeti yako na uchague ratiba ya usafirishaji. Uamuzi ni wako!",
+  "CustomizeButton": "Anza kubinafsisha",
+  "choosePlan": "Chagua mpango wako",
+  "choosePlandesc": "Chagua kifurushi kilicho tayari kulingana na mahitaji yako",
+  "(packageDetails)": {
+    "header": "Maelezo ya kifurushi",
+    "order": "Agizo",
+    "desc1": "Kimeundwa kwa ajili ya familia, kifurushi hiki kinakupa mazao mapya yenye thamani ya",
+    "desc2": "kwa mwezi, yakiletwa moja kwa moja hadi mlangoni mwako. Ni bora kwa mahitaji ya kaya ya kila mwezi.",
+    "Categories": "Kategoria na bidhaa",
+    "desc3": "Jiandikishe leo na uache FoodHouse ishughulikie ununuzi wako wa kila mwezi kwa usafirishaji wa kuaminika na ubora wa uhakika.",
+    "btn1": "Ghairi",
+    "btn2": "Agiza sasa"
+  },
+  "(customPackage)": {
+    "header": "Jenga kifurushi maalum",
+    "title": "Jenga kifurushi chako maalum",
+    "subtitle": "Weka bajeti yako na usafirishaji ili kuanza ununuzi wa kibinafsi",
+    "monthlyBudget": "Bajeti ya kila mwezi",
+    "deliveriesPerMonth": "Usafirishaji kwa mwezi",
+    "delivery": "Usafirishaji",
+    "deliveries": "Usafirishaji",
+    "totalBudget": "Bajeti ya jumla",
+    "discount": "Punguzo",
+    "total": "Jumla",
+    "continueToProducts": "Endelea kwa bidhaa"
+  },
+  "(order)": {
+    "checkout": "Malipo",
+    "order": "Agizo",
+    "Address": "Anwani ya usafirishaji",
+    "Home": "Nyumbani",
+    "Desc1": "Agizo lako litawasilishwa ndani ya siku",
+    "desc2": "baada ya kuthibitishwa",
+    "Amount": "Kiasi",
+    "Delivery": "Usafirishaji",
+    "Free": "Bure",
+    "TransactionCharges": "Gharama za muamala",
+    "ServiceFees": "Ada ya huduma",
+    "freeDelivery": "Usafirishaji 1 wa bure",
+    "btn1": "Thibitisha malipo",
+    "total": "Jumla"
+  },
+  "(selectProducts)": {
+    "header": "Chagua bidhaa",
+    "budgetUsed": "Bajeti iliyotumika",
+    "remaining": "Iliyobaki",
+    "delivery": "Usafirishaji",
+    "selectedItems": "Vitu vilivyochaguliwa",
+    "availableProducts": "Bidhaa zinazopatikana",
+    "viewSummary": "Angalia muhtasari"
+  },
+  "(summary)": {
+    "header": "Muhtasari",
+    "customPackage": "Kifurushi maalum",
+    "items": "Vitu",
+    "deliveries": "Usafirishaji",
+    "delivery": "Usafirishaji",
+    "paymentSummary": "Muhtasari wa malipo",
+    "amount": "Kiasi",
+    "free": "Bure",
+    "discount": "Punguzo (10%)",
+    "total": "Jumla",
+    "confirmPayment": "Thibitisha malipo"
+  },
+  "(paymentMethods)": {
+    "header": "Njia za malipo",
+    "description": "Ili kuendelea, tafadhali ongeza njia zako za malipo.",
+    "next": "Ifuatayo"
   }
+}
 }

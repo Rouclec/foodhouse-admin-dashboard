@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Linking,
   SafeAreaView,
+  ScrollView,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -16,9 +17,7 @@ import {
   productsListCategoriesOptions,
   productsListProductsOptions,
 } from '@/client/products.swagger/@tanstack/react-query.gen';
-import {
-  ordersListSubscriptionPlansOptions,
-} from '@/client/orders.swagger/@tanstack/react-query.gen';
+import { ordersListSubscriptionPlansOptions } from '@/client/orders.swagger/@tanstack/react-query.gen';
 import { ordersgrpcSubscription } from '@/client/orders.swagger';
 import { useContext } from 'react';
 import { Context, ContextType } from '@/app/_layout';
@@ -26,9 +25,9 @@ import {
   ActivityIndicator,
   Button,
   Dialog,
-  Icon,
   Portal,
   Text,
+  Icon,
   TextInput,
 } from 'react-native-paper';
 import i18n from '@/i18n';
@@ -140,21 +139,14 @@ export default function BuyerProducts() {
   });
 
   // Fetch subscription plans for the slider
-  const {
-    data: subscriptionPlansData,
-    isLoading: isSubscriptionPlansLoading,
-  } = useQuery({
-    ...ordersListSubscriptionPlansOptions({
-      path: {
-        userId: user?.userId ?? '',
-      },
-    }),
-  });
-
-  const visibleSubscriptionPlans = React.useMemo(() => {
-    const plans = subscriptionPlansData?.subscriptionPlans ?? [];
-    return plans.filter((p) => !isCustomSubscriptionPlan(p));
-  }, [subscriptionPlansData?.subscriptionPlans]);
+  const { data: subscriptionPlansData, isLoading: isSubscriptionPlansLoading } =
+    useQuery({
+      ...ordersListSubscriptionPlansOptions({
+        path: {
+          userId: user?.userId ?? '',
+        },
+      }),
+    });
   const { isLoading: isProductsLoading, data } = useQuery({
     ...productsListProductsOptions({
       path: {
@@ -191,6 +183,40 @@ export default function BuyerProducts() {
   const [filterSelectedMaxValue, setFilterSelectedMaxValue] =
     useState<string>();
   const [filterSelectedRating, setFilterSelectedRating] = useState<number>();
+
+  const plans = subscriptionPlansData?.subscriptionPlans || [];
+
+  const PackageCard = ({ item }: { item: ordersgrpcSubscription }) => (
+    <TouchableOpacity
+      key={item.id}
+      // style={styles.planCard}
+      onPress={() =>
+        router.push({
+          pathname: '/(payment)/package-details',
+          params: { planId: item.id },
+        })
+      }>
+      <View style={styles.packageContainer}>
+        <View style={styles.headerRow}>
+          <View style={styles.discountBadge}>
+            <Text style={styles.discountText}>
+              {item.description || 'Special Offer'}
+            </Text>
+          </View>
+          <Icon source="chevron-right" size={24} color={Colors.primary[500]} />
+        </View>
+ <View style={styles.detailsRow}>
+   <Text style={styles.tierTitle}>{item.title}</Text>
+   <Text style={[styles.amountText, { color: Colors.primary['500'] }]}>
+            {item.amount?.value?.toLocaleString()}{' '}
+            {item.amount?.currencyIsoCode}
+          </Text>
+
+ </View>
+        
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
     <>
@@ -229,8 +255,8 @@ export default function BuyerProducts() {
                         {HOUR_OF_DAY < 12
                           ? i18n.t('(buyer).(index).products.goodMorning')
                           : HOUR_OF_DAY < 17
-                            ? i18n.t('(buyer).(index).products.goodAfternoon')
-                            : i18n.t('(buyer).(index).products.goodEvening')}{' '}
+                          ? i18n.t('(buyer).(index).products.goodAfternoon')
+                          : i18n.t('(buyer).(index).products.goodEvening')}{' '}
                         👋
                       </Text>
                       <Text style={styles.nameText} variant="titleLarge">
@@ -256,27 +282,8 @@ export default function BuyerProducts() {
                       />
 
                       {cartCount > 0 && (
-                        <View
-                          style={{
-                            position: 'absolute',
-                            top: -14,
-                            right: -14,
-                            backgroundColor: Colors.primary[500],
-                            borderRadius: 28,
-                            width: 24,
-                            height: 24,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            borderWidth: 1.5,
-                            borderColor: 'white',
-                          }}>
-                          <Text
-                            style={{
-                              color: Colors.light[10],
-                              fontSize: 14,
-                              fontWeight: 'bold',
-                              textAlign: 'center',
-                            }}>
+                        <View style={defaultStyles.cardContainer}>
+                          <Text style={defaultStyles.cardText}>
                             {cartCount}
                           </Text>
                         </View>
@@ -332,122 +339,29 @@ export default function BuyerProducts() {
               </View>
             </SafeAreaView>
           </View>
-          {/* Subscription Plans Slider */}
-          {visibleSubscriptionPlans.length > 0 && (
-              <>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    paddingHorizontal: 24,
-                    marginTop: 16,
-                  }}>
-                  <Text variant="titleMedium" style={[styles.title]}>
-                    Subscription Plans
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => router.push('/(buyer)/subscription-plans')}>
-                    <Text
-                      style={{
-                        color: Colors.primary[500],
-                        fontSize: 14,
-                        fontWeight: '600',
-                      }}>
-                      More
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                {isSubscriptionPlansLoading ? (
-                  <View style={defaultStyles.center}>
-                    <Chase size={24} color={Colors.primary[500]} />
-                  </View>
-                ) : (
-                  <View style={[styles.flatListContainer, { marginBottom: 8 }]}>
-                    <FlatList
-                      horizontal
-                      data={visibleSubscriptionPlans.slice(0, 2)}
-                      contentContainerStyle={[
-                        { columnGap: 12, alignItems: 'flex-start', height: '100%' },
-                        styles.paddingRight24,
-                      ]}
-                      showsHorizontalScrollIndicator={false}
-                      style={[styles.horizontalFlatList, styles.paddingLeft24]}
-                      keyExtractor={(item, index) =>
-                        item?.id ?? index.toString()
-                      }
-                      renderItem={({ item }) => {
-                        const plan = item as ordersgrpcSubscription;
-                        const discountPct = getPlanDiscountPercent(plan);
-                        const cardWidth = Math.min(220, Math.round(width * 0.46));
-                        return (
-                          <TouchableOpacity
-                            style={[
-                              {
-                                backgroundColor: Colors.light[10],
-                                borderRadius: 12,
-                                padding: 12,
-                                width: cardWidth,
-                                borderWidth: 1,
-                                borderColor: Colors.grey['f8'],
-                              },
-                            ]}
-                            onPress={() =>
-                              router.push({
-                                pathname: '/(buyer)/subscription-plan-details',
-                                params: { planId: plan?.id },
-                              })
-                            }>
-                            <View
-                              style={{
-                                flexDirection: 'row',
-                                alignItems: 'flex-start',
-                                justifyContent: 'space-between',
-                                gap: 8,
-                              }}>
-                              <Text
-                                variant="bodyLarge"
-                                style={{ flex: 1, color: Colors.dark[10] }}
-                                numberOfLines={2}>
-                                {plan?.title ?? 'Subscription'}
-                              </Text>
-                              {discountPct !== null && (
-                                <View
-                                  style={{
-                                    backgroundColor: Colors.primary[50],
-                                    borderColor: Colors.primary[500],
-                                    borderWidth: 1,
-                                    paddingHorizontal: 8,
-                                    paddingVertical: 4,
-                                    borderRadius: 999,
-                                  }}>
-                                  <Text
-                                    variant="bodySmall"
-                                    style={{
-                                      color: Colors.primary[500],
-                                      fontWeight: '700',
-                                    }}>
-                                    -{discountPct}%
-                                  </Text>
-                                </View>
-                              )}
-                            </View>
+         
 
-                            <Text
-                              variant="titleMedium"
-                              style={{ color: Colors.primary[500] }}
-                              numberOfLines={1}>
-                              {plan?.amount?.currencyIsoCode ?? 'XAF'}{' '}
-                              {(plan?.amount?.value ?? 0).toLocaleString()}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      }}
-                    />
-                  </View>
-                )}
-              </>
-            )}
+          <View style={styles.subscriptionContainer}>
+            <View style={styles.package}>
+              <Text variant="titleMedium" style={[styles.title]}>
+                {i18n.t('(subscription).OurPackages')}
+              </Text>
+              <TouchableOpacity
+                onPress={() => router.push('../(payment)/subscription')}>
+                <Text style={[styles.title1]}>{i18n.t('(subscription).SeeAll')}</Text>
+              </TouchableOpacity>
+            </View>
+
+            <FlatList
+              horizontal
+              data={plans}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.scrollViewContent}
+              keyExtractor={(item, index) => item.id ?? index.toString()}
+              renderItem={({ item }) => <PackageCard item={item} />}
+            />
+          </View>
+
           <Text
             variant="titleMedium"
             style={[styles.title, styles.marginHorizontal24]}>
@@ -492,7 +406,7 @@ export default function BuyerProducts() {
                       style={[
                         styles.categoryItem,
                         selectedCategoryId === item?.id &&
-                        styles.selectedCategoryItem,
+                          styles.selectedCategoryItem,
                       ]}
                       onPress={() => setSelectedCategoryId(item?.id)}>
                       <Text
@@ -611,7 +525,7 @@ export default function BuyerProducts() {
                         style={[
                           styles.categoryItem,
                           !filterSelectedCategoryId &&
-                          styles.selectedCategoryItem,
+                            styles.selectedCategoryItem,
                         ]}
                         onPress={() => setFilterSelectedCategoryId(undefined)}>
                         <Text
@@ -630,7 +544,7 @@ export default function BuyerProducts() {
                           style={[
                             styles.categoryItem,
                             filterSelectedCategoryId === item?.id &&
-                            styles.selectedCategoryItem,
+                              styles.selectedCategoryItem,
                           ]}
                           onPress={() => setFilterSelectedCategoryId(item?.id)}>
                           <Text
@@ -654,7 +568,7 @@ export default function BuyerProducts() {
                 {i18n.t('(buyer).(index).products.priceRange')}
               </Text>
               <MultiSlider
-                onValuesChangeStart={() => { }}
+                onValuesChangeStart={() => {}}
                 onValuesChangeFinish={e => {
                   setFilterSelectedMinValue(e[0].toString());
                   setFilterSelectedMaxValue(e[1].toString());
@@ -744,7 +658,7 @@ export default function BuyerProducts() {
                         style={[
                           styles.categoryItem,
                           filterSelectedRating === item &&
-                          styles.selectedCategoryItem,
+                            styles.selectedCategoryItem,
                         ]}
                         onPress={() => setFilterSelectedRating(item)}>
                         <Icon

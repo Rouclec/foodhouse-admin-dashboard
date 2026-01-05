@@ -12,6 +12,7 @@ import { Colors } from "@/constants";
 import { defaultStyles, selectionSubscriptionStyles } from "@/styles";
 import { ordersgrpcPaymentMethodType } from "@/client/orders.swagger";
 import { KeyboardAvoidingView } from "react-native";
+import i18n from '@/i18n';
 
 const PaymentMethodsPage = () => {
   const router = useRouter();
@@ -65,7 +66,7 @@ const PaymentMethodsPage = () => {
               <Icon source={"arrow-left"} size={24} />
             </TouchableOpacity>
             <Text variant="titleMedium" style={defaultStyles.heading}>
-              Payment Methods
+              {i18n.t('(subscription).(paymentMethods).header')}
             </Text>
             <View />
           </Appbar.Header>
@@ -77,7 +78,7 @@ const PaymentMethodsPage = () => {
             keyboardShouldPersistTaps="handled"
           >
             <Text>
-              To proceed, please add your payment methods.
+              {i18n.t('(subscription).(paymentMethods).description')}
             </Text>
 
             <View style={selectionSubscriptionStyles.plansContainer}>
@@ -120,7 +121,7 @@ const PaymentMethodsPage = () => {
           style={defaultStyles.button}
           disabled={!selectedMethod}
         >
-          Next
+          {i18n.t('(subscription).(paymentMethods).next')}
         </Button>
       </View>
     </>

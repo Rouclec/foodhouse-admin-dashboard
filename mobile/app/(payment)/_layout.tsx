@@ -17,6 +17,7 @@ export default function paymentFlow() {
       <Stack.Screen name="index" options={{ headerShown: false }} />
 
       <Stack.Screen name="payment-account" options={{ headerShown: false }} />
+      <Stack.Screen name="subscription" options={{ headerShown: false }} />
     </Stack>
   );
 }
