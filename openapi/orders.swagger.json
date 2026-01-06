@@ -1828,6 +1828,14 @@
         }
       }
     },
+    "ordersgrpcCreateSignupCommissionResponse": {
+      "type": "object",
+      "properties": {
+        "commission": {
+          "$ref": "#/definitions/ordersgrpcCommission"
+        }
+      }
+    },
     "ordersgrpcCreateSubscriptionPlanResponse": {
       "type": "object",
       "properties": {

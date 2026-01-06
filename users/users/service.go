@@ -12,16 +12,19 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/nyaruka/phonenumbers"
 	"github.com/phpdave11/gofpdf"
 	"github.com/rs/zerolog"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/genproto/googleapis/api/httpbody"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/foodhouse/foodhouseapp/grpc/go/ordersgrpc"
 	"github.com/foodhouse/foodhouseapp/grpc/go/types"
 	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
 	"github.com/foodhouse/foodhouseapp/sms"
@@ -64,11 +67,23 @@ type Impl struct {
 	smsSender           sms.SmsSender
 	tokenManagerBuilder TokenManagerBuilder
 	devMethodsEndabled  bool
+	ordersService       SignupCommissionClient
 
 	usersgrpc.UnsafeUsersServer
 }
 
 var _ usersgrpc.UsersServer = (*Impl)(nil)
+
+// SignupCommissionClient is a narrow interface for the only Orders RPC the Users
+// service needs for referral signup commissions. Keeping this small makes it
+// easy to stub in tests.
+type SignupCommissionClient interface {
+	CreateSignupCommission(
+		ctx context.Context,
+		in *ordersgrpc.CreateSignupCommissionRequest,
+		opts ...grpc.CallOption,
+	) (*ordersgrpc.CreateSignupCommissionResponse, error)
+}
 
 // NewUsers returns a new instance of the UsersImpl.
 func NewUsers(
@@ -77,6 +92,7 @@ func NewUsers(
 	smsSender sms.SmsSender,
 	otpGenerator OtpGenerator,
 	tokenManagerBuilder TokenManagerBuilder,
+	ordersService SignupCommissionClient,
 	enableDevMethods bool,
 ) *Impl {
 	return &Impl{
@@ -85,6 +101,7 @@ func NewUsers(
 		otpGenerator:        otpGenerator,
 		smsSender:           smsSender,
 		tokenManagerBuilder: tokenManagerBuilder,
+		ordersService:       ordersService,
 		devMethodsEndabled:  enableDevMethods,
 	}
 }
@@ -478,10 +495,22 @@ func (i *Impl) CompleteRegistration(
 
 	i.logger.Debug().Interface("update user params: ", arg)
 
-	err = i.CreateReferral(ctx, querier, req.GetReferredBy(), userID)
-
+	referrerID, err := i.CreateReferral(ctx, querier, req.GetReferredBy(), userID)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error creating referral %v", err)
+	}
+
+	// Create flat signup commission for successful referrals.
+	// We do this within the same users transaction: if it fails, the whole
+	// registration completion is rolled back and can be retried.
+	if referrerID != "" && i.ordersService != nil {
+		_, commErr := i.ordersService.CreateSignupCommission(ctx, &ordersgrpc.CreateSignupCommissionRequest{
+			ReferrerId: referrerID,
+			ReferredId: userID,
+		})
+		if commErr != nil {
+			return nil, status.Errorf(codes.Internal, "error creating signup commission %v", commErr)
+		}
 	}
 
 	_, err = querier.UpdateUser(ctx, arg)
@@ -498,10 +527,10 @@ func (i *Impl) CompleteRegistration(
 	}, nil
 }
 
-func (i *Impl) CreateReferral(ctx context.Context, querrier sqlc.Querier, referralCode string, userID string) error {
+func (i *Impl) CreateReferral(ctx context.Context, querrier sqlc.Querier, referralCode string, userID string) (string, error) {
 	i.logger.Debug().Msgf("referal code %v", referralCode)
 	if referralCode == "" {
-		return nil
+		return "", nil
 	}
 
 	referrer, err := querrier.GetUserByReferralCode(ctx, referralCode)
@@ -509,12 +538,20 @@ func (i *Impl) CreateReferral(ctx context.Context, querrier sqlc.Querier, referr
 	i.logger.Debug().Msgf("referrer %v", referrer)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	_, err = querrier.CreateReferral(ctx, sqlc.CreateReferralParams{ReferrerID: referrer.ID, ReferredID: userID})
+	if err != nil {
+		// Idempotency: allow retries of CompleteRegistration without failing if
+		// the referral already exists.
+		if pgErr, ok := err.(*pgconn.PgError); ok && pgErr.Code == "23505" {
+			return referrer.ID, nil
+		}
+		return "", err
+	}
 
-	return err
+	return referrer.ID, nil
 }
 
 // Authenticate implements usersgrpc.UsersServer.

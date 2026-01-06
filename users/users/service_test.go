@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
+	"github.com/foodhouse/foodhouseapp/grpc/go/ordersgrpc"
 	"github.com/foodhouse/foodhouseapp/grpc/go/types"
 	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
 	smsMock "github.com/foodhouse/foodhouseapp/sms/mocks"
@@ -20,7 +21,25 @@ import (
 	sqlc_mocks "github.com/foodhouse/foodhouseapp/users/db/sqlc/mocks"
 	"github.com/foodhouse/foodhouseapp/users/users"
 	usersMocks "github.com/foodhouse/foodhouseapp/users/users/mocks"
+	"google.golang.org/grpc"
 )
+
+type fakeSignupCommissionClient struct {
+	t       *testing.T
+	called  int
+	lastReq *ordersgrpc.CreateSignupCommissionRequest
+	err     error
+}
+
+func (f *fakeSignupCommissionClient) CreateSignupCommission(
+	_ context.Context,
+	in *ordersgrpc.CreateSignupCommissionRequest,
+	_ ...grpc.CallOption,
+) (*ordersgrpc.CreateSignupCommissionResponse, error) {
+	f.called++
+	f.lastReq = in
+	return &ordersgrpc.CreateSignupCommissionResponse{}, f.err
+}
 
 func TestSendSignupSmsOtp(t *testing.T) {
 	ctrl := gomock.NewController(t)
@@ -160,7 +179,7 @@ func TestSendSignupSmsOtp(t *testing.T) {
 			tc.setupMocks(mockRepo, mockQuerier, mockSmsSender, mockOtpGenerator)
 
 			// Create the service
-			usersService := users.NewUsers(mockRepo, logger, mockSmsSender, mockOtpGenerator, nil, false)
+			usersService := users.NewUsers(mockRepo, logger, mockSmsSender, mockOtpGenerator, nil, nil, false)
 
 			// Call the method
 			resp, err := usersService.SendSignupSmsOtp(context.Background(), tc.request)
@@ -304,7 +323,7 @@ func TestSignup(t *testing.T) {
 			tc.setupMocks(mockRepo, mockQuerier, mockTokenManager, mockOtpGenerator)
 
 			usersService := users.NewUsers(mockRepo, logger, nil, mockOtpGenerator,
-				mockTokenManagerBuilder, false)
+				mockTokenManagerBuilder, nil, false)
 
 			resp, err := usersService.Signup(context.Background(), tc.request)
 
@@ -402,7 +421,7 @@ func TestRefreshAccessToken(t *testing.T) {
 
 			tc.setupMocks(mockRepo, mockQuerier, mockTokenManager)
 
-			usersService := users.NewUsers(mockRepo, logger, nil, nil, mockTokenManagerBuilder, false)
+			usersService := users.NewUsers(mockRepo, logger, nil, nil, mockTokenManagerBuilder, nil, false)
 
 			resp, err := usersService.RefreshAccessToken(context.Background(), tc.request)
 
@@ -463,7 +482,7 @@ func TestGetUserByID(t *testing.T) {
 			mockRepo.EXPECT().Do().Return(mockQuerier).AnyTimes()
 			tc.setupMocks(mockRepo, mockQuerier)
 
-			usersService := users.NewUsers(mockRepo, logger, nil, nil, nil, false)
+			usersService := users.NewUsers(mockRepo, logger, nil, nil, nil, nil, false)
 
 			resp, err := usersService.GetUserByID(context.Background(), tc.request)
 
@@ -563,7 +582,7 @@ func TestDeleteUserAccount(t *testing.T) {
 			mockRepo.EXPECT().Do().Return(mockQuerier).AnyTimes()
 			tc.setupMocks(mockRepo, mockQuerier)
 
-			usersService := users.NewUsers(mockRepo, logger, nil, nil, nil, false)
+			usersService := users.NewUsers(mockRepo, logger, nil, nil, nil, nil, false)
 
 			resp, err := usersService.DeleteUserAccount(context.Background(), tc.request)
 
@@ -590,10 +609,14 @@ func TestCompleteRegistration(t *testing.T) {
 	testEmail := "john.doe@example.com"
 	testLat := 40.7128
 	testLon := -74.0060
+	testReferralCode := "REF123"
+	testReferrerID := "referrer-1"
 
 	testCases := map[string]struct {
 		setupMocks    func(mockRepo *mocks.MockUsersRepo, mockQuerier *sqlc_mocks.MockQuerier)
 		request       *usersgrpc.CompleteRegistrationRequest
+		ordersClient  users.SignupCommissionClient
+		verify        func(t *testing.T, c *fakeSignupCommissionClient)
 		expectedError error
 		expectedResp  *usersgrpc.CompleteRegistrationResponse
 	}{
@@ -609,6 +632,38 @@ func TestCompleteRegistration(t *testing.T) {
 				LastName:            testLastName,
 				Email:               testEmail,
 				LocationCoordinates: &types.Point{Lat: testLat, Lon: testLon},
+			},
+			expectedError: nil,
+			expectedResp:  &usersgrpc.CompleteRegistrationResponse{Message: "Registration completed successfully."},
+		},
+		"Successful Registration With Referral Creates Signup Commission": {
+			setupMocks: func(mockRepo *mocks.MockUsersRepo, mockQuerier *sqlc_mocks.MockQuerier) {
+				mockRepo.EXPECT().Begin(gomock.Any()).Times(1).Return(mockQuerier, &sqlc_mocks.TxMock{}, nil)
+				mockQuerier.EXPECT().GetUserForUpdate(gomock.Any(), testUserID).Return(sqlc.User{ID: testUserID}, nil)
+				mockQuerier.EXPECT().GetUserByReferralCode(gomock.Any(), testReferralCode).Return(
+					sqlc.User{ID: testReferrerID}, nil,
+				)
+				mockQuerier.EXPECT().CreateReferral(gomock.Any(), sqlc.CreateReferralParams{
+					ReferrerID: testReferrerID,
+					ReferredID: testUserID,
+				}).Return(sqlc.Referral{}, nil)
+				mockQuerier.EXPECT().UpdateUser(gomock.Any(), gomock.Any()).Return(sqlc.User{}, nil)
+			},
+			request: &usersgrpc.CompleteRegistrationRequest{
+				UserId:              testUserID,
+				FirstName:           testFirstName,
+				LastName:            testLastName,
+				Email:               testEmail,
+				ReferredBy:          testReferralCode,
+				LocationCoordinates: &types.Point{Lat: testLat, Lon: testLon},
+			},
+			ordersClient: &fakeSignupCommissionClient{t: t},
+			verify: func(t *testing.T, c *fakeSignupCommissionClient) {
+				require.NotNil(t, c)
+				require.Equal(t, 1, c.called)
+				require.NotNil(t, c.lastReq)
+				require.Equal(t, testReferrerID, c.lastReq.ReferrerId)
+				require.Equal(t, testUserID, c.lastReq.ReferredId)
 			},
 			expectedError: nil,
 			expectedResp:  &usersgrpc.CompleteRegistrationResponse{Message: "Registration completed successfully."},
@@ -634,7 +689,12 @@ func TestCompleteRegistration(t *testing.T) {
 			mockRepo.EXPECT().Do().Return(mockQuerier).AnyTimes()
 			tc.setupMocks(mockRepo, mockQuerier)
 
-			usersService := users.NewUsers(mockRepo, logger, nil, nil, nil, false)
+			var fakeClient *fakeSignupCommissionClient
+			if tc.ordersClient != nil {
+				fakeClient = tc.ordersClient.(*fakeSignupCommissionClient)
+			}
+
+			usersService := users.NewUsers(mockRepo, logger, nil, nil, nil, tc.ordersClient, false)
 
 			resp, err := usersService.CompleteRegistration(context.Background(), tc.request)
 
@@ -646,6 +706,10 @@ func TestCompleteRegistration(t *testing.T) {
 				require.NoError(t, err)
 				require.NotNil(t, resp)
 				require.Equal(t, tc.expectedResp.GetMessage(), resp.GetMessage())
+			}
+
+			if tc.verify != nil {
+				tc.verify(t, fakeClient)
 			}
 		})
 	}
@@ -764,7 +828,7 @@ func TestNotifyFarmer(t *testing.T) {
 
 			tc.setupMocks(mockRepo, mockQuerier, mockSmsSender)
 
-			usersService := users.NewUsers(mockRepo, logger, mockSmsSender, nil, nil, false)
+			usersService := users.NewUsers(mockRepo, logger, mockSmsSender, nil, nil, nil, false)
 
 			resp, err := usersService.NotifyFarmer(context.Background(), tc.request)
 			if tc.expectedError != nil {

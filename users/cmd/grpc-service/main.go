@@ -17,6 +17,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sns"
+	"github.com/foodhouse/foodhouseapp/grpc/go/ordersgrpc"
 	"github.com/foodhouse/foodhouseapp/grpc/go/usersgrpc"
 	"github.com/foodhouse/foodhouseapp/sms"
 	"github.com/foodhouse/foodhouseapp/users/db/repo"
@@ -28,6 +29,7 @@ import (
 	"github.com/rs/zerolog"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -39,6 +41,8 @@ type Config struct {
 	ListenPort uint `conf:"env:LISTEN_PORT,required"`
 
 	MigrationPath string `conf:"env:MIGRATION_PATH,required"`
+
+	OrdersHostPort string `conf:"env:ORDERS_HOST_PORT,required"`
 
 	Sms struct {
 		Twilio struct {
@@ -217,8 +221,15 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 
 	tokenManager := users.NewFirebaseTokenManagerBuilder(firebaseAdminClient, config.FirebaseAPIKey, http.DefaultClient)
 
+	ordersConn, err := grpc.NewClient(config.OrdersHostPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return fmt.Errorf("failed to create orders gRPC connection: %w", err)
+	}
+	defer ordersConn.Close()
+	ordersClient := ordersgrpc.NewOrdersClient(ordersConn)
+
 	usersgrpc.RegisterUsersServer(grpcServer, users.NewUsers(usersRepo, logger, smsSender, otpGenerator, tokenManager,
-		config.EnableDevMethods))
+		ordersClient, config.EnableDevMethods))
 
 	logger.Info().Msg("Successfully registered usersgrpc...")
 

@@ -364,6 +364,15 @@ message Commission {
   google.protobuf.Timestamp created_at = 8;
 }
 
+// Creates a flat signup commission when a referral is recorded (one-time per
+// referred user).
+message CreateSignupCommissionRequest {
+  string referrer_id = 1;
+  string referred_id = 2;
+}
+
+message CreateSignupCommissionResponse { Commission commission = 1; }
+
 message ListCommissionsByReferrerRequest {
   string admin_user_id = 1;
   string referrer_id = 2;
@@ -691,6 +700,11 @@ service Orders {
       get : "/v1/admin/{user_id}/orders/list-payments"
     };
   }
+
+  // Internal: called by users service when a referral is recorded at
+  // registration time. This is intentionally not exposed via HTTP.
+  rpc CreateSignupCommission(CreateSignupCommissionRequest)
+      returns (CreateSignupCommissionResponse);
 
   rpc ListCommissionsByReferrer(ListCommissionsByReferrerRequest)
       returns (ListCommissionsByReferrerResponse) {

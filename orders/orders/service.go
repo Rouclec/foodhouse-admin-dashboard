@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/nyaruka/phonenumbers"
 	"github.com/rs/zerolog"
@@ -59,8 +60,11 @@ const (
 
 	FarmersPercentage = 1.00
 
-	// agent commission 30% * 20%.
-	ReferralCommissionPercentage = 0.06
+	// Flat commission amount paid to the referrer when a referred user completes
+	// registration using a referral code.
+	ReferralSignupCommissionAmountXAF = 200.00
+	ReferralSignupCommissionCurrency  = "XAF"
+	ReferralSignupCommissionOrderNum  = int64(0)
 
 	CENT = 100
 
@@ -851,55 +855,62 @@ func (i *Impl) getReferral(ctx context.Context, referredID string) (*usersgrpc.R
 	return resp.Referral, nil
 }
 
-// create commissions is a helper method that creates the commissions neccesary for any given transaction
-func (i *Impl) CreateCommissions(ctx context.Context, order sqlc.GetOrderByOrderNumberRow, querier sqlc.Querier) error {
-
-	var commissionsToCreate []sqlc.Commission
-
-	// 1. Get referral for buyer
-	if buyerReferral, err := i.getReferral(ctx, *order.CreatedBy); err != nil {
-		return err // gRPC error other than NotFound
-	} else if buyerReferral != nil {
-		commissionsToCreate = append(commissionsToCreate, sqlc.Commission{
-			ReferrerID:       buyerReferral.ReferrerId,
-			ReferredID:       *order.CreatedBy,
-			OrderNumber:      order.OrderNumber,
-			CurrencyCode:     *order.PriceCurrency,
-			CommissionAmount: calculateCommission(*order.PriceValue),
-		})
-	}
-
-	// 2. Get referral for farmer
-	if farmerReferral, err := i.getReferral(ctx, *order.ProductOwner); err != nil {
-		return err
-	} else if farmerReferral != nil {
-		commissionsToCreate = append(commissionsToCreate, sqlc.Commission{
-			ReferrerID:       farmerReferral.ReferrerId,
-			ReferredID:       *order.ProductOwner,
-			OrderNumber:      order.OrderNumber,
-			CurrencyCode:     *order.PriceCurrency,
-			CommissionAmount: calculateCommission(*order.PriceValue),
-		})
-	}
-
-	// 3. Create all commissions outside the if blocks
-	for _, c := range commissionsToCreate {
-		if _, err := querier.CreateCommission(ctx, sqlc.CreateCommissionParams{
-			ReferrerID:       c.ReferrerID,
-			ReferredID:       c.ReferredID,
-			OrderNumber:      c.OrderNumber,
-			CurrencyCode:     c.CurrencyCode,
-			CommissionAmount: c.CommissionAmount,
-		}); err != nil {
-			return err
-		}
-	}
-
+// CreateCommissions used to create commissions based on purchases.
+// The business model has changed: commissions are now a flat fee per referred
+// user registration (handled by CreateSignupCommission). Keep this method as a
+// no-op for backward compatibility with existing call sites.
+func (i *Impl) CreateCommissions(ctx context.Context, _ sqlc.GetOrderByOrderNumberRow, _ sqlc.Querier) error {
 	return nil
 }
 
-func calculateCommission(orderAmount float64) float64 {
-	return (orderAmount * ReferralCommissionPercentage) / TotalPercentage
+// CreateSignupCommission creates a flat 200 XAF commission for a successful
+// referral signup. It is intended to be called by the Users service when a
+// referral is recorded during registration.
+func (i *Impl) CreateSignupCommission(ctx context.Context, req *ordersgrpc.CreateSignupCommissionRequest) (*ordersgrpc.CreateSignupCommissionResponse, error) {
+	if req.GetReferrerId() == "" || req.GetReferredId() == "" {
+		return nil, status.Error(codes.InvalidArgument, "referrer_id and referred_id are required")
+	}
+	if req.GetReferrerId() == req.GetReferredId() {
+		return nil, status.Error(codes.InvalidArgument, "referrer_id and referred_id cannot be the same")
+	}
+
+	querier, tx, err := i.repo.Begin(ctx)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)
+	}
+	defer func() {
+		err := tx.Rollback(ctx)
+		if err != nil && !errors.Is(err, sql.ErrTxDone) {
+			i.logger.Err(err).Msg("Failed to rollback transaction")
+		}
+	}()
+
+	// Idempotency: use order_number=0 as a sentinel for signup commissions.
+	// The existing unique constraint (referrer_id, referred_id, order_number)
+	// prevents duplicates.
+	_, err = querier.CreateCommission(ctx, sqlc.CreateCommissionParams{
+		ReferrerID:       req.GetReferrerId(),
+		ReferredID:       req.GetReferredId(),
+		OrderNumber:      ReferralSignupCommissionOrderNum,
+		CurrencyCode:     ReferralSignupCommissionCurrency,
+		CommissionAmount: ReferralSignupCommissionAmountXAF,
+	})
+	if err != nil {
+		// If it's a duplicate commission, treat as success (idempotent).
+		if pgErr, ok := err.(*pgconn.PgError); ok && pgErr.Code == "23505" {
+			if err := tx.Commit(ctx); err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
+			}
+			return &ordersgrpc.CreateSignupCommissionResponse{}, nil
+		}
+		return nil, status.Errorf(codes.Internal, "failed to create signup commission: %v", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
+	}
+
+	return &ordersgrpc.CreateSignupCommissionResponse{}, nil
 }
 
 func decodeOrderItems(raw interface{}) ([]sqlc.OrderItem, error) {
