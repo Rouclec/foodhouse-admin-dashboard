@@ -64,6 +64,9 @@ Parameters:
     Type: String
     Default: "users"
 
+  OrdersHostPort:
+    Type: String
+
 Resources:
   MutationTopic:
     Type: AWS::SNS::Topic
@@ -130,6 +133,8 @@ Resources:
               Value: !Ref AWS::Region
             - Name: SENDER_EMAIL
               Value: !Sub "noreply@${DomainName}"
+            - Name: ORDERS_HOST_PORT
+              Value: !Ref OrdersHostPort
 
           Secrets:
             - Name: DB_NAME

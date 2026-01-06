@@ -255,6 +255,7 @@ Resources:
           ]
         CustomResourcesServiceToken: !GetAtt RdsStack.Outputs.DatabaseInitLambdaArn
         DesiredCount: 1
+        OrdersHostPort: "orders:80"
       Tags:
         - Key: EnvId
           Value: !Ref "EnvId"
