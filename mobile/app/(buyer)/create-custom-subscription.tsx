@@ -216,8 +216,8 @@ export default function CreateCustomSubscription() {
       // pickup vs home delivery).
       if (!deliveryLocation?.region) {
         router.push({
-          pathname: '/(buyer)/(order)' as any,
-          params: { returnTo: '/(buyer)/create-custom-subscription' },
+          pathname: '/(buyer)/(order)/delivery-address' as any,
+          params: { returnTo: '__BACK__' },
         } as any);
         return;
       }

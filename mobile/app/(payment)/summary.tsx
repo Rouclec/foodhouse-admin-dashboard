@@ -9,6 +9,7 @@ import { Context, ContextType } from '@/app/_layout';
 import { Colors } from '@/constants';
 import { typesAmount } from '@/client/orders.swagger';
 import i18n from '@/i18n';
+import { subscriptionCheckoutStyles } from '@/styles/subscription-checkout';
 
 export default function Summary() {
   const router = useRouter();
@@ -19,7 +20,7 @@ export default function Summary() {
     selectedProductsByDelivery?: string;
     subscriptionItems: string;
   }>();
-  const { user, setPaymentData } = useContext(Context) as ContextType;
+  const { user, setPaymentData, deliveryLocation } = useContext(Context) as ContextType;
 
   const totalBudget = parseInt(budget || '75000');
   const numDeliveries = parseInt(deliveries || '2');
@@ -69,12 +70,29 @@ export default function Summary() {
 
   const handleConfirmPayment = async () => {
     try {
+      if (!deliveryLocation?.region) {
+        router.push({
+          pathname: '/(buyer)/(order)/delivery-address' as any,
+          params: { returnTo: '__BACK__' },
+        } as any);
+        return;
+      }
+
       const result = await createCustomSubscription({
         body: {
           budget: { value: totalBudget, currencyIsoCode: 'XAF' },
           subscriptionItems: items,
           // Backend expects this value in cents (XAF * 100)
           maxAmountPerOrder: (budgetPerDelivery * 100).toString(),
+          deliveryLocation: {
+            lat: deliveryLocation.region.latitude,
+            lon: deliveryLocation.region.longitude,
+            address:
+              deliveryLocation.description ||
+              deliveryLocation.address ||
+              user?.address ||
+              '',
+          },
           estimatedDeliveryTimeDays: '7',
         },
         path: { userId: user?.userId ?? '' },
@@ -164,6 +182,37 @@ export default function Summary() {
         ))}
 
         <View style={styles.paymentSection}>
+          <Text style={styles.paymentTitle}>
+            {i18n.t('(subscription).(order).Address')}
+          </Text>
+          <View style={subscriptionCheckoutStyles.addressCard}>
+            <View style={subscriptionCheckoutStyles.addressIcon}>
+              <Icon source="home" size={20} color={Colors.light[10]} />
+            </View>
+            <View style={subscriptionCheckoutStyles.addressText}>
+              <Text style={subscriptionCheckoutStyles.addressTitle}>
+                {i18n.t('(subscription).(order).Home')}
+              </Text>
+              <Text style={subscriptionCheckoutStyles.addressSubtitle}>
+                {deliveryLocation?.description ||
+                  deliveryLocation?.address ||
+                  user?.address ||
+                  ''}
+              </Text>
+            </View>
+            <TouchableOpacity
+              onPress={() =>
+                router.push({
+                  pathname: '/(buyer)/(order)/delivery-address' as any,
+                  params: { returnTo: '__BACK__' },
+                } as any)
+              }>
+              <Icon source="pencil" size={20} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.paymentSection}>
           <Text style={styles.paymentTitle}>{i18n.t('(subscription).(summary).paymentSummary')}</Text>
           <View style={styles.paymentRow}>
             <Text style={styles.paymentLabel}>{i18n.t('(subscription).(summary).amount')}</Text>
@@ -191,11 +240,15 @@ export default function Summary() {
       <View style={defaultStyles.bottomButtonContainer}>
         <Button
           mode="contained"
-          style={[defaultStyles.button, defaultStyles.primaryButton, isPending && defaultStyles.greyButton]}
+          style={[
+            defaultStyles.button,
+            defaultStyles.primaryButton,
+            (isPending || !deliveryLocation?.region) && defaultStyles.greyButton,
+          ]}
           contentStyle={[defaultStyles.center]}
           onPress={handleConfirmPayment}
           loading={isPending}
-          disabled={isPending}>
+          disabled={isPending || !deliveryLocation?.region}>
           <Text variant="titleMedium" style={defaultStyles?.buttonText}>
             {i18n.t('(subscription).(summary).confirmPayment')}
           </Text>

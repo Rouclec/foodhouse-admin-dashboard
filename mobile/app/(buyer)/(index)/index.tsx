@@ -6,9 +6,12 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Linking,
+  LayoutAnimation,
+  Platform,
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
+  UIManager,
   View,
 } from 'react-native';
 import { defaultStyles, buyerProductsStyles as styles } from '@/styles';
@@ -75,6 +78,7 @@ export default function BuyerProducts() {
   const [debounceQuery, setDebounceQuery] = useState('');
   const [count, setCount] = useState(10);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>();
+  const [isCategoriesCollapsed, setIsCategoriesCollapsed] = useState(true);
   const [minAmount, setMinAmount] = useState<string>();
   const [maxAmount, setMaxAmount] = useState<string>();
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -121,12 +125,26 @@ export default function BuyerProducts() {
   // }, []);
 
   useEffect(() => {
+    if (
+      Platform.OS === 'android' &&
+      UIManager.setLayoutAnimationEnabledExperimental
+    ) {
+      UIManager.setLayoutAnimationEnabledExperimental(true);
+    }
+  }, []);
+
+  useEffect(() => {
     const timeoutId = setTimeout(() => {
       setDebounceQuery(searchQuery);
     }, 500);
 
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
+
+  const toggleCategories = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setIsCategoriesCollapsed(prev => !prev);
+  };
 
   const router = useRouter();
 
@@ -338,14 +356,20 @@ export default function BuyerProducts() {
 
 
           <View style={styles.subscriptionContainer}>
-            <View style={styles.package}>
-              <Text variant="titleMedium" style={[styles.title]}>
+            <View style={styles.sectionHeaderRow}>
+              <Text
+                variant="titleMedium"
+                style={[styles.title, styles.sectionHeaderTitle]}>
                 {i18n.t('(subscription).OurPackages')}
               </Text>
-              <TouchableOpacity
-                onPress={() => router.push('../(payment)/subscription')}>
-                <Text style={[styles.title1]}>{i18n.t('(subscription).SeeAll')}</Text>
-              </TouchableOpacity>
+              <View style={styles.sectionHeaderRight}>
+                <TouchableOpacity
+                  onPress={() => router.push('../(payment)/subscription')}>
+                  <Text style={[styles.title1, styles.sectionHeaderLink]}>
+                    {i18n.t('(subscription).SeeAll')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
             <FlatList
@@ -358,68 +382,89 @@ export default function BuyerProducts() {
             />
           </View>
 
-          <Text
-            variant="titleMedium"
-            style={[styles.title, styles.marginHorizontal24]}>
-            {i18n.t('(buyer).(index).products.categories')}
-          </Text>
-          {isCategoriesLoading && !categories ? (
-            <View style={defaultStyles.center}>
-              <Chase size={24} color={Colors.primary[500]} />
+          <View style={styles.categoriesContainer}>
+            <View style={[styles.sectionHeaderRow, styles.sectionHeaderRowTight]}>
+              <Text
+                variant="titleMedium"
+                style={[styles.title, styles.sectionHeaderTitle]}>
+                {i18n.t('(buyer).(index).products.categories')}
+              </Text>
+              <TouchableOpacity
+                onPress={toggleCategories}
+                hitSlop={12}
+                style={styles.collapseToggle}>
+                <Icon
+                  source={isCategoriesCollapsed ? 'chevron-down' : 'chevron-up'}
+                  size={22}
+                  color={Colors.primary[500]}
+                />
+              </TouchableOpacity>
             </View>
-          ) : (
-            <View style={styles.flatListContainer}>
-              <FlatList
-                horizontal
-                data={categories?.categories}
-                contentContainerStyle={[
-                  styles.horizontailFlatListContent,
-                  styles.paddingRight24,
-                ]}
-                showsHorizontalScrollIndicator={false}
-                style={[styles.horizontalFlatList, styles.paddingLeft24]}
-                keyExtractor={(item, index) => item?.id ?? index.toString()}
-                ListHeaderComponent={() => (
-                  <TouchableOpacity
-                    style={[
-                      styles.categoryItem,
-                      !selectedCategoryId && styles.selectedCategoryItem,
-                    ]}
-                    onPress={() => setSelectedCategoryId(undefined)}>
-                    <Text
-                      style={{
-                        color: !selectedCategoryId
-                          ? Colors.light[10]
-                          : Colors.dark[10],
-                      }}>
-                      {i18n.t('(buyer).(index).products.all')}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-                renderItem={({ item }) => {
-                  return (
-                    <TouchableOpacity
-                      style={[
-                        styles.categoryItem,
-                        selectedCategoryId === item?.id &&
-                        styles.selectedCategoryItem,
+
+            {!isCategoriesCollapsed && (
+              <>
+                {isCategoriesLoading && !categories ? (
+                  <View style={defaultStyles.center}>
+                    <Chase size={24} color={Colors.primary[500]} />
+                  </View>
+                ) : (
+                  <View style={styles.flatListContainer}>
+                    <FlatList
+                      horizontal
+                      data={categories?.categories}
+                      contentContainerStyle={[
+                        styles.horizontailFlatListContent,
+                        styles.paddingRight24,
                       ]}
-                      onPress={() => setSelectedCategoryId(item?.id)}>
-                      <Text
-                        style={{
-                          color:
-                            selectedCategoryId === item?.id
-                              ? Colors.light[10]
-                              : Colors.dark[10],
-                        }}>
-                        {item.name}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                }}
-              />
-            </View>
-          )}
+                      showsHorizontalScrollIndicator={false}
+                      style={[styles.horizontalFlatList, styles.paddingLeft24]}
+                      keyExtractor={(item, index) =>
+                        item?.id ?? index.toString()
+                      }
+                      ListHeaderComponent={() => (
+                        <TouchableOpacity
+                          style={[
+                            styles.categoryItem,
+                            !selectedCategoryId && styles.selectedCategoryItem,
+                          ]}
+                          onPress={() => setSelectedCategoryId(undefined)}>
+                          <Text
+                            style={{
+                              color: !selectedCategoryId
+                                ? Colors.light[10]
+                                : Colors.dark[10],
+                            }}>
+                            {i18n.t('(buyer).(index).products.all')}
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                      renderItem={({ item }) => {
+                        return (
+                          <TouchableOpacity
+                            style={[
+                              styles.categoryItem,
+                              selectedCategoryId === item?.id &&
+                              styles.selectedCategoryItem,
+                            ]}
+                            onPress={() => setSelectedCategoryId(item?.id)}>
+                            <Text
+                              style={{
+                                color:
+                                  selectedCategoryId === item?.id
+                                    ? Colors.light[10]
+                                    : Colors.dark[10],
+                              }}>
+                              {item.name}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      }}
+                    />
+                  </View>
+                )}
+              </>
+            )}
+          </View>
           <Text
             variant="titleMedium"
             style={[styles.title, styles.marginHorizontal24]}>

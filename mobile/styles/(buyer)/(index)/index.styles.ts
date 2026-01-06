@@ -69,7 +69,7 @@ export const buyerProductsStyles = StyleSheet.create({
     marginLeft: 0,
   },
   title: {
-    marginTop: 18,
+    marginTop: 12,
     fontSize: 20,
     fontWeight: 'bold',
   },
@@ -139,12 +139,12 @@ export const buyerProductsStyles = StyleSheet.create({
     lineHeight: 24,
   },
   horizontalFlatList: {
-    paddingVertical: 12,
+    paddingVertical: 6,
     flex: 1,
   },
 
   horizontailFlatListContent: {
-    columnGap: 32,
+    columnGap: 12,
     alignItems: 'flex-start',
     height: '100%',
   },
@@ -157,8 +157,8 @@ export const buyerProductsStyles = StyleSheet.create({
   categoryItem: {
     flexDirection: 'row',
     columnGap: 4,
-    height: 40,
-    paddingHorizontal: 20,
+    height: 34,
+    paddingHorizontal: 14,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.grey['f8'],
@@ -168,7 +168,7 @@ export const buyerProductsStyles = StyleSheet.create({
     backgroundColor: Colors.primary[500],
   },
   flatListContainer: {
-    height: 64,
+    height: 52,
   },
   filtersContainer: {
     height: '100%',
@@ -251,30 +251,54 @@ export const buyerProductsStyles = StyleSheet.create({
   },
 
   subscriptionContainer: {
-    
-    
-    margin:  8,
-    rowGap: 12,
-    paddingBottom: 8,
+    marginTop: 16,
+    marginHorizontal: 16,
+    rowGap: 8,
+    paddingBottom: 0,
+    marginBottom: 10,
   },
-  package: {
+  sectionHeaderRow: {
     flexDirection: 'row',
-    paddingHorizontal: 8,
-    justifyContent: 'space-between',
     alignItems: 'center',
-
-    // marginBottom: 8,
+    justifyContent: 'space-between',
+    paddingHorizontal: 8,
+  },
+  sectionHeaderRowTight: {
+    paddingHorizontal: 24,
+  },
+  sectionHeaderTitle: {
+    marginTop: 0,
+  },
+  sectionHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    columnGap: 6,
+  },
+  sectionHeaderLink: {
+    marginTop: 0,
+    marginRight: 0,
+  },
+  collapseToggle: {
+    height: 32,
+    width: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.light[10],
+  },
+  categoriesContainer: {
+    marginTop: 12,
   },
  scrollViewContent: {
     flexDirection: 'row',
-    justifyContent: 'space-between', 
-    //paddingHorizontal: 10,
+    columnGap: 12,
+    paddingHorizontal: 8,
   },
   packageContainer: {
     width: screenWidth * 0.60,
     backgroundColor: Colors.grey['200'],
     borderRadius: 10,
-    paddingVertical: 10,
+    paddingVertical: 8,
     paddingHorizontal: 12,
     flexDirection: 'row',
     alignItems: 'center',
@@ -309,9 +333,9 @@ export const buyerProductsStyles = StyleSheet.create({
   // amountText: { fontWeight: 'bold', fontSize: 14 },
 
   title1: {
-    marginTop: 18,
+    marginTop: 0,
     fontSize: 16,
     color: Colors.primary['500'],
-    marginRight: 8,
+    marginRight: 0,
   },
 });

@@ -173,8 +173,8 @@ export default function SubscriptionCheckout() {
                 <TouchableOpacity
                   onPress={() =>
                     router.push({
-                      pathname: '/(buyer)/(order)' as any,
-                      params: { returnTo: `/(payment)/subscription-checkout?planId=${plan.id}` },
+                      pathname: '/(buyer)/(order)/delivery-address' as any,
+                      params: { returnTo: '__BACK__' },
                     } as any)
                   }>
                   <Icon source="pencil" size={20} />

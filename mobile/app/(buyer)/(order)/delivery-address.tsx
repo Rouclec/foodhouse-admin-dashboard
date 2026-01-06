@@ -51,6 +51,7 @@ export default function DeliveryAddress() {
   const params = useLocalSearchParams();
   const returnTo =
     (params.returnTo as string | undefined) ?? '/(buyer)/(order)/checkout';
+  const shouldGoBack = returnTo === '__BACK__';
 
   const sheetRef = useRef<FilterBottomSheetRef>(null);
   const [loadingLocation, setLoadingLocation] = useState(false);
@@ -354,11 +355,11 @@ export default function DeliveryAddress() {
               ]}
               disabled={!deliveryLocation}
               contentStyle={[defaultStyles.center]}
-              onPress={() => router.push(returnTo)}>
+              onPress={() => (shouldGoBack ? router.back() : router.push(returnTo))}>
               <View style={defaultStyles.innerButtonContainer}>
                 <View>
                   <Text variant="titleMedium" style={defaultStyles?.buttonText}>
-                    {returnTo.includes('subscription')
+                    {returnTo.includes('subscription') || shouldGoBack
                       ? 'Continue'
                       : i18n.t(
                           '(buyer).(order).delivery-address.proceedToCheckout',
