@@ -527,7 +527,12 @@ func (i *Impl) CompleteRegistration(
 	}, nil
 }
 
-func (i *Impl) CreateReferral(ctx context.Context, querrier sqlc.Querier, referralCode string, userID string) (string, error) {
+func (i *Impl) CreateReferral(
+	ctx context.Context,
+	querrier sqlc.Querier,
+	referralCode string,
+	userID string,
+) (string, error) {
 	i.logger.Debug().Msgf("referal code %v", referralCode)
 	if referralCode == "" {
 		return "", nil
@@ -545,7 +550,8 @@ func (i *Impl) CreateReferral(ctx context.Context, querrier sqlc.Querier, referr
 	if err != nil {
 		// Idempotency: allow retries of CompleteRegistration without failing if
 		// the referral already exists.
-		if pgErr, ok := err.(*pgconn.PgError); ok && pgErr.Code == "23505" {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 			return referrer.ID, nil
 		}
 		return "", err

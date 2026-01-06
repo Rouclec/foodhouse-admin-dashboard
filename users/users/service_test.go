@@ -662,8 +662,8 @@ func TestCompleteRegistration(t *testing.T) {
 				require.NotNil(t, c)
 				require.Equal(t, 1, c.called)
 				require.NotNil(t, c.lastReq)
-				require.Equal(t, testReferrerID, c.lastReq.ReferrerId)
-				require.Equal(t, testUserID, c.lastReq.ReferredId)
+				require.Equal(t, testReferrerID, c.lastReq.GetReferrerId())
+				require.Equal(t, testUserID, c.lastReq.GetReferredId())
 			},
 			expectedError: nil,
 			expectedResp:  &usersgrpc.CompleteRegistrationResponse{Message: "Registration completed successfully."},
