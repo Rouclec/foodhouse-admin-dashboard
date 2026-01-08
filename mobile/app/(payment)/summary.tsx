@@ -1,7 +1,7 @@
 import { SafeAreaView, ScrollView, TouchableOpacity, View } from 'react-native';
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { defaultStyles, summaryStyles as styles } from '@/styles';
-import { Text, Button, Icon, Appbar } from 'react-native-paper';
+import { Text, Button, Icon, Appbar, Snackbar } from 'react-native-paper';
 import { useRouter, useLocalSearchParams, RelativePathString } from 'expo-router';
 import { useMutation } from '@tanstack/react-query';
 import { ordersCreateCustomSubscriptionMutation } from '@/client/orders.swagger/@tanstack/react-query.gen';
@@ -10,6 +10,7 @@ import { Colors } from '@/constants';
 import { typesAmount } from '@/client/orders.swagger';
 import i18n from '@/i18n';
 import { subscriptionCheckoutStyles } from '@/styles/subscription-checkout';
+import { delay } from '@/utils';
 
 export default function Summary() {
   const router = useRouter();
@@ -26,6 +27,7 @@ export default function Summary() {
   const numDeliveries = parseInt(deliveries || '2');
   const budgetPerDelivery = Math.floor(totalBudget / numDeliveries);
   const productsFallback = selectedProducts ? JSON.parse(selectedProducts) : [];
+  const [error, setError] = useState<string>();
 
   const productsByDelivery: Record<number, any[]> = (() => {
     if (selectedProductsByDelivery) {
@@ -62,6 +64,11 @@ export default function Summary() {
 
   const { mutateAsync: createCustomSubscription, isPending } = useMutation({
     ...ordersCreateCustomSubscriptionMutation(),
+    onError: async (error) => {
+      setError(error?.response?.data?.message ?? i18n.t('(subscription).(summary).unknownError'));
+      await delay(5000);
+      setError(undefined);
+    },
   });
 
   const amount = allProducts.reduce((sum: number, p: any) => sum + p.price * p.quantity, 0);
@@ -72,8 +79,15 @@ export default function Summary() {
     try {
       if (!deliveryLocation?.region) {
         router.push({
-          pathname: '/(buyer)/(order)/delivery-address' as any,
-          params: { returnTo: '__BACK__' },
+          pathname: '/(buyer)/(order)' as any,
+          params: {
+            returnTo: '/(payment)/summary',
+            budget,
+            deliveries,
+            selectedProducts,
+            selectedProductsByDelivery,
+            subscriptionItems,
+          },
         } as any);
         return;
       }
@@ -132,128 +146,144 @@ export default function Summary() {
   });
 
   return (
-    <View style={defaultStyles.flex}>
-      <Appbar.Header style={styles.appHeader}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={defaultStyles.backButtonContainer}>
-          <Icon source={'arrow-left'} size={24} color={Colors.dark[0]} />
-        </TouchableOpacity>
-        <Text variant="titleMedium" style={styles.headerTitle}>
-          {i18n.t('(subscription).(summary).header')}
-        </Text>
-        <View style={{ width: 64 }} />
-      </Appbar.Header>
+    <>
+      <View style={defaultStyles.flex}>
+        <Appbar.Header style={styles.appHeader}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={defaultStyles.backButtonContainer}>
+            <Icon source={'arrow-left'} size={24} color={Colors.dark[0]} />
+          </TouchableOpacity>
+          <Text variant="titleMedium" style={styles.headerTitle}>
+            {i18n.t('(subscription).(summary).header')}
+          </Text>
+          <View style={{ width: 64 }} />
+        </Appbar.Header>
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}>
-        <View style={styles.packageCard}>
-          <Text style={styles.packageTitle}>{i18n.t('(subscription).(summary).customPackage')}</Text>
-          <View style={styles.packageDetails}>
-            <Text style={styles.packageDetailText}>{allProducts.reduce((sum: number, p: any) => sum + p.quantity, 0)} {i18n.t('(subscription).(summary).items')}</Text>
-            <View style={styles.packageDivider} />
-            <Icon source="truck-delivery" size={16} color={Colors.light[10]} />
-            <Text style={styles.packageDetailText}>{numDeliveries} {i18n.t('(subscription).(summary).deliveries')}</Text>
-          </View>
-        </View>
-
-        {deliveriesData.map(delivery => (
-          <View key={delivery.id} style={styles.deliverySection}>
-            <View style={styles.deliveryHeader}>
-              <Text style={styles.deliveryTitle}>{i18n.t('(subscription).(summary).delivery')} {delivery.id}</Text>
-              <Text style={styles.deliveryTotal}>
-                {delivery.total.toLocaleString()} XAF
-              </Text>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}>
+          <View style={styles.packageCard}>
+            <Text style={styles.packageTitle}>{i18n.t('(subscription).(summary).customPackage')}</Text>
+            <View style={styles.packageDetails}>
+              <Text style={styles.packageDetailText}>{allProducts.reduce((sum: number, p: any) => sum + p.quantity, 0)} {i18n.t('(subscription).(summary).items')}</Text>
+              <View style={styles.packageDivider} />
+              <Icon source="truck-delivery" size={16} color={Colors.light[10]} />
+              <Text style={styles.packageDetailText}>{numDeliveries} {i18n.t('(subscription).(summary).deliveries')}</Text>
             </View>
-            {delivery.items.map((item: { name: string; unit: string; price: number }, index: number) => (
-              <View key={index} style={styles.itemRow}>
-                <View>
-                  <Text style={styles.itemName}>{item.name}</Text>
-                  <Text style={styles.itemUnit}>{item.unit}</Text>
-                </View>
-                <Text style={styles.itemPrice}>
-                  {item.price.toLocaleString()} XAF
+          </View>
+
+          {deliveriesData.map(delivery => (
+            <View key={delivery.id} style={styles.deliverySection}>
+              <View style={styles.deliveryHeader}>
+                <Text style={styles.deliveryTitle}>{i18n.t('(subscription).(summary).delivery')} {delivery.id}</Text>
+                <Text style={styles.deliveryTotal}>
+                  {delivery.total.toLocaleString()} XAF
                 </Text>
               </View>
-            ))}
-          </View>
-        ))}
-
-        <View style={styles.paymentSection}>
-          <Text style={styles.paymentTitle}>
-            {i18n.t('(subscription).(order).Address')}
-          </Text>
-          <View style={subscriptionCheckoutStyles.addressCard}>
-            <View style={subscriptionCheckoutStyles.addressIcon}>
-              <Icon source="home" size={20} color={Colors.light[10]} />
+              {delivery.items.map((item: { name: string; unit: string; price: number }, index: number) => (
+                <View key={index} style={styles.itemRow}>
+                  <View>
+                    <Text style={styles.itemName}>{item.name}</Text>
+                    <Text style={styles.itemUnit}>{item.unit}</Text>
+                  </View>
+                  <Text style={styles.itemPrice}>
+                    {item.price.toLocaleString()} XAF
+                  </Text>
+                </View>
+              ))}
             </View>
-            <View style={subscriptionCheckoutStyles.addressText}>
-              <Text style={subscriptionCheckoutStyles.addressTitle}>
-                {i18n.t('(subscription).(order).Home')}
-              </Text>
-              <Text style={subscriptionCheckoutStyles.addressSubtitle}>
-                {deliveryLocation?.description ||
-                  deliveryLocation?.address ||
-                  user?.address ||
-                  ''}
+          ))}
+
+          <View style={styles.paymentSection}>
+            <Text style={styles.paymentTitle}>
+              {i18n.t('(subscription).(order).Address')}
+            </Text>
+            <View style={subscriptionCheckoutStyles.addressCard}>
+              <View style={subscriptionCheckoutStyles.addressIcon}>
+                <Icon source="home" size={20} color={Colors.light[10]} />
+              </View>
+              <View style={subscriptionCheckoutStyles.addressText}>
+                <Text style={subscriptionCheckoutStyles.addressTitle}>
+                  {i18n.t('(subscription).(order).Home')}
+                </Text>
+                <Text style={subscriptionCheckoutStyles.addressSubtitle}>
+                  {deliveryLocation?.description ||
+                    deliveryLocation?.address ||
+                    user?.address ||
+                    ''}
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() =>
+                  router.push({
+                    pathname: '/(buyer)/(order)' as any,
+                    params: {
+                      returnTo: '/(payment)/summary',
+                      budget,
+                      deliveries,
+                      selectedProducts,
+                      selectedProductsByDelivery,
+                      subscriptionItems,
+                    },
+                  } as any)
+                }>
+                <Icon source="pencil" size={20} />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.paymentSection}>
+            <Text style={styles.paymentTitle}>{i18n.t('(subscription).(summary).paymentSummary')}</Text>
+            <View style={styles.paymentRow}>
+              <Text style={styles.paymentLabel}>{i18n.t('(subscription).(summary).amount')}</Text>
+              <Text style={styles.paymentValue}>
+                {amount.toLocaleString()} XAF
               </Text>
             </View>
-            <TouchableOpacity
-              onPress={() =>
-                router.push({
-                  pathname: '/(buyer)/(order)/delivery-address' as any,
-                  params: { returnTo: '__BACK__' },
-                } as any)
-              }>
-              <Icon source="pencil" size={20} />
-            </TouchableOpacity>
+            <View style={styles.paymentRow}>
+              <Text style={styles.paymentLabel}>{i18n.t('(subscription).(order).Delivery')}</Text>
+              <Text style={styles.paymentValueFree}>{i18n.t('(subscription).(summary).free')}</Text>
+            </View>
+            <View style={styles.paymentRow}>
+              <Text style={styles.paymentLabel}>{i18n.t('(subscription).(summary).discount')}</Text>
+              <Text style={styles.paymentValueDiscount}>
+                -{discount.toLocaleString()} XAF
+              </Text>
+            </View>
+            <View style={[styles.paymentRow, styles.totalRow]}>
+              <Text style={styles.totalLabel}>{i18n.t('(subscription).(summary).total')}</Text>
+              <Text style={styles.totalValue}>{total.toLocaleString()} XAF</Text>
+            </View>
           </View>
-        </View>
+        </ScrollView>
 
-        <View style={styles.paymentSection}>
-          <Text style={styles.paymentTitle}>{i18n.t('(subscription).(summary).paymentSummary')}</Text>
-          <View style={styles.paymentRow}>
-            <Text style={styles.paymentLabel}>{i18n.t('(subscription).(summary).amount')}</Text>
-            <Text style={styles.paymentValue}>
-              {amount.toLocaleString()} XAF
+        <View style={[defaultStyles.bottomButtonContainer]}>
+          <Button
+            mode="contained"
+            style={[
+              defaultStyles.button,
+              defaultStyles.primaryButton,
+              isPending && defaultStyles.greyButton,
+            ]}
+            contentStyle={[defaultStyles.center]}
+            onPress={handleConfirmPayment}
+            loading={isPending}
+            disabled={isPending}>
+            <Text variant="titleMedium" style={defaultStyles?.buttonText}>
+              {i18n.t('(subscription).(summary).confirmPayment')}
             </Text>
-          </View>
-          <View style={styles.paymentRow}>
-            <Text style={styles.paymentLabel}>{i18n.t('(subscription).(order).Delivery')}</Text>
-            <Text style={styles.paymentValueFree}>{i18n.t('(subscription).(summary).free')}</Text>
-          </View>
-          <View style={styles.paymentRow}>
-            <Text style={styles.paymentLabel}>{i18n.t('(subscription).(summary).discount')}</Text>
-            <Text style={styles.paymentValueDiscount}>
-              -{discount.toLocaleString()} XAF
-            </Text>
-          </View>
-          <View style={[styles.paymentRow, styles.totalRow]}>
-            <Text style={styles.totalLabel}>{i18n.t('(subscription).(summary).total')}</Text>
-            <Text style={styles.totalValue}>{total.toLocaleString()} XAF</Text>
-          </View>
+          </Button>
         </View>
-      </ScrollView>
-
-      <View style={defaultStyles.bottomButtonContainer}>
-        <Button
-          mode="contained"
-          style={[
-            defaultStyles.button,
-            defaultStyles.primaryButton,
-            (isPending || !deliveryLocation?.region) && defaultStyles.greyButton,
-          ]}
-          contentStyle={[defaultStyles.center]}
-          onPress={handleConfirmPayment}
-          loading={isPending}
-          disabled={isPending || !deliveryLocation?.region}>
-          <Text variant="titleMedium" style={defaultStyles?.buttonText}>
-            {i18n.t('(subscription).(summary).confirmPayment')}
-          </Text>
-        </Button>
       </View>
-    </View>
+      <Snackbar
+        visible={!!error}
+        onDismiss={() => { }}
+        duration={3000}
+        style={defaultStyles.snackbar}>
+        <Text style={defaultStyles.errorText}>{error}</Text>
+      </Snackbar>
+    </>
   );
 }

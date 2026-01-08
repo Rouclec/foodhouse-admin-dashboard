@@ -17,7 +17,6 @@ export const selectProductsStyles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    backgroundColor: Colors.light[10],
   },
   scrollContent: {
     padding: 16,

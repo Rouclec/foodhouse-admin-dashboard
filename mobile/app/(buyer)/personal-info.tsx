@@ -47,22 +47,22 @@ type FormData = {
 export default function PersonalInfo() {
   const router = useRouter();
   const { user, setUser } = useContext(Context) as ContextType;
-  const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
-  const [lastSelectedAddress, setLastSelectedAddress] = useState<string | null>(
-    formData.locationCoordinates?.address ?? null,
-  );
-
-  const [originalProfileImage, setOriginalProfileImage] = useState(
-    user?.profileImage || '',
-  );
-  const [profileImage, setProfileImage] = useState(originalProfileImage);
-
   const [formData, setFormData] = useState<FormData>({
     fullName: `${user?.firstName || ''} ${user?.lastName || ''}`.trim(),
     address: user?.locationCoordinates?.address || '',
     email: user?.email || '',
     locationCoordinates: user?.locationCoordinates || null,
   });
+
+  const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
+  const [lastSelectedAddress, setLastSelectedAddress] = useState<string | null>(
+    formData?.locationCoordinates?.address ?? null,
+  );
+
+  const [originalProfileImage, setOriginalProfileImage] = useState(
+    user?.profileImage || '',
+  );
+  const [profileImage, setProfileImage] = useState(originalProfileImage);
 
   const [loading, setLoading] = useState(false);
   const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
@@ -74,12 +74,12 @@ export default function PersonalInfo() {
   useEffect(() => {
     const changesDetected =
       `${user?.firstName || ''} ${user?.lastName || ''}`.trim() !==
-        formData.fullName ||
+      formData.fullName ||
       user?.locationCoordinates?.address !== formData.address ||
       user?.email !== formData.email ||
       profileImage !== originalProfileImage ||
       JSON.stringify(user?.locationCoordinates) !==
-        JSON.stringify(formData.locationCoordinates);
+      JSON.stringify(formData?.locationCoordinates);
 
     setHasChanges(prev => (prev === changesDetected ? prev : changesDetected));
   }, [
@@ -399,8 +399,8 @@ export default function PersonalInfo() {
                           handleInputChange('locationCoordinates', null);
                         }
                       },
-                      onFocus: () => {},
-                      onBlur: () => {},
+                      onFocus: () => { },
+                      onBlur: () => { },
                     }}
                     nearbyPlacesAPI="GooglePlacesSearch"
                     debounce={200}
@@ -419,7 +419,7 @@ export default function PersonalInfo() {
       <View style={defaultStyles.bottomButtonContainer}>
         <Button
           mode="contained"
-          onPress={hasChanges ? handleSave : () => {}}
+          onPress={hasChanges ? handleSave : () => { }}
           loading={loading}
           disabled={!hasChanges || loading}
           buttonColor={Colors.primary['500']}
@@ -438,14 +438,14 @@ export default function PersonalInfo() {
       />
       <Snackbar
         visible={!!error}
-        onDismiss={() => {}}
+        onDismiss={() => { }}
         duration={3000}
         style={defaultStyles.snackbar}>
         <Text style={defaultStyles.errorText}>{errorMessage}</Text>
       </Snackbar>
       <Snackbar
         visible={isSuccess}
-        onDismiss={() => {}}
+        onDismiss={() => { }}
         duration={3000}
         style={defaultStyles.successSnackBar}>
         <Text style={defaultStyles.primaryText}>

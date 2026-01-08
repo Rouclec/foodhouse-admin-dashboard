@@ -26,6 +26,7 @@ export default function SelectPickupPoint() {
   const params = useLocalSearchParams();
   const returnTo =
     (params.returnTo as string | undefined) ?? "/(buyer)/(order)/checkout";
+  const shouldReturnToPaymentSummary = returnTo === "/(payment)/summary";
   const [loading, setLoading] = useState(false);
   const [city, setCity] = useState<string>();
   const [debounceQuery, setDebounceQuery] = useState<string>();
@@ -221,7 +222,24 @@ export default function SelectPickupPoint() {
       </KeyboardAvoidingView>
       <View style={defaultStyles.bottomButtonContainer}>
         <Button
-          onPress={() => router.push(returnTo)}
+          onPress={() => {
+            if (shouldReturnToPaymentSummary) {
+              router.push({
+                pathname: "/(payment)/summary" as any,
+                params: {
+                  budget: params.budget as string | undefined,
+                  deliveries: params.deliveries as string | undefined,
+                  selectedProducts: params.selectedProducts as string | undefined,
+                  selectedProductsByDelivery:
+                    params.selectedProductsByDelivery as string | undefined,
+                  subscriptionItems: params.subscriptionItems as string | undefined,
+                },
+              } as any);
+              return;
+            }
+
+            router.push(returnTo as any);
+          }}
           style={[
             defaultStyles.button,
             defaultStyles.primaryButton,

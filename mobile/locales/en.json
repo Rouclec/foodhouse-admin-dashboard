@@ -521,7 +521,8 @@
       "free": "Free",
       "discount": "Discount (10%)",
       "total": "Total",
-      "confirmPayment": "Confirm Payment"
+      "confirmPayment": "Confirm Payment",
+      "unknownError": "An unknown error occured"
     },
     "(paymentMethods)": {
       "header": "Payment Methods",

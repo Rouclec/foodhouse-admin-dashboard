@@ -516,7 +516,8 @@
       "free": "Bure",
       "discount": "Punguzo (10%)",
       "total": "Jumla",
-      "confirmPayment": "Thibitisha malipo"
+      "confirmPayment": "Thibitisha malipo",
+      "unknownError": "Hitilafu isiyojulikana imetokea"
     },
     "(paymentMethods)": {
       "header": "Njia za malipo",

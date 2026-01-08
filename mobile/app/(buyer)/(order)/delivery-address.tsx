@@ -4,7 +4,7 @@ import { Context, ContextType } from '@/app/_layout';
 import { Colors } from '@/constants';
 import i18n from '@/i18n';
 import { defaultStyles } from '@/styles';
-import { useRouter } from 'expo-router';
+import { RelativePathString, useRouter } from 'expo-router';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
@@ -52,6 +52,7 @@ export default function DeliveryAddress() {
   const returnTo =
     (params.returnTo as string | undefined) ?? '/(buyer)/(order)/checkout';
   const shouldGoBack = returnTo === '__BACK__';
+  const shouldReturnToPaymentSummary = returnTo === '/(payment)/summary';
 
   const sheetRef = useRef<FilterBottomSheetRef>(null);
   const [loadingLocation, setLoadingLocation] = useState(false);
@@ -194,9 +195,8 @@ export default function DeliveryAddress() {
             scrollEnabled={true}>
             {(deliveryLocation || currentLocation)?.region ? (
               <Marker
-                key={`${
-                  (deliveryLocation || currentLocation)?.region?.latitude
-                },${(deliveryLocation || currentLocation)?.region?.longitude}`}
+                key={`${(deliveryLocation || currentLocation)?.region?.latitude
+                  },${(deliveryLocation || currentLocation)?.region?.longitude}`}
                 coordinate={{
                   latitude:
                     (deliveryLocation || currentLocation)?.region?.latitude ??
@@ -298,7 +298,7 @@ export default function DeliveryAddress() {
                     style={styles.checkBox}
                     status={
                       currentLocation?.description ===
-                      deliveryLocation?.description
+                        deliveryLocation?.description
                         ? 'checked'
                         : 'unchecked'
                     }
@@ -355,15 +355,37 @@ export default function DeliveryAddress() {
               ]}
               disabled={!deliveryLocation}
               contentStyle={[defaultStyles.center]}
-              onPress={() => (shouldGoBack ? router.back() : router.push(returnTo))}>
+              onPress={() => {
+                if (shouldReturnToPaymentSummary) {
+                  router.push({
+                    pathname: '/(payment)/summary' as any,
+                    params: {
+                      budget: params.budget as string | undefined,
+                      deliveries: params.deliveries as string | undefined,
+                      selectedProducts: params.selectedProducts as string | undefined,
+                      selectedProductsByDelivery:
+                        params.selectedProductsByDelivery as string | undefined,
+                      subscriptionItems: params.subscriptionItems as string | undefined,
+                    },
+                  } as any);
+                  return;
+                }
+
+                if (shouldGoBack) {
+                  router.back();
+                  return;
+                }
+
+                router.push(returnTo as RelativePathString);
+              }}>
               <View style={defaultStyles.innerButtonContainer}>
                 <View>
                   <Text variant="titleMedium" style={defaultStyles?.buttonText}>
                     {returnTo.includes('subscription') || shouldGoBack
                       ? 'Continue'
                       : i18n.t(
-                          '(buyer).(order).delivery-address.proceedToCheckout',
-                        )}
+                        '(buyer).(order).delivery-address.proceedToCheckout',
+                      )}
                   </Text>
                 </View>
 

@@ -1,6 +1,6 @@
 import i18n from "@/i18n";
 import { defaultStyles } from "@/styles";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { View, KeyboardAvoidingView } from "react-native";
@@ -11,6 +11,16 @@ import { Colors } from "@/constants";
 
 export default function DeliveryMethod() {
   const router = useRouter();
+  const params = useLocalSearchParams<{
+    returnTo?: string;
+    budget?: string;
+    deliveries?: string;
+    selectedProducts?: string;
+    selectedProductsByDelivery?: string;
+    subscriptionItems?: string;
+  }>();
+  const returnTo = params.returnTo ?? "/(buyer)/(order)/checkout";
+
   const [deliveryOption, setDeliveryOption] = useState<
     "pickup" | "home-delivery"
   >("pickup");
@@ -115,8 +125,28 @@ export default function DeliveryMethod() {
           contentStyle={[defaultStyles.center]}
           onPress={() =>
             deliveryOption === "home-delivery"
-              ? router.push("/(buyer)/(order)/delivery-address")
-              : router.push("/(buyer)/(order)/select-pickup-point")
+              ? router.push({
+                  pathname: "/(buyer)/(order)/delivery-address",
+                  params: {
+                    returnTo,
+                    budget: params.budget,
+                    deliveries: params.deliveries,
+                    selectedProducts: params.selectedProducts,
+                    selectedProductsByDelivery: params.selectedProductsByDelivery,
+                    subscriptionItems: params.subscriptionItems,
+                  },
+                })
+              : router.push({
+                  pathname: "/(buyer)/(order)/select-pickup-point",
+                  params: {
+                    returnTo,
+                    budget: params.budget,
+                    deliveries: params.deliveries,
+                    selectedProducts: params.selectedProducts,
+                    selectedProductsByDelivery: params.selectedProductsByDelivery,
+                    subscriptionItems: params.subscriptionItems,
+                  },
+                })
           }
         >
           <View style={defaultStyles.innerButtonContainer}>

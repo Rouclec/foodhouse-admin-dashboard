@@ -1,4 +1,10 @@
-import React, { useContext, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   View,
   ScrollView,
@@ -7,9 +13,18 @@ import {
   Share,
   KeyboardAvoidingView,
   Keyboard,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Appbar, Button, Text, Divider, List, Icon } from 'react-native-paper';
+import {
+  Appbar,
+  Button,
+  Text,
+  Divider,
+  List,
+  Icon,
+  Snackbar,
+} from 'react-native-paper';
 import { Colors } from '@/constants';
 import {
   buyerProductsStyles,
@@ -21,10 +36,12 @@ import {
 import i18n from '@/i18n';
 import { Context, ContextType } from '@/app/_layout';
 
-import { useMutation, 
-  // useQuery 
+import {
+  useMutation,
+  // useQuery
 } from '@tanstack/react-query';
 import {
+  usersCompleteRegistrationMutation,
   // usersGetUserActiveSubscriptionOptions,
   usersRevokeRefreshTokenMutation,
 } from '@/client/users.swagger/@tanstack/react-query.gen';
@@ -33,13 +50,33 @@ import {
   FilterBottomSheet,
   FilterBottomSheetRef,
 } from '@/components/(buyer)/(index)/FilterBottomSheet';
-import { clearStorage, readData, updateAuthHeader } from '@/utils';
+import {
+  clearStorage,
+  readData,
+  updateAuthHeader,
+  uploadImage,
+  useCompressImage,
+} from '@/utils';
+import { ImagePicker } from '@/components';
+
+const isLocalImageUri = (uri: string) =>
+  uri.startsWith('file://') ||
+  uri.startsWith('content://') ||
+  uri.startsWith('ph://') ||
+  uri.startsWith('assets-library://');
 
 export default function Profile() {
   const router = useRouter();
   const sheetRef = useRef<FilterBottomSheetRef>(null);
+  const didMountRef = useRef(false);
   const { user, setUser } = useContext(Context) as ContextType;
   const [loading, setLoading] = useState(false);
+  const [originalProfileImage, setOriginalProfileImage] = useState(
+    user?.profileImage || '',
+  );
+  const [profileImage, setProfileImage] = useState(originalProfileImage);
+  const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>();
 
   const handleLogout = async () => {
     try {
@@ -73,7 +110,6 @@ export default function Profile() {
     },
   });
 
-
   const shareApp = async () => {
     const shareMessage = `Check out Foodhouse - your trusted source for fresh, farm-to-home food items!\n
     Download now:\n
@@ -86,6 +122,96 @@ export default function Profile() {
       title: 'FOODHOUSE',
     });
   };
+
+  const handleImageSelect = async (asset: any) => {
+    console.log('handleImageSelect: Asset received:', asset?.uri);
+    if (asset && asset.uri !== originalProfileImage) {
+      setProfileImage(asset.uri);
+    }
+    setIsImagePickerVisible(false);
+  };
+
+  const { mutateAsync: updateProfile } = useMutation({
+    ...usersCompleteRegistrationMutation(),
+    onSuccess: async () => {},
+    onError: async error => {
+      console.error('updateProfile onError:', error);
+      setErrorMessage(
+        error?.response?.data?.message ?? i18n.t('(auth).profile.unknownError'),
+      );
+    },
+  });
+
+  const {
+    compressImage,
+    // loading: isCompressing,
+    // error: compressionError,
+  } = useCompressImage(profileImage ?? '');
+
+  const handleSave = useCallback(async (): Promise<void> => {
+    try {
+      // Only upload if the user actually picked a NEW local image.
+      if (
+        !profileImage ||
+        profileImage === originalProfileImage ||
+        !isLocalImageUri(profileImage)
+      ) {
+        return;
+      }
+
+      setLoading(true);
+
+      const imageUri = await compressImage();
+      if (!imageUri) {
+        throw new Error('Image compression failed');
+      }
+
+      const uploadedUrl = await uploadImage({
+        uri: imageUri,
+        filename: `profile_${user?.userId}_${Date.now()}.jpg`,
+        directory: 'profile_images',
+      });
+
+      const data = {
+        firstName: user?.firstName,
+        lastName: user?.lastName,
+        email: user?.email,
+        address: user?.address,
+        profileImage: uploadedUrl,
+        locationCoordinates: user?.locationCoordinates,
+      };
+
+      await updateProfile({ body: data, path: { userId: user?.userId || '' } });
+
+      setUser({ ...user, ...data });
+      setOriginalProfileImage(uploadedUrl);
+    } catch (error) {
+      console.error('handleSave: Error updating profile:', error);
+      setErrorMessage('Failed to update profile');
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    profileImage,
+    originalProfileImage,
+    compressImage,
+    updateProfile,
+    user,
+    setUser,
+  ]);
+
+  useEffect(() => {
+    // Prevent running the save flow on the initial render (when `profileImage`
+    // is seeded from `user?.profileImage`).
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+
+    if (profileImage) {
+      handleSave();
+    }
+  }, [profileImage, handleSave]);
 
   return (
     <>
@@ -101,9 +227,20 @@ export default function Profile() {
             />
           </Appbar.Header>
           <View style={signupStyles.imageContainer}>
-            <TouchableOpacity style={signupStyles.imageUpload}>
+            <TouchableOpacity
+              style={signupStyles.imageUpload}
+              onPress={() => {
+                setIsImagePickerVisible(true);
+              }}>
               <View style={signupStyles.addImageContainer}>
-                {user?.profileImage ? (
+                {loading ? (
+                  <ActivityIndicator size="small" color={Colors.primary[500]} />
+                ) : profileImage ? (
+                  <Image
+                    source={{ uri: profileImage }}
+                    style={signupStyles.profileImage}
+                  />
+                ) : user?.profileImage ? (
                   <Image
                     source={{ uri: user?.profileImage }}
                     style={signupStyles.profileImage}
@@ -266,6 +403,21 @@ export default function Profile() {
           </View>
         </View>
       </FilterBottomSheet>
+      <Snackbar
+        visible={!!errorMessage}
+        onDismiss={() => {}}
+        duration={3000}
+        style={defaultStyles.snackbar}>
+        <Text style={defaultStyles.errorText}>{errorMessage}</Text>
+      </Snackbar>
+      <ImagePicker
+        visible={isImagePickerVisible}
+        setImage={handleImageSelect}
+        onClose={() => {
+          setIsImagePickerVisible(false);
+        }}
+        aspect={[1, 1]}
+      />
     </>
   );
 }

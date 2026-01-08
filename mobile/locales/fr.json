@@ -524,7 +524,8 @@
       "free": "Gratuit",
       "discount": "Remise (10%)",
       "total": "Total",
-      "confirmPayment": "Confirmer le paiement"
+      "confirmPayment": "Confirmer le paiement",
+      "unknownError": "Une erreur inconnue s'est produite"
     },
     "(paymentMethods)": {
       "header": "Méthodes de paiement",
