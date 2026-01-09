@@ -88,7 +88,7 @@ export const customPackageStyles = StyleSheet.create({
     fontSize: 30,
     fontWeight: 'bold',
     color: Colors.dark[10],
-    lineHeight: 0,
+    lineHeight: 30,
   },
   valueSubtext: {
     fontSize: 14,
