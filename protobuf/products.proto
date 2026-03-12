@@ -14,6 +14,8 @@ message Category {
   string name = 2;
   string slug = 3;
   string created_by = 8;
+  int64 product_count = 9;
+  string image = 10;
 }
 
 message Product {
@@ -48,6 +50,7 @@ message PriceType {
 message CreateCategoryRequest {
   string user_id = 1;
   string name = 2;
+  string image = 3;
 }
 
 message CreateCategoryResponse { Category category = 1; }
@@ -56,6 +59,7 @@ message UpdateCategoryRequest {
   string user_id = 1;
   string category_id = 2;
   string name = 3;
+  string image = 4;
 }
 
 message UpdateCategoryResponse {}

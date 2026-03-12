@@ -318,6 +318,7 @@
       "products": {
         "products": "Products",
         "searchProducts": "Search products",
+        "searchCategories": "Search categories",
         "goodMorning": "Good morning",
         "goodAfternoon": "Good afternoon",
         "goodEvening": "Good evening",
@@ -358,7 +359,7 @@
       "couldNotLoad": "Could not load product details",
       "description": "Description",
       "farmer": "Farmer",
-      "orderNow": "Add to Card",
+      "orderNow": "Add to Cart",
       "price": "Price",
       "edit": "Edit",
       "delete": "Delete",
@@ -481,7 +482,8 @@
       "Categories": "Categories & Products",
       "desc3": " Subscribe today and let FoodHouse handle your monthly shopping needs with reliable delivery and guaranteed freshness.",
       "btn1": "Cancel",
-      "btn2": "Order Now"
+      "btn2": "Order Now",
+      "oneFreeDelivery": "1 Free Delivery"
     },
     "(order)": {
       "checkout": "Checkout",

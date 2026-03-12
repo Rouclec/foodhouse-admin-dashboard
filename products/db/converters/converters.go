@@ -132,15 +132,22 @@ func SqlcToProtoProduct(sqlcProduct sqlc.GetProductRow) (*productsgrpc.Product, 
 	}, nil
 }
 
-func SqlcToProtoCategories(sqlcCategories []sqlc.Category) ([]*productsgrpc.Category, error) {
+func SqlcToProtoCategories(sqlcCategories []sqlc.ListCategoriesRow) ([]*productsgrpc.Category, error) {
 	protoCategories := make([]*productsgrpc.Category, 0, len(sqlcCategories))
 
 	for _, c := range sqlcCategories {
+		productCount := int64(0)
+		if c.ProductCount > 0 {
+			productCount = c.ProductCount
+		}
+
 		protoCategory := &productsgrpc.Category{
-			Id:        c.ID,
-			Name:      c.Name,
-			Slug:      c.Slug,
-			CreatedBy: derefString(c.CreatedBy),
+			Id:           c.ID,
+			Name:         c.Name,
+			Slug:         c.Slug,
+			CreatedBy:    derefString(c.CreatedBy),
+			ProductCount: productCount,
+			Image:        c.Image,
 		}
 		protoCategories = append(protoCategories, protoCategory)
 	}

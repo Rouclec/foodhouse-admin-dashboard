@@ -2,7 +2,6 @@ import { Colors } from '@/constants';
 import { Dimensions, StyleSheet } from 'react-native';
 const screenWidth = Dimensions.get('window').width;
 
-
 const { width } = Dimensions.get('window');
 export const buyerProductsStyles = StyleSheet.create({
   bgWhite: {
@@ -82,18 +81,13 @@ export const buyerProductsStyles = StyleSheet.create({
     width: '80%',
   },
   searchContainer: {
-    position: 'absolute',
-    top: 0,
-    height: '100%',
-    width: '100%',
-    backgroundColor: '#fff',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 24,
+    width: '100%',
   },
   searchInput: {
     width: '100%',
-    marginHorizontal: 24,
     height: 56,
     paddingHorizontal: 0,
     borderRadius: 16,
@@ -142,7 +136,6 @@ export const buyerProductsStyles = StyleSheet.create({
     paddingVertical: 6,
     flex: 1,
   },
-
   horizontailFlatListContent: {
     columnGap: 12,
     alignItems: 'flex-start',
@@ -193,7 +186,6 @@ export const buyerProductsStyles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   silderContainer: {
-    // alignItems: "center",
     marginLeft: 16,
   },
   sliderTrack: {
@@ -211,7 +203,6 @@ export const buyerProductsStyles = StyleSheet.create({
     borderColor: Colors.primary[500],
     marginTop: 8,
   },
-
   tooltipContainer: {
     position: 'absolute',
     top: -20,
@@ -234,9 +225,9 @@ export const buyerProductsStyles = StyleSheet.create({
   },
   tooltipArrow: {
     position: 'absolute',
-    bottom: -4, // position below the tooltip box
+    bottom: -4,
     left: '50%',
-    marginLeft: -4, // half of border width to center it
+    marginLeft: -4,
     width: 0,
     height: 0,
     borderLeftWidth: 4,
@@ -249,7 +240,6 @@ export const buyerProductsStyles = StyleSheet.create({
   ratingText: {
     fontSize: 16,
   },
-
   subscriptionContainer: {
     marginTop: 16,
     marginHorizontal: 16,
@@ -289,7 +279,7 @@ export const buyerProductsStyles = StyleSheet.create({
   categoriesContainer: {
     marginTop: 12,
   },
- scrollViewContent: {
+  scrollViewContent: {
     flexDirection: 'row',
     columnGap: 12,
     paddingHorizontal: 8,
@@ -330,12 +320,41 @@ export const buyerProductsStyles = StyleSheet.create({
     marginLeft: 5,
     fontSize: 14,
   },
-  // amountText: { fontWeight: 'bold', fontSize: 14 },
-
   title1: {
     marginTop: 0,
     fontSize: 16,
     color: Colors.primary['500'],
     marginRight: 0,
+  },
+  categoriesGrid: {
+    paddingLeft: 24,
+    paddingTop: 8,
+  },
+  categoriesGridContent: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 24,
+    gap: 8,
+  },
+  categoriesRow: {
+    justifyContent: 'space-between',
+  },
+  categoriesWithAll: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 8,
+  },
+  categoryTitle: {
+    color: Colors.light[10],
+    fontSize: 20,
+    fontWeight: '600',
+    flex: 1,
+    textAlign: 'center',
+  },
+  headerSearchContainer: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
   },
 });
