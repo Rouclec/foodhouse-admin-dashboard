@@ -83,12 +83,13 @@ export const buyerProductsStyles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 24,
     width: '100%',
   },
   searchInput: {
+    flexGrow: 1,
+    height: 52,
+    fontSize: 16,
     width: '100%',
-    height: 56,
     paddingHorizontal: 0,
     borderRadius: 16,
   },
