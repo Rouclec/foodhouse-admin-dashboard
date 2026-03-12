@@ -13,27 +13,33 @@ type Querier interface {
 	CreatePriceType(ctx context.Context, arg CreatePriceTypeParams) (PriceType, error)
 	CreateProduct(ctx context.Context, arg CreateProductParams) (string, error)
 	CreateProductName(ctx context.Context, arg CreateProductNameParams) (ProductName, error)
+	CreateProductUnit(ctx context.Context, arg CreateProductUnitParams) (ProductUnit, error)
 	DeleteCategory(ctx context.Context, id string) error
 	DeletePriceType(ctx context.Context, id string) error
 	DeleteProduct(ctx context.Context, id string) error
 	DeleteProductName(ctx context.Context, name string) error
+	DeleteProductUnit(ctx context.Context, id string) error
+	DeleteProductUnitsByProduct(ctx context.Context, productID string) error
 	GetCategory(ctx context.Context, id string) (Category, error)
 	GetMaxDeliveryFeeByProductIds(ctx context.Context, dollar_1 []string) (GetMaxDeliveryFeeByProductIdsRow, error)
 	GetPriceTypeById(ctx context.Context, id string) (PriceType, error)
 	GetProduct(ctx context.Context, id string) (GetProductRow, error)
 	GetProductForUpdate(ctx context.Context, id string) (GetProductForUpdateRow, error)
 	GetProductStatsBetweenDates(ctx context.Context, arg GetProductStatsBetweenDatesParams) (int64, error)
+	GetProductUnit(ctx context.Context, id string) (ProductUnit, error)
 	GetRegionName(ctx context.Context, arg GetRegionNameParams) (string, error)
-	ListCategories(ctx context.Context) ([]Category, error)
+	ListCategories(ctx context.Context) ([]ListCategoriesRow, error)
 	ListFarmerProducts(ctx context.Context, arg ListFarmerProductsParams) ([]ListFarmerProductsRow, error)
 	ListPriceTypes(ctx context.Context, categoryID string) ([]PriceType, error)
 	ListProductNames(ctx context.Context, categoryID string) ([]ProductName, error)
+	ListProductUnits(ctx context.Context, productID string) ([]ProductUnit, error)
 	ListProducts(ctx context.Context, arg ListProductsParams) ([]ListProductsRow, error)
 	PublishProduct(ctx context.Context, id string) error
 	SumProductAmounts(ctx context.Context, arg SumProductAmountsParams) (float64, error)
 	UnPublishProduct(ctx context.Context, id string) error
 	UpdateCategory(ctx context.Context, arg UpdateCategoryParams) error
 	UpdateProduct(ctx context.Context, arg UpdateProductParams) error
+	UpdateProductUnit(ctx context.Context, arg UpdateProductUnitParams) error
 }
 
 var _ Querier = (*Queries)(nil)

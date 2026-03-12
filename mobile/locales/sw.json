@@ -465,7 +465,8 @@
       "Categories": "Kategoria na bidhaa",
       "desc3": "Jiandikishe leo na uache FoodHouse ishughulikie ununuzi wako wa kila mwezi kwa usafirishaji wa kuaminika na ubora wa uhakika.",
       "btn1": "Ghairi",
-      "btn2": "Agiza sasa"
+      "btn2": "Agiza sasa",
+      "oneFreeDelivery": "Usafirishaji 1 wa bure"
     },
     "(customPackage)": {
       "header": "Jenga kifurushi maalum",

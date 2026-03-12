@@ -2,14 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
   FlatList,
-  Image,
-  Keyboard,
   KeyboardAvoidingView,
   Linking,
-  LayoutAnimation,
   Platform,
   SafeAreaView,
-  ScrollView,
   TouchableOpacity,
   UIManager,
   View,
@@ -18,14 +14,12 @@ import { defaultStyles, buyerProductsStyles as styles } from '@/styles';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
   productsListCategoriesOptions,
-  productsListProductsOptions,
 } from '@/client/products.swagger/@tanstack/react-query.gen';
 import { ordersListSubscriptionPlansOptions } from '@/client/orders.swagger/@tanstack/react-query.gen';
 import { ordersgrpcSubscription } from '@/client/orders.swagger';
 import { useContext } from 'react';
 import { Context, ContextType } from '@/app/_layout';
 import {
-  ActivityIndicator,
   Button,
   Dialog,
   Portal,
@@ -34,15 +28,12 @@ import {
   TextInput,
 } from 'react-native-paper';
 import i18n from '@/i18n';
-import { useRouter } from 'expo-router';
-import { CAMEROON, Colors, countries } from '@/constants';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Colors } from '@/constants';
 import { Chase } from 'react-native-animated-spinkit';
-import { FilterBottomSheet, Product } from '@/components';
-import { Feather } from '@expo/vector-icons';
-import { FilterBottomSheetRef } from '@/components/(buyer)/(index)/FilterBottomSheet';
-import MultiSlider from '@ptomasroos/react-native-multi-slider';
+import { CategoryCard } from '@/components/(buyer)/(index)/CategoryCard';
+import { CartBottomSheet, CartBottomSheetRef } from '@/components/(buyer)/(index)/CartBottomSheet';
 
-const HOUR_OF_DAY = new Date().getHours();
 const { width } = Dimensions.get('window');
 
 function getPlanDiscountPercent(plan?: ordersgrpcSubscription): number | null {
@@ -73,15 +64,9 @@ function isCustomSubscriptionPlan(plan?: ordersgrpcSubscription): boolean {
 }
 
 export default function BuyerProducts() {
-  const [hasReachedEnd, setHasReachedEnd] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [debounceQuery, setDebounceQuery] = useState('');
-  const [count, setCount] = useState(10);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>();
-  const [isCategoriesCollapsed, setIsCategoriesCollapsed] = useState(true);
-  const [minAmount, setMinAmount] = useState<string>();
-  const [maxAmount, setMaxAmount] = useState<string>();
   const [showLocationModal, setShowLocationModal] = useState(false);
+  const params = useLocalSearchParams();
   // const [settingUp, setSettingUp] = useState(true);
 
   // const [userLocation, setUserLocation] = useState<{
@@ -89,9 +74,6 @@ export default function BuyerProducts() {
   //   lon: number;
   // } | null>(null);
   // const [locationError, setLocationError] = useState<string | null>(null);
-  const userCurrency =
-    countries.find(country => country.code === user?.residenceCountryIsoCode)
-      ?.currency_code ?? CAMEROON.currency_code;
 
   // useEffect(() => {
   //   (async () => {
@@ -134,27 +116,26 @@ export default function BuyerProducts() {
   }, []);
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setDebounceQuery(searchQuery);
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
-
-  const toggleCategories = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setIsCategoriesCollapsed(prev => !prev);
-  };
+    if (params.openCart === 'true') {
+      cartSheetRef.current?.open();
+      router.setParams({ openCart: undefined });
+    }
+  }, [params.openCart]);
 
   const router = useRouter();
 
   const { user, cartItems } = useContext(Context) as ContextType;
-  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const cartCount = cartItems.length;
 
   const { data: categories, isLoading: isCategoriesLoading } = useQuery({
     ...productsListCategoriesOptions(),
     placeholderData: keepPreviousData,
   });
+
+  const filteredCategories = categories?.categories?.filter(cat =>
+    (cat.name?.toLowerCase().includes(searchQuery.toLowerCase())) &&
+    (Number(cat.productCount) || 0) > 0
+  ) || [];
 
   // Fetch subscription plans for the slider
   const { data: subscriptionPlansData, isLoading: isSubscriptionPlansLoading } =
@@ -165,42 +146,9 @@ export default function BuyerProducts() {
         },
       }),
     });
-  const { isLoading: isProductsLoading, data } = useQuery({
-    ...productsListProductsOptions({
-      path: {
-        userId: user?.userId ?? '',
-      },
-      query: {
-        count: count,
-        'maxAmount.currencyIsoCode': userCurrency,
-        'maxAmount.value': maxAmount ? parseFloat(maxAmount ?? '') : undefined,
-        'minAmount.currencyIsoCode': userCurrency,
-        'minAmount.value': minAmount ? parseFloat(minAmount ?? '') : undefined,
-
-        'userLocation.lat': 1.1,
-        'userLocation.lon': 1.1,
-
-        categoryId: selectedCategoryId,
-        search: debounceQuery,
-        startKey: '',
-        isApproved: true,
-      },
-    }),
-    // enabled: !!userLocation,
-    placeholderData: keepPreviousData,
-    refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000,
-  });
 
   // control variables for filter container.
-  const sheetRef = useRef<FilterBottomSheetRef>(null);
-  const [filterSelectedCategoryId, setFilterSelectedCategoryId] =
-    useState<string>();
-  const [filterSelectedMinValue, setFilterSelectedMinValue] =
-    useState<string>();
-  const [filterSelectedMaxValue, setFilterSelectedMaxValue] =
-    useState<string>();
-  const [filterSelectedRating, setFilterSelectedRating] = useState<number>();
+  const cartSheetRef = useRef<CartBottomSheetRef>(null);
 
   const plans = subscriptionPlansData?.subscriptionPlans || [];
 
@@ -248,36 +196,7 @@ export default function BuyerProducts() {
             <SafeAreaView style={styles.safeArea}>
               <View style={styles.appHeaderContent}>
                 <View style={styles.appHeaderTopContainer}>
-                  <View style={styles.appHeaderLeftContainer}>
-                    <TouchableOpacity
-                      style={styles.iconContainer}
-                      onPress={() => router.push('/(buyer)/(index)/profile')}>
-                      {user?.profileImage ? (
-                        <Image
-                          source={{ uri: user?.profileImage }}
-                          style={styles.profileImage}
-                        />
-                      ) : (
-                        <Image
-                          source={require('@/assets/images/avatar.png')}
-                          style={styles.avatarImage}
-                        />
-                      )}
-                    </TouchableOpacity>
-                    <View>
-                      <Text style={styles.greetingsText} variant="bodyLarge">
-                        {HOUR_OF_DAY < 12
-                          ? i18n.t('(buyer).(index).products.goodMorning')
-                          : HOUR_OF_DAY < 17
-                            ? i18n.t('(buyer).(index).products.goodAfternoon')
-                            : i18n.t('(buyer).(index).products.goodEvening')}{' '}
-                        👋
-                      </Text>
-                      <Text style={styles.nameText} variant="titleLarge">
-                        {user?.firstName} {user?.lastName}
-                      </Text>
-                    </View>
-                  </View>
+                  <View style={styles.iconContainer} />
 
                   <TouchableOpacity
                     style={styles.iconContainer}
@@ -286,7 +205,7 @@ export default function BuyerProducts() {
                         return;
                       }
 
-                      router.push('/(buyer)/(order)');
+                      cartSheetRef.current?.open();
                     }}>
                     <View style={defaultStyles.relativeContainer}>
                       <Icon
@@ -305,10 +224,10 @@ export default function BuyerProducts() {
                     </View>
                   </TouchableOpacity>
                 </View>
+              </View>
+              <View style={[styles.searchContainer, { marginTop: 12 }]}>
                 <TextInput
-                  placeholder={i18n.t(
-                    '(buyer).(index).products.searchProducts',
-                  )}
+                  placeholder={i18n.t('(buyer).(index).products.searchCategories') || 'Search categories...'}
                   placeholderTextColor={Colors.grey['bd']}
                   style={[defaultStyles.input, styles.searchInput]}
                   outlineStyle={styles.searchInputOutline}
@@ -318,26 +237,7 @@ export default function BuyerProducts() {
                   left={
                     <TextInput.Icon
                       icon={() => (
-                        <Feather
-                          name="search"
-                          size={20}
-                          color={Colors.grey['bd']}
-                        />
-                      )}
-                      size={24}
-                      color={Colors.grey['61']}
-                    />
-                  }
-                  right={
-                    <TextInput.Icon
-                      onPress={e => {
-                        Keyboard.dismiss(); // pressing the text input opens the keyboard, so we dismiss it at once, since that is not what we want here
-                        sheetRef.current?.open();
-                      }}
-                      icon={() => (
-                        <Image
-                          source={require('@/assets/images/filter-icon.jpg')}
-                        />
+                        <Icon source="magnify" size={20} color={Colors.grey['bd']} />
                       )}
                     />
                   }
@@ -345,7 +245,6 @@ export default function BuyerProducts() {
                     colors: {
                       primary: Colors.primary[500],
                       background: Colors.grey['fa'],
-                      error: Colors.error,
                     },
                     roundness: 16,
                   }}
@@ -353,7 +252,6 @@ export default function BuyerProducts() {
               </View>
             </SafeAreaView>
           </View>
-
 
           <View style={styles.subscriptionContainer}>
             <View style={styles.sectionHeaderRow}>
@@ -389,396 +287,49 @@ export default function BuyerProducts() {
                 style={[styles.title, styles.sectionHeaderTitle]}>
                 {i18n.t('(buyer).(index).products.categories')}
               </Text>
-              <TouchableOpacity
-                onPress={toggleCategories}
-                hitSlop={12}
-                style={styles.collapseToggle}>
-                <Icon
-                  source={isCategoriesCollapsed ? 'chevron-down' : 'chevron-up'}
-                  size={22}
-                  color={Colors.primary[500]}
-                />
-              </TouchableOpacity>
             </View>
 
-            {!isCategoriesCollapsed && (
-              <>
-                {isCategoriesLoading && !categories ? (
-                  <View style={defaultStyles.center}>
-                    <Chase size={24} color={Colors.primary[500]} />
-                  </View>
-                ) : (
-                  <View style={styles.flatListContainer}>
-                    <FlatList
-                      horizontal
-                      data={categories?.categories}
-                      contentContainerStyle={[
-                        styles.horizontailFlatListContent,
-                        styles.paddingRight24,
-                      ]}
-                      showsHorizontalScrollIndicator={false}
-                      style={[styles.horizontalFlatList, styles.paddingLeft24]}
-                      keyExtractor={(item, index) =>
-                        item?.id ?? index.toString()
-                      }
-                      ListHeaderComponent={() => (
-                        <TouchableOpacity
-                          style={[
-                            styles.categoryItem,
-                            !selectedCategoryId && styles.selectedCategoryItem,
-                          ]}
-                          onPress={() => setSelectedCategoryId(undefined)}>
-                          <Text
-                            style={{
-                              color: !selectedCategoryId
-                                ? Colors.light[10]
-                                : Colors.dark[10],
-                            }}>
-                            {i18n.t('(buyer).(index).products.all')}
-                          </Text>
-                        </TouchableOpacity>
-                      )}
-                      renderItem={({ item }) => {
-                        return (
-                          <TouchableOpacity
-                            style={[
-                              styles.categoryItem,
-                              selectedCategoryId === item?.id &&
-                              styles.selectedCategoryItem,
-                            ]}
-                            onPress={() => setSelectedCategoryId(item?.id)}>
-                            <Text
-                              style={{
-                                color:
-                                  selectedCategoryId === item?.id
-                                    ? Colors.light[10]
-                                    : Colors.dark[10],
-                              }}>
-                              {item.name}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      }}
-                    />
-                  </View>
-                )}
-              </>
-            )}
-          </View>
-          <Text
-            variant="titleMedium"
-            style={[styles.title, styles.marginHorizontal24]}>
-            {i18n.t('(buyer).(index).products.products')}
-          </Text>
-          {isProductsLoading ? (
-            <View style={[defaultStyles.container, defaultStyles.center]}>
-              <Chase size={56} color={Colors.primary[500]} />
-            </View>
-          ) : (
-            <FlatList
-              data={data?.products}
-              keyExtractor={(item, index) => item?.id ?? index.toString()}
-              contentContainerStyle={[
-                defaultStyles.paddingVertical,
-                styles.flatListContentContainer,
-              ]}
-              ListEmptyComponent={
-                <View style={defaultStyles.noItemsContainer}>
-                  <Text style={defaultStyles.noItems}>
-                    {i18n.t('(buyer).(index).products.noProductsFound')}
-                  </Text>
-                </View>
-              }
-              numColumns={2}
-              columnWrapperStyle={styles.flatListColumnWrapper}
-              showsVerticalScrollIndicator={false}
-              onEndReached={() => {
-                if (!hasReachedEnd) {
-                  setHasReachedEnd(true);
-                }
-              }}
-              renderItem={({ item }) => {
-                return (
-                  <Product
-                    product={item}
-                    OnPress={() =>
+            {isCategoriesLoading && !categories ? (
+              <View style={defaultStyles.center}>
+                <Chase size={24} color={Colors.primary[500]} />
+              </View>
+            ) : (
+              <FlatList
+                data={filteredCategories}
+                contentContainerStyle={[
+                  styles.categoriesGridContent,
+                  { paddingBottom: 100 },
+                ]}
+                numColumns={2}
+                columnWrapperStyle={styles.categoriesRow}
+                keyExtractor={(item, index) => item?.id ?? index.toString()}
+                renderItem={({ item }) => (
+                  <CategoryCard
+                    category={item}
+                    isSelected={false}
+                    productCount={Number(item.productCount) || 0}
+                    onPress={() =>
                       router.push({
-                        pathname: '/(buyer)/product-details',
-                        params: {
-                          productId: item?.id,
-                        },
+                        pathname: '/(buyer)/category-products',
+                        params: { categoryId: item?.id, categoryName: item?.name },
                       })
                     }
                   />
-                );
-              }}
-              onScrollBeginDrag={() => {
-                // Reset flag when user starts dragging
-                setHasReachedEnd(false);
-              }}
-              onScrollEndDrag={() => {
-                if (hasReachedEnd && data?.nextKey) {
-                  setCount(prev => prev + 10);
-                  setHasReachedEnd(false);
+                )}
+                ListEmptyComponent={
+                  searchQuery ? (
+                    <View style={defaultStyles.noItemsContainer}>
+                      <Text style={defaultStyles.noItems}>
+                        No categories found
+                      </Text>
+                    </View>
+                  ) : null
                 }
-              }}
-              ListFooterComponent={() =>
-                data?.nextKey ? (
-                  <View style={defaultStyles.listFooterComponent}>
-                    {hasReachedEnd && (
-                      <ActivityIndicator
-                        color={Colors.primary[500]}
-                        style={defaultStyles.listFooterIndicator}
-                      />
-                    )}
-                  </View>
-                ) : null
-              }
-            />
-          )}
+              />
+            )}
+          </View>
         </View>
       </KeyboardAvoidingView>
-      <FilterBottomSheet ref={sheetRef} sheetHeight={548}>
-        <View style={styles.filtersContainer}>
-          <Text variant="titleMedium" style={styles.title}>
-            {i18n.t('(buyer).(index).products.filter')}
-          </Text>
-          <View style={styles.mainFilterContainer}>
-            <View>
-              <Text variant="titleMedium" style={styles.title}>
-                {i18n.t('(buyer).(index).products.categories')}
-              </Text>
-              {isCategoriesLoading ? (
-                <View style={defaultStyles.center}>
-                  <Chase size={24} color={Colors.primary[500]} />
-                </View>
-              ) : (
-                <View style={styles.flatListContainer}>
-                  <FlatList
-                    horizontal
-                    data={categories?.categories}
-                    contentContainerStyle={styles.horizontailFlatListContent}
-                    showsHorizontalScrollIndicator={false}
-                    style={styles.horizontalFlatList}
-                    keyExtractor={(item, index) => item?.id ?? index.toString()}
-                    ListHeaderComponent={() => (
-                      <TouchableOpacity
-                        style={[
-                          styles.categoryItem,
-                          !filterSelectedCategoryId &&
-                          styles.selectedCategoryItem,
-                        ]}
-                        onPress={() => setFilterSelectedCategoryId(undefined)}>
-                        <Text
-                          style={{
-                            color: !filterSelectedCategoryId
-                              ? Colors.light[10]
-                              : Colors.dark[10],
-                          }}>
-                          {i18n.t('(buyer).(index).products.all')}
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                    renderItem={({ item }) => {
-                      return (
-                        <TouchableOpacity
-                          style={[
-                            styles.categoryItem,
-                            filterSelectedCategoryId === item?.id &&
-                            styles.selectedCategoryItem,
-                          ]}
-                          onPress={() => setFilterSelectedCategoryId(item?.id)}>
-                          <Text
-                            style={{
-                              color:
-                                filterSelectedCategoryId === item?.id
-                                  ? Colors.light[10]
-                                  : Colors.dark[10],
-                            }}>
-                            {item.name}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    }}
-                  />
-                </View>
-              )}
-            </View>
-            <View>
-              <Text variant="titleMedium" style={styles.title}>
-                {i18n.t('(buyer).(index).products.priceRange')}
-              </Text>
-              <MultiSlider
-                onValuesChangeStart={() => { }}
-                onValuesChangeFinish={e => {
-                  setFilterSelectedMinValue(e[0].toString());
-                  setFilterSelectedMaxValue(e[1].toString());
-                }}
-                values={[2000, 200000]}
-                isMarkersSeparated
-                min={500}
-                max={200000}
-                containerStyle={styles.silderContainer}
-                trackStyle={styles.sliderTrack}
-                selectedStyle={styles.sliderSelectedStyle}
-                sliderLength={width - 72}
-                customMarkerLeft={e => (
-                  <View style={defaultStyles.relativeContainer}>
-                    <View style={styles.tooltipContainer}>
-                      <View style={styles.tooltip}>
-                        <Text style={styles.tooltipText}>{e.currentValue}</Text>
-                        <View style={styles.tooltipArrow} />
-                      </View>
-                    </View>
-                    <View style={styles.marker} />
-                  </View>
-                )}
-                customMarkerRight={e => (
-                  <View
-                    style={[
-                      defaultStyles.relativeContainer,
-                      defaultStyles.center,
-                    ]}>
-                    <View style={styles.tooltipContainer}>
-                      <View style={styles.tooltip}>
-                        <Text
-                          variant="titleMedium"
-                          style={styles.tooltipText}
-                          numberOfLines={1}>
-                          {e.currentValue}
-                        </Text>
-                        <View style={styles.tooltipArrow} />
-                      </View>
-                    </View>
-                    <View style={styles.marker} />
-                  </View>
-                )}
-              />
-            </View>
-            <View>
-              <Text variant="titleMedium" style={styles.title}>
-                {i18n.t('(buyer).(index).products.ratings')}
-              </Text>
-              <View style={styles.flatListContainer}>
-                <FlatList
-                  horizontal
-                  data={[1, 2, 3, 4, 5]}
-                  contentContainerStyle={styles.horizontailFlatListContent}
-                  showsHorizontalScrollIndicator={false}
-                  style={styles.horizontalFlatList}
-                  keyExtractor={(_item, index) => index.toString()}
-                  ListHeaderComponent={() => (
-                    <TouchableOpacity
-                      style={[
-                        styles.categoryItem,
-                        !filterSelectedRating && styles.selectedCategoryItem,
-                      ]}
-                      onPress={() => setFilterSelectedRating(undefined)}>
-                      <Icon
-                        source={'star'}
-                        size={24}
-                        color={
-                          !filterSelectedRating
-                            ? Colors.light[10]
-                            : Colors.dark[10]
-                        }
-                      />
-                      <Text
-                        style={{
-                          color: !filterSelectedRating
-                            ? Colors.light[10]
-                            : Colors.dark[10],
-                        }}>
-                        {i18n.t('(buyer).(index).products.all')}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                  renderItem={({ item }) => {
-                    return (
-                      <TouchableOpacity
-                        style={[
-                          styles.categoryItem,
-                          filterSelectedRating === item &&
-                          styles.selectedCategoryItem,
-                        ]}
-                        onPress={() => setFilterSelectedRating(item)}>
-                        <Icon
-                          source={'star'}
-                          size={24}
-                          color={
-                            filterSelectedRating === item
-                              ? Colors.light[10]
-                              : Colors.dark[10]
-                          }
-                        />
-                        <Text
-                          variant="titleMedium"
-                          style={[
-                            {
-                              color:
-                                filterSelectedRating === item
-                                  ? Colors.light[10]
-                                  : Colors.dark[10],
-                            },
-                            styles.ratingText,
-                          ]}>
-                          {item}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  }}
-                />
-              </View>
-            </View>
-          </View>
-          <View style={styles.bottomButtonContainer}>
-            <Button
-              style={[
-                defaultStyles.button,
-                defaultStyles.secondaryButton,
-                styles.halfButton,
-              ]}
-              onPress={() => {
-                sheetRef?.current?.close();
-
-                // clear the states
-                setFilterSelectedCategoryId(undefined);
-                setFilterSelectedMinValue(undefined);
-                setFilterSelectedMaxValue(undefined);
-                setFilterSelectedRating(undefined);
-              }}>
-              <Text style={defaultStyles.secondaryButtonText}>
-                {i18n.t('(buyer).(index).products.close')}
-              </Text>
-            </Button>
-            <Button
-              style={[
-                defaultStyles.button,
-                defaultStyles.primaryButton,
-                styles.halfButton,
-              ]}
-              onPress={() => {
-                setSelectedCategoryId(filterSelectedCategoryId);
-                // set the rating
-                setMinAmount(filterSelectedMinValue);
-                setMaxAmount(filterSelectedMaxValue);
-
-                // clear the states
-                setFilterSelectedCategoryId(undefined);
-                setFilterSelectedMinValue(undefined);
-                setFilterSelectedMaxValue(undefined);
-                setFilterSelectedRating(undefined);
-
-                // close the sheet
-                sheetRef?.current?.close();
-              }}>
-              <Text style={defaultStyles.buttonText}>
-                {i18n.t('(buyer).(index).products.apply')}
-              </Text>
-            </Button>
-          </View>
-        </View>
-      </FilterBottomSheet>
       <Portal>
         <Dialog
           visible={showLocationModal}
@@ -815,6 +366,7 @@ export default function BuyerProducts() {
           </Dialog.Actions>
         </Dialog>
       </Portal>
+      <CartBottomSheet ref={cartSheetRef} />
     </>
   );
 }

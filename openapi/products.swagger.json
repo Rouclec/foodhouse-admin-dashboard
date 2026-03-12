@@ -853,6 +853,9 @@
       "properties": {
         "name": {
           "type": "string"
+        },
+        "image": {
+          "type": "string"
         }
       }
     },
@@ -921,6 +924,9 @@
       "properties": {
         "name": {
           "type": "string"
+        },
+        "image": {
+          "type": "string"
         }
       }
     },
@@ -963,6 +969,13 @@
           "type": "string"
         },
         "createdBy": {
+          "type": "string"
+        },
+        "productCount": {
+          "type": "string",
+          "format": "int64"
+        },
+        "image": {
           "type": "string"
         }
       }

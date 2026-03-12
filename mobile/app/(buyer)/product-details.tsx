@@ -87,9 +87,7 @@ export default function ProductDetails() {
       setSnackbarAction('success');
       setSnackbarVisible(true);
 
-      setTimeout(() => {
-        router.replace('/(buyer)/(index)');
-      }, 1500);
+      router.replace('/(buyer)/(index)?openCart=true');
     } catch (error) {
       setSnackbarMessage(error as string);
       setSnackbarAction('info');

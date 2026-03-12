@@ -473,7 +473,8 @@
       "Categories": "Catégories et produits",
       "desc3": "Abonnez-vous dès aujourd’hui et laissez FoodHouse gérer vos courses mensuelles avec une livraison fiable et une fraîcheur garantie.",
       "btn1": "Annuler",
-      "btn2": "Commander maintenant"
+      "btn2": "Commander maintenant",
+      "oneFreeDelivery": "1 Livraison gratuite"
     },
     "(customPackage)": {
       "header": "Créer un forfait personnalisé",

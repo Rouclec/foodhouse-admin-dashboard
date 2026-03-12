@@ -182,7 +182,7 @@ export default function DeliveryAddress() {
           <MapView
             key={'map-instance'}
             style={{
-              height: height - (sheetHeight - insets.bottom),
+              height: height - (sheetHeight - insets.bottom) - keyboardHeight,
             }}
             pointerEvents="none"
             ref={mapRef}
@@ -253,6 +253,8 @@ export default function DeliveryAddress() {
                 textInputProps={{
                   placeholderTextColor: Colors.grey['3c'],
                   value: addressQuery,
+                  autoCorrect: false,
+                  autoCapitalize: 'none',
                   onChangeText: text => {
                     setAddressQuery(text);
                     if (lastSelectedDescription && text !== lastSelectedDescription) {

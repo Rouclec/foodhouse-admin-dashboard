@@ -1,12 +1,13 @@
 -- name: CreateCategory :one
-INSERT INTO categories (name, slug, created_by)
-VALUES ($1, $2, $3)
+INSERT INTO categories (name, slug, created_by, image)
+VALUES ($1, $2, $3, $4)
 RETURNING *;
 
 -- name: UpdateCategory :exec
 UPDATE categories
 SET name = $2,
-    slug = $3
+    slug = $3,
+    image = $4
 WHERE id = $1;
 
 -- name: DeleteCategory :exec
@@ -14,7 +15,13 @@ DELETE FROM categories
 WHERE id = $1;
 
 -- name: ListCategories :many
-SELECT * FROM categories;
+SELECT 
+    c.*,
+    COUNT(p.id) as product_count
+FROM categories c
+LEFT JOIN products p ON p.category_id = c.id AND p.is_approved = true
+GROUP BY c.id
+ORDER BY c.name;
 
 -- name: GetCategory :one
 SELECT * FROM categories where id = $1;
@@ -279,3 +286,44 @@ FROM products
 WHERE id = ANY($1::text[])
 ORDER BY delivery_fee_amount DESC
 LIMIT 1;
+
+-- name: CreateProductUnit :one
+INSERT INTO product_units (
+    product_id,
+    unit_type,
+    value,
+    currency_iso_code,
+    created_by
+)
+VALUES (
+    sqlc.arg(product_id)::text,
+    sqlc.arg(unit_type)::text,
+    sqlc.arg(value)::bigint,
+    sqlc.arg(currency_iso_code)::text,
+    sqlc.arg(created_by)::text
+)
+ON CONFLICT (product_id, unit_type) DO UPDATE
+SET value = sqlc.arg(value)::bigint,
+    currency_iso_code = sqlc.arg(currency_iso_code)::text,
+    updated_at = now()
+RETURNING *;
+
+-- name: UpdateProductUnit :exec
+UPDATE product_units
+SET
+    value = sqlc.arg(value)::bigint,
+    currency_iso_code = sqlc.arg(currency_iso_code)::text,
+    updated_at = now()
+WHERE id = sqlc.arg(id)::text AND product_id = sqlc.arg(product_id)::text;
+
+-- name: DeleteProductUnit :exec
+DELETE FROM product_units WHERE id = $1;
+
+-- name: ListProductUnits :many
+SELECT * FROM product_units WHERE product_id = $1 ORDER BY created_at ASC;
+
+-- name: GetProductUnit :one
+SELECT * FROM product_units WHERE id = $1;
+
+-- name: DeleteProductUnitsByProduct :exec
+DELETE FROM product_units WHERE product_id = $1;

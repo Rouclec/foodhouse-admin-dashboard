@@ -3,814 +3,890 @@
 export type OrdersApproveOrderBody = unknown;
 
 export type OrdersBulkSettleCommissionsBody = {
-    commissionIds?: Array<(string)>;
+  commissionIds?: Array<string>;
 };
 
 export type OrdersConfirmDeliveryBody = unknown;
 
 export type OrdersCreateCustomSubscriptionBody = {
-    budget?: typesAmount;
-    subscriptionItems?: Array<ordersgrpcSubscriptionItem>;
-    maxAmountPerOrder?: string;
-    deliveryLocation?: typesPoint;
-    estimatedDeliveryTimeDays?: string;
+  budget?: typesAmount;
+  subscriptionItems?: Array<ordersgrpcSubscriptionItem>;
+  maxAmountPerOrder?: string;
+  deliveryLocation?: typesPoint;
+  estimatedDeliveryTimeDays?: string;
 };
 
 export type OrdersCreateDeliveryPointBody = {
-    address?: typesPoint;
-    city?: string;
-    deliveryPointName?: string;
+  address?: typesPoint;
+  city?: string;
+  deliveryPointName?: string;
 };
 
 export type OrdersCreateOrderBody = {
-    orderItems?: Array<ordersgrpcOrderItem>;
-    deliveryLocation?: typesPoint;
+  orderItems?: Array<ordersgrpcOrderItem>;
+  deliveryLocation?: typesPoint;
 };
 
 export type OrdersCreateSubscriptionPlanBody = {
-    title?: string;
-    description?: string;
-    amount?: typesAmount;
-    duration?: string;
-    subscriptionItems?: Array<ordersgrpcSubscriptionItem>;
-    estimatedDeliveryTimeDays?: string;
+  title?: string;
+  description?: string;
+  amount?: typesAmount;
+  duration?: string;
+  subscriptionItems?: Array<ordersgrpcSubscriptionItem>;
+  estimatedDeliveryTimeDays?: string;
 };
 
 export type OrdersDispatchOrderBody = {
-    payoutPhoneNumber?: string;
+  payoutPhoneNumber?: string;
 };
 
 export type OrdersEstimateDeliveryFeeBody = {
-    orderItems?: Array<ordersgrpcOrderItem>;
-    deliveryLocation?: typesPoint;
+  orderItems?: Array<ordersgrpcOrderItem>;
+  deliveryLocation?: typesPoint;
 };
 
 export type ordersgrpcAccount = {
-    paymentMethod?: ordersgrpcPaymentMethodType;
-    accountNumber?: string;
+  paymentMethod?: ordersgrpcPaymentMethodType;
+  accountNumber?: string;
 };
 
 export type ordersgrpcApproveOrderResponse = unknown;
 
 export type ordersgrpcBulkSettleCommissionsResponse = {
-    message?: string;
+  message?: string;
 };
 
 export type ordersgrpcCheckPaymentStatusResponse = {
-    status?: ordersgrpcPaymentStatus;
+  status?: ordersgrpcPaymentStatus;
 };
 
 export type ordersgrpcCommission = {
-    id?: string;
-    referrerId?: string;
-    refferedId?: string;
-    orderNumber?: string;
-    commissionAmount?: typesAmount;
-    paidAt?: string;
-    paymentReference?: string;
-    createdAt?: string;
+  id?: string;
+  referrerId?: string;
+  refferedId?: string;
+  orderNumber?: string;
+  commissionAmount?: typesAmount;
+  paidAt?: string;
+  paymentReference?: string;
+  createdAt?: string;
 };
 
 export type ordersgrpcConfirmDeliveryResponse = unknown;
 
 export type ordersgrpcConfirmPaymentRequest = {
-    status?: string;
-    reference?: string;
-    amount?: string;
-    currency?: string;
-    operator?: string;
-    code?: string;
-    operatorReference?: string;
-    signature?: string;
-    endpoint?: string;
-    /**
-     * The reference on the platform that initiated the transaction.
-     */
-    externalReference?: string;
-    phoneNumber?: string;
-    orderId?: string;
+  status?: string;
+  reference?: string;
+  amount?: string;
+  currency?: string;
+  operator?: string;
+  code?: string;
+  operatorReference?: string;
+  signature?: string;
+  endpoint?: string;
+  /**
+   * The reference on the platform that initiated the transaction.
+   */
+  externalReference?: string;
+  phoneNumber?: string;
+  orderId?: string;
 };
 
 export type ordersgrpcConfirmPaymentResponse = unknown;
 
 export type ordersgrpcCreateCustomSubscriptionResponse = {
-    subscription?: ordersgrpcUserSubscription;
+  subscription?: ordersgrpcUserSubscription;
 };
 
 export type ordersgrpcCreateDeliveryPointResponse = {
-    deliveryPoint?: ordersgrpcDeliveryPoint;
+  deliveryPoint?: ordersgrpcDeliveryPoint;
 };
 
 export type ordersgrpcCreateOrderResponse = {
-    order?: ordersgrpcOrder;
+  order?: ordersgrpcOrder;
+};
+
+export type ordersgrpcCreateSignupCommissionResponse = {
+  commission?: ordersgrpcCommission;
 };
 
 export type ordersgrpcCreateSubscriptionPlanResponse = {
-    subscriptionPlan?: ordersgrpcSubscription;
+  subscriptionPlan?: ordersgrpcSubscription;
 };
 
 export type ordersgrpcDeleteDeliveryPointResponse = unknown;
 
 export type ordersgrpcDeliveryPoint = {
-    id?: string;
-    address?: typesPoint;
-    deliveryPointName?: string;
-    city?: string;
-    createdAt?: string;
+  id?: string;
+  address?: typesPoint;
+  deliveryPointName?: string;
+  city?: string;
+  createdAt?: string;
 };
 
 export type ordersgrpcDispatchOrderResponse = unknown;
 
 export type ordersgrpcEstimateDeliveryFeeResponse = {
-    estimatedDeliveryFee?: typesAmount;
+  estimatedDeliveryFee?: typesAmount;
 };
 
 export type ordersgrpcFarmerEarningsData = {
-    date?: string;
-    value?: number;
+  date?: string;
+  value?: number;
 };
 
-export type ordersgrpcFilterType = 'FilterType_UNSPECIFIED' | 'FilterType_THIS_WEEK' | 'FilterType_THIS_MONTH' | 'FilterType_THIS_YEAR' | 'FilterType_ALL_TIME';
+export type ordersgrpcFilterType =
+  | "FilterType_UNSPECIFIED"
+  | "FilterType_THIS_WEEK"
+  | "FilterType_THIS_MONTH"
+  | "FilterType_THIS_YEAR"
+  | "FilterType_ALL_TIME";
 
 export type ordersgrpcGetAdminStatsResponse = {
-    data?: Array<ordersgrpcStatItem>;
+  data?: Array<ordersgrpcStatItem>;
 };
 
 export type ordersgrpcGetFarmerEarningsResponse = {
-    data?: Array<ordersgrpcFarmerEarningsData>;
+  data?: Array<ordersgrpcFarmerEarningsData>;
 };
 
 export type ordersgrpcGetOrderDetailsResponse = {
-    order?: ordersgrpcOrder;
-    auditLog?: Array<ordersgrpcOrderAuditLog>;
+  order?: ordersgrpcOrder;
+  auditLog?: Array<ordersgrpcOrderAuditLog>;
 };
 
 export type ordersgrpcGetUserSubscriptionDetailsResponse = {
-    subscription?: ordersgrpcUserSubscription;
-    orders?: Array<ordersgrpcOrder>;
+  subscription?: ordersgrpcUserSubscription;
+  orders?: Array<ordersgrpcOrder>;
 };
 
 export type ordersgrpcHealthCheckResponse = unknown;
 
 export type ordersgrpcInitiatePaymentResponse = {
-    payment?: ordersgrpcPayment;
+  payment?: ordersgrpcPayment;
 };
 
 export type ordersgrpcListAllActiveSubscriptionsResponse = {
-    subscriptions?: Array<ordersgrpcUserSubscription>;
+  subscriptions?: Array<ordersgrpcUserSubscription>;
 };
 
 export type ordersgrpcListCommissionsByReferrerResponse = {
-    commissions?: Array<ordersgrpcCommission>;
+  commissions?: Array<ordersgrpcCommission>;
 };
 
 export type ordersgrpcListDeliveryCitiesResponse = {
-    cities?: Array<(string)>;
-    nextKey?: string;
+  cities?: Array<string>;
+  nextKey?: string;
 };
 
 export type ordersgrpcListDeliveryPointsResponse = {
-    deliveryPoints?: Array<ordersgrpcDeliveryPoint>;
-    nextKey?: string;
+  deliveryPoints?: Array<ordersgrpcDeliveryPoint>;
+  nextKey?: string;
 };
 
 export type ordersgrpcListFarmerOrdersResponse = {
-    orders?: Array<ordersgrpcOrder>;
-    nextKey?: string;
+  orders?: Array<ordersgrpcOrder>;
+  nextKey?: string;
 };
 
 export type ordersgrpcListOrdersDueSoonResponse = {
-    orders?: Array<ordersgrpcOrder>;
+  orders?: Array<ordersgrpcOrder>;
 };
 
 export type ordersgrpcListOrdersResponse = {
-    orders?: Array<ordersgrpcOrder>;
-    nextKey?: string;
+  orders?: Array<ordersgrpcOrder>;
+  nextKey?: string;
 };
 
 export type ordersgrpcListPaymentsResponse = {
-    payments?: Array<ordersgrpcPayment>;
-    nextKey?: string;
+  payments?: Array<ordersgrpcPayment>;
+  nextKey?: string;
 };
 
 export type ordersgrpcListSubscriptionPlansResponse = {
-    subscriptionPlans?: Array<ordersgrpcSubscription>;
+  subscriptionPlans?: Array<ordersgrpcSubscription>;
 };
 
 export type ordersgrpcListTotalCommissionAmountByReferrerResponse = {
-    commissions?: Array<typesAmount>;
+  commissions?: Array<typesAmount>;
 };
 
 export type ordersgrpcListUserOrdersResponse = {
-    orders?: Array<ordersgrpcOrder>;
-    nextKey?: string;
+  orders?: Array<ordersgrpcOrder>;
+  nextKey?: string;
 };
 
 export type ordersgrpcListUserSubscriptionsResponse = {
-    subscriptions?: Array<ordersgrpcUserSubscription>;
+  subscriptions?: Array<ordersgrpcUserSubscription>;
 };
 
 export type ordersgrpcOrder = {
-    orderNumber?: string;
-    deliveryLocation?: typesPoint;
-    sumTotal?: typesAmount;
-    status?: ordersgrpcOrderStatus;
-    rating?: number;
-    review?: string;
-    orderItems?: Array<ordersgrpcOrderItem>;
-    createdBy?: string;
-    createdAt?: string;
-    updatedAt?: string;
-    secretKey?: string;
-    productOwner?: string;
-    payoutPhoneNumber?: string;
-    dispatchedBy?: string;
-    deliveryFee?: typesAmount;
-    totalItems?: number;
-    userSubscriptionId?: string;
-    expectedDeliveryDate?: string;
+  orderNumber?: string;
+  deliveryLocation?: typesPoint;
+  sumTotal?: typesAmount;
+  status?: ordersgrpcOrderStatus;
+  rating?: number;
+  review?: string;
+  orderItems?: Array<ordersgrpcOrderItem>;
+  createdBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  secretKey?: string;
+  productOwner?: string;
+  payoutPhoneNumber?: string;
+  dispatchedBy?: string;
+  deliveryFee?: typesAmount;
+  totalItems?: number;
+  userSubscriptionId?: string;
+  expectedDeliveryDate?: string;
+  /**
+   * Flat platform fee charged on the order (excluded from farmer payout).
+   */
+  serviceFee?: typesAmount;
 };
 
 export type ordersgrpcOrderAuditLog = {
-    timestamp?: string;
-    actor?: string;
-    action?: string;
-    reason?: string;
-    before?: ordersgrpcOrder;
-    after?: ordersgrpcOrder;
+  timestamp?: string;
+  actor?: string;
+  action?: string;
+  reason?: string;
+  before?: ordersgrpcOrder;
+  after?: ordersgrpcOrder;
 };
 
 export type ordersgrpcOrderItem = {
-    productId?: string;
-    quantity?: string;
-    productImage?: string;
-    productName?: string;
-    productUnitPrice?: typesAmount;
-    unitType?: string;
+  productId?: string;
+  quantity?: string;
+  productImage?: string;
+  productName?: string;
+  productUnitPrice?: typesAmount;
+  unitType?: string;
 };
 
-export type ordersgrpcOrderStatus = 'OrderStatus_UNSPECIFIED' | 'OrderStatus_CREATED' | 'OrderStatus_PAYMENT_SUCCESSFUL' | 'OrderStatus_PAYMENT_FAILED' | 'OrderStatus_IN_TRANSIT' | 'OrderStatus_DELIVERED' | 'OrderStatus_APPROVED' | 'OrderStatus_REJECTED';
+export type ordersgrpcOrderStatus =
+  | "OrderStatus_UNSPECIFIED"
+  | "OrderStatus_CREATED"
+  | "OrderStatus_PAYMENT_SUCCESSFUL"
+  | "OrderStatus_PAYMENT_FAILED"
+  | "OrderStatus_IN_TRANSIT"
+  | "OrderStatus_DELIVERED"
+  | "OrderStatus_APPROVED"
+  | "OrderStatus_REJECTED";
 
 export type ordersgrpcPayment = {
-    id?: string;
-    paymentEntity?: ordersgrpcPaymentEntity;
-    entityId?: string;
-    amount?: typesAmount;
-    createdBy?: string;
-    createdAt?: string;
-    expiresAt?: string;
-    updatedAt?: string;
-    status?: ordersgrpcPaymentStatus;
-    account?: ordersgrpcAccount;
-    type?: ordersgrpcPaymentType;
+  id?: string;
+  paymentEntity?: ordersgrpcPaymentEntity;
+  entityId?: string;
+  amount?: typesAmount;
+  createdBy?: string;
+  createdAt?: string;
+  expiresAt?: string;
+  updatedAt?: string;
+  status?: ordersgrpcPaymentStatus;
+  account?: ordersgrpcAccount;
+  type?: ordersgrpcPaymentType;
 };
 
-export type ordersgrpcPaymentEntity = 'PaymentEntity_UNSPECIFIED' | 'PaymentEntity_ORDER' | 'PaymentEntity_SUBSCRIPTION' | 'PaymentEntity_COMMISSION' | 'PaymentEntity_REFUND';
+export type ordersgrpcPaymentEntity =
+  | "PaymentEntity_UNSPECIFIED"
+  | "PaymentEntity_ORDER"
+  | "PaymentEntity_SUBSCRIPTION"
+  | "PaymentEntity_COMMISSION"
+  | "PaymentEntity_REFUND";
 
-export type ordersgrpcPaymentMethodType = 'PaymentMethodType_UNSPECIFIED' | 'PaymentMethodType_MOBILE_MONEY' | 'PaymentMethodType_ORANGE_MONEY' | 'PaymentMethodType_CREDIT_CARD' | 'PaymentMethodType_ACCOUNT_BALANCE';
+export type ordersgrpcPaymentMethodType =
+  | "PaymentMethodType_UNSPECIFIED"
+  | "PaymentMethodType_MOBILE_MONEY"
+  | "PaymentMethodType_ORANGE_MONEY"
+  | "PaymentMethodType_CREDIT_CARD"
+  | "PaymentMethodType_ACCOUNT_BALANCE";
 
-export type ordersgrpcPaymentStatus = 'PaymentStatus_UNSPECIFIED' | 'PaymentStatus_INITIATED' | 'PaymentStatus_COMPLETED' | 'PaymentStatus_FAILED' | 'PaymentStatus_CANCELED';
+export type ordersgrpcPaymentStatus =
+  | "PaymentStatus_UNSPECIFIED"
+  | "PaymentStatus_INITIATED"
+  | "PaymentStatus_COMPLETED"
+  | "PaymentStatus_FAILED"
+  | "PaymentStatus_CANCELED";
 
-export type ordersgrpcPaymentType = 'PaymentType_UNSPECIFIED' | 'PaymentType_CREDIT' | 'PaymentType_DEBIT';
+export type ordersgrpcPaymentType =
+  | "PaymentType_UNSPECIFIED"
+  | "PaymentType_CREDIT"
+  | "PaymentType_DEBIT";
 
 export type ordersgrpcRejectOrderResponse = unknown;
 
 export type ordersgrpcStatItem = {
-    title?: string;
-    value?: number;
-    change?: number;
-    description?: string;
-    currency?: string;
+  title?: string;
+  value?: number;
+  change?: number;
+  description?: string;
+  currency?: string;
 };
 
 export type ordersgrpcSubscribeResponse = {
-    subscription?: ordersgrpcUserSubscription;
+  subscription?: ordersgrpcUserSubscription;
 };
 
 export type ordersgrpcSubscription = {
-    id?: string;
-    title?: string;
-    description?: string;
-    amount?: typesAmount;
-    duration?: string;
-    subscriptionItems?: Array<ordersgrpcSubscriptionItem>;
-    createdAt?: string;
-    updatedAt?: string;
-    estimatedDeliveryTimeDays?: string;
+  id?: string;
+  title?: string;
+  description?: string;
+  amount?: typesAmount;
+  duration?: string;
+  subscriptionItems?: Array<ordersgrpcSubscriptionItem>;
+  createdAt?: string;
+  updatedAt?: string;
+  estimatedDeliveryTimeDays?: string;
 };
 
 export type ordersgrpcSubscriptionItem = {
-    productId?: string;
-    quantity?: string;
-    productImage?: string;
-    productName?: string;
-    productUnitPrice?: typesAmount;
-    unitType?: string;
-    subscriptionId?: string;
-    /**
-     * order_index indicates which order (delivery) this item belongs to.
-     * 0 = first order, 1 = second order, etc. Defaults to 0 for single-order
-     * subscriptions.
-     */
-    orderIndex?: number;
+  productId?: string;
+  quantity?: string;
+  productImage?: string;
+  productName?: string;
+  productUnitPrice?: typesAmount;
+  unitType?: string;
+  subscriptionId?: string;
+  /**
+   * order_index indicates which order (delivery) this item belongs to.
+   * 0 = first order, 1 = second order, etc. Defaults to 0 for single-order
+   * subscriptions.
+   */
+  orderIndex?: number;
 };
 
 export type ordersgrpcUpdateDeliveryPointResponse = unknown;
 
 export type ordersgrpcUpdateSubscriptionPlanResponse = {
-    subscriptionPlan?: ordersgrpcSubscription;
+  subscriptionPlan?: ordersgrpcSubscription;
 };
 
 export type ordersgrpcUserSubscription = {
-    id?: string;
-    userId?: string;
-    subscriptionPlanId?: string;
-    active?: boolean;
-    createdAt?: string;
-    updatedAt?: string;
-    expiresAt?: string;
-    progress?: number;
-    amount?: typesAmount;
-    publicId?: string;
-    estimatedDeliveryTimeDays?: string;
-    isCustom?: boolean;
-    dailyDeliveryLimit?: string;
-    soonestDeliveryDate?: string;
-    /**
-     * Delivery location chosen at subscription time; used as the default delivery
-     * location for all orders generated from this subscription.
-     */
-    deliveryLocation?: typesPoint;
+  id?: string;
+  userId?: string;
+  subscriptionPlanId?: string;
+  active?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  expiresAt?: string;
+  progress?: number;
+  amount?: typesAmount;
+  publicId?: string;
+  estimatedDeliveryTimeDays?: string;
+  isCustom?: boolean;
+  dailyDeliveryLimit?: string;
+  soonestDeliveryDate?: string;
+  /**
+   * Delivery location chosen at subscription time; used as the default delivery
+   * location for all orders generated from this subscription.
+   */
+  deliveryLocation?: typesPoint;
 };
 
 export type OrdersInitiatePaymentBody = {
-    paymentEntity?: ordersgrpcPaymentEntity;
-    entityId?: string;
-    amount?: typesAmount;
-    account?: ordersgrpcAccount;
+  paymentEntity?: ordersgrpcPaymentEntity;
+  entityId?: string;
+  amount?: typesAmount;
+  account?: ordersgrpcAccount;
 };
 
 export type OrdersRejectOrderBody = {
-    reason?: string;
+  reason?: string;
 };
 
 export type OrdersSubscribeBody = {
-    subscriptionPlanId?: string;
-    deliveryLocation?: typesPoint;
+  subscriptionPlanId?: string;
+  deliveryLocation?: typesPoint;
 };
 
 export type OrdersUpdateDeliveryPointBody = {
-    address?: typesPoint;
-    city?: string;
-    deliveryPointName?: string;
+  address?: typesPoint;
+  city?: string;
+  deliveryPointName?: string;
 };
 
 export type OrdersUpdateSubscriptionPlanBody = {
-    title?: string;
-    description?: string;
-    amount?: typesAmount;
-    duration?: string;
-    subscriptionItems?: Array<ordersgrpcSubscriptionItem>;
-    estimatedDeliveryTimeDays?: string;
+  title?: string;
+  description?: string;
+  amount?: typesAmount;
+  duration?: string;
+  subscriptionItems?: Array<ordersgrpcSubscriptionItem>;
+  estimatedDeliveryTimeDays?: string;
 };
 
 export type protobufAny = {
-    [key: string]: unknown;
+  [key: string]: unknown;
 };
 
 export type rpcStatus = {
-    code?: number;
-    message?: string;
-    details?: Array<protobufAny>;
+  code?: number;
+  message?: string;
+  details?: Array<protobufAny>;
 };
 
 export type typesAmount = {
-    value?: number;
-    currencyIsoCode?: string;
+  value?: number;
+  currencyIsoCode?: string;
 };
 
 export type typesPoint = {
-    lon?: number;
-    lat?: number;
-    address?: string;
+  lon?: number;
+  lat?: number;
+  address?: string;
 };
 
 export type OrdersListAllActiveSubscriptionsData = {
-    path: {
-        adminUserId: string;
-    };
-    query?: {
-        /**
-         * Optional: filter by active status (defaults to true if not specified)
-         */
-        activeOnly?: boolean;
-    };
+  path: {
+    adminUserId: string;
+  };
+  query?: {
+    /**
+     * Optional: filter by active status (defaults to true if not specified)
+     */
+    activeOnly?: boolean;
+  };
 };
 
-export type OrdersListAllActiveSubscriptionsResponse = (ordersgrpcListAllActiveSubscriptionsResponse);
+export type OrdersListAllActiveSubscriptionsResponse =
+  ordersgrpcListAllActiveSubscriptionsResponse;
 
-export type OrdersListAllActiveSubscriptionsError = (rpcStatus);
+export type OrdersListAllActiveSubscriptionsError = rpcStatus;
 
 export type OrdersBulkSettleCommissionsData = {
-    body: OrdersBulkSettleCommissionsBody;
-    path: {
-        adminUserId: string;
-    };
+  body: OrdersBulkSettleCommissionsBody;
+  path: {
+    adminUserId: string;
+  };
 };
 
-export type OrdersBulkSettleCommissionsResponse = (ordersgrpcBulkSettleCommissionsResponse);
+export type OrdersBulkSettleCommissionsResponse =
+  ordersgrpcBulkSettleCommissionsResponse;
 
-export type OrdersBulkSettleCommissionsError = (rpcStatus);
+export type OrdersBulkSettleCommissionsError = rpcStatus;
 
 export type OrdersListCommissionsByReferrerData = {
-    path: {
-        adminUserId: string;
-        referrerId: string;
-    };
-    query?: {
-        isPaid?: boolean;
-    };
+  path: {
+    adminUserId: string;
+    referrerId: string;
+  };
+  query?: {
+    isPaid?: boolean;
+  };
 };
 
-export type OrdersListCommissionsByReferrerResponse = (ordersgrpcListCommissionsByReferrerResponse);
+export type OrdersListCommissionsByReferrerResponse =
+  ordersgrpcListCommissionsByReferrerResponse;
 
-export type OrdersListCommissionsByReferrerError = (rpcStatus);
+export type OrdersListCommissionsByReferrerError = rpcStatus;
 
 export type OrdersListTotalComissionAmountByReferrerData = {
-    path: {
-        adminUserId: string;
-        referrerId: string;
-    };
-    query?: {
-        isPaid?: boolean;
-    };
+  path: {
+    adminUserId: string;
+    referrerId: string;
+  };
+  query?: {
+    isPaid?: boolean;
+  };
 };
 
-export type OrdersListTotalComissionAmountByReferrerResponse = (ordersgrpcListTotalCommissionAmountByReferrerResponse);
+export type OrdersListTotalComissionAmountByReferrerResponse =
+  ordersgrpcListTotalCommissionAmountByReferrerResponse;
 
-export type OrdersListTotalComissionAmountByReferrerError = (rpcStatus);
+export type OrdersListTotalComissionAmountByReferrerError = rpcStatus;
 
 export type OrdersCreateSubscriptionPlanData = {
-    body: OrdersCreateSubscriptionPlanBody;
-    path: {
-        adminUserId: string;
-    };
+  body: OrdersCreateSubscriptionPlanBody;
+  path: {
+    adminUserId: string;
+  };
 };
 
-export type OrdersCreateSubscriptionPlanResponse = (ordersgrpcCreateSubscriptionPlanResponse);
+export type OrdersCreateSubscriptionPlanResponse =
+  ordersgrpcCreateSubscriptionPlanResponse;
 
-export type OrdersCreateSubscriptionPlanError = (rpcStatus);
+export type OrdersCreateSubscriptionPlanError = rpcStatus;
 
 export type OrdersListOrdersDueSoonData = {
-    path: {
-        adminUserId: string;
-    };
-    query?: {
-        /**
-         * Number of days to look ahead
-         */
-        days?: string;
-    };
+  path: {
+    adminUserId: string;
+  };
+  query?: {
+    /**
+     * Number of days to look ahead
+     */
+    days?: string;
+  };
 };
 
-export type OrdersListOrdersDueSoonResponse = (ordersgrpcListOrdersDueSoonResponse);
+export type OrdersListOrdersDueSoonResponse =
+  ordersgrpcListOrdersDueSoonResponse;
 
-export type OrdersListOrdersDueSoonError = (rpcStatus);
+export type OrdersListOrdersDueSoonError = rpcStatus;
 
 export type OrdersUpdateSubscriptionPlanData = {
-    body: OrdersUpdateSubscriptionPlanBody;
-    path: {
-        adminUserId: string;
-        subscriptionPlanId: string;
-    };
+  body: OrdersUpdateSubscriptionPlanBody;
+  path: {
+    adminUserId: string;
+    subscriptionPlanId: string;
+  };
 };
 
-export type OrdersUpdateSubscriptionPlanResponse = (ordersgrpcUpdateSubscriptionPlanResponse);
+export type OrdersUpdateSubscriptionPlanResponse =
+  ordersgrpcUpdateSubscriptionPlanResponse;
 
-export type OrdersUpdateSubscriptionPlanError = (rpcStatus);
+export type OrdersUpdateSubscriptionPlanError = rpcStatus;
 
 export type OrdersCreateDeliveryPointData = {
-    body: OrdersCreateDeliveryPointBody;
-    path: {
-        userId: string;
-    };
+  body: OrdersCreateDeliveryPointBody;
+  path: {
+    userId: string;
+  };
 };
 
-export type OrdersCreateDeliveryPointResponse = (ordersgrpcCreateDeliveryPointResponse);
+export type OrdersCreateDeliveryPointResponse =
+  ordersgrpcCreateDeliveryPointResponse;
 
-export type OrdersCreateDeliveryPointError = (rpcStatus);
+export type OrdersCreateDeliveryPointError = rpcStatus;
 
 export type OrdersGetAdminStatsData = {
-    path: {
-        userId: string;
-    };
+  path: {
+    userId: string;
+  };
 };
 
-export type OrdersGetAdminStatsResponse = (ordersgrpcGetAdminStatsResponse);
+export type OrdersGetAdminStatsResponse = ordersgrpcGetAdminStatsResponse;
 
-export type OrdersGetAdminStatsError = (rpcStatus);
+export type OrdersGetAdminStatsError = rpcStatus;
 
 export type OrdersListOrdersData = {
-    path: {
-        userId: string;
-    };
-    query?: {
-        count?: number;
-        searchKey?: string;
-        startKey?: string;
-        statuses?: Array<string>;
-    };
+  path: {
+    userId: string;
+  };
+  query?: {
+    count?: number;
+    searchKey?: string;
+    startKey?: string;
+    statuses?: Array<string>;
+  };
 };
 
-export type OrdersListOrdersResponse = (ordersgrpcListOrdersResponse);
+export type OrdersListOrdersResponse = ordersgrpcListOrdersResponse;
 
-export type OrdersListOrdersError = (rpcStatus);
+export type OrdersListOrdersError = rpcStatus;
 
 export type OrdersListPaymentsData = {
-    path: {
-        userId: string;
-    };
-    query?: {
-        count?: number;
-        paymentEntity?: 'PaymentEntity_UNSPECIFIED' | 'PaymentEntity_ORDER' | 'PaymentEntity_SUBSCRIPTION' | 'PaymentEntity_COMMISSION' | 'PaymentEntity_REFUND';
-        paymentStatus?: 'PaymentStatus_UNSPECIFIED' | 'PaymentStatus_INITIATED' | 'PaymentStatus_COMPLETED' | 'PaymentStatus_FAILED' | 'PaymentStatus_CANCELED';
-        paymentType?: 'PaymentType_UNSPECIFIED' | 'PaymentType_CREDIT' | 'PaymentType_DEBIT';
-        searchKey?: string;
-        startKey?: string;
-    };
+  path: {
+    userId: string;
+  };
+  query?: {
+    count?: number;
+    paymentEntity?:
+      | "PaymentEntity_UNSPECIFIED"
+      | "PaymentEntity_ORDER"
+      | "PaymentEntity_SUBSCRIPTION"
+      | "PaymentEntity_COMMISSION"
+      | "PaymentEntity_REFUND";
+    paymentStatus?:
+      | "PaymentStatus_UNSPECIFIED"
+      | "PaymentStatus_INITIATED"
+      | "PaymentStatus_COMPLETED"
+      | "PaymentStatus_FAILED"
+      | "PaymentStatus_CANCELED";
+    paymentType?:
+      | "PaymentType_UNSPECIFIED"
+      | "PaymentType_CREDIT"
+      | "PaymentType_DEBIT";
+    searchKey?: string;
+    startKey?: string;
+  };
 };
 
-export type OrdersListPaymentsResponse = (ordersgrpcListPaymentsResponse);
+export type OrdersListPaymentsResponse = ordersgrpcListPaymentsResponse;
 
-export type OrdersListPaymentsError = (rpcStatus);
+export type OrdersListPaymentsError = rpcStatus;
 
 export type OrdersDeleteDeliveryPointData = {
-    path: {
-        id: string;
-        userId: string;
-    };
+  path: {
+    id: string;
+    userId: string;
+  };
 };
 
-export type OrdersDeleteDeliveryPointResponse = (ordersgrpcDeleteDeliveryPointResponse);
+export type OrdersDeleteDeliveryPointResponse =
+  ordersgrpcDeleteDeliveryPointResponse;
 
-export type OrdersDeleteDeliveryPointError = (rpcStatus);
+export type OrdersDeleteDeliveryPointError = rpcStatus;
 
 export type OrdersUpdateDeliveryPointData = {
-    body: OrdersUpdateDeliveryPointBody;
-    path: {
-        id: string;
-        userId: string;
-    };
+  body: OrdersUpdateDeliveryPointBody;
+  path: {
+    id: string;
+    userId: string;
+  };
 };
 
-export type OrdersUpdateDeliveryPointResponse = (ordersgrpcUpdateDeliveryPointResponse);
+export type OrdersUpdateDeliveryPointResponse =
+  ordersgrpcUpdateDeliveryPointResponse;
 
-export type OrdersUpdateDeliveryPointError = (rpcStatus);
+export type OrdersUpdateDeliveryPointError = rpcStatus;
 
 export type OrdersConfirmPaymentData = {
-    body: ordersgrpcConfirmPaymentRequest;
+  body: ordersgrpcConfirmPaymentRequest;
 };
 
-export type OrdersConfirmPaymentResponse = (ordersgrpcConfirmPaymentResponse);
+export type OrdersConfirmPaymentResponse = ordersgrpcConfirmPaymentResponse;
 
-export type OrdersConfirmPaymentError = (rpcStatus);
+export type OrdersConfirmPaymentError = rpcStatus;
 
-export type OrdersHealthCheckResponse = (ordersgrpcHealthCheckResponse);
+export type OrdersHealthCheckResponse = ordersgrpcHealthCheckResponse;
 
-export type OrdersHealthCheckError = (rpcStatus);
+export type OrdersHealthCheckError = rpcStatus;
 
 export type OrdersListSubscriptionPlansData = {
-    path: {
-        userId: string;
-    };
+  path: {
+    userId: string;
+  };
 };
 
-export type OrdersListSubscriptionPlansResponse = (ordersgrpcListSubscriptionPlansResponse);
+export type OrdersListSubscriptionPlansResponse =
+  ordersgrpcListSubscriptionPlansResponse;
 
-export type OrdersListSubscriptionPlansError = (rpcStatus);
+export type OrdersListSubscriptionPlansError = rpcStatus;
 
 export type OrdersGetFarmerEarningsData = {
-    path: {
-        farmerId: string;
-    };
-    query?: {
-        /**
-         * "this_week", "this_month", etc.
-         */
-        filter?: 'FilterType_UNSPECIFIED' | 'FilterType_THIS_WEEK' | 'FilterType_THIS_MONTH' | 'FilterType_THIS_YEAR' | 'FilterType_ALL_TIME';
-    };
+  path: {
+    farmerId: string;
+  };
+  query?: {
+    /**
+     * "this_week", "this_month", etc.
+     */
+    filter?:
+      | "FilterType_UNSPECIFIED"
+      | "FilterType_THIS_WEEK"
+      | "FilterType_THIS_MONTH"
+      | "FilterType_THIS_YEAR"
+      | "FilterType_ALL_TIME";
+  };
 };
 
-export type OrdersGetFarmerEarningsResponse = (ordersgrpcGetFarmerEarningsResponse);
+export type OrdersGetFarmerEarningsResponse =
+  ordersgrpcGetFarmerEarningsResponse;
 
-export type OrdersGetFarmerEarningsError = (rpcStatus);
+export type OrdersGetFarmerEarningsError = rpcStatus;
 
 export type OrdersListFarmerOrdersData = {
-    path: {
-        farmerId: string;
-    };
-    query?: {
-        count?: number;
-        searchKey?: string;
-        startKey?: string;
-        statuses?: Array<string>;
-    };
+  path: {
+    farmerId: string;
+  };
+  query?: {
+    count?: number;
+    searchKey?: string;
+    startKey?: string;
+    statuses?: Array<string>;
+  };
 };
 
-export type OrdersListFarmerOrdersResponse = (ordersgrpcListFarmerOrdersResponse);
+export type OrdersListFarmerOrdersResponse = ordersgrpcListFarmerOrdersResponse;
 
-export type OrdersListFarmerOrdersError = (rpcStatus);
+export type OrdersListFarmerOrdersError = rpcStatus;
 
 export type OrdersCreateCustomSubscriptionData = {
-    body: OrdersCreateCustomSubscriptionBody;
-    path: {
-        userId: string;
-    };
+  body: OrdersCreateCustomSubscriptionBody;
+  path: {
+    userId: string;
+  };
 };
 
-export type OrdersCreateCustomSubscriptionResponse = (ordersgrpcCreateCustomSubscriptionResponse);
+export type OrdersCreateCustomSubscriptionResponse =
+  ordersgrpcCreateCustomSubscriptionResponse;
 
-export type OrdersCreateCustomSubscriptionError = (rpcStatus);
+export type OrdersCreateCustomSubscriptionError = rpcStatus;
 
 export type OrdersCreateOrderData = {
-    body: OrdersCreateOrderBody;
-    path: {
-        userId: string;
-    };
+  body: OrdersCreateOrderBody;
+  path: {
+    userId: string;
+  };
 };
 
-export type OrdersCreateOrderResponse = (ordersgrpcCreateOrderResponse);
+export type OrdersCreateOrderResponse = ordersgrpcCreateOrderResponse;
 
-export type OrdersCreateOrderError = (rpcStatus);
+export type OrdersCreateOrderError = rpcStatus;
 
 export type OrdersEstimateDeliveryFeeData = {
-    body: OrdersEstimateDeliveryFeeBody;
-    path: {
-        userId: string;
-    };
+  body: OrdersEstimateDeliveryFeeBody;
+  path: {
+    userId: string;
+  };
 };
 
-export type OrdersEstimateDeliveryFeeResponse = (ordersgrpcEstimateDeliveryFeeResponse);
+export type OrdersEstimateDeliveryFeeResponse =
+  ordersgrpcEstimateDeliveryFeeResponse;
 
-export type OrdersEstimateDeliveryFeeError = (rpcStatus);
+export type OrdersEstimateDeliveryFeeError = rpcStatus;
 
 export type OrdersInitiatePaymentData = {
-    body: OrdersInitiatePaymentBody;
-    path: {
-        userId: string;
-    };
+  body: OrdersInitiatePaymentBody;
+  path: {
+    userId: string;
+  };
 };
 
-export type OrdersInitiatePaymentResponse = (ordersgrpcInitiatePaymentResponse);
+export type OrdersInitiatePaymentResponse = ordersgrpcInitiatePaymentResponse;
 
-export type OrdersInitiatePaymentError = (rpcStatus);
+export type OrdersInitiatePaymentError = rpcStatus;
 
 export type OrdersListDeliveryCitiesData = {
-    path: {
-        userId: string;
-    };
-    query?: {
-        count?: number;
-        startKey?: string;
-    };
+  path: {
+    userId: string;
+  };
+  query?: {
+    count?: number;
+    startKey?: string;
+  };
 };
 
-export type OrdersListDeliveryCitiesResponse = (ordersgrpcListDeliveryCitiesResponse);
+export type OrdersListDeliveryCitiesResponse =
+  ordersgrpcListDeliveryCitiesResponse;
 
-export type OrdersListDeliveryCitiesError = (rpcStatus);
+export type OrdersListDeliveryCitiesError = rpcStatus;
 
 export type OrdersListDeliveryPointsData = {
-    path: {
-        userId: string;
-    };
-    query?: {
-        city?: string;
-        count?: number;
-        startKey?: string;
-    };
+  path: {
+    userId: string;
+  };
+  query?: {
+    city?: string;
+    count?: number;
+    startKey?: string;
+  };
 };
 
-export type OrdersListDeliveryPointsResponse = (ordersgrpcListDeliveryPointsResponse);
+export type OrdersListDeliveryPointsResponse =
+  ordersgrpcListDeliveryPointsResponse;
 
-export type OrdersListDeliveryPointsError = (rpcStatus);
+export type OrdersListDeliveryPointsError = rpcStatus;
 
 export type OrdersListUserOrdersData = {
-    path: {
-        userId: string;
-    };
-    query?: {
-        count?: number;
-        searchKey?: string;
-        startKey?: string;
-        statuses?: Array<string>;
-    };
+  path: {
+    userId: string;
+  };
+  query?: {
+    count?: number;
+    searchKey?: string;
+    startKey?: string;
+    statuses?: Array<string>;
+  };
 };
 
-export type OrdersListUserOrdersResponse = (ordersgrpcListUserOrdersResponse);
+export type OrdersListUserOrdersResponse = ordersgrpcListUserOrdersResponse;
 
-export type OrdersListUserOrdersError = (rpcStatus);
+export type OrdersListUserOrdersError = rpcStatus;
 
 export type OrdersSubscribeData = {
-    body: OrdersSubscribeBody;
-    path: {
-        userId: string;
-    };
+  body: OrdersSubscribeBody;
+  path: {
+    userId: string;
+  };
 };
 
-export type OrdersSubscribeResponse = (ordersgrpcSubscribeResponse);
+export type OrdersSubscribeResponse = ordersgrpcSubscribeResponse;
 
-export type OrdersSubscribeError = (rpcStatus);
+export type OrdersSubscribeError = rpcStatus;
 
 export type OrdersListUserSubscriptionsData = {
-    path: {
-        userId: string;
-    };
-    query?: {
-        activeOnly?: boolean;
-    };
+  path: {
+    userId: string;
+  };
+  query?: {
+    activeOnly?: boolean;
+  };
 };
 
-export type OrdersListUserSubscriptionsResponse = (ordersgrpcListUserSubscriptionsResponse);
+export type OrdersListUserSubscriptionsResponse =
+  ordersgrpcListUserSubscriptionsResponse;
 
-export type OrdersListUserSubscriptionsError = (rpcStatus);
+export type OrdersListUserSubscriptionsError = rpcStatus;
 
 export type OrdersGetUserSubscriptionDetailsData = {
-    path: {
-        subscriptionId: string;
-        userId: string;
-    };
+  path: {
+    subscriptionId: string;
+    userId: string;
+  };
 };
 
-export type OrdersGetUserSubscriptionDetailsResponse = (ordersgrpcGetUserSubscriptionDetailsResponse);
+export type OrdersGetUserSubscriptionDetailsResponse =
+  ordersgrpcGetUserSubscriptionDetailsResponse;
 
-export type OrdersGetUserSubscriptionDetailsError = (rpcStatus);
+export type OrdersGetUserSubscriptionDetailsError = rpcStatus;
 
 export type OrdersApproveOrderData = {
-    body: OrdersApproveOrderBody;
-    path: {
-        orderId: string;
-        userId: string;
-    };
+  body: OrdersApproveOrderBody;
+  path: {
+    orderId: string;
+    userId: string;
+  };
 };
 
-export type OrdersApproveOrderResponse = (ordersgrpcApproveOrderResponse);
+export type OrdersApproveOrderResponse = ordersgrpcApproveOrderResponse;
 
-export type OrdersApproveOrderError = (rpcStatus);
+export type OrdersApproveOrderError = rpcStatus;
 
 export type OrdersRejectOrderData = {
-    body: OrdersRejectOrderBody;
-    path: {
-        orderId: string;
-        userId: string;
-    };
+  body: OrdersRejectOrderBody;
+  path: {
+    orderId: string;
+    userId: string;
+  };
 };
 
-export type OrdersRejectOrderResponse = (ordersgrpcRejectOrderResponse);
+export type OrdersRejectOrderResponse = ordersgrpcRejectOrderResponse;
 
-export type OrdersRejectOrderError = (rpcStatus);
+export type OrdersRejectOrderError = rpcStatus;
 
 export type OrdersDispatchOrderData = {
-    body: OrdersDispatchOrderBody;
-    path: {
-        orderNumber: string;
-        userId: string;
-    };
+  body: OrdersDispatchOrderBody;
+  path: {
+    orderNumber: string;
+    userId: string;
+  };
 };
 
-export type OrdersDispatchOrderResponse = (ordersgrpcDispatchOrderResponse);
+export type OrdersDispatchOrderResponse = ordersgrpcDispatchOrderResponse;
 
-export type OrdersDispatchOrderError = (rpcStatus);
+export type OrdersDispatchOrderError = rpcStatus;
 
 export type OrdersGetOrderDetailsData = {
-    path: {
-        orderNumber: string;
-        userId: string;
-    };
+  path: {
+    orderNumber: string;
+    userId: string;
+  };
 };
 
-export type OrdersGetOrderDetailsResponse = (ordersgrpcGetOrderDetailsResponse);
+export type OrdersGetOrderDetailsResponse = ordersgrpcGetOrderDetailsResponse;
 
-export type OrdersGetOrderDetailsError = (rpcStatus);
+export type OrdersGetOrderDetailsError = rpcStatus;
 
 export type OrdersCheckPaymentStatusData = {
-    path: {
-        paymentId: string;
-        userId: string;
-    };
+  path: {
+    paymentId: string;
+    userId: string;
+  };
 };
 
-export type OrdersCheckPaymentStatusResponse = (ordersgrpcCheckPaymentStatusResponse);
+export type OrdersCheckPaymentStatusResponse =
+  ordersgrpcCheckPaymentStatusResponse;
 
-export type OrdersCheckPaymentStatusError = (rpcStatus);
+export type OrdersCheckPaymentStatusError = rpcStatus;
 
 export type OrdersConfirmDeliveryData = {
-    body: OrdersConfirmDeliveryBody;
-    path: {
-        secretKey: string;
-        userId: string;
-    };
+  body: OrdersConfirmDeliveryBody;
+  path: {
+    secretKey: string;
+    userId: string;
+  };
 };
 
-export type OrdersConfirmDeliveryResponse = (ordersgrpcConfirmDeliveryResponse);
+export type OrdersConfirmDeliveryResponse = ordersgrpcConfirmDeliveryResponse;
 
-export type OrdersConfirmDeliveryError = (rpcStatus);
+export type OrdersConfirmDeliveryError = rpcStatus;
