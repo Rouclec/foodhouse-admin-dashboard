@@ -132,9 +132,14 @@ export default function BuyerProducts() {
     placeholderData: keepPreviousData,
   });
 
+  // Filter out categories with no products (uncomment after deployment when productCount is populated)
+  // const filteredCategories = categories?.categories?.filter(cat =>
+  //   (cat.name?.toLowerCase().includes(searchQuery.toLowerCase())) &&
+  //   (Number(cat.productCount) || 0) > 0
+  // ) || [];
+  
   const filteredCategories = categories?.categories?.filter(cat =>
-    (cat.name?.toLowerCase().includes(searchQuery.toLowerCase())) &&
-    (Number(cat.productCount) || 0) > 0
+    cat.name?.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
   // Fetch subscription plans for the slider
@@ -229,7 +234,7 @@ export default function BuyerProducts() {
                 <TextInput
                   placeholder={i18n.t('(buyer).(index).products.searchCategories') || 'Search categories...'}
                   placeholderTextColor={Colors.grey['bd']}
-                  style={[defaultStyles.input, styles.searchInput]}
+                  style={[styles.searchInput]}
                   outlineStyle={styles.searchInputOutline}
                   value={searchQuery}
                   onChangeText={text => setSearchQuery(text)}
