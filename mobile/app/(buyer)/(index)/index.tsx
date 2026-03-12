@@ -132,15 +132,15 @@ export default function BuyerProducts() {
     placeholderData: keepPreviousData,
   });
 
-  // Filter out categories with no products (uncomment after deployment when productCount is populated)
-  // const filteredCategories = categories?.categories?.filter(cat =>
-  //   (cat.name?.toLowerCase().includes(searchQuery.toLowerCase())) &&
-  //   (Number(cat.productCount) || 0) > 0
-  // ) || [];
-  
+  // Filter out categories with no products
   const filteredCategories = categories?.categories?.filter(cat =>
-    cat.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    (cat.name?.toLowerCase().includes(searchQuery.toLowerCase())) &&
+    (Number(cat.productCount) || 0) > 0
   ) || [];
+  
+  // const filteredCategories = categories?.categories?.filter(cat =>
+  //   cat.name?.toLowerCase().includes(searchQuery.toLowerCase())
+  // ) || [];
 
   // Fetch subscription plans for the slider
   const { data: subscriptionPlansData, isLoading: isSubscriptionPlansLoading } =
@@ -285,7 +285,7 @@ export default function BuyerProducts() {
             />
           </View>
 
-          <View style={styles.categoriesContainer}>
+          <View style={[styles.categoriesContainer, { paddingBottom: 240 }]}>
             <View style={[styles.sectionHeaderRow, styles.sectionHeaderRowTight]}>
               <Text
                 variant="titleMedium"
