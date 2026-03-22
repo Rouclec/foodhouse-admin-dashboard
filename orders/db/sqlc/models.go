@@ -29,6 +29,17 @@ type DeliveryPoint struct {
 	CreatedAt         pgtype.Timestamptz `json:"created_at"`
 }
 
+type DeliveryRating struct {
+	ID          int32              `json:"id"`
+	OrderNumber int64              `json:"order_number"`
+	AgentID     string             `json:"agent_id"`
+	UserID      string             `json:"user_id"`
+	Rating      int32              `json:"rating"`
+	Comment     string             `json:"comment"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+}
+
 type Order struct {
 	OrderNumber          int64              `json:"order_number"`
 	DeliveryLocation     pgtype.Point       `json:"delivery_location"`
@@ -51,6 +62,7 @@ type Order struct {
 	ExpectedDeliveryDate pgtype.Timestamptz `json:"expected_delivery_date"`
 	ServiceFeeAmount     float64            `json:"service_fee_amount"`
 	ServiceFeeCurrency   string             `json:"service_fee_currency"`
+	AgentID              *string            `json:"agent_id"`
 }
 
 type OrderItem struct {
@@ -127,4 +139,5 @@ type UserSubscription struct {
 	DailyDeliveryLimit    *int64             `json:"daily_delivery_limit"`
 	DeliveryLocation      pgtype.Point       `json:"delivery_location"`
 	DeliveryAddress       string             `json:"delivery_address"`
+	AgentID               *string            `json:"agent_id"`
 }

@@ -78,6 +78,8 @@ const ProfilePage = () => {
       setTimeout(() => {
         if (user?.role === 'USER_ROLE_FARMER') {
           router.replace('/(farmer)/(index)');
+        } else if (user?.role === 'USER_ROLE_AGENT') {
+          router.replace('/(agent)/(kyc)');
         } else {
           router.replace('/(buyer)/(index)');
         }
@@ -97,44 +99,44 @@ const ProfilePage = () => {
       setLoading(true);
       let imageUrl = user?.profileImage || null;
 
-      if (profileImage) {
-        const imageUri = await compressImage();
-        imageUrl = await uploadImage({
-          uri: imageUri,
-          filename: `profile_${user?.userId}_${Date.now()}.jpg`,
-          directory: 'profile_images',
-        });
-      }
+      // if (profileImage) {
+      //   const imageUri = await compressImage();
+      //   imageUrl = await uploadImage({
+      //     uri: imageUri,
+      //     filename: `profile_${user?.userId}_${Date.now()}.jpg`,
+      //     directory: 'profile_images',
+      //   });
+      // }
 
-      if (!firstName) {
-        return;
-      }
+      // if (!firstName) {
+      //   return;
+      // }
 
-      if (user?.role === 'USER_ROLE_BUYER') {
-        if (!enteringReferal) return;
-        if (
-          enteringReferal === 'yes' &&
-          (!referralCode || (!!referralCode && referralCode.length < 7))
-        )
-          return;
-      } else {
-        if (!imageUrl) {
-          setError(true);
-          setErrorMessage(i18n.t('(auth).profile.profileImageRequired'));
-          await delay(5000);
-          setError(false);
-          setErrorMessage(undefined);
-          return;
-        }
-        if (!locationCoordinates || !address) {
-          setError(true);
-          setErrorMessage(i18n.t('(auth).profile.selectAValidAddress'));
-          await delay(5000);
-          setError(false);
-          setErrorMessage(undefined);
-          return;
-        }
-      }
+      // if (user?.role === 'USER_ROLE_BUYER') {
+      //   if (!enteringReferal) return;
+      //   if (
+      //     enteringReferal === 'yes' &&
+      //     (!referralCode || (!!referralCode && referralCode.length < 7))
+      //   )
+      //     return;
+      // } else {
+      //   if (!imageUrl) {
+      //     setError(true);
+      //     setErrorMessage(i18n.t('(auth).profile.profileImageRequired'));
+      //     await delay(5000);
+      //     setError(false);
+      //     setErrorMessage(undefined);
+      //     return;
+      //   }
+      //   if (!locationCoordinates || !address) {
+      //     setError(true);
+      //     setErrorMessage(i18n.t('(auth).profile.selectAValidAddress'));
+      //     await delay(5000);
+      //     setError(false);
+      //     setErrorMessage(undefined);
+      //     return;
+      //   }
+      // }
 
       const data: UsersCompleteRegistrationBody = {
         firstName,
@@ -147,13 +149,27 @@ const ProfilePage = () => {
         referredBy: referralCode,
       };
 
-      await updateUserRegistration({
-        body: data,
-        path: {
-          userId: user?.userId ?? '',
-        },
-      });
+      // await updateUserRegistration({
+      //   body: data,
+      //   path: {
+      //     userId: user?.userId ?? '',
+      //   },
+      // });
+
       setUser({ ...user, ...data });
+
+      console.log('user', user);
+
+      setSuccessModalVisible(true);
+      setTimeout(() => {
+        // if (user?.role === 'USER_ROLE_FARMER') {
+        //   router.replace('/(farmer)/(index)');
+        // } else if (user?.role === 'USER_ROLE_AGENT') {
+          router.replace('/(agent)/(kyc)');
+        // } else {
+        //   router.replace('/(buyer)/(index)');
+        // }
+      }, 3000);
     } catch (error) {
       console.error('Error completing registration:', error);
       // setErrorMessage(i18n.t('(auth).profile.uploadError'));
@@ -239,10 +255,16 @@ const ProfilePage = () => {
           </TouchableOpacity>
         </View>
         <KeyboardAwareScrollView
-          contentContainerStyle={defaultStyles.scrollContainer}
+          contentContainerStyle={[
+            defaultStyles.scrollContainer,
+            { paddingBottom: 100 },
+          ]}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="always"
-          nestedScrollEnabled>
+          keyboardShouldPersistTaps="handled"
+          nestedScrollEnabled={true}
+          enableOnAndroid={true}
+          extraScrollHeight={50}
+          keyboardOpeningTime={0}>
           <View style={signupStyles.allInput}>
             <View style={signupStyles.inputGap}>
               <TextInput
@@ -345,6 +367,10 @@ const ProfilePage = () => {
                     elevation: 3,
                     maxHeight: 220,
                     zIndex: 9999,
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
                   },
                   row: {
                     flexDirection: 'row',
@@ -357,14 +383,13 @@ const ProfilePage = () => {
                   <View style={{ flexDirection: 'row', flex: 1 }}>
                     <Text
                       style={{
-                        flexShrink: 1, // critical for wrapping
+                        flexShrink: 1,
                         flexGrow: 1,
                         fontSize: 14,
                         lineHeight: 18,
                         color: Colors.grey['3c'],
                       }}
-                      numberOfLines={0} // unlimited wrapping
-                    >
+                      numberOfLines={0}>
                       {data.description}
                     </Text>
                   </View>
@@ -374,10 +399,8 @@ const ProfilePage = () => {
                   value: address,
                   onChangeText: text => {
                     setAddress(text);
-                    if (lastSelectedAddress && text !== lastSelectedAddress) {
-                      setLastSelectedAddress(null);
-                      setLocationCoordinates(undefined);
-                    }
+                    setLastSelectedAddress(null);
+                    setLocationCoordinates(undefined);
                   },
                 }}
                 onPress={(data, details) => handleAddressSelect(data, details)}
@@ -456,10 +479,6 @@ const ProfilePage = () => {
             signupStyles.fullWidth,
           ]}
           loading={loading}
-          disabled={
-            (!!address && !locationCoordinates) ||
-            loading
-          }
           onPress={handleComplete}>
           <Text style={defaultStyles.buttonText}>Complete</Text>
         </Button>

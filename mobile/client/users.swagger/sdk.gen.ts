@@ -6,6 +6,12 @@ import {
   type OptionsLegacyParser,
 } from '@hey-api/client-axios';
 import type {
+  UsersListKycVerificationsData,
+  UsersListKycVerificationsError,
+  UsersListKycVerificationsResponse,
+  UsersUpdateKycStatusData,
+  UsersUpdateKycStatusError,
+  UsersUpdateKycStatusResponse,
   UsersExportUsersPdfData,
   UsersExportUsersPdfError,
   UsersExportUsersPdfResponse,
@@ -80,6 +86,12 @@ import type {
   UsersGetUserByIdData,
   UsersGetUserByIdError,
   UsersGetUserByIdResponse,
+  UsersGetKycByUserIdData,
+  UsersGetKycByUserIdError,
+  UsersGetKycByUserIdResponse,
+  UsersCreateKycData,
+  UsersCreateKycError,
+  UsersCreateKycResponse,
   UsersReviewFarmerData,
   UsersReviewFarmerError,
   UsersReviewFarmerResponse,
@@ -89,6 +101,32 @@ import type {
 } from './types.gen';
 
 export const client = createClient(createConfig());
+
+export const usersListKycVerifications = <ThrowOnError extends boolean = false>(
+  options?: OptionsLegacyParser<UsersListKycVerificationsData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    UsersListKycVerificationsResponse,
+    UsersListKycVerificationsError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/v1/admin/kyc/verifications',
+  });
+};
+
+export const usersUpdateKycStatus = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<UsersUpdateKycStatusData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).patch<
+    UsersUpdateKycStatusResponse,
+    UsersUpdateKycStatusError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/v1/admin/{adminUserId}/kyc/{kycId}/status',
+  });
+};
 
 export const usersExportUsersPdf = <ThrowOnError extends boolean = false>(
   options: OptionsLegacyParser<UsersExportUsersPdfData, ThrowOnError>,
@@ -412,6 +450,35 @@ export const usersGetUserById = <ThrowOnError extends boolean = false>(
   >({
     ...options,
     url: '/v1/users/{userId}/get-user-by-id',
+  });
+};
+
+export const usersGetKycByUserId = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<UsersGetKycByUserIdData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    UsersGetKycByUserIdResponse,
+    UsersGetKycByUserIdError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/v1/users/{userId}/kyc',
+  });
+};
+
+/**
+ * KYC endpoints
+ */
+export const usersCreateKyc = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<UsersCreateKycData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    UsersCreateKycResponse,
+    UsersCreateKycError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/v1/users/{userId}/kyc',
   });
 };
 

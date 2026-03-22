@@ -38,6 +38,7 @@ import {
   Users,
   TrendingUp,
   Repeat,
+  Shield,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -50,7 +51,7 @@ const menuItems: Array<{
   title: string;
   items: Array<{
     title: string;
-    url: UrlObject | __next_route_internal_types__.RouteImpl<string>;
+    url: string;
     icon: ForwardRefExoticComponent<
       Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>
     >;
@@ -97,9 +98,9 @@ const menuItems: Array<{
     title: "Account",
     items: [
       { title: "Field Agents", url: "/dashboard/agents", icon: Truck },
-      {title: "Marketing Agents", url: "/dashboard/marketing-agents", icon: TrendingUp},
+      { title: "Marketing Agents", url: "/dashboard/marketing-agents", icon: TrendingUp },
+      { title: "KYC Verifications", url: "/dashboard/kyc-verifications", icon: Shield },
       { title: "Profile", url: "/dashboard/profile", icon: User },
-      // { title: "Settings", url: "/dashboard/settings", icon: Settings },
     ],
   },
 ];
@@ -147,7 +148,7 @@ export function AppSidebar() {
                 {group.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild isActive={pathname === item.url}>
-                      <Link href={item.url}>
+                      <Link href={item.url as any}>
                         <item.icon className="h-4 w-4 text-gray-500" />
                         <span>{item.title}</span>
                       </Link>

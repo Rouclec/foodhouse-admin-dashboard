@@ -4,6 +4,93 @@
   "suggested": "Suggested",
   "others": "Others",
   "orderCannotContain": "A single order cannot contain products from different farmers",
+  "common": {
+    "currency": "XAF",
+    "error": "Error"
+  },
+  "(agent)": {
+    "kyc": {
+      "title": "Verify Your Identity",
+      "subtitle": "Please upload the required documents to become an agent",
+      "identityDocument": "Identity Document",
+      "identityDocumentDesc": "Upload clear photos of the front and back of your national ID or passport",
+      "front": "Front",
+      "back": "Back",
+      "selfie": "Selfie Photo",
+      "selfieDesc": "Take a selfie to verify your identity",
+      "vehicleDocument": "Vehicle Registration",
+      "vehicleDocumentDesc": "Upload your vehicle registration document (image or PDF)",
+      "uploadPhoto": "Tap to upload",
+      "takePhoto": "Tap to take photo",
+      "uploadDocument": "Tap to upload document",
+      "submit": "Submit for Review",
+      "submittedTitle": "Documents Submitted!",
+      "submittedMessage": "Your documents are being reviewed. We'll notify you once verified.",
+      "continueButton": "Continue",
+      "missingDocuments": "Missing Documents",
+      "uploadAllDocuments": "Please upload all required documents",
+      "submitError": "Failed to submit KYC documents. Please try again.",
+      "selectDocument": "Select Document",
+      "uploadPdf": "Upload PDF"
+    },
+    "orders": {
+      "title": "Available Orders",
+      "subtitle": "Orders near you",
+      "orderDetails": "Order Details",
+      "order": "Order",
+      "status": "Status",
+      "statusPending": "Pending",
+      "statusAssigned": "Assigned to you",
+      "statusPickedUp": "Picked up",
+      "statusDelivered": "Delivered",
+      "yourEarning": "Your Earning",
+      "pickupLocation": "Pickup Location",
+      "deliveryLocation": "Delivery Location",
+      "pickup": "Pickup",
+      "delivery": "Delivery",
+      "farmer": "Farmer",
+      "customer": "Customer",
+      "navigateToPickup": "Navigate to Pickup",
+      "navigateToDelivery": "Navigate to Delivery",
+      "callCustomer": "Call Customer",
+      "securityCodeLabel": "Security Code",
+      "securityCodeHint": "Enter this code when delivering to confirm",
+      "confirmPickup": "Confirm Pickup",
+      "confirmDelivery": "Confirm Delivery",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "enterSecurityCode": "Enter the customer's security code to confirm delivery",
+      "deliveryCompleted": "Delivery Completed",
+      "noOrdersAvailable": "No orders available in your area",
+      "distance": "Distance",
+      "km": "km",
+      "acceptOrder": "Accept Order",
+      "pickupSuccess": "Order marked as picked up",
+      "pickupError": "Failed to confirm pickup",
+      "deliverySuccess": "Delivery Confirmed!",
+      "paymentWillBeProcessed": "Payment will be processed shortly.",
+      "deliveryError": "Failed to confirm delivery",
+      "invalidCodeLength": "Please enter a 4-digit code",
+      "incorrectCode": "The security code is incorrect",
+      "askCustomerForCode": "Ask the customer for their delivery code",
+      "totalAmount": "Order Total",
+      "items": "Order Items",
+      "navigate": "Navigate",
+      "call": "Call",
+      "orderAccepted": "Order accepted! You can now pick it up."
+    },
+    "home": {
+      "title": "Deliveries",
+      "online": "Online",
+      "offline": "Offline",
+      "goOnline": "Go Online",
+      "goOffline": "Go Offline",
+      "totalEarnings": "Total Earnings",
+      "todayEarnings": "Today",
+      "completedDeliveries": "Completed",
+      "pendingOrders": "Pending"
+    }
+  },
   "(auth)": {
     "index": {
       "welcomeTo": "Welcome To",
@@ -59,6 +146,7 @@
       "lastName": "Last Name",
       "email": "Email",
       "address": "Address",
+      "location": "Your Location",
       "unknownError": "An unknown error occured",
       "congratulations": "Congratulations",
       "registrationCompleteMessage": "Your account is ready to use, you will be redirected to the home page in a few seconds",
@@ -95,7 +183,7 @@
 
     "location": {
       "title": "Location Access Needed",
-      "body": "We’re unable to access your location. Please enable location services in your device settings to continue. This helps us show accurate information and improve your experience.",
+      "body": "We're unable to access your location. Please enable location services in your device settings to continue. This helps us show accurate information and improve your experience.",
       "tail": "Tip: Go to Settings → Apps → [foodhouse] → Permissions → Location, and turn it ON.",
       "button2": "Open Settings",
       "button1": "Cancel"
@@ -106,7 +194,11 @@
       "registerNewAccount": "Register New Account",
       "description": "What describes you the best?",
       "buyer": "Buyer",
-      "seller": "Farmer or Seller",
+      "farmer": "Farmer",
+      "agent": "Agent",
+      "buyerDescription": "Buy fresh produce directly from local farmers",
+      "farmerDescription": "Sell your farm produce to customers",
+      "agentDescription": "Deliver orders to customers and earn money",
       "button": "Next",
       "havingAccount": "Already have an account?",
       "login": "Login"
@@ -114,6 +206,7 @@
     "createAccount": {
       "farmerAccount": "Create Farmer Account",
       "buyerAccount": "Create Buyer Account",
+      "agentAccount": "Create Agent Account",
       "createPassword": "Create Password",
       "createAccount": "Create Account",
       "enterEmail": "Enter Your Email",
@@ -344,6 +437,9 @@
         "howWasYourProduct": "How was your product?",
         "pleaseGiveYourRating": "Please give your rating and also your review",
         "review": "Review",
+        "rateYourDeliveryAgent": "Rate your delivery agent",
+        "howWasYourDelivery": "How was your delivery experience?",
+        "deliveryReview": "Delivery review",
         "cancel": "Cancel",
         "submit": "Submit",
         "items": "more"
@@ -448,7 +544,6 @@
       "allowAccessToGallery": "Please allow access to gallery"
     }
   },
-
   "(subscription)": {
     "planNotFound": "Plan not found",
     "GoBack": "Go Back",
@@ -530,6 +625,32 @@
       "header": "Payment Methods",
       "description": "To proceed, please add your payment methods.",
       "next": "Next"
+    }
+  },
+  "(agent)": {
+    "kyc": {
+      "title": "Verify Your Identity",
+      "subtitle": "Please upload the required documents to become an agent",
+      "identityDocument": "Identity Document",
+      "identityDocumentDesc": "Upload clear photos of the front and back of your national ID or passport",
+      "front": "Front",
+      "back": "Back",
+      "selfie": "Selfie Photo",
+      "selfieDesc": "Take a selfie to verify your identity",
+      "vehicleDocument": "Vehicle Registration",
+      "vehicleDocumentDesc": "Upload your vehicle registration document (image or PDF)",
+      "uploadPhoto": "Tap to upload",
+      "takePhoto": "Tap to take photo",
+      "uploadDocument": "Tap to upload document",
+      "submit": "Submit for Review",
+      "submittedTitle": "Documents Submitted!",
+      "submittedMessage": "Your documents are being reviewed. We'll notify you once verified.",
+      "continueButton": "Continue",
+      "missingDocuments": "Missing Documents",
+      "uploadAllDocuments": "Please upload all required documents",
+      "submitError": "Failed to submit KYC documents. Please try again.",
+      "selectDocument": "Select Document",
+      "uploadPdf": "Upload PDF"
     }
   }
 }

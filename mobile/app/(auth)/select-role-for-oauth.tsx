@@ -170,12 +170,41 @@ const SelectRoleForOAuth = () => {
                     <View style={signupStyles.textOverlay}>
                       <Text style={signupStyles.roleText}>
                         {' '}
-                        {i18n.t('(auth).register.seller')}
+                        {i18n.t('(auth).register.farmer')}
+                      </Text>
+                    </View>
+                  </ImageBackground>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    signupStyles.roleCard,
+                    role === 'USER_TYPE_AGENT' &&
+                      signupStyles.selectedRoleCard,
+                  ]}
+                  onPress={() => setUserRole('USER_TYPE_AGENT')}>
+                  <ImageBackground
+                    source={require('@/assets/images/farmer.png')}
+                    style={signupStyles.roleImageBackground}
+                    imageStyle={signupStyles.roleImage}>
+                    <View style={signupStyles.textOverlay}>
+                      <Text style={signupStyles.roleText}>
+                        {' '}
+                        {i18n.t('(auth).register.agent')}
                       </Text>
                     </View>
                   </ImageBackground>
                 </TouchableOpacity>
               </View>
+
+              {role && (
+                <View style={signupStyles.roleDescriptionContainer}>
+                  <Text style={signupStyles.roleDescription}>
+                    {role === 'USER_TYPE_BUYER' && i18n.t('(auth).register.buyerDescription')}
+                    {role === 'USER_TYPE_FARMER' && i18n.t('(auth).register.farmerDescription')}
+                    {role === 'USER_TYPE_AGENT' && i18n.t('(auth).register.agentDescription')}
+                  </Text>
+                </View>
+              )}
             </View>
           </ScrollView>
 

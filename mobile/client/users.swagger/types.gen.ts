@@ -172,6 +172,12 @@ export type UsersCompleteRegistrationBody = {
   phoneNumber?: string;
 };
 
+export type UsersCreateKYCBody = {
+  identityDocumentUrl?: string;
+  selfieUrl?: string;
+  vehicleDocumentUrl?: string;
+};
+
 export type UsersGrantAdminBody = {
   phoneNumber?: string;
   residenceCountryIsoCode?: string;
@@ -226,6 +232,10 @@ export type usersgrpcCompleteRegistrationResponse = {
   message?: string;
 };
 
+export type usersgrpcCreateKYCResponse = {
+  kycVerification?: usersgrpcKYCVerification;
+};
+
 export type usersgrpcDeleteAgentResponse = unknown;
 
 export type usersgrpcDeleteUserAccountResponse = unknown;
@@ -247,6 +257,10 @@ export type usersgrpcFarmerWithRating = {
 export type usersgrpcGetFarmerByIDResponse = {
   user?: usersgrpcUser;
   rating?: number;
+};
+
+export type usersgrpcGetKYCByUserIdResponse = {
+  kycVerification?: usersgrpcKYCVerification;
 };
 
 export type usersgrpcGetPublicUserResponse = {
@@ -276,6 +290,25 @@ export type usersgrpcGrantAgentResponse = {
 
 export type usersgrpcHealthCheckResponse = unknown;
 
+export type usersgrpcKYCStatus =
+  | 'KYC_STATUS_UNSPECIFIED'
+  | 'KYC_STATUS_PENDING'
+  | 'KYC_STATUS_VERIFIED'
+  | 'KYC_STATUS_REJECTED';
+
+export type usersgrpcKYCVerification = {
+  id?: string;
+  userId?: string;
+  identityDocumentUrl?: string;
+  selfieUrl?: string;
+  vehicleDocumentUrl?: string;
+  status?: usersgrpcKYCStatus;
+  rejectionReason?: string;
+  verifiedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 export type usersgrpcLastOtpForFactorResponse = {
   otp?: string;
 };
@@ -288,6 +321,11 @@ export type usersgrpcListFarmersReivewsResponse = {
 export type usersgrpcListFarmersResponse = {
   farmers?: Array<usersgrpcFarmerWithRating>;
   nextKey?: string;
+};
+
+export type usersgrpcListKYCVerificationsResponse = {
+  kycVerifications?: Array<usersgrpcKYCVerification>;
+  total?: number;
 };
 
 export type usersgrpcListUsersResponse = {
@@ -398,6 +436,10 @@ export type usersgrpcTokens = {
   refreshToken?: string;
 };
 
+export type usersgrpcUpdateKYCStatusResponse = {
+  kycVerification?: usersgrpcKYCVerification;
+};
+
 export type usersgrpcUser = {
   userId?: string;
   role?: usersgrpcUserRole;
@@ -431,7 +473,8 @@ export type usersgrpcUserStatus =
 export type usersgrpcUserType =
   | 'USER_TYPE_UNSPECIFIED'
   | 'USER_TYPE_FARMER'
-  | 'USER_TYPE_BUYER';
+  | 'USER_TYPE_BUYER'
+  | 'USER_TYPE_AGENT';
 
 export type usersgrpcVerifyOtpRequest = {
   authFactor?: usersgrpcAuthFactor;
@@ -461,6 +504,40 @@ export type UsersReviewFarmerBody = {
 };
 
 export type UsersSuspendUserBody = unknown;
+
+export type UsersUpdateKYCStatusBody = {
+  status?: usersgrpcKYCStatus;
+  rejectionReason?: string;
+};
+
+export type UsersListKycVerificationsData = {
+  query?: {
+    limit?: number;
+    offset?: number;
+    status?:
+      | 'KYC_STATUS_UNSPECIFIED'
+      | 'KYC_STATUS_PENDING'
+      | 'KYC_STATUS_VERIFIED'
+      | 'KYC_STATUS_REJECTED';
+  };
+};
+
+export type UsersListKycVerificationsResponse =
+  usersgrpcListKYCVerificationsResponse;
+
+export type UsersListKycVerificationsError = rpcStatus;
+
+export type UsersUpdateKycStatusData = {
+  body: UsersUpdateKYCStatusBody;
+  path: {
+    adminUserId: string;
+    kycId: string;
+  };
+};
+
+export type UsersUpdateKycStatusResponse = usersgrpcUpdateKYCStatusResponse;
+
+export type UsersUpdateKycStatusError = rpcStatus;
 
 export type UsersExportUsersPdfData = {
   path: {
@@ -770,6 +847,27 @@ export type UsersGetUserByIdData = {
 export type UsersGetUserByIdResponse = usersgrpcGetUserByIDResponse;
 
 export type UsersGetUserByIdError = rpcStatus;
+
+export type UsersGetKycByUserIdData = {
+  path: {
+    userId: string;
+  };
+};
+
+export type UsersGetKycByUserIdResponse = usersgrpcGetKYCByUserIdResponse;
+
+export type UsersGetKycByUserIdError = rpcStatus;
+
+export type UsersCreateKycData = {
+  body: UsersCreateKYCBody;
+  path: {
+    userId: string;
+  };
+};
+
+export type UsersCreateKycResponse = usersgrpcCreateKYCResponse;
+
+export type UsersCreateKycError = rpcStatus;
 
 export type UsersReviewFarmerData = {
   body: UsersReviewFarmerBody;

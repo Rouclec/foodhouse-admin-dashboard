@@ -6,7 +6,9 @@ export type OrdersBulkSettleCommissionsBody = {
   commissionIds?: Array<string>;
 };
 
-export type OrdersConfirmDeliveryBody = unknown;
+export type OrdersConfirmDeliveryBody = {
+  agentPayoutPhoneNumber?: string;
+};
 
 export type OrdersCreateCustomSubscriptionBody = {
   budget?: typesAmount;
@@ -38,6 +40,7 @@ export type OrdersCreateSubscriptionPlanBody = {
 
 export type OrdersDispatchOrderBody = {
   payoutPhoneNumber?: string;
+  agentId?: string;
 };
 
 export type OrdersEstimateDeliveryFeeBody = {

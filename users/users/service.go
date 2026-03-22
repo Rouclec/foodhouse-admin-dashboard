@@ -350,6 +350,8 @@ func getUserRoleFromType(userType usersgrpc.UserType) (usersgrpc.UserRole, error
 		return usersgrpc.UserRole_USER_ROLE_FARMER, nil
 	case usersgrpc.UserType_USER_TYPE_BUYER:
 		return usersgrpc.UserRole_USER_ROLE_BUYER, nil
+	case usersgrpc.UserType_USER_TYPE_AGENT:
+		return usersgrpc.UserRole_USER_ROLE_AGENT, nil
 	default:
 		return usersgrpc.UserRole_USER_ROLE_UNSPECIFIED, fmt.Errorf("invalid user type passed: %v", userType)
 	}
@@ -1956,4 +1958,110 @@ func (i *Impl) DeleteUserAccount(ctx context.Context,
 	}
 
 	return &usersgrpc.DeleteUserAccountResponse{}, nil
+}
+
+// CreateKYC creates or updates a KYC verification for a user
+func (i *Impl) CreateKYC(ctx context.Context, req *usersgrpc.CreateKYCRequest) (*usersgrpc.CreateKYCResponse, error) {
+	querier := i.repo.Do()
+
+	// Check if user exists
+	_, err := querier.GetUser(ctx, req.GetUserId())
+	if err != nil {
+		return nil, status.Error(codes.NotFound, "user not found")
+	}
+
+	kyc, err := querier.CreateKYC(ctx, sqlc.CreateKYCParams{
+		UserID:              req.GetUserId(),
+		IdentityDocumentUrl: req.GetIdentityDocumentUrl(),
+		SelfieUrl:           req.GetSelfieUrl(),
+		VehicleDocumentUrl:  req.GetVehicleDocumentUrl(),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to create KYC: %v", err)
+	}
+
+	return &usersgrpc.CreateKYCResponse{
+		KycVerification: &usersgrpc.KYCVerification{
+			Id:                  kyc.ID,
+			UserId:              kyc.UserID,
+			IdentityDocumentUrl: kyc.IdentityDocumentUrl,
+			SelfieUrl:           kyc.SelfieUrl,
+			VehicleDocumentUrl:  kyc.VehicleDocumentUrl,
+			Status: func() usersgrpc.KYCStatus {
+				if kyc.Status != nil {
+					return usersgrpc.KYCStatus(usersgrpc.KYCStatus_value[*kyc.Status])
+				}
+				return usersgrpc.KYCStatus_KYC_STATUS_UNSPECIFIED
+			}(),
+			VerifiedAt:          timestamppb.New(kyc.VerifiedAt.Time),
+			CreatedAt:           timestamppb.New(kyc.CreatedAt.Time),
+			UpdatedAt:           timestamppb.New(kyc.UpdatedAt.Time),
+		},
+	}, nil
+}
+
+// GetKYCByUserId retrieves KYC verification by user ID
+func (i *Impl) GetKYCByUserId(ctx context.Context, req *usersgrpc.GetKYCByUserIdRequest) (*usersgrpc.GetKYCByUserIdResponse, error) {
+	querier := i.repo.Do()
+
+	kyc, err := querier.GetKYCByUserId(ctx, req.GetUserId())
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return &usersgrpc.GetKYCByUserIdResponse{}, nil
+		}
+		return nil, status.Errorf(codes.Internal, "failed to get KYC: %v", err)
+	}
+
+	return &usersgrpc.GetKYCByUserIdResponse{
+		KycVerification: &usersgrpc.KYCVerification{
+			Id:                  kyc.ID,
+			UserId:              kyc.UserID,
+			IdentityDocumentUrl: kyc.IdentityDocumentUrl,
+			SelfieUrl:           kyc.SelfieUrl,
+			VehicleDocumentUrl:  kyc.VehicleDocumentUrl,
+			Status: func() usersgrpc.KYCStatus {
+				if kyc.Status != nil {
+					return usersgrpc.KYCStatus(usersgrpc.KYCStatus_value[*kyc.Status])
+				}
+				return usersgrpc.KYCStatus_KYC_STATUS_UNSPECIFIED
+			}(),
+			RejectionReason:     kyc.RejectionReason,
+			VerifiedAt:          timestamppb.New(kyc.VerifiedAt.Time),
+			CreatedAt:           timestamppb.New(kyc.CreatedAt.Time),
+			UpdatedAt:           timestamppb.New(kyc.UpdatedAt.Time),
+		},
+	}, nil
+}
+
+// UpdateKYCStatus updates the status of a KYC verification (admin only)
+func (i *Impl) UpdateKYCStatus(ctx context.Context, req *usersgrpc.UpdateKYCStatusRequest) (*usersgrpc.UpdateKYCStatusResponse, error) {
+	querier := i.repo.Do()
+
+	statusStr := req.GetStatus().String()
+	kyc, err := querier.UpdateKYCStatus(ctx, sqlc.UpdateKYCStatusParams{
+		ID:              req.GetKycId(),
+		Status:          &statusStr,
+		RejectionReason: req.GetRejectionReason(),
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to update KYC status: %v", err)
+	}
+
+	return &usersgrpc.UpdateKYCStatusResponse{
+		KycVerification: &usersgrpc.KYCVerification{
+			Id:              kyc.ID,
+			UserId:          kyc.UserID,
+			Status: func() usersgrpc.KYCStatus {
+				if kyc.Status != nil {
+					return usersgrpc.KYCStatus(usersgrpc.KYCStatus_value[*kyc.Status])
+				}
+				return usersgrpc.KYCStatus_KYC_STATUS_UNSPECIFIED
+			}(),
+			RejectionReason: kyc.RejectionReason,
+			VerifiedAt:      timestamppb.New(kyc.VerifiedAt.Time),
+			UpdatedAt:       timestamppb.New(kyc.UpdatedAt.Time),
+		},
+	}, nil
 }

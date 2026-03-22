@@ -190,6 +190,7 @@ message DispatchOrderRequest {
   int64 order_number = 1;
   string user_id = 2;
   string payout_phone_number = 3;
+  string agent_id = 4;
 }
 
 message DispatchOrderResponse {}
@@ -197,6 +198,7 @@ message DispatchOrderResponse {}
 message ConfirmDeliveryRequest {
   string secret_key = 1;
   string user_id = 2;
+  string agent_payout_phone_number = 3;
 }
 
 message ConfirmDeliveryResponse {}

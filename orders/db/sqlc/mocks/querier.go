@@ -143,6 +143,20 @@ func (mr *MockQuerierMockRecorder) CreateDeliveryPoint(ctx, arg any) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateDeliveryPoint", reflect.TypeOf((*MockQuerier)(nil).CreateDeliveryPoint), ctx, arg)
 }
 
+// CreateDeliveryRating mocks base method.
+func (m *MockQuerier) CreateDeliveryRating(ctx context.Context, arg sqlc.CreateDeliveryRatingParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateDeliveryRating", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateDeliveryRating indicates an expected call of CreateDeliveryRating.
+func (mr *MockQuerierMockRecorder) CreateDeliveryRating(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateDeliveryRating", reflect.TypeOf((*MockQuerier)(nil).CreateDeliveryRating), ctx, arg)
+}
+
 // CreateOrder mocks base method.
 func (m *MockQuerier) CreateOrder(ctx context.Context, arg sqlc.CreateOrderParams) (sqlc.Order, error) {
 	m.ctrl.T.Helper()
@@ -303,6 +317,21 @@ func (mr *MockQuerierMockRecorder) GetAllUserSubscriptions(ctx any) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllUserSubscriptions", reflect.TypeOf((*MockQuerier)(nil).GetAllUserSubscriptions), ctx)
 }
 
+// GetAverageAgentRating mocks base method.
+func (m *MockQuerier) GetAverageAgentRating(ctx context.Context, agentID string) (sqlc.GetAverageAgentRatingRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAverageAgentRating", ctx, agentID)
+	ret0, _ := ret[0].(sqlc.GetAverageAgentRatingRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAverageAgentRating indicates an expected call of GetAverageAgentRating.
+func (mr *MockQuerierMockRecorder) GetAverageAgentRating(ctx, agentID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAverageAgentRating", reflect.TypeOf((*MockQuerier)(nil).GetAverageAgentRating), ctx, agentID)
+}
+
 // GetCommissionsByIDsForUpdate mocks base method.
 func (m *MockQuerier) GetCommissionsByIDsForUpdate(ctx context.Context, commissionIds []string) ([]sqlc.Commission, error) {
 	m.ctrl.T.Helper()
@@ -316,6 +345,36 @@ func (m *MockQuerier) GetCommissionsByIDsForUpdate(ctx context.Context, commissi
 func (mr *MockQuerierMockRecorder) GetCommissionsByIDsForUpdate(ctx, commissionIds any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCommissionsByIDsForUpdate", reflect.TypeOf((*MockQuerier)(nil).GetCommissionsByIDsForUpdate), ctx, commissionIds)
+}
+
+// GetDeliveryRatingByOrderNumber mocks base method.
+func (m *MockQuerier) GetDeliveryRatingByOrderNumber(ctx context.Context, orderNumber int64) (sqlc.DeliveryRating, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDeliveryRatingByOrderNumber", ctx, orderNumber)
+	ret0, _ := ret[0].(sqlc.DeliveryRating)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetDeliveryRatingByOrderNumber indicates an expected call of GetDeliveryRatingByOrderNumber.
+func (mr *MockQuerierMockRecorder) GetDeliveryRatingByOrderNumber(ctx, orderNumber any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDeliveryRatingByOrderNumber", reflect.TypeOf((*MockQuerier)(nil).GetDeliveryRatingByOrderNumber), ctx, orderNumber)
+}
+
+// GetDeliveryRatingsByAgentId mocks base method.
+func (m *MockQuerier) GetDeliveryRatingsByAgentId(ctx context.Context, arg sqlc.GetDeliveryRatingsByAgentIdParams) ([]sqlc.DeliveryRating, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDeliveryRatingsByAgentId", ctx, arg)
+	ret0, _ := ret[0].([]sqlc.DeliveryRating)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetDeliveryRatingsByAgentId indicates an expected call of GetDeliveryRatingsByAgentId.
+func (mr *MockQuerierMockRecorder) GetDeliveryRatingsByAgentId(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDeliveryRatingsByAgentId", reflect.TypeOf((*MockQuerier)(nil).GetDeliveryRatingsByAgentId), ctx, arg)
 }
 
 // GetOrderByOrderNumber mocks base method.
@@ -764,6 +823,20 @@ func (m *MockQuerier) UpdateDeliveryPoint(ctx context.Context, arg sqlc.UpdateDe
 func (mr *MockQuerierMockRecorder) UpdateDeliveryPoint(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateDeliveryPoint", reflect.TypeOf((*MockQuerier)(nil).UpdateDeliveryPoint), ctx, arg)
+}
+
+// UpdateOrderAgent mocks base method.
+func (m *MockQuerier) UpdateOrderAgent(ctx context.Context, arg sqlc.UpdateOrderAgentParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateOrderAgent", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateOrderAgent indicates an expected call of UpdateOrderAgent.
+func (mr *MockQuerierMockRecorder) UpdateOrderAgent(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOrderAgent", reflect.TypeOf((*MockQuerier)(nil).UpdateOrderAgent), ctx, arg)
 }
 
 // UpdateOrderStatus mocks base method.
