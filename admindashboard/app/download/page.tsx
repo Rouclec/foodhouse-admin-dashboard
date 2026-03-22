@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 
-// Replace these with your actual store links
 const STORE_LINKS = {
   ios: process.env.NEXT_PUBLIC_IOS_STORE_LINK ?? "",
   android: process.env.NEXT_PUBLIC_ANDROID_STORE_LINK ?? "",
