@@ -197,6 +197,91 @@ func (i *Impl) ConfirmDelivery(ctx context.Context, req *ordersgrpc.ConfirmDeliv
 		return nil, status.Errorf(codes.Internal, "error creating order logs %v", err)
 	}
 
+	// If there's an agent assigned, pay them their delivery fee
+	if order.AgentID != nil && *order.AgentID != "" {
+		// Pay the agent their delivery fee
+		if order.DeliveryFeeAmount != nil && *order.DeliveryFeeAmount > 0 {
+			agentPaymentReference := fmt.Sprintf("agent-delivery-%s", strconv.FormatInt(order.OrderNumber, 10))
+			deliveryFee := *order.DeliveryFeeAmount
+			deliveryCurrency := "XAF"
+			if order.DeliveryFeeCurrency != nil {
+				deliveryCurrency = *order.DeliveryFeeCurrency
+			}
+
+			if !i.devMethodsEndabled && req.GetAgentPayoutPhoneNumber() != "" {
+				_, payErr := i.paymentService.WithdrawFunds(ctx,
+					req.GetAgentPayoutPhoneNumber(), deliveryFee,
+					deliveryCurrency, fmt.Sprintf("delivery fee for order %v", order.OrderNumber),
+					&agentPaymentReference)
+
+				if payErr != nil {
+					return nil, status.Errorf(codes.Internal, "error making agent payout %v", payErr)
+				}
+			}
+
+			_, err = querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
+				PaymentEntity:  ordersgrpc.PaymentEntity_PaymentEntity_ORDER.String(),
+				EntityID:       strconv.FormatInt(order.OrderNumber, 10),
+				AmountValue:    &deliveryFee,
+				AmountCurrency: &deliveryCurrency,
+				AccountNumber:  req.GetAgentPayoutPhoneNumber(),
+				Method:         ordersgrpc.PaymentMethodType_PaymentMethodType_ACCOUNT_BALANCE.String(),
+				Status:         ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED.String(),
+				ExpiresAt:      pgtype.Timestamptz{Time: time.Now().Add(5 * time.Minute), Valid: true},
+				CreatedBy:      order.AgentID,
+				Type:           ordersgrpc.PaymentType_PaymentType_DEBIT.String(),
+			})
+
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "error creating agent payment %v", err)
+			}
+		}
+
+		// Also pay farmer if not already paid (farmer wasn't paid on DispatchOrder when agent was assigned)
+		// We need to pay the farmer their share
+		if order.ProductOwner != nil && order.PriceValue != nil && order.PriceCurrency != nil {
+			farmerPaymentReference := fmt.Sprintf("farmer-payout-%s", strconv.FormatInt(order.OrderNumber, 10))
+			payoutAmount := *order.PriceValue / TotalPercentage * FarmersPercentage
+
+			// We need the farmer's payout phone number - it's stored in the order
+			if order.PayoutPhoneNumber != nil && *order.PayoutPhoneNumber != "" {
+				if !i.devMethodsEndabled {
+					_, payErr := i.paymentService.WithdrawFunds(ctx,
+						*order.PayoutPhoneNumber, payoutAmount,
+						*order.PriceCurrency, fmt.Sprintf("payment to farmer for order %v", order.OrderNumber),
+						&farmerPaymentReference)
+
+					if payErr != nil {
+						return nil, status.Errorf(codes.Internal, "error making farmer payout %v", payErr)
+					}
+				}
+
+				_, err = querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
+					PaymentEntity:  ordersgrpc.PaymentEntity_PaymentEntity_ORDER.String(),
+					EntityID:       strconv.FormatInt(order.OrderNumber, 10),
+					AmountValue:    &payoutAmount,
+					AmountCurrency: order.PriceCurrency,
+					AccountNumber:  *order.PayoutPhoneNumber,
+					Method:         ordersgrpc.PaymentMethodType_PaymentMethodType_ACCOUNT_BALANCE.String(),
+					Status:         ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED.String(),
+					ExpiresAt:      pgtype.Timestamptz{Time: time.Now().Add(5 * time.Minute), Valid: true},
+					CreatedBy:      *order.ProductOwner,
+					Type:           ordersgrpc.PaymentType_PaymentType_DEBIT.String(),
+				})
+
+				if err != nil {
+					return nil, status.Errorf(codes.Internal, "error creating farmer payment %v", err)
+				}
+
+				// Create commissions
+				err = i.CreateCommissions(ctx, order, querier)
+				if err != nil {
+					return nil, status.Errorf(codes.Internal, "error creating commissions %v", err)
+				}
+			}
+		}
+	}
+
 	err = tx.Commit(ctx)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to commit transaction: %v", err)
@@ -756,11 +841,25 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 		return nil, status.Errorf(codes.Internal, "order must be in status %v to be dispatched", ordersgrpc.OrderStatus_OrderStatus_APPROVED.String())
 	}
 
+	// Get agent_id from request if provided
+	agentID := req.GetAgentId()
+
 	err = querier.UpdateOrderStatus(ctx, sqlc.UpdateOrderStatusParams{
 		OrderNumber:  req.GetOrderNumber(),
 		Status:       ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String(),
 		DispatchedBy: &req.UserId,
 	})
+
+	// If agent_id is provided, update the order with agent assignment
+	if agentID != "" {
+		err = querier.UpdateOrderAgent(ctx, sqlc.UpdateOrderAgentParams{
+			OrderNumber: req.GetOrderNumber(),
+			AgentID:     &agentID,
+		})
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error assigning agent to order %v", err)
+		}
+	}
 
 	updatedOrder, err := querier.GetOrderByOrderNumber(ctx, order.OrderNumber)
 
@@ -788,46 +887,50 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 		return nil, status.Errorf(codes.Internal, "error dispatching order %v", err)
 	}
 
-	paymentReference := fmt.Sprintf("payout-%s", strconv.FormatInt(order.OrderNumber, 10))
+	// Only make payouts if NO agent is assigned (farmer delivering themselves)
+	// When agent is assigned, payment happens on ConfirmDelivery
+	if agentID == "" {
+		paymentReference := fmt.Sprintf("payout-%s", strconv.FormatInt(order.OrderNumber, 10))
 
-	// calculate payout amount
-	payoutAmount := *order.PriceValue / TotalPercentage * FarmersPercentage
+		// calculate payout amount
+		payoutAmount := *order.PriceValue / TotalPercentage * FarmersPercentage
 
-	i.logger.Debug().Msgf("payout phone number %v", req.GetPayoutPhoneNumber())
+		i.logger.Debug().Msgf("payout phone number %v", req.GetPayoutPhoneNumber())
 
-	// only make real payout when dev methods is not enabled
-	if !i.devMethodsEndabled {
-		_, payErr := i.paymentService.WithdrawFunds(ctx,
-			req.GetPayoutPhoneNumber(), payoutAmount,
-			*order.PriceCurrency, fmt.Sprintf("payment to farmer for order %v", order.OrderNumber),
-			&paymentReference)
+		// only make real payout when dev methods is not enabled
+		if !i.devMethodsEndabled {
+			_, payErr := i.paymentService.WithdrawFunds(ctx,
+				req.GetPayoutPhoneNumber(), payoutAmount,
+				*order.PriceCurrency, fmt.Sprintf("payment to farmer for order %v", order.OrderNumber),
+				&paymentReference)
 
-		if payErr != nil {
-			return nil, status.Errorf(codes.Internal, "error making payout %v", payErr)
+			if payErr != nil {
+				return nil, status.Errorf(codes.Internal, "error making payout %v", payErr)
+			}
 		}
-	}
 
-	_, err = querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
-		PaymentEntity:  ordersgrpc.PaymentEntity_PaymentEntity_ORDER.String(),
-		EntityID:       strconv.FormatInt(req.GetOrderNumber(), 10),
-		AmountValue:    &payoutAmount,
-		AmountCurrency: order.PriceCurrency,
-		AccountNumber:  req.GetPayoutPhoneNumber(),
-		Method:         ordersgrpc.PaymentMethodType_PaymentMethodType_ACCOUNT_BALANCE.String(),
-		Status:         ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED.String(),
-		ExpiresAt:      pgtype.Timestamptz{Time: time.Now().Add(5 * time.Minute), Valid: true},
-		CreatedBy:      *order.ProductOwner,
-		Type:           ordersgrpc.PaymentType_PaymentType_DEBIT.String(),
-	})
+		_, err = querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
+			PaymentEntity:  ordersgrpc.PaymentEntity_PaymentEntity_ORDER.String(),
+			EntityID:       strconv.FormatInt(req.GetOrderNumber(), 10),
+			AmountValue:    &payoutAmount,
+			AmountCurrency: order.PriceCurrency,
+			AccountNumber:  req.GetPayoutPhoneNumber(),
+			Method:         ordersgrpc.PaymentMethodType_PaymentMethodType_ACCOUNT_BALANCE.String(),
+			Status:         ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED.String(),
+			ExpiresAt:      pgtype.Timestamptz{Time: time.Now().Add(5 * time.Minute), Valid: true},
+			CreatedBy:      *order.ProductOwner,
+			Type:           ordersgrpc.PaymentType_PaymentType_DEBIT.String(),
+		})
 
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error creating payment entity %v", err)
-	}
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error creating payment entity %v", err)
+		}
 
-	err = i.CreateCommissions(ctx, order, querier)
+		err = i.CreateCommissions(ctx, order, querier)
 
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error creating comissions for order with number %v: %v", order.OrderNumber, err)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error creating comissions for order with number %v: %v", order.OrderNumber, err)
+		}
 	}
 
 	err = tx.Commit(ctx)

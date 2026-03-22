@@ -45,10 +45,21 @@ const Info = () => {
 
   const handleSignUp = async () => {
     try {
-      setLoading(true);
-      await mutateAsync({
-        body: {
+      // setLoading(true);
+      // await mutateAsync({
+      //   body: {
+      //     phoneNumber: `${callingCode}${mobile}`,
+      //   },
+      // });
+
+      router.push({
+        pathname: '/verify-otp',
+        params: {
+          requestId: '1234567890',
           phoneNumber: `${callingCode}${mobile}`,
+          password,
+          residenceCountryIsoCode: country?.code,
+          role: role || 'USER_ROLE_UNSPECIFIED',
         },
       });
     } catch (error) {
@@ -98,7 +109,11 @@ const Info = () => {
             <Text variant="titleMedium" style={defaultStyles.heading}>
               {i18n.t(
                 `(auth).createAccount.${
-                  role === 'USER_TYPE_FARMER' ? 'farmerAccount' : 'buyerAccount'
+                  role === 'USER_TYPE_FARMER'
+                    ? 'farmerAccount'
+                    : role === 'USER_TYPE_AGENT'
+                      ? 'agentAccount'
+                      : 'buyerAccount'
                 }`,
               )}
             </Text>

@@ -36,10 +36,30 @@ message User {
   types.Point location_coordinates = 9;
   string profile_image = 10;
   string address = 11;
-  google.protobuf.Timestamp created_at = 12; // Using a timestamp for date
+  google.protobuf.Timestamp created_at = 12;
   google.protobuf.Timestamp updated_at = 13;
   UserStatus status = 14;
   string referral_code = 15;
+}
+
+message KYCVerification {
+  string id = 1;
+  string user_id = 2;
+  string identity_document_url = 3;
+  string selfie_url = 4;
+  string vehicle_document_url = 5;
+  KYCStatus status = 6;
+  string rejection_reason = 7;
+  google.protobuf.Timestamp verified_at = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+enum KYCStatus {
+  KYC_STATUS_UNSPECIFIED = 0;
+  KYC_STATUS_PENDING = 1;
+  KYC_STATUS_VERIFIED = 2;
+  KYC_STATUS_REJECTED = 3;
 }
 
 message AuthFactor {
@@ -148,6 +168,7 @@ enum UserType {
   USER_TYPE_UNSPECIFIED = 0;
   USER_TYPE_FARMER = 1;
   USER_TYPE_BUYER = 2;
+  USER_TYPE_AGENT = 3;
 }
 
 message SignupRequest {
@@ -588,4 +609,74 @@ service Users {
       get : "/v1/users/{user_id}/delete-user-account"
     };
   }
+
+  // KYC endpoints
+  rpc CreateKYC(CreateKYCRequest) returns (CreateKYCResponse) {
+    option (google.api.http) = {
+      post : "/v1/users/{user_id}/kyc"
+      body : "*"
+    };
+  }
+
+  rpc GetKYCByUserId(GetKYCByUserIdRequest) returns (GetKYCByUserIdResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/kyc"
+    };
+  }
+
+  rpc UpdateKYCStatus(UpdateKYCStatusRequest) returns (UpdateKYCStatusResponse) {
+    option (google.api.http) = {
+      patch : "/v1/admin/{admin_user_id}/kyc/{kyc_id}/status"
+      body : "*"
+    };
+  }
+
+  rpc ListKYCVerifications(ListKYCVerificationsRequest) returns (ListKYCVerificationsResponse) {
+    option (google.api.http) = {
+      get : "/v1/admin/kyc/verifications"
+    };
+  }
+}
+
+// KYC Request/Response Messages
+
+message CreateKYCRequest {
+  string user_id = 1;
+  string identity_document_url = 2;
+  string selfie_url = 3;
+  string vehicle_document_url = 4;
+}
+
+message CreateKYCResponse {
+  KYCVerification kyc_verification = 1;
+}
+
+message GetKYCByUserIdRequest {
+  string user_id = 1;
+}
+
+message GetKYCByUserIdResponse {
+  KYCVerification kyc_verification = 1;
+}
+
+message UpdateKYCStatusRequest {
+  string admin_user_id = 1;
+  string kyc_id = 2;
+  KYCStatus status = 3;
+  string rejection_reason = 4;
+}
+
+message UpdateKYCStatusResponse {
+  KYCVerification kyc_verification = 1;
+}
+
+message ListKYCVerificationsRequest {
+  KYCStatus status = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+message ListKYCVerificationsResponse {
+  repeated KYCVerification kyc_verifications = 1;
+  int32 total = 2;
 }

@@ -12,6 +12,7 @@ export default function BuyerLayout() {
       }}
       initialRouteName="(index)">
       <Stack.Screen name="(index)" options={{ headerShown: false }} />
+      <Stack.Screen name="category-products" options={{ headerShown: false }} />
       <Stack.Screen name="product-details" options={{ headerShown: false }} />
       <Stack.Screen name="(order)" options={{ headerShown: false }} />
       <Stack.Screen name="contact-us" options={{ headerShown: false }} />

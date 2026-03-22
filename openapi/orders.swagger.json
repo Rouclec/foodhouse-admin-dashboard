@@ -1489,7 +1489,12 @@
       }
     },
     "OrdersConfirmDeliveryBody": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "agentPayoutPhoneNumber": {
+          "type": "string"
+        }
+      }
     },
     "OrdersCreateCustomSubscriptionBody": {
       "type": "object",
@@ -1583,6 +1588,9 @@
       "type": "object",
       "properties": {
         "payoutPhoneNumber": {
+          "type": "string"
+        },
+        "agentId": {
           "type": "string"
         }
       }

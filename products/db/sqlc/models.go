@@ -14,6 +14,7 @@ type Category struct {
 	Name      string  `json:"name"`
 	Slug      string  `json:"slug"`
 	CreatedBy *string `json:"created_by"`
+	Image     string  `json:"image"`
 }
 
 type PriceType struct {
@@ -49,6 +50,40 @@ type ProductName struct {
 	Name       string  `json:"name"`
 	Slug       string  `json:"slug"`
 	CategoryID *string `json:"category_id"`
+}
+
+type ProductUnit struct {
+	ID              string             `json:"id"`
+	ProductID       string             `json:"product_id"`
+	UnitType        string             `json:"unit_type"`
+	Value           int64              `json:"value"`
+	CurrencyIsoCode string             `json:"currency_iso_code"`
+	CreatedBy       *string            `json:"created_by"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+}
+
+type ProductsWithPrice struct {
+	ID                  string             `json:"id"`
+	CategoryID          *string            `json:"category_id"`
+	Name                string             `json:"name"`
+	UnitType            string             `json:"unit_type"`
+	Value               float64            `json:"value"`
+	CurrencyIsoCode     string             `json:"currency_iso_code"`
+	Description         string             `json:"description"`
+	Image               string             `json:"image"`
+	CreatedBy           *string            `json:"created_by"`
+	CreatedAt           pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
+	WholeSale           bool               `json:"whole_sale"`
+	DeletedAt           pgtype.Timestamptz `json:"deleted_at"`
+	DeliveryFeeAmount   *float64           `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency *string            `json:"delivery_fee_currency"`
+	IsApproved          *bool              `json:"is_approved"`
+	Location            interface{}        `json:"location"`
+	PriceValue          int64              `json:"price_value"`
+	PriceCurrency       string             `json:"price_currency"`
+	PriceUnitType       string             `json:"price_unit_type"`
 }
 
 type Region struct {

@@ -48,6 +48,14 @@ SET
 WHERE order_number = $1;
 
 
+-- name: UpdateOrderAgent :exec
+UPDATE orders
+SET
+  agent_id = $2,
+  updated_at = now()
+WHERE order_number = $1;
+
+
 -- name: GetOrderByOrderNumber :one
 SELECT 
     o.*,
@@ -313,3 +321,33 @@ VALUES (
 SELECT * FROM order_items
 WHERE order_number = $1
 ORDER BY id;
+
+-- Delivery Ratings
+
+-- name: CreateDeliveryRating :exec
+INSERT INTO delivery_ratings (order_number, agent_id, user_id, rating, comment)
+VALUES (
+    sqlc.arg(order_number)::bigint,
+    sqlc.arg(agent_id)::varchar,
+    sqlc.arg(user_id)::varchar,
+    sqlc.arg(rating)::integer,
+    sqlc.arg(comment)::text
+);
+
+-- name: GetDeliveryRatingByOrderNumber :one
+SELECT * FROM delivery_ratings WHERE order_number = $1;
+
+-- name: GetDeliveryRatingsByAgentId :many
+SELECT * FROM delivery_ratings 
+WHERE agent_id = $1
+ORDER BY created_at DESC
+LIMIT $2 OFFSET $3;
+
+-- name: GetAverageAgentRating :one
+SELECT 
+    agent_id,
+    COUNT(*) as rating_count,
+    AVG(rating)::numeric(10,2) as average_rating
+FROM delivery_ratings
+WHERE agent_id = $1
+GROUP BY agent_id;

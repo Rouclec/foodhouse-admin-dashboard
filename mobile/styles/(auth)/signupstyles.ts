@@ -209,6 +209,7 @@ export const signupStyles = StyleSheet.create({
   },
   roleContainer: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
     marginBottom: 20,
   },
@@ -219,6 +220,7 @@ export const signupStyles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#fff',
+    marginBottom: 12,
   },
   selectedRoleCard: {
     borderColor: Colors.primary['500'],
@@ -244,6 +246,18 @@ export const signupStyles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: 'white',
+  },
+  roleDescriptionContainer: {
+    backgroundColor: Colors.grey['fa'],
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 20,
+  },
+  roleDescription: {
+    fontSize: 14,
+    color: Colors.grey['61'],
+    textAlign: 'center',
+    lineHeight: 20,
   },
   flexButtonContainer: {
     paddingHorizontal: 16,
