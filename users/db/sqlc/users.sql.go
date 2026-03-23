@@ -28,6 +28,50 @@ func (q *Queries) CountUsers(ctx context.Context, arg CountUsersParams) (int64, 
 	return count, err
 }
 
+const createKYC = `-- name: CreateKYC :one
+
+INSERT INTO kyc_verifications (user_id, identity_document_url, selfie_url, vehicle_document_url, status)
+VALUES ($1, $2, $3, $4, 'KYC_STATUS_PENDING')
+ON CONFLICT (user_id) DO UPDATE
+SET identity_document_url = EXCLUDED.identity_document_url,
+    selfie_url = EXCLUDED.selfie_url,
+    vehicle_document_url = EXCLUDED.vehicle_document_url,
+    status = 'KYC_STATUS_PENDING',
+    updated_at = now()
+RETURNING id, user_id, identity_document_url, selfie_url, vehicle_document_url, status, rejection_reason, verified_at, created_at, updated_at
+`
+
+type CreateKYCParams struct {
+	UserID              string `json:"user_id"`
+	IdentityDocumentUrl string `json:"identity_document_url"`
+	SelfieUrl           string `json:"selfie_url"`
+	VehicleDocumentUrl  string `json:"vehicle_document_url"`
+}
+
+// KYC Queries
+func (q *Queries) CreateKYC(ctx context.Context, arg CreateKYCParams) (KycVerification, error) {
+	row := q.db.QueryRow(ctx, createKYC,
+		arg.UserID,
+		arg.IdentityDocumentUrl,
+		arg.SelfieUrl,
+		arg.VehicleDocumentUrl,
+	)
+	var i KycVerification
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.IdentityDocumentUrl,
+		&i.SelfieUrl,
+		&i.VehicleDocumentUrl,
+		&i.Status,
+		&i.RejectionReason,
+		&i.VerifiedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (phone_number, email, "password", first_name, last_name, residence_country_iso_code, "address", location_coordinates, profile_image, "role", user_status)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'UserStatus_ACTIVE')
@@ -120,6 +164,50 @@ func (q *Queries) GetFarmer(ctx context.Context, id string) (User, error) {
 		&i.ReferralCode,
 		&i.DeleteRequestedAt,
 		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const getKYCByID = `-- name: GetKYCByID :one
+SELECT id, user_id, identity_document_url, selfie_url, vehicle_document_url, status, rejection_reason, verified_at, created_at, updated_at FROM kyc_verifications WHERE id = $1
+`
+
+func (q *Queries) GetKYCByID(ctx context.Context, id string) (KycVerification, error) {
+	row := q.db.QueryRow(ctx, getKYCByID, id)
+	var i KycVerification
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.IdentityDocumentUrl,
+		&i.SelfieUrl,
+		&i.VehicleDocumentUrl,
+		&i.Status,
+		&i.RejectionReason,
+		&i.VerifiedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getKYCByUserID = `-- name: GetKYCByUserID :one
+SELECT id, user_id, identity_document_url, selfie_url, vehicle_document_url, status, rejection_reason, verified_at, created_at, updated_at FROM kyc_verifications WHERE user_id = $1
+`
+
+func (q *Queries) GetKYCByUserID(ctx context.Context, userID string) (KycVerification, error) {
+	row := q.db.QueryRow(ctx, getKYCByUserID, userID)
+	var i KycVerification
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.IdentityDocumentUrl,
+		&i.SelfieUrl,
+		&i.VehicleDocumentUrl,
+		&i.Status,
+		&i.RejectionReason,
+		&i.VerifiedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -471,6 +559,50 @@ func (q *Queries) ListFarmersByRating(ctx context.Context, arg ListFarmersByRati
 	return items, nil
 }
 
+const listKYCVerifications = `-- name: ListKYCVerifications :many
+SELECT id, user_id, identity_document_url, selfie_url, vehicle_document_url, status, rejection_reason, verified_at, created_at, updated_at FROM kyc_verifications 
+WHERE ($1::text IS NULL OR status = $1)
+ORDER BY created_at DESC
+LIMIT $2 OFFSET $3
+`
+
+type ListKYCVerificationsParams struct {
+	Column1 string `json:"column_1"`
+	Limit   int32  `json:"limit"`
+	Offset  int32  `json:"offset"`
+}
+
+func (q *Queries) ListKYCVerifications(ctx context.Context, arg ListKYCVerificationsParams) ([]KycVerification, error) {
+	rows, err := q.db.Query(ctx, listKYCVerifications, arg.Column1, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []KycVerification{}
+	for rows.Next() {
+		var i KycVerification
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.IdentityDocumentUrl,
+			&i.SelfieUrl,
+			&i.VehicleDocumentUrl,
+			&i.Status,
+			&i.RejectionReason,
+			&i.VerifiedAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listUsers = `-- name: ListUsers :many
 SELECT id, role, phone_number, email, first_name, last_name, residence_country_iso_code, address, location_coordinates, profile_image, password, created_at, updated_at, user_status, referral_code, delete_requested_at, deleted_at
 FROM users 
@@ -567,6 +699,40 @@ WHERE id = $1
 func (q *Queries) SuspendUser(ctx context.Context, id string) error {
 	_, err := q.db.Exec(ctx, suspendUser, id)
 	return err
+}
+
+const updateKYCStatus = `-- name: UpdateKYCStatus :one
+UPDATE kyc_verifications
+SET status = $2,
+    rejection_reason = $3,
+    verified_at = CASE WHEN $2 = 'KYC_STATUS_VERIFIED' THEN now() ELSE NULL END,
+    updated_at = now()
+WHERE id = $1
+RETURNING id, user_id, identity_document_url, selfie_url, vehicle_document_url, status, rejection_reason, verified_at, created_at, updated_at
+`
+
+type UpdateKYCStatusParams struct {
+	ID              string  `json:"id"`
+	Status          *string `json:"status"`
+	RejectionReason string  `json:"rejection_reason"`
+}
+
+func (q *Queries) UpdateKYCStatus(ctx context.Context, arg UpdateKYCStatusParams) (KycVerification, error) {
+	row := q.db.QueryRow(ctx, updateKYCStatus, arg.ID, arg.Status, arg.RejectionReason)
+	var i KycVerification
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.IdentityDocumentUrl,
+		&i.SelfieUrl,
+		&i.VehicleDocumentUrl,
+		&i.Status,
+		&i.RejectionReason,
+		&i.VerifiedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const updateUser = `-- name: UpdateUser :one

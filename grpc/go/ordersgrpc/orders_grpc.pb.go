@@ -36,6 +36,9 @@ const (
 	Orders_DeleteDeliveryPoint_FullMethodName                = "/ordersgrpc.Orders/DeleteDeliveryPoint"
 	Orders_ListDeliveryPoints_FullMethodName                 = "/ordersgrpc.Orders/ListDeliveryPoints"
 	Orders_GetAdminStats_FullMethodName                      = "/ordersgrpc.Orders/GetAdminStats"
+	Orders_GetAgentStats_FullMethodName                      = "/ordersgrpc.Orders/GetAgentStats"
+	Orders_CreateDeliveryRating_FullMethodName               = "/ordersgrpc.Orders/CreateDeliveryRating"
+	Orders_GetAgentRatingSummary_FullMethodName              = "/ordersgrpc.Orders/GetAgentRatingSummary"
 	Orders_ListDeliveryCities_FullMethodName                 = "/ordersgrpc.Orders/ListDeliveryCities"
 	Orders_CheckPaymentStatus_FullMethodName                 = "/ordersgrpc.Orders/CheckPaymentStatus"
 	Orders_GetFarmerEarnings_FullMethodName                  = "/ordersgrpc.Orders/GetFarmerEarnings"
@@ -77,6 +80,9 @@ type OrdersClient interface {
 	DeleteDeliveryPoint(ctx context.Context, in *DeleteDeliveryPointRequest, opts ...grpc.CallOption) (*DeleteDeliveryPointResponse, error)
 	ListDeliveryPoints(ctx context.Context, in *ListDeliveryPointsRequest, opts ...grpc.CallOption) (*ListDeliveryPointsResponse, error)
 	GetAdminStats(ctx context.Context, in *GetAdminStatsRequest, opts ...grpc.CallOption) (*GetAdminStatsResponse, error)
+	GetAgentStats(ctx context.Context, in *GetAgentStatsRequest, opts ...grpc.CallOption) (*GetAgentStatsResponse, error)
+	CreateDeliveryRating(ctx context.Context, in *CreateDeliveryRatingRequest, opts ...grpc.CallOption) (*CreateDeliveryRatingResponse, error)
+	GetAgentRatingSummary(ctx context.Context, in *GetAgentRatingSummaryRequest, opts ...grpc.CallOption) (*GetAgentRatingSummaryResponse, error)
 	ListDeliveryCities(ctx context.Context, in *ListDeliveryCitiesRequest, opts ...grpc.CallOption) (*ListDeliveryCitiesResponse, error)
 	CheckPaymentStatus(ctx context.Context, in *CheckPaymentStatusRequest, opts ...grpc.CallOption) (*CheckPaymentStatusResponse, error)
 	GetFarmerEarnings(ctx context.Context, in *GetFarmerEarningsRequest, opts ...grpc.CallOption) (*GetFarmerEarningsResponse, error)
@@ -271,6 +277,36 @@ func (c *ordersClient) GetAdminStats(ctx context.Context, in *GetAdminStatsReque
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetAdminStatsResponse)
 	err := c.cc.Invoke(ctx, Orders_GetAdminStats_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ordersClient) GetAgentStats(ctx context.Context, in *GetAgentStatsRequest, opts ...grpc.CallOption) (*GetAgentStatsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAgentStatsResponse)
+	err := c.cc.Invoke(ctx, Orders_GetAgentStats_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ordersClient) CreateDeliveryRating(ctx context.Context, in *CreateDeliveryRatingRequest, opts ...grpc.CallOption) (*CreateDeliveryRatingResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateDeliveryRatingResponse)
+	err := c.cc.Invoke(ctx, Orders_CreateDeliveryRating_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ordersClient) GetAgentRatingSummary(ctx context.Context, in *GetAgentRatingSummaryRequest, opts ...grpc.CallOption) (*GetAgentRatingSummaryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAgentRatingSummaryResponse)
+	err := c.cc.Invoke(ctx, Orders_GetAgentRatingSummary_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -478,6 +514,9 @@ type OrdersServer interface {
 	DeleteDeliveryPoint(context.Context, *DeleteDeliveryPointRequest) (*DeleteDeliveryPointResponse, error)
 	ListDeliveryPoints(context.Context, *ListDeliveryPointsRequest) (*ListDeliveryPointsResponse, error)
 	GetAdminStats(context.Context, *GetAdminStatsRequest) (*GetAdminStatsResponse, error)
+	GetAgentStats(context.Context, *GetAgentStatsRequest) (*GetAgentStatsResponse, error)
+	CreateDeliveryRating(context.Context, *CreateDeliveryRatingRequest) (*CreateDeliveryRatingResponse, error)
+	GetAgentRatingSummary(context.Context, *GetAgentRatingSummaryRequest) (*GetAgentRatingSummaryResponse, error)
 	ListDeliveryCities(context.Context, *ListDeliveryCitiesRequest) (*ListDeliveryCitiesResponse, error)
 	CheckPaymentStatus(context.Context, *CheckPaymentStatusRequest) (*CheckPaymentStatusResponse, error)
 	GetFarmerEarnings(context.Context, *GetFarmerEarningsRequest) (*GetFarmerEarningsResponse, error)
@@ -558,6 +597,15 @@ func (UnimplementedOrdersServer) ListDeliveryPoints(context.Context, *ListDelive
 }
 func (UnimplementedOrdersServer) GetAdminStats(context.Context, *GetAdminStatsRequest) (*GetAdminStatsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAdminStats not implemented")
+}
+func (UnimplementedOrdersServer) GetAgentStats(context.Context, *GetAgentStatsRequest) (*GetAgentStatsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAgentStats not implemented")
+}
+func (UnimplementedOrdersServer) CreateDeliveryRating(context.Context, *CreateDeliveryRatingRequest) (*CreateDeliveryRatingResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateDeliveryRating not implemented")
+}
+func (UnimplementedOrdersServer) GetAgentRatingSummary(context.Context, *GetAgentRatingSummaryRequest) (*GetAgentRatingSummaryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAgentRatingSummary not implemented")
 }
 func (UnimplementedOrdersServer) ListDeliveryCities(context.Context, *ListDeliveryCitiesRequest) (*ListDeliveryCitiesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListDeliveryCities not implemented")
@@ -936,6 +984,60 @@ func _Orders_GetAdminStats_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OrdersServer).GetAdminStats(ctx, req.(*GetAdminStatsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orders_GetAgentStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAgentStatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).GetAgentStats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_GetAgentStats_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).GetAgentStats(ctx, req.(*GetAgentStatsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orders_CreateDeliveryRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateDeliveryRatingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).CreateDeliveryRating(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_CreateDeliveryRating_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).CreateDeliveryRating(ctx, req.(*CreateDeliveryRatingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orders_GetAgentRatingSummary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAgentRatingSummaryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).GetAgentRatingSummary(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_GetAgentRatingSummary_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).GetAgentRatingSummary(ctx, req.(*GetAgentRatingSummaryRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1338,6 +1440,18 @@ var Orders_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAdminStats",
 			Handler:    _Orders_GetAdminStats_Handler,
+		},
+		{
+			MethodName: "GetAgentStats",
+			Handler:    _Orders_GetAgentStats_Handler,
+		},
+		{
+			MethodName: "CreateDeliveryRating",
+			Handler:    _Orders_CreateDeliveryRating_Handler,
+		},
+		{
+			MethodName: "GetAgentRatingSummary",
+			Handler:    _Orders_GetAgentRatingSummary_Handler,
 		},
 		{
 			MethodName: "ListDeliveryCities",

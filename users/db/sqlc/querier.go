@@ -12,6 +12,8 @@ type Querier interface {
 	CountReferralsByReferrer(ctx context.Context, referrerID string) (int64, error)
 	CountSentOtpsToFactorToday(ctx context.Context, factor string) (int64, error)
 	CountUsers(ctx context.Context, arg CountUsersParams) (int64, error)
+	// KYC Queries
+	CreateKYC(ctx context.Context, arg CreateKYCParams) (KycVerification, error)
 	CreateReferral(ctx context.Context, arg CreateReferralParams) (Referral, error)
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) error
 	CreateReview(ctx context.Context, arg CreateReviewParams) (FarmersReview, error)
@@ -20,6 +22,8 @@ type Querier interface {
 	DeleteUser(ctx context.Context, id string) error
 	GetFarmer(ctx context.Context, id string) (User, error)
 	GetFarmerRating(ctx context.Context, farmerID string) (float64, error)
+	GetKYCByID(ctx context.Context, id string) (KycVerification, error)
+	GetKYCByUserID(ctx context.Context, userID string) (KycVerification, error)
 	GetLatestSentOtpByFactor(ctx context.Context, arg GetLatestSentOtpByFactorParams) ([]SentOtp, error)
 	GetReferralByReferredID(ctx context.Context, referredID string) (Referral, error)
 	GetRefreshToken(ctx context.Context, token string) (RefreshToken, error)
@@ -35,10 +39,12 @@ type Querier interface {
 	GetUserStatsBetweenDates(ctx context.Context, arg GetUserStatsBetweenDatesParams) (GetUserStatsBetweenDatesRow, error)
 	ListFarmerReviews(ctx context.Context, arg ListFarmerReviewsParams) ([]FarmersReview, error)
 	ListFarmersByRating(ctx context.Context, arg ListFarmersByRatingParams) ([]ListFarmersByRatingRow, error)
+	ListKYCVerifications(ctx context.Context, arg ListKYCVerificationsParams) ([]KycVerification, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
 	ReactivateUser(ctx context.Context, id string) error
 	RevokeRefreshToken(ctx context.Context, token string) error
 	SuspendUser(ctx context.Context, id string) error
+	UpdateKYCStatus(ctx context.Context, arg UpdateKYCStatusParams) (KycVerification, error)
 	UpdateSentOtp(ctx context.Context, arg UpdateSentOtpParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error

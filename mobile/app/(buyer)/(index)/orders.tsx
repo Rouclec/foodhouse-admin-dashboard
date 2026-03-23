@@ -160,6 +160,8 @@ export default function Orders() {
   const sheetRef = useRef<FilterBottomSheetRef>(null);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
+  const [agentRating, setAgentRating] = useState(0);
+  const [agentComment, setAgentComment] = useState('');
   const [error, setError] = useState<string>();
 
   const toggleSearch = () => {
@@ -198,6 +200,8 @@ export default function Orders() {
     onSuccess: () => {
       setRating(0);
       setComment('');
+      setAgentRating(0);
+      setAgentComment('');
       sheetRef?.current?.close();
     },
     onError: async error => {
@@ -469,6 +473,64 @@ export default function Orders() {
             />
           </View>
         </View>
+        
+        {/* Agent Rating Section - show for delivered orders */}
+        {selectedOrder?.status === 'OrderStatus_DELIVERED' && (
+          <View style={styles.agentRatingContainer}>
+            <Text style={styles.ratingSectionTitle}>
+              {i18n.t('(buyer).(index).orders.rateYourDeliveryAgent')}
+            </Text>
+            <Text style={styles.ratingSectionSubtitle}>
+              {i18n.t('(buyer).(index).orders.howWasYourDelivery')}
+            </Text>
+            <View
+              style={[
+                defaultStyles.center,
+                {
+                  flexDirection: 'row',
+                  columnGap: 24,
+                },
+              ]}>
+              {Array(5)
+                .fill('a')
+                .map((_item, index) => {
+                  return (
+                    <TouchableOpacity
+                      onPress={() => setAgentRating(index + 1)}
+                      key={`agent-${index}`}>
+                      <Icon
+                        size={32}
+                        source={agentRating >= index + 1 ? 'star' : 'star-outline'}
+                        color={
+                          agentRating >= index + 1
+                            ? Colors.primary[500]
+                            : Colors.dark[10]
+                        }
+                      />
+                    </TouchableOpacity>
+                  );
+                })}
+            </View>
+            <View style={{ marginTop: 16 }}>
+              <TextInput
+                mode="outlined"
+                label={i18n.t('(buyer).(index).orders.deliveryReview')}
+                value={agentComment}
+                onChangeText={setAgentComment}
+                theme={{
+                  colors: {
+                    primary: Colors.primary[500],
+                    background: Colors.grey['fa'],
+                    error: Colors.error,
+                  },
+                  roundness: 10,
+                }}
+                outlineColor={Colors.grey['bg']}
+              />
+            </View>
+          </View>
+        )}
+        
         <View style={styles.ratingsButtonsContainer}>
           <Button
             style={[

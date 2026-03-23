@@ -50,6 +50,10 @@ const (
 	Users_GetReferralByReferredID_FullMethodName = "/usersgrpc.Users/GetReferralByReferredID"
 	Users_NotifyFarmer_FullMethodName            = "/usersgrpc.Users/NotifyFarmer"
 	Users_DeleteUserAccount_FullMethodName       = "/usersgrpc.Users/DeleteUserAccount"
+	Users_CreateKYC_FullMethodName               = "/usersgrpc.Users/CreateKYC"
+	Users_GetKYCByUserID_FullMethodName          = "/usersgrpc.Users/GetKYCByUserID"
+	Users_UpdateKYCStatus_FullMethodName         = "/usersgrpc.Users/UpdateKYCStatus"
+	Users_ListKYCVerifications_FullMethodName    = "/usersgrpc.Users/ListKYCVerifications"
 )
 
 // UsersClient is the client API for Users service.
@@ -86,6 +90,11 @@ type UsersClient interface {
 	GetReferralByReferredID(ctx context.Context, in *GetReferralByReferredIdRequest, opts ...grpc.CallOption) (*GetReferralByReferredIdResponse, error)
 	NotifyFarmer(ctx context.Context, in *NotifyFarmerRequest, opts ...grpc.CallOption) (*NotifyFarmerResponse, error)
 	DeleteUserAccount(ctx context.Context, in *DeleteUserAccountRequest, opts ...grpc.CallOption) (*DeleteUserAccountResponse, error)
+	// KYC endpoints
+	CreateKYC(ctx context.Context, in *CreateKYCRequest, opts ...grpc.CallOption) (*CreateKYCResponse, error)
+	GetKYCByUserID(ctx context.Context, in *GetKYCByUserIDRequest, opts ...grpc.CallOption) (*GetKYCByUserIDResponse, error)
+	UpdateKYCStatus(ctx context.Context, in *UpdateKYCStatusRequest, opts ...grpc.CallOption) (*UpdateKYCStatusResponse, error)
+	ListKYCVerifications(ctx context.Context, in *ListKYCVerificationsRequest, opts ...grpc.CallOption) (*ListKYCVerificationsResponse, error)
 }
 
 type usersClient struct {
@@ -396,6 +405,46 @@ func (c *usersClient) DeleteUserAccount(ctx context.Context, in *DeleteUserAccou
 	return out, nil
 }
 
+func (c *usersClient) CreateKYC(ctx context.Context, in *CreateKYCRequest, opts ...grpc.CallOption) (*CreateKYCResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateKYCResponse)
+	err := c.cc.Invoke(ctx, Users_CreateKYC_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersClient) GetKYCByUserID(ctx context.Context, in *GetKYCByUserIDRequest, opts ...grpc.CallOption) (*GetKYCByUserIDResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetKYCByUserIDResponse)
+	err := c.cc.Invoke(ctx, Users_GetKYCByUserID_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersClient) UpdateKYCStatus(ctx context.Context, in *UpdateKYCStatusRequest, opts ...grpc.CallOption) (*UpdateKYCStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateKYCStatusResponse)
+	err := c.cc.Invoke(ctx, Users_UpdateKYCStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersClient) ListKYCVerifications(ctx context.Context, in *ListKYCVerificationsRequest, opts ...grpc.CallOption) (*ListKYCVerificationsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListKYCVerificationsResponse)
+	err := c.cc.Invoke(ctx, Users_ListKYCVerifications_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsersServer is the server API for Users service.
 // All implementations must embed UnimplementedUsersServer
 // for forward compatibility.
@@ -430,6 +479,11 @@ type UsersServer interface {
 	GetReferralByReferredID(context.Context, *GetReferralByReferredIdRequest) (*GetReferralByReferredIdResponse, error)
 	NotifyFarmer(context.Context, *NotifyFarmerRequest) (*NotifyFarmerResponse, error)
 	DeleteUserAccount(context.Context, *DeleteUserAccountRequest) (*DeleteUserAccountResponse, error)
+	// KYC endpoints
+	CreateKYC(context.Context, *CreateKYCRequest) (*CreateKYCResponse, error)
+	GetKYCByUserID(context.Context, *GetKYCByUserIDRequest) (*GetKYCByUserIDResponse, error)
+	UpdateKYCStatus(context.Context, *UpdateKYCStatusRequest) (*UpdateKYCStatusResponse, error)
+	ListKYCVerifications(context.Context, *ListKYCVerificationsRequest) (*ListKYCVerificationsResponse, error)
 	mustEmbedUnimplementedUsersServer()
 }
 
@@ -529,6 +583,18 @@ func (UnimplementedUsersServer) NotifyFarmer(context.Context, *NotifyFarmerReque
 }
 func (UnimplementedUsersServer) DeleteUserAccount(context.Context, *DeleteUserAccountRequest) (*DeleteUserAccountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteUserAccount not implemented")
+}
+func (UnimplementedUsersServer) CreateKYC(context.Context, *CreateKYCRequest) (*CreateKYCResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateKYC not implemented")
+}
+func (UnimplementedUsersServer) GetKYCByUserID(context.Context, *GetKYCByUserIDRequest) (*GetKYCByUserIDResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetKYCByUserID not implemented")
+}
+func (UnimplementedUsersServer) UpdateKYCStatus(context.Context, *UpdateKYCStatusRequest) (*UpdateKYCStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateKYCStatus not implemented")
+}
+func (UnimplementedUsersServer) ListKYCVerifications(context.Context, *ListKYCVerificationsRequest) (*ListKYCVerificationsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListKYCVerifications not implemented")
 }
 func (UnimplementedUsersServer) mustEmbedUnimplementedUsersServer() {}
 func (UnimplementedUsersServer) testEmbeddedByValue()               {}
@@ -1091,6 +1157,78 @@ func _Users_DeleteUserAccount_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Users_CreateKYC_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateKYCRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).CreateKYC(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Users_CreateKYC_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).CreateKYC(ctx, req.(*CreateKYCRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Users_GetKYCByUserID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetKYCByUserIDRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).GetKYCByUserID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Users_GetKYCByUserID_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).GetKYCByUserID(ctx, req.(*GetKYCByUserIDRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Users_UpdateKYCStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateKYCStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).UpdateKYCStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Users_UpdateKYCStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).UpdateKYCStatus(ctx, req.(*UpdateKYCStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Users_ListKYCVerifications_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListKYCVerificationsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).ListKYCVerifications(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Users_ListKYCVerifications_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).ListKYCVerifications(ctx, req.(*ListKYCVerificationsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Users_ServiceDesc is the grpc.ServiceDesc for Users service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1217,6 +1355,22 @@ var Users_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteUserAccount",
 			Handler:    _Users_DeleteUserAccount_Handler,
+		},
+		{
+			MethodName: "CreateKYC",
+			Handler:    _Users_CreateKYC_Handler,
+		},
+		{
+			MethodName: "GetKYCByUserID",
+			Handler:    _Users_GetKYCByUserID_Handler,
+		},
+		{
+			MethodName: "UpdateKYCStatus",
+			Handler:    _Users_UpdateKYCStatus_Handler,
+		},
+		{
+			MethodName: "ListKYCVerifications",
+			Handler:    _Users_ListKYCVerifications_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

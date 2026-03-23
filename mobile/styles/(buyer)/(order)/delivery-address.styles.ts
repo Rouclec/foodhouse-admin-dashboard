@@ -12,6 +12,7 @@ export const deliveryAddressStyles = StyleSheet.create({
     borderTopLeftRadius: 44,
     borderTopRightRadius: 44,
     padding: 16,
+    paddingBottom: 0,
     zIndex: 2,
     elevation: 10, // for Android shadow and stacking
   },

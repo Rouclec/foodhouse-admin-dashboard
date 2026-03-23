@@ -12,6 +12,38 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createDeliveryRating = `-- name: CreateDeliveryRating :exec
+
+INSERT INTO delivery_ratings (order_number, agent_id, user_id, rating, comment)
+VALUES (
+    $1::bigint,
+    $2::varchar,
+    $3::varchar,
+    $4::integer,
+    $5::text
+)
+`
+
+type CreateDeliveryRatingParams struct {
+	OrderNumber int64  `json:"order_number"`
+	AgentID     string `json:"agent_id"`
+	UserID      string `json:"user_id"`
+	Rating      int32  `json:"rating"`
+	Comment     string `json:"comment"`
+}
+
+// Delivery Ratings
+func (q *Queries) CreateDeliveryRating(ctx context.Context, arg CreateDeliveryRatingParams) error {
+	_, err := q.db.Exec(ctx, createDeliveryRating,
+		arg.OrderNumber,
+		arg.AgentID,
+		arg.UserID,
+		arg.Rating,
+		arg.Comment,
+	)
+	return err
+}
+
 const createOrder = `-- name: CreateOrder :one
 INSERT INTO orders (
     delivery_location, 
@@ -51,7 +83,7 @@ VALUES (
     $14,
     $15
 )
-RETURNING order_number, delivery_location, price_value, price_currency, status, rating, review, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, dispatched_by, delivery_fee_amount, delivery_fee_currency, user_subscription_id, expected_delivery_date, service_fee_amount, service_fee_currency
+RETURNING order_number, delivery_location, price_value, price_currency, status, rating, review, created_by, created_at, updated_at, secret_key, product_owner, payout_phone_number, delivery_address, dispatched_by, delivery_fee_amount, delivery_fee_currency, user_subscription_id, expected_delivery_date, service_fee_amount, service_fee_currency, agent_id
 `
 
 type CreateOrderParams struct {
@@ -113,6 +145,7 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 		&i.ExpectedDeliveryDate,
 		&i.ServiceFeeAmount,
 		&i.ServiceFeeCurrency,
+		&i.AgentID,
 	)
 	return i, err
 }
@@ -232,9 +265,146 @@ func (q *Queries) CreatePayment(ctx context.Context, arg CreatePaymentParams) (P
 	return i, err
 }
 
+const getAgentStats = `-- name: GetAgentStats :one
+SELECT
+  COUNT(*) FILTER (
+    WHERE status = 'OrderStatus_APPROVED'
+      AND (agent_id IS NULL OR agent_id = '')
+  )::int AS available_count,
+  COUNT(*) FILTER (
+    WHERE status = 'OrderStatus_IN_TRANSIT'
+      AND agent_id = $1::varchar
+  )::int AS ongoing_count,
+  COUNT(*) FILTER (
+    WHERE status = 'OrderStatus_DELIVERED'
+      AND agent_id = $1::varchar
+  )::int AS completed_count,
+  COALESCE(
+    SUM(delivery_fee_amount) FILTER (
+      WHERE status = 'OrderStatus_DELIVERED'
+        AND agent_id = $1::varchar
+    ),
+    0
+  )::float8 AS total_earnings_value,
+  COALESCE(
+    MAX(delivery_fee_currency) FILTER (
+      WHERE status = 'OrderStatus_DELIVERED'
+        AND agent_id = $1::varchar
+    ),
+    'XAF'
+  )::text AS total_earnings_currency
+FROM orders
+`
+
+type GetAgentStatsRow struct {
+	AvailableCount        int32   `json:"available_count"`
+	OngoingCount          int32   `json:"ongoing_count"`
+	CompletedCount        int32   `json:"completed_count"`
+	TotalEarningsValue    float64 `json:"total_earnings_value"`
+	TotalEarningsCurrency string  `json:"total_earnings_currency"`
+}
+
+func (q *Queries) GetAgentStats(ctx context.Context, agentID string) (GetAgentStatsRow, error) {
+	row := q.db.QueryRow(ctx, getAgentStats, agentID)
+	var i GetAgentStatsRow
+	err := row.Scan(
+		&i.AvailableCount,
+		&i.OngoingCount,
+		&i.CompletedCount,
+		&i.TotalEarningsValue,
+		&i.TotalEarningsCurrency,
+	)
+	return i, err
+}
+
+const getAverageAgentRating = `-- name: GetAverageAgentRating :one
+SELECT 
+    agent_id,
+    COUNT(*) as rating_count,
+    AVG(rating)::numeric(10,2) as average_rating
+FROM delivery_ratings
+WHERE agent_id = $1
+GROUP BY agent_id
+`
+
+type GetAverageAgentRatingRow struct {
+	AgentID       string         `json:"agent_id"`
+	RatingCount   int64          `json:"rating_count"`
+	AverageRating pgtype.Numeric `json:"average_rating"`
+}
+
+func (q *Queries) GetAverageAgentRating(ctx context.Context, agentID string) (GetAverageAgentRatingRow, error) {
+	row := q.db.QueryRow(ctx, getAverageAgentRating, agentID)
+	var i GetAverageAgentRatingRow
+	err := row.Scan(&i.AgentID, &i.RatingCount, &i.AverageRating)
+	return i, err
+}
+
+const getDeliveryRatingByOrderNumber = `-- name: GetDeliveryRatingByOrderNumber :one
+SELECT id, order_number, agent_id, user_id, rating, comment, created_at, updated_at FROM delivery_ratings WHERE order_number = $1
+`
+
+func (q *Queries) GetDeliveryRatingByOrderNumber(ctx context.Context, orderNumber int64) (DeliveryRating, error) {
+	row := q.db.QueryRow(ctx, getDeliveryRatingByOrderNumber, orderNumber)
+	var i DeliveryRating
+	err := row.Scan(
+		&i.ID,
+		&i.OrderNumber,
+		&i.AgentID,
+		&i.UserID,
+		&i.Rating,
+		&i.Comment,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getDeliveryRatingsByAgentId = `-- name: GetDeliveryRatingsByAgentId :many
+SELECT id, order_number, agent_id, user_id, rating, comment, created_at, updated_at FROM delivery_ratings 
+WHERE agent_id = $1
+ORDER BY created_at DESC
+LIMIT $2 OFFSET $3
+`
+
+type GetDeliveryRatingsByAgentIdParams struct {
+	AgentID string `json:"agent_id"`
+	Limit   int32  `json:"limit"`
+	Offset  int32  `json:"offset"`
+}
+
+func (q *Queries) GetDeliveryRatingsByAgentId(ctx context.Context, arg GetDeliveryRatingsByAgentIdParams) ([]DeliveryRating, error) {
+	rows, err := q.db.Query(ctx, getDeliveryRatingsByAgentId, arg.AgentID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []DeliveryRating{}
+	for rows.Next() {
+		var i DeliveryRating
+		if err := rows.Scan(
+			&i.ID,
+			&i.OrderNumber,
+			&i.AgentID,
+			&i.UserID,
+			&i.Rating,
+			&i.Comment,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getOrderByOrderNumber = `-- name: GetOrderByOrderNumber :one
 SELECT 
-    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date, o.service_fee_amount, o.service_fee_currency,
+    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date, o.service_fee_amount, o.service_fee_currency, o.agent_id,
     COALESCE(
         JSON_AGG(
             JSON_BUILD_OBJECT(
@@ -274,6 +444,7 @@ type GetOrderByOrderNumberRow struct {
 	ExpectedDeliveryDate pgtype.Timestamptz `json:"expected_delivery_date"`
 	ServiceFeeAmount     float64            `json:"service_fee_amount"`
 	ServiceFeeCurrency   string             `json:"service_fee_currency"`
+	AgentID              *string            `json:"agent_id"`
 	Items                interface{}        `json:"items"`
 }
 
@@ -302,6 +473,7 @@ func (q *Queries) GetOrderByOrderNumber(ctx context.Context, orderNumber int64) 
 		&i.ExpectedDeliveryDate,
 		&i.ServiceFeeAmount,
 		&i.ServiceFeeCurrency,
+		&i.AgentID,
 		&i.Items,
 	)
 	return i, err
@@ -601,7 +773,7 @@ func (q *Queries) GetPaymentStatsBetweenDates(ctx context.Context, arg GetPaymen
 
 const getUserOrderBySecretKey = `-- name: GetUserOrderBySecretKey :one
 SELECT 
-    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date, o.service_fee_amount, o.service_fee_currency,
+    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date, o.service_fee_amount, o.service_fee_currency, o.agent_id,
     COALESCE(
         JSON_AGG(
             JSON_BUILD_OBJECT(
@@ -641,6 +813,7 @@ type GetUserOrderBySecretKeyRow struct {
 	ExpectedDeliveryDate pgtype.Timestamptz `json:"expected_delivery_date"`
 	ServiceFeeAmount     float64            `json:"service_fee_amount"`
 	ServiceFeeCurrency   string             `json:"service_fee_currency"`
+	AgentID              *string            `json:"agent_id"`
 	Items                interface{}        `json:"items"`
 }
 
@@ -669,6 +842,7 @@ func (q *Queries) GetUserOrderBySecretKey(ctx context.Context, secretKey *string
 		&i.ExpectedDeliveryDate,
 		&i.ServiceFeeAmount,
 		&i.ServiceFeeCurrency,
+		&i.AgentID,
 		&i.Items,
 	)
 	return i, err
@@ -676,7 +850,7 @@ func (q *Queries) GetUserOrderBySecretKey(ctx context.Context, secretKey *string
 
 const listFarmerOrders = `-- name: ListFarmerOrders :many
 SELECT 
-    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date, o.service_fee_amount, o.service_fee_currency,
+    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date, o.service_fee_amount, o.service_fee_currency, o.agent_id,
     COALESCE(oi_count.total_items, 0)::int AS total_items,
     oi_preview.product AS preview_product,
     oi_preview.quantity AS preview_quantity
@@ -735,6 +909,7 @@ type ListFarmerOrdersRow struct {
 	ExpectedDeliveryDate pgtype.Timestamptz `json:"expected_delivery_date"`
 	ServiceFeeAmount     float64            `json:"service_fee_amount"`
 	ServiceFeeCurrency   string             `json:"service_fee_currency"`
+	AgentID              *string            `json:"agent_id"`
 	TotalItems           int32              `json:"total_items"`
 	PreviewProduct       string             `json:"preview_product"`
 	PreviewQuantity      int32              `json:"preview_quantity"`
@@ -777,6 +952,7 @@ func (q *Queries) ListFarmerOrders(ctx context.Context, arg ListFarmerOrdersPara
 			&i.ExpectedDeliveryDate,
 			&i.ServiceFeeAmount,
 			&i.ServiceFeeCurrency,
+			&i.AgentID,
 			&i.TotalItems,
 			&i.PreviewProduct,
 			&i.PreviewQuantity,
@@ -826,7 +1002,7 @@ func (q *Queries) ListOrderAuditLogs(ctx context.Context, orderNumber int64) ([]
 
 const listOrders = `-- name: ListOrders :many
 SELECT 
-    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date, o.service_fee_amount, o.service_fee_currency,
+    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date, o.service_fee_amount, o.service_fee_currency, o.agent_id,
     COALESCE(oi_count.total_items, 0)::int AS total_items,
     oi_preview.product AS preview_product,
     oi_preview.quantity AS preview_quantity
@@ -883,6 +1059,7 @@ type ListOrdersRow struct {
 	ExpectedDeliveryDate pgtype.Timestamptz `json:"expected_delivery_date"`
 	ServiceFeeAmount     float64            `json:"service_fee_amount"`
 	ServiceFeeCurrency   string             `json:"service_fee_currency"`
+	AgentID              *string            `json:"agent_id"`
 	TotalItems           int32              `json:"total_items"`
 	PreviewProduct       string             `json:"preview_product"`
 	PreviewQuantity      int32              `json:"preview_quantity"`
@@ -924,6 +1101,7 @@ func (q *Queries) ListOrders(ctx context.Context, arg ListOrdersParams) ([]ListO
 			&i.ExpectedDeliveryDate,
 			&i.ServiceFeeAmount,
 			&i.ServiceFeeCurrency,
+			&i.AgentID,
 			&i.TotalItems,
 			&i.PreviewProduct,
 			&i.PreviewQuantity,
@@ -1011,7 +1189,7 @@ func (q *Queries) ListPayments(ctx context.Context, arg ListPaymentsParams) ([]P
 
 const listUserOrders = `-- name: ListUserOrders :many
 SELECT 
-  o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date, o.service_fee_amount, o.service_fee_currency,
+  o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date, o.service_fee_amount, o.service_fee_currency, o.agent_id,
   COALESCE(oi_count.total_items, 0)::int AS total_items,
   oi_preview.product AS preview_product,
   oi_preview.quantity AS preview_quantity
@@ -1076,6 +1254,7 @@ type ListUserOrdersRow struct {
 	ExpectedDeliveryDate pgtype.Timestamptz `json:"expected_delivery_date"`
 	ServiceFeeAmount     float64            `json:"service_fee_amount"`
 	ServiceFeeCurrency   string             `json:"service_fee_currency"`
+	AgentID              *string            `json:"agent_id"`
 	TotalItems           int32              `json:"total_items"`
 	PreviewProduct       string             `json:"preview_product"`
 	PreviewQuantity      int32              `json:"preview_quantity"`
@@ -1118,6 +1297,7 @@ func (q *Queries) ListUserOrders(ctx context.Context, arg ListUserOrdersParams) 
 			&i.ExpectedDeliveryDate,
 			&i.ServiceFeeAmount,
 			&i.ServiceFeeCurrency,
+			&i.AgentID,
 			&i.TotalItems,
 			&i.PreviewProduct,
 			&i.PreviewQuantity,
@@ -1144,6 +1324,24 @@ type ReviewOrderParams struct {
 
 func (q *Queries) ReviewOrder(ctx context.Context, arg ReviewOrderParams) error {
 	_, err := q.db.Exec(ctx, reviewOrder, arg.Review, arg.Rating, arg.OrderNumber)
+	return err
+}
+
+const updateOrderAgent = `-- name: UpdateOrderAgent :exec
+UPDATE orders
+SET
+  agent_id = $2,
+  updated_at = now()
+WHERE order_number = $1
+`
+
+type UpdateOrderAgentParams struct {
+	OrderNumber int64   `json:"order_number"`
+	AgentID     *string `json:"agent_id"`
+}
+
+func (q *Queries) UpdateOrderAgent(ctx context.Context, arg UpdateOrderAgentParams) error {
+	_, err := q.db.Exec(ctx, updateOrderAgent, arg.OrderNumber, arg.AgentID)
 	return err
 }
 

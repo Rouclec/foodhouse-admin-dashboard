@@ -150,6 +150,7 @@ export const defaultStyles = StyleSheet.create({
   },
   secondaryButton: {
     borderWidth: 1,
+    borderColor: Colors.primary[500],
     backgroundColor: Colors.primary[50],
   },
   secondaryButtonText: {
@@ -402,14 +403,18 @@ export const defaultStyles = StyleSheet.create({
     position: 'absolute',
     top: -14,
     right: -14,
-    backgroundColor: Colors.primary[500],
+    backgroundColor: Colors.light[10],
     borderRadius: 28,
     width: 24,
     height: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: 'white',
+    // borderWidth: 1.5,
+    // borderColor: 'white',
   },
-  cardText: {},
+  cardText: {
+    color: Colors.primary[500],
+    textAlign: 'center',
+    marginLeft: 2,
+  },
 });

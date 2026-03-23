@@ -73,6 +73,7 @@ func (i *Impl) CreateCategory(ctx context.Context, req *productsgrpc.CreateCateg
 		Name:      req.GetName(),
 		Slug:      slug.Make(req.GetName()),
 		CreatedBy: &req.UserId,
+		Image:     req.GetImage(),
 	})
 
 	if err != nil {
@@ -85,6 +86,7 @@ func (i *Impl) CreateCategory(ctx context.Context, req *productsgrpc.CreateCateg
 			Name:      category.Name,
 			Slug:      category.Slug,
 			CreatedBy: *category.CreatedBy,
+			Image:     category.Image,
 		},
 	}, nil
 }
@@ -103,9 +105,10 @@ func (i *Impl) DeleteCategory(ctx context.Context, req *productsgrpc.DeleteCateg
 func (i *Impl) UpdateCategory(ctx context.Context, req *productsgrpc.UpdateCategoryRequest) (*productsgrpc.UpdateCategoryResponse, error) {
 
 	err := i.repo.Do().UpdateCategory(ctx, sqlc.UpdateCategoryParams{
-		ID:   req.GetCategoryId(),
-		Name: req.GetName(),
-		Slug: slug.Make(req.GetName()),
+		ID:    req.GetCategoryId(),
+		Name:  req.GetName(),
+		Slug:  slug.Make(req.GetName()),
+		Image: req.GetImage(),
 	})
 
 	if err != nil {

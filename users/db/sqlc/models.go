@@ -19,6 +19,19 @@ type FarmersReview struct {
 	CreatedBy *string            `json:"created_by"`
 }
 
+type KycVerification struct {
+	ID                  string             `json:"id"`
+	UserID              string             `json:"user_id"`
+	IdentityDocumentUrl string             `json:"identity_document_url"`
+	SelfieUrl           string             `json:"selfie_url"`
+	VehicleDocumentUrl  string             `json:"vehicle_document_url"`
+	Status              *string            `json:"status"`
+	RejectionReason     string             `json:"rejection_reason"`
+	VerifiedAt          pgtype.Timestamptz `json:"verified_at"`
+	CreatedAt           pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
+}
+
 type Referral struct {
 	ID         string             `json:"id"`
 	ReferrerID string             `json:"referrer_id"`

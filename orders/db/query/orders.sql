@@ -48,6 +48,14 @@ SET
 WHERE order_number = $1;
 
 
+-- name: UpdateOrderAgent :exec
+UPDATE orders
+SET
+  agent_id = $2,
+  updated_at = now()
+WHERE order_number = $1;
+
+
 -- name: GetOrderByOrderNumber :one
 SELECT 
     o.*,
@@ -277,6 +285,36 @@ WHERE status = 'PaymentStatus_COMPLETED'
   AND created_at >= sqlc.arg(start_date)::timestamptz
   AND created_at <= sqlc.arg(end_date)::timestamptz;
 
+-- name: GetAgentStats :one
+SELECT
+  COUNT(*) FILTER (
+    WHERE status = 'OrderStatus_APPROVED'
+      AND (agent_id IS NULL OR agent_id = '')
+  )::int AS available_count,
+  COUNT(*) FILTER (
+    WHERE status = 'OrderStatus_IN_TRANSIT'
+      AND agent_id = sqlc.arg(agent_id)::varchar
+  )::int AS ongoing_count,
+  COUNT(*) FILTER (
+    WHERE status = 'OrderStatus_DELIVERED'
+      AND agent_id = sqlc.arg(agent_id)::varchar
+  )::int AS completed_count,
+  COALESCE(
+    SUM(delivery_fee_amount) FILTER (
+      WHERE status = 'OrderStatus_DELIVERED'
+        AND agent_id = sqlc.arg(agent_id)::varchar
+    ),
+    0
+  )::float8 AS total_earnings_value,
+  COALESCE(
+    MAX(delivery_fee_currency) FILTER (
+      WHERE status = 'OrderStatus_DELIVERED'
+        AND agent_id = sqlc.arg(agent_id)::varchar
+    ),
+    'XAF'
+  )::text AS total_earnings_currency
+FROM orders;
+
 
 
 -- name: ListPayments :many
@@ -313,3 +351,33 @@ VALUES (
 SELECT * FROM order_items
 WHERE order_number = $1
 ORDER BY id;
+
+-- Delivery Ratings
+
+-- name: CreateDeliveryRating :exec
+INSERT INTO delivery_ratings (order_number, agent_id, user_id, rating, comment)
+VALUES (
+    sqlc.arg(order_number)::bigint,
+    sqlc.arg(agent_id)::varchar,
+    sqlc.arg(user_id)::varchar,
+    sqlc.arg(rating)::integer,
+    sqlc.arg(comment)::text
+);
+
+-- name: GetDeliveryRatingByOrderNumber :one
+SELECT * FROM delivery_ratings WHERE order_number = $1;
+
+-- name: GetDeliveryRatingsByAgentId :many
+SELECT * FROM delivery_ratings 
+WHERE agent_id = $1
+ORDER BY created_at DESC
+LIMIT $2 OFFSET $3;
+
+-- name: GetAverageAgentRating :one
+SELECT 
+    agent_id,
+    COUNT(*) as rating_count,
+    AVG(rating)::numeric(10,2) as average_rating
+FROM delivery_ratings
+WHERE agent_id = $1
+GROUP BY agent_id;

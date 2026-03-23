@@ -799,6 +799,42 @@
         ]
       }
     },
+    "/v1/users/{userId}/agents/{agentId}/delivery-rating-summary": {
+      "get": {
+        "operationId": "Orders_GetAgentRatingSummary",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcGetAgentRatingSummaryResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/users/{userId}/orders/create-custom-subscription": {
       "post": {
         "operationId": "Orders_CreateCustomSubscription",
@@ -906,6 +942,36 @@
             "schema": {
               "$ref": "#/definitions/OrdersEstimateDeliveryFeeBody"
             }
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/v1/users/{userId}/orders/get-agent-stats": {
+      "get": {
+        "operationId": "Orders_GetAgentStats",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcGetAgentStatsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
           }
         ],
         "tags": [
@@ -1310,6 +1376,51 @@
         ]
       }
     },
+    "/v1/users/{userId}/orders/{orderNumber}/delivery-rating": {
+      "post": {
+        "operationId": "Orders_CreateDeliveryRating",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcCreateDeliveryRatingResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "orderNumber",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/OrdersCreateDeliveryRatingBody"
+            }
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/users/{userId}/orders/{orderNumber}/dispatch-order": {
       "put": {
         "operationId": "Orders_DispatchOrder",
@@ -1489,7 +1600,12 @@
       }
     },
     "OrdersConfirmDeliveryBody": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "agentPayoutPhoneNumber": {
+          "type": "string"
+        }
+      }
     },
     "OrdersCreateCustomSubscriptionBody": {
       "type": "object",
@@ -1529,6 +1645,19 @@
           "type": "string"
         },
         "deliveryPointName": {
+          "type": "string"
+        }
+      }
+    },
+    "OrdersCreateDeliveryRatingBody": {
+      "type": "object",
+      "properties": {
+        "rating": {
+          "type": "integer",
+          "format": "int32",
+          "title": "1..5"
+        },
+        "comment": {
           "type": "string"
         }
       }
@@ -1583,6 +1712,9 @@
       "type": "object",
       "properties": {
         "payoutPhoneNumber": {
+          "type": "string"
+        },
+        "agentId": {
           "type": "string"
         }
       }
@@ -1820,6 +1952,14 @@
         }
       }
     },
+    "ordersgrpcCreateDeliveryRatingResponse": {
+      "type": "object",
+      "properties": {
+        "deliveryRating": {
+          "$ref": "#/definitions/ordersgrpcDeliveryRating"
+        }
+      }
+    },
     "ordersgrpcCreateOrderResponse": {
       "type": "object",
       "properties": {
@@ -1868,6 +2008,42 @@
         }
       }
     },
+    "ordersgrpcDeliveryRating": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "orderNumber": {
+          "type": "string",
+          "format": "int64"
+        },
+        "agentId": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "rating": {
+          "type": "integer",
+          "format": "int32",
+          "title": "1..5"
+        },
+        "comment": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "description": "Delivery agent rating left by the buyer for a delivered order."
+    },
     "ordersgrpcDispatchOrderResponse": {
       "type": "object"
     },
@@ -1911,6 +2087,42 @@
             "type": "object",
             "$ref": "#/definitions/ordersgrpcStatItem"
           }
+        }
+      }
+    },
+    "ordersgrpcGetAgentRatingSummaryResponse": {
+      "type": "object",
+      "properties": {
+        "agentId": {
+          "type": "string"
+        },
+        "ratingCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "averageRating": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "ordersgrpcGetAgentStatsResponse": {
+      "type": "object",
+      "properties": {
+        "availableCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "ongoingCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "completedCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "totalEarnings": {
+          "$ref": "#/definitions/typesAmount"
         }
       }
     },

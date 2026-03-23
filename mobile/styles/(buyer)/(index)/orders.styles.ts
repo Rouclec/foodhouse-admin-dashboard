@@ -81,4 +81,46 @@ export const ordersStyles = StyleSheet.create({
   halfButton: {
     width: '45%',
   },
+  ratingSection: {
+    paddingVertical: 24,
+    borderBottomWidth: 1,
+    borderColor: Colors.grey['border'],
+  },
+  ratingSectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  ratingSectionSubtitle: {
+    fontSize: 14,
+    color: Colors.grey['61'],
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  agentRatingContainer: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: Colors.grey['e1'],
+  },
+  agentInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    gap: 8,
+  },
+  agentAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.grey['fa'],
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  agentName: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
 });

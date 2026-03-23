@@ -392,6 +392,8 @@ export default function PersonalInfo() {
                     textInputProps={{
                       placeholderTextColor: Colors.grey['3c'],
                       value: formData.address,
+                      autoCorrect: false,
+                      autoCapitalize: 'none',
                       onChangeText: text => {
                         handleInputChange('address', text);
                         if (lastSelectedAddress && text !== lastSelectedAddress) {

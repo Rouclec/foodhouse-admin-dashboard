@@ -16,6 +16,101 @@
     "application/json"
   ],
   "paths": {
+    "/v1/admin/kyc/verifications": {
+      "get": {
+        "operationId": "Users_ListKYCVerifications",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcListKYCVerificationsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "KYC_STATUS_UNSPECIFIED",
+              "KYC_STATUS_PENDING",
+              "KYC_STATUS_VERIFIED",
+              "KYC_STATUS_REJECTED"
+            ],
+            "default": "KYC_STATUS_UNSPECIFIED"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/admin/{adminUserId}/kyc/{kycId}/status": {
+      "patch": {
+        "operationId": "Users_UpdateKYCStatus",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcUpdateKYCStatusResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "kycId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UsersUpdateKYCStatusBody"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
     "/v1/admin/{adminUserId}/users/export-pdf": {
       "get": {
         "operationId": "Users_ExportUsersPdf",
@@ -985,6 +1080,73 @@
         ]
       }
     },
+    "/v1/users/{userId}/kyc": {
+      "get": {
+        "operationId": "Users_GetKYCByUserID",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcGetKYCByUserIDResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      },
+      "post": {
+        "summary": "KYC endpoints",
+        "operationId": "Users_CreateKYC",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcCreateKYCResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UsersCreateKYCBody"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
     "/v1/users/{userId}/review-farmer": {
       "post": {
         "operationId": "Users_ReviewFarmer",
@@ -1093,6 +1255,20 @@
       },
       "title": "Request message for UpdateUser"
     },
+    "UsersCreateKYCBody": {
+      "type": "object",
+      "properties": {
+        "identityDocumentUrl": {
+          "type": "string"
+        },
+        "selfieUrl": {
+          "type": "string"
+        },
+        "vehicleDocumentUrl": {
+          "type": "string"
+        }
+      }
+    },
     "UsersGrantAdminBody": {
       "type": "object",
       "properties": {
@@ -1179,6 +1355,17 @@
     },
     "UsersSuspendUserBody": {
       "type": "object"
+    },
+    "UsersUpdateKYCStatusBody": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/usersgrpcKYCStatus"
+        },
+        "rejectionReason": {
+          "type": "string"
+        }
+      }
     },
     "apiHttpBody": {
       "type": "object",
@@ -1344,6 +1531,14 @@
       },
       "title": "Response message for UpdateUser"
     },
+    "usersgrpcCreateKYCResponse": {
+      "type": "object",
+      "properties": {
+        "kycVerification": {
+          "$ref": "#/definitions/usersgrpcKYCVerification"
+        }
+      }
+    },
     "usersgrpcDeleteAgentResponse": {
       "type": "object"
     },
@@ -1388,6 +1583,14 @@
         }
       },
       "title": "Response message for GetFarmerByID"
+    },
+    "usersgrpcGetKYCByUserIDResponse": {
+      "type": "object",
+      "properties": {
+        "kycVerification": {
+          "$ref": "#/definitions/usersgrpcKYCVerification"
+        }
+      }
     },
     "usersgrpcGetPublicUserResponse": {
       "type": "object",
@@ -1449,6 +1652,54 @@
     "usersgrpcHealthCheckResponse": {
       "type": "object"
     },
+    "usersgrpcKYCStatus": {
+      "type": "string",
+      "enum": [
+        "KYC_STATUS_UNSPECIFIED",
+        "KYC_STATUS_PENDING",
+        "KYC_STATUS_VERIFIED",
+        "KYC_STATUS_REJECTED"
+      ],
+      "default": "KYC_STATUS_UNSPECIFIED"
+    },
+    "usersgrpcKYCVerification": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "identityDocumentUrl": {
+          "type": "string"
+        },
+        "selfieUrl": {
+          "type": "string"
+        },
+        "vehicleDocumentUrl": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/usersgrpcKYCStatus"
+        },
+        "rejectionReason": {
+          "type": "string"
+        },
+        "verifiedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
     "usersgrpcLastOtpForFactorResponse": {
       "type": "object",
       "properties": {
@@ -1484,6 +1735,22 @@
         },
         "nextKey": {
           "type": "string"
+        }
+      }
+    },
+    "usersgrpcListKYCVerificationsResponse": {
+      "type": "object",
+      "properties": {
+        "kycVerifications": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/usersgrpcKYCVerification"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -1739,6 +2006,14 @@
         }
       }
     },
+    "usersgrpcUpdateKYCStatusResponse": {
+      "type": "object",
+      "properties": {
+        "kycVerification": {
+          "$ref": "#/definitions/usersgrpcKYCVerification"
+        }
+      }
+    },
     "usersgrpcUser": {
       "type": "object",
       "properties": {
@@ -1774,8 +2049,7 @@
         },
         "createdAt": {
           "type": "string",
-          "format": "date-time",
-          "title": "Using a timestamp for date"
+          "format": "date-time"
         },
         "updatedAt": {
           "type": "string",
@@ -1815,7 +2089,8 @@
       "enum": [
         "USER_TYPE_UNSPECIFIED",
         "USER_TYPE_FARMER",
-        "USER_TYPE_BUYER"
+        "USER_TYPE_BUYER",
+        "USER_TYPE_AGENT"
       ],
       "default": "USER_TYPE_UNSPECIFIED"
     },

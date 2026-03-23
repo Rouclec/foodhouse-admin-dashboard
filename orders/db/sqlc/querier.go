@@ -16,6 +16,8 @@ type Querier interface {
 	CountUniqueOrdersByReferrer(ctx context.Context, arg CountUniqueOrdersByReferrerParams) (int64, error)
 	CreateCommission(ctx context.Context, arg CreateCommissionParams) (Commission, error)
 	CreateDeliveryPoint(ctx context.Context, arg CreateDeliveryPointParams) (DeliveryPoint, error)
+	// Delivery Ratings
+	CreateDeliveryRating(ctx context.Context, arg CreateDeliveryRatingParams) error
 	CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error)
 	CreateOrderAuditLog(ctx context.Context, arg CreateOrderAuditLogParams) error
 	CreateOrderItem(ctx context.Context, arg CreateOrderItemParams) error
@@ -26,8 +28,12 @@ type Querier interface {
 	DeleteDeliveryPoint(ctx context.Context, id string) error
 	DeleteSubscription(ctx context.Context, id string) error
 	DeleteSubscriptionItem(ctx context.Context, id string) error
+	GetAgentStats(ctx context.Context, agentID string) (GetAgentStatsRow, error)
 	GetAllUserSubscriptions(ctx context.Context) ([]UserSubscription, error)
+	GetAverageAgentRating(ctx context.Context, agentID string) (GetAverageAgentRatingRow, error)
 	GetCommissionsByIDsForUpdate(ctx context.Context, commissionIds []string) ([]Commission, error)
+	GetDeliveryRatingByOrderNumber(ctx context.Context, orderNumber int64) (DeliveryRating, error)
+	GetDeliveryRatingsByAgentId(ctx context.Context, arg GetDeliveryRatingsByAgentIdParams) ([]DeliveryRating, error)
 	GetOrderByOrderNumber(ctx context.Context, orderNumber int64) (GetOrderByOrderNumberRow, error)
 	GetOrderItemsByOrderNumber(ctx context.Context, orderNumber int32) ([]OrderItem, error)
 	GetOrderStatsBetweenDates(ctx context.Context, arg GetOrderStatsBetweenDatesParams) (int64, error)
@@ -58,6 +64,7 @@ type Querier interface {
 	ListUserSubscriptionsByUserID(ctx context.Context, userID string) ([]UserSubscription, error)
 	ReviewOrder(ctx context.Context, arg ReviewOrderParams) error
 	UpdateDeliveryPoint(ctx context.Context, arg UpdateDeliveryPointParams) error
+	UpdateOrderAgent(ctx context.Context, arg UpdateOrderAgentParams) error
 	UpdateOrderStatus(ctx context.Context, arg UpdateOrderStatusParams) error
 	UpdatePaymentStatus(ctx context.Context, arg UpdatePaymentStatusParams) error
 	UpdateSubscription(ctx context.Context, arg UpdateSubscriptionParams) (Subscription, error)

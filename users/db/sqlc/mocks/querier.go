@@ -86,6 +86,21 @@ func (mr *MockQuerierMockRecorder) CountUsers(ctx, arg any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountUsers", reflect.TypeOf((*MockQuerier)(nil).CountUsers), ctx, arg)
 }
 
+// CreateKYC mocks base method.
+func (m *MockQuerier) CreateKYC(ctx context.Context, arg sqlc.CreateKYCParams) (sqlc.KycVerification, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateKYC", ctx, arg)
+	ret0, _ := ret[0].(sqlc.KycVerification)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateKYC indicates an expected call of CreateKYC.
+func (mr *MockQuerierMockRecorder) CreateKYC(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateKYC", reflect.TypeOf((*MockQuerier)(nil).CreateKYC), ctx, arg)
+}
+
 // CreateReferral mocks base method.
 func (m *MockQuerier) CreateReferral(ctx context.Context, arg sqlc.CreateReferralParams) (sqlc.Referral, error) {
 	m.ctrl.T.Helper()
@@ -202,6 +217,36 @@ func (m *MockQuerier) GetFarmerRating(ctx context.Context, farmerID string) (flo
 func (mr *MockQuerierMockRecorder) GetFarmerRating(ctx, farmerID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFarmerRating", reflect.TypeOf((*MockQuerier)(nil).GetFarmerRating), ctx, farmerID)
+}
+
+// GetKYCByID mocks base method.
+func (m *MockQuerier) GetKYCByID(ctx context.Context, id string) (sqlc.KycVerification, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetKYCByID", ctx, id)
+	ret0, _ := ret[0].(sqlc.KycVerification)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetKYCByID indicates an expected call of GetKYCByID.
+func (mr *MockQuerierMockRecorder) GetKYCByID(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetKYCByID", reflect.TypeOf((*MockQuerier)(nil).GetKYCByID), ctx, id)
+}
+
+// GetKYCByUserID mocks base method.
+func (m *MockQuerier) GetKYCByUserID(ctx context.Context, userID string) (sqlc.KycVerification, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetKYCByUserID", ctx, userID)
+	ret0, _ := ret[0].(sqlc.KycVerification)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetKYCByUserID indicates an expected call of GetKYCByUserID.
+func (mr *MockQuerierMockRecorder) GetKYCByUserID(ctx, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetKYCByUserID", reflect.TypeOf((*MockQuerier)(nil).GetKYCByUserID), ctx, userID)
 }
 
 // GetLatestSentOtpByFactor mocks base method.
@@ -399,6 +444,21 @@ func (mr *MockQuerierMockRecorder) ListFarmersByRating(ctx, arg any) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListFarmersByRating", reflect.TypeOf((*MockQuerier)(nil).ListFarmersByRating), ctx, arg)
 }
 
+// ListKYCVerifications mocks base method.
+func (m *MockQuerier) ListKYCVerifications(ctx context.Context, arg sqlc.ListKYCVerificationsParams) ([]sqlc.KycVerification, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListKYCVerifications", ctx, arg)
+	ret0, _ := ret[0].([]sqlc.KycVerification)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListKYCVerifications indicates an expected call of ListKYCVerifications.
+func (mr *MockQuerierMockRecorder) ListKYCVerifications(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListKYCVerifications", reflect.TypeOf((*MockQuerier)(nil).ListKYCVerifications), ctx, arg)
+}
+
 // ListUsers mocks base method.
 func (m *MockQuerier) ListUsers(ctx context.Context, arg sqlc.ListUsersParams) ([]sqlc.User, error) {
 	m.ctrl.T.Helper()
@@ -454,6 +514,21 @@ func (m *MockQuerier) SuspendUser(ctx context.Context, id string) error {
 func (mr *MockQuerierMockRecorder) SuspendUser(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SuspendUser", reflect.TypeOf((*MockQuerier)(nil).SuspendUser), ctx, id)
+}
+
+// UpdateKYCStatus mocks base method.
+func (m *MockQuerier) UpdateKYCStatus(ctx context.Context, arg sqlc.UpdateKYCStatusParams) (sqlc.KycVerification, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateKYCStatus", ctx, arg)
+	ret0, _ := ret[0].(sqlc.KycVerification)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateKYCStatus indicates an expected call of UpdateKYCStatus.
+func (mr *MockQuerierMockRecorder) UpdateKYCStatus(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateKYCStatus", reflect.TypeOf((*MockQuerier)(nil).UpdateKYCStatus), ctx, arg)
 }
 
 // UpdateSentOtp mocks base method.

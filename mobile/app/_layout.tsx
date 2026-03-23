@@ -110,6 +110,8 @@ interface ContextSetters {
 
   addToCart: (product: productsgrpcProduct) => void;
   clearCart: () => void;
+  updateCartItem: (productId: string, quantity: number) => void;
+  removeFromCart: (productId: string) => void;
 }
 
 export interface ContextType extends ContextInfo, ContextSetters {}
@@ -268,6 +270,30 @@ function RootLayoutNav() {
       };
     });
   };
+
+  const updateCartItem = (productId: string, quantity: number) => {
+    setContextInfo(prevState => {
+      if (quantity <= 0) {
+        const updatedCart = prevState.cartItems.filter(item => item.id !== productId);
+        AsyncStorage.setItem('user_cart', JSON.stringify(updatedCart));
+        return { ...prevState, cartItems: updatedCart };
+      }
+      const updatedCart = prevState.cartItems.map(item =>
+        item.id === productId ? { ...item, quantity } : item
+      );
+      AsyncStorage.setItem('user_cart', JSON.stringify(updatedCart));
+      return { ...prevState, cartItems: updatedCart };
+    });
+  };
+
+  const removeFromCart = (productId: string) => {
+    setContextInfo(prevState => {
+      const updatedCart = prevState.cartItems.filter(item => item.id !== productId);
+      AsyncStorage.setItem('user_cart', JSON.stringify(updatedCart));
+      return { ...prevState, cartItems: updatedCart };
+    });
+  };
+
   const contextSetters: ContextSetters = {
     setUser,
     setUserRole,
@@ -276,6 +302,8 @@ function RootLayoutNav() {
     setPaymentData,
     addToCart,
     clearCart,
+    updateCartItem,
+    removeFromCart,
   };
 
   return (
@@ -289,6 +317,7 @@ function RootLayoutNav() {
               <Stack.Screen name="(farmer)" options={{ headerShown: false }} />
               <Stack.Screen name="(buyer)" options={{ headerShown: false }} />
               <Stack.Screen name="(payment)" options={{ headerShown: false }} />
+              <Stack.Screen name="(agent)" options={{ headerShown: false }} />
               <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
             </Stack>
           </GestureHandlerRootView>

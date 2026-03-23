@@ -180,3 +180,37 @@ UPDATE users
 SET delete_requested_at = NOW(),
     deleted_at = NOW() + INTERVAL '90 days'
 WHERE id = $1;
+
+-- KYC Queries
+
+-- name: CreateKYC :one
+INSERT INTO kyc_verifications (user_id, identity_document_url, selfie_url, vehicle_document_url, status)
+VALUES ($1, $2, $3, $4, 'KYC_STATUS_PENDING')
+ON CONFLICT (user_id) DO UPDATE
+SET identity_document_url = EXCLUDED.identity_document_url,
+    selfie_url = EXCLUDED.selfie_url,
+    vehicle_document_url = EXCLUDED.vehicle_document_url,
+    status = 'KYC_STATUS_PENDING',
+    updated_at = now()
+RETURNING *;
+
+-- name: GetKYCByUserID :one
+SELECT * FROM kyc_verifications WHERE user_id = $1;
+
+-- name: GetKYCByID :one
+SELECT * FROM kyc_verifications WHERE id = $1;
+
+-- name: UpdateKYCStatus :one
+UPDATE kyc_verifications
+SET status = $2,
+    rejection_reason = $3,
+    verified_at = CASE WHEN $2 = 'KYC_STATUS_VERIFIED' THEN now() ELSE NULL END,
+    updated_at = now()
+WHERE id = $1
+RETURNING *;
+
+-- name: ListKYCVerifications :many
+SELECT * FROM kyc_verifications 
+WHERE ($1::text IS NULL OR status = $1)
+ORDER BY created_at DESC
+LIMIT $2 OFFSET $3;

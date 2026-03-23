@@ -13,25 +13,32 @@ import (
 )
 
 const createCategory = `-- name: CreateCategory :one
-INSERT INTO categories (name, slug, created_by)
-VALUES ($1, $2, $3)
-RETURNING id, name, slug, created_by
+INSERT INTO categories (name, slug, created_by, image)
+VALUES ($1, $2, $3, $4)
+RETURNING id, name, slug, created_by, image
 `
 
 type CreateCategoryParams struct {
 	Name      string  `json:"name"`
 	Slug      string  `json:"slug"`
 	CreatedBy *string `json:"created_by"`
+	Image     string  `json:"image"`
 }
 
 func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error) {
-	row := q.db.QueryRow(ctx, createCategory, arg.Name, arg.Slug, arg.CreatedBy)
+	row := q.db.QueryRow(ctx, createCategory,
+		arg.Name,
+		arg.Slug,
+		arg.CreatedBy,
+		arg.Image,
+	)
 	var i Category
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Slug,
 		&i.CreatedBy,
+		&i.Image,
 	)
 	return i, err
 }
@@ -158,6 +165,58 @@ func (q *Queries) CreateProductName(ctx context.Context, arg CreateProductNamePa
 	return i, err
 }
 
+const createProductUnit = `-- name: CreateProductUnit :one
+INSERT INTO product_units (
+    product_id,
+    unit_type,
+    value,
+    currency_iso_code,
+    created_by
+)
+VALUES (
+    $1::text,
+    $2::text,
+    $3::bigint,
+    $4::text,
+    $5::text
+)
+ON CONFLICT (product_id, unit_type) DO UPDATE
+SET value = $3::bigint,
+    currency_iso_code = $4::text,
+    updated_at = now()
+RETURNING id, product_id, unit_type, value, currency_iso_code, created_by, created_at, updated_at
+`
+
+type CreateProductUnitParams struct {
+	ProductID       string `json:"product_id"`
+	UnitType        string `json:"unit_type"`
+	Value           int64  `json:"value"`
+	CurrencyIsoCode string `json:"currency_iso_code"`
+	CreatedBy       string `json:"created_by"`
+}
+
+func (q *Queries) CreateProductUnit(ctx context.Context, arg CreateProductUnitParams) (ProductUnit, error) {
+	row := q.db.QueryRow(ctx, createProductUnit,
+		arg.ProductID,
+		arg.UnitType,
+		arg.Value,
+		arg.CurrencyIsoCode,
+		arg.CreatedBy,
+	)
+	var i ProductUnit
+	err := row.Scan(
+		&i.ID,
+		&i.ProductID,
+		&i.UnitType,
+		&i.Value,
+		&i.CurrencyIsoCode,
+		&i.CreatedBy,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const deleteCategory = `-- name: DeleteCategory :exec
 DELETE FROM categories
 WHERE id = $1
@@ -195,8 +254,26 @@ func (q *Queries) DeleteProductName(ctx context.Context, name string) error {
 	return err
 }
 
+const deleteProductUnit = `-- name: DeleteProductUnit :exec
+DELETE FROM product_units WHERE id = $1
+`
+
+func (q *Queries) DeleteProductUnit(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, deleteProductUnit, id)
+	return err
+}
+
+const deleteProductUnitsByProduct = `-- name: DeleteProductUnitsByProduct :exec
+DELETE FROM product_units WHERE product_id = $1
+`
+
+func (q *Queries) DeleteProductUnitsByProduct(ctx context.Context, productID string) error {
+	_, err := q.db.Exec(ctx, deleteProductUnitsByProduct, productID)
+	return err
+}
+
 const getCategory = `-- name: GetCategory :one
-SELECT id, name, slug, created_by FROM categories where id = $1
+SELECT id, name, slug, created_by, image FROM categories where id = $1
 `
 
 func (q *Queries) GetCategory(ctx context.Context, id string) (Category, error) {
@@ -207,6 +284,7 @@ func (q *Queries) GetCategory(ctx context.Context, id string) (Category, error) 
 		&i.Name,
 		&i.Slug,
 		&i.CreatedBy,
+		&i.Image,
 	)
 	return i, err
 }
@@ -402,6 +480,26 @@ func (q *Queries) GetProductStatsBetweenDates(ctx context.Context, arg GetProduc
 	return total_products, err
 }
 
+const getProductUnit = `-- name: GetProductUnit :one
+SELECT id, product_id, unit_type, value, currency_iso_code, created_by, created_at, updated_at FROM product_units WHERE id = $1
+`
+
+func (q *Queries) GetProductUnit(ctx context.Context, id string) (ProductUnit, error) {
+	row := q.db.QueryRow(ctx, getProductUnit, id)
+	var i ProductUnit
+	err := row.Scan(
+		&i.ID,
+		&i.ProductID,
+		&i.UnitType,
+		&i.Value,
+		&i.CurrencyIsoCode,
+		&i.CreatedBy,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getRegionName = `-- name: GetRegionName :one
 SELECT name
 FROM regions
@@ -425,23 +523,40 @@ func (q *Queries) GetRegionName(ctx context.Context, arg GetRegionNameParams) (s
 }
 
 const listCategories = `-- name: ListCategories :many
-SELECT id, name, slug, created_by FROM categories
+SELECT 
+    c.id, c.name, c.slug, c.created_by, c.image,
+    COUNT(p.id) as product_count
+FROM categories c
+LEFT JOIN products p ON p.category_id = c.id AND p.is_approved = true
+GROUP BY c.id
+ORDER BY c.name
 `
 
-func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
+type ListCategoriesRow struct {
+	ID           string  `json:"id"`
+	Name         string  `json:"name"`
+	Slug         string  `json:"slug"`
+	CreatedBy    *string `json:"created_by"`
+	Image        string  `json:"image"`
+	ProductCount int64   `json:"product_count"`
+}
+
+func (q *Queries) ListCategories(ctx context.Context) ([]ListCategoriesRow, error) {
 	rows, err := q.db.Query(ctx, listCategories)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Category{}
+	items := []ListCategoriesRow{}
 	for rows.Next() {
-		var i Category
+		var i ListCategoriesRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
 			&i.Slug,
 			&i.CreatedBy,
+			&i.Image,
+			&i.ProductCount,
 		); err != nil {
 			return nil, err
 		}
@@ -608,6 +723,39 @@ func (q *Queries) ListProductNames(ctx context.Context, categoryID string) ([]Pr
 	for rows.Next() {
 		var i ProductName
 		if err := rows.Scan(&i.Name, &i.Slug, &i.CategoryID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listProductUnits = `-- name: ListProductUnits :many
+SELECT id, product_id, unit_type, value, currency_iso_code, created_by, created_at, updated_at FROM product_units WHERE product_id = $1 ORDER BY created_at ASC
+`
+
+func (q *Queries) ListProductUnits(ctx context.Context, productID string) ([]ProductUnit, error) {
+	rows, err := q.db.Query(ctx, listProductUnits, productID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ProductUnit{}
+	for rows.Next() {
+		var i ProductUnit
+		if err := rows.Scan(
+			&i.ID,
+			&i.ProductID,
+			&i.UnitType,
+			&i.Value,
+			&i.CurrencyIsoCode,
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -804,18 +952,25 @@ func (q *Queries) UnPublishProduct(ctx context.Context, id string) error {
 const updateCategory = `-- name: UpdateCategory :exec
 UPDATE categories
 SET name = $2,
-    slug = $3
+    slug = $3,
+    image = $4
 WHERE id = $1
 `
 
 type UpdateCategoryParams struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	Slug string `json:"slug"`
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Slug  string `json:"slug"`
+	Image string `json:"image"`
 }
 
 func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) error {
-	_, err := q.db.Exec(ctx, updateCategory, arg.ID, arg.Name, arg.Slug)
+	_, err := q.db.Exec(ctx, updateCategory,
+		arg.ID,
+		arg.Name,
+		arg.Slug,
+		arg.Image,
+	)
 	return err
 }
 
@@ -862,6 +1017,32 @@ func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) er
 		arg.Lon,
 		arg.Lat,
 		arg.ID,
+	)
+	return err
+}
+
+const updateProductUnit = `-- name: UpdateProductUnit :exec
+UPDATE product_units
+SET
+    value = $1::bigint,
+    currency_iso_code = $2::text,
+    updated_at = now()
+WHERE id = $3::text AND product_id = $4::text
+`
+
+type UpdateProductUnitParams struct {
+	Value           int64  `json:"value"`
+	CurrencyIsoCode string `json:"currency_iso_code"`
+	ID              string `json:"id"`
+	ProductID       string `json:"product_id"`
+}
+
+func (q *Queries) UpdateProductUnit(ctx context.Context, arg UpdateProductUnitParams) error {
+	_, err := q.db.Exec(ctx, updateProductUnit,
+		arg.Value,
+		arg.CurrencyIsoCode,
+		arg.ID,
+		arg.ProductID,
 	)
 	return err
 }

@@ -46,19 +46,19 @@
  * handled, all other features will continue to work unchanged.
  */
 export type apiHttpBody = {
-    /**
-     * The HTTP Content-Type header value specifying the content type of the body.
-     */
-    contentType?: string;
-    /**
-     * The HTTP request/response body as raw binary.
-     */
-    data?: string;
-    /**
-     * Application specific response metadata. Must be set in the first response
-     * for streaming APIs.
-     */
-    extensions?: Array<protobufAny>;
+  /**
+   * The HTTP Content-Type header value specifying the content type of the body.
+   */
+  contentType?: string;
+  /**
+   * The HTTP request/response body as raw binary.
+   */
+  data?: string;
+  /**
+   * Application specific response metadata. Must be set in the first response
+   * for streaming APIs.
+   */
+  extensions?: Array<protobufAny>;
 };
 
 /**
@@ -146,606 +146,753 @@ export type apiHttpBody = {
  * }
  */
 export type protobufAny = {
-    [key: string]: unknown;
+  [key: string]: unknown;
 };
 
 export type rpcStatus = {
-    code?: number;
-    message?: string;
-    details?: Array<protobufAny>;
+  code?: number;
+  message?: string;
+  details?: Array<protobufAny>;
 };
 
 export type typesPoint = {
-    lon?: number;
-    lat?: number;
-    address?: string;
+  lon?: number;
+  lat?: number;
+  address?: string;
 };
 
 export type UsersCompleteRegistrationBody = {
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-    address?: string;
-    profileImage?: string;
-    locationCoordinates?: typesPoint;
-    referredBy?: string;
-    phoneNumber?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  address?: string;
+  profileImage?: string;
+  locationCoordinates?: typesPoint;
+  referredBy?: string;
+  phoneNumber?: string;
+};
+
+export type UsersCreateKYCBody = {
+  identityDocumentUrl?: string;
+  selfieUrl?: string;
+  vehicleDocumentUrl?: string;
 };
 
 export type UsersGrantAdminBody = {
-    phoneNumber?: string;
-    residenceCountryIsoCode?: string;
-    password?: string;
+  phoneNumber?: string;
+  residenceCountryIsoCode?: string;
+  password?: string;
 };
 
 export type UsersGrantAgentBody = {
-    phoneNumber?: string;
-    residenceCountryIsoCode?: string;
-    address?: string;
-    email?: string;
-    password?: string;
-    role?: usersgrpcUserRole;
+  phoneNumber?: string;
+  residenceCountryIsoCode?: string;
+  address?: string;
+  email?: string;
+  password?: string;
+  role?: usersgrpcUserRole;
 };
 
 /**
  * Request and response messages for gRPC methods.
  */
 export type usersgrpcAdditionalFactor = {
-    factorType?: usersgrpcFactorType;
-    requestId?: string;
-    factorHint?: string;
+  factorType?: usersgrpcFactorType;
+  requestId?: string;
+  factorHint?: string;
 };
 
 export type usersgrpcAuthenticateRequest = {
-    factors?: Array<usersgrpcAuthFactor>;
+  factors?: Array<usersgrpcAuthFactor>;
 };
 
 export type usersgrpcAuthenticateResponse = {
-    loginComplete?: boolean;
-    additionalFactor?: usersgrpcAdditionalFactor;
-    tokens?: usersgrpcTokens;
-    userId?: string;
+  loginComplete?: boolean;
+  additionalFactor?: usersgrpcAdditionalFactor;
+  tokens?: usersgrpcTokens;
+  userId?: string;
 };
 
 export type usersgrpcAuthFactor = {
-    type?: usersgrpcFactorType;
-    id?: string;
-    secretValue?: string;
+  type?: usersgrpcFactorType;
+  id?: string;
+  secretValue?: string;
 };
 
 export type usersgrpcChangePasswordRequest = {
-    newPassword?: string;
-    emailFactor?: usersgrpcAuthFactor;
+  newPassword?: string;
+  emailFactor?: usersgrpcAuthFactor;
 };
 
 export type usersgrpcChangePasswordResponse = {
-    message?: string;
+  message?: string;
 };
 
 export type usersgrpcCompleteRegistrationResponse = {
-    message?: string;
+  message?: string;
+};
+
+export type usersgrpcCreateKYCResponse = {
+  kycVerification?: usersgrpcKYCVerification;
 };
 
 export type usersgrpcDeleteAgentResponse = unknown;
 
 export type usersgrpcDeleteUserAccountResponse = unknown;
 
-export type usersgrpcFactorType = 'FACTOR_TYPE_UNSPECIFIED' | 'FACTOR_TYPE_EMAIL_PASSWORD' | 'FACTOR_TYPE_SMS_OTP' | 'FACTOR_TYPE_EMAIL_OTP' | 'FACTOR_TYPE_EMAIL_PHONE_PASSWORD' | 'FACTOR_TYPE_GOOGLE' | 'FACTOR_TYPE_APPLE';
+export type usersgrpcFactorType =
+  | 'FACTOR_TYPE_UNSPECIFIED'
+  | 'FACTOR_TYPE_EMAIL_PASSWORD'
+  | 'FACTOR_TYPE_SMS_OTP'
+  | 'FACTOR_TYPE_EMAIL_OTP'
+  | 'FACTOR_TYPE_EMAIL_PHONE_PASSWORD'
+  | 'FACTOR_TYPE_GOOGLE'
+  | 'FACTOR_TYPE_APPLE';
 
 export type usersgrpcFarmerWithRating = {
-    user?: usersgrpcUser;
-    rating?: number;
+  user?: usersgrpcUser;
+  rating?: number;
 };
 
 export type usersgrpcGetFarmerByIDResponse = {
-    user?: usersgrpcUser;
-    rating?: number;
+  user?: usersgrpcUser;
+  rating?: number;
+};
+
+export type usersgrpcGetKYCByUserIDResponse = {
+  kycVerification?: usersgrpcKYCVerification;
 };
 
 export type usersgrpcGetPublicUserResponse = {
-    name?: string;
-    profileImage?: string;
+  name?: string;
+  profileImage?: string;
 };
 
 export type usersgrpcGetReferralByReferredIdResponse = {
-    referral?: usersgrpcReferral;
+  referral?: usersgrpcReferral;
 };
 
 export type usersgrpcGetUserByIDResponse = {
-    user?: usersgrpcUser;
+  user?: usersgrpcUser;
 };
 
 export type usersgrpcGetUserStatsResponse = {
-    data?: Array<usersgrpcStatItem>;
+  data?: Array<usersgrpcStatItem>;
 };
 
 export type usersgrpcGrantAdminResponse = {
-    message?: string;
+  message?: string;
 };
 
 export type usersgrpcGrantAgentResponse = {
-    message?: string;
+  message?: string;
 };
 
 export type usersgrpcHealthCheckResponse = unknown;
 
+export type usersgrpcKYCStatus =
+  | 'KYC_STATUS_UNSPECIFIED'
+  | 'KYC_STATUS_PENDING'
+  | 'KYC_STATUS_VERIFIED'
+  | 'KYC_STATUS_REJECTED';
+
+export type usersgrpcKYCVerification = {
+  id?: string;
+  userId?: string;
+  identityDocumentUrl?: string;
+  selfieUrl?: string;
+  vehicleDocumentUrl?: string;
+  status?: usersgrpcKYCStatus;
+  rejectionReason?: string;
+  verifiedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 export type usersgrpcLastOtpForFactorResponse = {
-    otp?: string;
+  otp?: string;
 };
 
 export type usersgrpcListFarmersReivewsResponse = {
-    reviews?: Array<usersgrpcReview>;
-    nextKey?: string;
+  reviews?: Array<usersgrpcReview>;
+  nextKey?: string;
 };
 
 export type usersgrpcListFarmersResponse = {
-    farmers?: Array<usersgrpcFarmerWithRating>;
-    nextKey?: string;
+  farmers?: Array<usersgrpcFarmerWithRating>;
+  nextKey?: string;
+};
+
+export type usersgrpcListKYCVerificationsResponse = {
+  kycVerifications?: Array<usersgrpcKYCVerification>;
+  total?: string;
 };
 
 export type usersgrpcListUsersResponse = {
-    users?: Array<usersgrpcUser>;
-    nextKey?: string;
+  users?: Array<usersgrpcUser>;
+  nextKey?: string;
 };
 
 export type usersgrpcNotifyFarmerResponse = {
-    success?: boolean;
+  success?: boolean;
 };
 
-export type usersgrpcOtpIntent = 'OTP_INTENT_UNSPECIFIED' | 'OTP_INTENT_LOGIN' | 'OTP_INTENT_RESET_PASSWORD' | 'OTP_INTENT_SIGNUP' | 'OTP_INTENT_VERIFY_EMAIL';
+export type usersgrpcOtpIntent =
+  | 'OTP_INTENT_UNSPECIFIED'
+  | 'OTP_INTENT_LOGIN'
+  | 'OTP_INTENT_RESET_PASSWORD'
+  | 'OTP_INTENT_SIGNUP'
+  | 'OTP_INTENT_VERIFY_EMAIL';
 
 export type usersgrpcReactivateUserResponse = unknown;
 
 export type usersgrpcReferral = {
-    id?: string;
-    referrerId?: string;
-    referredId?: string;
-    createdAt?: string;
+  id?: string;
+  referrerId?: string;
+  referredId?: string;
+  createdAt?: string;
 };
 
 export type usersgrpcRefreshAccessTokenRequest = {
-    refreshToken?: string;
+  refreshToken?: string;
 };
 
 export type usersgrpcRefreshAccessTokenResponse = {
-    accessToken?: string;
+  accessToken?: string;
 };
 
 export type usersgrpcReview = {
-    id?: string;
-    farmerId?: string;
-    orderId?: string;
-    productId?: string;
-    rating?: number;
-    comment?: string;
-    createdBy?: string;
-    createdAt?: string;
+  id?: string;
+  farmerId?: string;
+  orderId?: string;
+  productId?: string;
+  rating?: number;
+  comment?: string;
+  createdBy?: string;
+  createdAt?: string;
 };
 
 export type usersgrpcReviewFarmerResponse = unknown;
 
 export type usersgrpcRevokeRefreshTokenRequest = {
-    refreshToken?: string;
+  refreshToken?: string;
 };
 
 export type usersgrpcRevokeRefreshTokenResponse = {
-    message?: string;
+  message?: string;
 };
 
 export type usersgrpcSendEmailOtpRequest = {
-    email?: string;
-    intent?: usersgrpcOtpIntent;
+  email?: string;
+  intent?: usersgrpcOtpIntent;
 };
 
 export type usersgrpcSendEmailOtpResponse = {
-    requestId?: string;
+  requestId?: string;
 };
 
 export type usersgrpcSendSignupSmsOtpRequest = {
-    phoneNumber?: string;
-    intent?: usersgrpcOtpIntent;
+  phoneNumber?: string;
+  intent?: usersgrpcOtpIntent;
 };
 
 export type usersgrpcSendSignUpSmsOtpResponse = {
-    requestId?: string;
+  requestId?: string;
 };
 
 export type usersgrpcSendSmsOtpRequest = {
-    phoneNumber?: string;
-    intent?: usersgrpcOtpIntent;
+  phoneNumber?: string;
+  intent?: usersgrpcOtpIntent;
 };
 
 export type usersgrpcSendSmsOtpResponse = {
-    requestId?: string;
+  requestId?: string;
 };
 
 export type usersgrpcSignupRequest = {
-    phoneFactor?: usersgrpcAuthFactor;
-    residenceCountryIsoCode?: string;
-    password?: string;
-    userType?: usersgrpcUserType;
-    email?: string;
+  phoneFactor?: usersgrpcAuthFactor;
+  residenceCountryIsoCode?: string;
+  password?: string;
+  userType?: usersgrpcUserType;
+  email?: string;
 };
 
 export type usersgrpcSignupResponse = {
-    userId?: string;
-    tokens?: usersgrpcTokens;
+  userId?: string;
+  tokens?: usersgrpcTokens;
 };
 
 export type usersgrpcStatItem = {
-    title?: string;
-    value?: number;
-    change?: number;
-    description?: string;
+  title?: string;
+  value?: number;
+  change?: number;
+  description?: string;
 };
 
 export type usersgrpcSuspendUserResponse = unknown;
 
 export type usersgrpcTokens = {
-    accessToken?: string;
-    refreshToken?: string;
+  accessToken?: string;
+  refreshToken?: string;
+};
+
+export type usersgrpcUpdateKYCStatusResponse = {
+  kycVerification?: usersgrpcKYCVerification;
 };
 
 export type usersgrpcUser = {
-    userId?: string;
-    role?: usersgrpcUserRole;
-    phoneNumber?: string;
-    email?: string;
-    firstName?: string;
-    lastName?: string;
-    residenceCountryIsoCode?: string;
-    locationCoordinates?: typesPoint;
-    profileImage?: string;
-    address?: string;
-    createdAt?: string;
-    updatedAt?: string;
-    status?: usersgrpcUserStatus;
-    referralCode?: string;
+  userId?: string;
+  role?: usersgrpcUserRole;
+  phoneNumber?: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  residenceCountryIsoCode?: string;
+  locationCoordinates?: typesPoint;
+  profileImage?: string;
+  address?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  status?: usersgrpcUserStatus;
+  referralCode?: string;
 };
 
-export type usersgrpcUserRole = 'USER_ROLE_UNSPECIFIED' | 'USER_ROLE_FARMER' | 'USER_ROLE_BUYER' | 'USER_ROLE_ADMIN' | 'USER_ROLE_AGENT' | 'USER_ROLE_MARKETING_AGENT';
+export type usersgrpcUserRole =
+  | 'USER_ROLE_UNSPECIFIED'
+  | 'USER_ROLE_FARMER'
+  | 'USER_ROLE_BUYER'
+  | 'USER_ROLE_ADMIN'
+  | 'USER_ROLE_AGENT'
+  | 'USER_ROLE_MARKETING_AGENT';
 
-export type usersgrpcUserStatus = 'UserStatus_UNSPECIFIED' | 'UserStatus_SUSPENDED' | 'UserStatus_ACTIVE';
+export type usersgrpcUserStatus =
+  | 'UserStatus_UNSPECIFIED'
+  | 'UserStatus_SUSPENDED'
+  | 'UserStatus_ACTIVE';
 
-export type usersgrpcUserType = 'USER_TYPE_UNSPECIFIED' | 'USER_TYPE_FARMER' | 'USER_TYPE_BUYER';
+export type usersgrpcUserType =
+  | 'USER_TYPE_UNSPECIFIED'
+  | 'USER_TYPE_FARMER'
+  | 'USER_TYPE_BUYER'
+  | 'USER_TYPE_AGENT';
 
 export type usersgrpcVerifyOtpRequest = {
-    authFactor?: usersgrpcAuthFactor;
+  authFactor?: usersgrpcAuthFactor;
 };
 
 export type usersgrpcVerifyOtpResponse = {
-    valid?: boolean;
+  valid?: boolean;
 };
 
 export type UsersOAuthBody = {
-    factor?: {
-        type?: usersgrpcFactorType;
-        secretValue?: string;
-    };
-    user?: usersgrpcUser;
-    userType?: usersgrpcUserType;
+  factor?: {
+    type?: usersgrpcFactorType;
+    secretValue?: string;
+  };
+  user?: usersgrpcUser;
+  userType?: usersgrpcUserType;
 };
 
 export type UsersReactivateUserBody = unknown;
 
 export type UsersReviewFarmerBody = {
-    farmerId?: string;
-    orderId?: string;
-    productId?: string;
-    rating?: number;
-    comment?: string;
+  farmerId?: string;
+  orderId?: string;
+  productId?: string;
+  rating?: number;
+  comment?: string;
 };
 
 export type UsersSuspendUserBody = unknown;
 
-export type UsersExportUsersPdfData = {
-    path: {
-        adminUserId: string;
-    };
-    query?: {
-        /**
-         * Optional keyword search (name/email/phone).
-         */
-        search?: string;
-        /**
-         * Filter by role (buyers vs farmers).
-         */
-        userRole?: 'USER_ROLE_UNSPECIFIED' | 'USER_ROLE_FARMER' | 'USER_ROLE_BUYER' | 'USER_ROLE_ADMIN' | 'USER_ROLE_AGENT' | 'USER_ROLE_MARKETING_AGENT';
-        /**
-         * Optional status filter.
-         */
-        userStatus?: 'UserStatus_UNSPECIFIED' | 'UserStatus_SUSPENDED' | 'UserStatus_ACTIVE';
-    };
+export type UsersUpdateKYCStatusBody = {
+  status?: usersgrpcKYCStatus;
+  rejectionReason?: string;
 };
 
-export type UsersExportUsersPdfResponse = (apiHttpBody);
+export type UsersListKycVerificationsData = {
+  query?: {
+    limit?: number;
+    offset?: number;
+    status?:
+      | 'KYC_STATUS_UNSPECIFIED'
+      | 'KYC_STATUS_PENDING'
+      | 'KYC_STATUS_VERIFIED'
+      | 'KYC_STATUS_REJECTED';
+  };
+};
 
-export type UsersExportUsersPdfError = (rpcStatus);
+export type UsersListKycVerificationsResponse =
+  usersgrpcListKYCVerificationsResponse;
+
+export type UsersListKycVerificationsError = rpcStatus;
+
+export type UsersUpdateKycStatusData = {
+  body: UsersUpdateKYCStatusBody;
+  path: {
+    adminUserId: string;
+    kycId: string;
+  };
+};
+
+export type UsersUpdateKycStatusResponse = usersgrpcUpdateKYCStatusResponse;
+
+export type UsersUpdateKycStatusError = rpcStatus;
+
+export type UsersExportUsersPdfData = {
+  path: {
+    adminUserId: string;
+  };
+  query?: {
+    /**
+     * Optional keyword search (name/email/phone).
+     */
+    search?: string;
+    /**
+     * Filter by role (buyers vs farmers).
+     */
+    userRole?:
+      | 'USER_ROLE_UNSPECIFIED'
+      | 'USER_ROLE_FARMER'
+      | 'USER_ROLE_BUYER'
+      | 'USER_ROLE_ADMIN'
+      | 'USER_ROLE_AGENT'
+      | 'USER_ROLE_MARKETING_AGENT';
+    /**
+     * Optional status filter.
+     */
+    userStatus?:
+      | 'UserStatus_UNSPECIFIED'
+      | 'UserStatus_SUSPENDED'
+      | 'UserStatus_ACTIVE';
+  };
+};
+
+export type UsersExportUsersPdfResponse = apiHttpBody;
+
+export type UsersExportUsersPdfError = rpcStatus;
 
 export type UsersGrantAdminData = {
-    body: UsersGrantAdminBody;
-    path: {
-        adminUserId: string;
-    };
+  body: UsersGrantAdminBody;
+  path: {
+    adminUserId: string;
+  };
 };
 
-export type UsersGrantAdminResponse = (usersgrpcGrantAdminResponse);
+export type UsersGrantAdminResponse = usersgrpcGrantAdminResponse;
 
-export type UsersGrantAdminError = (rpcStatus);
+export type UsersGrantAdminError = rpcStatus;
 
 export type UsersGrantAgentData = {
-    body: UsersGrantAgentBody;
-    path: {
-        adminUserId: string;
-    };
+  body: UsersGrantAgentBody;
+  path: {
+    adminUserId: string;
+  };
 };
 
-export type UsersGrantAgentResponse = (usersgrpcGrantAgentResponse);
+export type UsersGrantAgentResponse = usersgrpcGrantAgentResponse;
 
-export type UsersGrantAgentError = (rpcStatus);
+export type UsersGrantAgentError = rpcStatus;
 
 export type UsersListUsersData = {
-    path: {
-        adminUserId: string;
-    };
-    query?: {
-        /**
-         * Number of users to retrieve
-         */
-        count?: number;
-        /**
-         * keyword search for the users (could be name, or email)
-         */
-        search?: string;
-        /**
-         * Key for pagination, indicating where to start the list
-         */
-        startKey?: string;
-        userRole?: 'USER_ROLE_UNSPECIFIED' | 'USER_ROLE_FARMER' | 'USER_ROLE_BUYER' | 'USER_ROLE_ADMIN' | 'USER_ROLE_AGENT' | 'USER_ROLE_MARKETING_AGENT';
-        userStatus?: 'UserStatus_UNSPECIFIED' | 'UserStatus_SUSPENDED' | 'UserStatus_ACTIVE';
-    };
+  path: {
+    adminUserId: string;
+  };
+  query?: {
+    /**
+     * Number of users to retrieve
+     */
+    count?: number;
+    /**
+     * keyword search for the users (could be name, or email)
+     */
+    search?: string;
+    /**
+     * Key for pagination, indicating where to start the list
+     */
+    startKey?: string;
+    userRole?:
+      | 'USER_ROLE_UNSPECIFIED'
+      | 'USER_ROLE_FARMER'
+      | 'USER_ROLE_BUYER'
+      | 'USER_ROLE_ADMIN'
+      | 'USER_ROLE_AGENT'
+      | 'USER_ROLE_MARKETING_AGENT';
+    userStatus?:
+      | 'UserStatus_UNSPECIFIED'
+      | 'UserStatus_SUSPENDED'
+      | 'UserStatus_ACTIVE';
+  };
 };
 
-export type UsersListUsersResponse = (usersgrpcListUsersResponse);
+export type UsersListUsersResponse = usersgrpcListUsersResponse;
 
-export type UsersListUsersError = (rpcStatus);
+export type UsersListUsersError = rpcStatus;
 
 export type UsersDeleteAgentData = {
-    path: {
-        adminUserId: string;
-        userId: string;
-    };
+  path: {
+    adminUserId: string;
+    userId: string;
+  };
 };
 
-export type UsersDeleteAgentResponse = (usersgrpcDeleteAgentResponse);
+export type UsersDeleteAgentResponse = usersgrpcDeleteAgentResponse;
 
-export type UsersDeleteAgentError = (rpcStatus);
+export type UsersDeleteAgentError = rpcStatus;
 
 export type UsersReactivateUserData = {
-    body: UsersReactivateUserBody;
-    path: {
-        adminUserId: string;
-        userId: string;
-    };
+  body: UsersReactivateUserBody;
+  path: {
+    adminUserId: string;
+    userId: string;
+  };
 };
 
-export type UsersReactivateUserResponse = (usersgrpcReactivateUserResponse);
+export type UsersReactivateUserResponse = usersgrpcReactivateUserResponse;
 
-export type UsersReactivateUserError = (rpcStatus);
+export type UsersReactivateUserError = rpcStatus;
 
 export type UsersSuspendUserData = {
-    body: UsersSuspendUserBody;
-    path: {
-        adminUserId: string;
-        userId: string;
-    };
+  body: UsersSuspendUserBody;
+  path: {
+    adminUserId: string;
+    userId: string;
+  };
 };
 
-export type UsersSuspendUserResponse = (usersgrpcSuspendUserResponse);
+export type UsersSuspendUserResponse = usersgrpcSuspendUserResponse;
 
-export type UsersSuspendUserError = (rpcStatus);
+export type UsersSuspendUserError = rpcStatus;
 
 export type UsersOAuthData = {
-    body: UsersOAuthBody;
-    path: {
-        /**
-         * for OTPs this will be a request_id, for email_password this
-         * will be the email address
-         */
-        'factor.id': string;
-    };
+  body: UsersOAuthBody;
+  path: {
+    /**
+     * for OTPs this will be a request_id, for email_password this
+     * will be the email address
+     */
+    'factor.id': string;
+  };
 };
 
-export type UsersOAuthResponse = (usersgrpcAuthenticateResponse);
+export type UsersOAuthResponse = usersgrpcAuthenticateResponse;
 
-export type UsersOAuthError = (rpcStatus);
+export type UsersOAuthError = rpcStatus;
 
 export type UsersRevokeRefreshTokenData = {
-    body: usersgrpcRevokeRefreshTokenRequest;
+  body: usersgrpcRevokeRefreshTokenRequest;
 };
 
-export type UsersRevokeRefreshTokenResponse = (usersgrpcRevokeRefreshTokenResponse);
+export type UsersRevokeRefreshTokenResponse =
+  usersgrpcRevokeRefreshTokenResponse;
 
-export type UsersRevokeRefreshTokenError = (rpcStatus);
+export type UsersRevokeRefreshTokenError = rpcStatus;
 
 export type UsersAuthenticateData = {
-    body: usersgrpcAuthenticateRequest;
+  body: usersgrpcAuthenticateRequest;
 };
 
-export type UsersAuthenticateResponse = (usersgrpcAuthenticateResponse);
+export type UsersAuthenticateResponse = usersgrpcAuthenticateResponse;
 
-export type UsersAuthenticateError = (rpcStatus);
+export type UsersAuthenticateError = rpcStatus;
 
 export type UsersChangePasswordData = {
-    body: usersgrpcChangePasswordRequest;
+  body: usersgrpcChangePasswordRequest;
 };
 
-export type UsersChangePasswordResponse = (usersgrpcChangePasswordResponse);
+export type UsersChangePasswordResponse = usersgrpcChangePasswordResponse;
 
-export type UsersChangePasswordError = (rpcStatus);
+export type UsersChangePasswordError = rpcStatus;
 
-export type UsersHealthCheckResponse = (usersgrpcHealthCheckResponse);
+export type UsersHealthCheckResponse = usersgrpcHealthCheckResponse;
 
-export type UsersHealthCheckError = (rpcStatus);
+export type UsersHealthCheckError = rpcStatus;
 
 export type UsersLastOtpForFactorData = {
-    query?: {
-        factor?: string;
-    };
+  query?: {
+    factor?: string;
+  };
 };
 
-export type UsersLastOtpForFactorResponse = (usersgrpcLastOtpForFactorResponse);
+export type UsersLastOtpForFactorResponse = usersgrpcLastOtpForFactorResponse;
 
-export type UsersLastOtpForFactorError = (rpcStatus);
+export type UsersLastOtpForFactorError = rpcStatus;
 
 export type UsersRefreshAccessTokenData = {
-    body: usersgrpcRefreshAccessTokenRequest;
+  body: usersgrpcRefreshAccessTokenRequest;
 };
 
-export type UsersRefreshAccessTokenResponse = (usersgrpcRefreshAccessTokenResponse);
+export type UsersRefreshAccessTokenResponse =
+  usersgrpcRefreshAccessTokenResponse;
 
-export type UsersRefreshAccessTokenError = (rpcStatus);
+export type UsersRefreshAccessTokenError = rpcStatus;
 
 export type UsersSendEmailOtpData = {
-    body: usersgrpcSendEmailOtpRequest;
+  body: usersgrpcSendEmailOtpRequest;
 };
 
-export type UsersSendEmailOtpResponse = (usersgrpcSendEmailOtpResponse);
+export type UsersSendEmailOtpResponse = usersgrpcSendEmailOtpResponse;
 
-export type UsersSendEmailOtpError = (rpcStatus);
+export type UsersSendEmailOtpError = rpcStatus;
 
 export type UsersSendSignupSmsOtpData = {
-    body: usersgrpcSendSignupSmsOtpRequest;
+  body: usersgrpcSendSignupSmsOtpRequest;
 };
 
-export type UsersSendSignupSmsOtpResponse = (usersgrpcSendSignUpSmsOtpResponse);
+export type UsersSendSignupSmsOtpResponse = usersgrpcSendSignUpSmsOtpResponse;
 
-export type UsersSendSignupSmsOtpError = (rpcStatus);
+export type UsersSendSignupSmsOtpError = rpcStatus;
 
 export type UsersSendSmsOtpData = {
-    body: usersgrpcSendSmsOtpRequest;
+  body: usersgrpcSendSmsOtpRequest;
 };
 
-export type UsersSendSmsOtpResponse = (usersgrpcSendSmsOtpResponse);
+export type UsersSendSmsOtpResponse = usersgrpcSendSmsOtpResponse;
 
-export type UsersSendSmsOtpError = (rpcStatus);
+export type UsersSendSmsOtpError = rpcStatus;
 
 export type UsersSignupData = {
-    body: usersgrpcSignupRequest;
+  body: usersgrpcSignupRequest;
 };
 
-export type UsersSignupResponse = (usersgrpcSignupResponse);
+export type UsersSignupResponse = usersgrpcSignupResponse;
 
-export type UsersSignupError = (rpcStatus);
+export type UsersSignupError = rpcStatus;
 
 export type UsersVerifyOtpData = {
-    body: usersgrpcVerifyOtpRequest;
+  body: usersgrpcVerifyOtpRequest;
 };
 
-export type UsersVerifyOtpResponse = (usersgrpcVerifyOtpResponse);
+export type UsersVerifyOtpResponse = usersgrpcVerifyOtpResponse;
 
-export type UsersVerifyOtpError = (rpcStatus);
+export type UsersVerifyOtpError = rpcStatus;
 
 export type UsersGetPublicUserData = {
-    path: {
-        userId: string;
-    };
+  path: {
+    userId: string;
+  };
 };
 
-export type UsersGetPublicUserResponse = (usersgrpcGetPublicUserResponse);
+export type UsersGetPublicUserResponse = usersgrpcGetPublicUserResponse;
 
-export type UsersGetPublicUserError = (rpcStatus);
+export type UsersGetPublicUserError = rpcStatus;
 
 export type UsersCompleteRegistrationData = {
-    body: UsersCompleteRegistrationBody;
-    path: {
-        userId: string;
-    };
+  body: UsersCompleteRegistrationBody;
+  path: {
+    userId: string;
+  };
 };
 
-export type UsersCompleteRegistrationResponse = (usersgrpcCompleteRegistrationResponse);
+export type UsersCompleteRegistrationResponse =
+  usersgrpcCompleteRegistrationResponse;
 
-export type UsersCompleteRegistrationError = (rpcStatus);
+export type UsersCompleteRegistrationError = rpcStatus;
 
 export type UsersDeleteUserAccountData = {
-    path: {
-        userId: string;
-    };
+  path: {
+    userId: string;
+  };
 };
 
-export type UsersDeleteUserAccountResponse = (usersgrpcDeleteUserAccountResponse);
+export type UsersDeleteUserAccountResponse = usersgrpcDeleteUserAccountResponse;
 
-export type UsersDeleteUserAccountError = (rpcStatus);
+export type UsersDeleteUserAccountError = rpcStatus;
 
 export type UsersListFarmersData = {
-    path: {
-        userId: string;
-    };
-    query?: {
-        count?: number;
-        searchKey?: string;
-        sortCreatedAtDesc?: boolean;
-        startKey?: string;
-        userStatus?: 'UserStatus_UNSPECIFIED' | 'UserStatus_SUSPENDED' | 'UserStatus_ACTIVE';
-    };
+  path: {
+    userId: string;
+  };
+  query?: {
+    count?: number;
+    searchKey?: string;
+    sortCreatedAtDesc?: boolean;
+    startKey?: string;
+    userStatus?:
+      | 'UserStatus_UNSPECIFIED'
+      | 'UserStatus_SUSPENDED'
+      | 'UserStatus_ACTIVE';
+  };
 };
 
-export type UsersListFarmersResponse = (usersgrpcListFarmersResponse);
+export type UsersListFarmersResponse = usersgrpcListFarmersResponse;
 
-export type UsersListFarmersError = (rpcStatus);
+export type UsersListFarmersError = rpcStatus;
 
 export type UsersListFarmersReivewsData = {
-    path: {
-        farmerId: string;
-        userId: string;
-    };
-    query?: {
-        count?: number;
-        startKey?: string;
-    };
+  path: {
+    farmerId: string;
+    userId: string;
+  };
+  query?: {
+    count?: number;
+    startKey?: string;
+  };
 };
 
-export type UsersListFarmersReivewsResponse = (usersgrpcListFarmersReivewsResponse);
+export type UsersListFarmersReivewsResponse =
+  usersgrpcListFarmersReivewsResponse;
 
-export type UsersListFarmersReivewsError = (rpcStatus);
+export type UsersListFarmersReivewsError = rpcStatus;
 
 export type UsersGetUserByIdData = {
-    path: {
-        /**
-         * ID of the user to fetch
-         */
-        userId: string;
-    };
+  path: {
+    /**
+     * ID of the user to fetch
+     */
+    userId: string;
+  };
 };
 
-export type UsersGetUserByIdResponse = (usersgrpcGetUserByIDResponse);
+export type UsersGetUserByIdResponse = usersgrpcGetUserByIDResponse;
 
-export type UsersGetUserByIdError = (rpcStatus);
+export type UsersGetUserByIdError = rpcStatus;
+
+export type UsersGetKycByUserIdData = {
+  path: {
+    userId: string;
+  };
+};
+
+export type UsersGetKycByUserIdResponse = usersgrpcGetKYCByUserIDResponse;
+
+export type UsersGetKycByUserIdError = rpcStatus;
+
+export type UsersCreateKycData = {
+  body: UsersCreateKYCBody;
+  path: {
+    userId: string;
+  };
+};
+
+export type UsersCreateKycResponse = usersgrpcCreateKYCResponse;
+
+export type UsersCreateKycError = rpcStatus;
 
 export type UsersReviewFarmerData = {
-    body: UsersReviewFarmerBody;
-    path: {
-        userId: string;
-    };
+  body: UsersReviewFarmerBody;
+  path: {
+    userId: string;
+  };
 };
 
-export type UsersReviewFarmerResponse = (usersgrpcReviewFarmerResponse);
+export type UsersReviewFarmerResponse = usersgrpcReviewFarmerResponse;
 
-export type UsersReviewFarmerError = (rpcStatus);
+export type UsersReviewFarmerError = rpcStatus;
 
 export type UsersGetFarmerByIdData = {
-    path: {
-        /**
-         * ID of the farmer to be fetched
-         */
-        farmerId: string;
-        /**
-         * ID of the user fetching the farmer
-         */
-        userId: string;
-    };
+  path: {
+    /**
+     * ID of the farmer to be fetched
+     */
+    farmerId: string;
+    /**
+     * ID of the user fetching the farmer
+     */
+    userId: string;
+  };
 };
 
-export type UsersGetFarmerByIdResponse = (usersgrpcGetFarmerByIDResponse);
+export type UsersGetFarmerByIdResponse = usersgrpcGetFarmerByIDResponse;
 
-export type UsersGetFarmerByIdError = (rpcStatus);
+export type UsersGetFarmerByIdError = rpcStatus;

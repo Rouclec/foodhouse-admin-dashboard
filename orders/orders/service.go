@@ -101,6 +101,135 @@ type ProductInfo struct {
 
 var _ ordersgrpc.OrdersServer = (*Impl)(nil)
 
+// GetAgentStats implements ordersgrpc.OrdersServer.
+func (i *Impl) GetAgentStats(ctx context.Context, req *ordersgrpc.GetAgentStatsRequest) (*ordersgrpc.GetAgentStatsResponse, error) {
+	agentID := strings.TrimSpace(req.GetUserId())
+	if agentID == "" {
+		return nil, status.Error(codes.InvalidArgument, "user_id is required")
+	}
+
+	row, err := i.repo.Do().GetAgentStats(ctx, agentID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting agent stats: %v", err)
+	}
+
+	return &ordersgrpc.GetAgentStatsResponse{
+		AvailableCount:  int32(row.AvailableCount),
+		OngoingCount:    int32(row.OngoingCount),
+		CompletedCount:  int32(row.CompletedCount),
+		TotalEarnings:   &types.Amount{Value: row.TotalEarningsValue, CurrencyIsoCode: row.TotalEarningsCurrency},
+	}, nil
+}
+
+// CreateDeliveryRating allows the buyer to rate the delivery agent for a delivered order.
+func (i *Impl) CreateDeliveryRating(ctx context.Context, req *ordersgrpc.CreateDeliveryRatingRequest) (*ordersgrpc.CreateDeliveryRatingResponse, error) {
+	userID := strings.TrimSpace(req.GetUserId())
+	if userID == "" {
+		return nil, status.Error(codes.InvalidArgument, "user_id is required")
+	}
+	if req.GetOrderNumber() <= 0 {
+		return nil, status.Error(codes.InvalidArgument, "order_number is required")
+	}
+	if req.GetRating() < 1 || req.GetRating() > 5 {
+		return nil, status.Error(codes.InvalidArgument, "rating must be between 1 and 5")
+	}
+
+	querier := i.repo.Do()
+
+	order, err := querier.GetOrderByOrderNumber(ctx, req.GetOrderNumber())
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, status.Error(codes.NotFound, "order not found")
+		}
+		return nil, status.Errorf(codes.Internal, "error getting order: %v", err)
+	}
+
+	if order.Status != ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String() {
+		return nil, status.Error(codes.FailedPrecondition, "order must be delivered before rating")
+	}
+	if order.CreatedBy == nil || *order.CreatedBy != userID {
+		return nil, status.Error(codes.PermissionDenied, "only the buyer who created the order can rate the delivery")
+	}
+	if order.AgentID == nil || strings.TrimSpace(*order.AgentID) == "" {
+		return nil, status.Error(codes.FailedPrecondition, "order has no assigned agent to rate")
+	}
+
+	err = querier.CreateDeliveryRating(ctx, sqlc.CreateDeliveryRatingParams{
+		OrderNumber: req.GetOrderNumber(),
+		AgentID:     *order.AgentID,
+		UserID:      userID,
+		Rating:      req.GetRating(),
+		Comment:     strings.TrimSpace(req.GetComment()),
+	})
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return nil, status.Error(codes.AlreadyExists, "delivery rating already exists for this order")
+		}
+		return nil, status.Errorf(codes.Internal, "failed to create delivery rating: %v", err)
+	}
+
+	ratingRow, err := querier.GetDeliveryRatingByOrderNumber(ctx, req.GetOrderNumber())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to fetch created delivery rating: %v", err)
+	}
+
+	var createdAt *timestamppb.Timestamp
+	if ratingRow.CreatedAt.Valid {
+		createdAt = timestamppb.New(ratingRow.CreatedAt.Time)
+	}
+	var updatedAt *timestamppb.Timestamp
+	if ratingRow.UpdatedAt.Valid {
+		updatedAt = timestamppb.New(ratingRow.UpdatedAt.Time)
+	}
+
+	return &ordersgrpc.CreateDeliveryRatingResponse{
+		DeliveryRating: &ordersgrpc.DeliveryRating{
+			Id:          ratingRow.ID,
+			OrderNumber: ratingRow.OrderNumber,
+			AgentId:     ratingRow.AgentID,
+			UserId:      ratingRow.UserID,
+			Rating:      ratingRow.Rating,
+			Comment:     ratingRow.Comment,
+			CreatedAt:   createdAt,
+			UpdatedAt:   updatedAt,
+		},
+	}, nil
+}
+
+// GetAgentRatingSummary returns the agent's average rating and total count.
+func (i *Impl) GetAgentRatingSummary(ctx context.Context, req *ordersgrpc.GetAgentRatingSummaryRequest) (*ordersgrpc.GetAgentRatingSummaryResponse, error) {
+	agentID := strings.TrimSpace(req.GetAgentId())
+	if agentID == "" {
+		return nil, status.Error(codes.InvalidArgument, "agent_id is required")
+	}
+
+	row, err := i.repo.Do().GetAverageAgentRating(ctx, agentID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return &ordersgrpc.GetAgentRatingSummaryResponse{
+				AgentId:       agentID,
+				RatingCount:   0,
+				AverageRating: 0,
+			}, nil
+		}
+		return nil, status.Errorf(codes.Internal, "failed to get agent rating summary: %v", err)
+	}
+
+	avg := 0.0
+	if row.AverageRating.Valid {
+		if f8, convErr := row.AverageRating.Float64Value(); convErr == nil && f8.Valid {
+			avg = f8.Float64
+		}
+	}
+
+	return &ordersgrpc.GetAgentRatingSummaryResponse{
+		AgentId:       row.AgentID,
+		RatingCount:   int32(row.RatingCount),
+		AverageRating: avg,
+	}, nil
+}
+
 // NewOrders returns a new instance of the ordersImpl.
 func NewOrders(
 	repo repo.OrdersRepo,
@@ -195,6 +324,96 @@ func (i *Impl) ConfirmDelivery(ctx context.Context, req *ordersgrpc.ConfirmDeliv
 	if err != nil {
 		i.logger.Debug().Msgf("Error creating order logs %v", err)
 		return nil, status.Errorf(codes.Internal, "error creating order logs %v", err)
+	}
+
+	// If there's an agent assigned, pay them their delivery fee
+	if order.AgentID != nil && *order.AgentID != "" {
+		// Pay the agent their delivery fee
+		if order.DeliveryFeeAmount != nil && *order.DeliveryFeeAmount > 0 {
+			agentPaymentReference := fmt.Sprintf("agent-delivery-%s", strconv.FormatInt(order.OrderNumber, 10))
+			deliveryFee := *order.DeliveryFeeAmount
+			deliveryCurrency := "XAF"
+			if order.DeliveryFeeCurrency != nil {
+				deliveryCurrency = *order.DeliveryFeeCurrency
+			}
+
+			if !i.devMethodsEndabled && req.GetAgentPayoutPhoneNumber() != "" {
+				_, payErr := i.paymentService.WithdrawFunds(ctx,
+					req.GetAgentPayoutPhoneNumber(), deliveryFee,
+					deliveryCurrency, fmt.Sprintf("delivery fee for order %v", order.OrderNumber),
+					&agentPaymentReference)
+
+				if payErr != nil {
+					return nil, status.Errorf(codes.Internal, "error making agent payout %v", payErr)
+				}
+			}
+
+			_, err = querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
+				PaymentEntity:  ordersgrpc.PaymentEntity_PaymentEntity_ORDER.String(),
+				EntityID:       strconv.FormatInt(order.OrderNumber, 10),
+				AmountValue:    &deliveryFee,
+				AmountCurrency: &deliveryCurrency,
+				AccountNumber:  req.GetAgentPayoutPhoneNumber(),
+				Method:         ordersgrpc.PaymentMethodType_PaymentMethodType_ACCOUNT_BALANCE.String(),
+				Status:         ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED.String(),
+				ExpiresAt:      pgtype.Timestamptz{Time: time.Now().Add(5 * time.Minute), Valid: true},
+				CreatedBy:      *order.AgentID,
+				Type:           ordersgrpc.PaymentType_PaymentType_DEBIT.String(),
+			})
+
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "error creating agent payment %v", err)
+			}
+		}
+
+		// Also pay farmer if not already paid (farmer wasn't paid on DispatchOrder when agent was assigned)
+		// We need to pay the farmer their share
+		if order.ProductOwner != nil && order.PriceValue != nil && order.PriceCurrency != nil {
+			farmerPaymentReference := fmt.Sprintf("farmer-payout-%s", strconv.FormatInt(order.OrderNumber, 10))
+			payoutAmount := *order.PriceValue / TotalPercentage * FarmersPercentage
+
+			// We need the farmer's payout phone number - it's stored in the order
+			if order.PayoutPhoneNumber != nil && *order.PayoutPhoneNumber != "" {
+				if !i.devMethodsEndabled {
+					_, payErr := i.paymentService.WithdrawFunds(ctx,
+						*order.PayoutPhoneNumber, payoutAmount,
+						*order.PriceCurrency, fmt.Sprintf("payment to farmer for order %v", order.OrderNumber),
+						&farmerPaymentReference)
+
+					if payErr != nil {
+						return nil, status.Errorf(codes.Internal, "error making farmer payout %v", payErr)
+					}
+				}
+
+				_, err = querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
+					PaymentEntity:  ordersgrpc.PaymentEntity_PaymentEntity_ORDER.String(),
+					EntityID:       strconv.FormatInt(order.OrderNumber, 10),
+					AmountValue:    &payoutAmount,
+					AmountCurrency: order.PriceCurrency,
+					AccountNumber:  *order.PayoutPhoneNumber,
+					Method:         ordersgrpc.PaymentMethodType_PaymentMethodType_ACCOUNT_BALANCE.String(),
+					Status:         ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED.String(),
+					ExpiresAt:      pgtype.Timestamptz{Time: time.Now().Add(5 * time.Minute), Valid: true},
+					CreatedBy:      *order.ProductOwner,
+					Type:           ordersgrpc.PaymentType_PaymentType_DEBIT.String(),
+				})
+
+				if err != nil {
+					return nil, status.Errorf(codes.Internal, "error creating farmer payment %v", err)
+				}
+
+				// Create commissions
+				orderByNumber, getErr := querier.GetOrderByOrderNumber(ctx, order.OrderNumber)
+				if getErr != nil {
+					return nil, status.Errorf(codes.Internal, "error getting order for commissions %v", getErr)
+				}
+
+				err = i.CreateCommissions(ctx, orderByNumber, querier)
+				if err != nil {
+					return nil, status.Errorf(codes.Internal, "error creating commissions %v", err)
+				}
+			}
+		}
 	}
 
 	err = tx.Commit(ctx)
@@ -597,7 +816,9 @@ func (i *Impl) CreateOrder(ctx context.Context, req *ordersgrpc.CreateOrderReque
 		}
 	}()
 
-	secretKey, err := generateHexSecretKey(6)
+	// secret_key column is VARCHAR(6). generateHexSecretKey length is in BYTES,
+	// and hex encoding doubles it. 3 bytes => 6 hex chars.
+	secretKey, err := generateHexSecretKey(3)
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error generating order secret key %v", err)
@@ -756,11 +977,25 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 		return nil, status.Errorf(codes.Internal, "order must be in status %v to be dispatched", ordersgrpc.OrderStatus_OrderStatus_APPROVED.String())
 	}
 
+	// Get agent_id from request if provided
+	agentID := req.GetAgentId()
+
 	err = querier.UpdateOrderStatus(ctx, sqlc.UpdateOrderStatusParams{
 		OrderNumber:  req.GetOrderNumber(),
 		Status:       ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String(),
 		DispatchedBy: &req.UserId,
 	})
+
+	// If agent_id is provided, update the order with agent assignment
+	if agentID != "" {
+		err = querier.UpdateOrderAgent(ctx, sqlc.UpdateOrderAgentParams{
+			OrderNumber: req.GetOrderNumber(),
+			AgentID:     &agentID,
+		})
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error assigning agent to order %v", err)
+		}
+	}
 
 	updatedOrder, err := querier.GetOrderByOrderNumber(ctx, order.OrderNumber)
 
@@ -788,46 +1023,50 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 		return nil, status.Errorf(codes.Internal, "error dispatching order %v", err)
 	}
 
-	paymentReference := fmt.Sprintf("payout-%s", strconv.FormatInt(order.OrderNumber, 10))
+	// Only make payouts if NO agent is assigned (farmer delivering themselves)
+	// When agent is assigned, payment happens on ConfirmDelivery
+	if agentID == "" {
+		paymentReference := fmt.Sprintf("payout-%s", strconv.FormatInt(order.OrderNumber, 10))
 
-	// calculate payout amount
-	payoutAmount := *order.PriceValue / TotalPercentage * FarmersPercentage
+		// calculate payout amount
+		payoutAmount := *order.PriceValue / TotalPercentage * FarmersPercentage
 
-	i.logger.Debug().Msgf("payout phone number %v", req.GetPayoutPhoneNumber())
+		i.logger.Debug().Msgf("payout phone number %v", req.GetPayoutPhoneNumber())
 
-	// only make real payout when dev methods is not enabled
-	if !i.devMethodsEndabled {
-		_, payErr := i.paymentService.WithdrawFunds(ctx,
-			req.GetPayoutPhoneNumber(), payoutAmount,
-			*order.PriceCurrency, fmt.Sprintf("payment to farmer for order %v", order.OrderNumber),
-			&paymentReference)
+		// only make real payout when dev methods is not enabled
+		if !i.devMethodsEndabled {
+			_, payErr := i.paymentService.WithdrawFunds(ctx,
+				req.GetPayoutPhoneNumber(), payoutAmount,
+				*order.PriceCurrency, fmt.Sprintf("payment to farmer for order %v", order.OrderNumber),
+				&paymentReference)
 
-		if payErr != nil {
-			return nil, status.Errorf(codes.Internal, "error making payout %v", payErr)
+			if payErr != nil {
+				return nil, status.Errorf(codes.Internal, "error making payout %v", payErr)
+			}
 		}
-	}
 
-	_, err = querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
-		PaymentEntity:  ordersgrpc.PaymentEntity_PaymentEntity_ORDER.String(),
-		EntityID:       strconv.FormatInt(req.GetOrderNumber(), 10),
-		AmountValue:    &payoutAmount,
-		AmountCurrency: order.PriceCurrency,
-		AccountNumber:  req.GetPayoutPhoneNumber(),
-		Method:         ordersgrpc.PaymentMethodType_PaymentMethodType_ACCOUNT_BALANCE.String(),
-		Status:         ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED.String(),
-		ExpiresAt:      pgtype.Timestamptz{Time: time.Now().Add(5 * time.Minute), Valid: true},
-		CreatedBy:      *order.ProductOwner,
-		Type:           ordersgrpc.PaymentType_PaymentType_DEBIT.String(),
-	})
+		_, err = querier.CreatePayment(ctx, sqlc.CreatePaymentParams{
+			PaymentEntity:  ordersgrpc.PaymentEntity_PaymentEntity_ORDER.String(),
+			EntityID:       strconv.FormatInt(req.GetOrderNumber(), 10),
+			AmountValue:    &payoutAmount,
+			AmountCurrency: order.PriceCurrency,
+			AccountNumber:  req.GetPayoutPhoneNumber(),
+			Method:         ordersgrpc.PaymentMethodType_PaymentMethodType_ACCOUNT_BALANCE.String(),
+			Status:         ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED.String(),
+			ExpiresAt:      pgtype.Timestamptz{Time: time.Now().Add(5 * time.Minute), Valid: true},
+			CreatedBy:      *order.ProductOwner,
+			Type:           ordersgrpc.PaymentType_PaymentType_DEBIT.String(),
+		})
 
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error creating payment entity %v", err)
-	}
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error creating payment entity %v", err)
+		}
 
-	err = i.CreateCommissions(ctx, order, querier)
+		err = i.CreateCommissions(ctx, order, querier)
 
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error creating comissions for order with number %v: %v", order.OrderNumber, err)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error creating comissions for order with number %v: %v", order.OrderNumber, err)
+		}
 	}
 
 	err = tx.Commit(ctx)
@@ -1115,7 +1354,8 @@ func (i *Impl) createOrdersFromSubscription(
 		}
 
 		// Generate secret key
-		secretKey, err := generateHexSecretKey(6)
+		// secret_key column is VARCHAR(6). 3 bytes => 6 hex chars.
+		secretKey, err := generateHexSecretKey(3)
 		if err != nil {
 			return fmt.Errorf("error generating secret key: %w", err)
 		}

@@ -44,7 +44,7 @@ export default function SubscriptionCheckout() {
   if (!plan) {
     return (
       <View style={[defaultStyles.flex, defaultStyles.center]}>
-        <Text>Plan not found</Text>
+        <Text>{i18n.t('(subscription).planNotFound')}</Text>
       </View>
     );
   }
@@ -103,7 +103,7 @@ export default function SubscriptionCheckout() {
                     color={Colors.primary[500]}
                   />
                   <Text style={subscriptionCheckoutStyles.planDetailText}>
-                    1 Free Delivery
+                    {i18n.t('(subscription).(packageDetails).oneFreeDelivery')}
                   </Text>
                 </View>
               </View>
