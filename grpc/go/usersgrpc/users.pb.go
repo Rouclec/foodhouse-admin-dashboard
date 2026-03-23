@@ -4289,7 +4289,7 @@ func (x *CreateKYCResponse) GetKycVerification() *KYCVerification {
 	return nil
 }
 
-type GetKYCByUserIdRequest struct {
+type GetKYCByUserIDRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -4297,20 +4297,20 @@ type GetKYCByUserIdRequest struct {
 	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 }
 
-func (x *GetKYCByUserIdRequest) Reset() {
-	*x = GetKYCByUserIdRequest{}
+func (x *GetKYCByUserIDRequest) Reset() {
+	*x = GetKYCByUserIDRequest{}
 	mi := &file_users_proto_msgTypes[69]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetKYCByUserIdRequest) String() string {
+func (x *GetKYCByUserIDRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetKYCByUserIdRequest) ProtoMessage() {}
+func (*GetKYCByUserIDRequest) ProtoMessage() {}
 
-func (x *GetKYCByUserIdRequest) ProtoReflect() protoreflect.Message {
+func (x *GetKYCByUserIDRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_users_proto_msgTypes[69]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -4322,19 +4322,19 @@ func (x *GetKYCByUserIdRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetKYCByUserIdRequest.ProtoReflect.Descriptor instead.
-func (*GetKYCByUserIdRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetKYCByUserIDRequest.ProtoReflect.Descriptor instead.
+func (*GetKYCByUserIDRequest) Descriptor() ([]byte, []int) {
 	return file_users_proto_rawDescGZIP(), []int{69}
 }
 
-func (x *GetKYCByUserIdRequest) GetUserId() string {
+func (x *GetKYCByUserIDRequest) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
 	return ""
 }
 
-type GetKYCByUserIdResponse struct {
+type GetKYCByUserIDResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -4342,20 +4342,20 @@ type GetKYCByUserIdResponse struct {
 	KycVerification *KYCVerification `protobuf:"bytes,1,opt,name=kyc_verification,json=kycVerification,proto3" json:"kyc_verification,omitempty"`
 }
 
-func (x *GetKYCByUserIdResponse) Reset() {
-	*x = GetKYCByUserIdResponse{}
+func (x *GetKYCByUserIDResponse) Reset() {
+	*x = GetKYCByUserIDResponse{}
 	mi := &file_users_proto_msgTypes[70]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetKYCByUserIdResponse) String() string {
+func (x *GetKYCByUserIDResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetKYCByUserIdResponse) ProtoMessage() {}
+func (*GetKYCByUserIDResponse) ProtoMessage() {}
 
-func (x *GetKYCByUserIdResponse) ProtoReflect() protoreflect.Message {
+func (x *GetKYCByUserIDResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_users_proto_msgTypes[70]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -4367,12 +4367,12 @@ func (x *GetKYCByUserIdResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetKYCByUserIdResponse.ProtoReflect.Descriptor instead.
-func (*GetKYCByUserIdResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetKYCByUserIDResponse.ProtoReflect.Descriptor instead.
+func (*GetKYCByUserIDResponse) Descriptor() ([]byte, []int) {
 	return file_users_proto_rawDescGZIP(), []int{70}
 }
 
-func (x *GetKYCByUserIdResponse) GetKycVerification() *KYCVerification {
+func (x *GetKYCByUserIDResponse) GetKycVerification() *KYCVerification {
 	if x != nil {
 		return x.KycVerification
 	}
@@ -4560,7 +4560,7 @@ type ListKYCVerificationsResponse struct {
 	unknownFields protoimpl.UnknownFields
 
 	KycVerifications []*KYCVerification `protobuf:"bytes,1,rep,name=kyc_verifications,json=kycVerifications,proto3" json:"kyc_verifications,omitempty"`
-	Total            int32              `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	Total            int64              `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
 }
 
 func (x *ListKYCVerificationsResponse) Reset() {
@@ -4600,7 +4600,7 @@ func (x *ListKYCVerificationsResponse) GetKycVerifications() []*KYCVerification 
 	return nil
 }
 
-func (x *ListKYCVerificationsResponse) GetTotal() int32 {
+func (x *ListKYCVerificationsResponse) GetTotal() int64 {
 	if x != nil {
 		return x.Total
 	}
@@ -5102,10 +5102,10 @@ var file_users_proto_rawDesc = []byte{
 	0x72, 0x73, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x4b, 0x59, 0x43, 0x56, 0x65, 0x72, 0x69, 0x66, 0x69,
 	0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x0f, 0x6b, 0x79, 0x63, 0x56, 0x65, 0x72, 0x69, 0x66,
 	0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x30, 0x0a, 0x15, 0x47, 0x65, 0x74, 0x4b, 0x59,
-	0x43, 0x42, 0x79, 0x55, 0x73, 0x65, 0x72, 0x49, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x43, 0x42, 0x79, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
 	0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
 	0x09, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x22, 0x5f, 0x0a, 0x16, 0x47, 0x65, 0x74,
-	0x4b, 0x59, 0x43, 0x42, 0x79, 0x55, 0x73, 0x65, 0x72, 0x49, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x4b, 0x59, 0x43, 0x42, 0x79, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x52, 0x65, 0x73, 0x70, 0x6f,
 	0x6e, 0x73, 0x65, 0x12, 0x45, 0x0a, 0x10, 0x6b, 0x79, 0x63, 0x5f, 0x76, 0x65, 0x72, 0x69, 0x66,
 	0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e,
 	0x75, 0x73, 0x65, 0x72, 0x73, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x4b, 0x59, 0x43, 0x56, 0x65, 0x72,
@@ -5142,7 +5142,7 @@ var file_users_proto_rawDesc = []byte{
 	0x0b, 0x32, 0x1a, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x73, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x4b, 0x59,
 	0x43, 0x56, 0x65, 0x72, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x10, 0x6b,
 	0x79, 0x63, 0x56, 0x65, 0x72, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12,
-	0x14, 0x0a, 0x05, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05,
+	0x14, 0x0a, 0x05, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05,
 	0x74, 0x6f, 0x74, 0x61, 0x6c, 0x2a, 0x99, 0x01, 0x0a, 0x08, 0x55, 0x73, 0x65, 0x72, 0x52, 0x6f,
 	0x6c, 0x65, 0x12, 0x19, 0x0a, 0x15, 0x55, 0x53, 0x45, 0x52, 0x5f, 0x52, 0x4f, 0x4c, 0x45, 0x5f,
 	0x55, 0x4e, 0x53, 0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45, 0x44, 0x10, 0x00, 0x12, 0x14, 0x0a,
@@ -5445,11 +5445,11 @@ var file_users_proto_rawDesc = []byte{
 	0x6f, 0x6e, 0x73, 0x65, 0x22, 0x22, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x1c, 0x3a, 0x01, 0x2a, 0x22,
 	0x17, 0x2f, 0x76, 0x31, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x73, 0x2f, 0x7b, 0x75, 0x73, 0x65, 0x72,
 	0x5f, 0x69, 0x64, 0x7d, 0x2f, 0x6b, 0x79, 0x63, 0x12, 0x76, 0x0a, 0x0e, 0x47, 0x65, 0x74, 0x4b,
-	0x59, 0x43, 0x42, 0x79, 0x55, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x20, 0x2e, 0x75, 0x73, 0x65,
+	0x59, 0x43, 0x42, 0x79, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x12, 0x20, 0x2e, 0x75, 0x73, 0x65,
 	0x72, 0x73, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x47, 0x65, 0x74, 0x4b, 0x59, 0x43, 0x42, 0x79, 0x55,
-	0x73, 0x65, 0x72, 0x49, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x21, 0x2e, 0x75,
+	0x73, 0x65, 0x72, 0x49, 0x44, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x21, 0x2e, 0x75,
 	0x73, 0x65, 0x72, 0x73, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x47, 0x65, 0x74, 0x4b, 0x59, 0x43, 0x42,
-	0x79, 0x55, 0x73, 0x65, 0x72, 0x49, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22,
+	0x79, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22,
 	0x1f, 0x82, 0xd3, 0xe4, 0x93, 0x02, 0x19, 0x12, 0x17, 0x2f, 0x76, 0x31, 0x2f, 0x75, 0x73, 0x65,
 	0x72, 0x73, 0x2f, 0x7b, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x7d, 0x2f, 0x6b, 0x79, 0x63,
 	0x12, 0x92, 0x01, 0x0a, 0x0f, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x4b, 0x59, 0x43, 0x53, 0x74,
@@ -5567,8 +5567,8 @@ var file_users_proto_goTypes = []any{
 	(*DeleteUserAccountResponse)(nil),       // 72: usersgrpc.DeleteUserAccountResponse
 	(*CreateKYCRequest)(nil),                // 73: usersgrpc.CreateKYCRequest
 	(*CreateKYCResponse)(nil),               // 74: usersgrpc.CreateKYCResponse
-	(*GetKYCByUserIdRequest)(nil),           // 75: usersgrpc.GetKYCByUserIdRequest
-	(*GetKYCByUserIdResponse)(nil),          // 76: usersgrpc.GetKYCByUserIdResponse
+	(*GetKYCByUserIDRequest)(nil),           // 75: usersgrpc.GetKYCByUserIDRequest
+	(*GetKYCByUserIDResponse)(nil),          // 76: usersgrpc.GetKYCByUserIDResponse
 	(*UpdateKYCStatusRequest)(nil),          // 77: usersgrpc.UpdateKYCStatusRequest
 	(*UpdateKYCStatusResponse)(nil),         // 78: usersgrpc.UpdateKYCStatusResponse
 	(*ListKYCVerificationsRequest)(nil),     // 79: usersgrpc.ListKYCVerificationsRequest
@@ -5621,7 +5621,7 @@ var file_users_proto_depIdxs = []int32{
 	82, // 40: usersgrpc.Referral.created_at:type_name -> google.protobuf.Timestamp
 	66, // 41: usersgrpc.GetReferralByReferredIdResponse.referral:type_name -> usersgrpc.Referral
 	7,  // 42: usersgrpc.CreateKYCResponse.kyc_verification:type_name -> usersgrpc.KYCVerification
-	7,  // 43: usersgrpc.GetKYCByUserIdResponse.kyc_verification:type_name -> usersgrpc.KYCVerification
+	7,  // 43: usersgrpc.GetKYCByUserIDResponse.kyc_verification:type_name -> usersgrpc.KYCVerification
 	2,  // 44: usersgrpc.UpdateKYCStatusRequest.status:type_name -> usersgrpc.KYCStatus
 	7,  // 45: usersgrpc.UpdateKYCStatusResponse.kyc_verification:type_name -> usersgrpc.KYCVerification
 	2,  // 46: usersgrpc.ListKYCVerificationsRequest.status:type_name -> usersgrpc.KYCStatus
@@ -5657,7 +5657,7 @@ var file_users_proto_depIdxs = []int32{
 	69, // 76: usersgrpc.Users.NotifyFarmer:input_type -> usersgrpc.NotifyFarmerRequest
 	71, // 77: usersgrpc.Users.DeleteUserAccount:input_type -> usersgrpc.DeleteUserAccountRequest
 	73, // 78: usersgrpc.Users.CreateKYC:input_type -> usersgrpc.CreateKYCRequest
-	75, // 79: usersgrpc.Users.GetKYCByUserId:input_type -> usersgrpc.GetKYCByUserIdRequest
+	75, // 79: usersgrpc.Users.GetKYCByUserID:input_type -> usersgrpc.GetKYCByUserIDRequest
 	77, // 80: usersgrpc.Users.UpdateKYCStatus:input_type -> usersgrpc.UpdateKYCStatusRequest
 	79, // 81: usersgrpc.Users.ListKYCVerifications:input_type -> usersgrpc.ListKYCVerificationsRequest
 	20, // 82: usersgrpc.Users.SendSignupSmsOtp:output_type -> usersgrpc.SendSignUpSmsOtpResponse
@@ -5691,7 +5691,7 @@ var file_users_proto_depIdxs = []int32{
 	70, // 110: usersgrpc.Users.NotifyFarmer:output_type -> usersgrpc.NotifyFarmerResponse
 	72, // 111: usersgrpc.Users.DeleteUserAccount:output_type -> usersgrpc.DeleteUserAccountResponse
 	74, // 112: usersgrpc.Users.CreateKYC:output_type -> usersgrpc.CreateKYCResponse
-	76, // 113: usersgrpc.Users.GetKYCByUserId:output_type -> usersgrpc.GetKYCByUserIdResponse
+	76, // 113: usersgrpc.Users.GetKYCByUserID:output_type -> usersgrpc.GetKYCByUserIDResponse
 	78, // 114: usersgrpc.Users.UpdateKYCStatus:output_type -> usersgrpc.UpdateKYCStatusResponse
 	80, // 115: usersgrpc.Users.ListKYCVerifications:output_type -> usersgrpc.ListKYCVerificationsResponse
 	82, // [82:116] is the sub-list for method output_type

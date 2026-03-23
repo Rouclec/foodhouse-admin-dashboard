@@ -22,8 +22,8 @@ type Querier interface {
 	DeleteUser(ctx context.Context, id string) error
 	GetFarmer(ctx context.Context, id string) (User, error)
 	GetFarmerRating(ctx context.Context, farmerID string) (float64, error)
-	GetKYCById(ctx context.Context, id string) (KycVerification, error)
-	GetKYCByUserId(ctx context.Context, userID string) (KycVerification, error)
+	GetKYCByID(ctx context.Context, id string) (KycVerification, error)
+	GetKYCByUserID(ctx context.Context, userID string) (KycVerification, error)
 	GetLatestSentOtpByFactor(ctx context.Context, arg GetLatestSentOtpByFactorParams) ([]SentOtp, error)
 	GetReferralByReferredID(ctx context.Context, referredID string) (Referral, error)
 	GetRefreshToken(ctx context.Context, token string) (RefreshToken, error)

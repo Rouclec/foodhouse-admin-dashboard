@@ -618,7 +618,7 @@ service Users {
     };
   }
 
-  rpc GetKYCByUserId(GetKYCByUserIdRequest) returns (GetKYCByUserIdResponse) {
+  rpc GetKYCByUserID(GetKYCByUserIDRequest) returns (GetKYCByUserIDResponse) {
     option (google.api.http) = {
       get : "/v1/users/{user_id}/kyc"
     };
@@ -651,9 +651,9 @@ message CreateKYCRequest {
 
 message CreateKYCResponse { KYCVerification kyc_verification = 1; }
 
-message GetKYCByUserIdRequest { string user_id = 1; }
+message GetKYCByUserIDRequest { string user_id = 1; }
 
-message GetKYCByUserIdResponse { KYCVerification kyc_verification = 1; }
+message GetKYCByUserIDResponse { KYCVerification kyc_verification = 1; }
 
 message UpdateKYCStatusRequest {
   string admin_user_id = 1;
@@ -672,5 +672,5 @@ message ListKYCVerificationsRequest {
 
 message ListKYCVerificationsResponse {
   repeated KYCVerification kyc_verifications = 1;
-  int32 total = 2;
+  int64 total = 2;
 }

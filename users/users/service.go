@@ -1960,11 +1960,13 @@ func (i *Impl) DeleteUserAccount(ctx context.Context,
 	return &usersgrpc.DeleteUserAccountResponse{}, nil
 }
 
-// CreateKYC creates or updates a KYC verification for a user
-func (i *Impl) CreateKYC(ctx context.Context, req *usersgrpc.CreateKYCRequest) (*usersgrpc.CreateKYCResponse, error) {
+// CreateKYC creates or updates a KYC verification for a user.
+func (i *Impl) CreateKYC(ctx context.Context,
+	req *usersgrpc.CreateKYCRequest) (
+	*usersgrpc.CreateKYCResponse, error) {
 	querier := i.repo.Do()
 
-	// Check if user exists
+	// Check if user exists.
 	_, err := querier.GetUser(ctx, req.GetUserId())
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "user not found")
@@ -1994,26 +1996,28 @@ func (i *Impl) CreateKYC(ctx context.Context, req *usersgrpc.CreateKYCRequest) (
 				}
 				return usersgrpc.KYCStatus_KYC_STATUS_UNSPECIFIED
 			}(),
-			VerifiedAt:          timestamppb.New(kyc.VerifiedAt.Time),
-			CreatedAt:           timestamppb.New(kyc.CreatedAt.Time),
-			UpdatedAt:           timestamppb.New(kyc.UpdatedAt.Time),
+			VerifiedAt: timestamppb.New(kyc.VerifiedAt.Time),
+			CreatedAt:  timestamppb.New(kyc.CreatedAt.Time),
+			UpdatedAt:  timestamppb.New(kyc.UpdatedAt.Time),
 		},
 	}, nil
 }
 
-// GetKYCByUserId retrieves KYC verification by user ID
-func (i *Impl) GetKYCByUserId(ctx context.Context, req *usersgrpc.GetKYCByUserIdRequest) (*usersgrpc.GetKYCByUserIdResponse, error) {
+// GetKYCByUserId retrieves KYC verification by user ID.
+func (i *Impl) GetKYCByUserID(ctx context.Context,
+	req *usersgrpc.GetKYCByUserIDRequest) (
+	*usersgrpc.GetKYCByUserIDResponse, error) {
 	querier := i.repo.Do()
 
-	kyc, err := querier.GetKYCByUserId(ctx, req.GetUserId())
+	kyc, err := querier.GetKYCByUserID(ctx, req.GetUserId())
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return &usersgrpc.GetKYCByUserIdResponse{}, nil
+		if errors.Is(err, sql.ErrNoRows) {
+			return &usersgrpc.GetKYCByUserIDResponse{}, nil
 		}
 		return nil, status.Errorf(codes.Internal, "failed to get KYC: %v", err)
 	}
 
-	return &usersgrpc.GetKYCByUserIdResponse{
+	return &usersgrpc.GetKYCByUserIDResponse{
 		KycVerification: &usersgrpc.KYCVerification{
 			Id:                  kyc.ID,
 			UserId:              kyc.UserID,
@@ -2026,16 +2030,18 @@ func (i *Impl) GetKYCByUserId(ctx context.Context, req *usersgrpc.GetKYCByUserId
 				}
 				return usersgrpc.KYCStatus_KYC_STATUS_UNSPECIFIED
 			}(),
-			RejectionReason:     kyc.RejectionReason,
-			VerifiedAt:          timestamppb.New(kyc.VerifiedAt.Time),
-			CreatedAt:           timestamppb.New(kyc.CreatedAt.Time),
-			UpdatedAt:           timestamppb.New(kyc.UpdatedAt.Time),
+			RejectionReason: kyc.RejectionReason,
+			VerifiedAt:      timestamppb.New(kyc.VerifiedAt.Time),
+			CreatedAt:       timestamppb.New(kyc.CreatedAt.Time),
+			UpdatedAt:       timestamppb.New(kyc.UpdatedAt.Time),
 		},
 	}, nil
 }
 
-// UpdateKYCStatus updates the status of a KYC verification (admin only)
-func (i *Impl) UpdateKYCStatus(ctx context.Context, req *usersgrpc.UpdateKYCStatusRequest) (*usersgrpc.UpdateKYCStatusResponse, error) {
+// UpdateKYCStatus updates the status of a KYC verification (admin only).
+func (i *Impl) UpdateKYCStatus(ctx context.Context,
+	req *usersgrpc.UpdateKYCStatusRequest) (
+	*usersgrpc.UpdateKYCStatusResponse, error) {
 	querier := i.repo.Do()
 
 	statusStr := req.GetStatus().String()
@@ -2051,8 +2057,8 @@ func (i *Impl) UpdateKYCStatus(ctx context.Context, req *usersgrpc.UpdateKYCStat
 
 	return &usersgrpc.UpdateKYCStatusResponse{
 		KycVerification: &usersgrpc.KYCVerification{
-			Id:              kyc.ID,
-			UserId:          kyc.UserID,
+			Id:     kyc.ID,
+			UserId: kyc.UserID,
 			Status: func() usersgrpc.KYCStatus {
 				if kyc.Status != nil {
 					return usersgrpc.KYCStatus(usersgrpc.KYCStatus_value[*kyc.Status])
@@ -2067,7 +2073,9 @@ func (i *Impl) UpdateKYCStatus(ctx context.Context, req *usersgrpc.UpdateKYCStat
 }
 
 // ListKYCVerifications lists KYC submissions for admin review.
-func (i *Impl) ListKYCVerifications(ctx context.Context, req *usersgrpc.ListKYCVerificationsRequest) (*usersgrpc.ListKYCVerificationsResponse, error) {
+func (i *Impl) ListKYCVerifications(ctx context.Context,
+	req *usersgrpc.ListKYCVerificationsRequest) (
+	*usersgrpc.ListKYCVerificationsResponse, error) {
 	querier := i.repo.Do()
 
 	limit := req.GetLimit()
@@ -2124,6 +2132,6 @@ func (i *Impl) ListKYCVerifications(ctx context.Context, req *usersgrpc.ListKYCV
 
 	return &usersgrpc.ListKYCVerificationsResponse{
 		KycVerifications: out,
-		Total:            int32(len(out)),
+		Total:            int64(len(out)),
 	}, nil
 }

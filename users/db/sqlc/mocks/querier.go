@@ -219,34 +219,34 @@ func (mr *MockQuerierMockRecorder) GetFarmerRating(ctx, farmerID any) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFarmerRating", reflect.TypeOf((*MockQuerier)(nil).GetFarmerRating), ctx, farmerID)
 }
 
-// GetKYCById mocks base method.
-func (m *MockQuerier) GetKYCById(ctx context.Context, id string) (sqlc.KycVerification, error) {
+// GetKYCByID mocks base method.
+func (m *MockQuerier) GetKYCByID(ctx context.Context, id string) (sqlc.KycVerification, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetKYCById", ctx, id)
+	ret := m.ctrl.Call(m, "GetKYCByID", ctx, id)
 	ret0, _ := ret[0].(sqlc.KycVerification)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetKYCById indicates an expected call of GetKYCById.
-func (mr *MockQuerierMockRecorder) GetKYCById(ctx, id any) *gomock.Call {
+// GetKYCByID indicates an expected call of GetKYCByID.
+func (mr *MockQuerierMockRecorder) GetKYCByID(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetKYCById", reflect.TypeOf((*MockQuerier)(nil).GetKYCById), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetKYCByID", reflect.TypeOf((*MockQuerier)(nil).GetKYCByID), ctx, id)
 }
 
-// GetKYCByUserId mocks base method.
-func (m *MockQuerier) GetKYCByUserId(ctx context.Context, userID string) (sqlc.KycVerification, error) {
+// GetKYCByUserID mocks base method.
+func (m *MockQuerier) GetKYCByUserID(ctx context.Context, userID string) (sqlc.KycVerification, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetKYCByUserId", ctx, userID)
+	ret := m.ctrl.Call(m, "GetKYCByUserID", ctx, userID)
 	ret0, _ := ret[0].(sqlc.KycVerification)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetKYCByUserId indicates an expected call of GetKYCByUserId.
-func (mr *MockQuerierMockRecorder) GetKYCByUserId(ctx, userID any) *gomock.Call {
+// GetKYCByUserID indicates an expected call of GetKYCByUserID.
+func (mr *MockQuerierMockRecorder) GetKYCByUserID(ctx, userID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetKYCByUserId", reflect.TypeOf((*MockQuerier)(nil).GetKYCByUserId), ctx, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetKYCByUserID", reflect.TypeOf((*MockQuerier)(nil).GetKYCByUserID), ctx, userID)
 }
 
 // GetLatestSentOtpByFactor mocks base method.

@@ -259,7 +259,7 @@ export type usersgrpcGetFarmerByIDResponse = {
   rating?: number;
 };
 
-export type usersgrpcGetKYCByUserIdResponse = {
+export type usersgrpcGetKYCByUserIDResponse = {
   kycVerification?: usersgrpcKYCVerification;
 };
 
@@ -325,7 +325,7 @@ export type usersgrpcListFarmersResponse = {
 
 export type usersgrpcListKYCVerificationsResponse = {
   kycVerifications?: Array<usersgrpcKYCVerification>;
-  total?: number;
+  total?: string;
 };
 
 export type usersgrpcListUsersResponse = {
@@ -854,7 +854,7 @@ export type UsersGetKycByUserIdData = {
   };
 };
 
-export type UsersGetKycByUserIdResponse = usersgrpcGetKYCByUserIdResponse;
+export type UsersGetKycByUserIdResponse = usersgrpcGetKYCByUserIDResponse;
 
 export type UsersGetKycByUserIdError = rpcStatus;
 

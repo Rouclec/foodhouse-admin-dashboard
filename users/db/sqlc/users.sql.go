@@ -168,12 +168,12 @@ func (q *Queries) GetFarmer(ctx context.Context, id string) (User, error) {
 	return i, err
 }
 
-const getKYCById = `-- name: GetKYCById :one
+const getKYCByID = `-- name: GetKYCByID :one
 SELECT id, user_id, identity_document_url, selfie_url, vehicle_document_url, status, rejection_reason, verified_at, created_at, updated_at FROM kyc_verifications WHERE id = $1
 `
 
-func (q *Queries) GetKYCById(ctx context.Context, id string) (KycVerification, error) {
-	row := q.db.QueryRow(ctx, getKYCById, id)
+func (q *Queries) GetKYCByID(ctx context.Context, id string) (KycVerification, error) {
+	row := q.db.QueryRow(ctx, getKYCByID, id)
 	var i KycVerification
 	err := row.Scan(
 		&i.ID,
@@ -190,12 +190,12 @@ func (q *Queries) GetKYCById(ctx context.Context, id string) (KycVerification, e
 	return i, err
 }
 
-const getKYCByUserId = `-- name: GetKYCByUserId :one
+const getKYCByUserID = `-- name: GetKYCByUserID :one
 SELECT id, user_id, identity_document_url, selfie_url, vehicle_document_url, status, rejection_reason, verified_at, created_at, updated_at FROM kyc_verifications WHERE user_id = $1
 `
 
-func (q *Queries) GetKYCByUserId(ctx context.Context, userID string) (KycVerification, error) {
-	row := q.db.QueryRow(ctx, getKYCByUserId, userID)
+func (q *Queries) GetKYCByUserID(ctx context.Context, userID string) (KycVerification, error) {
+	row := q.db.QueryRow(ctx, getKYCByUserID, userID)
 	var i KycVerification
 	err := row.Scan(
 		&i.ID,

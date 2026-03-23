@@ -194,10 +194,10 @@ SET identity_document_url = EXCLUDED.identity_document_url,
     updated_at = now()
 RETURNING *;
 
--- name: GetKYCByUserId :one
+-- name: GetKYCByUserID :one
 SELECT * FROM kyc_verifications WHERE user_id = $1;
 
--- name: GetKYCById :one
+-- name: GetKYCByID :one
 SELECT * FROM kyc_verifications WHERE id = $1;
 
 -- name: UpdateKYCStatus :one

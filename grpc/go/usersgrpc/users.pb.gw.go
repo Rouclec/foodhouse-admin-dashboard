@@ -1439,8 +1439,8 @@ func local_request_Users_CreateKYC_0(ctx context.Context, marshaler runtime.Mars
 
 }
 
-func request_Users_GetKYCByUserId_0(ctx context.Context, marshaler runtime.Marshaler, client UsersClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetKYCByUserIdRequest
+func request_Users_GetKYCByUserID_0(ctx context.Context, marshaler runtime.Marshaler, client UsersClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetKYCByUserIDRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -1460,13 +1460,13 @@ func request_Users_GetKYCByUserId_0(ctx context.Context, marshaler runtime.Marsh
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
 	}
 
-	msg, err := client.GetKYCByUserId(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.GetKYCByUserID(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_Users_GetKYCByUserId_0(ctx context.Context, marshaler runtime.Marshaler, server UsersServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetKYCByUserIdRequest
+func local_request_Users_GetKYCByUserID_0(ctx context.Context, marshaler runtime.Marshaler, server UsersServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetKYCByUserIDRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -1486,7 +1486,7 @@ func local_request_Users_GetKYCByUserId_0(ctx context.Context, marshaler runtime
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
 	}
 
-	msg, err := server.GetKYCByUserId(ctx, &protoReq)
+	msg, err := server.GetKYCByUserID(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -2314,7 +2314,7 @@ func RegisterUsersHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 
 	})
 
-	mux.Handle("GET", pattern_Users_GetKYCByUserId_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Users_GetKYCByUserID_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -2322,12 +2322,12 @@ func RegisterUsersHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/usersgrpc.Users/GetKYCByUserId", runtime.WithHTTPPathPattern("/v1/users/{user_id}/kyc"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/usersgrpc.Users/GetKYCByUserID", runtime.WithHTTPPathPattern("/v1/users/{user_id}/kyc"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Users_GetKYCByUserId_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Users_GetKYCByUserID_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
@@ -2335,7 +2335,7 @@ func RegisterUsersHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 			return
 		}
 
-		forward_Users_GetKYCByUserId_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Users_GetKYCByUserID_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -3046,25 +3046,25 @@ func RegisterUsersHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 
 	})
 
-	mux.Handle("GET", pattern_Users_GetKYCByUserId_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Users_GetKYCByUserID_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/usersgrpc.Users/GetKYCByUserId", runtime.WithHTTPPathPattern("/v1/users/{user_id}/kyc"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/usersgrpc.Users/GetKYCByUserID", runtime.WithHTTPPathPattern("/v1/users/{user_id}/kyc"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Users_GetKYCByUserId_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Users_GetKYCByUserID_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Users_GetKYCByUserId_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Users_GetKYCByUserID_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -3172,7 +3172,7 @@ var (
 
 	pattern_Users_CreateKYC_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "users", "user_id", "kyc"}, ""))
 
-	pattern_Users_GetKYCByUserId_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "users", "user_id", "kyc"}, ""))
+	pattern_Users_GetKYCByUserID_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "users", "user_id", "kyc"}, ""))
 
 	pattern_Users_UpdateKYCStatus_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"v1", "admin", "admin_user_id", "kyc", "kyc_id", "status"}, ""))
 
@@ -3236,7 +3236,7 @@ var (
 
 	forward_Users_CreateKYC_0 = runtime.ForwardResponseMessage
 
-	forward_Users_GetKYCByUserId_0 = runtime.ForwardResponseMessage
+	forward_Users_GetKYCByUserID_0 = runtime.ForwardResponseMessage
 
 	forward_Users_UpdateKYCStatus_0 = runtime.ForwardResponseMessage
 

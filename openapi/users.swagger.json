@@ -1082,12 +1082,12 @@
     },
     "/v1/users/{userId}/kyc": {
       "get": {
-        "operationId": "Users_GetKYCByUserId",
+        "operationId": "Users_GetKYCByUserID",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/usersgrpcGetKYCByUserIdResponse"
+              "$ref": "#/definitions/usersgrpcGetKYCByUserIDResponse"
             }
           },
           "default": {
@@ -1584,7 +1584,7 @@
       },
       "title": "Response message for GetFarmerByID"
     },
-    "usersgrpcGetKYCByUserIdResponse": {
+    "usersgrpcGetKYCByUserIDResponse": {
       "type": "object",
       "properties": {
         "kycVerification": {
@@ -1749,8 +1749,8 @@
           }
         },
         "total": {
-          "type": "integer",
-          "format": "int32"
+          "type": "string",
+          "format": "int64"
         }
       }
     },
