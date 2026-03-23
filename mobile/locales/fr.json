@@ -628,14 +628,14 @@
       "deliverySuccess": "Livraison Confirmée!",
       "paymentWillBeProcessed": "Le paiement sera traité sous peu.",
       "deliveryError": "Échec de la confirmation de la livraison",
-      "invalidCodeLength": "Veuillez entrer un code à 4 chiffres",
+      "invalidCodeLength": "Veuillez entrer le code à 6 caractères",
       "incorrectCode": "Le code de sécurité est incorrect",
       "askCustomerForCode": "Demandez au client son code de livraison",
       "totalAmount": "Total de la Commande",
       "items": "Articles de la Commande",
       "navigate": "Naviguer",
       "call": "Appeler",
-      "orderAccepted": "Commande acceptée! Vous pouvez maintenant la retirer."
+      "orderAccepted": "Commande acceptée! Vous pouvez maintenant commencer la livraison."
     },
     "home": {
       "title": "Livraisons",
@@ -646,7 +646,7 @@
       "totalEarnings": "Gains Totaux",
       "todayEarnings": "Aujourd'hui",
       "completedDeliveries": "Terminées",
-      "pendingOrders": "En attente"
+      "ongoingDeliveries": "En cours"
     }
   }
 }

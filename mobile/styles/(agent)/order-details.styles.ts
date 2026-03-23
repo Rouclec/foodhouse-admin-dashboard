@@ -7,17 +7,24 @@ export const agentOrderDetailsStyles = StyleSheet.create({
     backgroundColor: Colors.light['bg'],
   },
   backButton: {
-    position: 'absolute',
-    top: 50,
-    left: 16,
-    zIndex: 10,
-    padding: 4,
+    height: 40,
+    width: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   header: {
     backgroundColor: Colors.primary[500],
-    paddingTop: 50,
-    paddingHorizontal: 16,
+    paddingTop: 0,
+    paddingHorizontal: 24,
     paddingBottom: 16,
+  },
+  headerTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    columnGap: 12,
+    marginBottom: 8,
   },
   headerTitle: {
     fontSize: 20,
@@ -31,7 +38,8 @@ export const agentOrderDetailsStyles = StyleSheet.create({
     opacity: 0.8,
   },
   scrollContent: {
-    padding: 16,
+    paddingHorizontal: 24,
+    paddingTop: 16,
     paddingBottom: 100,
   },
   section: {
@@ -112,16 +120,18 @@ export const agentOrderDetailsStyles = StyleSheet.create({
     lineHeight: 20,
   },
   securityCodeSection: {
-    backgroundColor: Colors.gold + '20',
+    backgroundColor: Colors.primary[50],
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
-    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.primary[100],
   },
   securityCodeLabel: {
     fontSize: 14,
-    color: Colors.grey['61'],
-    marginBottom: 8,
+    color: Colors.primary[500],
+    fontWeight: '600',
+    marginBottom: 6,
   },
   securityCode: {
     fontSize: 32,
@@ -135,6 +145,12 @@ export const agentOrderDetailsStyles = StyleSheet.create({
     borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
   },
   buttonText: {
     color: Colors.light[10],
@@ -152,8 +168,13 @@ export const agentOrderDetailsStyles = StyleSheet.create({
   deliveryFee: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: Colors.success,
+    color: Colors.primary[500],
     marginTop: 8,
+  },
+  securityCodeHint: {
+    fontSize: 12,
+    color: Colors.grey['61'],
+    lineHeight: 18,
   },
   errorText: {
     color: Colors.error,

@@ -2065,3 +2065,65 @@ func (i *Impl) UpdateKYCStatus(ctx context.Context, req *usersgrpc.UpdateKYCStat
 		},
 	}, nil
 }
+
+// ListKYCVerifications lists KYC submissions for admin review.
+func (i *Impl) ListKYCVerifications(ctx context.Context, req *usersgrpc.ListKYCVerificationsRequest) (*usersgrpc.ListKYCVerificationsResponse, error) {
+	querier := i.repo.Do()
+
+	limit := req.GetLimit()
+	if limit <= 0 {
+		limit = 50
+	}
+	offset := req.GetOffset()
+	if offset < 0 {
+		offset = 0
+	}
+
+	statusStr := req.GetStatus().String()
+	// sqlc query currently expects a concrete status string; default to pending when unspecified.
+	if req.GetStatus() == usersgrpc.KYCStatus_KYC_STATUS_UNSPECIFIED {
+		statusStr = usersgrpc.KYCStatus_KYC_STATUS_PENDING.String()
+	}
+
+	rows, err := querier.ListKYCVerifications(ctx, sqlc.ListKYCVerificationsParams{
+		Column1: statusStr,
+		Limit:   limit,
+		Offset:  offset,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to list KYC verifications: %v", err)
+	}
+
+	out := make([]*usersgrpc.KYCVerification, 0, len(rows))
+	for _, row := range rows {
+		kycStatus := usersgrpc.KYCStatus_KYC_STATUS_UNSPECIFIED
+		if row.Status != nil {
+			if v, ok := usersgrpc.KYCStatus_value[*row.Status]; ok {
+				kycStatus = usersgrpc.KYCStatus(v)
+			}
+		}
+
+		var verifiedAt *timestamppb.Timestamp
+		if row.VerifiedAt.Valid {
+			verifiedAt = timestamppb.New(row.VerifiedAt.Time)
+		}
+
+		out = append(out, &usersgrpc.KYCVerification{
+			Id:                  row.ID,
+			UserId:              row.UserID,
+			IdentityDocumentUrl: row.IdentityDocumentUrl,
+			SelfieUrl:           row.SelfieUrl,
+			VehicleDocumentUrl:  row.VehicleDocumentUrl,
+			Status:              kycStatus,
+			RejectionReason:     row.RejectionReason,
+			VerifiedAt:          verifiedAt,
+			CreatedAt:           timestamppb.New(row.CreatedAt.Time),
+			UpdatedAt:           timestamppb.New(row.UpdatedAt.Time),
+		})
+	}
+
+	return &usersgrpc.ListKYCVerificationsResponse{
+		KycVerifications: out,
+		Total:            int32(len(out)),
+	}, nil
+}

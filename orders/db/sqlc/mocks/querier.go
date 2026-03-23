@@ -302,6 +302,21 @@ func (mr *MockQuerierMockRecorder) DeleteSubscriptionItem(ctx, id any) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSubscriptionItem", reflect.TypeOf((*MockQuerier)(nil).DeleteSubscriptionItem), ctx, id)
 }
 
+// GetAgentStats mocks base method.
+func (m *MockQuerier) GetAgentStats(ctx context.Context, agentID string) (sqlc.GetAgentStatsRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAgentStats", ctx, agentID)
+	ret0, _ := ret[0].(sqlc.GetAgentStatsRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAgentStats indicates an expected call of GetAgentStats.
+func (mr *MockQuerierMockRecorder) GetAgentStats(ctx, agentID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAgentStats", reflect.TypeOf((*MockQuerier)(nil).GetAgentStats), ctx, agentID)
+}
+
 // GetAllUserSubscriptions mocks base method.
 func (m *MockQuerier) GetAllUserSubscriptions(ctx context.Context) ([]sqlc.UserSubscription, error) {
 	m.ctrl.T.Helper()

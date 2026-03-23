@@ -1,74 +1,170 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useContext } from 'react';
 import {
   View,
-  Text,
   ScrollView,
   TouchableOpacity,
   RefreshControl,
-  Switch,
   Alert,
 } from 'react-native';
-import { Icon, Button } from 'react-native-paper';
+import { Icon, Button, Text } from 'react-native-paper';
 import { router } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { agentHomeStyles as styles, defaultStyles } from '@/styles';
 import { Colors } from '@/constants';
 import i18n from '@/i18n';
-import { useAgent, AgentKYCStatus } from '@/contexts/AgentContext';
+import { agentDemoState } from '@/contexts/AgentContext';
 import { mockDataStore, AgentOrder } from '@/data/mock-orders';
+import { Context, ContextType } from '@/app/_layout';
+import {
+  listAgentOrdersFromBackend,
+} from '@/data/agent-orders-backend';
 
 const AgentHomeScreen = () => {
-  const { state: agentState, goOnline, goOffline, resetDemo } = useAgent();
+  const insets = useSafeAreaInsets();
+  const { user } = useContext(Context) as ContextType;
+  const [agentState, setAgentState] = useState(agentDemoState.getState());
   const [refreshing, setRefreshing] = useState(false);
-  const [orders, setOrders] = useState<AgentOrder[]>([]);
-  const [stats, setStats] = useState({ totalEarnings: 0, completedDeliveries: 0, pendingOrders: 0 });
-
-  const loadData = useCallback(() => {
-    const availableOrders = mockDataStore.getOrders();
-    const mockStats = mockDataStore.getStats();
-    
-    setOrders(availableOrders);
-    setStats({
-      totalEarnings: agentState.earnings || mockStats.totalEarnings,
-      completedDeliveries: agentState.completedDeliveries || mockStats.completedDeliveries,
-      pendingOrders: agentState.pendingDeliveries || mockStats.pendingOrders,
-    });
-  }, [agentState.earnings, agentState.completedDeliveries, agentState.pendingDeliveries]);
+  const [availableOrders, setAvailableOrders] = useState<AgentOrder[]>([]);
+  const [ongoingOrders, setOngoingOrders] = useState<AgentOrder[]>([]);
+  const [completedOrders, setCompletedOrders] = useState<AgentOrder[]>([]);
+  const [stats, setStats] = useState({ totalEarnings: 0, completedDeliveries: 0, ongoingDeliveries: 0 });
+  const isDemo = agentState.isDemoMode;
+  const isKycVerified = isDemo ? agentState.kycStatus === 'verified' : true;
+  const [tab, setTab] = useState<'available' | 'ongoing' | 'completed'>('available');
+  const canAcceptNewOrders = ongoingOrders.length === 0;
 
   useEffect(() => {
-    loadData();
+    const unsubscribe = agentDemoState.subscribe(setAgentState);
+    return () => { unsubscribe(); };
+  }, []);
+
+  const loadData = useCallback(async () => {
+    // Demo mode: keep using the mock store.
+    if (agentState.isDemoMode) {
+      const demoAvailable = mockDataStore.getOrders();
+      const accepted = mockDataStore.getAcceptedOrders();
+      const demoOngoing = accepted.filter(o => o.status === 'assigned' || o.status === 'picked_up');
+      const demoCompleted = accepted.filter(o => o.status === 'delivered');
+      const mockStats = mockDataStore.getStats();
+
+      setAvailableOrders(demoAvailable);
+      setOngoingOrders(demoOngoing);
+      setCompletedOrders(demoCompleted);
+      setStats({
+        totalEarnings: mockStats.totalEarnings,
+        completedDeliveries: demoCompleted.length,
+        ongoingDeliveries: demoOngoing.length,
+      });
+      return;
+    }
+
+    // Non-demo: try backend.
+    const userId = user?.userId ?? '';
+    if (!userId) {
+      setAvailableOrders([]);
+      setOngoingOrders([]);
+      setCompletedOrders([]);
+      setStats({ totalEarnings: 0, completedDeliveries: 0, ongoingDeliveries: 0 });
+      return;
+    }
+
+    try {
+      const [backendAvailable, backendOngoing, backendCompleted] = await Promise.all([
+        listAgentOrdersFromBackend({
+          userId,
+          statuses: ['OrderStatus_APPROVED'],
+        }),
+        listAgentOrdersFromBackend({
+          userId,
+          statuses: ['OrderStatus_IN_TRANSIT'],
+        }),
+        listAgentOrdersFromBackend({
+          userId,
+          statuses: ['OrderStatus_DELIVERED'],
+        }),
+      ]);
+
+      setAvailableOrders(backendAvailable);
+      setOngoingOrders(backendOngoing);
+      setCompletedOrders(backendCompleted);
+
+      const completed = backendCompleted.length;
+      const earnings = backendCompleted.reduce((sum, o) => sum + (o.deliveryFee || 0), 0);
+
+      setStats({
+        totalEarnings: earnings,
+        completedDeliveries: completed,
+        ongoingDeliveries: backendOngoing.length,
+      });
+    } catch (_e) {
+      // If backend isn't ready for agent views yet, keep the screen usable.
+      setAvailableOrders([]);
+      setOngoingOrders([]);
+      setCompletedOrders([]);
+      setStats({ totalEarnings: 0, completedDeliveries: 0, ongoingDeliveries: 0 });
+    }
+  }, [agentState, user?.userId]);
+
+  useEffect(() => {
+    void loadData();
   }, [loadData]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void loadData();
+    }, [loadData]),
+  );
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     setTimeout(() => {
-      loadData();
+      void loadData();
       setRefreshing(false);
     }, 500);
   }, [loadData]);
 
-  const handleToggleOnline = () => {
-    if (agentState.agentStatus === 'online') {
-      goOffline();
-      Alert.alert(
-        i18n.t('(agent).home.offline'),
-        'You are now offline and will not receive new orders.',
-        [{ text: 'OK' }]
-      );
-    } else {
-      goOnline();
-      Alert.alert(
-        i18n.t('(agent).home.online'),
-        'You are now online and can receive delivery orders!',
-        [{ text: 'OK' }]
-      );
-    }
-  };
+  const ordersForTab =
+    tab === 'available' ? availableOrders : tab === 'ongoing' ? ongoingOrders : completedOrders;
 
   const handleAcceptOrder = (order: AgentOrder) => {
     router.push({
-      pathname: '/order-details',
+      pathname: '/(agent)/order-details',
       params: { orderId: order.id },
     });
+  };
+
+  const handleCardPrimaryAction = async (order: AgentOrder) => {
+    // Available tab = accept (and transition to ongoing).
+    if (tab === 'available') {
+      if (!canAcceptNewOrders) {
+        Alert.alert(
+          'Ongoing delivery',
+          'Finish your current delivery before accepting a new order.',
+        );
+        return;
+      }
+      if (isDemo && agentState.kycStatus !== 'verified') {
+        Alert.alert('KYC Required', 'Please complete your KYC verification first.');
+        return;
+      }
+
+      if (isDemo) {
+        mockDataStore.acceptOrder(order.id);
+        setTab('ongoing');
+        await loadData();
+        handleAcceptOrder(order);
+        return;
+      }
+
+      // Non-demo: current backend flow moves the order to in-transit via dispatch.
+      // (We will improve this with a dedicated Accept endpoint + status.)
+      handleAcceptOrder(order);
+      return;
+    }
+
+    // Ongoing/Completed = view.
+    handleAcceptOrder(order);
   };
 
   const handleResetData = () => {
@@ -82,7 +178,7 @@ const AgentHomeScreen = () => {
           style: 'destructive',
           onPress: () => {
             mockDataStore.resetAll();
-            resetDemo();
+            agentDemoState.resetDemo();
             loadData();
             Alert.alert('Success', 'Demo data has been reset.');
           },
@@ -92,24 +188,28 @@ const AgentHomeScreen = () => {
   };
 
   const getKYCStatusMessage = () => {
+    if (!isDemo) return null;
     switch (agentState.kycStatus) {
       case 'not_started':
         return {
           title: 'Complete Your KYC',
           subtitle: 'You need to verify your identity before accepting deliveries',
           showKYCButton: true,
+          type: 'warning' as const,
         };
       case 'pending':
         return {
           title: 'KYC Under Review',
           subtitle: 'Your documents are being reviewed. This usually takes 24-48 hours.',
           showKYCButton: false,
+          type: 'info' as const,
         };
       case 'rejected':
         return {
           title: 'KYC Rejected',
           subtitle: 'Your documents were not accepted. Please resubmit.',
           showKYCButton: true,
+          type: 'error' as const,
         };
       case 'verified':
         return null;
@@ -122,32 +222,16 @@ const AgentHomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 24 }]}>
         <View style={styles.headerTop}>
-          <Text style={styles.headerTitle}>{i18n.t('(agent).home.title')}</Text>
-          {agentState.kycStatus === 'verified' && (
-            <View style={styles.statusToggle}>
-              <View
-                style={
-                  agentState.agentStatus === 'online'
-                    ? styles.onlineIndicator
-                    : styles.offlineIndicator
-                }
-              />
-              <Text style={styles.statusLabel}>
-                {agentState.agentStatus === 'online'
-                  ? i18n.t('(agent).home.online')
-                  : i18n.t('(agent).home.offline')}
-              </Text>
-              <Switch
-                value={agentState.agentStatus === 'online'}
-                onValueChange={handleToggleOnline}
-                trackColor={{ false: 'rgba(255,255,255,0.3)', true: 'rgba(255,255,255,0.3)' }}
-                thumbColor={agentState.agentStatus === 'online' ? '#4ADE80' : Colors.light[10]}
-                disabled={agentState.kycStatus !== 'verified'}
-              />
-            </View>
-          )}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Text style={styles.headerTitle}>{i18n.t('(agent).home.title')}</Text>
+            {isDemo && (
+              <View style={{ backgroundColor: Colors.gold, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 }}>
+                <Text style={{ color: Colors.dark[0], fontSize: 10, fontWeight: '600' }}>DEMO</Text>
+              </View>
+            )}
+          </View>
         </View>
 
         <View style={styles.statsRow}>
@@ -160,15 +244,15 @@ const AgentHomeScreen = () => {
             </Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>{stats.completedDeliveries}</Text>
+            <Text style={styles.statValue}>{stats.ongoingDeliveries}</Text>
             <Text style={styles.statLabel}>
-              {i18n.t('(agent).home.completedDeliveries')}
+              {i18n.t('(agent).home.ongoingDeliveries')}
             </Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>{stats.pendingOrders}</Text>
+            <Text style={styles.statValue}>{stats.completedDeliveries}</Text>
             <Text style={styles.statLabel}>
-              {i18n.t('(agent).home.pendingOrders')}
+              {i18n.t('(agent).home.completedDeliveries')}
             </Text>
           </View>
         </View>
@@ -183,12 +267,12 @@ const AgentHomeScreen = () => {
         
         {kycMessage && (
           <View style={{ 
-            backgroundColor: agentState.kycStatus === 'rejected' ? Colors.error + '20' : Colors.gold + '20',
+            backgroundColor: kycMessage.type === 'error' ? Colors.error + '20' : Colors.gold + '20',
             borderRadius: 12, 
             padding: 16, 
             marginBottom: 16,
             borderWidth: 1,
-            borderColor: agentState.kycStatus === 'rejected' ? Colors.error : Colors.gold,
+            borderColor: kycMessage.type === 'error' ? Colors.error : Colors.gold,
           }}>
             <Text style={{ fontSize: 16, fontWeight: '600', color: Colors.dark[0], marginBottom: 4 }}>
               {kycMessage.title}
@@ -199,51 +283,81 @@ const AgentHomeScreen = () => {
             {kycMessage.showKYCButton && (
               <Button
                 mode="contained"
-                onPress={() => router.push('/(agent)/(kyc)')}
+                onPress={() => router.push('/(agent)/kyc')}
                 buttonColor={Colors.primary[500]}
                 style={{ borderRadius: 8 }}>
                 {i18n.t('(agent).kyc.title')}
               </Button>
             )}
-            {agentState.kycStatus === 'pending' && agentState.isDemoMode && (
-              <Text style={{ fontSize: 12, color: Colors.grey['61'], fontStyle: 'italic', marginTop: 8 }}>
-                Demo Mode: KYC auto-approves after 3 seconds
-              </Text>
-            )}
           </View>
         )}
 
+        <View style={styles.tabsRow}>
+          <TouchableOpacity
+            style={[styles.tabPill, tab === 'available' && styles.tabPillActive]}
+            activeOpacity={0.85}
+            onPress={() => setTab('available')}>
+            <Text style={[styles.tabText, tab === 'available' && styles.tabTextActive]}>
+              Available
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tabPill, tab === 'ongoing' && styles.tabPillActive]}
+            activeOpacity={0.85}
+            onPress={() => setTab('ongoing')}>
+            <Text style={[styles.tabText, tab === 'ongoing' && styles.tabTextActive]}>
+              Ongoing
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tabPill, tab === 'completed' && styles.tabPillActive]}
+            activeOpacity={0.85}
+            onPress={() => setTab('completed')}>
+            <Text style={[styles.tabText, tab === 'completed' && styles.tabTextActive]}>
+              Completed
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>
-            {agentState.agentStatus === 'online'
+            {tab === 'available'
               ? i18n.t('(agent).orders.title')
-              : i18n.t('(agent).home.offline')}
+              : tab === 'ongoing'
+              ? 'Ongoing deliveries'
+              : 'Completed deliveries'}
           </Text>
           <Text style={{ color: Colors.grey['61'], fontSize: 14 }}>
-            {orders.length} {i18n.t('(agent).orders.order')}
-            {orders.length !== 1 ? 's' : ''}
+            {ordersForTab.length} {i18n.t('(agent).orders.order')}
+            {ordersForTab.length !== 1 ? 's' : ''}
           </Text>
         </View>
 
-        {orders.length === 0 ? (
+        {ordersForTab.length === 0 ? (
           <View style={styles.emptyState}>
             <View style={styles.emptyIcon}>
               <Icon source="package-variant" size={40} color={Colors.grey['61']} />
             </View>
             <Text style={styles.emptyTitle}>
-              {i18n.t('(agent).orders.noOrdersAvailable')}
+              {tab === 'available'
+                ? i18n.t('(agent).orders.noOrdersAvailable')
+                : tab === 'ongoing'
+                ? 'No ongoing deliveries'
+                : 'No completed deliveries yet'}
             </Text>
             <Text style={styles.emptySubtitle}>
-              {agentState.agentStatus === 'online'
-                ? 'New orders will appear here when customers request delivery'
-                : agentState.kycStatus !== 'verified'
-                ? 'Complete your KYC verification to start accepting orders'
-                : 'Go online to start receiving orders'}
+              {tab === 'available'
+                ? !isKycVerified
+                  ? 'Complete your KYC verification to start accepting orders'
+                  : 'New orders will appear here when customers request delivery'
+                : tab === 'ongoing'
+                ? 'Orders you’re currently delivering will appear here.'
+                : 'Your completed deliveries will appear here.'}
             </Text>
           </View>
         ) : (
           <View style={styles.ordersList}>
-            {orders.map((order) => (
+            {ordersForTab.map((order) => (
               <TouchableOpacity
                 key={order.id}
                 style={styles.orderCard}
@@ -301,20 +415,15 @@ const AgentHomeScreen = () => {
                     </Text>
                   </View>
                   <TouchableOpacity
-                    style={[styles.acceptButton, { opacity: agentState.kycStatus === 'verified' ? 1 : 0.5 }]}
-                    onPress={() => {
-                      if (agentState.kycStatus !== 'verified') {
-                        Alert.alert('KYC Required', 'Please complete your KYC verification first.');
-                        return;
-                      }
-                      if (agentState.agentStatus !== 'online') {
-                        Alert.alert('Go Online', 'Please go online to accept orders.');
-                        return;
-                      }
-                      handleAcceptOrder(order);
-                    }}>
+                    style={[
+                      styles.acceptButton,
+                      tab === 'available' && !canAcceptNewOrders
+                        ? defaultStyles.greyButton
+                        : undefined,
+                    ]}
+                    onPress={() => void handleCardPrimaryAction(order)}>
                     <Text style={styles.acceptButtonText}>
-                      {i18n.t('(agent).orders.acceptOrder')}
+                      {tab === 'available' ? i18n.t('(agent).orders.acceptOrder') : 'View'}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -323,15 +432,17 @@ const AgentHomeScreen = () => {
           </View>
         )}
 
-        <View style={{ marginTop: 24, paddingHorizontal: 4 }}>
-          <Button
-            mode="outlined"
-            onPress={handleResetData}
-            style={{ borderColor: Colors.grey['bd'], borderWidth: 1 }}
-            textColor={Colors.grey['61']}>
-            Reset Demo Data
-          </Button>
-        </View>
+        <TouchableOpacity
+          style={{ marginTop: 24, padding: 16 }}
+          onLongPress={() => {
+            if (!agentState.isDemoMode) return;
+            handleResetData();
+          }}
+          delayLongPress={2000}>
+          <Text style={{ textAlign: 'center', color: Colors.grey['61'], fontSize: 12 }}>
+            {agentState.isDemoMode ? 'Long press to reset demo data' : ''}
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );

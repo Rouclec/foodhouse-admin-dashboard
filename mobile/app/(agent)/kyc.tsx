@@ -13,7 +13,8 @@ import { router } from 'expo-router';
 import { kycStyles, defaultStyles } from '@/styles';
 import { Colors } from '@/constants';
 import i18n from '@/i18n';
-import { useAgent } from '@/contexts/AgentContext';
+import { agentDemoState } from '@/contexts/AgentContext';
+import { demoConfig } from '@/constants/demo';
 
 interface DocumentState {
   uri: string;
@@ -22,7 +23,7 @@ interface DocumentState {
 }
 
 const KYC = () => {
-  const { state: agentState, submitKYC, approveKYC } = useAgent();
+  const [agentState, setAgentState] = useState(agentDemoState.getState());
   const [identityDocumentFront, setIdentityDocumentFront] =
     useState<DocumentState | null>(null);
   const [identityDocumentBack, setIdentityDocumentBack] =
@@ -33,25 +34,11 @@ const KYC = () => {
   );
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [demoMode, setDemoMode] = useState(false);
 
   useEffect(() => {
-    setDemoMode(agentState.isDemoMode);
-  }, [agentState.isDemoMode]);
-
-  useEffect(() => {
-    if (submitted && demoMode && agentState.kycStatus === 'pending') {
-      const timer = setTimeout(() => {
-        approveKYC();
-        Alert.alert(
-          'Demo Mode - KYC Approved!',
-          'Your KYC has been automatically approved in demo mode.',
-          [{ text: 'Continue', onPress: () => router.replace('/(agent)/(index)' as any) }]
-        );
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [submitted, demoMode, agentState.kycStatus, approveKYC]);
+    const unsubscribe = agentDemoState.subscribe(setAgentState);
+    return () => { unsubscribe(); };
+  }, []);
 
   const pickImage = async (
     setImage: React.Dispatch<React.SetStateAction<DocumentState | null>>,
@@ -227,20 +214,24 @@ const KYC = () => {
 
     setLoading(true);
     try {
-      if (demoMode) {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        submitKYC();
-        setSubmitted(true);
-      } else {
-        console.log('KYC submitted:', {
-          idFront: identityDocumentFront,
-          idBack: identityDocumentBack,
-          selfie,
-          vehicle: vehicleDocument,
-        });
-        submitKYC();
-        setSubmitted(true);
+      console.log('KYC submitted:', {
+        idFront: identityDocumentFront,
+        idBack: identityDocumentBack,
+        selfie,
+        vehicle: vehicleDocument,
+      });
+
+      if (!demoConfig.enabled) {
+        Alert.alert(
+          i18n.t('common.error'),
+          'KYC demo flow is disabled in this build.',
+        );
+        return;
       }
+
+      agentDemoState.loginAsAgent(true);
+      agentDemoState.submitKYC();
+      setSubmitted(true);
     } catch (error) {
       console.error('Error submitting KYC:', error);
       Alert.alert(
@@ -258,21 +249,25 @@ const KYC = () => {
     selfie &&
     vehicleDocument;
 
-  if (submitted) {
+  if (submitted || agentState.kycStatus === 'verified') {
     return (
       <View style={[defaultStyles.flex, defaultStyles.container]}>
         <View style={kycStyles.successContainer}>
           <View style={kycStyles.successIcon}>
-            <Icon source="check-circle" size={64} color={Colors.success} />
+            <Icon source="check-circle" size={64} color={Colors.primary[500]} />
           </View>
           <Text style={kycStyles.successTitle}>
-            {i18n.t('(agent).kyc.submittedTitle')}
+            {agentState.kycStatus === 'verified' 
+              ? 'KYC Verified!' 
+              : i18n.t('(agent).kyc.submittedTitle')}
           </Text>
           <Text style={kycStyles.successMessage}>
-            {i18n.t('(agent).kyc.submittedMessage')}
+            {agentState.kycStatus === 'verified'
+              ? 'Your identity has been verified. You can now start accepting deliveries.'
+              : i18n.t('(agent).kyc.submittedMessage')}
           </Text>
           
-          {demoMode && (
+          {agentState.isDemoMode && agentState.kycStatus === 'pending' && (
             <View style={{ marginTop: 24, padding: 16, backgroundColor: Colors.primary[50], borderRadius: 12 }}>
               <Text style={{ fontSize: 14, fontWeight: '600', color: Colors.primary[500], marginBottom: 8 }}>
                 Demo Mode Active
@@ -290,10 +285,12 @@ const KYC = () => {
         <View style={defaultStyles.bottomButtonContainer}>
           <Button
             mode="contained"
-            onPress={() => router.replace('/(agent)/(index)' as any)}
+            onPress={() => router.replace('/(agent)/(index)')}
             style={[defaultStyles.button, defaultStyles.primaryButton]}
-            disabled={demoMode && agentState.kycStatus !== 'verified'}>
-            {demoMode ? 'Continue (Auto-approving...)' : i18n.t('(agent).kyc.continueButton')}
+            disabled={agentState.kycStatus === 'pending'}>
+            {agentState.kycStatus === 'verified' 
+              ? 'Continue to Dashboard' 
+              : 'Please Wait...'}
           </Button>
         </View>
       </View>
@@ -449,12 +446,13 @@ const KYC = () => {
           </TouchableOpacity>
         </View>
 
-        <View style={{ marginTop: 16, padding: 12, backgroundColor: Colors.gold + '20', borderRadius: 8 }}>
-          <Text style={{ fontSize: 12, color: Colors.grey['61'], textAlign: 'center' }}>
-            In demo mode, your KYC will be automatically approved after submission.
-            {'\n'}In production, verification takes 24-48 hours.
-          </Text>
-        </View>
+        {agentState.isDemoMode && (
+          <View style={{ marginTop: 16, padding: 12, backgroundColor: Colors.gold + '20', borderRadius: 8 }}>
+            <Text style={{ fontSize: 12, color: Colors.grey['61'], textAlign: 'center' }}>
+              Demo Mode: KYC will auto-approve after submission.
+            </Text>
+          </View>
+        )}
       </ScrollView>
 
       <View style={defaultStyles.bottomButtonContainer}>

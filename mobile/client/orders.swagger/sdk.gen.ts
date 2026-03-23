@@ -59,6 +59,9 @@ import type {
   OrdersListFarmerOrdersData,
   OrdersListFarmerOrdersError,
   OrdersListFarmerOrdersResponse,
+  OrdersGetAgentRatingSummaryData,
+  OrdersGetAgentRatingSummaryError,
+  OrdersGetAgentRatingSummaryResponse,
   OrdersCreateCustomSubscriptionData,
   OrdersCreateCustomSubscriptionError,
   OrdersCreateCustomSubscriptionResponse,
@@ -68,6 +71,9 @@ import type {
   OrdersEstimateDeliveryFeeData,
   OrdersEstimateDeliveryFeeError,
   OrdersEstimateDeliveryFeeResponse,
+  OrdersGetAgentStatsData,
+  OrdersGetAgentStatsError,
+  OrdersGetAgentStatsResponse,
   OrdersInitiatePaymentData,
   OrdersInitiatePaymentError,
   OrdersInitiatePaymentResponse,
@@ -95,6 +101,9 @@ import type {
   OrdersRejectOrderData,
   OrdersRejectOrderError,
   OrdersRejectOrderResponse,
+  OrdersCreateDeliveryRatingData,
+  OrdersCreateDeliveryRatingError,
+  OrdersCreateDeliveryRatingResponse,
   OrdersDispatchOrderData,
   OrdersDispatchOrderError,
   OrdersDispatchOrderResponse,
@@ -368,6 +377,21 @@ export const ordersListFarmerOrders = <ThrowOnError extends boolean = false>(
   });
 };
 
+export const ordersGetAgentRatingSummary = <
+  ThrowOnError extends boolean = false,
+>(
+  options: OptionsLegacyParser<OrdersGetAgentRatingSummaryData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    OrdersGetAgentRatingSummaryResponse,
+    OrdersGetAgentRatingSummaryError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/v1/users/{userId}/agents/{agentId}/delivery-rating-summary',
+  });
+};
+
 export const ordersCreateCustomSubscription = <
   ThrowOnError extends boolean = false,
 >(
@@ -409,6 +433,19 @@ export const ordersEstimateDeliveryFee = <ThrowOnError extends boolean = false>(
   >({
     ...options,
     url: '/v1/users/{userId}/orders/estimate-delivery-fee',
+  });
+};
+
+export const ordersGetAgentStats = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<OrdersGetAgentStatsData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    OrdersGetAgentStatsResponse,
+    OrdersGetAgentStatsError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/v1/users/{userId}/orders/get-agent-stats',
   });
 };
 
@@ -533,6 +570,21 @@ export const ordersRejectOrder = <ThrowOnError extends boolean = false>(
   >({
     ...options,
     url: '/v1/users/{userId}/orders/{orderId}/reject-order',
+  });
+};
+
+export const ordersCreateDeliveryRating = <
+  ThrowOnError extends boolean = false,
+>(
+  options: OptionsLegacyParser<OrdersCreateDeliveryRatingData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    OrdersCreateDeliveryRatingResponse,
+    OrdersCreateDeliveryRatingError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/v1/users/{userId}/orders/{orderNumber}/delivery-rating',
   });
 };
 

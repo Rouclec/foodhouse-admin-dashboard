@@ -265,6 +265,58 @@ func (q *Queries) CreatePayment(ctx context.Context, arg CreatePaymentParams) (P
 	return i, err
 }
 
+const getAgentStats = `-- name: GetAgentStats :one
+SELECT
+  COUNT(*) FILTER (
+    WHERE status = 'OrderStatus_APPROVED'
+      AND (agent_id IS NULL OR agent_id = '')
+  )::int AS available_count,
+  COUNT(*) FILTER (
+    WHERE status = 'OrderStatus_IN_TRANSIT'
+      AND agent_id = $1::varchar
+  )::int AS ongoing_count,
+  COUNT(*) FILTER (
+    WHERE status = 'OrderStatus_DELIVERED'
+      AND agent_id = $1::varchar
+  )::int AS completed_count,
+  COALESCE(
+    SUM(delivery_fee_amount) FILTER (
+      WHERE status = 'OrderStatus_DELIVERED'
+        AND agent_id = $1::varchar
+    ),
+    0
+  )::float8 AS total_earnings_value,
+  COALESCE(
+    MAX(delivery_fee_currency) FILTER (
+      WHERE status = 'OrderStatus_DELIVERED'
+        AND agent_id = $1::varchar
+    ),
+    'XAF'
+  )::text AS total_earnings_currency
+FROM orders
+`
+
+type GetAgentStatsRow struct {
+	AvailableCount        int32   `json:"available_count"`
+	OngoingCount          int32   `json:"ongoing_count"`
+	CompletedCount        int32   `json:"completed_count"`
+	TotalEarningsValue    float64 `json:"total_earnings_value"`
+	TotalEarningsCurrency string  `json:"total_earnings_currency"`
+}
+
+func (q *Queries) GetAgentStats(ctx context.Context, agentID string) (GetAgentStatsRow, error) {
+	row := q.db.QueryRow(ctx, getAgentStats, agentID)
+	var i GetAgentStatsRow
+	err := row.Scan(
+		&i.AvailableCount,
+		&i.OngoingCount,
+		&i.CompletedCount,
+		&i.TotalEarningsValue,
+		&i.TotalEarningsCurrency,
+	)
+	return i, err
+}
+
 const getAverageAgentRating = `-- name: GetAverageAgentRating :one
 SELECT 
     agent_id,

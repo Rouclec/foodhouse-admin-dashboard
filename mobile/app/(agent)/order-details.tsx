@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   View,
   ScrollView,
@@ -11,12 +11,23 @@ import {
 } from 'react-native';
 import { Text, Button, Icon } from 'react-native-paper';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { agentOrderDetailsStyles as styles, defaultStyles } from '@/styles';
 import { Colors } from '@/constants';
 import i18n from '@/i18n';
 import { mockDataStore, AgentOrder } from '@/data/mock-orders';
+import { agentDemoState } from '@/contexts/AgentContext';
+import { Context, type ContextType } from '@/app/_layout';
+import {
+  confirmDeliveryWithSecretKey,
+  dispatchOrderToAgent,
+  getAgentOrderDetailsFromBackend,
+} from '@/data/agent-orders-backend';
 
 const AgentOrderDetails = () => {
+  const insets = useSafeAreaInsets();
+  const { user } = useContext(Context) as ContextType;
+  const [agentState, setAgentState] = useState(agentDemoState.getState());
   const params = useLocalSearchParams();
   const [order, setOrder] = useState<AgentOrder | null>(null);
   const [loading, setLoading] = useState(false);
@@ -25,16 +36,60 @@ const AgentOrderDetails = () => {
   const [orderNotFound, setOrderNotFound] = useState(false);
 
   useEffect(() => {
-    const orderId = params.orderId as string;
-    if (orderId) {
+    const unsubscribe = agentDemoState.subscribe(setAgentState);
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    const orderId = (params.orderId as string) ?? '';
+    if (!orderId) return;
+
+    // Demo mode uses the local mock store (orderId is the mock id).
+    if (agentState.isDemoMode) {
       const foundOrder = mockDataStore.getOrderById(orderId);
       if (foundOrder) {
         setOrder(foundOrder);
+        setOrderNotFound(false);
       } else {
+        setOrder(null);
         setOrderNotFound(true);
       }
+      return;
     }
-  }, [params.orderId]);
+
+    // Non-demo uses backend (orderId is treated as orderNumber).
+    const userId = user?.userId ?? '';
+    if (!userId) {
+      setOrder(null);
+      setOrderNotFound(true);
+      return;
+    }
+
+    setLoading(true);
+    setOrderNotFound(false);
+
+    void (async () => {
+      try {
+        const details = await getAgentOrderDetailsFromBackend({
+          userId,
+          orderNumber: orderId,
+        });
+        if (!details) {
+          setOrder(null);
+          setOrderNotFound(true);
+          return;
+        }
+        setOrder(details);
+      } catch (_e) {
+        setOrder(null);
+        setOrderNotFound(true);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [agentState.isDemoMode, params.orderId, user?.userId]);
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -76,10 +131,34 @@ const AgentOrderDetails = () => {
         { text: i18n.t('(agent).orders.cancel'), style: 'cancel' },
         {
           text: 'Accept',
-          onPress: () => {
-            mockDataStore.acceptOrder(order.id);
-            setOrder({ ...order, status: 'assigned' });
-            Alert.alert('Success', i18n.t('(agent).orders.orderAccepted'));
+          onPress: async () => {
+            if (agentState.isDemoMode) {
+              mockDataStore.acceptOrder(order.id);
+              setOrder({ ...order, status: 'picked_up' });
+              Alert.alert('Success', i18n.t('(agent).orders.orderAccepted'));
+              return;
+            }
+
+            const userId = user?.userId ?? '';
+            if (!userId) {
+              Alert.alert(i18n.t('common.error'), i18n.t('(auth).login.anUnknownError'));
+              return;
+            }
+
+            try {
+              setLoading(true);
+              await dispatchOrderToAgent({
+                userId,
+                orderNumber: String(order.orderNumber),
+                agentId: userId,
+              });
+              setOrder({ ...order, status: 'picked_up' });
+              Alert.alert('Success', i18n.t('(agent).orders.orderAccepted'));
+            } catch (_e) {
+              Alert.alert(i18n.t('common.error'), i18n.t('(auth).login.anUnknownError'));
+            } finally {
+              setLoading(false);
+            }
           },
         },
       ]
@@ -97,7 +176,9 @@ const AgentOrderDetails = () => {
         {
           text: i18n.t('(agent).orders.confirm'),
           onPress: () => {
-            mockDataStore.confirmPickup(order.id);
+            if (agentState.isDemoMode) {
+              mockDataStore.confirmPickup(order.id);
+            }
             setOrder({ ...order, status: 'picked_up' });
             Alert.alert('Success', i18n.t('(agent).orders.pickupSuccess'));
           },
@@ -114,14 +195,10 @@ const AgentOrderDetails = () => {
   const handleSubmitSecurityCode = () => {
     if (!order) return;
 
-    if (enteredCode.length !== 4) {
-      Alert.alert(i18n.t('common.error'), i18n.t('(agent).orders.invalidCodeLength'));
-      return;
-    }
+    const secretKey = enteredCode.trim().toUpperCase();
 
-    if (enteredCode !== order.securityCode) {
-      Alert.alert(i18n.t('common.error'), i18n.t('(agent).orders.incorrectCode'));
-      setEnteredCode('');
+    if (secretKey.length !== 6) {
+      Alert.alert(i18n.t('common.error'), i18n.t('(agent).orders.invalidCodeLength'));
       return;
     }
 
@@ -129,13 +206,39 @@ const AgentOrderDetails = () => {
     setLoading(true);
     
     setTimeout(() => {
-      mockDataStore.confirmDelivery(order.id);
-      setOrder({ ...order, status: 'delivered' });
-      setLoading(false);
-      Alert.alert(
-        i18n.t('(agent).orders.deliverySuccess'),
-        `${i18n.t('(agent).orders.paymentWillBeProcessed')}\n\n+${i18n.t('common.currency')} ${order.deliveryFee.toLocaleString()} earned!`
-      );
+      void (async () => {
+        try {
+          if (agentState.isDemoMode) {
+            if (secretKey !== order.securityCode.toUpperCase()) {
+              Alert.alert(i18n.t('common.error'), i18n.t('(agent).orders.incorrectCode'));
+              setEnteredCode('');
+              return;
+            }
+            mockDataStore.confirmDelivery(order.id);
+          } else {
+            const userId = user?.userId ?? '';
+            if (!userId) {
+              Alert.alert(i18n.t('common.error'), i18n.t('(auth).login.anUnknownError'));
+              return;
+            }
+
+            await confirmDeliveryWithSecretKey({
+              userId,
+              secretKey,
+            });
+          }
+
+          setOrder({ ...order, status: 'delivered' });
+          Alert.alert(
+            i18n.t('(agent).orders.deliverySuccess'),
+            `${i18n.t('(agent).orders.paymentWillBeProcessed')}\n\n+${i18n.t('common.currency')} ${order.deliveryFee.toLocaleString()} earned!`,
+          );
+        } catch (_e) {
+          Alert.alert(i18n.t('common.error'), i18n.t('(auth).login.anUnknownError'));
+        } finally {
+          setLoading(false);
+        }
+      })();
     }, 500);
   };
 
@@ -180,11 +283,12 @@ const AgentOrderDetails = () => {
         return (
           <Button
             mode="contained"
-            onPress={handlePickUp}
-            style={[defaultStyles.button, { backgroundColor: Colors.primary[500] }]}
+            onPress={handleConfirmDelivery}
+            buttonColor={Colors.primary[500]}
+            style={defaultStyles.button}
             loading={loading}
             disabled={loading}>
-            {i18n.t('(agent).orders.confirmPickup')}
+            {i18n.t('(agent).orders.confirmDelivery')}
           </Button>
         );
       case 'picked_up':
@@ -192,7 +296,8 @@ const AgentOrderDetails = () => {
           <Button
             mode="contained"
             onPress={handleConfirmDelivery}
-            style={[defaultStyles.button, { backgroundColor: Colors.success }]}
+            buttonColor={Colors.primary[500]}
+            style={defaultStyles.button}
             loading={loading}
             disabled={loading}>
             {i18n.t('(agent).orders.confirmDelivery')}
@@ -200,7 +305,7 @@ const AgentOrderDetails = () => {
         );
       case 'delivered':
         return (
-          <View style={[defaultStyles.button, { backgroundColor: Colors.success, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }]}>
+          <View style={[defaultStyles.button, defaultStyles.primaryButton, { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }]}>
             <Icon source="check-circle" size={24} color={Colors.light[10]} />
             <Text style={{ color: Colors.light[10], fontSize: 16, fontWeight: '600', marginLeft: 8 }}>
               {i18n.t('(agent).orders.deliveryCompleted')}
@@ -245,18 +350,23 @@ const AgentOrderDetails = () => {
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
       
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}>
-          <Icon source="arrow-left" size={24} color={Colors.light[10]} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>
-          {i18n.t('(agent).orders.orderDetails')}
-        </Text>
-        <Text style={styles.headerSubtitle}>
-          {i18n.t('(agent).orders.order')} #{order.orderNumber}
-        </Text>
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+        <View style={styles.headerTopRow}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+            activeOpacity={0.8}>
+            <Icon source="arrow-left" size={22} color={Colors.light[10]} />
+          </TouchableOpacity>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.headerTitle}>
+              {i18n.t('(agent).orders.orderDetails')}
+            </Text>
+            <Text style={styles.headerSubtitle}>
+              {i18n.t('(agent).orders.order')} #{order.orderNumber}
+            </Text>
+          </View>
+        </View>
       </View>
 
       <ScrollView
@@ -316,18 +426,20 @@ const AgentOrderDetails = () => {
             <TouchableOpacity
               style={[defaultStyles.button, styles.buttonSecondary, { flex: 1 }]}
               onPress={handleNavigateToPickup}>
-              <Icon source="navigation" size={20} color={Colors.dark[0]} />
-              <Text style={[styles.buttonText, styles.buttonSecondaryText]}>
-                {i18n.t('(agent).orders.navigate')}
-              </Text>
+              <View style={defaultStyles.innerButtonContainer}>
+                <Icon source="navigation" size={20} color={Colors.dark[0]} />
+                <Text style={[styles.buttonText, styles.buttonSecondaryText]}>
+                  {i18n.t('(agent).orders.navigate')}
+                </Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[defaultStyles.button, { backgroundColor: Colors.success, flex: 1 }]}
+              style={[defaultStyles.button, { backgroundColor: Colors.primary[500], flex: 1 }]}
               onPress={handleCallFarmer}>
-              <Icon source="phone" size={20} color={Colors.light[10]} />
-              <Text style={[styles.buttonText]}>
-                {i18n.t('(agent).orders.call')}
-              </Text>
+              <View style={defaultStyles.innerButtonContainer}>
+                <Icon source="phone" size={20} color={Colors.light[10]} />
+                <Text style={styles.buttonText}>{i18n.t('(agent).orders.call')}</Text>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
@@ -351,33 +463,37 @@ const AgentOrderDetails = () => {
             <TouchableOpacity
               style={[defaultStyles.button, styles.buttonSecondary, { flex: 1 }]}
               onPress={handleNavigateToDelivery}>
-              <Icon source="navigation" size={20} color={Colors.dark[0]} />
-              <Text style={[styles.buttonText, styles.buttonSecondaryText]}>
-                {i18n.t('(agent).orders.navigate')}
-              </Text>
+              <View style={defaultStyles.innerButtonContainer}>
+                <Icon source="navigation" size={20} color={Colors.dark[0]} />
+                <Text style={[styles.buttonText, styles.buttonSecondaryText]}>
+                  {i18n.t('(agent).orders.navigate')}
+                </Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[defaultStyles.button, { backgroundColor: '#25D366', flex: 1 }]}
+              style={[defaultStyles.button, { backgroundColor: Colors.primary[500], flex: 1 }]}
               onPress={handleCallCustomer}>
-              <Icon source="phone" size={20} color={Colors.light[10]} />
-              <Text style={[styles.buttonText]}>
-                {i18n.t('(agent).orders.call')}
-              </Text>
+              <View style={defaultStyles.innerButtonContainer}>
+                <Icon source="phone" size={20} color={Colors.light[10]} />
+                <Text style={styles.buttonText}>{i18n.t('(agent).orders.call')}</Text>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
 
-        {order.status !== 'delivered' && (
+        {agentState.isDemoMode && order.status !== 'delivered' && (
           <View style={styles.securityCodeSection}>
-            <Text style={styles.securityCodeLabel}>
-              {i18n.t('(agent).orders.securityCodeLabel')}
+            <Text style={styles.securityCodeLabel}>Demo security code</Text>
+            <Text style={[styles.securityCodeHint, { fontSize: 13, lineHeight: 26 }]}>
+              In demo mode, you can use this code to complete the delivery flow.
             </Text>
-            <Text style={styles.securityCode}>{order.securityCode}</Text>
-            <Text style={{ fontSize: 12, color: Colors.grey['61'], marginTop: 8 }}>
-              {i18n.t('(agent).orders.securityCodeHint')}
+            <Text style={[styles.securityCode, {lineHeight: 48, marginTop: 10}]}>
+              {order.securityCode}
             </Text>
           </View>
         )}
+
+        {/* Delivery confirmation happens via the bottom CTA + modal input. */}
       </ScrollView>
 
       <View style={defaultStyles.bottomButtonContainer}>
@@ -408,9 +524,11 @@ const AgentOrderDetails = () => {
               style={styles.codeInput}
               value={enteredCode}
               onChangeText={setEnteredCode}
-              keyboardType="number-pad"
-              maxLength={4}
-              placeholder="----"
+              keyboardType="default"
+              autoCapitalize="characters"
+              autoCorrect={false}
+              maxLength={6}
+              placeholder="------"
               placeholderTextColor={Colors.grey['61']}
               textAlign="center"
               autoFocus
@@ -422,16 +540,24 @@ const AgentOrderDetails = () => {
 
             <View style={styles.modalButtons}>
               <TouchableOpacity
-                style={[defaultStyles.button, styles.cancelButton]}
+                style={[
+                  defaultStyles.button,
+                  defaultStyles.secondaryButton,
+                  { flex: 1 },
+                ]}
                 onPress={() => setShowSecurityCodeModal(false)}>
-                <Text style={styles.cancelButtonText}>
+                <Text style={[defaultStyles.buttonText, defaultStyles.secondaryButtonText]}>
                   {i18n.t('(agent).orders.cancel')}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[defaultStyles.button, { backgroundColor: Colors.success }]}
+                style={[
+                  defaultStyles.button,
+                  defaultStyles.primaryButton,
+                  { flex: 1 },
+                ]}
                 onPress={handleSubmitSecurityCode}>
-                <Text style={[styles.buttonText]}>
+                <Text style={defaultStyles.buttonText}>
                   {i18n.t('(agent).orders.confirm')}
                 </Text>
               </TouchableOpacity>

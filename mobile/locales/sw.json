@@ -70,14 +70,14 @@
       "deliverySuccess": "Utoaji Umethibitishwa!",
       "paymentWillBeProcessed": "Malipo yatashughulikiwa hivi karibuni.",
       "deliveryError": "Imeshindwa kuthibitisha utoaji",
-      "invalidCodeLength": "Tafadhali ingiza nambari 4 ya kodi",
+      "invalidCodeLength": "Tafadhali ingiza kodi ya herufi 6",
       "incorrectCode": "Kodi ya usalama si sahihi",
       "askCustomerForCode": "Muumbye mteja kodi yao ya utoaji",
       "totalAmount": "Jumla ya Agizo",
       "items": "Vifaa vya Agizo",
       "navigate": "Nawiri",
       "call": "Piga",
-      "orderAccepted": "Agizo limelekezwa! Sasa unaweza kuchukua."
+      "orderAccepted": "Agizo limekubaliwa! Sasa unaweza kuanza utoaji."
     },
     "home": {
       "title": "Usafirishaji",
@@ -88,7 +88,7 @@
       "totalEarnings": "Mapato Yote",
       "todayEarnings": "Leo",
       "completedDeliveries": "Imewasilishwa",
-      "pendingOrders": "Inasubiri"
+      "ongoingDeliveries": "Inaendelea"
     }
   },
   "(auth)": {
