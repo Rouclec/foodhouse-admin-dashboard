@@ -727,7 +727,7 @@ service Orders {
   rpc CreateDeliveryRating(CreateDeliveryRatingRequest)
       returns (CreateDeliveryRatingResponse) {
     option (google.api.http) = {
-      post : "/v1/users/{user_id}/orders/{order_number}/delivery-rating"
+      post : "/v1/users/{user_id}/orders/{order_number}/create-delivery-rating"
       body : "*"
     };
   }
