@@ -57,6 +57,8 @@ const (
 	TWO = 2
 
 	ThirtyTwo = 32
+
+	DefaultPageSize = 10
 )
 
 // Impl is the implementation of the Users service.
@@ -2115,26 +2117,60 @@ func (i *Impl) UpdateKYCStatus(ctx context.Context,
 	}, nil
 }
 
+func normalizeListLimit(limit int32) int32 {
+	if limit <= 0 {
+		return DefaultPageSize
+	}
+	return limit
+}
+
+func normalizeListOffset(offset int32) int32 {
+	if offset < 0 {
+		return 0
+	}
+	return offset
+}
+
+func normalizeKycStatusFilter(status usersgrpc.KYCStatus) string {
+	if status == usersgrpc.KYCStatus_KYC_STATUS_UNSPECIFIED {
+		return usersgrpc.KYCStatus_KYC_STATUS_PENDING.String()
+	}
+	return status.String()
+}
+
+func kycStatusFromDBStringPtr(status *string) usersgrpc.KYCStatus {
+	if status == nil {
+		return usersgrpc.KYCStatus_KYC_STATUS_UNSPECIFIED
+	}
+	if v, ok := usersgrpc.KYCStatus_value[*status]; ok {
+		return usersgrpc.KYCStatus(v)
+	}
+	return usersgrpc.KYCStatus_KYC_STATUS_UNSPECIFIED
+}
+
+func timestampOrNil(t pgtype.Timestamptz) *timestamppb.Timestamp {
+	if !t.Valid {
+		return nil
+	}
+	return timestamppb.New(t.Time)
+}
+
+func firstOrEmpty(values []string) string {
+	if len(values) == 0 {
+		return ""
+	}
+	return values[0]
+}
+
 // ListKYCVerifications lists KYC submissions for admin review.
 func (i *Impl) ListKYCVerifications(ctx context.Context,
 	req *usersgrpc.ListKYCVerificationsRequest) (
 	*usersgrpc.ListKYCVerificationsResponse, error) {
 	querier := i.repo.Do()
 
-	limit := req.GetLimit()
-	if limit <= 0 {
-		limit = 50
-	}
-	offset := req.GetOffset()
-	if offset < 0 {
-		offset = 0
-	}
-
-	statusStr := req.GetStatus().String()
-	// sqlc query currently expects a concrete status string; default to pending when unspecified.
-	if req.GetStatus() == usersgrpc.KYCStatus_KYC_STATUS_UNSPECIFIED {
-		statusStr = usersgrpc.KYCStatus_KYC_STATUS_PENDING.String()
-	}
+	limit := normalizeListLimit(req.GetLimit())
+	offset := normalizeListOffset(req.GetOffset())
+	statusStr := normalizeKycStatusFilter(req.GetStatus())
 
 	rows, err := querier.ListKYCVerifications(ctx, sqlc.ListKYCVerificationsParams{
 		Column1: statusStr,
@@ -2147,45 +2183,18 @@ func (i *Impl) ListKYCVerifications(ctx context.Context,
 
 	out := make([]*usersgrpc.KYCVerification, 0, len(rows))
 	for _, row := range rows {
-		kycStatus := usersgrpc.KYCStatus_KYC_STATUS_UNSPECIFIED
-		if row.Status != nil {
-			if v, ok := usersgrpc.KYCStatus_value[*row.Status]; ok {
-				kycStatus = usersgrpc.KYCStatus(v)
-			}
-		}
-
-		var verifiedAt *timestamppb.Timestamp
-		if row.VerifiedAt.Valid {
-			verifiedAt = timestamppb.New(row.VerifiedAt.Time)
-		}
-
 		out = append(out, &usersgrpc.KYCVerification{
-			Id:     row.ID,
-			UserId: row.UserID,
-			IdentityDocumentUrl: func() string {
-				if len(row.IdentityDocumentUrls) > 0 {
-					return row.IdentityDocumentUrls[0]
-				}
-				return ""
-			}(),
-			SelfieUrl: func() string {
-				if len(row.SelfieUrls) > 0 {
-					return row.SelfieUrls[0]
-				}
-				return ""
-			}(),
-			VehicleDocumentUrl: func() string {
-				if len(row.VehicleDocumentUrls) > 0 {
-					return row.VehicleDocumentUrls[0]
-				}
-				return ""
-			}(),
+			Id:                   row.ID,
+			UserId:               row.UserID,
+			IdentityDocumentUrl:  firstOrEmpty(row.IdentityDocumentUrls),
+			SelfieUrl:            firstOrEmpty(row.SelfieUrls),
+			VehicleDocumentUrl:   firstOrEmpty(row.VehicleDocumentUrls),
 			IdentityDocumentUrls: row.IdentityDocumentUrls,
 			SelfieUrls:           row.SelfieUrls,
 			VehicleDocumentUrls:  row.VehicleDocumentUrls,
-			Status:               kycStatus,
+			Status:               kycStatusFromDBStringPtr(row.Status),
 			RejectionReason:      row.RejectionReason,
-			VerifiedAt:           verifiedAt,
+			VerifiedAt:           timestampOrNil(row.VerifiedAt),
 			CreatedAt:            timestamppb.New(row.CreatedAt.Time),
 			UpdatedAt:            timestamppb.New(row.UpdatedAt.Time),
 		})
