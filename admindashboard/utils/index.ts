@@ -81,3 +81,4 @@ export * from "./utils";
 export * from "./auth";
 export * from "./interceptor";
 export * from "./password-generator";
+export * from "./uploadImage";

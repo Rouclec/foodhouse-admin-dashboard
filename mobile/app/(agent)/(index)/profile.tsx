@@ -1,16 +1,30 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { Keyboard, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useMutation } from '@tanstack/react-query';
 import { Colors } from '@/constants';
 import { agentDemoState } from '@/contexts/AgentContext';
 import { Context, type ContextType } from '@/app/_layout';
+import { usersRevokeRefreshTokenMutation } from '@/client/users.swagger/@tanstack/react-query.gen';
+import {
+  buyerProductsStyles,
+  defaultStyles,
+  profileFlowStyles,
+} from '@/styles';
+import {
+  FilterBottomSheet,
+  type FilterBottomSheetRef,
+} from '@/components/(buyer)/(index)/FilterBottomSheet';
+import { clearStorage, readData, updateAuthHeader } from '@/utils';
 
 const AgentProfile = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { user } = useContext(Context) as ContextType;
+  const sheetRef = useRef<FilterBottomSheetRef>(null);
+  const { user, setUser } = useContext(Context) as ContextType;
+  const [loading, setLoading] = useState(false);
   const [state, setState] = useState(agentDemoState.getState());
 
   useEffect(() => {
@@ -24,11 +38,39 @@ const AgentProfile = () => {
   const displayLastName = state.isDemoMode ? state.agent?.lastName : user?.lastName;
   const displayEmail = state.isDemoMode ? state.agent?.email : user?.email;
 
-  const handleLogout = () => {
-    if (state.isDemoMode) {
-      agentDemoState.logout();
+  const { mutate: revokeRefreshToken } = useMutation({
+    ...usersRevokeRefreshTokenMutation(),
+    onError: async error => {
+      console.error('error logging out: ', error);
+    },
+  });
+
+  const handleLogout = async () => {
+    try {
+      setLoading(true);
+
+      const refreshToken = await readData('@refreshToken');
+      revokeRefreshToken({
+        body: {
+          refreshToken: refreshToken ?? '',
+        },
+      });
+
+      clearStorage();
+      updateAuthHeader('');
+      setUser(undefined);
+
+      if (state.isDemoMode) {
+        agentDemoState.logout();
+      }
+
+      router.replace('/(auth)/login');
+      sheetRef.current?.close();
+    } catch (error) {
+      console.error({ error }, 'logging out');
+    } finally {
+      setLoading(false);
     }
-    router.replace('/login');
   };
 
   return (
@@ -87,13 +129,55 @@ const AgentProfile = () => {
         <View style={{ marginTop: 24, padding: 16 }}>
           <Button
             mode="outlined"
-            onPress={handleLogout}
+            onPress={() => {
+              Keyboard.dismiss();
+              sheetRef.current?.open();
+            }}
             style={{ borderColor: Colors.error }}
             textColor={Colors.error}>
             Logout
           </Button>
         </View>
       </ScrollView>
+
+      <FilterBottomSheet ref={sheetRef} sheetHeight={200}>
+        <View style={[buyerProductsStyles.filtersContainer]}>
+          <View style={profileFlowStyles.content}>
+            <Text variant="titleMedium" style={buyerProductsStyles.title}>
+              Logout
+            </Text>
+
+            <Text style={defaultStyles.dialogSubtitle}>
+              Are you sure you want to logout?
+            </Text>
+          </View>
+          <View style={buyerProductsStyles.bottomButtonContainer}>
+            <Button
+              onPress={() => {
+                sheetRef.current?.close();
+              }}
+              style={[
+                defaultStyles.button,
+                defaultStyles.secondaryButton,
+                buyerProductsStyles.halfButton,
+              ]}
+              disabled={loading}>
+              <Text style={defaultStyles.primaryText}>Cancel</Text>
+            </Button>
+            <Button
+              onPress={handleLogout}
+              style={[
+                defaultStyles.button,
+                defaultStyles.primaryButton,
+                buyerProductsStyles.halfButton,
+              ]}
+              loading={loading}
+              disabled={loading}>
+              <Text style={defaultStyles.buttonText}>Logout</Text>
+            </Button>
+          </View>
+        </View>
+      </FilterBottomSheet>
     </View>
   );
 };

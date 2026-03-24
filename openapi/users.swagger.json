@@ -1266,6 +1266,25 @@
         },
         "vehicleDocumentUrl": {
           "type": "string"
+        },
+        "identityDocumentUrls": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "New: allow multiple documents per field."
+        },
+        "selfieUrls": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "vehicleDocumentUrls": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -1697,6 +1716,25 @@
         "updatedAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "identityDocumentUrls": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "New: allow multiple documents per field."
+        },
+        "selfieUrls": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "vehicleDocumentUrls": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },

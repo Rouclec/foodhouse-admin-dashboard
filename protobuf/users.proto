@@ -53,6 +53,11 @@ message KYCVerification {
   google.protobuf.Timestamp verified_at = 8;
   google.protobuf.Timestamp created_at = 9;
   google.protobuf.Timestamp updated_at = 10;
+
+  // New: allow multiple documents per field.
+  repeated string identity_document_urls = 11;
+  repeated string selfie_urls = 12;
+  repeated string vehicle_document_urls = 13;
 }
 
 enum KYCStatus {
@@ -613,21 +618,21 @@ service Users {
   // KYC endpoints
   rpc CreateKYC(CreateKYCRequest) returns (CreateKYCResponse) {
     option (google.api.http) = {
-      post : "/v1/users/{user_id}/kyc"
+      post : "/v1/users/{user_id}/upload-kyc"
       body : "*"
     };
   }
 
   rpc GetKYCByUserID(GetKYCByUserIDRequest) returns (GetKYCByUserIDResponse) {
     option (google.api.http) = {
-      get : "/v1/users/{user_id}/kyc"
+      get : "/v1/users/{user_id}/get-kyc-by-user-id"
     };
   }
 
   rpc UpdateKYCStatus(UpdateKYCStatusRequest)
       returns (UpdateKYCStatusResponse) {
     option (google.api.http) = {
-      patch : "/v1/admin/{admin_user_id}/kyc/{kyc_id}/status"
+      patch : "/v1/admin/{admin_user_id}/{kyc_id}/update-kyc-status"
       body : "*"
     };
   }
@@ -635,7 +640,7 @@ service Users {
   rpc ListKYCVerifications(ListKYCVerificationsRequest)
       returns (ListKYCVerificationsResponse) {
     option (google.api.http) = {
-      get : "/v1/admin/kyc/verifications"
+      get : "/v1/admin/{admin_user_id}/list-kyc-verifications"
     };
   }
 }
@@ -647,6 +652,11 @@ message CreateKYCRequest {
   string identity_document_url = 2;
   string selfie_url = 3;
   string vehicle_document_url = 4;
+
+  // New: allow multiple documents per field.
+  repeated string identity_document_urls = 5;
+  repeated string selfie_urls = 6;
+  repeated string vehicle_document_urls = 7;
 }
 
 message CreateKYCResponse { KYCVerification kyc_verification = 1; }
@@ -665,9 +675,10 @@ message UpdateKYCStatusRequest {
 message UpdateKYCStatusResponse { KYCVerification kyc_verification = 1; }
 
 message ListKYCVerificationsRequest {
-  KYCStatus status = 1;
-  int32 limit = 2;
-  int32 offset = 3;
+  string admin_user_id = 1;
+  KYCStatus status = 2;
+  int32 limit = 3;
+  int32 offset = 4;
 }
 
 message ListKYCVerificationsResponse {

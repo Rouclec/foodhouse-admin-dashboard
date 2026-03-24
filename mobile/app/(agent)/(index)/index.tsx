@@ -19,6 +19,9 @@ import { Context, ContextType } from '@/app/_layout';
 import {
   listAgentOrdersFromBackend,
 } from '@/data/agent-orders-backend';
+import { usersGetKycByUserIdOptions } from '@/client/users.swagger/@tanstack/react-query.gen';
+import { useQuery } from '@tanstack/react-query';
+import type { usersgrpcKYCStatus } from '@/client/users.swagger';
 
 const AgentHomeScreen = () => {
   const insets = useSafeAreaInsets();
@@ -30,9 +33,33 @@ const AgentHomeScreen = () => {
   const [completedOrders, setCompletedOrders] = useState<AgentOrder[]>([]);
   const [stats, setStats] = useState({ totalEarnings: 0, completedDeliveries: 0, ongoingDeliveries: 0 });
   const isDemo = agentState.isDemoMode;
-  const isKycVerified = isDemo ? agentState.kycStatus === 'verified' : true;
   const [tab, setTab] = useState<'available' | 'ongoing' | 'completed'>('available');
   const canAcceptNewOrders = ongoingOrders.length === 0;
+  const userId = user?.userId ?? '';
+
+  const { data: backendKycData } = useQuery({
+    ...usersGetKycByUserIdOptions({
+      path: { userId },
+    }),
+    enabled: !!userId && !isDemo,
+  });
+
+  const backendKycStatus = (() => {
+    const status = backendKycData?.kycVerification?.status as usersgrpcKYCStatus | undefined;
+    switch (status) {
+      case 'KYC_STATUS_VERIFIED':
+        return 'verified' as const;
+      case 'KYC_STATUS_REJECTED':
+        return 'rejected' as const;
+      case 'KYC_STATUS_PENDING':
+        return 'pending' as const;
+      default:
+        return backendKycData?.kycVerification ? ('pending' as const) : ('not_started' as const);
+    }
+  })();
+
+  const kycStatus = isDemo ? agentState.kycStatus : backendKycStatus;
+  const isKycVerified = kycStatus === 'verified';
 
   useEffect(() => {
     const unsubscribe = agentDemoState.subscribe(setAgentState);
@@ -144,7 +171,7 @@ const AgentHomeScreen = () => {
         );
         return;
       }
-      if (isDemo && agentState.kycStatus !== 'verified') {
+      if (!isKycVerified) {
         Alert.alert('KYC Required', 'Please complete your KYC verification first.');
         return;
       }
@@ -188,8 +215,7 @@ const AgentHomeScreen = () => {
   };
 
   const getKYCStatusMessage = () => {
-    if (!isDemo) return null;
-    switch (agentState.kycStatus) {
+    switch (kycStatus) {
       case 'not_started':
         return {
           title: 'Complete Your KYC',

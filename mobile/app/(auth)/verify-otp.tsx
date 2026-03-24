@@ -23,7 +23,6 @@ import { delay, storeData, updateAuthHeader } from '@/utils';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Context, ContextType } from '../_layout';
 import i18n from '@/i18n';
-import { usersGetUserById } from '@/client/users.swagger';
 
 const VerifyOtpScreen: FC = () => {
   const { requestId, email, phoneNumber, residenceCountryIsoCode } =
@@ -50,30 +49,18 @@ const VerifyOtpScreen: FC = () => {
   const handleVerifyOtp = async () => {
     try {
       setLoading(true);
-      // await mutateAsync({
-      //   body: {
-      //     phoneFactor: {
-      //       type: 'FACTOR_TYPE_SMS_OTP',
-      //       secretValue: otp,
-      //       id: requestIdState as string,
-      //     },
-      //     email: email as string,
-      //     residenceCountryIsoCode: residenceCountryIsoCode as string,
-      //     userType: role,
-      //   },
-      // });
-
-      setTimeLeft(0);
-      updateAuthHeader('1234567890');
-      await storeData('@userId', '1234567890');
-      await storeData('@refreshToken', '1234567890');
-      setUserId('1234567890');
-      setUser({
-        userId: '1234567890',
-        phoneNumber: phoneNumber as string,
+      await mutateAsync({
+        body: {
+          phoneFactor: {
+            type: 'FACTOR_TYPE_SMS_OTP',
+            secretValue: otp,
+            id: requestIdState as string,
+          },
+          email: email as string,
+          residenceCountryIsoCode: residenceCountryIsoCode as string,
+          userType: role,
+        },
       });
-
-      router.push('/profile-page');
     } catch (error) {
       console.error('Error verifying otp', error);
       setError(true);
@@ -196,20 +183,20 @@ const VerifyOtpScreen: FC = () => {
     },
   });
 
-  // const { data: userData } = useQuery({
-  //   ...usersGetUserByIdOptions({
-  //     path: {
-  //       userId: userId ?? '',
-  //     },
-  //   }),
-  //   enabled: !!userId,
-  // });
+  const { data: userData } = useQuery({
+    ...usersGetUserByIdOptions({
+      path: {
+        userId: userId ?? '',
+      },
+    }),
+    enabled: !!userId,
+  });
 
-  // useEffect(() => {
-  //   if (userData) {
-  //     setUser(userData.user);
-  //   }
-  // }, [userData]);
+  useEffect(() => {
+    if (userData) {
+      setUser(userData.user);
+    }
+  }, [userData, setUser]);
 
   return (
     <>

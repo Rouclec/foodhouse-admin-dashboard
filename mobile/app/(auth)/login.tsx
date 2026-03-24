@@ -164,12 +164,11 @@ export default function Login() {
         keyboardVerticalOffset={0}>
         <View style={defaultStyles.flex}>
           <Appbar.Header dark={false} style={defaultStyles.appHeader}>
-            {/* <TouchableOpacity
+            <TouchableOpacity
               onPress={() => router.back()}
               style={defaultStyles.backButtonContainer}>
               <Icon source={'arrow-left'} size={24} />
-            </TouchableOpacity> */}
-            <View />
+            </TouchableOpacity>
             <View />
           </Appbar.Header>
           <ScrollView

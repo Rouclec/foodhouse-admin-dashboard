@@ -20,16 +20,16 @@ type FarmersReview struct {
 }
 
 type KycVerification struct {
-	ID                  string             `json:"id"`
-	UserID              string             `json:"user_id"`
-	IdentityDocumentUrl string             `json:"identity_document_url"`
-	SelfieUrl           string             `json:"selfie_url"`
-	VehicleDocumentUrl  string             `json:"vehicle_document_url"`
-	Status              *string            `json:"status"`
-	RejectionReason     string             `json:"rejection_reason"`
-	VerifiedAt          pgtype.Timestamptz `json:"verified_at"`
-	CreatedAt           pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
+	ID                   string             `json:"id"`
+	UserID               string             `json:"user_id"`
+	Status               *string            `json:"status"`
+	RejectionReason      string             `json:"rejection_reason"`
+	VerifiedAt           pgtype.Timestamptz `json:"verified_at"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	IdentityDocumentUrls []string           `json:"identity_document_urls"`
+	SelfieUrls           []string           `json:"selfie_urls"`
+	VehicleDocumentUrls  []string           `json:"vehicle_document_urls"`
 }
 
 type Referral struct {
