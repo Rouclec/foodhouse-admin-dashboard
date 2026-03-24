@@ -735,7 +735,7 @@ service Orders {
   rpc GetAgentRatingSummary(GetAgentRatingSummaryRequest)
       returns (GetAgentRatingSummaryResponse) {
     option (google.api.http) = {
-      get : "/v1/users/{user_id}/agents/{agent_id}/delivery-rating-summary"
+      get : "/v1/users/{user_id}/agents/{agent_id}/get-delivery-rating-summary"
     };
   }
 
