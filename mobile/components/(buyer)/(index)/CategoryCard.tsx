@@ -1,7 +1,7 @@
 import { productsgrpcCategory } from '@/client/products.swagger';
 import React, { FC } from 'react';
-import { Dimensions, TouchableOpacity, View } from 'react-native';
-import { Text } from 'react-native-paper';
+import { Dimensions, Image, TouchableOpacity, View } from 'react-native';
+import { Icon, Text } from 'react-native-paper';
 import { Colors } from '@/constants';
 
 const { width } = Dimensions.get('window');
@@ -14,33 +14,12 @@ interface CategoryCardProps {
   productCount?: number;
 }
 
-const categoryIcons: Record<string, string> = {
-  vegetables: '🥬',
-  fruits: '🍎',
-  grains: '🌾',
-  legumes: '🫘',
-  tubers: '🥔',
-  default: '🛒',
-};
-
-function getCategoryIcon(name: string = ''): string {
-  const lowerName = name.toLowerCase();
-  for (const [key, icon] of Object.entries(categoryIcons)) {
-    if (lowerName.includes(key)) {
-      return icon;
-    }
-  }
-  return categoryIcons.default;
-}
-
 export const CategoryCard: FC<CategoryCardProps> = ({
   category,
   isSelected,
   onPress,
   productCount,
 }) => {
-  const icon = getCategoryIcon(category.name);
-
   return (
     <TouchableOpacity
       style={[
@@ -53,7 +32,14 @@ export const CategoryCard: FC<CategoryCardProps> = ({
       onPress={onPress}
       activeOpacity={0.7}>
       <View style={styles.iconContainer}>
-        <Text style={styles.icon}>{icon}</Text>
+        {category.image ? (
+          <Image
+            source={{ uri: category.image }}
+            style={styles.iconContainer}
+          />
+        ) : (
+          <Icon source="cart-outline" size={28} color={Colors.primary[500]} />
+        )}
       </View>
       <Text
         variant="titleMedium"
@@ -96,8 +82,9 @@ const styles = {
     justifyContent: 'center' as const,
     marginBottom: 12,
   },
-  icon: {
-    fontSize: 28,
+  iconImage: {
+    width: 32,
+    height: 32,
   },
   categoryName: {
     fontSize: 14,

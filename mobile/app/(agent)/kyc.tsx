@@ -286,6 +286,7 @@ const KYC = () => {
         agentDemoState.loginAsAgent(true);
         agentDemoState.submitKYC();
         setSubmitted(true);
+        router.replace('/(agent)/(index)');
         return;
       }
 
@@ -333,6 +334,7 @@ const KYC = () => {
       });
 
       setSubmitted(true);
+      router.replace('/(agent)/(index)');
     } catch (error) {
       console.error('Error submitting KYC:', error);
       Alert.alert(
@@ -353,7 +355,6 @@ const KYC = () => {
   const isSubmitDisabled = loading || !isFormValid;
 
   if (submitted || kycStatus === 'verified') {
-    const isContinueDisabled = kycStatus === 'pending';
     return (
       <View style={[defaultStyles.flex, defaultStyles.container]}>
         <View style={kycStyles.successContainer}>
@@ -393,13 +394,8 @@ const KYC = () => {
             mode="contained"
             onPress={() => router.replace('/(agent)/(index)')}
             style={defaultStyles.button}
-            buttonColor={
-              isContinueDisabled ? Colors.grey['bg'] : Colors.primary[500]
-            }
-            disabled={isContinueDisabled}>
-            {kycStatus === 'verified' 
-              ? i18n.t('(agent).kyc.continueToDashboard')
-              : i18n.t('(agent).kyc.pleaseWait')}
+            buttonColor={Colors.primary[500]}>
+            {i18n.t('(agent).kyc.continueToDashboard')}
           </Button>
         </View>
       </View>

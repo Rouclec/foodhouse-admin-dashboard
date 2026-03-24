@@ -3,12 +3,16 @@ import { Keyboard, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Colors } from '@/constants';
 import i18n from '@/i18n';
 import { agentDemoState } from '@/contexts/AgentContext';
 import { Context, type ContextType } from '@/app/_layout';
-import { usersRevokeRefreshTokenMutation } from '@/client/users.swagger/@tanstack/react-query.gen';
+import {
+  usersGetKycByUserIdOptions,
+  usersRevokeRefreshTokenMutation,
+} from '@/client/users.swagger/@tanstack/react-query.gen';
+import type { usersgrpcKYCStatus } from '@/client/users.swagger';
 import {
   buyerProductsStyles,
   defaultStyles,
@@ -38,6 +42,31 @@ const AgentProfile = () => {
   const displayFirstName = state.isDemoMode ? state.agent?.firstName : user?.firstName;
   const displayLastName = state.isDemoMode ? state.agent?.lastName : user?.lastName;
   const displayEmail = state.isDemoMode ? state.agent?.email : user?.email;
+  const userId = user?.userId ?? '';
+
+  const { data: backendKycData } = useQuery({
+    ...usersGetKycByUserIdOptions({
+      path: { userId },
+    }),
+    enabled: !!userId && !state.isDemoMode,
+  });
+
+  const backendKycStatus = (() => {
+    const status = backendKycData?.kycVerification?.status as usersgrpcKYCStatus | undefined;
+    switch (status) {
+      case 'KYC_STATUS_VERIFIED':
+        return 'verified' as const;
+      case 'KYC_STATUS_REJECTED':
+        return 'rejected' as const;
+      case 'KYC_STATUS_PENDING':
+        return 'pending' as const;
+      default:
+        return backendKycData?.kycVerification ? ('pending' as const) : ('not_started' as const);
+    }
+  })();
+
+  const kycStatus = state.isDemoMode ? state.kycStatus : backendKycStatus;
+  const isKycVerified = kycStatus === 'verified';
 
   const { mutate: revokeRefreshToken } = useMutation({
     ...usersRevokeRefreshTokenMutation(),
@@ -96,12 +125,12 @@ const AgentProfile = () => {
           <View style={styles.infoRow}>
             <Text style={styles.label}>{i18n.t('(agent).profile.kycStatusLabel')}</Text>
             <View style={[styles.statusBadge, { 
-              backgroundColor: state.kycStatus === 'verified' ? Colors.success + '20' : Colors.gold + '20' 
+              backgroundColor: isKycVerified ? Colors.success + '20' : Colors.gold + '20' 
             }]}>
               <Text style={[styles.statusText, { 
-                color: state.kycStatus === 'verified' ? Colors.success : Colors.gold 
+                color: isKycVerified ? Colors.success : Colors.gold 
               }]}>
-                {i18n.t(`(agent).profile.kycStatus.${state.kycStatus}`)}
+                {i18n.t(`(agent).profile.kycStatus.${kycStatus}`)}
               </Text>
             </View>
           </View>

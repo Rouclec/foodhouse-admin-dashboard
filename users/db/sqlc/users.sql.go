@@ -561,7 +561,7 @@ func (q *Queries) ListFarmersByRating(ctx context.Context, arg ListFarmersByRati
 
 const listKYCVerifications = `-- name: ListKYCVerifications :many
 SELECT id, user_id, status, rejection_reason, verified_at, created_at, updated_at, identity_document_urls, selfie_urls, vehicle_document_urls FROM kyc_verifications 
-WHERE ($1::text IS NULL OR status = $1)
+WHERE ($1::text IS NULL OR status = $1::text)
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
 `
@@ -703,9 +703,12 @@ func (q *Queries) SuspendUser(ctx context.Context, id string) error {
 
 const updateKYCStatus = `-- name: UpdateKYCStatus :one
 UPDATE kyc_verifications
-SET status = $2,
-    rejection_reason = $3,
-    verified_at = CASE WHEN $2 = 'KYC_STATUS_VERIFIED' THEN now() ELSE NULL END,
+SET status = $2::text,
+    rejection_reason = $3::text,
+    verified_at = CASE
+        WHEN $2::text = 'KYC_STATUS_VERIFIED' THEN now()
+        ELSE NULL::timestamptz
+    END,
     updated_at = now()
 WHERE id = $1
 RETURNING id, user_id, status, rejection_reason, verified_at, created_at, updated_at, identity_document_urls, selfie_urls, vehicle_document_urls
