@@ -26,7 +26,7 @@ export const mockOrders: AgentOrder[] = [
     pickupLocation: { lat: 4.0511, lng: 9.7679 },
     deliveryAddress: '456 Customer Street, Bonamoussadi, Douala',
     deliveryLocation: { lat: 4.0611, lng: 9.7779 },
-    securityCode: '5839',
+    securityCode: '58A39F',
     totalAmount: 15000,
     deliveryFee: 2500,
     customerName: 'John Customer',
@@ -44,7 +44,7 @@ export const mockOrders: AgentOrder[] = [
     pickupLocation: { lat: 4.0550, lng: 9.7600 },
     deliveryAddress: '321 Main Avenue, Makepe, Douala',
     deliveryLocation: { lat: 4.0700, lng: 9.7850 },
-    securityCode: '2947',
+    securityCode: '29F4B7',
     totalAmount: 22000,
     deliveryFee: 3000,
     customerName: 'Mary Client',
@@ -62,7 +62,7 @@ export const mockOrders: AgentOrder[] = [
     pickupLocation: { lat: 4.0600, lng: 9.7750 },
     deliveryAddress: '789 Hills Road, Bastos, Douala',
     deliveryLocation: { lat: 4.0750, lng: 9.7900 },
-    securityCode: '1056',
+    securityCode: '10C5E6',
     totalAmount: 8500,
     deliveryFee: 2000,
     customerName: 'Paul Client',
@@ -80,7 +80,7 @@ export const mockOrders: AgentOrder[] = [
     pickupLocation: { lat: 4.0480, lng: 9.7550 },
     deliveryAddress: '555 Lake View, Deido, Douala',
     deliveryLocation: { lat: 4.0650, lng: 9.7720 },
-    securityCode: '7832',
+    securityCode: '78D3A2',
     totalAmount: 18000,
     deliveryFee: 3500,
     customerName: 'Sarah Wilson',
@@ -113,7 +113,8 @@ class MockDataStore {
   acceptOrder(orderId: string): AgentOrder | undefined {
     const order = this.orders.find(o => o.id === orderId);
     if (order) {
-      order.status = 'assigned';
+      // No pickup-confirmation step: accepting starts the delivery.
+      order.status = 'picked_up';
     }
     return order;
   }

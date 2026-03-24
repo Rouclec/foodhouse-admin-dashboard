@@ -28,6 +28,7 @@ type Querier interface {
 	DeleteDeliveryPoint(ctx context.Context, id string) error
 	DeleteSubscription(ctx context.Context, id string) error
 	DeleteSubscriptionItem(ctx context.Context, id string) error
+	GetAgentStats(ctx context.Context, agentID string) (GetAgentStatsRow, error)
 	GetAllUserSubscriptions(ctx context.Context) ([]UserSubscription, error)
 	GetAverageAgentRating(ctx context.Context, agentID string) (GetAverageAgentRatingRow, error)
 	GetCommissionsByIDsForUpdate(ctx context.Context, commissionIds []string) ([]Commission, error)

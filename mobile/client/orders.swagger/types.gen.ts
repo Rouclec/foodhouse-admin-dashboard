@@ -24,6 +24,11 @@ export type OrdersCreateDeliveryPointBody = {
   deliveryPointName?: string;
 };
 
+export type OrdersCreateDeliveryRatingBody = {
+  rating?: number;
+  comment?: string;
+};
+
 export type OrdersCreateOrderBody = {
   orderItems?: Array<ordersgrpcOrderItem>;
   deliveryLocation?: typesPoint;
@@ -104,6 +109,10 @@ export type ordersgrpcCreateDeliveryPointResponse = {
   deliveryPoint?: ordersgrpcDeliveryPoint;
 };
 
+export type ordersgrpcCreateDeliveryRatingResponse = {
+  deliveryRating?: ordersgrpcDeliveryRating;
+};
+
 export type ordersgrpcCreateOrderResponse = {
   order?: ordersgrpcOrder;
 };
@@ -126,6 +135,20 @@ export type ordersgrpcDeliveryPoint = {
   createdAt?: string;
 };
 
+/**
+ * Delivery agent rating left by the buyer for a delivered order.
+ */
+export type ordersgrpcDeliveryRating = {
+  id?: number;
+  orderNumber?: string;
+  agentId?: string;
+  userId?: string;
+  rating?: number;
+  comment?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 export type ordersgrpcDispatchOrderResponse = unknown;
 
 export type ordersgrpcEstimateDeliveryFeeResponse = {
@@ -146,6 +169,19 @@ export type ordersgrpcFilterType =
 
 export type ordersgrpcGetAdminStatsResponse = {
   data?: Array<ordersgrpcStatItem>;
+};
+
+export type ordersgrpcGetAgentRatingSummaryResponse = {
+  agentId?: string;
+  ratingCount?: number;
+  averageRating?: number;
+};
+
+export type ordersgrpcGetAgentStatsResponse = {
+  availableCount?: number;
+  ongoingCount?: number;
+  completedCount?: number;
+  totalEarnings?: typesAmount;
 };
 
 export type ordersgrpcGetFarmerEarningsResponse = {
@@ -693,6 +729,18 @@ export type OrdersListFarmerOrdersResponse = ordersgrpcListFarmerOrdersResponse;
 
 export type OrdersListFarmerOrdersError = rpcStatus;
 
+export type OrdersGetAgentRatingSummaryData = {
+  path: {
+    agentId: string;
+    userId: string;
+  };
+};
+
+export type OrdersGetAgentRatingSummaryResponse =
+  ordersgrpcGetAgentRatingSummaryResponse;
+
+export type OrdersGetAgentRatingSummaryError = rpcStatus;
+
 export type OrdersCreateCustomSubscriptionData = {
   body: OrdersCreateCustomSubscriptionBody;
   path: {
@@ -727,6 +775,16 @@ export type OrdersEstimateDeliveryFeeResponse =
   ordersgrpcEstimateDeliveryFeeResponse;
 
 export type OrdersEstimateDeliveryFeeError = rpcStatus;
+
+export type OrdersGetAgentStatsData = {
+  path: {
+    userId: string;
+  };
+};
+
+export type OrdersGetAgentStatsResponse = ordersgrpcGetAgentStatsResponse;
+
+export type OrdersGetAgentStatsError = rpcStatus;
 
 export type OrdersInitiatePaymentData = {
   body: OrdersInitiatePaymentBody;
@@ -846,6 +904,19 @@ export type OrdersRejectOrderData = {
 export type OrdersRejectOrderResponse = ordersgrpcRejectOrderResponse;
 
 export type OrdersRejectOrderError = rpcStatus;
+
+export type OrdersCreateDeliveryRatingData = {
+  body: OrdersCreateDeliveryRatingBody;
+  path: {
+    orderNumber: string;
+    userId: string;
+  };
+};
+
+export type OrdersCreateDeliveryRatingResponse =
+  ordersgrpcCreateDeliveryRatingResponse;
+
+export type OrdersCreateDeliveryRatingError = rpcStatus;
 
 export type OrdersDispatchOrderData = {
   body: OrdersDispatchOrderBody;

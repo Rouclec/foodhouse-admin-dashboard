@@ -302,7 +302,9 @@ export default function ProductDetails() {
               buttonColor={Colors.error}
               style={[defaultStyles.button, createProductStyles.button]}
               loading={deleteMutation.isPending}>
-              <Text style={defaultStyles.buttonText}> Delete</Text>
+              <Text style={defaultStyles.buttonText}>
+                {i18n.t('common.delete')}
+              </Text>
             </Button>
           </Dialog.Actions>
         </Dialog>

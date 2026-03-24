@@ -1,9 +1,9 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { demoConfig } from '@/constants/demo';
 
-export type AgentKYCStatus = 'not_started' | 'pending' | 'verified' | 'rejected';
-export type AgentStatus = 'not_registered' | 'registered' | 'online' | 'offline';
+type AgentKYCStatus = 'not_started' | 'pending' | 'verified' | 'rejected';
+type AgentStatus = 'not_registered' | 'registered' | 'online' | 'offline';
 
-export interface AgentProfile {
+interface AgentProfile {
   id: string;
   email: string;
   phone: string;
@@ -12,7 +12,7 @@ export interface AgentProfile {
   profileImage?: string;
 }
 
-export interface AgentState {
+interface AgentState {
   isLoggedIn: boolean;
   isDemoMode: boolean;
   agent: AgentProfile | null;
@@ -23,7 +23,7 @@ export interface AgentState {
   pendingDeliveries: number;
 }
 
-const initialState: AgentState = {
+const initialAgentState: AgentState = {
   isLoggedIn: false,
   isDemoMode: false,
   agent: null,
@@ -34,146 +34,136 @@ const initialState: AgentState = {
   pendingDeliveries: 0,
 };
 
-interface AgentContextType {
-  state: AgentState;
-  loginAsAgent: (demoMode?: boolean) => void;
-  logout: () => void;
-  submitKYC: () => void;
-  approveKYC: () => void;
-  rejectKYC: (reason: string) => void;
-  goOnline: () => void;
-  goOffline: () => void;
-  updateEarnings: (amount: number) => void;
-  completeDelivery: () => void;
-  resetDemo: () => void;
-  setAgent: (agent: Partial<AgentProfile>) => void;
-}
+class AgentDemoState {
+  private state: AgentState = { ...initialAgentState };
+  private listeners: Set<(state: AgentState) => void> = new Set();
 
-const AgentContext = createContext<AgentContextType | undefined>(undefined);
+  getState(): AgentState {
+    return { ...this.state };
+  }
 
-export const AgentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [state, setState] = useState<AgentState>(initialState);
+  isDemoModeEnabled(): boolean {
+    return demoConfig.enabled && this.state.isDemoMode;
+  }
 
-  const loginAsAgent = useCallback((demoMode: boolean = false) => {
+  loginAsAgent(demoMode: boolean = false) {
     const demoAgent: AgentProfile = {
-      id: 'demo-agent-001',
+      id: demoConfig.demoUserId,
       email: 'agent@foodhouse.demo',
       phone: '+237 600 000 000',
       firstName: 'Demo',
       lastName: 'Agent',
-      profileImage: undefined,
     };
-    
-    setState(prev => ({
-      ...prev,
+
+    this.state = {
+      ...this.state,
       isLoggedIn: true,
       isDemoMode: demoMode,
       agent: demoAgent,
       kycStatus: demoMode ? 'verified' : 'not_started',
       agentStatus: demoMode ? 'offline' : 'not_registered',
-    }));
-  }, []);
+    };
+    this.notifyListeners();
+  }
 
-  const logout = useCallback(() => {
-    setState(initialState);
-  }, []);
+  logout() {
+    this.state = { ...initialAgentState };
+    this.notifyListeners();
+  }
 
-  const submitKYC = useCallback(() => {
-    setState(prev => ({
-      ...prev,
-      kycStatus: 'pending',
-    }));
-  }, []);
+  submitKYC() {
+    if (this.state.isDemoMode) {
+      this.state = {
+        ...this.state,
+        kycStatus: 'pending',
+      };
+      this.notifyListeners();
+      
+      setTimeout(() => {
+        this.approveKYC();
+      }, demoConfig.kycAutoApproveDelay);
+    }
+  }
 
-  const approveKYC = useCallback(() => {
-    setState(prev => ({
-      ...prev,
+  approveKYC() {
+    this.state = {
+      ...this.state,
       kycStatus: 'verified',
       agentStatus: 'offline',
-    }));
-  }, []);
+    };
+    this.notifyListeners();
+  }
 
-  const rejectKYC = useCallback((reason: string) => {
-    setState(prev => ({
-      ...prev,
+  rejectKYC(_reason: string) {
+    this.state = {
+      ...this.state,
       kycStatus: 'rejected',
-    }));
-  }, []);
+    };
+    this.notifyListeners();
+  }
 
-  const goOnline = useCallback(() => {
-    setState(prev => ({
-      ...prev,
+  goOnline() {
+    this.state = {
+      ...this.state,
       agentStatus: 'online',
-    }));
-  }, []);
+    };
+    this.notifyListeners();
+  }
 
-  const goOffline = useCallback(() => {
-    setState(prev => ({
-      ...prev,
+  goOffline() {
+    this.state = {
+      ...this.state,
       agentStatus: 'offline',
-    }));
-  }, []);
+    };
+    this.notifyListeners();
+  }
 
-  const updateEarnings = useCallback((amount: number) => {
-    setState(prev => ({
-      ...prev,
-      earnings: prev.earnings + amount,
-    }));
-  }, []);
+  updateEarnings(amount: number) {
+    this.state = {
+      ...this.state,
+      earnings: this.state.earnings + amount,
+    };
+    this.notifyListeners();
+  }
 
-  const completeDelivery = useCallback(() => {
-    setState(prev => ({
-      ...prev,
-      completedDeliveries: prev.completedDeliveries + 1,
-      pendingDeliveries: Math.max(0, prev.pendingDeliveries - 1),
-    }));
-  }, []);
+  completeDelivery() {
+    this.state = {
+      ...this.state,
+      completedDeliveries: this.state.completedDeliveries + 1,
+      pendingDeliveries: Math.max(0, this.state.pendingDeliveries - 1),
+    };
+    this.notifyListeners();
+  }
 
-  const resetDemo = useCallback(() => {
-    setState(prev => ({
-      ...prev,
+  resetDemo() {
+    this.state = {
+      ...this.state,
       kycStatus: 'verified',
       agentStatus: 'offline',
       earnings: 15000,
       completedDeliveries: 5,
       pendingDeliveries: 2,
-    }));
-  }, []);
-
-  const setAgent = useCallback((agentData: Partial<AgentProfile>) => {
-    setState(prev => ({
-      ...prev,
-      agent: prev.agent ? { ...prev.agent, ...agentData } : agentData as AgentProfile,
-    }));
-  }, []);
-
-  return (
-    <AgentContext.Provider
-      value={{
-        state,
-        loginAsAgent,
-        logout,
-        submitKYC,
-        approveKYC,
-        rejectKYC,
-        goOnline,
-        goOffline,
-        updateEarnings,
-        completeDelivery,
-        resetDemo,
-        setAgent,
-      }}>
-      {children}
-    </AgentContext.Provider>
-  );
-};
-
-export const useAgent = (): AgentContextType => {
-  const context = useContext(AgentContext);
-  if (!context) {
-    throw new Error('useAgent must be used within an AgentProvider');
+    };
+    this.notifyListeners();
   }
-  return context;
-};
 
-export default AgentContext;
+  setAgent(agentData: Partial<AgentProfile>) {
+    this.state = {
+      ...this.state,
+      agent: this.state.agent ? { ...this.state.agent, ...agentData } : agentData as AgentProfile,
+    };
+    this.notifyListeners();
+  }
+
+  subscribe(listener: (state: AgentState) => void) {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  }
+
+  private notifyListeners() {
+    this.listeners.forEach(listener => listener(this.getState()));
+  }
+}
+
+export const agentDemoState = new AgentDemoState();
+export type { AgentState, AgentKYCStatus, AgentStatus, AgentProfile };

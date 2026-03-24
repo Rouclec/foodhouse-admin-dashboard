@@ -30,44 +30,44 @@ func (q *Queries) CountUsers(ctx context.Context, arg CountUsersParams) (int64, 
 
 const createKYC = `-- name: CreateKYC :one
 
-INSERT INTO kyc_verifications (user_id, identity_document_url, selfie_url, vehicle_document_url, status)
+INSERT INTO kyc_verifications (user_id, identity_document_urls, selfie_urls, vehicle_document_urls, status)
 VALUES ($1, $2, $3, $4, 'KYC_STATUS_PENDING')
 ON CONFLICT (user_id) DO UPDATE
-SET identity_document_url = EXCLUDED.identity_document_url,
-    selfie_url = EXCLUDED.selfie_url,
-    vehicle_document_url = EXCLUDED.vehicle_document_url,
+SET identity_document_urls = EXCLUDED.identity_document_urls,
+    selfie_urls = EXCLUDED.selfie_urls,
+    vehicle_document_urls = EXCLUDED.vehicle_document_urls,
     status = 'KYC_STATUS_PENDING',
     updated_at = now()
-RETURNING id, user_id, identity_document_url, selfie_url, vehicle_document_url, status, rejection_reason, verified_at, created_at, updated_at
+RETURNING id, user_id, status, rejection_reason, verified_at, created_at, updated_at, identity_document_urls, selfie_urls, vehicle_document_urls
 `
 
 type CreateKYCParams struct {
-	UserID              string `json:"user_id"`
-	IdentityDocumentUrl string `json:"identity_document_url"`
-	SelfieUrl           string `json:"selfie_url"`
-	VehicleDocumentUrl  string `json:"vehicle_document_url"`
+	UserID               string   `json:"user_id"`
+	IdentityDocumentUrls []string `json:"identity_document_urls"`
+	SelfieUrls           []string `json:"selfie_urls"`
+	VehicleDocumentUrls  []string `json:"vehicle_document_urls"`
 }
 
 // KYC Queries
 func (q *Queries) CreateKYC(ctx context.Context, arg CreateKYCParams) (KycVerification, error) {
 	row := q.db.QueryRow(ctx, createKYC,
 		arg.UserID,
-		arg.IdentityDocumentUrl,
-		arg.SelfieUrl,
-		arg.VehicleDocumentUrl,
+		arg.IdentityDocumentUrls,
+		arg.SelfieUrls,
+		arg.VehicleDocumentUrls,
 	)
 	var i KycVerification
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
-		&i.IdentityDocumentUrl,
-		&i.SelfieUrl,
-		&i.VehicleDocumentUrl,
 		&i.Status,
 		&i.RejectionReason,
 		&i.VerifiedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.IdentityDocumentUrls,
+		&i.SelfieUrls,
+		&i.VehicleDocumentUrls,
 	)
 	return i, err
 }
@@ -168,46 +168,46 @@ func (q *Queries) GetFarmer(ctx context.Context, id string) (User, error) {
 	return i, err
 }
 
-const getKYCById = `-- name: GetKYCById :one
-SELECT id, user_id, identity_document_url, selfie_url, vehicle_document_url, status, rejection_reason, verified_at, created_at, updated_at FROM kyc_verifications WHERE id = $1
+const getKYCByID = `-- name: GetKYCByID :one
+SELECT id, user_id, status, rejection_reason, verified_at, created_at, updated_at, identity_document_urls, selfie_urls, vehicle_document_urls FROM kyc_verifications WHERE id = $1
 `
 
-func (q *Queries) GetKYCById(ctx context.Context, id string) (KycVerification, error) {
-	row := q.db.QueryRow(ctx, getKYCById, id)
+func (q *Queries) GetKYCByID(ctx context.Context, id string) (KycVerification, error) {
+	row := q.db.QueryRow(ctx, getKYCByID, id)
 	var i KycVerification
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
-		&i.IdentityDocumentUrl,
-		&i.SelfieUrl,
-		&i.VehicleDocumentUrl,
 		&i.Status,
 		&i.RejectionReason,
 		&i.VerifiedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.IdentityDocumentUrls,
+		&i.SelfieUrls,
+		&i.VehicleDocumentUrls,
 	)
 	return i, err
 }
 
-const getKYCByUserId = `-- name: GetKYCByUserId :one
-SELECT id, user_id, identity_document_url, selfie_url, vehicle_document_url, status, rejection_reason, verified_at, created_at, updated_at FROM kyc_verifications WHERE user_id = $1
+const getKYCByUserID = `-- name: GetKYCByUserID :one
+SELECT id, user_id, status, rejection_reason, verified_at, created_at, updated_at, identity_document_urls, selfie_urls, vehicle_document_urls FROM kyc_verifications WHERE user_id = $1
 `
 
-func (q *Queries) GetKYCByUserId(ctx context.Context, userID string) (KycVerification, error) {
-	row := q.db.QueryRow(ctx, getKYCByUserId, userID)
+func (q *Queries) GetKYCByUserID(ctx context.Context, userID string) (KycVerification, error) {
+	row := q.db.QueryRow(ctx, getKYCByUserID, userID)
 	var i KycVerification
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
-		&i.IdentityDocumentUrl,
-		&i.SelfieUrl,
-		&i.VehicleDocumentUrl,
 		&i.Status,
 		&i.RejectionReason,
 		&i.VerifiedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.IdentityDocumentUrls,
+		&i.SelfieUrls,
+		&i.VehicleDocumentUrls,
 	)
 	return i, err
 }
@@ -560,7 +560,7 @@ func (q *Queries) ListFarmersByRating(ctx context.Context, arg ListFarmersByRati
 }
 
 const listKYCVerifications = `-- name: ListKYCVerifications :many
-SELECT id, user_id, identity_document_url, selfie_url, vehicle_document_url, status, rejection_reason, verified_at, created_at, updated_at FROM kyc_verifications 
+SELECT id, user_id, status, rejection_reason, verified_at, created_at, updated_at, identity_document_urls, selfie_urls, vehicle_document_urls FROM kyc_verifications 
 WHERE ($1::text IS NULL OR status = $1)
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
@@ -584,14 +584,14 @@ func (q *Queries) ListKYCVerifications(ctx context.Context, arg ListKYCVerificat
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
-			&i.IdentityDocumentUrl,
-			&i.SelfieUrl,
-			&i.VehicleDocumentUrl,
 			&i.Status,
 			&i.RejectionReason,
 			&i.VerifiedAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.IdentityDocumentUrls,
+			&i.SelfieUrls,
+			&i.VehicleDocumentUrls,
 		); err != nil {
 			return nil, err
 		}
@@ -708,7 +708,7 @@ SET status = $2,
     verified_at = CASE WHEN $2 = 'KYC_STATUS_VERIFIED' THEN now() ELSE NULL END,
     updated_at = now()
 WHERE id = $1
-RETURNING id, user_id, identity_document_url, selfie_url, vehicle_document_url, status, rejection_reason, verified_at, created_at, updated_at
+RETURNING id, user_id, status, rejection_reason, verified_at, created_at, updated_at, identity_document_urls, selfie_urls, vehicle_document_urls
 `
 
 type UpdateKYCStatusParams struct {
@@ -723,14 +723,14 @@ func (q *Queries) UpdateKYCStatus(ctx context.Context, arg UpdateKYCStatusParams
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
-		&i.IdentityDocumentUrl,
-		&i.SelfieUrl,
-		&i.VehicleDocumentUrl,
 		&i.Status,
 		&i.RejectionReason,
 		&i.VerifiedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.IdentityDocumentUrls,
+		&i.SelfieUrls,
+		&i.VehicleDocumentUrls,
 	)
 	return i, err
 }

@@ -79,7 +79,7 @@ const ProfilePage = () => {
         if (user?.role === 'USER_ROLE_FARMER') {
           router.replace('/(farmer)/(index)');
         } else if (user?.role === 'USER_ROLE_AGENT') {
-          router.replace('/(agent)/(kyc)');
+          router.replace('/(agent)/kyc');
         } else {
           router.replace('/(buyer)/(index)');
         }
@@ -99,44 +99,44 @@ const ProfilePage = () => {
       setLoading(true);
       let imageUrl = user?.profileImage || null;
 
-      // if (profileImage) {
-      //   const imageUri = await compressImage();
-      //   imageUrl = await uploadImage({
-      //     uri: imageUri,
-      //     filename: `profile_${user?.userId}_${Date.now()}.jpg`,
-      //     directory: 'profile_images',
-      //   });
-      // }
+      if (profileImage) {
+        const imageUri = await compressImage();
+        imageUrl = await uploadImage({
+          uri: imageUri,
+          filename: `profile_${user?.userId}_${Date.now()}.jpg`,
+          directory: 'profile_images',
+        });
+      }
 
-      // if (!firstName) {
-      //   return;
-      // }
+      if (!firstName) {
+        return;
+      }
 
-      // if (user?.role === 'USER_ROLE_BUYER') {
-      //   if (!enteringReferal) return;
-      //   if (
-      //     enteringReferal === 'yes' &&
-      //     (!referralCode || (!!referralCode && referralCode.length < 7))
-      //   )
-      //     return;
-      // } else {
-      //   if (!imageUrl) {
-      //     setError(true);
-      //     setErrorMessage(i18n.t('(auth).profile.profileImageRequired'));
-      //     await delay(5000);
-      //     setError(false);
-      //     setErrorMessage(undefined);
-      //     return;
-      //   }
-      //   if (!locationCoordinates || !address) {
-      //     setError(true);
-      //     setErrorMessage(i18n.t('(auth).profile.selectAValidAddress'));
-      //     await delay(5000);
-      //     setError(false);
-      //     setErrorMessage(undefined);
-      //     return;
-      //   }
-      // }
+      if (user?.role === 'USER_ROLE_BUYER') {
+        if (!enteringReferal) return;
+        if (
+          enteringReferal === 'yes' &&
+          (!referralCode || (!!referralCode && referralCode.length < 7))
+        )
+          return;
+      } else {
+        if (!imageUrl) {
+          setError(true);
+          setErrorMessage(i18n.t('(auth).profile.profileImageRequired'));
+          await delay(5000);
+          setError(false);
+          setErrorMessage(undefined);
+          return;
+        }
+        if (!locationCoordinates || !address) {
+          setError(true);
+          setErrorMessage(i18n.t('(auth).profile.selectAValidAddress'));
+          await delay(5000);
+          setError(false);
+          setErrorMessage(undefined);
+          return;
+        }
+      }
 
       const data: UsersCompleteRegistrationBody = {
         firstName,
@@ -149,33 +149,20 @@ const ProfilePage = () => {
         referredBy: referralCode,
       };
 
-      // await updateUserRegistration({
-      //   body: data,
-      //   path: {
-      //     userId: user?.userId ?? '',
-      //   },
-      // });
+      await updateUserRegistration({
+        body: data,
+        path: {
+          userId: user?.userId ?? '',
+        },
+      });
 
       setUser({ ...user, ...data });
-
-      console.log('user', user);
-
-      setSuccessModalVisible(true);
-      setTimeout(() => {
-        // if (user?.role === 'USER_ROLE_FARMER') {
-        //   router.replace('/(farmer)/(index)');
-        // } else if (user?.role === 'USER_ROLE_AGENT') {
-          router.replace('/(agent)/(kyc)');
-        // } else {
-        //   router.replace('/(buyer)/(index)');
-        // }
-      }, 3000);
     } catch (error) {
       console.error('Error completing registration:', error);
-      // setErrorMessage(i18n.t('(auth).profile.uploadError'));
-      // setError(true);
-      // await delay(5000);
-      // setError(false);
+      setErrorMessage(i18n.t('(auth).profile.uploadError'));
+      setError(true);
+      await delay(5000);
+      setError(false);
     } finally {
       setLoading(false);
     }
@@ -185,6 +172,7 @@ const ProfilePage = () => {
     data: GooglePlaceData,
     details: GooglePlaceDetail | null,
   ) => {
+    console.log('handleAddressSelect: Data:', data);
     setAddress(data.description);
     setLastSelectedAddress(data.description);
     if (details?.geometry?.location) {
@@ -399,8 +387,6 @@ const ProfilePage = () => {
                   value: address,
                   onChangeText: text => {
                     setAddress(text);
-                    setLastSelectedAddress(null);
-                    setLocationCoordinates(undefined);
                   },
                 }}
                 onPress={(data, details) => handleAddressSelect(data, details)}
@@ -480,7 +466,9 @@ const ProfilePage = () => {
           ]}
           loading={loading}
           onPress={handleComplete}>
-          <Text style={defaultStyles.buttonText}>Complete</Text>
+          <Text style={defaultStyles.buttonText}>
+            {i18n.t('(auth).profile.completeButton')}
+          </Text>
         </Button>
       </View>
 

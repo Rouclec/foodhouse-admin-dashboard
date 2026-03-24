@@ -102,6 +102,7 @@ export const kycStyles = StyleSheet.create({
   },
   successTitle: {
     fontSize: 24,
+    lineHeight: 48,
     fontWeight: 'bold',
     marginBottom: 8,
     textAlign: 'center',

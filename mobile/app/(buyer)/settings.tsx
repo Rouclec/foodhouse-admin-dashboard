@@ -87,7 +87,10 @@ export default function SettingsPage() {
 
   const handleDeleteAccount = async () => {
     if (!user?.userId) {
-      Alert.alert('Error', 'User ID is missing. Cannot delete account.');
+      Alert.alert(
+        i18n.t('common.error'),
+        i18n.t('common.deleteAccountUserIdMissing'),
+      );
       return;
     }
 
@@ -105,10 +108,10 @@ export default function SettingsPage() {
     } catch (error) {
       console.error('Account Deletion Failed:', error);
       Alert.alert(
-        'Deletion Failed',
+        i18n.t('common.deletionFailedTitle'),
         error instanceof Error
           ? error.message
-          : 'An unknown error occurred while trying to delete your account.',
+          : i18n.t('common.unknownErrorDeletingAccount'),
       );
     }
   };

@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { defaultStyles } from '@/styles';
+import i18n from '@/i18n';
 import { useQuery } from '@tanstack/react-query';
 import {
   productsListProductsOptions,
@@ -188,11 +189,21 @@ export default function CreateCustomSubscription() {
       const overallAfter = overallBefore - prevQty * unit + newQty * unit;
 
       if (deliveryTotalAfter > MAX_PER_DELIVERY_XAF) {
-        setSnack(`Max per delivery is XAF ${MAX_PER_DELIVERY_XAF.toLocaleString()}.`);
+        setSnack(
+          i18n.t('(subscription).(customPackage).maxPerDeliverySnack', {
+            currency: i18n.t('common.currency'),
+            amount: MAX_PER_DELIVERY_XAF.toLocaleString(),
+          }),
+        );
         return prev;
       }
       if (overallAfter > budgetXaf) {
-        setSnack(`You only have XAF ${budgetXaf.toLocaleString()} total budget.`);
+        setSnack(
+          i18n.t('(subscription).(customPackage).totalBudgetSnack', {
+            currency: i18n.t('common.currency'),
+            amount: budgetXaf.toLocaleString(),
+          }),
+        );
         return prev;
       }
 
@@ -302,10 +313,13 @@ export default function CreateCustomSubscription() {
         </TouchableOpacity>
         <View style={{ paddingBottom: 16 }}>
           <Text variant="titleLarge" style={{ color: Colors.light[10], fontWeight: '800' }}>
-            Custom plan
+            {i18n.t('(subscription).(customPackage).title')}
           </Text>
           <Text variant="bodySmall" style={{ color: 'rgba(255,255,255,0.85)' }}>
-            Max per delivery is XAF {MAX_PER_DELIVERY_XAF.toLocaleString()}.
+            {i18n.t('(subscription).(customPackage).maxPerDeliveryHero', {
+              currency: i18n.t('common.currency'),
+              amount: MAX_PER_DELIVERY_XAF.toLocaleString(),
+            })}
           </Text>
         </View>
       </ImageBackground>
@@ -314,9 +328,15 @@ export default function CreateCustomSubscription() {
         <View style={{ padding: 16, paddingBottom: 32 }}>
           <Card style={{ marginTop: -24, backgroundColor: Colors.light[10] }}>
             <Card.Content>
-              <Text variant="titleMedium">Set your budget</Text>
+              <Text variant="titleMedium">
+                {i18n.t('(subscription).(customPackage).budgetStepTitle')}
+              </Text>
               <Text variant="bodySmall" style={{ color: Colors.light['10.87'], marginTop: 4 }}>
-                Max budget: XAF {MAX_BUDGET_XAF.toLocaleString()} • Default: XAF {DEFAULT_BUDGET_XAF.toLocaleString()}
+                {i18n.t('(subscription).(customPackage).budgetMeta', {
+                  currency: i18n.t('common.currency'),
+                  max: MAX_BUDGET_XAF.toLocaleString(),
+                  default: DEFAULT_BUDGET_XAF.toLocaleString(),
+                })}
               </Text>
 
               <View style={{ marginTop: 16 }}>
@@ -337,7 +357,7 @@ export default function CreateCustomSubscription() {
                   <View style={{ flex: 1 }}>
                     <TextInput
                       mode="outlined"
-                      label="Budget (XAF)"
+                      label={i18n.t('(subscription).(customPackage).monthlyBudget')}
                       value={budgetText}
                       onChangeText={(t) => setBudgetText(t.replace(/[^0-9]/g, ''))}
                       keyboardType="numeric"
@@ -350,7 +370,7 @@ export default function CreateCustomSubscription() {
                       outlineStyle={{ borderRadius: 14 }}
                     />
                     <Text variant="bodySmall" style={{ color: Colors.light['10.87'], marginTop: 6 }}>
-                      Tip: use +/− for quick changes (5,000). Slider step is 1,000.
+                      {i18n.t('(subscription).(customPackage).budgetTip')}
                     </Text>
                   </View>
 
@@ -394,9 +414,15 @@ export default function CreateCustomSubscription() {
 
           <Card style={{ marginTop: 12, backgroundColor: Colors.light[10] }}>
             <Card.Content>
-              <Text variant="titleMedium">Deliveries</Text>
+              <Text variant="titleMedium">
+                {i18n.t('(subscription).(customPackage).deliveries')}
+              </Text>
               <Text variant="bodySmall" style={{ color: Colors.light['10.87'], marginTop: 4 }}>
-                Minimum deliveries: {minDeliveriesForBudget(budgetXaf)} (because one delivery can be at most XAF {MAX_PER_DELIVERY_XAF.toLocaleString()})
+                {i18n.t('(subscription).(customPackage).minimumDeliveries', {
+                  min: minDeliveriesForBudget(budgetXaf),
+                  currency: i18n.t('common.currency'),
+                  maxPerDelivery: MAX_PER_DELIVERY_XAF.toLocaleString(),
+                })}
               </Text>
 
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 12 }}>
@@ -451,7 +477,7 @@ export default function CreateCustomSubscription() {
               setActiveDeliveryIdx(0);
               setStep('builder');
             }}>
-            Continue
+            {i18n.t('common.continue')}
           </Button>
         </View>
       )}
@@ -462,16 +488,22 @@ export default function CreateCustomSubscription() {
             <Card.Content>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
                 <View style={{ flex: 1 }}>
-                  <Text variant="titleMedium">Budget usage</Text>
+                  <Text variant="titleMedium">
+                    {i18n.t('(subscription).(selectProducts).budgetUsed')}
+                  </Text>
                   <Text variant="bodySmall" style={{ color: Colors.light['10.87'], marginTop: 4 }}>
-                    Used: XAF {totals.used.toLocaleString()} • Left: XAF {Math.max(0, totals.remaining).toLocaleString()}
+                    {i18n.t('(subscription).(customPackage).usedLeft', {
+                      currency: i18n.t('common.currency'),
+                      used: totals.used.toLocaleString(),
+                      left: Math.max(0, totals.remaining).toLocaleString(),
+                    })}
                   </Text>
                 </View>
                 <TouchableOpacity
                   onPress={() => setDeliveriesCountSafe(deliveriesCount + 1)}
                   style={{ paddingHorizontal: 12, paddingVertical: 10, borderRadius: 999, backgroundColor: Colors.primary[50], borderWidth: 1, borderColor: Colors.primary[500] }}>
                   <Text variant="bodySmall" style={{ color: Colors.primary[500], fontWeight: '800' }}>
-                    + delivery
+                    {i18n.t('(subscription).(customPackage).addDelivery')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -516,13 +548,20 @@ export default function CreateCustomSubscription() {
               }}
             />
             <Text variant="bodySmall" style={{ color: Colors.light['10.87'], marginTop: 8 }}>
-              Delivery {activeDeliveryIdx + 1}: XAF {(totals.deliveryTotals[activeDeliveryIdx] ?? 0).toLocaleString()} / {MAX_PER_DELIVERY_XAF.toLocaleString()}
+              {i18n.t('(subscription).(selectProducts).deliveryBudgetLine', {
+                index: activeDeliveryIdx + 1,
+                currency: i18n.t('common.currency'),
+                total: (totals.deliveryTotals[activeDeliveryIdx] ?? 0).toLocaleString(),
+                max: MAX_PER_DELIVERY_XAF.toLocaleString(),
+              })}
             </Text>
           </View>
 
           {/* Products list for active delivery */}
           <Text variant="titleMedium" style={{ marginTop: 16, marginBottom: 12 }}>
-            Select products for delivery {activeDeliveryIdx + 1}
+            {i18n.t('(subscription).(selectProducts).selectProductsForDelivery', {
+              index: activeDeliveryIdx + 1,
+            })}
           </Text>
 
           {isProductsLoading ? (
@@ -537,7 +576,9 @@ export default function CreateCustomSubscription() {
               contentContainerStyle={{ paddingBottom: 16 }}
               ListEmptyComponent={
                 <View style={defaultStyles.noItemsContainer}>
-                  <Text style={defaultStyles.noItems}>No products available</Text>
+                  <Text style={defaultStyles.noItems}>
+                    {i18n.t('(subscription).(selectProducts).noProductsAvailable')}
+                  </Text>
                 </View>
               }
               renderItem={({ item }) => {
@@ -594,7 +635,10 @@ export default function CreateCustomSubscription() {
 
                       {qty > 0 && (
                         <Text variant="bodySmall" style={{ color: Colors.primary[500], fontWeight: '800', marginTop: 10 }}>
-                          Line total: XAF {lineTotal.toLocaleString()}
+                          {i18n.t('(subscription).(selectProducts).lineTotal', {
+                            currency: i18n.t('common.currency'),
+                            amount: lineTotal.toLocaleString(),
+                          })}
                         </Text>
                       )}
                     </Card.Content>
@@ -608,8 +652,11 @@ export default function CreateCustomSubscription() {
             <Card.Content>
               <Text variant="bodySmall" style={{ color: totals.remaining === 0 ? Colors.primary[500] : Colors.light['10.87'] }}>
                 {totals.remaining === 0
-                  ? 'Perfect — you’ve allocated the full budget.'
-                  : `You still have XAF ${Math.max(0, totals.remaining).toLocaleString()} left. Allocate it (or add a delivery) to continue.`}
+                  ? i18n.t('(subscription).(selectProducts).budgetAllocatedPerfect')
+                  : i18n.t('(subscription).(selectProducts).budgetRemainingToAllocate', {
+                      currency: i18n.t('common.currency'),
+                      amount: Math.max(0, totals.remaining).toLocaleString(),
+                    })}
               </Text>
             </Card.Content>
           </Card>
@@ -620,7 +667,7 @@ export default function CreateCustomSubscription() {
             style={{ borderRadius: 12, marginTop: 12 }}
             disabled={totals.remaining !== 0 || totals.used <= 0}
             onPress={() => setStep('summary')}>
-            Review summary
+            {i18n.t('(subscription).(selectProducts).viewSummary')}
           </Button>
         </View>
       )}
@@ -629,9 +676,13 @@ export default function CreateCustomSubscription() {
         <View style={{ padding: 16, paddingBottom: 32, flex: 1 }}>
           <Card style={{ marginTop: -24, marginBottom: 12, backgroundColor: Colors.light[10] }}>
             <Card.Content>
-              <Text variant="titleMedium">Summary</Text>
+              <Text variant="titleMedium">{i18n.t('(subscription).(summary).header')}</Text>
               <Text variant="bodySmall" style={{ color: Colors.light['10.87'], marginTop: 4 }}>
-                Budget: XAF {budgetXaf.toLocaleString()} • Deliveries: {deliveriesCount}
+                {i18n.t('(subscription).(summary).budgetDeliveriesLine', {
+                  currency: i18n.t('common.currency'),
+                  budget: budgetXaf.toLocaleString(),
+                  deliveries: deliveriesCount,
+                })}
               </Text>
             </Card.Content>
           </Card>
@@ -642,12 +693,18 @@ export default function CreateCustomSubscription() {
                 const { firstDelivery, daysUntilSaturday } = getFirstDeliveryDate(new Date());
                 return (
                   <>
-                    <Text variant="titleMedium">Delivery dates</Text>
+                    <Text variant="titleMedium">
+                      {i18n.t('(subscription).(summary).deliveryDatesTitle')}
+                    </Text>
                     <Text variant="bodySmall" style={{ color: Colors.light['10.87'], marginTop: 4 }}>
-                      Rule: if there are 3 days or less until Saturday, the first delivery is this Saturday; otherwise it’s next Saturday.
+                      {i18n.t('(subscription).(summary).deliveryDatesRule')}
                     </Text>
                     <Text variant="bodySmall" style={{ color: Colors.light['10.87'], marginTop: 8 }}>
-                      Today → Saturday in {daysUntilSaturday} day{daysUntilSaturday === 1 ? '' : 's'} • First delivery: {formatShortDate(firstDelivery)}
+                      {i18n.t('(subscription).(summary).deliveryDatesTodayLine', {
+                        daysUntilSaturday,
+                        dayLabel: i18n.t('common.day', { count: daysUntilSaturday }),
+                        firstDelivery: formatShortDate(firstDelivery),
+                      })}
                     </Text>
                     <View style={{ marginTop: 12 }}>
                       {Array.from({ length: deliveriesCount }, (_, idx) => {
@@ -655,7 +712,12 @@ export default function CreateCustomSubscription() {
                         const spent = totals.deliveryTotals[idx] ?? 0;
                         return (
                           <Text key={idx} variant="bodySmall" style={{ marginBottom: 4 }}>
-                            Delivery #{idx + 1} • {formatShortDate(date)} • XAF {spent.toLocaleString()}
+                            {i18n.t('(subscription).(summary).deliveryDatesItem', {
+                              index: idx + 1,
+                              date: formatShortDate(date),
+                              currency: i18n.t('common.currency'),
+                              amount: spent.toLocaleString(),
+                            })}
                           </Text>
                         );
                       })}
@@ -667,7 +729,7 @@ export default function CreateCustomSubscription() {
           </Card>
 
           <Text variant="titleMedium" style={{ marginBottom: 12 }}>
-            Products per delivery
+            {i18n.t('(subscription).(summary).productsPerDeliveryTitle')}
           </Text>
 
           <FlatList
@@ -684,11 +746,14 @@ export default function CreateCustomSubscription() {
                 <Card style={{ marginBottom: 12, backgroundColor: Colors.light[10] }}>
                   <Card.Content>
                     <Text variant="titleMedium">
-                      Delivery #{idx + 1} • {formatShortDate(date)}
+                      {i18n.t('(subscription).(summary).deliveryCardTitle', {
+                        index: idx + 1,
+                        date: formatShortDate(date),
+                      })}
                     </Text>
                     {items.length === 0 ? (
                       <Text variant="bodySmall" style={{ color: Colors.light['10.87'], marginTop: 6 }}>
-                        No products selected.
+                        {i18n.t('(subscription).(summary).noProductsSelected')}
                       </Text>
                     ) : (
                       <View style={{ marginTop: 8 }}>
@@ -714,11 +779,17 @@ export default function CreateCustomSubscription() {
 
           <Card style={{ marginTop: 4, marginBottom: 12, backgroundColor: Colors.light[10] }}>
             <Card.Content>
-              <Text variant="titleMedium">Delivery method</Text>
+              <Text variant="titleMedium">
+                {i18n.t('(subscription).(summary).deliveryMethodTitle')}
+              </Text>
               <Text variant="bodySmall" style={{ color: Colors.light['10.87'], marginTop: 4 }}>
                 {deliveryLocation?.description
-                  ? `Selected: ${deliveryLocation.description}${deliveryLocation.address ? ` • ${deliveryLocation.address}` : ''}`
-                  : 'Choose pickup point or home delivery, then select your location.'}
+                  ? i18n.t('(subscription).(summary).deliveryMethodSelected', {
+                      selection: `${deliveryLocation.description}${
+                        deliveryLocation.address ? ` • ${deliveryLocation.address}` : ''
+                      }`,
+                    })
+                  : i18n.t('(subscription).(summary).deliveryMethodChoose')}
               </Text>
               <View style={{ flexDirection: 'row', gap: 10, marginTop: 10 }}>
                 <Button
@@ -731,7 +802,7 @@ export default function CreateCustomSubscription() {
                       params: { returnTo: '/(buyer)/create-custom-subscription' },
                     } as any)
                   }>
-                  Pickup point
+                  {i18n.t('(subscription).(summary).pickupPoint')}
                 </Button>
                 <Button
                   mode="outlined"
@@ -743,7 +814,7 @@ export default function CreateCustomSubscription() {
                       params: { returnTo: '/(buyer)/create-custom-subscription' },
                     } as any)
                   }>
-                  Home delivery
+                  {i18n.t('(subscription).(summary).homeDelivery')}
                 </Button>
               </View>
             </Card.Content>
@@ -761,7 +832,7 @@ export default function CreateCustomSubscription() {
               !deliveryLocation?.region
             }
             onPress={handleSubmit}>
-            Proceed to pay
+            {i18n.t('(subscription).(summary).proceedToPay')}
           </Button>
         </View>
       )}

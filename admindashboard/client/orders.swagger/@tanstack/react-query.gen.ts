@@ -34,6 +34,7 @@ import type {
   OrdersListSubscriptionPlansData,
   OrdersGetFarmerEarningsData,
   OrdersListFarmerOrdersData,
+  OrdersGetAgentRatingSummaryData,
   OrdersCreateCustomSubscriptionData,
   OrdersCreateCustomSubscriptionError,
   OrdersCreateCustomSubscriptionResponse,
@@ -43,6 +44,7 @@ import type {
   OrdersEstimateDeliveryFeeData,
   OrdersEstimateDeliveryFeeError,
   OrdersEstimateDeliveryFeeResponse,
+  OrdersGetAgentStatsData,
   OrdersInitiatePaymentData,
   OrdersInitiatePaymentError,
   OrdersInitiatePaymentResponse,
@@ -60,6 +62,9 @@ import type {
   OrdersRejectOrderData,
   OrdersRejectOrderError,
   OrdersRejectOrderResponse,
+  OrdersCreateDeliveryRatingData,
+  OrdersCreateDeliveryRatingError,
+  OrdersCreateDeliveryRatingResponse,
   OrdersDispatchOrderData,
   OrdersDispatchOrderError,
   OrdersDispatchOrderResponse,
@@ -89,9 +94,11 @@ import {
   ordersListSubscriptionPlans,
   ordersGetFarmerEarnings,
   ordersListFarmerOrders,
+  ordersGetAgentRatingSummary,
   ordersCreateCustomSubscription,
   ordersCreateOrder,
   ordersEstimateDeliveryFee,
+  ordersGetAgentStats,
   ordersInitiatePayment,
   ordersListDeliveryCities,
   ordersListDeliveryPoints,
@@ -101,6 +108,7 @@ import {
   ordersGetUserSubscriptionDetails,
   ordersApproveOrder,
   ordersRejectOrder,
+  ordersCreateDeliveryRating,
   ordersDispatchOrder,
   ordersGetOrderDetails,
   ordersCheckPaymentStatus,
@@ -595,6 +603,27 @@ export const ordersListFarmerOrdersOptions = (
   });
 };
 
+export const ordersGetAgentRatingSummaryQueryKey = (
+  options: OptionsLegacyParser<OrdersGetAgentRatingSummaryData>,
+) => [createQueryKey("ordersGetAgentRatingSummary", options)];
+
+export const ordersGetAgentRatingSummaryOptions = (
+  options: OptionsLegacyParser<OrdersGetAgentRatingSummaryData>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await ordersGetAgentRatingSummary({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: ordersGetAgentRatingSummaryQueryKey(options),
+  });
+};
+
 export const ordersCreateCustomSubscriptionQueryKey = (
   options: OptionsLegacyParser<OrdersCreateCustomSubscriptionData>,
 ) => [createQueryKey("ordersCreateCustomSubscription", options)];
@@ -716,6 +745,27 @@ export const ordersEstimateDeliveryFeeMutation = (
     },
   };
   return mutationOptions;
+};
+
+export const ordersGetAgentStatsQueryKey = (
+  options: OptionsLegacyParser<OrdersGetAgentStatsData>,
+) => [createQueryKey("ordersGetAgentStats", options)];
+
+export const ordersGetAgentStatsOptions = (
+  options: OptionsLegacyParser<OrdersGetAgentStatsData>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await ordersGetAgentStats({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: ordersGetAgentStatsQueryKey(options),
+  });
 };
 
 export const ordersInitiatePaymentQueryKey = (
@@ -935,6 +985,47 @@ export const ordersRejectOrderMutation = (
   > = {
     mutationFn: async (localOptions) => {
       const { data } = await ordersRejectOrder({
+        ...options,
+        ...localOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const ordersCreateDeliveryRatingQueryKey = (
+  options: OptionsLegacyParser<OrdersCreateDeliveryRatingData>,
+) => [createQueryKey("ordersCreateDeliveryRating", options)];
+
+export const ordersCreateDeliveryRatingOptions = (
+  options: OptionsLegacyParser<OrdersCreateDeliveryRatingData>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await ordersCreateDeliveryRating({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: ordersCreateDeliveryRatingQueryKey(options),
+  });
+};
+
+export const ordersCreateDeliveryRatingMutation = (
+  options?: Partial<OptionsLegacyParser<OrdersCreateDeliveryRatingData>>,
+) => {
+  const mutationOptions: UseMutationOptions<
+    OrdersCreateDeliveryRatingResponse,
+    AxiosError<OrdersCreateDeliveryRatingError>,
+    OptionsLegacyParser<OrdersCreateDeliveryRatingData>
+  > = {
+    mutationFn: async (localOptions) => {
+      const { data } = await ordersCreateDeliveryRating({
         ...options,
         ...localOptions,
         throwOnError: true,

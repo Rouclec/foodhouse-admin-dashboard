@@ -355,6 +355,48 @@ message StatItem {
 message GetAdminStatsRequest { string user_id = 1; }
 message GetAdminStatsResponse { repeated StatItem data = 1; }
 
+// Agent dashboard statistics.
+message GetAgentStatsRequest { string user_id = 1; }
+
+message GetAgentStatsResponse {
+  int32 available_count = 1;
+  int32 ongoing_count = 2;
+  int32 completed_count = 3;
+  types.Amount total_earnings = 4;
+}
+
+// Delivery agent rating left by the buyer for a delivered order.
+message DeliveryRating {
+  int32 id = 1;
+  int64 order_number = 2;
+  string agent_id = 3;
+  string user_id = 4;
+  int32 rating = 5; // 1..5
+  string comment = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+message CreateDeliveryRatingRequest {
+  string user_id = 1;
+  int64 order_number = 2;
+  int32 rating = 3; // 1..5
+  string comment = 4;
+}
+
+message CreateDeliveryRatingResponse { DeliveryRating delivery_rating = 1; }
+
+message GetAgentRatingSummaryRequest {
+  string user_id = 1;
+  string agent_id = 2;
+}
+
+message GetAgentRatingSummaryResponse {
+  string agent_id = 1;
+  int32 rating_count = 2;
+  double average_rating = 3;
+}
+
 message Commission {
   string id = 1;
   string referrer_id = 2;
@@ -673,6 +715,27 @@ service Orders {
   rpc GetAdminStats(GetAdminStatsRequest) returns (GetAdminStatsResponse) {
     option (google.api.http) = {
       get : "/v1/admin/{user_id}/orders/get-admin-stats"
+    };
+  }
+
+  rpc GetAgentStats(GetAgentStatsRequest) returns (GetAgentStatsResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/orders/get-agent-stats"
+    };
+  }
+
+  rpc CreateDeliveryRating(CreateDeliveryRatingRequest)
+      returns (CreateDeliveryRatingResponse) {
+    option (google.api.http) = {
+      post : "/v1/users/{user_id}/orders/{order_number}/create-delivery-rating"
+      body : "*"
+    };
+  }
+
+  rpc GetAgentRatingSummary(GetAgentRatingSummaryRequest)
+      returns (GetAgentRatingSummaryResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/agents/{agent_id}/get-delivery-rating-summary"
     };
   }
 

@@ -101,6 +101,135 @@ type ProductInfo struct {
 
 var _ ordersgrpc.OrdersServer = (*Impl)(nil)
 
+// GetAgentStats implements ordersgrpc.OrdersServer.
+func (i *Impl) GetAgentStats(ctx context.Context, req *ordersgrpc.GetAgentStatsRequest) (*ordersgrpc.GetAgentStatsResponse, error) {
+	agentID := strings.TrimSpace(req.GetUserId())
+	if agentID == "" {
+		return nil, status.Error(codes.InvalidArgument, "user_id is required")
+	}
+
+	row, err := i.repo.Do().GetAgentStats(ctx, agentID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting agent stats: %v", err)
+	}
+
+	return &ordersgrpc.GetAgentStatsResponse{
+		AvailableCount:  int32(row.AvailableCount),
+		OngoingCount:    int32(row.OngoingCount),
+		CompletedCount:  int32(row.CompletedCount),
+		TotalEarnings:   &types.Amount{Value: row.TotalEarningsValue, CurrencyIsoCode: row.TotalEarningsCurrency},
+	}, nil
+}
+
+// CreateDeliveryRating allows the buyer to rate the delivery agent for a delivered order.
+func (i *Impl) CreateDeliveryRating(ctx context.Context, req *ordersgrpc.CreateDeliveryRatingRequest) (*ordersgrpc.CreateDeliveryRatingResponse, error) {
+	userID := strings.TrimSpace(req.GetUserId())
+	if userID == "" {
+		return nil, status.Error(codes.InvalidArgument, "user_id is required")
+	}
+	if req.GetOrderNumber() <= 0 {
+		return nil, status.Error(codes.InvalidArgument, "order_number is required")
+	}
+	if req.GetRating() < 1 || req.GetRating() > 5 {
+		return nil, status.Error(codes.InvalidArgument, "rating must be between 1 and 5")
+	}
+
+	querier := i.repo.Do()
+
+	order, err := querier.GetOrderByOrderNumber(ctx, req.GetOrderNumber())
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, status.Error(codes.NotFound, "order not found")
+		}
+		return nil, status.Errorf(codes.Internal, "error getting order: %v", err)
+	}
+
+	if order.Status != ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String() {
+		return nil, status.Error(codes.FailedPrecondition, "order must be delivered before rating")
+	}
+	if order.CreatedBy == nil || *order.CreatedBy != userID {
+		return nil, status.Error(codes.PermissionDenied, "only the buyer who created the order can rate the delivery")
+	}
+	if order.AgentID == nil || strings.TrimSpace(*order.AgentID) == "" {
+		return nil, status.Error(codes.FailedPrecondition, "order has no assigned agent to rate")
+	}
+
+	err = querier.CreateDeliveryRating(ctx, sqlc.CreateDeliveryRatingParams{
+		OrderNumber: req.GetOrderNumber(),
+		AgentID:     *order.AgentID,
+		UserID:      userID,
+		Rating:      req.GetRating(),
+		Comment:     strings.TrimSpace(req.GetComment()),
+	})
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return nil, status.Error(codes.AlreadyExists, "delivery rating already exists for this order")
+		}
+		return nil, status.Errorf(codes.Internal, "failed to create delivery rating: %v", err)
+	}
+
+	ratingRow, err := querier.GetDeliveryRatingByOrderNumber(ctx, req.GetOrderNumber())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to fetch created delivery rating: %v", err)
+	}
+
+	var createdAt *timestamppb.Timestamp
+	if ratingRow.CreatedAt.Valid {
+		createdAt = timestamppb.New(ratingRow.CreatedAt.Time)
+	}
+	var updatedAt *timestamppb.Timestamp
+	if ratingRow.UpdatedAt.Valid {
+		updatedAt = timestamppb.New(ratingRow.UpdatedAt.Time)
+	}
+
+	return &ordersgrpc.CreateDeliveryRatingResponse{
+		DeliveryRating: &ordersgrpc.DeliveryRating{
+			Id:          ratingRow.ID,
+			OrderNumber: ratingRow.OrderNumber,
+			AgentId:     ratingRow.AgentID,
+			UserId:      ratingRow.UserID,
+			Rating:      ratingRow.Rating,
+			Comment:     ratingRow.Comment,
+			CreatedAt:   createdAt,
+			UpdatedAt:   updatedAt,
+		},
+	}, nil
+}
+
+// GetAgentRatingSummary returns the agent's average rating and total count.
+func (i *Impl) GetAgentRatingSummary(ctx context.Context, req *ordersgrpc.GetAgentRatingSummaryRequest) (*ordersgrpc.GetAgentRatingSummaryResponse, error) {
+	agentID := strings.TrimSpace(req.GetAgentId())
+	if agentID == "" {
+		return nil, status.Error(codes.InvalidArgument, "agent_id is required")
+	}
+
+	row, err := i.repo.Do().GetAverageAgentRating(ctx, agentID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return &ordersgrpc.GetAgentRatingSummaryResponse{
+				AgentId:       agentID,
+				RatingCount:   0,
+				AverageRating: 0,
+			}, nil
+		}
+		return nil, status.Errorf(codes.Internal, "failed to get agent rating summary: %v", err)
+	}
+
+	avg := 0.0
+	if row.AverageRating.Valid {
+		if f8, convErr := row.AverageRating.Float64Value(); convErr == nil && f8.Valid {
+			avg = f8.Float64
+		}
+	}
+
+	return &ordersgrpc.GetAgentRatingSummaryResponse{
+		AgentId:       row.AgentID,
+		RatingCount:   int32(row.RatingCount),
+		AverageRating: avg,
+	}, nil
+}
+
 // NewOrders returns a new instance of the ordersImpl.
 func NewOrders(
 	repo repo.OrdersRepo,
@@ -228,7 +357,7 @@ func (i *Impl) ConfirmDelivery(ctx context.Context, req *ordersgrpc.ConfirmDeliv
 				Method:         ordersgrpc.PaymentMethodType_PaymentMethodType_ACCOUNT_BALANCE.String(),
 				Status:         ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED.String(),
 				ExpiresAt:      pgtype.Timestamptz{Time: time.Now().Add(5 * time.Minute), Valid: true},
-				CreatedBy:      order.AgentID,
+				CreatedBy:      *order.AgentID,
 				Type:           ordersgrpc.PaymentType_PaymentType_DEBIT.String(),
 			})
 
@@ -274,7 +403,12 @@ func (i *Impl) ConfirmDelivery(ctx context.Context, req *ordersgrpc.ConfirmDeliv
 				}
 
 				// Create commissions
-				err = i.CreateCommissions(ctx, order, querier)
+				orderByNumber, getErr := querier.GetOrderByOrderNumber(ctx, order.OrderNumber)
+				if getErr != nil {
+					return nil, status.Errorf(codes.Internal, "error getting order for commissions %v", getErr)
+				}
+
+				err = i.CreateCommissions(ctx, orderByNumber, querier)
 				if err != nil {
 					return nil, status.Errorf(codes.Internal, "error creating commissions %v", err)
 				}
@@ -682,7 +816,9 @@ func (i *Impl) CreateOrder(ctx context.Context, req *ordersgrpc.CreateOrderReque
 		}
 	}()
 
-	secretKey, err := generateHexSecretKey(6)
+	// secret_key column is VARCHAR(6). generateHexSecretKey length is in BYTES,
+	// and hex encoding doubles it. 3 bytes => 6 hex chars.
+	secretKey, err := generateHexSecretKey(3)
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error generating order secret key %v", err)
@@ -1218,7 +1354,8 @@ func (i *Impl) createOrdersFromSubscription(
 		}
 
 		// Generate secret key
-		secretKey, err := generateHexSecretKey(6)
+		// secret_key column is VARCHAR(6). 3 bytes => 6 hex chars.
+		secretKey, err := generateHexSecretKey(3)
 		if err != nil {
 			return fmt.Errorf("error generating secret key: %w", err)
 		}

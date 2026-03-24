@@ -4,6 +4,34 @@
   "suggested": "Suggéré",
   "others": "Autres",
   "orderCannotContain": "Une seule commande ne peut pas contenir des produits de différents agriculteurs",
+  "common": {
+    "appName": "FoodHouse",
+    "currency": "XAF",
+    "error": "Erreur",
+    "cancel": "Annuler",
+    "success": "Succès",
+    "view": "Voir",
+    "logout": "Déconnexion",
+    "total": "Total",
+    "goBack": "Retour",
+    "loading": "Chargement...",
+    "continue": "Continuer",
+    "day_one": "jour",
+    "day_other": "jours",
+    "deleteAccountUserIdMissing": "L’identifiant utilisateur est manquant. Impossible de supprimer le compte.",
+    "deletionFailedTitle": "Échec de la suppression",
+    "unknownErrorDeletingAccount": "Une erreur inconnue s'est produite lors de la suppression de votre compte.",
+    "addressFallback": "Adresse non renseignée",
+    "delete": "Supprimer",
+    "notFound": {
+      "title": "Oups !",
+      "message": "Cet écran n’existe pas.",
+      "goHome": "Aller à l’écran d’accueil !"
+    },
+    "modal": {
+      "title": "Fenêtre modale"
+    }
+  },
   "(auth)": {
     "index": {
       "welcomeTo": "Bienvenue à",
@@ -40,7 +68,10 @@
       "or": "ou",
       "continueWith": "Continuer avec",
       "dontHaveAnAccount": "Vous n'avez pas de compte ?",
-      "registerNow": "Inscrivez-vous maintenant"
+      "registerNow": "Inscrivez-vous maintenant",
+      "demoModeTitle": "Mode démo",
+      "demoModeMessage": "Démarrer la démo agent avec des données fictives ?",
+      "startDemo": "Démarrer la démo"
     },
     "verifyOtp": {
       "verifyNumber": "Vérifiez votre numéro de téléphone",
@@ -68,7 +99,8 @@
       "firstNameRequired": "Le prénom est requis",
       "enterValidEmail": "Veuillez entrer un e-mail valide",
       "doYouHaveAReferralCode": "Avez-vous un code de parrainage ?",
-      "pleaseSelectThisOption": "Veuillez sélectionner cette option"
+      "pleaseSelectThisOption": "Veuillez sélectionner cette option",
+      "completeButton": "Terminer"
     },
     "variety": {
       "description": "Bienvenue sur l'application Food House ! Choisissez votre variété et explorez une large gamme de produits adaptés à vos préférences.",
@@ -477,6 +509,18 @@
     "Dropdown": {
       "noData": "Pas de données"
     },
+    "Cart": {
+      "title_one": "Panier ({{count}} article)",
+      "title_other": "Panier ({{count}} articles)",
+      "continueShopping": "Continuer les achats",
+      "checkout": "Commander"
+    },
+    "PhoneNumberInput": {
+      "mobileNumber": "Numéro de téléphone"
+    },
+    "CountryList": {
+      "searchPlaceholder": "Entrez le nom du pays"
+    },
     "ImagePicker": {
       "photoGalery": "Galerie de photos",
       "camera": "Caméra",
@@ -490,6 +534,7 @@
     "GoBack": "Retour",
     "OurPackages": "Nos forfaits pour vous",
     "SeeAll": "Voir tout",
+    "discountBadge": "-10%",
     "SubscriptionTitle": "Laissez FoodHouse s'occuper de vos courses et de la livraison !",
     "SubSubTitle": "Choisissez un forfait adapté à vos besoins et recevez des produits frais directement chez vous — rapide, simple et sans tracas",
     "CustomPackage": "Personnaliser votre forfait",
@@ -519,11 +564,23 @@
       "totalBudget": "Budget total",
       "discount": "Remise",
       "total": "Total",
-      "continueToProducts": "Continuer vers les produits"
+      "deliveriesPerMonthValue": "{{deliveries}}x par mois",
+      "continueToProducts": "Continuer vers les produits",
+      "maxPerDeliveryHero": "Maximum par livraison : {{currency}} {{amount}}.",
+      "maxPerDeliverySnack": "Maximum par livraison : {{currency}} {{amount}}.",
+      "totalBudgetSnack": "Vous avez un budget total de {{currency}} {{amount}}.",
+      "budgetStepTitle": "Définissez votre budget",
+      "budgetMeta": "Budget max : {{currency}} {{max}} • Par défaut : {{currency}} {{default}}",
+      "budgetTip": "Astuce : utilisez +/− pour des changements rapides (5 000). Le pas du curseur est de 1 000.",
+      "minimumDeliveries": "Livraisons minimum : {{min}} (car une livraison ne peut pas dépasser {{currency}} {{maxPerDelivery}})",
+      "usedLeft": "Utilisé : {{currency}} {{used}} • Restant : {{currency}} {{left}}",
+      "addDelivery": "+ livraison"
     },
     "(order)": {
       "checkout": "Paiement",
       "order": "Commande",
+      "productsCount_one": "{{count}} produit",
+      "productsCount_other": "{{count}} produits",
       "Address": "Adresse de livraison",
       "Home": "Domicile",
       "Desc1": "Votre commande sera livrée dans un délai de",
@@ -544,7 +601,13 @@
       "delivery": "Livraison",
       "selectedItems": "Articles sélectionnés",
       "availableProducts": "Produits disponibles",
-      "viewSummary": "Voir le résumé"
+      "viewSummary": "Voir le résumé",
+      "deliveryBudgetLine": "Livraison {{index}} : {{currency}} {{total}} / {{max}}",
+      "selectProductsForDelivery": "Sélectionner les produits pour la livraison {{index}}",
+      "noProductsAvailable": "Aucun produit disponible",
+      "lineTotal": "Total ligne : {{currency}} {{amount}}",
+      "budgetAllocatedPerfect": "Parfait — vous avez alloué tout le budget.",
+      "budgetRemainingToAllocate": "Il vous reste {{currency}} {{amount}}. Allouez-le (ou ajoutez une livraison) pour continuer."
     },
     "(summary)": {
       "header": "Résumé",
@@ -552,6 +615,20 @@
       "items": "Articles",
       "deliveries": "Livraisons",
       "delivery": "Livraison",
+      "budgetDeliveriesLine": "Budget : {{currency}} {{budget}} • Livraisons : {{deliveries}}",
+      "deliveryDatesTitle": "Dates de livraison",
+      "deliveryDatesRule": "Règle : s’il reste 3 jours ou moins jusqu’à samedi, la première livraison a lieu ce samedi ; sinon, c’est samedi prochain.",
+      "deliveryDatesTodayLine": "Aujourd’hui → samedi dans {{daysUntilSaturday}} {{dayLabel}} • Première livraison : {{firstDelivery}}",
+      "deliveryDatesItem": "Livraison #{{index}} • {{date}} • {{currency}} {{amount}}",
+      "productsPerDeliveryTitle": "Produits par livraison",
+      "deliveryCardTitle": "Livraison #{{index}} • {{date}}",
+      "noProductsSelected": "Aucun produit sélectionné.",
+      "deliveryMethodTitle": "Méthode de livraison",
+      "deliveryMethodSelected": "Sélectionné : {{selection}}",
+      "deliveryMethodChoose": "Choisissez un point de retrait ou une livraison à domicile, puis sélectionnez votre localisation.",
+      "pickupPoint": "Point de retrait",
+      "homeDelivery": "Livraison à domicile",
+      "proceedToPay": "Passer au paiement",
       "paymentSummary": "Résumé du paiement",
       "amount": "Montant",
       "free": "Gratuit",
@@ -567,6 +644,29 @@
     }
   },
   "(agent)": {
+    "profile": {
+      "defaultName": "Agent",
+      "accountStatus": "Statut du compte",
+      "kycStatusLabel": "Statut KYC",
+      "agentStatusLabel": "Statut de l’agent",
+      "kycStatus": {
+        "not_started": "NON COMMENCÉ",
+        "pending": "EN ATTENTE",
+        "verified": "VÉRIFIÉ",
+        "rejected": "REFUSÉ"
+      },
+      "agentStatus": {
+        "not_registered": "Non inscrit",
+        "registered": "Inscrit",
+        "online": "En ligne",
+        "offline": "Hors ligne"
+      },
+      "statistics": "Statistiques",
+      "totalEarningsWithCurrency": "Gains totaux ({{currency}})",
+      "completed": "Terminées",
+      "pending": "En attente",
+      "logoutConfirm": "Êtes-vous sûr de vouloir vous déconnecter ?"
+    },
     "kyc": {
       "title": "Vérifiez Votre Identité",
       "subtitle": "Veuillez télécharger les documents requis pour devenir agent",
@@ -589,13 +689,24 @@
       "uploadAllDocuments": "Veuillez télécharger tous les documents requis",
       "submitError": "Échec de l'envoi des documents KYC. Veuillez réessayer.",
       "selectDocument": "Sélectionner Document",
-      "uploadPdf": "Télécharger PDF"
+      "uploadPdf": "Télécharger PDF",
+      "demoDisabled": "Le flux de démo KYC est désactivé dans cette version.",
+      "missingSession": "Session utilisateur manquante. Veuillez vous reconnecter.",
+      "verifiedTitle": "KYC vérifié !",
+      "verifiedMessage": "Votre identité a été vérifiée. Vous pouvez maintenant commencer à accepter des livraisons.",
+      "demoActiveTitle": "Mode démo actif",
+      "autoApproveMessage": "Votre KYC sera automatiquement approuvé dans 3 secondes...",
+      "processing": "Traitement...",
+      "continueToDashboard": "Continuer vers le tableau de bord",
+      "pleaseWait": "Veuillez patienter..."
     },
     "orders": {
       "title": "Commandes Disponibles",
       "subtitle": "Commandes près de chez vous",
       "orderDetails": "Détails de la Commande",
       "order": "Commande",
+      "order_one": "Commande",
+      "order_other": "Commandes",
       "status": "Statut",
       "statusPending": "En attente",
       "statusAssigned": "Assignée",
@@ -623,19 +734,28 @@
       "distance": "Distance",
       "km": "km",
       "acceptOrder": "Accepter la Commande",
+      "acceptOrderTitle": "Accepter la commande",
+      "acceptOrderMessage": "Voulez-vous accepter la livraison de la commande n°{{orderNumber}} ?",
+      "accept": "Accepter",
       "pickupSuccess": "Commande marquée comme retirée",
       "pickupError": "Échec de la confirmation du retrait",
       "deliverySuccess": "Livraison Confirmée!",
       "paymentWillBeProcessed": "Le paiement sera traité sous peu.",
+      "deliveryEarningsMessage": "Le paiement sera traité sous peu.\n\n+{{currency}} {{amount}} gagnés !",
       "deliveryError": "Échec de la confirmation de la livraison",
-      "invalidCodeLength": "Veuillez entrer un code à 4 chiffres",
+      "invalidCodeLength": "Veuillez entrer le code à 6 caractères",
       "incorrectCode": "Le code de sécurité est incorrect",
       "askCustomerForCode": "Demandez au client son code de livraison",
+      "demoSecurityCodeLabel": "Code de sécurité démo",
+      "demoSecurityCodeHint": "En mode démo, vous pouvez utiliser ce code pour compléter le flux de livraison.",
+      "orderNotFoundTitle": "Commande introuvable",
+      "orderNotFoundMessage": "La commande que vous recherchez n’existe pas ou a été supprimée.",
+      "confirmPickupMessage": "Marquer la commande n°{{orderNumber}} comme retirée chez {{farmerName}} ?",
       "totalAmount": "Total de la Commande",
       "items": "Articles de la Commande",
       "navigate": "Naviguer",
       "call": "Appeler",
-      "orderAccepted": "Commande acceptée! Vous pouvez maintenant la retirer."
+      "orderAccepted": "Commande acceptée! Vous pouvez maintenant commencer la livraison."
     },
     "home": {
       "title": "Livraisons",
@@ -646,7 +766,52 @@
       "totalEarnings": "Gains Totaux",
       "todayEarnings": "Aujourd'hui",
       "completedDeliveries": "Terminées",
-      "pendingOrders": "En attente"
+      "ongoingDeliveries": "En cours",
+      "demoBadge": "DÉMO",
+      "tabs": {
+        "available": "Disponibles",
+        "ongoing": "En cours",
+        "completed": "Terminées"
+      },
+      "sectionTitle": {
+        "ongoing": "Livraisons en cours",
+        "completed": "Livraisons terminées"
+      },
+      "empty": {
+        "ongoingTitle": "Aucune livraison en cours",
+        "completedTitle": "Aucune livraison terminée pour l’instant",
+        "availableKycRequiredSubtitle": "Terminez votre vérification KYC pour commencer à accepter des commandes",
+        "availableSubtitle": "Les nouvelles commandes apparaîtront ici lorsque les clients demanderont une livraison",
+        "ongoingSubtitle": "Les commandes que vous livrez actuellement apparaîtront ici.",
+        "completedSubtitle": "Vos livraisons terminées apparaîtront ici."
+      },
+      "alert": {
+        "ongoingDeliveryTitle": "Livraison en cours",
+        "ongoingDeliveryMessage": "Terminez votre livraison en cours avant d’accepter une nouvelle commande.",
+        "kycRequiredTitle": "KYC requis",
+        "kycRequiredMessage": "Veuillez d’abord terminer votre vérification KYC."
+      },
+      "resetDemo": {
+        "title": "Réinitialiser les données de démo",
+        "message": "Cela réinitialisera toutes les commandes et les gains à leur état initial. Continuer ?",
+        "resetButton": "Réinitialiser",
+        "successMessage": "Les données de démo ont été réinitialisées.",
+        "longPressHint": "Appui long pour réinitialiser les données de démo"
+      },
+      "kycBanner": {
+        "notStarted": {
+          "title": "Complétez votre KYC",
+          "subtitle": "Vous devez vérifier votre identité avant d’accepter des livraisons"
+        },
+        "pending": {
+          "title": "KYC en cours d’examen",
+          "subtitle": "Vos documents sont en cours d’examen. Cela prend généralement 24 à 48 heures."
+        },
+        "rejected": {
+          "title": "KYC refusé",
+          "subtitle": "Vos documents n’ont pas été acceptés. Veuillez les soumettre à nouveau."
+        }
+      }
     }
   }
 }

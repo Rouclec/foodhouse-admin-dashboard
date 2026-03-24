@@ -176,6 +176,12 @@ export type UsersCreateKYCBody = {
   identityDocumentUrl?: string;
   selfieUrl?: string;
   vehicleDocumentUrl?: string;
+  /**
+   * New: allow multiple documents per field.
+   */
+  identityDocumentUrls?: Array<string>;
+  selfieUrls?: Array<string>;
+  vehicleDocumentUrls?: Array<string>;
 };
 
 export type UsersGrantAdminBody = {
@@ -259,7 +265,7 @@ export type usersgrpcGetFarmerByIDResponse = {
   rating?: number;
 };
 
-export type usersgrpcGetKYCByUserIdResponse = {
+export type usersgrpcGetKYCByUserIDResponse = {
   kycVerification?: usersgrpcKYCVerification;
 };
 
@@ -307,6 +313,12 @@ export type usersgrpcKYCVerification = {
   verifiedAt?: string;
   createdAt?: string;
   updatedAt?: string;
+  /**
+   * New: allow multiple documents per field.
+   */
+  identityDocumentUrls?: Array<string>;
+  selfieUrls?: Array<string>;
+  vehicleDocumentUrls?: Array<string>;
 };
 
 export type usersgrpcLastOtpForFactorResponse = {
@@ -325,7 +337,7 @@ export type usersgrpcListFarmersResponse = {
 
 export type usersgrpcListKYCVerificationsResponse = {
   kycVerifications?: Array<usersgrpcKYCVerification>;
-  total?: number;
+  total?: string;
 };
 
 export type usersgrpcListUsersResponse = {
@@ -854,7 +866,7 @@ export type UsersGetKycByUserIdData = {
   };
 };
 
-export type UsersGetKycByUserIdResponse = usersgrpcGetKYCByUserIdResponse;
+export type UsersGetKycByUserIdResponse = usersgrpcGetKYCByUserIDResponse;
 
 export type UsersGetKycByUserIdError = rpcStatus;
 

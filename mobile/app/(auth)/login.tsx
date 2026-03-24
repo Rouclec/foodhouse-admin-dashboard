@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { Appbar, Icon, Snackbar, TextInput } from 'react-native-paper';
 import { Link, router } from 'expo-router';
@@ -20,6 +21,8 @@ import { defaultStyles, loginstyles, signupStyles } from '@/styles';
 import { CAMEROON, Colors } from '@/constants';
 import i18n from '@/i18n';
 import { delay, storeData, updateAuthHeader } from '@/utils';
+import { canEnableDemoMode } from '@/constants/demo';
+import { agentDemoState } from '@/contexts/AgentContext';
 
 import PhoneNumberInput from '@/components/general/PhoneNumberInput';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -75,9 +78,11 @@ export default function Login() {
       }
       if (role === 'USER_ROLE_FARMER') {
         return router.replace('/(farmer)/(index)');
-      } else {
-        return router.replace('/(buyer)/(index)');
       }
+      if (role === 'USER_ROLE_AGENT') {
+        return router.replace('/(agent)/(index)');
+      }
+      return router.replace('/(buyer)/(index)');
     }
   }, [userData]);
 
@@ -159,12 +164,11 @@ export default function Login() {
         keyboardVerticalOffset={0}>
         <View style={defaultStyles.flex}>
           <Appbar.Header dark={false} style={defaultStyles.appHeader}>
-            {/* <TouchableOpacity
+            <TouchableOpacity
               onPress={() => router.back()}
               style={defaultStyles.backButtonContainer}>
               <Icon source={'arrow-left'} size={24} />
-            </TouchableOpacity> */}
-            <View />
+            </TouchableOpacity>
             <View />
           </Appbar.Header>
           <ScrollView
@@ -173,7 +177,7 @@ export default function Login() {
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled">
             <View style={loginstyles.logoCircle}>
-              <Text style={loginstyles.logoText}>Food House</Text>
+              <Text style={loginstyles.logoText}>{i18n.t('common.appName')}</Text>
             </View>
             <View style={defaultStyles.inputsContainer}>
               <Text style={loginstyles.loginTitle}>
@@ -220,8 +224,26 @@ export default function Login() {
             {i18n.t('(auth).login.dontHaveAnAccount')}{' '}
           </Text>
           <TouchableOpacity 
-          // onPress={() => router.push('/(auth)/register')}
-          onPress={() => router.push('/(agent)/(kyc)')}
+            onPress={() => router.push('/register')}
+            onLongPress={() => {
+              if (!canEnableDemoMode) return;
+              
+              Alert.alert(
+                i18n.t('(auth).login.demoModeTitle'),
+                i18n.t('(auth).login.demoModeMessage'),
+                [
+                  { text: i18n.t('common.cancel'), style: 'cancel' },
+                  { 
+                    text: i18n.t('(auth).login.startDemo'),
+                    onPress: () => {
+                      agentDemoState.loginAsAgent(true);
+                      agentDemoState.approveKYC();
+                      router.replace('/(agent)/(index)');
+                    }
+                  },
+                ]
+              );
+            }}
           >
             <Text style={loginstyles.registerLink}>
               {i18n.t('(auth).login.registerNow')}

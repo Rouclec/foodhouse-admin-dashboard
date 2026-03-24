@@ -53,6 +53,11 @@ message KYCVerification {
   google.protobuf.Timestamp verified_at = 8;
   google.protobuf.Timestamp created_at = 9;
   google.protobuf.Timestamp updated_at = 10;
+
+  // New: allow multiple documents per field.
+  repeated string identity_document_urls = 11;
+  repeated string selfie_urls = 12;
+  repeated string vehicle_document_urls = 13;
 }
 
 enum KYCStatus {
@@ -613,27 +618,29 @@ service Users {
   // KYC endpoints
   rpc CreateKYC(CreateKYCRequest) returns (CreateKYCResponse) {
     option (google.api.http) = {
-      post : "/v1/users/{user_id}/kyc"
+      post : "/v1/users/{user_id}/upload-kyc"
       body : "*"
     };
   }
 
-  rpc GetKYCByUserId(GetKYCByUserIdRequest) returns (GetKYCByUserIdResponse) {
+  rpc GetKYCByUserID(GetKYCByUserIDRequest) returns (GetKYCByUserIDResponse) {
     option (google.api.http) = {
-      get : "/v1/users/{user_id}/kyc"
+      get : "/v1/users/{user_id}/get-kyc-by-user-id"
     };
   }
 
-  rpc UpdateKYCStatus(UpdateKYCStatusRequest) returns (UpdateKYCStatusResponse) {
+  rpc UpdateKYCStatus(UpdateKYCStatusRequest)
+      returns (UpdateKYCStatusResponse) {
     option (google.api.http) = {
-      patch : "/v1/admin/{admin_user_id}/kyc/{kyc_id}/status"
+      patch : "/v1/admin/{admin_user_id}/{kyc_id}/update-kyc-status"
       body : "*"
     };
   }
 
-  rpc ListKYCVerifications(ListKYCVerificationsRequest) returns (ListKYCVerificationsResponse) {
+  rpc ListKYCVerifications(ListKYCVerificationsRequest)
+      returns (ListKYCVerificationsResponse) {
     option (google.api.http) = {
-      get : "/v1/admin/kyc/verifications"
+      get : "/v1/admin/{admin_user_id}/list-kyc-verifications"
     };
   }
 }
@@ -645,19 +652,18 @@ message CreateKYCRequest {
   string identity_document_url = 2;
   string selfie_url = 3;
   string vehicle_document_url = 4;
+
+  // New: allow multiple documents per field.
+  repeated string identity_document_urls = 5;
+  repeated string selfie_urls = 6;
+  repeated string vehicle_document_urls = 7;
 }
 
-message CreateKYCResponse {
-  KYCVerification kyc_verification = 1;
-}
+message CreateKYCResponse { KYCVerification kyc_verification = 1; }
 
-message GetKYCByUserIdRequest {
-  string user_id = 1;
-}
+message GetKYCByUserIDRequest { string user_id = 1; }
 
-message GetKYCByUserIdResponse {
-  KYCVerification kyc_verification = 1;
-}
+message GetKYCByUserIDResponse { KYCVerification kyc_verification = 1; }
 
 message UpdateKYCStatusRequest {
   string admin_user_id = 1;
@@ -666,17 +672,16 @@ message UpdateKYCStatusRequest {
   string rejection_reason = 4;
 }
 
-message UpdateKYCStatusResponse {
-  KYCVerification kyc_verification = 1;
-}
+message UpdateKYCStatusResponse { KYCVerification kyc_verification = 1; }
 
 message ListKYCVerificationsRequest {
-  KYCStatus status = 1;
-  int32 limit = 2;
-  int32 offset = 3;
+  string admin_user_id = 1;
+  KYCStatus status = 2;
+  int32 limit = 3;
+  int32 offset = 4;
 }
 
 message ListKYCVerificationsResponse {
   repeated KYCVerification kyc_verifications = 1;
-  int32 total = 2;
+  int64 total = 2;
 }

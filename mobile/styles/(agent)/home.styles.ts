@@ -3,13 +3,19 @@ import { StyleSheet } from 'react-native';
 import { defaultStyles } from '../default.styles';
 
 export const agentHomeStyles = StyleSheet.create({
+  ...defaultStyles,
+  container: {
+    flex: 1,
+    backgroundColor: Colors.light['bg'],
+    paddingHorizontal: 0,
+    paddingTop: 0,
+    gap: 0,
+  },
   header: {
-    paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingHorizontal: 24,
+    paddingTop: 0,
     paddingBottom: 20,
     backgroundColor: Colors.primary[500],
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
   },
   headerTop: {
     flexDirection: 'row',
@@ -19,6 +25,7 @@ export const agentHomeStyles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 24,
+    lineHeight: 48,
     fontWeight: '700',
     color: Colors.light[10],
   },
@@ -69,8 +76,35 @@ export const agentHomeStyles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingHorizontal: 24,
+    paddingTop: 16,
+  },
+  tabsRow: {
+    flexDirection: 'row',
+    backgroundColor: Colors.grey['fa'],
+    borderRadius: 16,
+    padding: 4,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: Colors.grey['e1'],
+  },
+  tabPill: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabPillActive: {
+    backgroundColor: Colors.primary[500],
+  },
+  tabText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: Colors.grey['61'],
+  },
+  tabTextActive: {
+    color: Colors.light[10],
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -174,7 +208,7 @@ export const agentHomeStyles = StyleSheet.create({
   earningAmount: {
     fontSize: 18,
     fontWeight: '700',
-    color: Colors.success,
+    color: Colors.primary[500],
   },
   acceptButton: {
     backgroundColor: Colors.primary[500],
@@ -213,5 +247,4 @@ export const agentHomeStyles = StyleSheet.create({
     color: Colors.grey['61'],
     textAlign: 'center',
   },
-  ...defaultStyles,
 });

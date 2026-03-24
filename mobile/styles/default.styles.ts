@@ -150,6 +150,7 @@ export const defaultStyles = StyleSheet.create({
   },
   secondaryButton: {
     borderWidth: 1,
+    borderColor: Colors.primary[500],
     backgroundColor: Colors.primary[50],
   },
   secondaryButtonText: {

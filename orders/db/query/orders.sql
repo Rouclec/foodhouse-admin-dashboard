@@ -285,6 +285,36 @@ WHERE status = 'PaymentStatus_COMPLETED'
   AND created_at >= sqlc.arg(start_date)::timestamptz
   AND created_at <= sqlc.arg(end_date)::timestamptz;
 
+-- name: GetAgentStats :one
+SELECT
+  COUNT(*) FILTER (
+    WHERE status = 'OrderStatus_APPROVED'
+      AND (agent_id IS NULL OR agent_id = '')
+  )::int AS available_count,
+  COUNT(*) FILTER (
+    WHERE status = 'OrderStatus_IN_TRANSIT'
+      AND agent_id = sqlc.arg(agent_id)::varchar
+  )::int AS ongoing_count,
+  COUNT(*) FILTER (
+    WHERE status = 'OrderStatus_DELIVERED'
+      AND agent_id = sqlc.arg(agent_id)::varchar
+  )::int AS completed_count,
+  COALESCE(
+    SUM(delivery_fee_amount) FILTER (
+      WHERE status = 'OrderStatus_DELIVERED'
+        AND agent_id = sqlc.arg(agent_id)::varchar
+    ),
+    0
+  )::float8 AS total_earnings_value,
+  COALESCE(
+    MAX(delivery_fee_currency) FILTER (
+      WHERE status = 'OrderStatus_DELIVERED'
+        AND agent_id = sqlc.arg(agent_id)::varchar
+    ),
+    'XAF'
+  )::text AS total_earnings_currency
+FROM orders;
+
 
 
 -- name: ListPayments :many
