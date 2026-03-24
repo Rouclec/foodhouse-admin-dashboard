@@ -278,7 +278,7 @@ const KYC = () => {
         if (!demoConfig.enabled) {
           Alert.alert(
             i18n.t('common.error'),
-            'KYC demo flow is disabled in this build.',
+            i18n.t('(agent).kyc.demoDisabled'),
           );
           return;
         }
@@ -290,7 +290,7 @@ const KYC = () => {
       }
 
       if (!userId) {
-        Alert.alert(i18n.t('common.error'), 'Missing user session. Please log in again.');
+        Alert.alert(i18n.t('common.error'), i18n.t('(agent).kyc.missingSession'));
         return;
       }
 
@@ -362,26 +362,28 @@ const KYC = () => {
           </View>
           <Text style={kycStyles.successTitle}>
             {kycStatus === 'verified' 
-              ? 'KYC Verified!' 
+              ? i18n.t('(agent).kyc.verifiedTitle')
               : i18n.t('(agent).kyc.submittedTitle')}
           </Text>
           <Text style={kycStyles.successMessage}>
             {kycStatus === 'verified'
-              ? 'Your identity has been verified. You can now start accepting deliveries.'
+              ? i18n.t('(agent).kyc.verifiedMessage')
               : i18n.t('(agent).kyc.submittedMessage')}
           </Text>
           
           {isDemoMode && agentState.kycStatus === 'pending' && (
             <View style={{ marginTop: 24, padding: 16, backgroundColor: Colors.primary[50], borderRadius: 12 }}>
               <Text style={{ fontSize: 14, fontWeight: '600', color: Colors.primary[500], marginBottom: 8 }}>
-                Demo Mode Active
+                {i18n.t('(agent).kyc.demoActiveTitle')}
               </Text>
               <Text style={{ fontSize: 12, color: Colors.grey['61'] }}>
-                Your KYC will be automatically approved in 3 seconds...
+                {i18n.t('(agent).kyc.autoApproveMessage')}
               </Text>
               <View style={{ marginTop: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
                 <Icon source="loading" size={20} color={Colors.primary[500]} />
-                <Text style={{ marginLeft: 8, color: Colors.primary[500] }}>Processing...</Text>
+                <Text style={{ marginLeft: 8, color: Colors.primary[500] }}>
+                  {i18n.t('(agent).kyc.processing')}
+                </Text>
               </View>
             </View>
           )}
@@ -396,8 +398,8 @@ const KYC = () => {
             }
             disabled={isContinueDisabled}>
             {kycStatus === 'verified' 
-              ? 'Continue to Dashboard' 
-              : 'Please Wait...'}
+              ? i18n.t('(agent).kyc.continueToDashboard')
+              : i18n.t('(agent).kyc.pleaseWait')}
           </Button>
         </View>
       </View>

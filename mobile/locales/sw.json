@@ -5,10 +5,57 @@
   "others": "Wengine",
   "orderCannotContain": "Agizo moja haliwezi kuwa na bidhaa kutoka kwa wakulima tofauti",
   "common": {
+    "appName": "Food House",
     "currency": "XAF",
-    "error": "Hitilafu"
+    "error": "Hitilafu",
+    "cancel": "Ghairi",
+    "success": "Mafanikio",
+    "view": "Tazama",
+    "logout": "Ondoka",
+    "total": "Jumla",
+    "goBack": "Rudi nyuma",
+    "loading": "Inapakia...",
+    "continue": "Endelea",
+    "day_one": "siku",
+    "day_other": "siku",
+    "deleteAccountUserIdMissing": "Kitambulisho cha mtumiaji hakipo. Haiwezi kufuta akaunti.",
+    "deletionFailedTitle": "Ufutaji Umeshindikana",
+    "unknownErrorDeletingAccount": "Hitilafu isiyojulikana imetokea wakati wa kujaribu kufuta akaunti yako.",
+    "addressFallback": "Anwani haijawekwa",
+    "delete": "Futa",
+    "notFound": {
+      "title": "Lo!",
+      "message": "Skrini hii haipo.",
+      "goHome": "Nenda kwenye skrini ya nyumbani!"
+    },
+    "modal": {
+      "title": "Modali"
+    }
   },
   "(agent)": {
+    "profile": {
+      "defaultName": "Wakala",
+      "accountStatus": "Hali ya akaunti",
+      "kycStatusLabel": "Hali ya KYC",
+      "agentStatusLabel": "Hali ya wakala",
+      "kycStatus": {
+        "not_started": "HAIJAANZA",
+        "pending": "INASUBIRI",
+        "verified": "IMETHIBITISHWA",
+        "rejected": "IMEKATALIWA"
+      },
+      "agentStatus": {
+        "not_registered": "Hajasajiliwa",
+        "registered": "Amesajiliwa",
+        "online": "Mtandaoni",
+        "offline": "Nje ya mtandao"
+      },
+      "statistics": "Takwimu",
+      "totalEarningsWithCurrency": "Mapato yote ({{currency}})",
+      "completed": "Imekamilika",
+      "pending": "Inasubiri",
+      "logoutConfirm": "Una uhakika unataka kuondoka?"
+    },
     "kyc": {
       "title": "Thibitisha Utambulisho Wako",
       "subtitle": "Tafadhali pakua hati zinazohitajika ili kuwa msafiri",
@@ -31,13 +78,24 @@
       "uploadAllDocuments": "Tafadhali pakua hati zote zinazohitajika",
       "submitError": "Imeshindwa kuwasilisha hati za KYC. Jaribu tena.",
       "selectDocument": "Chagua Hati",
-      "uploadPdf": "Pakia PDF"
+      "uploadPdf": "Pakia PDF",
+      "demoDisabled": "Mtiririko wa demo wa KYC umezimwa kwenye toleo hili.",
+      "missingSession": "Kikao cha mtumiaji hakipo. Tafadhali ingia tena.",
+      "verifiedTitle": "KYC imethibitishwa!",
+      "verifiedMessage": "Utambulisho wako umethibitishwa. Sasa unaweza kuanza kukubali uwasilishaji.",
+      "demoActiveTitle": "Hali ya Demo Imewashwa",
+      "autoApproveMessage": "KYC yako itaidhinishwa kiotomatiki baada ya sekunde 3...",
+      "processing": "Inachakata...",
+      "continueToDashboard": "Endelea kwenye dashibodi",
+      "pleaseWait": "Tafadhali subiri..."
     },
     "orders": {
       "title": "Maagizo Yanayopatikana",
       "subtitle": "Maagizo karibu nawe",
       "orderDetails": "Maelezo ya Agizo",
       "order": "Agizo",
+      "order_one": "Agizo",
+      "order_other": "Maagizo",
       "status": "Hali",
       "statusPending": "Inasubiri",
       "statusAssigned": "Imepangiwa kwako",
@@ -65,14 +123,23 @@
       "distance": "Umbali",
       "km": "km",
       "acceptOrder": "Kubali Agizo",
+      "acceptOrderTitle": "Kubali agizo",
+      "acceptOrderMessage": "Unataka kukubali uwasilishaji wa agizo #{{orderNumber}}?",
+      "accept": "Kubali",
       "pickupSuccess": "Agizo limepokelewa",
       "pickupError": "Imeshindwa kuthibitisha kuchukua",
       "deliverySuccess": "Utoaji Umethibitishwa!",
       "paymentWillBeProcessed": "Malipo yatashughulikiwa hivi karibuni.",
+      "deliveryEarningsMessage": "Malipo yatashughulikiwa hivi karibuni.\n\n+{{currency}} {{amount}} umepata!",
       "deliveryError": "Imeshindwa kuthibitisha utoaji",
       "invalidCodeLength": "Tafadhali ingiza kodi ya herufi 6",
       "incorrectCode": "Kodi ya usalama si sahihi",
       "askCustomerForCode": "Muumbye mteja kodi yao ya utoaji",
+      "demoSecurityCodeLabel": "Kodi ya usalama ya demo",
+      "demoSecurityCodeHint": "Kwenye hali ya demo, unaweza kutumia kodi hii kukamilisha mtiririko wa uwasilishaji.",
+      "orderNotFoundTitle": "Agizo halijapatikana",
+      "orderNotFoundMessage": "Agizo unalolitafuta halipo au limeondolewa.",
+      "confirmPickupMessage": "Weka agizo #{{orderNumber}} kuwa limechukuliwa kutoka kwa {{farmerName}}?",
       "totalAmount": "Jumla ya Agizo",
       "items": "Vifaa vya Agizo",
       "navigate": "Nawiri",
@@ -88,7 +155,52 @@
       "totalEarnings": "Mapato Yote",
       "todayEarnings": "Leo",
       "completedDeliveries": "Imewasilishwa",
-      "ongoingDeliveries": "Inaendelea"
+      "ongoingDeliveries": "Inaendelea",
+      "demoBadge": "DEMO",
+      "tabs": {
+        "available": "Inapatikana",
+        "ongoing": "Inaendelea",
+        "completed": "Imekamilika"
+      },
+      "sectionTitle": {
+        "ongoing": "Uwasilishaji unaoendelea",
+        "completed": "Uwasilishaji uliokamilika"
+      },
+      "empty": {
+        "ongoingTitle": "Hakuna uwasilishaji unaoendelea",
+        "completedTitle": "Bado hakuna uwasilishaji uliokamilika",
+        "availableKycRequiredSubtitle": "Kamilisha uthibitisho wako wa KYC ili uanze kukubali maagizo",
+        "availableSubtitle": "Maagizo mapya yataonekana hapa wateja wanapoomba uwasilishaji",
+        "ongoingSubtitle": "Maagizo unayowasilisha kwa sasa yataonekana hapa.",
+        "completedSubtitle": "Uwasilishaji wako uliokamilika utaonekana hapa."
+      },
+      "alert": {
+        "ongoingDeliveryTitle": "Uwasilishaji unaoendelea",
+        "ongoingDeliveryMessage": "Maliza uwasilishaji wako wa sasa kabla ya kukubali agizo jipya.",
+        "kycRequiredTitle": "KYC inahitajika",
+        "kycRequiredMessage": "Tafadhali kamilisha uthibitisho wako wa KYC kwanza."
+      },
+      "resetDemo": {
+        "title": "Weka upya data ya demo",
+        "message": "Hii itaweka upya maagizo yote na mapato kwenye hali ya awali. Endelea?",
+        "resetButton": "Weka upya",
+        "successMessage": "Data ya demo imewekwa upya.",
+        "longPressHint": "Bonyeza kwa muda mrefu kuweka upya data ya demo"
+      },
+      "kycBanner": {
+        "notStarted": {
+          "title": "Kamilisha KYC yako",
+          "subtitle": "Unahitaji kuthibitisha utambulisho wako kabla ya kukubali uwasilishaji"
+        },
+        "pending": {
+          "title": "KYC inachunguzwa",
+          "subtitle": "Hati zako zinachunguzwa. Hii kwa kawaida huchukua saa 24–48."
+        },
+        "rejected": {
+          "title": "KYC imekataliwa",
+          "subtitle": "Hati zako hazikukubaliwa. Tafadhali wasilisha tena."
+        }
+      }
     }
   },
   "(auth)": {
@@ -127,7 +239,10 @@
       "or": "au",
       "continueWith": "Endelea na",
       "dontHaveAnAccount": "Huna akaunti?",
-      "registerNow": "Jisajili sasa"
+      "registerNow": "Jisajili sasa",
+      "demoModeTitle": "Hali ya Demo",
+      "demoModeMessage": "Anzisha demo ya wakala kwa data ya mfano?",
+      "startDemo": "Anzisha Demo"
     },
     "verifyOtp": {
       "verifyNumber": "Thibitisha nambari yako ya simu",
@@ -155,7 +270,8 @@
       "firstNameRequired": "Jina la kwanza linahitajika",
       "enterValidEmail": "Tafadhali ingiza barua pepe halali",
       "doYouHaveAReferralCode": "Je, una nambari ya rufaa?",
-      "pleaseSelectThisOption": "Tafadhali chagua chaguo hili"
+      "pleaseSelectThisOption": "Tafadhali chagua chaguo hili",
+      "completeButton": "Kamilisha"
     },
     "variety": {
       "description": "Karibu kwenye programu ya Food House! Chagua Aina Yako na gundua aina mbalimbali za bidhaa zinazolingana na mapendeleo yako.",
@@ -556,6 +672,18 @@
     "Dropdown": {
       "noData": "Hakuna data"
     },
+    "Cart": {
+      "title_one": "Kikapu ({{count}} bidhaa)",
+      "title_other": "Kikapu ({{count}} bidhaa)",
+      "continueShopping": "Endelea kununua",
+      "checkout": "Lipa"
+    },
+    "PhoneNumberInput": {
+      "mobileNumber": "Nambari ya simu"
+    },
+    "CountryList": {
+      "searchPlaceholder": "Weka jina la nchi"
+    },
     "ImagePicker": {
       "photoGalery": "Maktaba ya Picha",
       "camera": "Kamera",
@@ -569,6 +697,7 @@
     "GoBack": "Rudi nyuma",
     "OurPackages": "Vifurushi vyetu kwa ajili yako",
     "SeeAll": "Angalia vyote",
+    "discountBadge": "Punguzo la 10%",
     "SubscriptionTitle": "Acha FoodHouse ishughulikie ununuzi na usafirishaji wako!",
     "SubSubTitle": "Chagua kifurushi kinachokufaa na upokee mazao mapya moja kwa moja mlangoni mwako — haraka, rahisi na bila usumbufu",
     "CustomPackage": "Binafsisha kifurushi chako",
@@ -598,11 +727,23 @@
       "totalBudget": "Bajeti ya jumla",
       "discount": "Punguzo",
       "total": "Jumla",
-      "continueToProducts": "Endelea kwa bidhaa"
+      "deliveriesPerMonthValue": "{{deliveries}}x kwa mwezi",
+      "continueToProducts": "Endelea kwa bidhaa",
+      "maxPerDeliveryHero": "Kiwango cha juu kwa kila usafirishaji ni {{currency}} {{amount}}.",
+      "maxPerDeliverySnack": "Kiwango cha juu kwa kila usafirishaji ni {{currency}} {{amount}}.",
+      "totalBudgetSnack": "Una bajeti ya jumla ya {{currency}} {{amount}} tu.",
+      "budgetStepTitle": "Weka bajeti yako",
+      "budgetMeta": "Bajeti ya juu: {{currency}} {{max}} • Chaguomsingi: {{currency}} {{default}}",
+      "budgetTip": "Kidokezo: tumia +/− kwa mabadiliko ya haraka (5,000). Hatua ya kitelezi ni 1,000.",
+      "minimumDeliveries": "Usafirishaji wa chini: {{min}} (kwa kuwa usafirishaji mmoja unaweza kuwa hadi {{currency}} {{maxPerDelivery}})",
+      "usedLeft": "Imetumika: {{currency}} {{used}} • Iliyobaki: {{currency}} {{left}}",
+      "addDelivery": "+ usafirishaji"
     },
     "(order)": {
       "checkout": "Malipo",
       "order": "Agizo",
+      "productsCount_one": "{{count}} bidhaa",
+      "productsCount_other": "{{count}} bidhaa",
       "Address": "Anwani ya usafirishaji",
       "Home": "Nyumbani",
       "Desc1": "Agizo lako litawasilishwa ndani ya siku",
@@ -623,7 +764,13 @@
       "delivery": "Usafirishaji",
       "selectedItems": "Vitu vilivyochaguliwa",
       "availableProducts": "Bidhaa zinazopatikana",
-      "viewSummary": "Angalia muhtasari"
+      "viewSummary": "Angalia muhtasari",
+      "deliveryBudgetLine": "Usafirishaji {{index}}: {{currency}} {{total}} / {{max}}",
+      "selectProductsForDelivery": "Chagua bidhaa kwa usafirishaji {{index}}",
+      "noProductsAvailable": "Hakuna bidhaa zinazopatikana",
+      "lineTotal": "Jumla ya mstari: {{currency}} {{amount}}",
+      "budgetAllocatedPerfect": "Sawa kabisa — umetumia bajeti yote.",
+      "budgetRemainingToAllocate": "Bado una {{currency}} {{amount}}. Igawie (au ongeza usafirishaji) ili kuendelea."
     },
     "(summary)": {
       "header": "Muhtasari",
@@ -631,6 +778,20 @@
       "items": "Vitu",
       "deliveries": "Usafirishaji",
       "delivery": "Usafirishaji",
+      "budgetDeliveriesLine": "Bajeti: {{currency}} {{budget}} • Usafirishaji: {{deliveries}}",
+      "deliveryDatesTitle": "Tarehe za usafirishaji",
+      "deliveryDatesRule": "Kanuni: ikiwa zimesalia siku 3 au chini hadi Jumamosi, usafirishaji wa kwanza ni Jumamosi hii; vinginevyo ni Jumamosi ijayo.",
+      "deliveryDatesTodayLine": "Leo → Jumamosi baada ya {{daysUntilSaturday}} {{dayLabel}} • Usafirishaji wa kwanza: {{firstDelivery}}",
+      "deliveryDatesItem": "Usafirishaji #{{index}} • {{date}} • {{currency}} {{amount}}",
+      "productsPerDeliveryTitle": "Bidhaa kwa kila usafirishaji",
+      "deliveryCardTitle": "Usafirishaji #{{index}} • {{date}}",
+      "noProductsSelected": "Hakuna bidhaa zilizochaguliwa.",
+      "deliveryMethodTitle": "Njia ya usafirishaji",
+      "deliveryMethodSelected": "Umechagua: {{selection}}",
+      "deliveryMethodChoose": "Chagua kituo cha kuchukulia au uwasilishaji nyumbani, kisha chagua eneo lako.",
+      "pickupPoint": "Kituo cha kuchukulia",
+      "homeDelivery": "Uwasilishaji nyumbani",
+      "proceedToPay": "Endelea kulipa",
       "paymentSummary": "Muhtasari wa malipo",
       "amount": "Kiasi",
       "free": "Bure",
@@ -643,32 +804,6 @@
       "header": "Njia za malipo",
       "description": "Ili kuendelea, tafadhali ongeza njia zako za malipo.",
       "next": "Ifuatayo"
-    }
-  },
-  "(agent)": {
-    "kyc": {
-      "title": "Thibitisha Utambulisho Wako",
-      "subtitle": "Tafadhali pakua hati zinazohitajika ili kuwa msafiri",
-      "identityDocument": "Hati ya Utambulisho",
-      "identityDocumentDesc": "Pakia picha wazi ya mbele na nyuma ya kitambulisho chako au pasipoti",
-      "front": "Mbele",
-      "back": "Nyuma",
-      "selfie": "Picha ya Kujitolea",
-      "selfieDesc": "Chukua picha ya kujitolea kuthibitisha utambulisho wako",
-      "vehicleDocument": "Usajili wa Gari",
-      "vehicleDocumentDesc": "Pakia hati ya usajili wa gari lako (picha au PDF)",
-      "uploadPhoto": "Gusa kupakia",
-      "takePhoto": "Gusa kuchukua picha",
-      "uploadDocument": "Gusa kupakia hati",
-      "submit": "Wasilisha kwa Mapitio",
-      "submittedTitle": "Hati Zimewasilishwa!",
-      "submittedMessage": "Hati zako zinachunguzwa. Tutakuarifu utakapothibitishwa.",
-      "continueButton": "Endelea",
-      "missingDocuments": "Hati Hazijachukuliwa",
-      "uploadAllDocuments": "Tafadhali pakua hati zote zinazohitajika",
-      "submitError": "Imeshindwa kuwasilisha hati za KYC. Jaribu tena.",
-      "selectDocument": "Chagua Hati",
-      "uploadPdf": "Pakia PDF"
     }
   }
 }

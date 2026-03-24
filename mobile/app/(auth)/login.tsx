@@ -177,7 +177,7 @@ export default function Login() {
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled">
             <View style={loginstyles.logoCircle}>
-              <Text style={loginstyles.logoText}>Food House</Text>
+              <Text style={loginstyles.logoText}>{i18n.t('common.appName')}</Text>
             </View>
             <View style={defaultStyles.inputsContainer}>
               <Text style={loginstyles.loginTitle}>
@@ -229,12 +229,12 @@ export default function Login() {
               if (!canEnableDemoMode) return;
               
               Alert.alert(
-                'Demo Mode',
-                'Start agent demo with mock data?',
+                i18n.t('(auth).login.demoModeTitle'),
+                i18n.t('(auth).login.demoModeMessage'),
                 [
-                  { text: 'Cancel', style: 'cancel' },
+                  { text: i18n.t('common.cancel'), style: 'cancel' },
                   { 
-                    text: 'Start Demo', 
+                    text: i18n.t('(auth).login.startDemo'),
                     onPress: () => {
                       agentDemoState.loginAsAgent(true);
                       agentDemoState.approveKYC();

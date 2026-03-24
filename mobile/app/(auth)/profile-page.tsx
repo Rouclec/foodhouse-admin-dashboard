@@ -466,7 +466,9 @@ const ProfilePage = () => {
           ]}
           loading={loading}
           onPress={handleComplete}>
-          <Text style={defaultStyles.buttonText}>Complete</Text>
+          <Text style={defaultStyles.buttonText}>
+            {i18n.t('(auth).profile.completeButton')}
+          </Text>
         </Button>
       </View>
 

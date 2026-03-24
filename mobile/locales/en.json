@@ -5,10 +5,57 @@
   "others": "Others",
   "orderCannotContain": "A single order cannot contain products from different farmers",
   "common": {
+    "appName": "Food House",
     "currency": "XAF",
-    "error": "Error"
+    "error": "Error",
+    "cancel": "Cancel",
+    "success": "Success",
+    "view": "View",
+    "logout": "Logout",
+    "total": "Total",
+    "goBack": "Go Back",
+    "loading": "Loading...",
+    "continue": "Continue",
+    "day_one": "day",
+    "day_other": "days",
+    "deleteAccountUserIdMissing": "User ID is missing. Cannot delete account.",
+    "deletionFailedTitle": "Deletion Failed",
+    "unknownErrorDeletingAccount": "An unknown error occurred while trying to delete your account.",
+    "addressFallback": "Address not provided",
+    "delete": "Delete",
+    "notFound": {
+      "title": "Oops!",
+      "message": "This screen doesn't exist.",
+      "goHome": "Go to home screen!"
+    },
+    "modal": {
+      "title": "Modal"
+    }
   },
   "(agent)": {
+    "profile": {
+      "defaultName": "Agent",
+      "accountStatus": "Account Status",
+      "kycStatusLabel": "KYC Status",
+      "agentStatusLabel": "Agent Status",
+      "kycStatus": {
+        "not_started": "NOT STARTED",
+        "pending": "PENDING",
+        "verified": "VERIFIED",
+        "rejected": "REJECTED"
+      },
+      "agentStatus": {
+        "not_registered": "Not registered",
+        "registered": "Registered",
+        "online": "Online",
+        "offline": "Offline"
+      },
+      "statistics": "Statistics",
+      "totalEarningsWithCurrency": "Total Earnings ({{currency}})",
+      "completed": "Completed",
+      "pending": "Pending",
+      "logoutConfirm": "Are you sure you want to logout?"
+    },
     "kyc": {
       "title": "Verify Your Identity",
       "subtitle": "Please upload the required documents to become an agent",
@@ -31,13 +78,24 @@
       "uploadAllDocuments": "Please upload all required documents",
       "submitError": "Failed to submit KYC documents. Please try again.",
       "selectDocument": "Select Document",
-      "uploadPdf": "Upload PDF"
+      "uploadPdf": "Upload PDF",
+      "demoDisabled": "KYC demo flow is disabled in this build.",
+      "missingSession": "Missing user session. Please log in again.",
+      "verifiedTitle": "KYC Verified!",
+      "verifiedMessage": "Your identity has been verified. You can now start accepting deliveries.",
+      "demoActiveTitle": "Demo Mode Active",
+      "autoApproveMessage": "Your KYC will be automatically approved in 3 seconds...",
+      "processing": "Processing...",
+      "continueToDashboard": "Continue to Dashboard",
+      "pleaseWait": "Please Wait..."
     },
     "orders": {
       "title": "Available Orders",
       "subtitle": "Orders near you",
       "orderDetails": "Order Details",
       "order": "Order",
+      "order_one": "Order",
+      "order_other": "Orders",
       "status": "Status",
       "statusPending": "Pending",
       "statusAssigned": "Assigned to you",
@@ -65,14 +123,23 @@
       "distance": "Distance",
       "km": "km",
       "acceptOrder": "Accept Order",
+      "acceptOrderTitle": "Accept Order",
+      "acceptOrderMessage": "Do you want to accept delivery of order #{{orderNumber}}?",
+      "accept": "Accept",
       "pickupSuccess": "Order marked as picked up",
       "pickupError": "Failed to confirm pickup",
       "deliverySuccess": "Delivery Confirmed!",
       "paymentWillBeProcessed": "Payment will be processed shortly.",
+      "deliveryEarningsMessage": "Payment will be processed shortly.\n\n+{{currency}} {{amount}} earned!",
       "deliveryError": "Failed to confirm delivery",
       "invalidCodeLength": "Please enter the 6-character code",
       "incorrectCode": "The security code is incorrect",
       "askCustomerForCode": "Ask the customer for their delivery code",
+      "demoSecurityCodeLabel": "Demo security code",
+      "demoSecurityCodeHint": "In demo mode, you can use this code to complete the delivery flow.",
+      "orderNotFoundTitle": "Order Not Found",
+      "orderNotFoundMessage": "The order you're looking for doesn't exist or has been removed.",
+      "confirmPickupMessage": "Mark order #{{orderNumber}} as picked up from {{farmerName}}?",
       "totalAmount": "Order Total",
       "items": "Order Items",
       "navigate": "Navigate",
@@ -88,7 +155,52 @@
       "totalEarnings": "Total Earnings",
       "todayEarnings": "Today",
       "completedDeliveries": "Completed",
-      "ongoingDeliveries": "Ongoing"
+      "ongoingDeliveries": "Ongoing",
+      "demoBadge": "DEMO",
+      "tabs": {
+        "available": "Available",
+        "ongoing": "Ongoing",
+        "completed": "Completed"
+      },
+      "sectionTitle": {
+        "ongoing": "Ongoing deliveries",
+        "completed": "Completed deliveries"
+      },
+      "empty": {
+        "ongoingTitle": "No ongoing deliveries",
+        "completedTitle": "No completed deliveries yet",
+        "availableKycRequiredSubtitle": "Complete your KYC verification to start accepting orders",
+        "availableSubtitle": "New orders will appear here when customers request delivery",
+        "ongoingSubtitle": "Orders you’re currently delivering will appear here.",
+        "completedSubtitle": "Your completed deliveries will appear here."
+      },
+      "alert": {
+        "ongoingDeliveryTitle": "Ongoing delivery",
+        "ongoingDeliveryMessage": "Finish your current delivery before accepting a new order.",
+        "kycRequiredTitle": "KYC Required",
+        "kycRequiredMessage": "Please complete your KYC verification first."
+      },
+      "resetDemo": {
+        "title": "Reset Demo Data",
+        "message": "This will reset all orders and earnings to their initial state. Continue?",
+        "resetButton": "Reset",
+        "successMessage": "Demo data has been reset.",
+        "longPressHint": "Long press to reset demo data"
+      },
+      "kycBanner": {
+        "notStarted": {
+          "title": "Complete Your KYC",
+          "subtitle": "You need to verify your identity before accepting deliveries"
+        },
+        "pending": {
+          "title": "KYC Under Review",
+          "subtitle": "Your documents are being reviewed. This usually takes 24-48 hours."
+        },
+        "rejected": {
+          "title": "KYC Rejected",
+          "subtitle": "Your documents were not accepted. Please resubmit."
+        }
+      }
     }
   },
   "(auth)": {
@@ -128,7 +240,10 @@
       "continueWith": "Continue with",
       "dontHaveAnAccount": "Don't have an account?",
       "registerNow": "Register Now",
-      "invalidUser": "Invalid user"
+      "invalidUser": "Invalid user",
+      "demoModeTitle": "Demo Mode",
+      "demoModeMessage": "Start agent demo with mock data?",
+      "startDemo": "Start Demo"
     },
     "verifyOtp": {
       "verifyNumber": "Verify your phone number",
@@ -156,7 +271,8 @@
       "firstNameRequired": "First name is required",
       "enterValidEmail": "Please enter a valid email",
       "doYouHaveAReferralCode": "Do you have a referral code?",
-      "pleaseSelectThisOption": "Please select this option"
+      "pleaseSelectThisOption": "Please select this option",
+      "completeButton": "Complete"
     },
     "variety": {
       "description": "Welcome to Food House app! Choose Your Variety and explore a wide range of products tailored to your preferences.",
@@ -536,6 +652,18 @@
     "Dropdown": {
       "noData": "No data"
     },
+    "Cart": {
+      "title_one": "Cart ({{count}} item)",
+      "title_other": "Cart ({{count}} items)",
+      "continueShopping": "Continue Shopping",
+      "checkout": "Checkout"
+    },
+    "PhoneNumberInput": {
+      "mobileNumber": "Mobile number"
+    },
+    "CountryList": {
+      "searchPlaceholder": "Enter country name"
+    },
     "ImagePicker": {
       "photoGalery": "Photo Galery",
       "camera": "Camera",
@@ -549,6 +677,7 @@
     "GoBack": "Go Back",
     "OurPackages": "Our Packages for you",
     "SeeAll": "See All",
+    "discountBadge": "10% off",
     "SubscriptionTitle": "Let FoodHouse do the shopping & delivery for you!",
     "SubSubTitle": "Pick a package that fits your needs and get fresh produce delivered straight to your door- fast, easy and hassle-free",
     "CustomPackage": "Customize Your Package",
@@ -567,7 +696,17 @@
       "totalBudget": "Total Budget",
       "discount": "Discount",
       "total": "Total",
-      "continueToProducts": "Continue to Products"
+      "deliveriesPerMonthValue": "{{deliveries}}x per month",
+      "continueToProducts": "Continue to Products",
+      "maxPerDeliveryHero": "Max per delivery is {{currency}} {{amount}}.",
+      "maxPerDeliverySnack": "Max per delivery is {{currency}} {{amount}}.",
+      "totalBudgetSnack": "You only have {{currency}} {{amount}} total budget.",
+      "budgetStepTitle": "Set your budget",
+      "budgetMeta": "Max budget: {{currency}} {{max}} • Default: {{currency}} {{default}}",
+      "budgetTip": "Tip: use +/− for quick changes (5,000). Slider step is 1,000.",
+      "minimumDeliveries": "Minimum deliveries: {{min}} (because one delivery can be at most {{currency}} {{maxPerDelivery}})",
+      "usedLeft": "Used: {{currency}} {{used}} • Left: {{currency}} {{left}}",
+      "addDelivery": "+ delivery"
     },
     "(packageDetails)": {
       "header": "Package Details",
@@ -583,6 +722,8 @@
     "(order)": {
       "checkout": "Checkout",
       "order": "Order",
+      "productsCount_one": "{{count}} Product",
+      "productsCount_other": "{{count}} Products",
       "Address": "Shipping Address",
       "Home": "Home",
       "Desc1": "Your order will be delivered within",
@@ -605,7 +746,13 @@
       "selectedItems": "Selected Items",
       "availableProducts": "Available Products",
       "budgetExceeded": "This would exceed your delivery budget.",
-      "viewSummary": "View Summary"
+      "viewSummary": "View Summary",
+      "deliveryBudgetLine": "Delivery {{index}}: {{currency}} {{total}} / {{max}}",
+      "selectProductsForDelivery": "Select products for delivery {{index}}",
+      "noProductsAvailable": "No products available",
+      "lineTotal": "Line total: {{currency}} {{amount}}",
+      "budgetAllocatedPerfect": "Perfect — you’ve allocated the full budget.",
+      "budgetRemainingToAllocate": "You still have {{currency}} {{amount}} left. Allocate it (or add a delivery) to continue."
     },
     "(summary)": {
       "header": "Summary",
@@ -613,6 +760,20 @@
       "items": "Items",
       "deliveries": "Deliveries",
       "delivery": "Delivery",
+      "budgetDeliveriesLine": "Budget: {{currency}} {{budget}} • Deliveries: {{deliveries}}",
+      "deliveryDatesTitle": "Delivery dates",
+      "deliveryDatesRule": "Rule: if there are 3 days or less until Saturday, the first delivery is this Saturday; otherwise it’s next Saturday.",
+      "deliveryDatesTodayLine": "Today → Saturday in {{daysUntilSaturday}} {{dayLabel}} • First delivery: {{firstDelivery}}",
+      "deliveryDatesItem": "Delivery #{{index}} • {{date}} • {{currency}} {{amount}}",
+      "productsPerDeliveryTitle": "Products per delivery",
+      "deliveryCardTitle": "Delivery #{{index}} • {{date}}",
+      "noProductsSelected": "No products selected.",
+      "deliveryMethodTitle": "Delivery method",
+      "deliveryMethodSelected": "Selected: {{selection}}",
+      "deliveryMethodChoose": "Choose pickup point or home delivery, then select your location.",
+      "pickupPoint": "Pickup point",
+      "homeDelivery": "Home delivery",
+      "proceedToPay": "Proceed to pay",
       "paymentSummary": "Payment Summary",
       "amount": "Amount",
       "free": "Free",
@@ -625,89 +786,6 @@
       "header": "Payment Methods",
       "description": "To proceed, please add your payment methods.",
       "next": "Next"
-    }
-  },
-  "(agent)": {
-    "home": {
-      "title": "Deliveries",
-      "online": "Online",
-      "offline": "Offline",
-      "goOnline": "Go Online",
-      "goOffline": "Go Offline",
-      "totalEarnings": "Total Earnings",
-      "todayEarnings": "Today",
-      "completedDeliveries": "Completed",
-      "ongoingDeliveries": "Ongoing"
-    },
-    "orders": {
-      "title": "Available Orders",
-      "subtitle": "Orders near you",
-      "orderDetails": "Order Details",
-      "order": "Order",
-      "status": "Status",
-      "statusPending": "Pending",
-      "statusAssigned": "Assigned to you",
-      "statusPickedUp": "Picked up",
-      "statusDelivered": "Delivered",
-      "yourEarning": "Your Earning",
-      "pickupLocation": "Pickup Location",
-      "deliveryLocation": "Delivery Location",
-      "pickup": "Pickup",
-      "delivery": "Delivery",
-      "farmer": "Farmer",
-      "customer": "Customer",
-      "navigateToPickup": "Navigate to Pickup",
-      "navigateToDelivery": "Navigate to Delivery",
-      "callCustomer": "Call Customer",
-      "securityCodeLabel": "Security Code",
-      "securityCodeHint": "Enter this code when delivering to confirm",
-      "confirmPickup": "Confirm Pickup",
-      "confirmDelivery": "Confirm Delivery",
-      "cancel": "Cancel",
-      "confirm": "Confirm",
-      "enterSecurityCode": "Enter the customer's security code to confirm delivery",
-      "deliveryCompleted": "Delivery Completed",
-      "noOrdersAvailable": "No orders available in your area",
-      "distance": "Distance",
-      "km": "km",
-      "acceptOrder": "Accept Order",
-      "pickupSuccess": "Order marked as picked up",
-      "pickupError": "Failed to confirm pickup",
-      "deliverySuccess": "Delivery Confirmed!",
-      "paymentWillBeProcessed": "Payment will be processed shortly.",
-      "deliveryError": "Failed to confirm delivery",
-      "invalidCodeLength": "Please enter the 6-character code",
-      "incorrectCode": "The security code is incorrect",
-      "askCustomerForCode": "Ask the customer for their delivery code",
-      "totalAmount": "Order Total",
-      "items": "Order Items",
-      "navigate": "Navigate",
-      "call": "Call",
-      "orderAccepted": "Order accepted! You can now pick it up."
-    },
-    "kyc": {
-      "title": "Verify Your Identity",
-      "subtitle": "Please upload the required documents to become an agent",
-      "identityDocument": "Identity Document",
-      "identityDocumentDesc": "Upload clear photos of the front and back of your national ID or passport",
-      "front": "Front",
-      "back": "Back",
-      "selfie": "Selfie Photo",
-      "selfieDesc": "Take a selfie to verify your identity",
-      "vehicleDocument": "Vehicle Registration",
-      "vehicleDocumentDesc": "Upload your vehicle registration document (image or PDF)",
-      "uploadPhoto": "Tap to upload",
-      "takePhoto": "Tap to take photo",
-      "uploadDocument": "Tap to upload document",
-      "submit": "Submit for Review",
-      "submittedTitle": "Documents Submitted!",
-      "submittedMessage": "Your documents are being reviewed. We'll notify you once verified.",
-      "continueButton": "Continue",
-      "missingDocuments": "Missing Documents",
-      "uploadAllDocuments": "Please upload all required documents",
-      "submitError": "Failed to submit KYC documents. Please try again.",
-      "selectDocument": "Select Document",
-      "uploadPdf": "Upload PDF"
     }
   }
 }

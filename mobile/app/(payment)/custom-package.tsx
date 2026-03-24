@@ -57,7 +57,7 @@ export default function CustomPackage() {
               <Text style={styles.valueText}>
                 {monthlyBudget.toLocaleString()}
               </Text>
-              <Text style={styles.valueSubtext}>XAF</Text>
+              <Text style={styles.valueSubtext}>{i18n.t('common.currency')}</Text>
             </View>
             <TouchableOpacity
               style={styles.controlButtonGreen}
@@ -103,20 +103,26 @@ export default function CustomPackage() {
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>{i18n.t('(subscription).(customPackage).totalBudget')}</Text>
             <Text style={styles.summaryValue}>
-              {totalBudget.toLocaleString()} XAF
+              {totalBudget.toLocaleString()} {i18n.t('common.currency')}
             </Text>
           </View>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>{i18n.t('(subscription).(customPackage).deliveries')}</Text>
-            <Text style={styles.summaryValue}>{deliveries}x per month</Text>
+            <Text style={styles.summaryValue}>
+              {i18n.t('(subscription).(customPackage).deliveriesPerMonthValue', {
+                deliveries,
+              })}
+            </Text>
           </View>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>{i18n.t('(subscription).(customPackage).discount')}</Text>
-            <Text style={styles.summaryValue}>10% off</Text>
+            <Text style={styles.summaryValue}>{i18n.t('(subscription).discountBadge')}</Text>
           </View>
           <View style={[styles.summaryRow, styles.totalRow]}>
             <Text style={styles.totalLabel}>{i18n.t('(subscription).(customPackage).total')}</Text>
-            <Text style={styles.totalValue}>{total.toLocaleString()} XAF</Text>
+            <Text style={styles.totalValue}>
+              {total.toLocaleString()} {i18n.t('common.currency')}
+            </Text>
           </View>
         </View>
       </ScrollView>

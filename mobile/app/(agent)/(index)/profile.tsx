@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMutation } from '@tanstack/react-query';
 import { Colors } from '@/constants';
+import i18n from '@/i18n';
 import { agentDemoState } from '@/contexts/AgentContext';
 import { Context, type ContextType } from '@/app/_layout';
 import { usersRevokeRefreshTokenMutation } from '@/client/users.swagger/@tanstack/react-query.gen';
@@ -82,46 +83,58 @@ const AgentProfile = () => {
           </Text>
         </View>
         <Text style={styles.name}>
-          {(displayFirstName ?? 'Agent') || 'Agent'} {(displayLastName ?? '') || ''}
+          {(displayFirstName ?? i18n.t('(agent).profile.defaultName')) ||
+            i18n.t('(agent).profile.defaultName')}{' '}
+          {(displayLastName ?? '') || ''}
         </Text>
         <Text style={styles.email}>{displayEmail || 'agent@foodhouse.demo'}</Text>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Account Status</Text>
+          <Text style={styles.sectionTitle}>{i18n.t('(agent).profile.accountStatus')}</Text>
           <View style={styles.infoRow}>
-            <Text style={styles.label}>KYC Status</Text>
+            <Text style={styles.label}>{i18n.t('(agent).profile.kycStatusLabel')}</Text>
             <View style={[styles.statusBadge, { 
               backgroundColor: state.kycStatus === 'verified' ? Colors.success + '20' : Colors.gold + '20' 
             }]}>
               <Text style={[styles.statusText, { 
                 color: state.kycStatus === 'verified' ? Colors.success : Colors.gold 
               }]}>
-                {state.kycStatus.toUpperCase()}
+                {i18n.t(`(agent).profile.kycStatus.${state.kycStatus}`)}
               </Text>
             </View>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.label}>Agent Status</Text>
-            <Text style={styles.value}>{state.agentStatus}</Text>
+            <Text style={styles.label}>{i18n.t('(agent).profile.agentStatusLabel')}</Text>
+            <Text style={styles.value}>
+              {i18n.t(`(agent).profile.agentStatus.${state.agentStatus}`)}
+            </Text>
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Statistics</Text>
+          <Text style={styles.sectionTitle}>{i18n.t('(agent).profile.statistics')}</Text>
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{state.earnings.toLocaleString()}</Text>
-              <Text style={styles.statLabel}>Total Earnings (XAF)</Text>
+              <Text style={styles.statLabel}>
+                {i18n.t('(agent).profile.totalEarningsWithCurrency', {
+                  currency: i18n.t('common.currency'),
+                })}
+              </Text>
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{state.completedDeliveries}</Text>
-              <Text style={styles.statLabel}>Completed</Text>
+              <Text style={styles.statLabel}>
+                {i18n.t('(agent).profile.completed')}
+              </Text>
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{state.pendingDeliveries}</Text>
-              <Text style={styles.statLabel}>Pending</Text>
+              <Text style={styles.statLabel}>
+                {i18n.t('(agent).profile.pending')}
+              </Text>
             </View>
           </View>
         </View>
@@ -135,7 +148,7 @@ const AgentProfile = () => {
             }}
             style={{ borderColor: Colors.error }}
             textColor={Colors.error}>
-            Logout
+            {i18n.t('common.logout')}
           </Button>
         </View>
       </ScrollView>
@@ -144,11 +157,11 @@ const AgentProfile = () => {
         <View style={[buyerProductsStyles.filtersContainer]}>
           <View style={profileFlowStyles.content}>
             <Text variant="titleMedium" style={buyerProductsStyles.title}>
-              Logout
+              {i18n.t('common.logout')}
             </Text>
 
             <Text style={defaultStyles.dialogSubtitle}>
-              Are you sure you want to logout?
+              {i18n.t('(agent).profile.logoutConfirm')}
             </Text>
           </View>
           <View style={buyerProductsStyles.bottomButtonContainer}>
@@ -162,7 +175,7 @@ const AgentProfile = () => {
                 buyerProductsStyles.halfButton,
               ]}
               disabled={loading}>
-              <Text style={defaultStyles.primaryText}>Cancel</Text>
+              <Text style={defaultStyles.primaryText}>{i18n.t('common.cancel')}</Text>
             </Button>
             <Button
               onPress={handleLogout}
@@ -173,7 +186,7 @@ const AgentProfile = () => {
               ]}
               loading={loading}
               disabled={loading}>
-              <Text style={defaultStyles.buttonText}>Logout</Text>
+              <Text style={defaultStyles.buttonText}>{i18n.t('common.logout')}</Text>
             </Button>
           </View>
         </View>

@@ -126,7 +126,7 @@ const SelectRoleForOAuth = () => {
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled">
             <View style={loginstyles.logoCircle}>
-              <Text style={loginstyles.logoText}>Food House</Text>
+              <Text style={loginstyles.logoText}>{i18n.t('common.appName')}</Text>
             </View>
 
             <View style={signupStyles.content}>

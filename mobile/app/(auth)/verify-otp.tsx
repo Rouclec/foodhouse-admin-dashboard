@@ -111,7 +111,7 @@ const VerifyOtpScreen: FC = () => {
           return errorData?.message;
         }
 
-        let message = 'An unknown error occurred';
+        let message = i18n.t('(auth).login.anUnknownError');
 
         if (typeof errorData === 'string') {
           try {
@@ -158,7 +158,7 @@ const VerifyOtpScreen: FC = () => {
           return errorData?.message;
         }
 
-        let message = 'An unknown error occurred';
+        let message = i18n.t('(auth).login.anUnknownError');
 
         if (typeof errorData === 'string') {
           try {

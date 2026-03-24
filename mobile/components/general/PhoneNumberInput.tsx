@@ -23,6 +23,7 @@ import {
   TANZANIA,
   countries as allCountries,
 } from "@/constants";
+import i18n from "@/i18n";
 import { Country } from "@/interface";
 import { phoneNumberInputStyles as styles } from "@/styles";
 import { Icon, TextInput } from "react-native-paper";
@@ -74,8 +75,9 @@ const PhoneNumberInput: FC<Props> = ({
   setPhoneNumber,
   containerStyle,
   countries,
-  label = "Mobile number",
+  label,
 }) => {
+  const resolvedLabel = label ?? i18n.t("components.PhoneNumberInput.mobileNumber");
   const [showCountries, setShowCountries] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [country, setCountry] = useState<Country>(CAMEROON);
@@ -139,7 +141,7 @@ const PhoneNumberInput: FC<Props> = ({
               : null,
           ]}
           mode="outlined"
-          label={label}
+          label={resolvedLabel}
           testID="text-input-container"
           onChangeText={handlePhoneNumber}
           value={phoneNumber ?? ""}

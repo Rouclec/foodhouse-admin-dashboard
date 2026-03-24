@@ -2007,11 +2007,11 @@ func (i *Impl) CreateKYC(ctx context.Context,
 
 	return &usersgrpc.CreateKYCResponse{
 		KycVerification: &usersgrpc.KYCVerification{
-			Id:                  kyc.ID,
-			UserId:              kyc.UserID,
-			IdentityDocumentUrl: first(kyc.IdentityDocumentUrls),
-			SelfieUrl:           first(kyc.SelfieUrls),
-			VehicleDocumentUrl:  first(kyc.VehicleDocumentUrls),
+			Id:                   kyc.ID,
+			UserId:               kyc.UserID,
+			IdentityDocumentUrl:  first(kyc.IdentityDocumentUrls),
+			SelfieUrl:            first(kyc.SelfieUrls),
+			VehicleDocumentUrl:   first(kyc.VehicleDocumentUrls),
 			IdentityDocumentUrls: kyc.IdentityDocumentUrls,
 			SelfieUrls:           kyc.SelfieUrls,
 			VehicleDocumentUrls:  kyc.VehicleDocumentUrls,
@@ -2044,8 +2044,8 @@ func (i *Impl) GetKYCByUserID(ctx context.Context,
 
 	return &usersgrpc.GetKYCByUserIDResponse{
 		KycVerification: &usersgrpc.KYCVerification{
-			Id:                  kyc.ID,
-			UserId:              kyc.UserID,
+			Id:     kyc.ID,
+			UserId: kyc.UserID,
 			IdentityDocumentUrl: func() string {
 				if len(kyc.IdentityDocumentUrls) > 0 {
 					return kyc.IdentityDocumentUrls[0]
@@ -2160,8 +2160,8 @@ func (i *Impl) ListKYCVerifications(ctx context.Context,
 		}
 
 		out = append(out, &usersgrpc.KYCVerification{
-			Id:                  row.ID,
-			UserId:              row.UserID,
+			Id:     row.ID,
+			UserId: row.UserID,
 			IdentityDocumentUrl: func() string {
 				if len(row.IdentityDocumentUrls) > 0 {
 					return row.IdentityDocumentUrls[0]
@@ -2183,11 +2183,11 @@ func (i *Impl) ListKYCVerifications(ctx context.Context,
 			IdentityDocumentUrls: row.IdentityDocumentUrls,
 			SelfieUrls:           row.SelfieUrls,
 			VehicleDocumentUrls:  row.VehicleDocumentUrls,
-			Status:              kycStatus,
-			RejectionReason:     row.RejectionReason,
-			VerifiedAt:          verifiedAt,
-			CreatedAt:           timestamppb.New(row.CreatedAt.Time),
-			UpdatedAt:           timestamppb.New(row.UpdatedAt.Time),
+			Status:               kycStatus,
+			RejectionReason:      row.RejectionReason,
+			VerifiedAt:           verifiedAt,
+			CreatedAt:            timestamppb.New(row.CreatedAt.Time),
+			UpdatedAt:            timestamppb.New(row.UpdatedAt.Time),
 		})
 	}
 
