@@ -2133,7 +2133,8 @@ func normalizeListOffset(offset int32) int32 {
 
 func normalizeKycStatusFilter(status usersgrpc.KYCStatus) string {
 	if status == usersgrpc.KYCStatus_KYC_STATUS_UNSPECIFIED {
-		return usersgrpc.KYCStatus_KYC_STATUS_PENDING.String()
+		// Unspecified means "no filter" (list all).
+		return ""
 	}
 	return status.String()
 }

@@ -214,6 +214,6 @@ RETURNING *;
 
 -- name: ListKYCVerifications :many
 SELECT * FROM kyc_verifications 
-WHERE ($1::text IS NULL OR status = $1::text)
+WHERE ($1::text = '' OR status = $1::text)
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3;
