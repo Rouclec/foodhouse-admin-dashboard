@@ -16,7 +16,7 @@
     "application/json"
   ],
   "paths": {
-    "/v1/admin/kyc/verifications": {
+    "/v1/admin/{adminUserId}/list-kyc-verifications": {
       "get": {
         "operationId": "Users_ListKYCVerifications",
         "responses": {
@@ -34,6 +34,12 @@
           }
         },
         "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "status",
             "in": "query",
@@ -60,50 +66,6 @@
             "required": false,
             "type": "integer",
             "format": "int32"
-          }
-        ],
-        "tags": [
-          "Users"
-        ]
-      }
-    },
-    "/v1/admin/{adminUserId}/kyc/{kycId}/status": {
-      "patch": {
-        "operationId": "Users_UpdateKYCStatus",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/usersgrpcUpdateKYCStatusResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "adminUserId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "kycId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/UsersUpdateKYCStatusBody"
-            }
           }
         ],
         "tags": [
@@ -448,6 +410,50 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/UsersSuspendUserBody"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/admin/{adminUserId}/{kycId}/update-kyc-status": {
+      "patch": {
+        "operationId": "Users_UpdateKYCStatus",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcUpdateKYCStatusResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "adminUserId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "kycId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UsersUpdateKYCStatusBody"
             }
           }
         ],
@@ -1049,38 +1055,7 @@
         ]
       }
     },
-    "/v1/users/{userId}/get-user-by-id": {
-      "get": {
-        "operationId": "Users_GetUserByID",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/usersgrpcGetUserByIDResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "userId",
-            "description": "ID of the user to fetch",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Users"
-        ]
-      }
-    },
-    "/v1/users/{userId}/kyc": {
+    "/v1/users/{userId}/get-kyc-by-user-id": {
       "get": {
         "operationId": "Users_GetKYCByUserID",
         "responses": {
@@ -1108,15 +1083,16 @@
         "tags": [
           "Users"
         ]
-      },
-      "post": {
-        "summary": "KYC endpoints",
-        "operationId": "Users_CreateKYC",
+      }
+    },
+    "/v1/users/{userId}/get-user-by-id": {
+      "get": {
+        "operationId": "Users_GetUserByID",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/usersgrpcCreateKYCResponse"
+              "$ref": "#/definitions/usersgrpcGetUserByIDResponse"
             }
           },
           "default": {
@@ -1129,17 +1105,10 @@
         "parameters": [
           {
             "name": "userId",
+            "description": "ID of the user to fetch",
             "in": "path",
             "required": true,
             "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/UsersCreateKYCBody"
-            }
           }
         ],
         "tags": [
@@ -1177,6 +1146,45 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/UsersReviewFarmerBody"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/users/{userId}/upload-kyc": {
+      "post": {
+        "summary": "KYC endpoints",
+        "operationId": "Users_CreateKYC",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/usersgrpcCreateKYCResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UsersCreateKYCBody"
             }
           }
         ],

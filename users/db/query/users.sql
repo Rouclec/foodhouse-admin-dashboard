@@ -202,14 +202,14 @@ SELECT * FROM kyc_verifications WHERE id = $1;
 
 -- name: UpdateKYCStatus :one
 UPDATE kyc_verifications
-SET status = $2::text,
-    rejection_reason = $3::text,
+SET status = sqlc.arg(status)::text,
+    rejection_reason = sqlc.arg(rejection_reason)::text,
     verified_at = CASE
-        WHEN $2::text = 'KYC_STATUS_VERIFIED' THEN now()
+        WHEN sqlc.arg(status)::text = 'KYC_STATUS_VERIFIED' THEN now()
         ELSE NULL::timestamptz
     END,
     updated_at = now()
-WHERE id = $1
+WHERE id = sqlc.arg(id)::text
 RETURNING *;
 
 -- name: ListKYCVerifications :many

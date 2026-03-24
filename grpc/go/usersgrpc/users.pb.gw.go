@@ -1572,12 +1572,29 @@ func local_request_Users_UpdateKYCStatus_0(ctx context.Context, marshaler runtim
 }
 
 var (
-	filter_Users_ListKYCVerifications_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+	filter_Users_ListKYCVerifications_0 = &utilities.DoubleArray{Encoding: map[string]int{"admin_user_id": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
 )
 
 func request_Users_ListKYCVerifications_0(ctx context.Context, marshaler runtime.Marshaler, client UsersClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq ListKYCVerificationsRequest
 	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["admin_user_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "admin_user_id")
+	}
+
+	protoReq.AdminUserId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "admin_user_id", err)
+	}
 
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
@@ -1594,6 +1611,23 @@ func request_Users_ListKYCVerifications_0(ctx context.Context, marshaler runtime
 func local_request_Users_ListKYCVerifications_0(ctx context.Context, marshaler runtime.Marshaler, server UsersServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq ListKYCVerificationsRequest
 	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["admin_user_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "admin_user_id")
+	}
+
+	protoReq.AdminUserId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "admin_user_id", err)
+	}
 
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
@@ -2297,7 +2331,7 @@ func RegisterUsersHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/usersgrpc.Users/CreateKYC", runtime.WithHTTPPathPattern("/v1/users/{user_id}/kyc"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/usersgrpc.Users/CreateKYC", runtime.WithHTTPPathPattern("/v1/users/{user_id}/upload-kyc"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2322,7 +2356,7 @@ func RegisterUsersHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/usersgrpc.Users/GetKYCByUserID", runtime.WithHTTPPathPattern("/v1/users/{user_id}/kyc"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/usersgrpc.Users/GetKYCByUserID", runtime.WithHTTPPathPattern("/v1/users/{user_id}/get-kyc-by-user-id"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2347,7 +2381,7 @@ func RegisterUsersHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/usersgrpc.Users/UpdateKYCStatus", runtime.WithHTTPPathPattern("/v1/admin/{admin_user_id}/kyc/{kyc_id}/status"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/usersgrpc.Users/UpdateKYCStatus", runtime.WithHTTPPathPattern("/v1/admin/{admin_user_id}/{kyc_id}/update-kyc-status"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2372,7 +2406,7 @@ func RegisterUsersHandlerServer(ctx context.Context, mux *runtime.ServeMux, serv
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/usersgrpc.Users/ListKYCVerifications", runtime.WithHTTPPathPattern("/v1/admin/kyc/verifications"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/usersgrpc.Users/ListKYCVerifications", runtime.WithHTTPPathPattern("/v1/admin/{admin_user_id}/list-kyc-verifications"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3030,7 +3064,7 @@ func RegisterUsersHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/usersgrpc.Users/CreateKYC", runtime.WithHTTPPathPattern("/v1/users/{user_id}/kyc"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/usersgrpc.Users/CreateKYC", runtime.WithHTTPPathPattern("/v1/users/{user_id}/upload-kyc"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3052,7 +3086,7 @@ func RegisterUsersHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/usersgrpc.Users/GetKYCByUserID", runtime.WithHTTPPathPattern("/v1/users/{user_id}/kyc"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/usersgrpc.Users/GetKYCByUserID", runtime.WithHTTPPathPattern("/v1/users/{user_id}/get-kyc-by-user-id"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3074,7 +3108,7 @@ func RegisterUsersHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/usersgrpc.Users/UpdateKYCStatus", runtime.WithHTTPPathPattern("/v1/admin/{admin_user_id}/kyc/{kyc_id}/status"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/usersgrpc.Users/UpdateKYCStatus", runtime.WithHTTPPathPattern("/v1/admin/{admin_user_id}/{kyc_id}/update-kyc-status"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3096,7 +3130,7 @@ func RegisterUsersHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/usersgrpc.Users/ListKYCVerifications", runtime.WithHTTPPathPattern("/v1/admin/kyc/verifications"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/usersgrpc.Users/ListKYCVerifications", runtime.WithHTTPPathPattern("/v1/admin/{admin_user_id}/list-kyc-verifications"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3170,13 +3204,13 @@ var (
 
 	pattern_Users_DeleteUserAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "users", "user_id", "delete-user-account"}, ""))
 
-	pattern_Users_CreateKYC_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "users", "user_id", "kyc"}, ""))
+	pattern_Users_CreateKYC_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "users", "user_id", "upload-kyc"}, ""))
 
-	pattern_Users_GetKYCByUserID_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "users", "user_id", "kyc"}, ""))
+	pattern_Users_GetKYCByUserID_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "users", "user_id", "get-kyc-by-user-id"}, ""))
 
-	pattern_Users_UpdateKYCStatus_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"v1", "admin", "admin_user_id", "kyc", "kyc_id", "status"}, ""))
+	pattern_Users_UpdateKYCStatus_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"v1", "admin", "admin_user_id", "kyc_id", "update-kyc-status"}, ""))
 
-	pattern_Users_ListKYCVerifications_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"v1", "admin", "kyc", "verifications"}, ""))
+	pattern_Users_ListKYCVerifications_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "admin", "admin_user_id", "list-kyc-verifications"}, ""))
 )
 
 var (

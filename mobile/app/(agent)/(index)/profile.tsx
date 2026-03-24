@@ -13,6 +13,7 @@ import {
   usersRevokeRefreshTokenMutation,
 } from '@/client/users.swagger/@tanstack/react-query.gen';
 import type { usersgrpcKYCStatus } from '@/client/users.swagger';
+import { ordersGetAgentStatsOptions } from '@/client/orders.swagger/@tanstack/react-query.gen';
 import {
   buyerProductsStyles,
   defaultStyles,
@@ -68,6 +69,28 @@ const AgentProfile = () => {
   const kycStatus = state.isDemoMode ? state.kycStatus : backendKycStatus;
   const isKycVerified = kycStatus === 'verified';
 
+  const { data: agentStatsData } = useQuery({
+    ...ordersGetAgentStatsOptions({
+      path: { userId },
+    }),
+    enabled: !!userId && !state.isDemoMode,
+  });
+
+  const totalEarnings =
+    state.isDemoMode
+      ? state.earnings
+      : (agentStatsData?.totalEarnings?.value ?? 0);
+
+  const completedDeliveries =
+    state.isDemoMode
+      ? state.completedDeliveries
+      : (agentStatsData?.completedCount ?? 0);
+
+  const ongoingDeliveries =
+    state.isDemoMode
+      ? state.pendingDeliveries
+      : (agentStatsData?.ongoingCount ?? 0);
+
   const { mutate: revokeRefreshToken } = useMutation({
     ...usersRevokeRefreshTokenMutation(),
     onError: async error => {
@@ -116,7 +139,9 @@ const AgentProfile = () => {
             i18n.t('(agent).profile.defaultName')}{' '}
           {(displayLastName ?? '') || ''}
         </Text>
-        <Text style={styles.email}>{displayEmail || 'agent@foodhouse.demo'}</Text>
+        <Text style={styles.email}>
+          {displayEmail || (state.isDemoMode ? 'agent@foodhouse.demo' : '')}
+        </Text>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -134,19 +159,13 @@ const AgentProfile = () => {
               </Text>
             </View>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>{i18n.t('(agent).profile.agentStatusLabel')}</Text>
-            <Text style={styles.value}>
-              {i18n.t(`(agent).profile.agentStatus.${state.agentStatus}`)}
-            </Text>
-          </View>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{i18n.t('(agent).profile.statistics')}</Text>
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{state.earnings.toLocaleString()}</Text>
+              <Text style={styles.statValue}>{totalEarnings.toLocaleString()}</Text>
               <Text style={styles.statLabel}>
                 {i18n.t('(agent).profile.totalEarningsWithCurrency', {
                   currency: i18n.t('common.currency'),
@@ -154,15 +173,15 @@ const AgentProfile = () => {
               </Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{state.completedDeliveries}</Text>
+              <Text style={styles.statValue}>{completedDeliveries}</Text>
               <Text style={styles.statLabel}>
                 {i18n.t('(agent).profile.completed')}
               </Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{state.pendingDeliveries}</Text>
+              <Text style={styles.statValue}>{ongoingDeliveries}</Text>
               <Text style={styles.statLabel}>
-                {i18n.t('(agent).profile.pending')}
+                {i18n.t('(agent).profile.ongoing')}
               </Text>
             </View>
           </View>
@@ -248,6 +267,7 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 32,
     fontWeight: 'bold',
+    lineHeight: 64,
     color: Colors.primary[500],
   },
   name: {

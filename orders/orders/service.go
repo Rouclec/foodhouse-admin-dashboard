@@ -1580,6 +1580,174 @@ func (i *Impl) ListUserOrders(ctx context.Context, req *ordersgrpc.ListUserOrder
 	}, nil
 }
 
+func (i *Impl) agentRegisteredLocationPoint(ctx context.Context, agentID string) (pgtype.Point, error) {
+	if i.userService == nil {
+		return pgtype.Point{}, status.Error(codes.FailedPrecondition, "users service is not configured")
+	}
+
+	resp, err := i.userService.GetUserByID(ctx, &usersgrpc.GetUserByIDRequest{UserId: agentID})
+	if err != nil {
+		return pgtype.Point{}, status.Errorf(codes.Internal, "failed to fetch agent profile: %v", err)
+	}
+	u := resp.GetUser()
+	if u == nil {
+		return pgtype.Point{}, status.Error(codes.NotFound, "agent not found")
+	}
+
+	loc := u.GetLocationCoordinates()
+	if loc == nil {
+		return pgtype.Point{}, status.Error(codes.FailedPrecondition, "agent has no registered location")
+	}
+
+	lat := loc.GetLat()
+	lon := loc.GetLon()
+	if lat == 0 && lon == 0 {
+		return pgtype.Point{}, status.Error(codes.FailedPrecondition, "agent has no registered location")
+	}
+
+	return pgtype.Point{
+		P:     pgtype.Vec2{X: lon, Y: lat},
+		Valid: true,
+	}, nil
+}
+
+// ListAgentAvailableOrders implements ordersgrpc.OrdersServer.
+func (i *Impl) ListAgentAvailableOrders(ctx context.Context, req *ordersgrpc.ListAgentAvailableOrdersRequest) (*ordersgrpc.ListAgentAvailableOrdersResponse, error) {
+	agentID := strings.TrimSpace(req.GetUserId())
+	if agentID == "" {
+		return nil, status.Error(codes.InvalidArgument, "user_id is required")
+	}
+
+	var err error
+	startKey := time.Now().Add(time.Hour)
+	if req.GetStartKey() != "" {
+		startKey, err = time.Parse(time.RFC3339, req.GetStartKey())
+		if err != nil {
+			return nil, status.Error(codes.InvalidArgument, "Invalid start key")
+		}
+	}
+
+	count := int(req.GetCount())
+	if count == 0 {
+		count = 20
+	}
+
+	radiusKm := req.GetRadiusKm()
+	if radiusKm <= 0 {
+		radiusKm = 300
+	}
+
+	agentLoc, err := i.agentRegisteredLocationPoint(ctx, agentID)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := i.repo.Do().ListAgentAvailableOrders(ctx, sqlc.ListAgentAvailableOrdersParams{
+		CreatedBefore:  startKey,
+		Count:          int32(count),
+		AgentLocation:  agentLoc,
+		RadiusKm:       radiusKm,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting available agent orders: %v", err)
+	}
+
+	protoOrders := converters.SqlcAgentAvailableOrdersToProto(rows)
+	nextKey := ""
+	if len(protoOrders) >= count {
+		nextKey = protoOrders[len(protoOrders)-1].GetCreatedAt().AsTime().Format(time.RFC3339)
+	}
+
+	return &ordersgrpc.ListAgentAvailableOrdersResponse{
+		Orders:  protoOrders,
+		NextKey: nextKey,
+	}, nil
+}
+
+// ListAgentOngoingOrders implements ordersgrpc.OrdersServer.
+func (i *Impl) ListAgentOngoingOrders(ctx context.Context, req *ordersgrpc.ListAgentOngoingOrdersRequest) (*ordersgrpc.ListAgentOngoingOrdersResponse, error) {
+	agentID := strings.TrimSpace(req.GetUserId())
+	if agentID == "" {
+		return nil, status.Error(codes.InvalidArgument, "user_id is required")
+	}
+
+	var err error
+	startKey := time.Now().Add(time.Hour)
+	if req.GetStartKey() != "" {
+		startKey, err = time.Parse(time.RFC3339, req.GetStartKey())
+		if err != nil {
+			return nil, status.Error(codes.InvalidArgument, "Invalid start key")
+		}
+	}
+
+	count := int(req.GetCount())
+	if count == 0 {
+		count = 20
+	}
+
+	rows, err := i.repo.Do().ListAgentOngoingOrders(ctx, sqlc.ListAgentOngoingOrdersParams{
+		AgentID:       agentID,
+		CreatedBefore: startKey,
+		Count:         int32(count),
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting ongoing agent orders: %v", err)
+	}
+
+	protoOrders := converters.SqlcAgentOngoingOrdersToProto(rows)
+	nextKey := ""
+	if len(protoOrders) >= count {
+		nextKey = protoOrders[len(protoOrders)-1].GetCreatedAt().AsTime().Format(time.RFC3339)
+	}
+
+	return &ordersgrpc.ListAgentOngoingOrdersResponse{
+		Orders:  protoOrders,
+		NextKey: nextKey,
+	}, nil
+}
+
+// ListAgentDeliveredOrders implements ordersgrpc.OrdersServer.
+func (i *Impl) ListAgentDeliveredOrders(ctx context.Context, req *ordersgrpc.ListAgentDeliveredOrdersRequest) (*ordersgrpc.ListAgentDeliveredOrdersResponse, error) {
+	agentID := strings.TrimSpace(req.GetUserId())
+	if agentID == "" {
+		return nil, status.Error(codes.InvalidArgument, "user_id is required")
+	}
+
+	var err error
+	startKey := time.Now().Add(time.Hour)
+	if req.GetStartKey() != "" {
+		startKey, err = time.Parse(time.RFC3339, req.GetStartKey())
+		if err != nil {
+			return nil, status.Error(codes.InvalidArgument, "Invalid start key")
+		}
+	}
+
+	count := int(req.GetCount())
+	if count == 0 {
+		count = 20
+	}
+
+	rows, err := i.repo.Do().ListAgentDeliveredOrders(ctx, sqlc.ListAgentDeliveredOrdersParams{
+		AgentID:       agentID,
+		CreatedBefore: startKey,
+		Count:         int32(count),
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting delivered agent orders: %v", err)
+	}
+
+	protoOrders := converters.SqlcAgentDeliveredOrdersToProto(rows)
+	nextKey := ""
+	if len(protoOrders) >= count {
+		nextKey = protoOrders[len(protoOrders)-1].GetCreatedAt().AsTime().Format(time.RFC3339)
+	}
+
+	return &ordersgrpc.ListAgentDeliveredOrdersResponse{
+		Orders:  protoOrders,
+		NextKey: nextKey,
+	}, nil
+}
+
 func convertOrderStatusesToStrings(orderStatus []ordersgrpc.OrderStatus) []string {
 	stringStatuses := make([]string, len(orderStatus))
 

@@ -317,6 +317,45 @@ message ListOrdersResponse {
   string next_key = 2;
 }
 
+// Lists orders that are available for an agent to accept.
+// "Available" means the order is approved and not yet assigned to an agent.
+// Results are filtered to orders within a radius (km) of the agent's registered location.
+message ListAgentAvailableOrdersRequest {
+  string user_id = 1; // agent user id
+  int32 count = 2;
+  string start_key = 3;
+  double radius_km = 4; // defaults to 300 when omitted/<=0
+}
+
+message ListAgentAvailableOrdersResponse {
+  repeated Order orders = 1;
+  string next_key = 2;
+}
+
+// Lists ongoing (in-transit) orders assigned to the agent.
+message ListAgentOngoingOrdersRequest {
+  string user_id = 1; // agent user id
+  int32 count = 2;
+  string start_key = 3;
+}
+
+message ListAgentOngoingOrdersResponse {
+  repeated Order orders = 1;
+  string next_key = 2;
+}
+
+// Lists delivered orders completed by the agent.
+message ListAgentDeliveredOrdersRequest {
+  string user_id = 1; // agent user id
+  int32 count = 2;
+  string start_key = 3;
+}
+
+message ListAgentDeliveredOrdersResponse {
+  repeated Order orders = 1;
+  string next_key = 2;
+}
+
 message CheckPaymentStatusRequest {
   string payment_id = 1;
   string user_id = 2;
@@ -658,6 +697,27 @@ service Orders {
   rpc ListUserOrders(ListUserOrdersRequest) returns (ListUserOrdersResponse) {
     option (google.api.http) = {
       get : "/v1/users/{user_id}/orders/list-user-orders"
+    };
+  }
+
+  rpc ListAgentAvailableOrders(ListAgentAvailableOrdersRequest)
+      returns (ListAgentAvailableOrdersResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/orders/list-agent-available-orders"
+    };
+  }
+
+  rpc ListAgentOngoingOrders(ListAgentOngoingOrdersRequest)
+      returns (ListAgentOngoingOrdersResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/orders/list-agent-ongoing-orders"
+    };
+  }
+
+  rpc ListAgentDeliveredOrders(ListAgentDeliveredOrdersRequest)
+      returns (ListAgentDeliveredOrdersResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/orders/list-agent-delivered-orders"
     };
   }
 

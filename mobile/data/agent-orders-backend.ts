@@ -2,11 +2,18 @@ import {
   ordersConfirmDelivery,
   ordersDispatchOrder,
   ordersGetOrderDetails,
-  ordersListUserOrders,
+  ordersListAgentAvailableOrders,
+  ordersListAgentDeliveredOrders,
+  ordersListAgentOngoingOrders,
   type ordersgrpcOrder,
   type ordersgrpcOrderStatus,
 } from '@/client/orders.swagger';
 import type { AgentOrder } from '@/data/mock-orders';
+
+export type AgentOrdersPage = {
+  orders: AgentOrder[];
+  nextKey?: string;
+};
 
 function mapOrderStatus(status?: ordersgrpcOrderStatus): AgentOrder['status'] {
   switch (status) {
@@ -62,21 +69,89 @@ export function mapBackendOrderToAgentOrder(order: ordersgrpcOrder): AgentOrder 
   };
 }
 
+export async function listAgentAvailableOrdersPage(params: {
+  userId: string;
+  count?: number;
+  startKey?: string;
+  radiusKm?: number;
+}): Promise<AgentOrdersPage> {
+  const { data } = await ordersListAgentAvailableOrders({
+    path: { userId: params.userId },
+    query: {
+      count: params.count ?? 20,
+      startKey: params.startKey,
+      radiusKm: params.radiusKm ?? 300,
+    },
+  });
+
+  const orders = ((data?.orders ?? []) as ordersgrpcOrder[]).map(mapBackendOrderToAgentOrder);
+  const nextKey = (data?.nextKey ?? '') || undefined;
+
+  return { orders, nextKey };
+}
+
+export async function listAgentOngoingOrdersPage(params: {
+  userId: string;
+  count?: number;
+  startKey?: string;
+}): Promise<AgentOrdersPage> {
+  const { data } = await ordersListAgentOngoingOrders({
+    path: { userId: params.userId },
+    query: {
+      count: params.count ?? 20,
+      startKey: params.startKey,
+    },
+  });
+
+  const orders = ((data?.orders ?? []) as ordersgrpcOrder[]).map(mapBackendOrderToAgentOrder);
+  const nextKey = (data?.nextKey ?? '') || undefined;
+
+  return { orders, nextKey };
+}
+
+export async function listAgentDeliveredOrdersPage(params: {
+  userId: string;
+  count?: number;
+  startKey?: string;
+}): Promise<AgentOrdersPage> {
+  const { data } = await ordersListAgentDeliveredOrders({
+    path: { userId: params.userId },
+    query: {
+      count: params.count ?? 20,
+      startKey: params.startKey,
+    },
+  });
+
+  const orders = ((data?.orders ?? []) as ordersgrpcOrder[]).map(mapBackendOrderToAgentOrder);
+  const nextKey = (data?.nextKey ?? '') || undefined;
+
+  return { orders, nextKey };
+}
+
 export async function listAgentOrdersFromBackend(params: {
   userId: string;
   statuses?: ordersgrpcOrderStatus[];
   count?: number;
 }): Promise<AgentOrder[]> {
-  const { data } = await ordersListUserOrders({
-    path: { userId: params.userId },
-    query: {
-      count: params.count ?? 50,
-      statuses: params.statuses,
-    },
-  });
+  const status = params.statuses?.[0];
 
-  const orders = (data?.orders ?? []) as ordersgrpcOrder[];
-  return orders.map(mapBackendOrderToAgentOrder);
+  const count = params.count ?? 50;
+
+  if (status === 'OrderStatus_IN_TRANSIT') {
+    const page = await listAgentOngoingOrdersPage({ userId: params.userId, count });
+    return page.orders;
+  }
+  if (status === 'OrderStatus_DELIVERED') {
+    const page = await listAgentDeliveredOrdersPage({ userId: params.userId, count });
+    return page.orders;
+  }
+
+  const page = await listAgentAvailableOrdersPage({
+    userId: params.userId,
+    count,
+    radiusKm: 300,
+  });
+  return page.orders;
 }
 
 export async function getAgentOrderDetailsFromBackend(params: {
