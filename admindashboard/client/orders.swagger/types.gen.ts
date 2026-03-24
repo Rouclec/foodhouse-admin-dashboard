@@ -296,6 +296,10 @@ export type ordersgrpcOrder = {
    * Flat platform fee charged on the order (excluded from farmer payout).
    */
   serviceFee?: typesAmount;
+  /**
+   * Pickup location for delivery agents (farmer location at time of order creation).
+   */
+  pickupLocation?: typesPoint;
 };
 
 export type ordersgrpcOrderAuditLog = {

@@ -2594,6 +2594,10 @@
         "serviceFee": {
           "$ref": "#/definitions/typesAmount",
           "description": "Flat platform fee charged on the order (excluded from farmer payout)."
+        },
+        "pickupLocation": {
+          "$ref": "#/definitions/typesPoint",
+          "description": "Pickup location for delivery agents (farmer location at time of order creation)."
         }
       }
     },

@@ -22,7 +22,7 @@ import {
   listAgentOngoingOrdersPage,
 } from '@/data/agent-orders-backend';
 import { usersGetKycByUserIdOptions } from '@/client/users.swagger/@tanstack/react-query.gen';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { usersgrpcKYCStatus } from '@/client/users.swagger';
 
 const AgentHomeScreen = () => {
@@ -38,6 +38,7 @@ const AgentHomeScreen = () => {
   const [tab, setTab] = useState<'available' | 'ongoing' | 'completed'>('available');
   const canAcceptNewOrders = ongoingOrders.length === 0;
   const userId = user?.userId ?? '';
+  const queryClient = useQueryClient();
 
   const pageSize = 20;
   const infiniteEnabled = !!userId && !isDemo;
@@ -46,6 +47,10 @@ const AgentHomeScreen = () => {
     queryKey: ['agentAvailableOrders', userId],
     enabled: infiniteEnabled,
     initialPageParam: undefined as string | undefined,
+    retry: 3,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
     queryFn: ({ pageParam }) =>
       listAgentAvailableOrdersPage({
         userId,
@@ -60,6 +65,10 @@ const AgentHomeScreen = () => {
     queryKey: ['agentOngoingOrders', userId],
     enabled: infiniteEnabled,
     initialPageParam: undefined as string | undefined,
+    retry: 3,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
     queryFn: ({ pageParam }) =>
       listAgentOngoingOrdersPage({
         userId,
@@ -73,6 +82,10 @@ const AgentHomeScreen = () => {
     queryKey: ['agentCompletedOrders', userId],
     enabled: infiniteEnabled,
     initialPageParam: undefined as string | undefined,
+    retry: 3,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
     queryFn: ({ pageParam }) =>
       listAgentDeliveredOrdersPage({
         userId,
@@ -151,26 +164,26 @@ const AgentHomeScreen = () => {
   useFocusEffect(
     useCallback(() => {
       void loadData();
-      if (!isDemo) {
-        void availableQuery.refetch();
-        void ongoingQuery.refetch();
-        void completedQuery.refetch();
-      }
-    }, [loadData, isDemo, availableQuery, ongoingQuery, completedQuery]),
+    }, [loadData]),
   );
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    setTimeout(() => {
+    setTimeout(async () => {
       void loadData();
-      if (!isDemo) {
-        void availableQuery.refetch();
-        void ongoingQuery.refetch();
-        void completedQuery.refetch();
+
+      // Hard refresh: clear error state + refetch from first page.
+      if (!isDemo && userId) {
+        await Promise.all([
+          queryClient.resetQueries({ queryKey: ['agentAvailableOrders', userId] }),
+          queryClient.resetQueries({ queryKey: ['agentOngoingOrders', userId] }),
+          queryClient.resetQueries({ queryKey: ['agentCompletedOrders', userId] }),
+        ]);
       }
+
       setRefreshing(false);
     }, 500);
-  }, [loadData, isDemo, availableQuery, ongoingQuery, completedQuery]);
+  }, [loadData, isDemo, queryClient, userId]);
 
   const ordersForTab =
     tab === 'available' ? derivedAvailable : tab === 'ongoing' ? derivedOngoing : derivedCompleted;
