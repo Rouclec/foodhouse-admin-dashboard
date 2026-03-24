@@ -62,7 +62,11 @@ export default function SubscriptionCheckout() {
           deliveryLocation: {
             lon: deliveryLocation?.region?.longitude || 0,
             lat: deliveryLocation?.region?.latitude || 0,
-            address: deliveryLocation?.description || deliveryLocation?.address || user?.address || '6140 Sunbrook Park, PC 5679',
+            address:
+              deliveryLocation?.description ||
+              deliveryLocation?.address ||
+              user?.address ||
+              i18n.t('common.addressFallback'),
           },
         },
         path: { userId: user?.userId ?? '' },
@@ -86,7 +90,7 @@ export default function SubscriptionCheckout() {
   if (!plan) {
     return (
       <View style={[defaultStyles.flex, defaultStyles.center]}>
-        <Text>Plan not found</Text>
+        <Text>{i18n.t('(subscription).planNotFound')}</Text>
       </View>
     );
   }
@@ -122,7 +126,7 @@ export default function SubscriptionCheckout() {
               <View style={subscriptionCheckoutStyles.planCard}>
                 <View style={subscriptionCheckoutStyles.planBadge}>
                   <Text style={subscriptionCheckoutStyles.planBadgeText}>
-                    {'10% off'}
+                    {i18n.t('(subscription).discountBadge')}
                   </Text>
                 </View>
                 <View style={subscriptionCheckoutStyles.summaryRow}>
@@ -138,7 +142,9 @@ export default function SubscriptionCheckout() {
                 <View style={subscriptionCheckoutStyles.planDetail}>
                   <Icon source="check" size={16} color={Colors.primary[500]} />
                   <Text style={subscriptionCheckoutStyles.planDetailText}>
-                    {plan.subscriptionItems?.length || 0} Products
+                    {i18n.t('(subscription).(order).productsCount', {
+                      count: plan.subscriptionItems?.length || 0,
+                    })}
                   </Text>
                 </View>
                 <View style={subscriptionCheckoutStyles.planDetail}>
@@ -167,7 +173,10 @@ export default function SubscriptionCheckout() {
                     {i18n.t('(subscription).(order).Home')}
                   </Text>
                   <Text style={subscriptionCheckoutStyles.addressSubtitle}>
-                    {deliveryLocation?.description || deliveryLocation?.address || user?.address || '6140 Sunbrook Park, PC 5679'}
+                    {deliveryLocation?.description ||
+                      deliveryLocation?.address ||
+                      user?.address ||
+                      i18n.t('common.addressFallback')}
                   </Text>
                 </View>
                 <TouchableOpacity

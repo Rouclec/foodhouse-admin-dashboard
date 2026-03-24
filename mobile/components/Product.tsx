@@ -29,14 +29,6 @@ export const Product: FC<Props> = ({ product, OnPress }) => {
         <Text variant="titleLarge" style={styles.productName}>
           {product.name}
         </Text>
-        {/* <View style={styles.ratingsContainer}>
-          <Text>star</Text>
-          <View />
-          <Text>4.5</Text>
-          <View>
-            <Text>New</Text>
-          </View>
-        </View> */}
         <Text style={defaultStyles.primaryText}>
           {product.amount?.currencyIsoCode}{' '}
           {formatAmount(product.amount?.value ?? '', { decimalPlaces: 2 })}

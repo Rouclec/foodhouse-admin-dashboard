@@ -36,16 +36,26 @@ import {
   Search,
   Image as ImageIcon,
   FileText,
+  MessageCircle,
+  ExternalLink,
+  Download,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   usersgrpcKYCStatus,
   usersgrpcKYCVerification,
+  usersgrpcUser,
 } from "@/client/users.swagger";
 import { Context, ContextType } from "@/app/contexts/QueryProvider";
-import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import {
+  keepPreviousData,
+  useMutation,
+  useQueries,
+  useQuery,
+} from "@tanstack/react-query";
+import {
+  usersGetUserByIdOptions,
   usersListKycVerificationsOptions,
   usersUpdateKycStatusMutation,
 } from "@/client/users.swagger/@tanstack/react-query.gen";
@@ -71,6 +81,10 @@ export default function KYCVerificationsPage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
+  const [expandedImage, setExpandedImage] = useState<{
+    url: string;
+    title?: string;
+  } | null>(null);
   const { toast } = useToast();
 
   const {
@@ -92,6 +106,151 @@ export default function KYCVerificationsPage() {
   });
 
   useQueryLoading(isLoading);
+
+  const kycVerifications = kycData?.kycVerifications ?? [];
+
+  const userIds = React.useMemo(() => {
+    const ids = kycVerifications
+      .map((k) => k.userId)
+      .filter((id): id is string => !!id);
+    return Array.from(new Set(ids));
+  }, [kycVerifications]);
+
+  const userQueries = useQueries({
+    queries: userIds.map((userId) => ({
+      ...usersGetUserByIdOptions({
+        path: { userId },
+      }),
+      enabled: !!user?.userId && !!userId,
+      staleTime: 60_000,
+    })),
+  });
+
+  const userById = React.useMemo(() => {
+    const map: Record<string, usersgrpcUser> = {};
+    userQueries.forEach((q, idx) => {
+      const id = userIds[idx];
+      if (!id) return;
+      const u = q.data?.user;
+      if (u) map[id] = u;
+    });
+    return map;
+  }, [userQueries, userIds]);
+
+  const selectedUser = selectedVerification?.userId
+    ? userById[selectedVerification.userId]
+    : undefined;
+
+  const getUserDisplayName = (u?: usersgrpcUser, fallbackId?: string) => {
+    const fullName = [u?.firstName, u?.lastName].filter(Boolean).join(" ").trim();
+    return fullName || u?.email || u?.phoneNumber || fallbackId || "Unknown user";
+  };
+
+  const toWhatsAppPhone = (phone?: string) => {
+    if (!phone) return "";
+    return phone.replace(/[^\d]/g, "");
+  };
+
+  const isPdfUrl = (url?: string) => {
+    if (!url) return false;
+    const clean = url.split("?")[0] ?? url;
+    return clean.toLowerCase().endsWith(".pdf");
+  };
+
+  const getFilenameFromUrl = (url?: string) => {
+    if (!url) return "";
+    try {
+      const u = new URL(url);
+      const pathname = u.pathname ?? "";
+      const last = pathname.split("/").filter(Boolean).pop() ?? "";
+      return decodeURIComponent(last);
+    } catch {
+      const clean = (url.split("?")[0] ?? url).split("#")[0] ?? url;
+      const last = clean.split("/").filter(Boolean).pop() ?? "";
+      try {
+        return decodeURIComponent(last);
+      } catch {
+        return last;
+      }
+    }
+  };
+
+  const IdentityDocsSection = (props: { urls?: string[] }) => {
+    const urls = props.urls?.filter(Boolean) ?? [];
+    const front = urls[0];
+    const back = urls[1];
+    const items: Array<{ label: string; url?: string }> = [
+      { label: "Front", url: front },
+      { label: "Back", url: back },
+    ];
+
+    return (
+      <div className="grid grid-cols-2 gap-3">
+        {items.map((it) => (
+          <div key={it.label} className="space-y-2">
+            <p className="text-xs font-medium text-gray-600">{it.label}</p>
+            <div className="border rounded-lg p-2 bg-gray-50">
+              {it.url ? (
+                <button
+                  type="button"
+                  className="relative h-40 w-full bg-gray-100 rounded overflow-hidden group"
+                  onClick={() =>
+                    setExpandedImage({
+                      url: it.url!,
+                      title: `Identity document (${it.label})`,
+                    })
+                  }
+                >
+                  <Image
+                    src={it.url}
+                    alt={`Identity Document ${it.label}`}
+                    fill
+                    className="object-contain"
+                  />
+                  <span className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-md p-1">
+                    <ExternalLink className="h-4 w-4 text-gray-700" />
+                  </span>
+                </button>
+              ) : (
+                <div className="h-40 flex items-center justify-center bg-gray-100 rounded">
+                  <p className="text-sm text-gray-500">Not provided</p>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const ExpandableImagePreview = (props: {
+    url?: string;
+    alt: string;
+    title?: string;
+  }) => {
+    if (!props.url) {
+      return (
+        <div className="h-40 flex items-center justify-center bg-gray-100 rounded">
+          <p className="text-sm text-gray-500">Not provided</p>
+        </div>
+      );
+    }
+
+    return (
+      <button
+        type="button"
+        className="relative h-40 w-full bg-gray-100 rounded overflow-hidden group"
+        onClick={() =>
+          setExpandedImage({ url: props.url!, title: props.title ?? props.alt })
+        }
+      >
+        <Image src={props.url} alt={props.alt} fill className="object-contain" />
+        <span className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-md p-1">
+          <ExternalLink className="h-4 w-4 text-gray-700" />
+        </span>
+      </button>
+    );
+  };
 
   const getStatusColor = (status: usersgrpcKYCStatus | undefined) => {
     switch (status) {
@@ -138,6 +297,16 @@ export default function KYCVerificationsPage() {
     setShowDetailModal(true);
   };
 
+  const getBackendErrorMessage = (error: unknown) => {
+    const err = error as any;
+    return (
+      err?.response?.data?.message ||
+      err?.response?.data?.error ||
+      err?.message ||
+      undefined
+    );
+  };
+
   const { mutateAsync: updateStatus } = useMutation({
     ...usersUpdateKycStatusMutation(),
   });
@@ -163,9 +332,10 @@ export default function KYCVerificationsPage() {
       setShowDetailModal(false);
       refetch();
     } catch (error) {
+      const backendMessage = getBackendErrorMessage(error);
       toast({
         title: "Error",
-        description: "Failed to approve KYC. Please try again.",
+        description: backendMessage ?? "Failed to approve KYC. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -204,9 +374,10 @@ export default function KYCVerificationsPage() {
       setShowDetailModal(false);
       refetch();
     } catch (error) {
+      const backendMessage = getBackendErrorMessage(error);
       toast({
         title: "Error",
-        description: "Failed to reject KYC. Please try again.",
+        description: backendMessage ?? "Failed to reject KYC. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -346,11 +517,15 @@ export default function KYCVerificationsPage() {
                     <Avatar className="h-12 w-12">
                       <AvatarImage src={kyc.selfieUrl ?? ""} alt="Agent" />
                       <AvatarFallback className="bg-primary text-white">
-                        {kyc.userId?.[0]?.toUpperCase() ?? "A"}
+                        {getUserDisplayName(userById[kyc.userId ?? ""], kyc.userId)?.[0]?.toUpperCase() ??
+                          "A"}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-medium">User ID: {kyc.userId}</p>
+                      <p className="font-medium">
+                        {getUserDisplayName(userById[kyc.userId ?? ""], kyc.userId)}
+                      </p>
+                      <p className="text-xs text-gray-500">User ID: {kyc.userId}</p>
                       <p className="text-sm text-gray-500">
                         Submitted: {moment(kyc.createdAt).format("DD-MM-YYYY HH:mm")}
                       </p>
@@ -403,8 +578,49 @@ export default function KYCVerificationsPage() {
                   </Badge>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-gray-500">User ID</p>
-                  <p className="font-medium">{selectedVerification.userId}</p>
+                  <p className="text-sm text-gray-500">User</p>
+                  <p className="font-medium">
+                    {getUserDisplayName(selectedUser, selectedVerification.userId)}
+                  </p>
+                  <p className="text-xs text-gray-500">{selectedVerification.userId}</p>
+                </div>
+              </div>
+
+              {/* Review card actions */}
+              <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage
+                      src={selectedUser?.profileImage ?? selectedVerification.selfieUrl ?? ""}
+                      alt="User"
+                    />
+                    <AvatarFallback className="bg-primary text-white">
+                      {getUserDisplayName(selectedUser, selectedVerification.userId)?.[0]?.toUpperCase() ??
+                        "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">
+                      {getUserDisplayName(selectedUser, selectedVerification.userId)}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {selectedUser?.phoneNumber ?? selectedUser?.email ?? ""}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    disabled={!toWhatsAppPhone(selectedUser?.phoneNumber)}
+                    onClick={() => {
+                      const phone = toWhatsAppPhone(selectedUser?.phoneNumber);
+                      if (!phone) return;
+                      window.open(`https://wa.me/${phone}`, "_blank");
+                    }}
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    WhatsApp
+                  </Button>
                 </div>
               </div>
 
@@ -423,20 +639,14 @@ export default function KYCVerificationsPage() {
                       Identity Document (Front/Back)
                     </Label>
                     <div className="border rounded-lg p-2 bg-gray-50">
-                      {selectedVerification.identityDocumentUrl ? (
-                        <div className="relative h-40 bg-gray-100 rounded">
-                          <Image
-                            src={selectedVerification.identityDocumentUrl}
-                            alt="Identity Document"
-                            fill
-                            className="object-contain"
-                          />
-                        </div>
-                      ) : (
-                        <div className="h-40 flex items-center justify-center bg-gray-100 rounded">
-                          <p className="text-sm text-gray-500">Not provided</p>
-                        </div>
-                      )}
+                      <IdentityDocsSection
+                        urls={
+                          selectedVerification.identityDocumentUrls ??
+                          (selectedVerification.identityDocumentUrl
+                            ? [selectedVerification.identityDocumentUrl]
+                            : [])
+                        }
+                      />
                     </div>
                   </div>
 
@@ -444,20 +654,11 @@ export default function KYCVerificationsPage() {
                   <div className="space-y-2">
                     <Label>Selfie Photo</Label>
                     <div className="border rounded-lg p-2 bg-gray-50">
-                      {selectedVerification.selfieUrl ? (
-                        <div className="relative h-40 bg-gray-100 rounded">
-                          <Image
-                            src={selectedVerification.selfieUrl}
-                            alt="Selfie"
-                            fill
-                            className="object-contain"
-                          />
-                        </div>
-                      ) : (
-                        <div className="h-40 flex items-center justify-center bg-gray-100 rounded">
-                          <p className="text-sm text-gray-500">Not provided</p>
-                        </div>
-                      )}
+                      <ExpandableImagePreview
+                        url={selectedVerification.selfieUrl ?? undefined}
+                        alt="Selfie"
+                        title="Selfie"
+                      />
                     </div>
                   </div>
 
@@ -466,14 +667,40 @@ export default function KYCVerificationsPage() {
                     <Label>Vehicle Registration</Label>
                     <div className="border rounded-lg p-2 bg-gray-50">
                       {selectedVerification.vehicleDocumentUrl ? (
-                        <div className="relative h-40 bg-gray-100 rounded">
-                          <Image
-                            src={selectedVerification.vehicleDocumentUrl}
+                        isPdfUrl(selectedVerification.vehicleDocumentUrl) ? (
+                          <div className="h-40 flex flex-col items-center justify-center bg-gray-100 rounded gap-2 p-3">
+                            <FileText className="h-10 w-10 text-gray-500" />
+                            <p className="text-sm font-medium text-gray-700 text-center break-all">
+                              {getFilenameFromUrl(selectedVerification.vehicleDocumentUrl) || "Vehicle document.pdf"}
+                            </p>
+                            <div className="flex gap-2">
+                              <a
+                                href={selectedVerification.vehicleDocumentUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center text-sm text-primary hover:underline"
+                              >
+                                <ExternalLink className="h-4 w-4 mr-1" />
+                                Open
+                              </a>
+                              <a
+                                href={selectedVerification.vehicleDocumentUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center text-sm text-primary hover:underline"
+                              >
+                                <Download className="h-4 w-4 mr-1" />
+                                Download
+                              </a>
+                            </div>
+                          </div>
+                        ) : (
+                          <ExpandableImagePreview
+                            url={selectedVerification.vehicleDocumentUrl}
                             alt="Vehicle Document"
-                            fill
-                            className="object-contain"
+                            title="Vehicle Registration"
                           />
-                        </div>
+                        )
                       ) : (
                         <div className="h-40 flex items-center justify-center bg-gray-100 rounded">
                           <p className="text-sm text-gray-500">Not provided</p>
@@ -545,6 +772,43 @@ export default function KYCVerificationsPage() {
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Expanded image viewer */}
+      <Dialog
+        open={!!expandedImage}
+        onOpenChange={(open) => {
+          if (!open) setExpandedImage(null);
+        }}
+      >
+        <DialogContent className="max-w-5xl">
+          <DialogHeader>
+            <DialogTitle>{expandedImage?.title ?? "Preview"}</DialogTitle>
+          </DialogHeader>
+          {expandedImage?.url && (
+            <div className="relative w-full h-[70vh] bg-gray-50 rounded">
+              <Image
+                src={expandedImage.url}
+                alt={expandedImage.title ?? "Expanded image"}
+                fill
+                className="object-contain"
+              />
+            </div>
+          )}
+          <DialogFooter>
+            {expandedImage?.url && (
+              <a
+                href={expandedImage.url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center text-sm text-primary hover:underline"
+              >
+                <ExternalLink className="h-4 w-4 mr-1" />
+                Open in new tab
+              </a>
+            )}
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

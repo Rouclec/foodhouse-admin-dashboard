@@ -71,7 +71,7 @@ export default function TabOneScreen() {
             <Text style={index1.headingH1}>
               {i18n.t('(auth).index.welcomeTo')}
               {'\n'}
-              <Text style={{ fontWeight: 'bold' }}>FoodHouse</Text>
+              <Text style={{ fontWeight: 'bold' }}>{i18n.t('common.appName')}</Text>
             </Text>
 
             {/* <Text style={index1.subText}>

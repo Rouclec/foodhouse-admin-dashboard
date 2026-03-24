@@ -125,17 +125,17 @@ const AgentOrderDetails = () => {
     if (!order) return;
     
     Alert.alert(
-      'Accept Order',
-      `Do you want to accept delivery of order #${order.orderNumber}?`,
+      i18n.t('(agent).orders.acceptOrderTitle'),
+      i18n.t('(agent).orders.acceptOrderMessage', { orderNumber: order.orderNumber }),
       [
         { text: i18n.t('(agent).orders.cancel'), style: 'cancel' },
         {
-          text: 'Accept',
+          text: i18n.t('(agent).orders.accept'),
           onPress: async () => {
             if (agentState.isDemoMode) {
               mockDataStore.acceptOrder(order.id);
               setOrder({ ...order, status: 'picked_up' });
-              Alert.alert('Success', i18n.t('(agent).orders.orderAccepted'));
+              Alert.alert(i18n.t('common.success'), i18n.t('(agent).orders.orderAccepted'));
               return;
             }
 
@@ -153,7 +153,7 @@ const AgentOrderDetails = () => {
                 agentId: userId,
               });
               setOrder({ ...order, status: 'picked_up' });
-              Alert.alert('Success', i18n.t('(agent).orders.orderAccepted'));
+              Alert.alert(i18n.t('common.success'), i18n.t('(agent).orders.orderAccepted'));
             } catch (_e) {
               Alert.alert(i18n.t('common.error'), i18n.t('(auth).login.anUnknownError'));
             } finally {
@@ -170,7 +170,10 @@ const AgentOrderDetails = () => {
     
     Alert.alert(
       i18n.t('(agent).orders.confirmPickup'),
-      `Mark order #${order.orderNumber} as picked up from ${order.farmerName}?`,
+      i18n.t('(agent).orders.confirmPickupMessage', {
+        orderNumber: order.orderNumber,
+        farmerName: order.farmerName,
+      }),
       [
         { text: i18n.t('(agent).orders.cancel'), style: 'cancel' },
         {
@@ -180,7 +183,7 @@ const AgentOrderDetails = () => {
               mockDataStore.confirmPickup(order.id);
             }
             setOrder({ ...order, status: 'picked_up' });
-            Alert.alert('Success', i18n.t('(agent).orders.pickupSuccess'));
+            Alert.alert(i18n.t('common.success'), i18n.t('(agent).orders.pickupSuccess'));
           },
         },
       ]
@@ -231,7 +234,10 @@ const AgentOrderDetails = () => {
           setOrder({ ...order, status: 'delivered' });
           Alert.alert(
             i18n.t('(agent).orders.deliverySuccess'),
-            `${i18n.t('(agent).orders.paymentWillBeProcessed')}\n\n+${i18n.t('common.currency')} ${order.deliveryFee.toLocaleString()} earned!`,
+            i18n.t('(agent).orders.deliveryEarningsMessage', {
+              currency: i18n.t('common.currency'),
+              amount: order.deliveryFee.toLocaleString(),
+            }),
           );
         } catch (_e) {
           Alert.alert(i18n.t('common.error'), i18n.t('(auth).login.anUnknownError'));
@@ -324,16 +330,16 @@ const AgentOrderDetails = () => {
         <Stack.Screen options={{ headerShown: false }} />
         <Icon source="package-variant-closed" size={64} color={Colors.grey['61']} />
         <Text style={{ fontSize: 18, fontWeight: '600', marginTop: 16, color: Colors.dark[10] }}>
-          Order Not Found
+          {i18n.t('(agent).orders.orderNotFoundTitle')}
         </Text>
         <Text style={{ fontSize: 14, color: Colors.grey['61'], marginTop: 8, textAlign: 'center', paddingHorizontal: 32 }}>
-          The order you&apos;re looking for doesn&apos;t exist or has been removed.
+          {i18n.t('(agent).orders.orderNotFoundMessage')}
         </Text>
         <Button
           mode="contained"
           onPress={() => router.back()}
           style={{ marginTop: 24 }}>
-          Go Back
+          {i18n.t('common.goBack')}
         </Button>
       </View>
     );
@@ -342,7 +348,7 @@ const AgentOrderDetails = () => {
   if (!order) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text>Loading...</Text>
+        <Text>{i18n.t('common.loading')}</Text>
       </View>
     );
   }
@@ -484,9 +490,11 @@ const AgentOrderDetails = () => {
 
         {agentState.isDemoMode && order.status !== 'delivered' && (
           <View style={styles.securityCodeSection}>
-            <Text style={styles.securityCodeLabel}>Demo security code</Text>
+            <Text style={styles.securityCodeLabel}>
+              {i18n.t('(agent).orders.demoSecurityCodeLabel')}
+            </Text>
             <Text style={[styles.securityCodeHint, { fontSize: 13, lineHeight: 26 }]}>
-              In demo mode, you can use this code to complete the delivery flow.
+              {i18n.t('(agent).orders.demoSecurityCodeHint')}
             </Text>
             <Text style={[styles.securityCode, {lineHeight: 48, marginTop: 10}]}>
               {order.securityCode}

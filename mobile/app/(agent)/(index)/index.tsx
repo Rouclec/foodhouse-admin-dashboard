@@ -166,13 +166,16 @@ const AgentHomeScreen = () => {
     if (tab === 'available') {
       if (!canAcceptNewOrders) {
         Alert.alert(
-          'Ongoing delivery',
-          'Finish your current delivery before accepting a new order.',
+          i18n.t('(agent).home.alert.ongoingDeliveryTitle'),
+          i18n.t('(agent).home.alert.ongoingDeliveryMessage'),
         );
         return;
       }
       if (!isKycVerified) {
-        Alert.alert('KYC Required', 'Please complete your KYC verification first.');
+        Alert.alert(
+          i18n.t('(agent).home.alert.kycRequiredTitle'),
+          i18n.t('(agent).home.alert.kycRequiredMessage'),
+        );
         return;
       }
 
@@ -196,18 +199,21 @@ const AgentHomeScreen = () => {
 
   const handleResetData = () => {
     Alert.alert(
-      'Reset Demo Data',
-      'This will reset all orders and earnings to their initial state. Continue?',
+      i18n.t('(agent).home.resetDemo.title'),
+      i18n.t('(agent).home.resetDemo.message'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: i18n.t('common.cancel'), style: 'cancel' },
         {
-          text: 'Reset',
+          text: i18n.t('(agent).home.resetDemo.resetButton'),
           style: 'destructive',
           onPress: () => {
             mockDataStore.resetAll();
             agentDemoState.resetDemo();
             loadData();
-            Alert.alert('Success', 'Demo data has been reset.');
+            Alert.alert(
+              i18n.t('common.success'),
+              i18n.t('(agent).home.resetDemo.successMessage'),
+            );
           },
         },
       ]
@@ -218,22 +224,22 @@ const AgentHomeScreen = () => {
     switch (kycStatus) {
       case 'not_started':
         return {
-          title: 'Complete Your KYC',
-          subtitle: 'You need to verify your identity before accepting deliveries',
+          title: i18n.t('(agent).home.kycBanner.notStarted.title'),
+          subtitle: i18n.t('(agent).home.kycBanner.notStarted.subtitle'),
           showKYCButton: true,
           type: 'warning' as const,
         };
       case 'pending':
         return {
-          title: 'KYC Under Review',
-          subtitle: 'Your documents are being reviewed. This usually takes 24-48 hours.',
+          title: i18n.t('(agent).home.kycBanner.pending.title'),
+          subtitle: i18n.t('(agent).home.kycBanner.pending.subtitle'),
           showKYCButton: false,
           type: 'info' as const,
         };
       case 'rejected':
         return {
-          title: 'KYC Rejected',
-          subtitle: 'Your documents were not accepted. Please resubmit.',
+          title: i18n.t('(agent).home.kycBanner.rejected.title'),
+          subtitle: i18n.t('(agent).home.kycBanner.rejected.subtitle'),
           showKYCButton: true,
           type: 'error' as const,
         };
@@ -254,7 +260,9 @@ const AgentHomeScreen = () => {
             <Text style={styles.headerTitle}>{i18n.t('(agent).home.title')}</Text>
             {isDemo && (
               <View style={{ backgroundColor: Colors.gold, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 }}>
-                <Text style={{ color: Colors.dark[0], fontSize: 10, fontWeight: '600' }}>DEMO</Text>
+                <Text style={{ color: Colors.dark[0], fontSize: 10, fontWeight: '600' }}>
+                  {i18n.t('(agent).home.demoBadge')}
+                </Text>
               </View>
             )}
           </View>
@@ -324,7 +332,7 @@ const AgentHomeScreen = () => {
             activeOpacity={0.85}
             onPress={() => setTab('available')}>
             <Text style={[styles.tabText, tab === 'available' && styles.tabTextActive]}>
-              Available
+              {i18n.t('(agent).home.tabs.available')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -332,7 +340,7 @@ const AgentHomeScreen = () => {
             activeOpacity={0.85}
             onPress={() => setTab('ongoing')}>
             <Text style={[styles.tabText, tab === 'ongoing' && styles.tabTextActive]}>
-              Ongoing
+              {i18n.t('(agent).home.tabs.ongoing')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -340,7 +348,7 @@ const AgentHomeScreen = () => {
             activeOpacity={0.85}
             onPress={() => setTab('completed')}>
             <Text style={[styles.tabText, tab === 'completed' && styles.tabTextActive]}>
-              Completed
+              {i18n.t('(agent).home.tabs.completed')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -350,12 +358,11 @@ const AgentHomeScreen = () => {
             {tab === 'available'
               ? i18n.t('(agent).orders.title')
               : tab === 'ongoing'
-              ? 'Ongoing deliveries'
-              : 'Completed deliveries'}
+              ? i18n.t('(agent).home.sectionTitle.ongoing')
+              : i18n.t('(agent).home.sectionTitle.completed')}
           </Text>
           <Text style={{ color: Colors.grey['61'], fontSize: 14 }}>
-            {ordersForTab.length} {i18n.t('(agent).orders.order')}
-            {ordersForTab.length !== 1 ? 's' : ''}
+            {i18n.t('(agent).orders.order', { count: ordersForTab.length })}
           </Text>
         </View>
 
@@ -368,17 +375,17 @@ const AgentHomeScreen = () => {
               {tab === 'available'
                 ? i18n.t('(agent).orders.noOrdersAvailable')
                 : tab === 'ongoing'
-                ? 'No ongoing deliveries'
-                : 'No completed deliveries yet'}
+                ? i18n.t('(agent).home.empty.ongoingTitle')
+                : i18n.t('(agent).home.empty.completedTitle')}
             </Text>
             <Text style={styles.emptySubtitle}>
               {tab === 'available'
                 ? !isKycVerified
-                  ? 'Complete your KYC verification to start accepting orders'
-                  : 'New orders will appear here when customers request delivery'
+                  ? i18n.t('(agent).home.empty.availableKycRequiredSubtitle')
+                  : i18n.t('(agent).home.empty.availableSubtitle')
                 : tab === 'ongoing'
-                ? 'Orders you’re currently delivering will appear here.'
-                : 'Your completed deliveries will appear here.'}
+                ? i18n.t('(agent).home.empty.ongoingSubtitle')
+                : i18n.t('(agent).home.empty.completedSubtitle')}
             </Text>
           </View>
         ) : (
@@ -449,7 +456,9 @@ const AgentHomeScreen = () => {
                     ]}
                     onPress={() => void handleCardPrimaryAction(order)}>
                     <Text style={styles.acceptButtonText}>
-                      {tab === 'available' ? i18n.t('(agent).orders.acceptOrder') : 'View'}
+                      {tab === 'available'
+                        ? i18n.t('(agent).orders.acceptOrder')
+                        : i18n.t('common.view')}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -466,7 +475,9 @@ const AgentHomeScreen = () => {
           }}
           delayLongPress={2000}>
           <Text style={{ textAlign: 'center', color: Colors.grey['61'], fontSize: 12 }}>
-            {agentState.isDemoMode ? 'Long press to reset demo data' : ''}
+            {agentState.isDemoMode
+              ? i18n.t('(agent).home.resetDemo.longPressHint')
+              : ''}
           </Text>
         </TouchableOpacity>
       </ScrollView>

@@ -13,6 +13,7 @@ import { useRouter } from 'expo-router';
 import { Context, ContextType, CartItem } from '@/app/_layout';
 import { Colors } from '@/constants';
 import { formatAmount } from '@/utils/amountFormater';
+import i18n from '@/i18n';
 
 export type CartBottomSheetRef = {
   open: () => void;
@@ -85,7 +86,7 @@ export const CartBottomSheet = forwardRef<CartBottomSheetRef, CartBottomSheetPro
       0
     );
 
-    const currency = cartItems[0]?.currency || 'XAF';
+    const currency = cartItems[0]?.currency || i18n.t('common.currency');
 
     const handleCheckout = () => {
       close();
@@ -160,7 +161,7 @@ export const CartBottomSheet = forwardRef<CartBottomSheetRef, CartBottomSheetPro
             <View style={styles.headerLeft}>
               <Icon source="cart" size={24} color={Colors.primary[500]} />
               <Text variant="titleMedium" style={styles.headerTitle}>
-                Cart ({cartItems.length} {cartItems.length === 1 ? 'item' : 'items'})
+                {i18n.t('components.Cart.title', { count: cartItems.length })}
               </Text>
             </View>
             <IconButton
@@ -180,7 +181,7 @@ export const CartBottomSheet = forwardRef<CartBottomSheetRef, CartBottomSheetPro
 
           <View style={styles.footer}>
             <View style={styles.totalContainer}>
-              <Text style={styles.totalLabel}>Total</Text>
+              <Text style={styles.totalLabel}>{i18n.t('common.total')}</Text>
               <Text style={styles.totalAmount}>
                 {currency} {formatAmount(totalAmount, { decimalPlaces: 0 })}
               </Text>
@@ -194,14 +195,14 @@ export const CartBottomSheet = forwardRef<CartBottomSheetRef, CartBottomSheetPro
                   close();
                   router.back();
                 }}>
-                Continue Shopping
+                {i18n.t('components.Cart.continueShopping')}
               </Button>
               <Button
                 mode="contained"
                 style={styles.checkoutButton}
                 buttonColor={Colors.primary[500]}
                 onPress={handleCheckout}>
-                Checkout
+                {i18n.t('components.Cart.checkout')}
               </Button>
             </View>
           </View>

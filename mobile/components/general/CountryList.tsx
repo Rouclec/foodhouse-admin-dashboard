@@ -15,6 +15,7 @@ import {
 } from "react-native";
 
 import { Colors, countries as allCountries } from "@/constants";
+import i18n from "@/i18n";
 import { Country } from "@/interface";
 import { phoneNumberInputStyles as styles } from "@/styles";
 import { Icon, Text } from "react-native-paper";
@@ -72,7 +73,7 @@ export const CountryList: FC<Props> = ({
               </TouchableOpacity>
               <TextInput
                 style={styles.searchInput}
-                placeholder="Enter country name"
+                placeholder={i18n.t("components.CountryList.searchPlaceholder")}
                 placeholderTextColor={Colors.grey["77"]}
                 onChangeText={setCountryName}
               />

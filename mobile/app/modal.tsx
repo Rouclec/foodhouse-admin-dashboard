@@ -1,11 +1,12 @@
 import { StatusBar } from 'expo-status-bar';
 import { Platform, StyleSheet, Text, View } from 'react-native';
+import i18n from '@/i18n';
 
 
 export default function ModalScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Modal</Text>
+      <Text style={styles.title}>{i18n.t('common.modal.title')}</Text>
       <View style={styles.separator} />
       {/* <EditScreenInfo path="app/modal.tsx" /> */}
 
