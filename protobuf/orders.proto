@@ -59,7 +59,8 @@ message Order {
   // Flat platform fee charged on the order (excluded from farmer payout).
   types.Amount service_fee = 19;
 
-  // Pickup location for delivery agents (farmer location at time of order creation).
+  // Pickup location for delivery agents (farmer location at time of order
+  // creation).
   types.Point pickup_location = 20;
 }
 
