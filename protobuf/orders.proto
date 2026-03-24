@@ -319,7 +319,8 @@ message ListOrdersResponse {
 
 // Lists orders that are available for an agent to accept.
 // "Available" means the order is approved and not yet assigned to an agent.
-// Results are filtered to orders within a radius (km) of the agent's registered location.
+// Results are filtered to orders within a radius (km) of the agent's registered
+// location.
 message ListAgentAvailableOrdersRequest {
   string user_id = 1; // agent user id
   int32 count = 2;
