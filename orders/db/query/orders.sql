@@ -1,6 +1,7 @@
 -- name: CreateOrder :one
 INSERT INTO orders (
     delivery_location, 
+    pickup_location,
     price_value, 
     price_currency, 
     status, 
@@ -11,6 +12,7 @@ INSERT INTO orders (
     rating, 
     review,
     delivery_address,
+    pickup_address,
     delivery_fee_amount,
     delivery_fee_currency,
     service_fee_amount,
@@ -20,6 +22,7 @@ INSERT INTO orders (
 )
 VALUES (
     sqlc.arg(delivery_location)::point,    -- Enforcing as POINT (casting delivery_location)
+    sqlc.arg(pickup_location)::point,
     sqlc.arg(price_value)::float,         -- Enforcing as BIGINT
     sqlc.arg(price_currency)::varchar(3),  -- Enforcing as VARCHAR(3)
     sqlc.arg(status)::text,                -- Enforcing as TEXT
@@ -30,6 +33,7 @@ VALUES (
     1, -- Default rating
     '', -- Default review
     sqlc.arg(delivery_address)::text,
+    sqlc.arg(pickup_address)::text,
     sqlc.arg(delivery_fee_amount)::float,
     sqlc.arg(delivery_fee_currency)::varchar(3),
     sqlc.arg(service_fee_amount)::float,

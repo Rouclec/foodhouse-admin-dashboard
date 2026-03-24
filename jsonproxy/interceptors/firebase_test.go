@@ -63,7 +63,7 @@ func TestNewFirebaseAuthenticationInterceptor(t *testing.T) {
 			userID:             "123",
 			role:               interceptors.RoleAdmin,
 			status:             "UserStatus_SUSPENDED",
-			expectedStatusCode: http.StatusUnauthorized,
+			expectedStatusCode: http.StatusForbidden,
 		},
 		"GET /v1/users/123": {
 			method:             "GET",
@@ -81,7 +81,7 @@ func TestNewFirebaseAuthenticationInterceptor(t *testing.T) {
 			userID:             "123",
 			role:               "",
 			status:             "UserStatus_SUSPENDED",
-			expectedStatusCode: http.StatusUnauthorized,
+			expectedStatusCode: http.StatusForbidden,
 		},
 		"GET /v1/users/123 wrong user id": {
 			method:             "GET",

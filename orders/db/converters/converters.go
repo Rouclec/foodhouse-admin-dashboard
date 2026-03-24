@@ -82,6 +82,16 @@ func SqlcOrderBySecretKeyToProto(order sqlc.GetUserOrderBySecretKeyRow) *ordersg
 			Lat:     order.DeliveryLocation.P.Y,
 			Lon:     order.DeliveryLocation.P.X,
 		},
+		PickupLocation: func() *types.Point {
+			if !order.PickupLocation.Valid {
+				return nil
+			}
+			return &types.Point{
+				Address: order.PickupAddress,
+				Lat:     order.PickupLocation.P.Y,
+				Lon:     order.PickupLocation.P.X,
+			}
+		}(),
 		SumTotal:          price,
 		Status:            statusEnum,
 		Rating:            int32(order.Rating.Int.Int64()),
@@ -167,6 +177,16 @@ func SqlcOrderByNumberToProto(order sqlc.GetOrderByOrderNumberRow, logger zerolo
 			Lat:     order.DeliveryLocation.P.Y,
 			Lon:     order.DeliveryLocation.P.X,
 		},
+		PickupLocation: func() *types.Point {
+			if !order.PickupLocation.Valid {
+				return nil
+			}
+			return &types.Point{
+				Address: order.PickupAddress,
+				Lat:     order.PickupLocation.P.Y,
+				Lon:     order.PickupLocation.P.X,
+			}
+		}(),
 		SumTotal:          price,
 		Status:            statusEnum,
 		Rating:            int32(order.Rating.Int.Int64()),
@@ -238,6 +258,16 @@ func SqlcOrderRowToProto(order sqlc.ListOrdersRow) *ordersgrpc.Order {
 			Lat:     order.DeliveryLocation.P.Y,
 			Lon:     order.DeliveryLocation.P.X,
 		},
+		PickupLocation: func() *types.Point {
+			if !order.PickupLocation.Valid {
+				return nil
+			}
+			return &types.Point{
+				Address: order.PickupAddress,
+				Lat:     order.PickupLocation.P.Y,
+				Lon:     order.PickupLocation.P.X,
+			}
+		}(),
 		SumTotal:          price,
 		Status:            statusEnum,
 		Rating:            int32(order.Rating.Int.Int64()),
@@ -310,6 +340,16 @@ func SqlcUserOrderRowToProto(order sqlc.ListUserOrdersRow) *ordersgrpc.Order {
 			Lat:     order.DeliveryLocation.P.Y,
 			Lon:     order.DeliveryLocation.P.X,
 		},
+		PickupLocation: func() *types.Point {
+			if !order.PickupLocation.Valid {
+				return nil
+			}
+			return &types.Point{
+				Address: order.PickupAddress,
+				Lat:     order.PickupLocation.P.Y,
+				Lon:     order.PickupLocation.P.X,
+			}
+		}(),
 		SumTotal:          price,
 		Status:            statusEnum,
 		Rating:            int32(order.Rating.Int.Int64()),
@@ -382,6 +422,16 @@ func SqlcFarmerOrderRowToProto(order sqlc.ListFarmerOrdersRow) *ordersgrpc.Order
 			Lat:     order.DeliveryLocation.P.Y,
 			Lon:     order.DeliveryLocation.P.X,
 		},
+		PickupLocation: func() *types.Point {
+			if !order.PickupLocation.Valid {
+				return nil
+			}
+			return &types.Point{
+				Address: order.PickupAddress,
+				Lat:     order.PickupLocation.P.Y,
+				Lon:     order.PickupLocation.P.X,
+			}
+		}(),
 		SumTotal:          price,
 		Status:            statusEnum,
 		Rating:            int32(order.Rating.Int.Int64()),
@@ -443,6 +493,16 @@ func SqlcOrderToProto(order sqlc.Order) *ordersgrpc.Order {
 			Lat:     order.DeliveryLocation.P.Y,
 			Lon:     order.DeliveryLocation.P.X,
 		},
+		PickupLocation: func() *types.Point {
+			if !order.PickupLocation.Valid {
+				return nil
+			}
+			return &types.Point{
+				Address: order.PickupAddress,
+				Lat:     order.PickupLocation.P.Y,
+				Lon:     order.PickupLocation.P.X,
+			}
+		}(),
 		SumTotal:          price,
 		Status:            statusEnum,
 		Rating:            int32(order.Rating.Int.Int64()),
@@ -528,6 +588,16 @@ func SqlcAgentAvailableOrderRowToProto(order sqlc.ListAgentAvailableOrdersRow) *
 			Lat:     order.DeliveryLocation.P.Y,
 			Lon:     order.DeliveryLocation.P.X,
 		},
+		PickupLocation: func() *types.Point {
+			if !order.PickupLocation.Valid {
+				return nil
+			}
+			return &types.Point{
+				Address: order.PickupAddress,
+				Lat:     order.PickupLocation.P.Y,
+				Lon:     order.PickupLocation.P.X,
+			}
+		}(),
 		SumTotal:          price,
 		Status:            statusEnum,
 		Rating:            int32(order.Rating.Int.Int64()),
@@ -607,6 +677,16 @@ func SqlcAgentOngoingOrderRowToProto(order sqlc.ListAgentOngoingOrdersRow) *orde
 			Lat:     order.DeliveryLocation.P.Y,
 			Lon:     order.DeliveryLocation.P.X,
 		},
+		PickupLocation: func() *types.Point {
+			if !order.PickupLocation.Valid {
+				return nil
+			}
+			return &types.Point{
+				Address: order.PickupAddress,
+				Lat:     order.PickupLocation.P.Y,
+				Lon:     order.PickupLocation.P.X,
+			}
+		}(),
 		SumTotal:          price,
 		Status:            statusEnum,
 		Rating:            int32(order.Rating.Int.Int64()),
@@ -686,6 +766,16 @@ func SqlcAgentDeliveredOrderRowToProto(order sqlc.ListAgentDeliveredOrdersRow) *
 			Lat:     order.DeliveryLocation.P.Y,
 			Lon:     order.DeliveryLocation.P.X,
 		},
+		PickupLocation: func() *types.Point {
+			if !order.PickupLocation.Valid {
+				return nil
+			}
+			return &types.Point{
+				Address: order.PickupAddress,
+				Lat:     order.PickupLocation.P.Y,
+				Lon:     order.PickupLocation.P.X,
+			}
+		}(),
 		SumTotal:          price,
 		Status:            statusEnum,
 		Rating:            int32(order.Rating.Int.Int64()),
@@ -1001,7 +1091,7 @@ func SqlcCommissionToProto(commission sqlc.Commission) *ordersgrpc.Commission {
 
 	var paidAt *timestamppb.Timestamp
 
-	if &commission.PaidAt != nil {
+	if commission.PaidAt.Valid {
 		paidAt = timestamppb.New(commission.PaidAt.Time)
 	}
 

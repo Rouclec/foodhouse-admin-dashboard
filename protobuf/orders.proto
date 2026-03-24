@@ -58,6 +58,9 @@ message Order {
   optional google.protobuf.Timestamp expected_delivery_date = 18;
   // Flat platform fee charged on the order (excluded from farmer payout).
   types.Amount service_fee = 19;
+
+  // Pickup location for delivery agents (farmer location at time of order creation).
+  types.Point pickup_location = 20;
 }
 
 message OrderAuditLog {

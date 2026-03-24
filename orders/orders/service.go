@@ -861,6 +861,28 @@ func (i *Impl) CreateOrder(ctx context.Context, req *ordersgrpc.CreateOrderReque
 		totalAmount += p.Product.Amount.Value * float64(p.Quantity) * TotalPercentage
 	}
 
+	// Fetch farmer pickup location (registered location).
+	if i.userService == nil {
+		return nil, status.Error(codes.FailedPrecondition, "users service is not configured")
+	}
+	farmerResp, err := i.userService.GetUserByID(ctx, &usersgrpc.GetUserByIDRequest{UserId: farmerID})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to fetch farmer profile: %v", err)
+	}
+	farmer := farmerResp.GetUser()
+	if farmer == nil {
+		return nil, status.Error(codes.NotFound, "farmer not found")
+	}
+	farmerLoc := farmer.GetLocationCoordinates()
+	if farmerLoc == nil || (farmerLoc.GetLat() == 0 && farmerLoc.GetLon() == 0) {
+		return nil, status.Error(codes.FailedPrecondition, "farmer has no pickup location configured")
+	}
+
+	pickupAddress := strings.TrimSpace(farmer.GetAddress())
+	if pickupAddress == "" {
+		pickupAddress = strings.TrimSpace(fmt.Sprintf("%v, %v", farmerLoc.GetLat(), farmerLoc.GetLon()))
+	}
+
 	// Calculate the devliery fee
 	deliveryFee, err := i.EstimateDeliveryFee(ctx, &ordersgrpc.EstimateDeliveryFeeRequest{
 		UserId:           req.GetUserId(),
@@ -876,6 +898,10 @@ func (i *Impl) CreateOrder(ctx context.Context, req *ordersgrpc.CreateOrderReque
 		DeliveryLocation: pgtype.Point{P: pgtype.Vec2{X: float64(req.GetDeliveryLocation().GetLon()),
 			Y: float64(req.GetDeliveryLocation().GetLat())},
 			Valid: true},
+		PickupLocation: pgtype.Point{
+			P:     pgtype.Vec2{X: float64(farmerLoc.GetLon()), Y: float64(farmerLoc.GetLat())},
+			Valid: true,
+		},
 		PriceValue:          totalAmount,
 		PriceCurrency:       productInfos[0].Product.GetAmount().GetCurrencyIsoCode(),
 		Status:              ordersgrpc.OrderStatus_OrderStatus_CREATED.String(),
@@ -883,6 +909,7 @@ func (i *Impl) CreateOrder(ctx context.Context, req *ordersgrpc.CreateOrderReque
 		SecretKey:           secretKey,
 		ProductOwner:        productInfos[0].Product.GetCreatedBy(),
 		DeliveryAddress:     req.GetDeliveryLocation().GetAddress(),
+		PickupAddress:       pickupAddress,
 		DeliveryFeeAmount:   deliveryFee.EstimatedDeliveryFee.Value,
 		DeliveryFeeCurrency: deliveryFee.EstimatedDeliveryFee.CurrencyIsoCode,
 		ServiceFeeAmount:    DefaultOrderServiceFeeAmountXAF,
