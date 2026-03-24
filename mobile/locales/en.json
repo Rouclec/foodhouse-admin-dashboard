@@ -53,6 +53,7 @@
       "statistics": "Statistics",
       "totalEarningsWithCurrency": "Total Earnings ({{currency}})",
       "completed": "Completed",
+      "ongoing": "Ongoing",
       "pending": "Pending",
       "logoutConfirm": "Are you sure you want to logout?"
     },

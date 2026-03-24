@@ -9,9 +9,6 @@ import type {
   UsersListKycVerificationsData,
   UsersListKycVerificationsError,
   UsersListKycVerificationsResponse,
-  UsersUpdateKycStatusData,
-  UsersUpdateKycStatusError,
-  UsersUpdateKycStatusResponse,
   UsersExportUsersPdfData,
   UsersExportUsersPdfError,
   UsersExportUsersPdfResponse,
@@ -33,6 +30,9 @@ import type {
   UsersSuspendUserData,
   UsersSuspendUserError,
   UsersSuspendUserResponse,
+  UsersUpdateKycStatusData,
+  UsersUpdateKycStatusError,
+  UsersUpdateKycStatusResponse,
   UsersOAuthData,
   UsersOAuthError,
   UsersOAuthResponse,
@@ -83,18 +83,18 @@ import type {
   UsersListFarmersReivewsData,
   UsersListFarmersReivewsError,
   UsersListFarmersReivewsResponse,
-  UsersGetUserByIdData,
-  UsersGetUserByIdError,
-  UsersGetUserByIdResponse,
   UsersGetKycByUserIdData,
   UsersGetKycByUserIdError,
   UsersGetKycByUserIdResponse,
-  UsersCreateKycData,
-  UsersCreateKycError,
-  UsersCreateKycResponse,
+  UsersGetUserByIdData,
+  UsersGetUserByIdError,
+  UsersGetUserByIdResponse,
   UsersReviewFarmerData,
   UsersReviewFarmerError,
   UsersReviewFarmerResponse,
+  UsersCreateKycData,
+  UsersCreateKycError,
+  UsersCreateKycResponse,
   UsersGetFarmerByIdData,
   UsersGetFarmerByIdError,
   UsersGetFarmerByIdResponse,
@@ -103,7 +103,7 @@ import type {
 export const client = createClient(createConfig());
 
 export const usersListKycVerifications = <ThrowOnError extends boolean = false>(
-  options?: OptionsLegacyParser<UsersListKycVerificationsData, ThrowOnError>,
+  options: OptionsLegacyParser<UsersListKycVerificationsData, ThrowOnError>,
 ) => {
   return (options?.client ?? client).get<
     UsersListKycVerificationsResponse,
@@ -111,20 +111,7 @@ export const usersListKycVerifications = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: '/v1/admin/kyc/verifications',
-  });
-};
-
-export const usersUpdateKycStatus = <ThrowOnError extends boolean = false>(
-  options: OptionsLegacyParser<UsersUpdateKycStatusData, ThrowOnError>,
-) => {
-  return (options?.client ?? client).patch<
-    UsersUpdateKycStatusResponse,
-    UsersUpdateKycStatusError,
-    ThrowOnError
-  >({
-    ...options,
-    url: '/v1/admin/{adminUserId}/kyc/{kycId}/status',
+    url: '/v1/admin/{adminUserId}/list-kyc-verifications',
   });
 };
 
@@ -216,6 +203,19 @@ export const usersSuspendUser = <ThrowOnError extends boolean = false>(
   >({
     ...options,
     url: '/v1/admin/{adminUserId}/users/{userId}/suspend-user',
+  });
+};
+
+export const usersUpdateKycStatus = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<UsersUpdateKycStatusData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).patch<
+    UsersUpdateKycStatusResponse,
+    UsersUpdateKycStatusError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/v1/admin/{adminUserId}/{kycId}/update-kyc-status',
   });
 };
 
@@ -440,6 +440,19 @@ export const usersListFarmersReivews = <ThrowOnError extends boolean = false>(
   });
 };
 
+export const usersGetKycByUserId = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<UsersGetKycByUserIdData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    UsersGetKycByUserIdResponse,
+    UsersGetKycByUserIdError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/v1/users/{userId}/get-kyc-by-user-id',
+  });
+};
+
 export const usersGetUserById = <ThrowOnError extends boolean = false>(
   options: OptionsLegacyParser<UsersGetUserByIdData, ThrowOnError>,
 ) => {
@@ -453,16 +466,16 @@ export const usersGetUserById = <ThrowOnError extends boolean = false>(
   });
 };
 
-export const usersGetKycByUserId = <ThrowOnError extends boolean = false>(
-  options: OptionsLegacyParser<UsersGetKycByUserIdData, ThrowOnError>,
+export const usersReviewFarmer = <ThrowOnError extends boolean = false>(
+  options: OptionsLegacyParser<UsersReviewFarmerData, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).get<
-    UsersGetKycByUserIdResponse,
-    UsersGetKycByUserIdError,
+  return (options?.client ?? client).post<
+    UsersReviewFarmerResponse,
+    UsersReviewFarmerError,
     ThrowOnError
   >({
     ...options,
-    url: '/v1/users/{userId}/kyc',
+    url: '/v1/users/{userId}/review-farmer',
   });
 };
 
@@ -478,20 +491,7 @@ export const usersCreateKyc = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: '/v1/users/{userId}/kyc',
-  });
-};
-
-export const usersReviewFarmer = <ThrowOnError extends boolean = false>(
-  options: OptionsLegacyParser<UsersReviewFarmerData, ThrowOnError>,
-) => {
-  return (options?.client ?? client).post<
-    UsersReviewFarmerResponse,
-    UsersReviewFarmerError,
-    ThrowOnError
-  >({
-    ...options,
-    url: '/v1/users/{userId}/review-farmer',
+    url: '/v1/users/{userId}/upload-kyc',
   });
 };
 

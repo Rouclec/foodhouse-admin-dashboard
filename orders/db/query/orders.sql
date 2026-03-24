@@ -189,6 +189,107 @@ WHERE
 ORDER BY o.created_at DESC
 LIMIT sqlc.arg(count)::int;
 
+-- name: ListAgentAvailableOrders :many
+SELECT
+  o.*,
+  COALESCE(oi_count.total_items, 0)::int AS total_items,
+  oi_preview.product AS preview_product,
+  oi_preview.quantity AS preview_quantity
+FROM orders o
+LEFT JOIN LATERAL (
+    SELECT product, quantity
+    FROM order_items
+    WHERE order_number = o.order_number
+    LIMIT 1
+) AS oi_preview ON TRUE
+LEFT JOIN (
+    SELECT order_number, COUNT(*) AS total_items
+    FROM order_items
+    GROUP BY order_number
+) AS oi_count ON oi_count.order_number = o.order_number
+WHERE
+  o.status = 'OrderStatus_APPROVED'
+  AND o.agent_id IS NULL
+  AND o.delivery_location IS NOT NULL
+  AND (
+    sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR
+    o.created_at < sqlc.arg(created_before)::timestamptz
+  )
+  AND (
+    6371 * 2 * asin(
+      sqrt(
+        power(
+          sin(radians((o.delivery_location[1] - (sqlc.arg(agent_location)::point)[1]) / 2)),
+          2
+        ) +
+        cos(radians((sqlc.arg(agent_location)::point)[1])) *
+        cos(radians(o.delivery_location[1])) *
+        power(
+          sin(radians((o.delivery_location[0] - (sqlc.arg(agent_location)::point)[0]) / 2)),
+          2
+        )
+      )
+    )
+  ) <= sqlc.arg(radius_km)::float8
+ORDER BY o.created_at DESC
+LIMIT sqlc.arg(count)::int;
+
+-- name: ListAgentOngoingOrders :many
+SELECT
+  o.*,
+  COALESCE(oi_count.total_items, 0)::int AS total_items,
+  oi_preview.product AS preview_product,
+  oi_preview.quantity AS preview_quantity
+FROM orders o
+LEFT JOIN LATERAL (
+    SELECT product, quantity
+    FROM order_items
+    WHERE order_number = o.order_number
+    LIMIT 1
+) AS oi_preview ON TRUE
+LEFT JOIN (
+    SELECT order_number, COUNT(*) AS total_items
+    FROM order_items
+    GROUP BY order_number
+) AS oi_count ON oi_count.order_number = o.order_number
+WHERE
+  o.status = 'OrderStatus_IN_TRANSIT'
+  AND o.agent_id = sqlc.arg(agent_id)::varchar(36)
+  AND (
+    sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR
+    o.created_at < sqlc.arg(created_before)::timestamptz
+  )
+ORDER BY o.created_at DESC
+LIMIT sqlc.arg(count)::int;
+
+-- name: ListAgentDeliveredOrders :many
+SELECT
+  o.*,
+  COALESCE(oi_count.total_items, 0)::int AS total_items,
+  oi_preview.product AS preview_product,
+  oi_preview.quantity AS preview_quantity
+FROM orders o
+LEFT JOIN LATERAL (
+    SELECT product, quantity
+    FROM order_items
+    WHERE order_number = o.order_number
+    LIMIT 1
+) AS oi_preview ON TRUE
+LEFT JOIN (
+    SELECT order_number, COUNT(*) AS total_items
+    FROM order_items
+    GROUP BY order_number
+) AS oi_count ON oi_count.order_number = o.order_number
+WHERE
+  o.status = 'OrderStatus_DELIVERED'
+  AND o.agent_id = sqlc.arg(agent_id)::varchar(36)
+  AND (
+    sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR
+    o.created_at < sqlc.arg(created_before)::timestamptz
+  )
+ORDER BY o.created_at DESC
+LIMIT sqlc.arg(count)::int;
+
 -- name: ReviewOrder :exec
 UPDATE orders SET review = $1, rating = $2, updated_at = now() WHERE order_number = $3;
 

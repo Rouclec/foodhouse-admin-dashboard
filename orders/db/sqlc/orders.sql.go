@@ -848,6 +848,356 @@ func (q *Queries) GetUserOrderBySecretKey(ctx context.Context, secretKey *string
 	return i, err
 }
 
+const listAgentAvailableOrders = `-- name: ListAgentAvailableOrders :many
+SELECT
+  o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date, o.service_fee_amount, o.service_fee_currency, o.agent_id,
+  COALESCE(oi_count.total_items, 0)::int AS total_items,
+  oi_preview.product AS preview_product,
+  oi_preview.quantity AS preview_quantity
+FROM orders o
+LEFT JOIN LATERAL (
+    SELECT product, quantity
+    FROM order_items
+    WHERE order_number = o.order_number
+    LIMIT 1
+) AS oi_preview ON TRUE
+LEFT JOIN (
+    SELECT order_number, COUNT(*) AS total_items
+    FROM order_items
+    GROUP BY order_number
+) AS oi_count ON oi_count.order_number = o.order_number
+WHERE
+  o.status = 'OrderStatus_APPROVED'
+  AND o.agent_id IS NULL
+  AND o.delivery_location IS NOT NULL
+  AND (
+    $1::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR
+    o.created_at < $1::timestamptz
+  )
+  AND (
+    6371 * 2 * asin(
+      sqrt(
+        power(
+          sin(radians((o.delivery_location[1] - ($2::point)[1]) / 2)),
+          2
+        ) +
+        cos(radians(($2::point)[1])) *
+        cos(radians(o.delivery_location[1])) *
+        power(
+          sin(radians((o.delivery_location[0] - ($2::point)[0]) / 2)),
+          2
+        )
+      )
+    )
+  ) <= $3::float8
+ORDER BY o.created_at DESC
+LIMIT $4::int
+`
+
+type ListAgentAvailableOrdersParams struct {
+	CreatedBefore time.Time    `json:"created_before"`
+	AgentLocation pgtype.Point `json:"agent_location"`
+	RadiusKm      float64      `json:"radius_km"`
+	Count         int32        `json:"count"`
+}
+
+type ListAgentAvailableOrdersRow struct {
+	OrderNumber          int64              `json:"order_number"`
+	DeliveryLocation     pgtype.Point       `json:"delivery_location"`
+	PriceValue           *float64           `json:"price_value"`
+	PriceCurrency        *string            `json:"price_currency"`
+	Status               string             `json:"status"`
+	Rating               pgtype.Numeric     `json:"rating"`
+	Review               string             `json:"review"`
+	CreatedBy            *string            `json:"created_by"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	SecretKey            *string            `json:"secret_key"`
+	ProductOwner         *string            `json:"product_owner"`
+	PayoutPhoneNumber    *string            `json:"payout_phone_number"`
+	DeliveryAddress      string             `json:"delivery_address"`
+	DispatchedBy         *string            `json:"dispatched_by"`
+	DeliveryFeeAmount    *float64           `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency  *string            `json:"delivery_fee_currency"`
+	UserSubscriptionID   *int64             `json:"user_subscription_id"`
+	ExpectedDeliveryDate pgtype.Timestamptz `json:"expected_delivery_date"`
+	ServiceFeeAmount     float64            `json:"service_fee_amount"`
+	ServiceFeeCurrency   string             `json:"service_fee_currency"`
+	AgentID              *string            `json:"agent_id"`
+	TotalItems           int32              `json:"total_items"`
+	PreviewProduct       string             `json:"preview_product"`
+	PreviewQuantity      int32              `json:"preview_quantity"`
+}
+
+func (q *Queries) ListAgentAvailableOrders(ctx context.Context, arg ListAgentAvailableOrdersParams) ([]ListAgentAvailableOrdersRow, error) {
+	rows, err := q.db.Query(ctx, listAgentAvailableOrders,
+		arg.CreatedBefore,
+		arg.AgentLocation,
+		arg.RadiusKm,
+		arg.Count,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListAgentAvailableOrdersRow{}
+	for rows.Next() {
+		var i ListAgentAvailableOrdersRow
+		if err := rows.Scan(
+			&i.OrderNumber,
+			&i.DeliveryLocation,
+			&i.PriceValue,
+			&i.PriceCurrency,
+			&i.Status,
+			&i.Rating,
+			&i.Review,
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.SecretKey,
+			&i.ProductOwner,
+			&i.PayoutPhoneNumber,
+			&i.DeliveryAddress,
+			&i.DispatchedBy,
+			&i.DeliveryFeeAmount,
+			&i.DeliveryFeeCurrency,
+			&i.UserSubscriptionID,
+			&i.ExpectedDeliveryDate,
+			&i.ServiceFeeAmount,
+			&i.ServiceFeeCurrency,
+			&i.AgentID,
+			&i.TotalItems,
+			&i.PreviewProduct,
+			&i.PreviewQuantity,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listAgentDeliveredOrders = `-- name: ListAgentDeliveredOrders :many
+SELECT
+  o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date, o.service_fee_amount, o.service_fee_currency, o.agent_id,
+  COALESCE(oi_count.total_items, 0)::int AS total_items,
+  oi_preview.product AS preview_product,
+  oi_preview.quantity AS preview_quantity
+FROM orders o
+LEFT JOIN LATERAL (
+    SELECT product, quantity
+    FROM order_items
+    WHERE order_number = o.order_number
+    LIMIT 1
+) AS oi_preview ON TRUE
+LEFT JOIN (
+    SELECT order_number, COUNT(*) AS total_items
+    FROM order_items
+    GROUP BY order_number
+) AS oi_count ON oi_count.order_number = o.order_number
+WHERE
+  o.status = 'OrderStatus_DELIVERED'
+  AND o.agent_id = $1::varchar(36)
+  AND (
+    $2::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR
+    o.created_at < $2::timestamptz
+  )
+ORDER BY o.created_at DESC
+LIMIT $3::int
+`
+
+type ListAgentDeliveredOrdersParams struct {
+	AgentID       string    `json:"agent_id"`
+	CreatedBefore time.Time `json:"created_before"`
+	Count         int32     `json:"count"`
+}
+
+type ListAgentDeliveredOrdersRow struct {
+	OrderNumber          int64              `json:"order_number"`
+	DeliveryLocation     pgtype.Point       `json:"delivery_location"`
+	PriceValue           *float64           `json:"price_value"`
+	PriceCurrency        *string            `json:"price_currency"`
+	Status               string             `json:"status"`
+	Rating               pgtype.Numeric     `json:"rating"`
+	Review               string             `json:"review"`
+	CreatedBy            *string            `json:"created_by"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	SecretKey            *string            `json:"secret_key"`
+	ProductOwner         *string            `json:"product_owner"`
+	PayoutPhoneNumber    *string            `json:"payout_phone_number"`
+	DeliveryAddress      string             `json:"delivery_address"`
+	DispatchedBy         *string            `json:"dispatched_by"`
+	DeliveryFeeAmount    *float64           `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency  *string            `json:"delivery_fee_currency"`
+	UserSubscriptionID   *int64             `json:"user_subscription_id"`
+	ExpectedDeliveryDate pgtype.Timestamptz `json:"expected_delivery_date"`
+	ServiceFeeAmount     float64            `json:"service_fee_amount"`
+	ServiceFeeCurrency   string             `json:"service_fee_currency"`
+	AgentID              *string            `json:"agent_id"`
+	TotalItems           int32              `json:"total_items"`
+	PreviewProduct       string             `json:"preview_product"`
+	PreviewQuantity      int32              `json:"preview_quantity"`
+}
+
+func (q *Queries) ListAgentDeliveredOrders(ctx context.Context, arg ListAgentDeliveredOrdersParams) ([]ListAgentDeliveredOrdersRow, error) {
+	rows, err := q.db.Query(ctx, listAgentDeliveredOrders, arg.AgentID, arg.CreatedBefore, arg.Count)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListAgentDeliveredOrdersRow{}
+	for rows.Next() {
+		var i ListAgentDeliveredOrdersRow
+		if err := rows.Scan(
+			&i.OrderNumber,
+			&i.DeliveryLocation,
+			&i.PriceValue,
+			&i.PriceCurrency,
+			&i.Status,
+			&i.Rating,
+			&i.Review,
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.SecretKey,
+			&i.ProductOwner,
+			&i.PayoutPhoneNumber,
+			&i.DeliveryAddress,
+			&i.DispatchedBy,
+			&i.DeliveryFeeAmount,
+			&i.DeliveryFeeCurrency,
+			&i.UserSubscriptionID,
+			&i.ExpectedDeliveryDate,
+			&i.ServiceFeeAmount,
+			&i.ServiceFeeCurrency,
+			&i.AgentID,
+			&i.TotalItems,
+			&i.PreviewProduct,
+			&i.PreviewQuantity,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listAgentOngoingOrders = `-- name: ListAgentOngoingOrders :many
+SELECT
+  o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date, o.service_fee_amount, o.service_fee_currency, o.agent_id,
+  COALESCE(oi_count.total_items, 0)::int AS total_items,
+  oi_preview.product AS preview_product,
+  oi_preview.quantity AS preview_quantity
+FROM orders o
+LEFT JOIN LATERAL (
+    SELECT product, quantity
+    FROM order_items
+    WHERE order_number = o.order_number
+    LIMIT 1
+) AS oi_preview ON TRUE
+LEFT JOIN (
+    SELECT order_number, COUNT(*) AS total_items
+    FROM order_items
+    GROUP BY order_number
+) AS oi_count ON oi_count.order_number = o.order_number
+WHERE
+  o.status = 'OrderStatus_IN_TRANSIT'
+  AND o.agent_id = $1::varchar(36)
+  AND (
+    $2::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR
+    o.created_at < $2::timestamptz
+  )
+ORDER BY o.created_at DESC
+LIMIT $3::int
+`
+
+type ListAgentOngoingOrdersParams struct {
+	AgentID       string    `json:"agent_id"`
+	CreatedBefore time.Time `json:"created_before"`
+	Count         int32     `json:"count"`
+}
+
+type ListAgentOngoingOrdersRow struct {
+	OrderNumber          int64              `json:"order_number"`
+	DeliveryLocation     pgtype.Point       `json:"delivery_location"`
+	PriceValue           *float64           `json:"price_value"`
+	PriceCurrency        *string            `json:"price_currency"`
+	Status               string             `json:"status"`
+	Rating               pgtype.Numeric     `json:"rating"`
+	Review               string             `json:"review"`
+	CreatedBy            *string            `json:"created_by"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	SecretKey            *string            `json:"secret_key"`
+	ProductOwner         *string            `json:"product_owner"`
+	PayoutPhoneNumber    *string            `json:"payout_phone_number"`
+	DeliveryAddress      string             `json:"delivery_address"`
+	DispatchedBy         *string            `json:"dispatched_by"`
+	DeliveryFeeAmount    *float64           `json:"delivery_fee_amount"`
+	DeliveryFeeCurrency  *string            `json:"delivery_fee_currency"`
+	UserSubscriptionID   *int64             `json:"user_subscription_id"`
+	ExpectedDeliveryDate pgtype.Timestamptz `json:"expected_delivery_date"`
+	ServiceFeeAmount     float64            `json:"service_fee_amount"`
+	ServiceFeeCurrency   string             `json:"service_fee_currency"`
+	AgentID              *string            `json:"agent_id"`
+	TotalItems           int32              `json:"total_items"`
+	PreviewProduct       string             `json:"preview_product"`
+	PreviewQuantity      int32              `json:"preview_quantity"`
+}
+
+func (q *Queries) ListAgentOngoingOrders(ctx context.Context, arg ListAgentOngoingOrdersParams) ([]ListAgentOngoingOrdersRow, error) {
+	rows, err := q.db.Query(ctx, listAgentOngoingOrders, arg.AgentID, arg.CreatedBefore, arg.Count)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListAgentOngoingOrdersRow{}
+	for rows.Next() {
+		var i ListAgentOngoingOrdersRow
+		if err := rows.Scan(
+			&i.OrderNumber,
+			&i.DeliveryLocation,
+			&i.PriceValue,
+			&i.PriceCurrency,
+			&i.Status,
+			&i.Rating,
+			&i.Review,
+			&i.CreatedBy,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.SecretKey,
+			&i.ProductOwner,
+			&i.PayoutPhoneNumber,
+			&i.DeliveryAddress,
+			&i.DispatchedBy,
+			&i.DeliveryFeeAmount,
+			&i.DeliveryFeeCurrency,
+			&i.UserSubscriptionID,
+			&i.ExpectedDeliveryDate,
+			&i.ServiceFeeAmount,
+			&i.ServiceFeeCurrency,
+			&i.AgentID,
+			&i.TotalItems,
+			&i.PreviewProduct,
+			&i.PreviewQuantity,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listFarmerOrders = `-- name: ListFarmerOrders :many
 SELECT 
     o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, o.review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date, o.service_fee_amount, o.service_fee_currency, o.agent_id,

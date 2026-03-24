@@ -664,6 +664,7 @@
       "statistics": "Statistiques",
       "totalEarningsWithCurrency": "Gains totaux ({{currency}})",
       "completed": "Terminées",
+      "ongoing": "En cours",
       "pending": "En attente",
       "logoutConfirm": "Êtes-vous sûr de vouloir vous déconnecter ?"
     },

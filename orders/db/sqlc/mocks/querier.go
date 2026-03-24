@@ -632,6 +632,51 @@ func (mr *MockQuerierMockRecorder) GetUserSubscriptionsBySubscriptionID(ctx, sub
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserSubscriptionsBySubscriptionID", reflect.TypeOf((*MockQuerier)(nil).GetUserSubscriptionsBySubscriptionID), ctx, subscriptionID)
 }
 
+// ListAgentAvailableOrders mocks base method.
+func (m *MockQuerier) ListAgentAvailableOrders(ctx context.Context, arg sqlc.ListAgentAvailableOrdersParams) ([]sqlc.ListAgentAvailableOrdersRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListAgentAvailableOrders", ctx, arg)
+	ret0, _ := ret[0].([]sqlc.ListAgentAvailableOrdersRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListAgentAvailableOrders indicates an expected call of ListAgentAvailableOrders.
+func (mr *MockQuerierMockRecorder) ListAgentAvailableOrders(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAgentAvailableOrders", reflect.TypeOf((*MockQuerier)(nil).ListAgentAvailableOrders), ctx, arg)
+}
+
+// ListAgentDeliveredOrders mocks base method.
+func (m *MockQuerier) ListAgentDeliveredOrders(ctx context.Context, arg sqlc.ListAgentDeliveredOrdersParams) ([]sqlc.ListAgentDeliveredOrdersRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListAgentDeliveredOrders", ctx, arg)
+	ret0, _ := ret[0].([]sqlc.ListAgentDeliveredOrdersRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListAgentDeliveredOrders indicates an expected call of ListAgentDeliveredOrders.
+func (mr *MockQuerierMockRecorder) ListAgentDeliveredOrders(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAgentDeliveredOrders", reflect.TypeOf((*MockQuerier)(nil).ListAgentDeliveredOrders), ctx, arg)
+}
+
+// ListAgentOngoingOrders mocks base method.
+func (m *MockQuerier) ListAgentOngoingOrders(ctx context.Context, arg sqlc.ListAgentOngoingOrdersParams) ([]sqlc.ListAgentOngoingOrdersRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListAgentOngoingOrders", ctx, arg)
+	ret0, _ := ret[0].([]sqlc.ListAgentOngoingOrdersRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListAgentOngoingOrders indicates an expected call of ListAgentOngoingOrders.
+func (mr *MockQuerierMockRecorder) ListAgentOngoingOrders(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAgentOngoingOrders", reflect.TypeOf((*MockQuerier)(nil).ListAgentOngoingOrders), ctx, arg)
+}
+
 // ListAllActiveUserSubscriptions mocks base method.
 func (m *MockQuerier) ListAllActiveUserSubscriptions(ctx context.Context) ([]sqlc.ListAllActiveUserSubscriptionsRow, error) {
 	m.ctrl.T.Helper()

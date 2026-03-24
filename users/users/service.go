@@ -2092,7 +2092,7 @@ func (i *Impl) UpdateKYCStatus(ctx context.Context,
 	statusStr := req.GetStatus().String()
 	kyc, err := querier.UpdateKYCStatus(ctx, sqlc.UpdateKYCStatusParams{
 		ID:              req.GetKycId(),
-		Status:          &statusStr,
+		Status:          statusStr,
 		RejectionReason: req.GetRejectionReason(),
 	})
 

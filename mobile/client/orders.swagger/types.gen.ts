@@ -204,6 +204,21 @@ export type ordersgrpcInitiatePaymentResponse = {
   payment?: ordersgrpcPayment;
 };
 
+export type ordersgrpcListAgentAvailableOrdersResponse = {
+  orders?: Array<ordersgrpcOrder>;
+  nextKey?: string;
+};
+
+export type ordersgrpcListAgentDeliveredOrdersResponse = {
+  orders?: Array<ordersgrpcOrder>;
+  nextKey?: string;
+};
+
+export type ordersgrpcListAgentOngoingOrdersResponse = {
+  orders?: Array<ordersgrpcOrder>;
+  nextKey?: string;
+};
+
 export type ordersgrpcListAllActiveSubscriptionsResponse = {
   subscriptions?: Array<ordersgrpcUserSubscription>;
 };
@@ -796,6 +811,64 @@ export type OrdersInitiatePaymentData = {
 export type OrdersInitiatePaymentResponse = ordersgrpcInitiatePaymentResponse;
 
 export type OrdersInitiatePaymentError = rpcStatus;
+
+export type OrdersListAgentAvailableOrdersData = {
+  path: {
+    /**
+     * agent user id
+     */
+    userId: string;
+  };
+  query?: {
+    count?: number;
+    /**
+     * defaults to 300 when omitted/<=0
+     */
+    radiusKm?: number;
+    startKey?: string;
+  };
+};
+
+export type OrdersListAgentAvailableOrdersResponse =
+  ordersgrpcListAgentAvailableOrdersResponse;
+
+export type OrdersListAgentAvailableOrdersError = rpcStatus;
+
+export type OrdersListAgentDeliveredOrdersData = {
+  path: {
+    /**
+     * agent user id
+     */
+    userId: string;
+  };
+  query?: {
+    count?: number;
+    startKey?: string;
+  };
+};
+
+export type OrdersListAgentDeliveredOrdersResponse =
+  ordersgrpcListAgentDeliveredOrdersResponse;
+
+export type OrdersListAgentDeliveredOrdersError = rpcStatus;
+
+export type OrdersListAgentOngoingOrdersData = {
+  path: {
+    /**
+     * agent user id
+     */
+    userId: string;
+  };
+  query?: {
+    count?: number;
+    startKey?: string;
+  };
+};
+
+export type OrdersListAgentOngoingOrdersResponse =
+  ordersgrpcListAgentOngoingOrdersResponse;
+
+export type OrdersListAgentOngoingOrdersError = rpcStatus;
 
 export type OrdersListDeliveryCitiesData = {
   path: {

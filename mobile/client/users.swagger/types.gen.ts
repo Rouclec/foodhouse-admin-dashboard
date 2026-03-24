@@ -523,6 +523,9 @@ export type UsersUpdateKYCStatusBody = {
 };
 
 export type UsersListKycVerificationsData = {
+  path: {
+    adminUserId: string;
+  };
   query?: {
     limit?: number;
     offset?: number;
@@ -538,18 +541,6 @@ export type UsersListKycVerificationsResponse =
   usersgrpcListKYCVerificationsResponse;
 
 export type UsersListKycVerificationsError = rpcStatus;
-
-export type UsersUpdateKycStatusData = {
-  body: UsersUpdateKYCStatusBody;
-  path: {
-    adminUserId: string;
-    kycId: string;
-  };
-};
-
-export type UsersUpdateKycStatusResponse = usersgrpcUpdateKYCStatusResponse;
-
-export type UsersUpdateKycStatusError = rpcStatus;
 
 export type UsersExportUsersPdfData = {
   path: {
@@ -675,6 +666,18 @@ export type UsersSuspendUserData = {
 export type UsersSuspendUserResponse = usersgrpcSuspendUserResponse;
 
 export type UsersSuspendUserError = rpcStatus;
+
+export type UsersUpdateKycStatusData = {
+  body: UsersUpdateKYCStatusBody;
+  path: {
+    adminUserId: string;
+    kycId: string;
+  };
+};
+
+export type UsersUpdateKycStatusResponse = usersgrpcUpdateKYCStatusResponse;
+
+export type UsersUpdateKycStatusError = rpcStatus;
 
 export type UsersOAuthData = {
   body: UsersOAuthBody;
@@ -847,6 +850,16 @@ export type UsersListFarmersReivewsResponse =
 
 export type UsersListFarmersReivewsError = rpcStatus;
 
+export type UsersGetKycByUserIdData = {
+  path: {
+    userId: string;
+  };
+};
+
+export type UsersGetKycByUserIdResponse = usersgrpcGetKYCByUserIDResponse;
+
+export type UsersGetKycByUserIdError = rpcStatus;
+
 export type UsersGetUserByIdData = {
   path: {
     /**
@@ -860,15 +873,16 @@ export type UsersGetUserByIdResponse = usersgrpcGetUserByIDResponse;
 
 export type UsersGetUserByIdError = rpcStatus;
 
-export type UsersGetKycByUserIdData = {
+export type UsersReviewFarmerData = {
+  body: UsersReviewFarmerBody;
   path: {
     userId: string;
   };
 };
 
-export type UsersGetKycByUserIdResponse = usersgrpcGetKYCByUserIDResponse;
+export type UsersReviewFarmerResponse = usersgrpcReviewFarmerResponse;
 
-export type UsersGetKycByUserIdError = rpcStatus;
+export type UsersReviewFarmerError = rpcStatus;
 
 export type UsersCreateKycData = {
   body: UsersCreateKYCBody;
@@ -880,17 +894,6 @@ export type UsersCreateKycData = {
 export type UsersCreateKycResponse = usersgrpcCreateKYCResponse;
 
 export type UsersCreateKycError = rpcStatus;
-
-export type UsersReviewFarmerData = {
-  body: UsersReviewFarmerBody;
-  path: {
-    userId: string;
-  };
-};
-
-export type UsersReviewFarmerResponse = usersgrpcReviewFarmerResponse;
-
-export type UsersReviewFarmerError = rpcStatus;
 
 export type UsersGetFarmerByIdData = {
   path: {

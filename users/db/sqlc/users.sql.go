@@ -703,25 +703,25 @@ func (q *Queries) SuspendUser(ctx context.Context, id string) error {
 
 const updateKYCStatus = `-- name: UpdateKYCStatus :one
 UPDATE kyc_verifications
-SET status = $2::text,
-    rejection_reason = $3::text,
+SET status = $1::text,
+    rejection_reason = $2::text,
     verified_at = CASE
-        WHEN $2::text = 'KYC_STATUS_VERIFIED' THEN now()
+        WHEN $1::text = 'KYC_STATUS_VERIFIED' THEN now()
         ELSE NULL::timestamptz
     END,
     updated_at = now()
-WHERE id = $1
+WHERE id = $3::text
 RETURNING id, user_id, status, rejection_reason, verified_at, created_at, updated_at, identity_document_urls, selfie_urls, vehicle_document_urls
 `
 
 type UpdateKYCStatusParams struct {
-	ID              string  `json:"id"`
-	Status          *string `json:"status"`
-	RejectionReason string  `json:"rejection_reason"`
+	Status          string `json:"status"`
+	RejectionReason string `json:"rejection_reason"`
+	ID              string `json:"id"`
 }
 
 func (q *Queries) UpdateKYCStatus(ctx context.Context, arg UpdateKYCStatusParams) (KycVerification, error) {
-	row := q.db.QueryRow(ctx, updateKYCStatus, arg.ID, arg.Status, arg.RejectionReason)
+	row := q.db.QueryRow(ctx, updateKYCStatus, arg.Status, arg.RejectionReason, arg.ID)
 	var i KycVerification
 	err := row.Scan(
 		&i.ID,

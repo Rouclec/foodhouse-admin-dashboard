@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useContext } from 'react';
 import {
   View,
-  ScrollView,
+  FlatList,
   TouchableOpacity,
   RefreshControl,
   Alert,
@@ -17,10 +17,12 @@ import { agentDemoState } from '@/contexts/AgentContext';
 import { mockDataStore, AgentOrder } from '@/data/mock-orders';
 import { Context, ContextType } from '@/app/_layout';
 import {
-  listAgentOrdersFromBackend,
+  listAgentAvailableOrdersPage,
+  listAgentDeliveredOrdersPage,
+  listAgentOngoingOrdersPage,
 } from '@/data/agent-orders-backend';
 import { usersGetKycByUserIdOptions } from '@/client/users.swagger/@tanstack/react-query.gen';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import type { usersgrpcKYCStatus } from '@/client/users.swagger';
 
 const AgentHomeScreen = () => {
@@ -36,6 +38,49 @@ const AgentHomeScreen = () => {
   const [tab, setTab] = useState<'available' | 'ongoing' | 'completed'>('available');
   const canAcceptNewOrders = ongoingOrders.length === 0;
   const userId = user?.userId ?? '';
+
+  const pageSize = 20;
+  const infiniteEnabled = !!userId && !isDemo;
+
+  const availableQuery = useInfiniteQuery({
+    queryKey: ['agentAvailableOrders', userId],
+    enabled: infiniteEnabled,
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) =>
+      listAgentAvailableOrdersPage({
+        userId,
+        count: pageSize,
+        startKey: pageParam,
+        radiusKm: 300,
+      }),
+    getNextPageParam: (lastPage) => lastPage.nextKey,
+  });
+
+  const ongoingQuery = useInfiniteQuery({
+    queryKey: ['agentOngoingOrders', userId],
+    enabled: infiniteEnabled,
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) =>
+      listAgentOngoingOrdersPage({
+        userId,
+        count: pageSize,
+        startKey: pageParam,
+      }),
+    getNextPageParam: (lastPage) => lastPage.nextKey,
+  });
+
+  const completedQuery = useInfiniteQuery({
+    queryKey: ['agentCompletedOrders', userId],
+    enabled: infiniteEnabled,
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) =>
+      listAgentDeliveredOrdersPage({
+        userId,
+        count: pageSize,
+        startKey: pageParam,
+      }),
+    getNextPageParam: (lastPage) => lastPage.nextKey,
+  });
 
   const { data: backendKycData } = useQuery({
     ...usersGetKycByUserIdOptions({
@@ -66,6 +111,18 @@ const AgentHomeScreen = () => {
     return () => { unsubscribe(); };
   }, []);
 
+  const derivedAvailable = isDemo
+    ? availableOrders
+    : (availableQuery.data?.pages ?? []).flatMap(p => p.orders);
+  const derivedOngoing = isDemo
+    ? ongoingOrders
+    : (ongoingQuery.data?.pages ?? []).flatMap(p => p.orders);
+  const derivedCompleted = isDemo
+    ? completedOrders
+    : (completedQuery.data?.pages ?? []).flatMap(p => p.orders);
+
+  const effectiveCanAcceptNewOrders = derivedOngoing.length === 0;
+
   const loadData = useCallback(async () => {
     // Demo mode: keep using the mock store.
     if (agentState.isDemoMode) {
@@ -85,53 +142,7 @@ const AgentHomeScreen = () => {
       });
       return;
     }
-
-    // Non-demo: try backend.
-    const userId = user?.userId ?? '';
-    if (!userId) {
-      setAvailableOrders([]);
-      setOngoingOrders([]);
-      setCompletedOrders([]);
-      setStats({ totalEarnings: 0, completedDeliveries: 0, ongoingDeliveries: 0 });
-      return;
-    }
-
-    try {
-      const [backendAvailable, backendOngoing, backendCompleted] = await Promise.all([
-        listAgentOrdersFromBackend({
-          userId,
-          statuses: ['OrderStatus_APPROVED'],
-        }),
-        listAgentOrdersFromBackend({
-          userId,
-          statuses: ['OrderStatus_IN_TRANSIT'],
-        }),
-        listAgentOrdersFromBackend({
-          userId,
-          statuses: ['OrderStatus_DELIVERED'],
-        }),
-      ]);
-
-      setAvailableOrders(backendAvailable);
-      setOngoingOrders(backendOngoing);
-      setCompletedOrders(backendCompleted);
-
-      const completed = backendCompleted.length;
-      const earnings = backendCompleted.reduce((sum, o) => sum + (o.deliveryFee || 0), 0);
-
-      setStats({
-        totalEarnings: earnings,
-        completedDeliveries: completed,
-        ongoingDeliveries: backendOngoing.length,
-      });
-    } catch (_e) {
-      // If backend isn't ready for agent views yet, keep the screen usable.
-      setAvailableOrders([]);
-      setOngoingOrders([]);
-      setCompletedOrders([]);
-      setStats({ totalEarnings: 0, completedDeliveries: 0, ongoingDeliveries: 0 });
-    }
-  }, [agentState, user?.userId]);
+  }, [agentState]);
 
   useEffect(() => {
     void loadData();
@@ -140,19 +151,29 @@ const AgentHomeScreen = () => {
   useFocusEffect(
     useCallback(() => {
       void loadData();
-    }, [loadData]),
+      if (!isDemo) {
+        void availableQuery.refetch();
+        void ongoingQuery.refetch();
+        void completedQuery.refetch();
+      }
+    }, [loadData, isDemo, availableQuery, ongoingQuery, completedQuery]),
   );
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     setTimeout(() => {
       void loadData();
+      if (!isDemo) {
+        void availableQuery.refetch();
+        void ongoingQuery.refetch();
+        void completedQuery.refetch();
+      }
       setRefreshing(false);
     }, 500);
-  }, [loadData]);
+  }, [loadData, isDemo, availableQuery, ongoingQuery, completedQuery]);
 
   const ordersForTab =
-    tab === 'available' ? availableOrders : tab === 'ongoing' ? ongoingOrders : completedOrders;
+    tab === 'available' ? derivedAvailable : tab === 'ongoing' ? derivedOngoing : derivedCompleted;
 
   const handleAcceptOrder = (order: AgentOrder) => {
     router.push({
@@ -164,7 +185,7 @@ const AgentHomeScreen = () => {
   const handleCardPrimaryAction = async (order: AgentOrder) => {
     // Available tab = accept (and transition to ongoing).
     if (tab === 'available') {
-      if (!canAcceptNewOrders) {
+      if (!effectiveCanAcceptNewOrders) {
         Alert.alert(
           i18n.t('(agent).home.alert.ongoingDeliveryTitle'),
           i18n.t('(agent).home.alert.ongoingDeliveryMessage'),
@@ -252,6 +273,27 @@ const AgentHomeScreen = () => {
 
   const kycMessage = getKYCStatusMessage();
 
+  const activeQuery =
+    tab === 'available' ? availableQuery : tab === 'ongoing' ? ongoingQuery : completedQuery;
+
+  const handleEndReached = () => {
+    if (isDemo) return;
+    if (activeQuery.hasNextPage && !activeQuery.isFetchingNextPage) {
+      void activeQuery.fetchNextPage();
+    }
+  };
+
+  useEffect(() => {
+    if (isDemo) return;
+    const completed = derivedCompleted.length;
+    const earnings = derivedCompleted.reduce((sum, o) => sum + (o.deliveryFee || 0), 0);
+    setStats({
+      totalEarnings: earnings,
+      completedDeliveries: completed,
+      ongoingDeliveries: derivedOngoing.length,
+    });
+  }, [isDemo, derivedCompleted, derivedOngoing]);
+
   return (
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + 24 }]}>
@@ -292,81 +334,85 @@ const AgentHomeScreen = () => {
         </View>
       </View>
 
-      <ScrollView
+      <FlatList
         style={styles.content}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }>
-        
-        {kycMessage && (
-          <View style={{ 
-            backgroundColor: kycMessage.type === 'error' ? Colors.error + '20' : Colors.gold + '20',
-            borderRadius: 12, 
-            padding: 16, 
-            marginBottom: 16,
-            borderWidth: 1,
-            borderColor: kycMessage.type === 'error' ? Colors.error : Colors.gold,
-          }}>
-            <Text style={{ fontSize: 16, fontWeight: '600', color: Colors.dark[0], marginBottom: 4 }}>
-              {kycMessage.title}
-            </Text>
-            <Text style={{ fontSize: 14, color: Colors.grey['61'], marginBottom: 12 }}>
-              {kycMessage.subtitle}
-            </Text>
-            {kycMessage.showKYCButton && (
-              <Button
-                mode="contained"
-                onPress={() => router.push('/(agent)/kyc')}
-                buttonColor={Colors.primary[500]}
-                style={{ borderRadius: 8 }}>
-                {i18n.t('(agent).kyc.title')}
-              </Button>
+        data={ordersForTab}
+        keyExtractor={(item) => item.id}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        onEndReachedThreshold={0.6}
+        onEndReached={handleEndReached}
+        ListHeaderComponent={
+          <View>
+            {kycMessage && (
+              <View style={{ 
+                backgroundColor: kycMessage.type === 'error' ? Colors.error + '20' : Colors.gold + '20',
+                borderRadius: 12, 
+                padding: 16, 
+                marginBottom: 16,
+                borderWidth: 1,
+                borderColor: kycMessage.type === 'error' ? Colors.error : Colors.gold,
+              }}>
+                <Text style={{ fontSize: 16, fontWeight: '600', color: Colors.dark[0], marginBottom: 4 }}>
+                  {kycMessage.title}
+                </Text>
+                <Text style={{ fontSize: 14, color: Colors.grey['61'], marginBottom: 12 }}>
+                  {kycMessage.subtitle}
+                </Text>
+                {kycMessage.showKYCButton && (
+                  <Button
+                    mode="contained"
+                    onPress={() => router.push('/(agent)/kyc')}
+                    buttonColor={Colors.primary[500]}
+                    style={{ borderRadius: 8 }}>
+                    {i18n.t('(agent).kyc.title')}
+                  </Button>
+                )}
+              </View>
             )}
+
+            <View style={styles.tabsRow}>
+              <TouchableOpacity
+                style={[styles.tabPill, tab === 'available' && styles.tabPillActive]}
+                activeOpacity={0.85}
+                onPress={() => setTab('available')}>
+                <Text style={[styles.tabText, tab === 'available' && styles.tabTextActive]}>
+                  {i18n.t('(agent).home.tabs.available')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.tabPill, tab === 'ongoing' && styles.tabPillActive]}
+                activeOpacity={0.85}
+                onPress={() => setTab('ongoing')}>
+                <Text style={[styles.tabText, tab === 'ongoing' && styles.tabTextActive]}>
+                  {i18n.t('(agent).home.tabs.ongoing')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.tabPill, tab === 'completed' && styles.tabPillActive]}
+                activeOpacity={0.85}
+                onPress={() => setTab('completed')}>
+                <Text style={[styles.tabText, tab === 'completed' && styles.tabTextActive]}>
+                  {i18n.t('(agent).home.tabs.completed')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>
+                {tab === 'available'
+                  ? i18n.t('(agent).orders.title')
+                  : tab === 'ongoing'
+                  ? i18n.t('(agent).home.sectionTitle.ongoing')
+                  : i18n.t('(agent).home.sectionTitle.completed')}
+              </Text>
+              <Text style={{ color: Colors.grey['61'], fontSize: 14 }}>
+                {i18n.t('(agent).orders.order', { count: ordersForTab.length })}
+              </Text>
+            </View>
           </View>
-        )}
-
-        <View style={styles.tabsRow}>
-          <TouchableOpacity
-            style={[styles.tabPill, tab === 'available' && styles.tabPillActive]}
-            activeOpacity={0.85}
-            onPress={() => setTab('available')}>
-            <Text style={[styles.tabText, tab === 'available' && styles.tabTextActive]}>
-              {i18n.t('(agent).home.tabs.available')}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tabPill, tab === 'ongoing' && styles.tabPillActive]}
-            activeOpacity={0.85}
-            onPress={() => setTab('ongoing')}>
-            <Text style={[styles.tabText, tab === 'ongoing' && styles.tabTextActive]}>
-              {i18n.t('(agent).home.tabs.ongoing')}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tabPill, tab === 'completed' && styles.tabPillActive]}
-            activeOpacity={0.85}
-            onPress={() => setTab('completed')}>
-            <Text style={[styles.tabText, tab === 'completed' && styles.tabTextActive]}>
-              {i18n.t('(agent).home.tabs.completed')}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>
-            {tab === 'available'
-              ? i18n.t('(agent).orders.title')
-              : tab === 'ongoing'
-              ? i18n.t('(agent).home.sectionTitle.ongoing')
-              : i18n.t('(agent).home.sectionTitle.completed')}
-          </Text>
-          <Text style={{ color: Colors.grey['61'], fontSize: 14 }}>
-            {i18n.t('(agent).orders.order', { count: ordersForTab.length })}
-          </Text>
-        </View>
-
-        {ordersForTab.length === 0 ? (
+        }
+        ListEmptyComponent={
           <View style={styles.emptyState}>
             <View style={styles.emptyIcon}>
               <Icon source="package-variant" size={40} color={Colors.grey['61']} />
@@ -388,99 +434,95 @@ const AgentHomeScreen = () => {
                 : i18n.t('(agent).home.empty.completedSubtitle')}
             </Text>
           </View>
-        ) : (
-          <View style={styles.ordersList}>
-            {ordersForTab.map((order) => (
-              <TouchableOpacity
-                key={order.id}
-                style={styles.orderCard}
-                onPress={() => handleAcceptOrder(order)}
-                activeOpacity={0.7}>
-                <View style={styles.orderHeader}>
-                  <Text style={styles.orderNumber}>
-                    {i18n.t('(agent).orders.order')} #{order.orderNumber}
+        }
+        renderItem={({ item: order }) => (
+          <TouchableOpacity
+            style={styles.orderCard}
+            onPress={() => handleAcceptOrder(order)}
+            activeOpacity={0.7}>
+            <View style={styles.orderHeader}>
+              <Text style={styles.orderNumber}>
+                {i18n.t('(agent).orders.order')} #{order.orderNumber}
+              </Text>
+              <View style={styles.orderDistance}>
+                <Icon source="map-marker-distance" size={14} color={Colors.grey['61']} />
+                <Text style={styles.distanceText}>
+                  {order.distance} {i18n.t('(agent).orders.km')}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.orderRoute}>
+              <View style={styles.routeRow}>
+                <View style={styles.routeIcon}>
+                  <Icon source="store" size={16} color={Colors.primary[500]} />
+                </View>
+                <View style={styles.routeInfo}>
+                  <Text style={styles.routeLabel}>
+                    {i18n.t('(agent).orders.pickup')}
                   </Text>
-                  <View style={styles.orderDistance}>
-                    <Icon source="map-marker-distance" size={14} color={Colors.grey['61']} />
-                    <Text style={styles.distanceText}>
-                      {order.distance} {i18n.t('(agent).orders.km')}
-                    </Text>
-                  </View>
+                  <Text style={styles.routeAddress}>{order.farmerName}</Text>
+                  <Text style={styles.routeAddress}>{order.pickupAddress}</Text>
                 </View>
+              </View>
 
-                <View style={styles.orderRoute}>
-                  <View style={styles.routeRow}>
-                    <View style={styles.routeIcon}>
-                      <Icon source="store" size={16} color={Colors.primary[500]} />
-                    </View>
-                    <View style={styles.routeInfo}>
-                      <Text style={styles.routeLabel}>
-                        {i18n.t('(agent).orders.pickup')}
-                      </Text>
-                      <Text style={styles.routeAddress}>{order.farmerName}</Text>
-                      <Text style={styles.routeAddress}>{order.pickupAddress}</Text>
-                    </View>
-                  </View>
+              <View style={styles.routeConnector} />
 
-                  <View style={styles.routeConnector} />
-
-                  <View style={styles.routeRow}>
-                    <View style={[styles.routeIcon, styles.routeDestinationIcon]}>
-                      <Icon source="home" size={16} color={Colors.success} />
-                    </View>
-                    <View style={styles.routeInfo}>
-                      <Text style={styles.routeLabel}>
-                        {i18n.t('(agent).orders.delivery')}
-                      </Text>
-                      <Text style={styles.routeAddress}>{order.customerName}</Text>
-                      <Text style={styles.routeAddress}>{order.deliveryAddress}</Text>
-                    </View>
-                  </View>
+              <View style={styles.routeRow}>
+                <View style={[styles.routeIcon, styles.routeDestinationIcon]}>
+                  <Icon source="home" size={16} color={Colors.success} />
                 </View>
-
-                <View style={styles.orderFooter}>
-                  <View style={styles.earningContainer}>
-                    <Text style={styles.earningLabel}>
-                      {i18n.t('(agent).orders.yourEarning')}
-                    </Text>
-                    <Text style={styles.earningAmount}>
-                      {i18n.t('common.currency')} {order.deliveryFee.toLocaleString()}
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    style={[
-                      styles.acceptButton,
-                      tab === 'available' && !canAcceptNewOrders
-                        ? defaultStyles.greyButton
-                        : undefined,
-                    ]}
-                    onPress={() => void handleCardPrimaryAction(order)}>
-                    <Text style={styles.acceptButtonText}>
-                      {tab === 'available'
-                        ? i18n.t('(agent).orders.acceptOrder')
-                        : i18n.t('common.view')}
-                    </Text>
-                  </TouchableOpacity>
+                <View style={styles.routeInfo}>
+                  <Text style={styles.routeLabel}>
+                    {i18n.t('(agent).orders.delivery')}
+                  </Text>
+                  <Text style={styles.routeAddress}>{order.customerName}</Text>
+                  <Text style={styles.routeAddress}>{order.deliveryAddress}</Text>
                 </View>
+              </View>
+            </View>
+
+            <View style={styles.orderFooter}>
+              <View style={styles.earningContainer}>
+                <Text style={styles.earningLabel}>
+                  {i18n.t('(agent).orders.yourEarning')}
+                </Text>
+                <Text style={styles.earningAmount}>
+                  {i18n.t('common.currency')} {order.deliveryFee.toLocaleString()}
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={[
+                  styles.acceptButton,
+                  tab === 'available' && !effectiveCanAcceptNewOrders
+                    ? defaultStyles.greyButton
+                    : undefined,
+                ]}
+                onPress={() => void handleCardPrimaryAction(order)}>
+                <Text style={styles.acceptButtonText}>
+                  {tab === 'available'
+                    ? i18n.t('(agent).orders.acceptOrder')
+                    : i18n.t('common.view')}
+                </Text>
               </TouchableOpacity>
-            ))}
-          </View>
+            </View>
+          </TouchableOpacity>
         )}
-
-        <TouchableOpacity
-          style={{ marginTop: 24, padding: 16 }}
-          onLongPress={() => {
-            if (!agentState.isDemoMode) return;
-            handleResetData();
-          }}
-          delayLongPress={2000}>
-          <Text style={{ textAlign: 'center', color: Colors.grey['61'], fontSize: 12 }}>
-            {agentState.isDemoMode
-              ? i18n.t('(agent).home.resetDemo.longPressHint')
-              : ''}
-          </Text>
-        </TouchableOpacity>
-      </ScrollView>
+        contentContainerStyle={styles.ordersList}
+        ListFooterComponent={
+          <TouchableOpacity
+            style={{ marginTop: 24, padding: 16 }}
+            onLongPress={() => {
+              if (!agentState.isDemoMode) return;
+              handleResetData();
+            }}
+            delayLongPress={2000}>
+            <Text style={{ textAlign: 'center', color: Colors.grey['61'], fontSize: 12 }}>
+              {agentState.isDemoMode ? i18n.t('(agent).home.resetDemo.longPressHint') : ''}
+            </Text>
+          </TouchableOpacity>
+        }
+      />
     </View>
   );
 };

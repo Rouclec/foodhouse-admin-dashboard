@@ -28,6 +28,9 @@ const (
 	Orders_RejectOrder_FullMethodName                        = "/ordersgrpc.Orders/RejectOrder"
 	Orders_HealthCheck_FullMethodName                        = "/ordersgrpc.Orders/HealthCheck"
 	Orders_ListUserOrders_FullMethodName                     = "/ordersgrpc.Orders/ListUserOrders"
+	Orders_ListAgentAvailableOrders_FullMethodName           = "/ordersgrpc.Orders/ListAgentAvailableOrders"
+	Orders_ListAgentOngoingOrders_FullMethodName             = "/ordersgrpc.Orders/ListAgentOngoingOrders"
+	Orders_ListAgentDeliveredOrders_FullMethodName           = "/ordersgrpc.Orders/ListAgentDeliveredOrders"
 	Orders_ListFarmerOrders_FullMethodName                   = "/ordersgrpc.Orders/ListFarmerOrders"
 	Orders_ListOrders_FullMethodName                         = "/ordersgrpc.Orders/ListOrders"
 	Orders_InitiatePayment_FullMethodName                    = "/ordersgrpc.Orders/InitiatePayment"
@@ -72,6 +75,9 @@ type OrdersClient interface {
 	RejectOrder(ctx context.Context, in *RejectOrderRequest, opts ...grpc.CallOption) (*RejectOrderResponse, error)
 	HealthCheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
 	ListUserOrders(ctx context.Context, in *ListUserOrdersRequest, opts ...grpc.CallOption) (*ListUserOrdersResponse, error)
+	ListAgentAvailableOrders(ctx context.Context, in *ListAgentAvailableOrdersRequest, opts ...grpc.CallOption) (*ListAgentAvailableOrdersResponse, error)
+	ListAgentOngoingOrders(ctx context.Context, in *ListAgentOngoingOrdersRequest, opts ...grpc.CallOption) (*ListAgentOngoingOrdersResponse, error)
+	ListAgentDeliveredOrders(ctx context.Context, in *ListAgentDeliveredOrdersRequest, opts ...grpc.CallOption) (*ListAgentDeliveredOrdersResponse, error)
 	ListFarmerOrders(ctx context.Context, in *ListFarmerOrdersRequest, opts ...grpc.CallOption) (*ListFarmerOrdersResponse, error)
 	ListOrders(ctx context.Context, in *ListOrdersRequest, opts ...grpc.CallOption) (*ListOrdersResponse, error)
 	InitiatePayment(ctx context.Context, in *InitiatePaymentRequest, opts ...grpc.CallOption) (*InitiatePaymentResponse, error)
@@ -197,6 +203,36 @@ func (c *ordersClient) ListUserOrders(ctx context.Context, in *ListUserOrdersReq
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListUserOrdersResponse)
 	err := c.cc.Invoke(ctx, Orders_ListUserOrders_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ordersClient) ListAgentAvailableOrders(ctx context.Context, in *ListAgentAvailableOrdersRequest, opts ...grpc.CallOption) (*ListAgentAvailableOrdersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListAgentAvailableOrdersResponse)
+	err := c.cc.Invoke(ctx, Orders_ListAgentAvailableOrders_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ordersClient) ListAgentOngoingOrders(ctx context.Context, in *ListAgentOngoingOrdersRequest, opts ...grpc.CallOption) (*ListAgentOngoingOrdersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListAgentOngoingOrdersResponse)
+	err := c.cc.Invoke(ctx, Orders_ListAgentOngoingOrders_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ordersClient) ListAgentDeliveredOrders(ctx context.Context, in *ListAgentDeliveredOrdersRequest, opts ...grpc.CallOption) (*ListAgentDeliveredOrdersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListAgentDeliveredOrdersResponse)
+	err := c.cc.Invoke(ctx, Orders_ListAgentDeliveredOrders_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -506,6 +542,9 @@ type OrdersServer interface {
 	RejectOrder(context.Context, *RejectOrderRequest) (*RejectOrderResponse, error)
 	HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
 	ListUserOrders(context.Context, *ListUserOrdersRequest) (*ListUserOrdersResponse, error)
+	ListAgentAvailableOrders(context.Context, *ListAgentAvailableOrdersRequest) (*ListAgentAvailableOrdersResponse, error)
+	ListAgentOngoingOrders(context.Context, *ListAgentOngoingOrdersRequest) (*ListAgentOngoingOrdersResponse, error)
+	ListAgentDeliveredOrders(context.Context, *ListAgentDeliveredOrdersRequest) (*ListAgentDeliveredOrdersResponse, error)
 	ListFarmerOrders(context.Context, *ListFarmerOrdersRequest) (*ListFarmerOrdersResponse, error)
 	ListOrders(context.Context, *ListOrdersRequest) (*ListOrdersResponse, error)
 	InitiatePayment(context.Context, *InitiatePaymentRequest) (*InitiatePaymentResponse, error)
@@ -573,6 +612,15 @@ func (UnimplementedOrdersServer) HealthCheck(context.Context, *HealthCheckReques
 }
 func (UnimplementedOrdersServer) ListUserOrders(context.Context, *ListUserOrdersRequest) (*ListUserOrdersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListUserOrders not implemented")
+}
+func (UnimplementedOrdersServer) ListAgentAvailableOrders(context.Context, *ListAgentAvailableOrdersRequest) (*ListAgentAvailableOrdersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListAgentAvailableOrders not implemented")
+}
+func (UnimplementedOrdersServer) ListAgentOngoingOrders(context.Context, *ListAgentOngoingOrdersRequest) (*ListAgentOngoingOrdersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListAgentOngoingOrders not implemented")
+}
+func (UnimplementedOrdersServer) ListAgentDeliveredOrders(context.Context, *ListAgentDeliveredOrdersRequest) (*ListAgentDeliveredOrdersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListAgentDeliveredOrders not implemented")
 }
 func (UnimplementedOrdersServer) ListFarmerOrders(context.Context, *ListFarmerOrdersRequest) (*ListFarmerOrdersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListFarmerOrders not implemented")
@@ -840,6 +888,60 @@ func _Orders_ListUserOrders_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OrdersServer).ListUserOrders(ctx, req.(*ListUserOrdersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orders_ListAgentAvailableOrders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAgentAvailableOrdersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).ListAgentAvailableOrders(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_ListAgentAvailableOrders_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).ListAgentAvailableOrders(ctx, req.(*ListAgentAvailableOrdersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orders_ListAgentOngoingOrders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAgentOngoingOrdersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).ListAgentOngoingOrders(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_ListAgentOngoingOrders_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).ListAgentOngoingOrders(ctx, req.(*ListAgentOngoingOrdersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Orders_ListAgentDeliveredOrders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAgentDeliveredOrdersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServer).ListAgentDeliveredOrders(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Orders_ListAgentDeliveredOrders_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServer).ListAgentDeliveredOrders(ctx, req.(*ListAgentDeliveredOrdersRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1408,6 +1510,18 @@ var Orders_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListUserOrders",
 			Handler:    _Orders_ListUserOrders_Handler,
+		},
+		{
+			MethodName: "ListAgentAvailableOrders",
+			Handler:    _Orders_ListAgentAvailableOrders_Handler,
+		},
+		{
+			MethodName: "ListAgentOngoingOrders",
+			Handler:    _Orders_ListAgentOngoingOrders_Handler,
+		},
+		{
+			MethodName: "ListAgentDeliveredOrders",
+			Handler:    _Orders_ListAgentDeliveredOrders_Handler,
 		},
 		{
 			MethodName: "ListFarmerOrders",

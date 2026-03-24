@@ -48,6 +48,9 @@ import type {
   OrdersInitiatePaymentData,
   OrdersInitiatePaymentError,
   OrdersInitiatePaymentResponse,
+  OrdersListAgentAvailableOrdersData,
+  OrdersListAgentDeliveredOrdersData,
+  OrdersListAgentOngoingOrdersData,
   OrdersListDeliveryCitiesData,
   OrdersListDeliveryPointsData,
   OrdersListUserOrdersData,
@@ -100,6 +103,9 @@ import {
   ordersEstimateDeliveryFee,
   ordersGetAgentStats,
   ordersInitiatePayment,
+  ordersListAgentAvailableOrders,
+  ordersListAgentDeliveredOrders,
+  ordersListAgentOngoingOrders,
   ordersListDeliveryCities,
   ordersListDeliveryPoints,
   ordersListUserOrders,
@@ -807,6 +813,69 @@ export const ordersInitiatePaymentMutation = (
     },
   };
   return mutationOptions;
+};
+
+export const ordersListAgentAvailableOrdersQueryKey = (
+  options: OptionsLegacyParser<OrdersListAgentAvailableOrdersData>,
+) => [createQueryKey("ordersListAgentAvailableOrders", options)];
+
+export const ordersListAgentAvailableOrdersOptions = (
+  options: OptionsLegacyParser<OrdersListAgentAvailableOrdersData>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await ordersListAgentAvailableOrders({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: ordersListAgentAvailableOrdersQueryKey(options),
+  });
+};
+
+export const ordersListAgentDeliveredOrdersQueryKey = (
+  options: OptionsLegacyParser<OrdersListAgentDeliveredOrdersData>,
+) => [createQueryKey("ordersListAgentDeliveredOrders", options)];
+
+export const ordersListAgentDeliveredOrdersOptions = (
+  options: OptionsLegacyParser<OrdersListAgentDeliveredOrdersData>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await ordersListAgentDeliveredOrders({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: ordersListAgentDeliveredOrdersQueryKey(options),
+  });
+};
+
+export const ordersListAgentOngoingOrdersQueryKey = (
+  options: OptionsLegacyParser<OrdersListAgentOngoingOrdersData>,
+) => [createQueryKey("ordersListAgentOngoingOrders", options)];
+
+export const ordersListAgentOngoingOrdersOptions = (
+  options: OptionsLegacyParser<OrdersListAgentOngoingOrdersData>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await ordersListAgentOngoingOrders({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: ordersListAgentOngoingOrdersQueryKey(options),
+  });
 };
 
 export const ordersListDeliveryCitiesQueryKey = (
