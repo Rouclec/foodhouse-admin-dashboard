@@ -561,7 +561,7 @@ func (q *Queries) ListFarmersByRating(ctx context.Context, arg ListFarmersByRati
 
 const listKYCVerifications = `-- name: ListKYCVerifications :many
 SELECT id, user_id, status, rejection_reason, verified_at, created_at, updated_at, identity_document_urls, selfie_urls, vehicle_document_urls FROM kyc_verifications 
-WHERE ($1::text IS NULL OR status = $1::text)
+WHERE ($1::text = '' OR status = $1::text)
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
 `
