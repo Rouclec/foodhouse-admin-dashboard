@@ -1972,24 +1972,49 @@ func (i *Impl) CreateKYC(ctx context.Context,
 		return nil, status.Error(codes.NotFound, "user not found")
 	}
 
+	identityUrls := req.GetIdentityDocumentUrls()
+	if len(identityUrls) == 0 && req.GetIdentityDocumentUrl() != "" {
+		identityUrls = []string{req.GetIdentityDocumentUrl()}
+	}
+
+	selfieUrls := req.GetSelfieUrls()
+	if len(selfieUrls) == 0 && req.GetSelfieUrl() != "" {
+		selfieUrls = []string{req.GetSelfieUrl()}
+	}
+
+	vehicleUrls := req.GetVehicleDocumentUrls()
+	if len(vehicleUrls) == 0 && req.GetVehicleDocumentUrl() != "" {
+		vehicleUrls = []string{req.GetVehicleDocumentUrl()}
+	}
+
 	kyc, err := querier.CreateKYC(ctx, sqlc.CreateKYCParams{
-		UserID:              req.GetUserId(),
-		IdentityDocumentUrl: req.GetIdentityDocumentUrl(),
-		SelfieUrl:           req.GetSelfieUrl(),
-		VehicleDocumentUrl:  req.GetVehicleDocumentUrl(),
+		UserID:               req.GetUserId(),
+		IdentityDocumentUrls: identityUrls,
+		SelfieUrls:           selfieUrls,
+		VehicleDocumentUrls:  vehicleUrls,
 	})
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to create KYC: %v", err)
 	}
 
+	first := func(xs []string) string {
+		if len(xs) == 0 {
+			return ""
+		}
+		return xs[0]
+	}
+
 	return &usersgrpc.CreateKYCResponse{
 		KycVerification: &usersgrpc.KYCVerification{
 			Id:                  kyc.ID,
 			UserId:              kyc.UserID,
-			IdentityDocumentUrl: kyc.IdentityDocumentUrl,
-			SelfieUrl:           kyc.SelfieUrl,
-			VehicleDocumentUrl:  kyc.VehicleDocumentUrl,
+			IdentityDocumentUrl: first(kyc.IdentityDocumentUrls),
+			SelfieUrl:           first(kyc.SelfieUrls),
+			VehicleDocumentUrl:  first(kyc.VehicleDocumentUrls),
+			IdentityDocumentUrls: kyc.IdentityDocumentUrls,
+			SelfieUrls:           kyc.SelfieUrls,
+			VehicleDocumentUrls:  kyc.VehicleDocumentUrls,
 			Status: func() usersgrpc.KYCStatus {
 				if kyc.Status != nil {
 					return usersgrpc.KYCStatus(usersgrpc.KYCStatus_value[*kyc.Status])
@@ -2021,9 +2046,27 @@ func (i *Impl) GetKYCByUserID(ctx context.Context,
 		KycVerification: &usersgrpc.KYCVerification{
 			Id:                  kyc.ID,
 			UserId:              kyc.UserID,
-			IdentityDocumentUrl: kyc.IdentityDocumentUrl,
-			SelfieUrl:           kyc.SelfieUrl,
-			VehicleDocumentUrl:  kyc.VehicleDocumentUrl,
+			IdentityDocumentUrl: func() string {
+				if len(kyc.IdentityDocumentUrls) > 0 {
+					return kyc.IdentityDocumentUrls[0]
+				}
+				return ""
+			}(),
+			SelfieUrl: func() string {
+				if len(kyc.SelfieUrls) > 0 {
+					return kyc.SelfieUrls[0]
+				}
+				return ""
+			}(),
+			VehicleDocumentUrl: func() string {
+				if len(kyc.VehicleDocumentUrls) > 0 {
+					return kyc.VehicleDocumentUrls[0]
+				}
+				return ""
+			}(),
+			IdentityDocumentUrls: kyc.IdentityDocumentUrls,
+			SelfieUrls:           kyc.SelfieUrls,
+			VehicleDocumentUrls:  kyc.VehicleDocumentUrls,
 			Status: func() usersgrpc.KYCStatus {
 				if kyc.Status != nil {
 					return usersgrpc.KYCStatus(usersgrpc.KYCStatus_value[*kyc.Status])
@@ -2119,9 +2162,27 @@ func (i *Impl) ListKYCVerifications(ctx context.Context,
 		out = append(out, &usersgrpc.KYCVerification{
 			Id:                  row.ID,
 			UserId:              row.UserID,
-			IdentityDocumentUrl: row.IdentityDocumentUrl,
-			SelfieUrl:           row.SelfieUrl,
-			VehicleDocumentUrl:  row.VehicleDocumentUrl,
+			IdentityDocumentUrl: func() string {
+				if len(row.IdentityDocumentUrls) > 0 {
+					return row.IdentityDocumentUrls[0]
+				}
+				return ""
+			}(),
+			SelfieUrl: func() string {
+				if len(row.SelfieUrls) > 0 {
+					return row.SelfieUrls[0]
+				}
+				return ""
+			}(),
+			VehicleDocumentUrl: func() string {
+				if len(row.VehicleDocumentUrls) > 0 {
+					return row.VehicleDocumentUrls[0]
+				}
+				return ""
+			}(),
+			IdentityDocumentUrls: row.IdentityDocumentUrls,
+			SelfieUrls:           row.SelfieUrls,
+			VehicleDocumentUrls:  row.VehicleDocumentUrls,
 			Status:              kycStatus,
 			RejectionReason:     row.RejectionReason,
 			VerifiedAt:          verifiedAt,

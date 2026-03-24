@@ -273,7 +273,8 @@ const AgentOrderDetails = () => {
           <Button
             mode="contained"
             onPress={handleAcceptOrder}
-            style={[defaultStyles.button, { backgroundColor: Colors.primary[500] }]}
+            style={defaultStyles.button}
+            buttonColor={loading ? Colors.grey['bg'] : Colors.primary[500]}
             loading={loading}
             disabled={loading}>
             {i18n.t('(agent).orders.acceptOrder')}

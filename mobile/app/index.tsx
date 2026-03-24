@@ -81,6 +81,8 @@ export default function Index() {
         }
         if (user?.role === 'USER_ROLE_FARMER')
           return router.replace('/(farmer)/(index)');
+        if (user?.role === 'USER_ROLE_AGENT')
+          return router.replace('/(agent)/(index)');
         return router.replace('/(buyer)/(index)');
       }
       if (hasOnboarded) {

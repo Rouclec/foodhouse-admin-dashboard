@@ -176,6 +176,12 @@ export type UsersCreateKYCBody = {
   identityDocumentUrl?: string;
   selfieUrl?: string;
   vehicleDocumentUrl?: string;
+  /**
+   * New: allow multiple documents per field.
+   */
+  identityDocumentUrls?: Array<string>;
+  selfieUrls?: Array<string>;
+  vehicleDocumentUrls?: Array<string>;
 };
 
 export type UsersGrantAdminBody = {
@@ -307,6 +313,12 @@ export type usersgrpcKYCVerification = {
   verifiedAt?: string;
   createdAt?: string;
   updatedAt?: string;
+  /**
+   * New: allow multiple documents per field.
+   */
+  identityDocumentUrls?: Array<string>;
+  selfieUrls?: Array<string>;
+  vehicleDocumentUrls?: Array<string>;
 };
 
 export type usersgrpcLastOtpForFactorResponse = {

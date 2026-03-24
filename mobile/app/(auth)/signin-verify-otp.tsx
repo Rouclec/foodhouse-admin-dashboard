@@ -229,6 +229,8 @@ const SignInVerifyOtpScreen: FC = () => {
         router.push('/(auth)/profile-page');
       } else if (navigationData.role === 'USER_ROLE_FARMER') {
         router.replace('/(farmer)/(index)');
+      } else if (navigationData.role === 'USER_ROLE_AGENT') {
+        router.replace('/(agent)/(index)');
       } else {
         router.replace('/(buyer)/(index)');
       }
