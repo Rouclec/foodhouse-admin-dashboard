@@ -2,11 +2,11 @@
   name: Development
   gitRefName: main
   awsAccountId: 382773571482
-  domainName: dev.foodhousetesting.xyz
+  domainName: dev.foodhousetesting.onine
   
 - envId: testing
   name: Testing
-  gitRefName: release/registration-based-subscription
+  gitRefName: release/new-aws-account
   awsAccountId: 223382717684
-  domainName: foodhousetesting.xyz
+  domainName: foodhousetesting.online
 
