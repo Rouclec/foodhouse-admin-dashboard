@@ -297,7 +297,8 @@ export type ordersgrpcOrder = {
    */
   serviceFee?: typesAmount;
   /**
-   * Pickup location for delivery agents (farmer location at time of order creation).
+   * Pickup location for delivery agents (farmer location at time of order
+   * creation).
    */
   pickupLocation?: typesPoint;
 };

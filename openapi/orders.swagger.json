@@ -2597,7 +2597,7 @@
         },
         "pickupLocation": {
           "$ref": "#/definitions/typesPoint",
-          "description": "Pickup location for delivery agents (farmer location at time of order creation)."
+          "description": "Pickup location for delivery agents (farmer location at time of order\ncreation)."
         }
       }
     },

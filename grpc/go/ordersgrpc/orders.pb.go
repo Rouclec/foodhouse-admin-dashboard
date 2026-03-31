@@ -466,7 +466,8 @@ type Order struct {
 	ExpectedDeliveryDate *timestamppb.Timestamp `protobuf:"bytes,18,opt,name=expected_delivery_date,json=expectedDeliveryDate,proto3,oneof" json:"expected_delivery_date,omitempty"`
 	// Flat platform fee charged on the order (excluded from farmer payout).
 	ServiceFee *types.Amount `protobuf:"bytes,19,opt,name=service_fee,json=serviceFee,proto3" json:"service_fee,omitempty"`
-	// Pickup location for delivery agents (farmer location at time of order creation).
+	// Pickup location for delivery agents (farmer location at time of order
+	// creation).
 	PickupLocation *types.Point `protobuf:"bytes,20,opt,name=pickup_location,json=pickupLocation,proto3" json:"pickup_location,omitempty"`
 }
 
