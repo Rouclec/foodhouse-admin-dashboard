@@ -542,15 +542,6 @@ func SqlcAgentAvailableOrdersToProto(orders []sqlc.ListAgentAvailableOrdersRow) 
 }
 
 func SqlcAgentAvailableOrderRowToProto(order sqlc.ListAgentAvailableOrdersRow) *ordersgrpc.Order {
-	// Convert price
-	var price *types.Amount
-	if order.PriceValue != nil && order.PriceCurrency != nil {
-		price = &types.Amount{
-			Value:           *order.PriceValue,
-			CurrencyIsoCode: *order.PriceCurrency,
-		}
-	}
-
 	// Convert status (string → enum)
 	statusEnum := ordersgrpc.OrderStatus_OrderStatus_UNSPECIFIED
 	switch order.Status {
@@ -598,20 +589,15 @@ func SqlcAgentAvailableOrderRowToProto(order sqlc.ListAgentAvailableOrdersRow) *
 				Lon:     order.PickupLocation.P.X,
 			}
 		}(),
-		SumTotal:          price,
-		Status:            statusEnum,
-		CreatedBy:         derefString(order.CreatedBy),
-		CreatedAt:         timestamppb.New(order.CreatedAt.Time),
-		UpdatedAt:         timestamppb.New(order.UpdatedAt.Time),
-		ProductOwner:      derefString(order.ProductOwner),
-		DispatchedBy:      derefString(order.DispatchedBy),
+		Status:       statusEnum,
+		CreatedBy:    derefString(order.CreatedBy),
+		CreatedAt:    timestamppb.New(order.CreatedAt.Time),
+		UpdatedAt:    timestamppb.New(order.UpdatedAt.Time),
+		ProductOwner: derefString(order.ProductOwner),
+		DispatchedBy: derefString(order.DispatchedBy),
 		DeliveryFee: &types.Amount{
 			Value:           derefFloat(order.DeliveryFeeAmount),
 			CurrencyIsoCode: derefString(order.DeliveryFeeCurrency),
-		},
-		ServiceFee: &types.Amount{
-			Value:           order.ServiceFeeAmount,
-			CurrencyIsoCode: order.ServiceFeeCurrency,
 		},
 		TotalItems: order.TotalItems,
 		OrderItems: previewItems,
@@ -627,15 +613,6 @@ func SqlcAgentOngoingOrdersToProto(orders []sqlc.ListAgentOngoingOrdersRow) []*o
 }
 
 func SqlcAgentOngoingOrderRowToProto(order sqlc.ListAgentOngoingOrdersRow) *ordersgrpc.Order {
-	// Convert price
-	var price *types.Amount
-	if order.PriceValue != nil && order.PriceCurrency != nil {
-		price = &types.Amount{
-			Value:           *order.PriceValue,
-			CurrencyIsoCode: *order.PriceCurrency,
-		}
-	}
-
 	// Convert status (string → enum)
 	statusEnum := ordersgrpc.OrderStatus_OrderStatus_UNSPECIFIED
 	switch order.Status {
@@ -683,24 +660,15 @@ func SqlcAgentOngoingOrderRowToProto(order sqlc.ListAgentOngoingOrdersRow) *orde
 				Lon:     order.PickupLocation.P.X,
 			}
 		}(),
-		SumTotal:          price,
-		Status:            statusEnum,
-		Rating:            int32(order.Rating.Int.Int64()),
-		Review:            order.Review,
-		CreatedBy:         derefString(order.CreatedBy),
-		CreatedAt:         timestamppb.New(order.CreatedAt.Time),
-		UpdatedAt:         timestamppb.New(order.UpdatedAt.Time),
-		SecretKey:         derefString(order.SecretKey),
-		ProductOwner:      derefString(order.ProductOwner),
-		PayoutPhoneNumber: derefString(order.PayoutPhoneNumber),
-		DispatchedBy:      derefString(order.DispatchedBy),
+		Status:       statusEnum,
+		CreatedBy:    derefString(order.CreatedBy),
+		CreatedAt:    timestamppb.New(order.CreatedAt.Time),
+		UpdatedAt:    timestamppb.New(order.UpdatedAt.Time),
+		ProductOwner: derefString(order.ProductOwner),
+		DispatchedBy: derefString(order.DispatchedBy),
 		DeliveryFee: &types.Amount{
 			Value:           derefFloat(order.DeliveryFeeAmount),
 			CurrencyIsoCode: derefString(order.DeliveryFeeCurrency),
-		},
-		ServiceFee: &types.Amount{
-			Value:           order.ServiceFeeAmount,
-			CurrencyIsoCode: order.ServiceFeeCurrency,
 		},
 		TotalItems: order.TotalItems,
 		OrderItems: previewItems,
@@ -716,15 +684,6 @@ func SqlcAgentDeliveredOrdersToProto(orders []sqlc.ListAgentDeliveredOrdersRow) 
 }
 
 func SqlcAgentDeliveredOrderRowToProto(order sqlc.ListAgentDeliveredOrdersRow) *ordersgrpc.Order {
-	// Convert price
-	var price *types.Amount
-	if order.PriceValue != nil && order.PriceCurrency != nil {
-		price = &types.Amount{
-			Value:           *order.PriceValue,
-			CurrencyIsoCode: *order.PriceCurrency,
-		}
-	}
-
 	// Convert status (string → enum)
 	statusEnum := ordersgrpc.OrderStatus_OrderStatus_UNSPECIFIED
 	switch order.Status {
@@ -772,24 +731,15 @@ func SqlcAgentDeliveredOrderRowToProto(order sqlc.ListAgentDeliveredOrdersRow) *
 				Lon:     order.PickupLocation.P.X,
 			}
 		}(),
-		SumTotal:          price,
-		Status:            statusEnum,
-		Rating:            int32(order.Rating.Int.Int64()),
-		Review:            order.Review,
-		CreatedBy:         derefString(order.CreatedBy),
-		CreatedAt:         timestamppb.New(order.CreatedAt.Time),
-		UpdatedAt:         timestamppb.New(order.UpdatedAt.Time),
-		SecretKey:         derefString(order.SecretKey),
-		ProductOwner:      derefString(order.ProductOwner),
-		PayoutPhoneNumber: derefString(order.PayoutPhoneNumber),
-		DispatchedBy:      derefString(order.DispatchedBy),
+		Status:       statusEnum,
+		CreatedBy:    derefString(order.CreatedBy),
+		CreatedAt:    timestamppb.New(order.CreatedAt.Time),
+		UpdatedAt:    timestamppb.New(order.UpdatedAt.Time),
+		ProductOwner: derefString(order.ProductOwner),
+		DispatchedBy: derefString(order.DispatchedBy),
 		DeliveryFee: &types.Amount{
 			Value:           derefFloat(order.DeliveryFeeAmount),
 			CurrencyIsoCode: derefString(order.DeliveryFeeCurrency),
-		},
-		ServiceFee: &types.Amount{
-			Value:           order.ServiceFeeAmount,
-			CurrencyIsoCode: order.ServiceFeeCurrency,
 		},
 		TotalItems: order.TotalItems,
 		OrderItems: previewItems,
