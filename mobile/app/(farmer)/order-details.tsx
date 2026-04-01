@@ -39,6 +39,7 @@ import PhoneNumberInput, {
   validatePhoneNumber,
   CAMEROON,
 } from '@/components/general/PhoneNumberInput';
+import { useAppRating } from '@/hooks/useAppRating';
 
 export default function OrderDetails() {
   const router = useRouter();
@@ -57,6 +58,7 @@ export default function OrderDetails() {
   const [payoutCountryCode, setPayoutCountryCode] = useState(
     CAMEROON.dial_code
   );
+  const { requestReview } = useAppRating();
 
   const {
     data: orderDetailsResult,
@@ -170,6 +172,7 @@ export default function OrderDetails() {
     onSuccess: async () => {
       refetch();
       setShowSuccessModal(true);
+      void requestReview();
       await delay(5000);
       setShowSuccessModal(false);
     },

@@ -29,6 +29,7 @@ import {
 } from '@/client/orders.swagger/@tanstack/react-query.gen';
 import { delay } from '@/utils';
 import { ordersgrpcPaymentMethodType } from '@/client/orders.swagger';
+import { useAppRating } from '@/hooks/useAppRating';
 
 const PaymentAccountPage = () => {
   const router = useRouter();
@@ -38,6 +39,7 @@ const PaymentAccountPage = () => {
   const [failureModalVisisble, setFailureModalVisible] = useState(false);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const { requestReview } = useAppRating();
   const [callingCode, setCallingCode] = useState('');
   const [mobile, setMobile] = useState('');
   const [loading, setLoading] = useState(false);
@@ -127,6 +129,7 @@ const PaymentAccountPage = () => {
       setSuccessModalVisible(true);
       setPaymentData(undefined);
       clearCart();
+      void requestReview();
     }
     if (paymentStatus?.status === 'PaymentStatus_FAILED') {
       setLoadingModalVisible(false);
