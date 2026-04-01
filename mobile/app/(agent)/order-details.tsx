@@ -6,7 +6,6 @@ import {
   Alert,
   Modal,
   TextInput,
-  StyleSheet,
   Linking,
 } from 'react-native';
 import { Text, Button, Icon } from 'react-native-paper';
@@ -27,8 +26,8 @@ import {
 const AgentOrderDetails = () => {
   const insets = useSafeAreaInsets();
   const { user } = useContext(Context) as ContextType;
-  const [agentState, setAgentState] = useState(agentDemoState.getState());
   const params = useLocalSearchParams();
+  const [isDemo, setIsDemo] = useState(false);
   const [order, setOrder] = useState<AgentOrder | null>(null);
   const [loading, setLoading] = useState(false);
   const [showSecurityCodeModal, setShowSecurityCodeModal] = useState(false);
@@ -36,7 +35,12 @@ const AgentOrderDetails = () => {
   const [orderNotFound, setOrderNotFound] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = agentDemoState.subscribe(setAgentState);
+    const checkDemoMode = () => {
+      const state = agentDemoState.getState();
+      setIsDemo(state.isDemoMode && state.isLoggedIn);
+    };
+    checkDemoMode();
+    const unsubscribe = agentDemoState.subscribe(checkDemoMode);
     return () => {
       unsubscribe();
     };
@@ -46,8 +50,7 @@ const AgentOrderDetails = () => {
     const orderId = (params.orderId as string) ?? '';
     if (!orderId) return;
 
-    // Demo mode uses the local mock store (orderId is the mock id).
-    if (agentState.isDemoMode) {
+    if (isDemo) {
       const foundOrder = mockDataStore.getOrderById(orderId);
       if (foundOrder) {
         setOrder(foundOrder);
@@ -59,7 +62,6 @@ const AgentOrderDetails = () => {
       return;
     }
 
-    // Non-demo uses backend (orderId is treated as orderNumber).
     const userId = user?.userId ?? '';
     if (!userId) {
       setOrder(null);
@@ -89,7 +91,7 @@ const AgentOrderDetails = () => {
         setLoading(false);
       }
     })();
-  }, [agentState.isDemoMode, params.orderId, user?.userId]);
+  }, [isDemo, params.orderId, user?.userId]);
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -132,7 +134,7 @@ const AgentOrderDetails = () => {
         {
           text: i18n.t('(agent).orders.accept'),
           onPress: async () => {
-            if (agentState.isDemoMode) {
+            if (isDemo) {
               mockDataStore.acceptOrder(order.id);
               setOrder({ ...order, status: 'picked_up' });
               Alert.alert(i18n.t('common.success'), i18n.t('(agent).orders.orderAccepted'));
@@ -179,7 +181,7 @@ const AgentOrderDetails = () => {
         {
           text: i18n.t('(agent).orders.confirm'),
           onPress: () => {
-            if (agentState.isDemoMode) {
+            if (isDemo) {
               mockDataStore.confirmPickup(order.id);
             }
             setOrder({ ...order, status: 'picked_up' });
@@ -211,7 +213,7 @@ const AgentOrderDetails = () => {
     setTimeout(() => {
       void (async () => {
         try {
-          if (agentState.isDemoMode) {
+          if (isDemo) {
             if (secretKey !== order.securityCode.toUpperCase()) {
               Alert.alert(i18n.t('common.error'), i18n.t('(agent).orders.incorrectCode'));
               setEnteredCode('');
@@ -348,6 +350,7 @@ const AgentOrderDetails = () => {
   if (!order) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Stack.Screen options={{ headerShown: false }} />
         <Text>{i18n.t('common.loading')}</Text>
       </View>
     );
@@ -488,7 +491,7 @@ const AgentOrderDetails = () => {
           </View>
         </View>
 
-        {agentState.isDemoMode && order.status !== 'delivered' && (
+        {isDemo && order.status !== 'delivered' && (
           <View style={styles.securityCodeSection}>
             <Text style={styles.securityCodeLabel}>
               {i18n.t('(agent).orders.demoSecurityCodeLabel')}
@@ -501,8 +504,6 @@ const AgentOrderDetails = () => {
             </Text>
           </View>
         )}
-
-        {/* Delivery confirmation happens via the bottom CTA + modal input. */}
       </ScrollView>
 
       <View style={defaultStyles.bottomButtonContainer}>

@@ -13,9 +13,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { agentHomeStyles as styles, defaultStyles } from '@/styles';
 import { Colors } from '@/constants';
 import i18n from '@/i18n';
-import { agentDemoState } from '@/contexts/AgentContext';
-import { mockDataStore, AgentOrder } from '@/data/mock-orders';
-import { Context, ContextType } from '@/app/_layout';
 import {
   listAgentAvailableOrdersPage,
   listAgentDeliveredOrdersPage,
@@ -24,28 +21,45 @@ import {
 import { usersGetKycByUserIdOptions } from '@/client/users.swagger/@tanstack/react-query.gen';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { usersgrpcKYCStatus } from '@/client/users.swagger';
+import { agentDemoState } from '@/contexts/AgentContext';
+import { mockDataStore, AgentOrder } from '@/data/mock-orders';
+import { Context, ContextType } from '@/app/_layout';
 
 const AgentHomeScreen = () => {
   const insets = useSafeAreaInsets();
   const { user } = useContext(Context) as ContextType;
-  const [agentState, setAgentState] = useState(agentDemoState.getState());
   const [refreshing, setRefreshing] = useState(false);
-  const [availableOrders, setAvailableOrders] = useState<AgentOrder[]>([]);
-  const [ongoingOrders, setOngoingOrders] = useState<AgentOrder[]>([]);
-  const [completedOrders, setCompletedOrders] = useState<AgentOrder[]>([]);
-  const [stats, setStats] = useState({ totalEarnings: 0, completedDeliveries: 0, ongoingDeliveries: 0 });
-  const isDemo = agentState.isDemoMode;
+  const [isDemo, setIsDemo] = useState(false);
+  const [demoStats, setDemoStats] = useState({ totalEarnings: 0, completedDeliveries: 0, ongoingDeliveries: 0 });
   const [tab, setTab] = useState<'available' | 'ongoing' | 'completed'>('available');
-  const canAcceptNewOrders = ongoingOrders.length === 0;
   const userId = user?.userId ?? '';
   const queryClient = useQueryClient();
 
+  useEffect(() => {
+    const checkDemoMode = () => {
+      const state = agentDemoState.getState();
+      setIsDemo(state.isDemoMode && state.isLoggedIn);
+      if (state.isDemoMode && state.isLoggedIn) {
+        const mockStats = mockDataStore.getStats();
+        const accepted = mockDataStore.getAcceptedOrders();
+        setDemoStats({
+          totalEarnings: mockStats.totalEarnings,
+          completedDeliveries: accepted.filter(o => o.status === 'delivered').length,
+          ongoingDeliveries: accepted.filter(o => o.status === 'assigned' || o.status === 'picked_up').length,
+        });
+      }
+    };
+    checkDemoMode();
+    const unsubscribe = agentDemoState.subscribe(checkDemoMode);
+    return () => { unsubscribe(); };
+  }, []);
+
   const pageSize = 20;
-  const infiniteEnabled = !!userId && !isDemo;
+  const useBackend = !isDemo && !!userId;
 
   const availableQuery = useInfiniteQuery({
     queryKey: ['agentAvailableOrders', userId],
-    enabled: infiniteEnabled,
+    enabled: useBackend,
     initialPageParam: undefined as string | undefined,
     retry: 3,
     refetchOnMount: false,
@@ -63,7 +77,7 @@ const AgentHomeScreen = () => {
 
   const ongoingQuery = useInfiniteQuery({
     queryKey: ['agentOngoingOrders', userId],
-    enabled: infiniteEnabled,
+    enabled: useBackend,
     initialPageParam: undefined as string | undefined,
     retry: 3,
     refetchOnMount: false,
@@ -80,7 +94,7 @@ const AgentHomeScreen = () => {
 
   const completedQuery = useInfiniteQuery({
     queryKey: ['agentCompletedOrders', userId],
-    enabled: infiniteEnabled,
+    enabled: useBackend,
     initialPageParam: undefined as string | undefined,
     retry: 3,
     refetchOnMount: false,
@@ -99,7 +113,7 @@ const AgentHomeScreen = () => {
     ...usersGetKycByUserIdOptions({
       path: { userId },
     }),
-    enabled: !!userId && !isDemo,
+    enabled: useBackend,
   });
 
   const backendKycStatus = (() => {
@@ -116,74 +130,61 @@ const AgentHomeScreen = () => {
     }
   })();
 
-  const kycStatus = isDemo ? agentState.kycStatus : backendKycStatus;
+  const kycStatus = backendKycStatus;
   const isKycVerified = kycStatus === 'verified';
 
-  useEffect(() => {
-    const unsubscribe = agentDemoState.subscribe(setAgentState);
-    return () => { unsubscribe(); };
-  }, []);
+  const backendAvailable = (availableQuery.data?.pages ?? []).flatMap(p => p.orders);
+  const backendOngoing = (ongoingQuery.data?.pages ?? []).flatMap(p => p.orders);
+  const backendCompleted = (completedQuery.data?.pages ?? []).flatMap(p => p.orders);
 
-  const derivedAvailable = isDemo
-    ? availableOrders
-    : (availableQuery.data?.pages ?? []).flatMap(p => p.orders);
-  const derivedOngoing = isDemo
-    ? ongoingOrders
-    : (ongoingQuery.data?.pages ?? []).flatMap(p => p.orders);
-  const derivedCompleted = isDemo
-    ? completedOrders
-    : (completedQuery.data?.pages ?? []).flatMap(p => p.orders);
+  const demoAvailable = mockDataStore.getOrders();
+  const demoAccepted = mockDataStore.getAcceptedOrders();
+  const demoOngoing = demoAccepted.filter(o => o.status === 'assigned' || o.status === 'picked_up');
+  const demoCompleted = demoAccepted.filter(o => o.status === 'delivered');
+
+  const derivedAvailable = isDemo ? demoAvailable : backendAvailable;
+  const derivedOngoing = isDemo ? demoOngoing : backendOngoing;
+  const derivedCompleted = isDemo ? demoCompleted : backendCompleted;
 
   const effectiveCanAcceptNewOrders = derivedOngoing.length === 0;
 
-  const loadData = useCallback(async () => {
-    // Demo mode: keep using the mock store.
-    if (agentState.isDemoMode) {
-      const demoAvailable = mockDataStore.getOrders();
-      const accepted = mockDataStore.getAcceptedOrders();
-      const demoOngoing = accepted.filter(o => o.status === 'assigned' || o.status === 'picked_up');
-      const demoCompleted = accepted.filter(o => o.status === 'delivered');
+  const stats = isDemo ? demoStats : {
+    totalEarnings: backendCompleted.reduce((sum, o) => sum + (o.deliveryFee || 0), 0),
+    completedDeliveries: backendCompleted.length,
+    ongoingDeliveries: backendOngoing.length,
+  };
+
+  const refreshData = useCallback(async () => {
+    if (isDemo) {
       const mockStats = mockDataStore.getStats();
-
-      setAvailableOrders(demoAvailable);
-      setOngoingOrders(demoOngoing);
-      setCompletedOrders(demoCompleted);
-      setStats({
+      const accepted = mockDataStore.getAcceptedOrders();
+      setDemoStats({
         totalEarnings: mockStats.totalEarnings,
-        completedDeliveries: demoCompleted.length,
-        ongoingDeliveries: demoOngoing.length,
+        completedDeliveries: accepted.filter(o => o.status === 'delivered').length,
+        ongoingDeliveries: accepted.filter(o => o.status === 'assigned' || o.status === 'picked_up').length,
       });
-      return;
+    } else {
+      await Promise.all([
+        queryClient.resetQueries({ queryKey: ['agentAvailableOrders', userId] }),
+        queryClient.resetQueries({ queryKey: ['agentOngoingOrders', userId] }),
+        queryClient.resetQueries({ queryKey: ['agentCompletedOrders', userId] }),
+      ]);
     }
-  }, [agentState]);
-
-  useEffect(() => {
-    void loadData();
-  }, [loadData]);
-
-  useFocusEffect(
-    useCallback(() => {
-      void loadData();
-    }, [loadData]),
-  );
+  }, [isDemo, queryClient, userId]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     setTimeout(async () => {
-      void loadData();
-
-      // Hard refresh: clear error state + refetch from first page.
-      if (!isDemo && userId) {
-        await Promise.all([
-          queryClient.resetQueries({ queryKey: ['agentAvailableOrders', userId] }),
-          queryClient.resetQueries({ queryKey: ['agentOngoingOrders', userId] }),
-          queryClient.resetQueries({ queryKey: ['agentCompletedOrders', userId] }),
-        ]);
-      }
-
+      await refreshData();
       setRefreshing(false);
     }, 500);
-  }, [loadData, isDemo, queryClient, userId]);
+  }, [refreshData]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void refreshData();
+    }, [refreshData]),
+  );
 
   const ordersForTab =
     tab === 'available' ? derivedAvailable : tab === 'ongoing' ? derivedOngoing : derivedCompleted;
@@ -196,7 +197,6 @@ const AgentHomeScreen = () => {
   };
 
   const handleCardPrimaryAction = async (order: AgentOrder) => {
-    // Available tab = accept (and transition to ongoing).
     if (tab === 'available') {
       if (!effectiveCanAcceptNewOrders) {
         Alert.alert(
@@ -216,18 +216,15 @@ const AgentHomeScreen = () => {
       if (isDemo) {
         mockDataStore.acceptOrder(order.id);
         setTab('ongoing');
-        await loadData();
+        await refreshData();
         handleAcceptOrder(order);
         return;
       }
 
-      // Non-demo: current backend flow moves the order to in-transit via dispatch.
-      // (We will improve this with a dedicated Accept endpoint + status.)
       handleAcceptOrder(order);
       return;
     }
 
-    // Ongoing/Completed = view.
     handleAcceptOrder(order);
   };
 
@@ -243,7 +240,7 @@ const AgentHomeScreen = () => {
           onPress: () => {
             mockDataStore.resetAll();
             agentDemoState.resetDemo();
-            loadData();
+            refreshData();
             Alert.alert(
               i18n.t('common.success'),
               i18n.t('(agent).home.resetDemo.successMessage'),
@@ -295,17 +292,6 @@ const AgentHomeScreen = () => {
       void activeQuery.fetchNextPage();
     }
   };
-
-  useEffect(() => {
-    if (isDemo) return;
-    const completed = derivedCompleted.length;
-    const earnings = derivedCompleted.reduce((sum, o) => sum + (o.deliveryFee || 0), 0);
-    setStats({
-      totalEarnings: earnings,
-      completedDeliveries: completed,
-      ongoingDeliveries: derivedOngoing.length,
-    });
-  }, [isDemo, derivedCompleted, derivedOngoing]);
 
   return (
     <View style={styles.container}>
@@ -526,12 +512,13 @@ const AgentHomeScreen = () => {
           <TouchableOpacity
             style={{ marginTop: 24, padding: 16 }}
             onLongPress={() => {
-              if (!agentState.isDemoMode) return;
+              const state = agentDemoState.getState();
+              if (!state.isDemoMode) return;
               handleResetData();
             }}
             delayLongPress={2000}>
             <Text style={{ textAlign: 'center', color: Colors.grey['61'], fontSize: 12 }}>
-              {agentState.isDemoMode ? i18n.t('(agent).home.resetDemo.longPressHint') : ''}
+              {isDemo ? i18n.t('(agent).home.resetDemo.longPressHint') : ''}
             </Text>
           </TouchableOpacity>
         }

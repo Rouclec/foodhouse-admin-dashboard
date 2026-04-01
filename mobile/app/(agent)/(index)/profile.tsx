@@ -31,25 +31,32 @@ const AgentProfile = () => {
   const sheetRef = useRef<FilterBottomSheetRef>(null);
   const { user, setUser } = useContext(Context) as ContextType;
   const [loading, setLoading] = useState(false);
-  const [state, setState] = useState(agentDemoState.getState());
+  const [isDemo, setIsDemo] = useState(false);
+  const [demoState, setDemoState] = useState(agentDemoState.getState());
 
   useEffect(() => {
-    const unsubscribe = agentDemoState.subscribe(setState);
+    const checkDemoMode = () => {
+      const state = agentDemoState.getState();
+      setIsDemo(state.isDemoMode && state.isLoggedIn);
+      setDemoState(state);
+    };
+    checkDemoMode();
+    const unsubscribe = agentDemoState.subscribe(checkDemoMode);
     return () => {
       unsubscribe();
     };
   }, []);
 
-  const displayFirstName = state.isDemoMode ? state.agent?.firstName : user?.firstName;
-  const displayLastName = state.isDemoMode ? state.agent?.lastName : user?.lastName;
-  const displayEmail = state.isDemoMode ? state.agent?.email : user?.email;
+  const displayFirstName = isDemo ? demoState.agent?.firstName : user?.firstName;
+  const displayLastName = isDemo ? demoState.agent?.lastName : user?.lastName;
+  const displayEmail = isDemo ? demoState.agent?.email : user?.email;
   const userId = user?.userId ?? '';
 
   const { data: backendKycData } = useQuery({
     ...usersGetKycByUserIdOptions({
       path: { userId },
     }),
-    enabled: !!userId && !state.isDemoMode,
+    enabled: !isDemo && !!userId,
   });
 
   const backendKycStatus = (() => {
@@ -66,30 +73,27 @@ const AgentProfile = () => {
     }
   })();
 
-  const kycStatus = state.isDemoMode ? state.kycStatus : backendKycStatus;
+  const kycStatus = isDemo ? demoState.kycStatus : backendKycStatus;
   const isKycVerified = kycStatus === 'verified';
 
   const { data: agentStatsData } = useQuery({
     ...ordersGetAgentStatsOptions({
       path: { userId },
     }),
-    enabled: !!userId && !state.isDemoMode,
+    enabled: !isDemo && !!userId,
   });
 
-  const totalEarnings =
-    state.isDemoMode
-      ? state.earnings
-      : (agentStatsData?.totalEarnings?.value ?? 0);
+  const totalEarnings = isDemo
+    ? demoState.earnings
+    : (agentStatsData?.totalEarnings?.value ?? 0);
 
-  const completedDeliveries =
-    state.isDemoMode
-      ? state.completedDeliveries
-      : (agentStatsData?.completedCount ?? 0);
+  const completedDeliveries = isDemo
+    ? demoState.completedDeliveries
+    : (agentStatsData?.completedCount ?? 0);
 
-  const ongoingDeliveries =
-    state.isDemoMode
-      ? state.pendingDeliveries
-      : (agentStatsData?.ongoingCount ?? 0);
+  const ongoingDeliveries = isDemo
+    ? demoState.pendingDeliveries
+    : (agentStatsData?.ongoingCount ?? 0);
 
   const { mutate: revokeRefreshToken } = useMutation({
     ...usersRevokeRefreshTokenMutation(),
@@ -113,7 +117,7 @@ const AgentProfile = () => {
       updateAuthHeader('');
       setUser(undefined);
 
-      if (state.isDemoMode) {
+      if (isDemo) {
         agentDemoState.logout();
       }
 
@@ -140,8 +144,15 @@ const AgentProfile = () => {
           {(displayLastName ?? '') || ''}
         </Text>
         <Text style={styles.email}>
-          {displayEmail || (state.isDemoMode ? 'agent@foodhouse.demo' : '')}
+          {displayEmail || (isDemo ? 'agent@foodhouse.demo' : '')}
         </Text>
+        {isDemo && (
+          <View style={{ backgroundColor: Colors.gold, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, marginTop: 8 }}>
+            <Text style={{ color: Colors.dark[0], fontSize: 10, fontWeight: '600' }}>
+              DEMO
+            </Text>
+          </View>
+        )}
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>

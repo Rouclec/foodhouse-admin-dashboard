@@ -166,7 +166,7 @@ LIMIT sqlc.arg(count)::int;
 
 -- name: ListOrders :many
 SELECT 
-    o.*,
+    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, COALESCE(o.review, '')::text AS review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.service_fee_amount, o.service_fee_currency, o.agent_id, o.pickup_location, COALESCE(o.pickup_address, '')::text AS pickup_address,
     COALESCE(oi_count.total_items, 0)::int AS total_items,
     oi_preview.product AS preview_product,
     oi_preview.quantity AS preview_quantity
@@ -195,7 +195,7 @@ LIMIT sqlc.arg(count)::int;
 
 -- name: ListAgentAvailableOrders :many
 SELECT
-  o.*,
+  o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.created_by, o.created_at, o.updated_at, o.product_owner, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.service_fee_amount, o.service_fee_currency, o.agent_id, o.pickup_location, o.pickup_address,
   COALESCE(oi_count.total_items, 0)::int AS total_items,
   oi_preview.product AS preview_product,
   oi_preview.quantity AS preview_quantity
@@ -240,7 +240,7 @@ LIMIT sqlc.arg(count)::int;
 
 -- name: ListAgentOngoingOrders :many
 SELECT
-  o.*,
+  o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, COALESCE(o.review, '')::text AS review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.service_fee_amount, o.service_fee_currency, o.agent_id, o.pickup_location, o.pickup_address,
   COALESCE(oi_count.total_items, 0)::int AS total_items,
   oi_preview.product AS preview_product,
   oi_preview.quantity AS preview_quantity
@@ -268,7 +268,7 @@ LIMIT sqlc.arg(count)::int;
 
 -- name: ListAgentDeliveredOrders :many
 SELECT
-  o.*,
+  o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, COALESCE(o.review, '')::text AS review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.service_fee_amount, o.service_fee_currency, o.agent_id, o.pickup_location, o.pickup_address,
   COALESCE(oi_count.total_items, 0)::int AS total_items,
   oi_preview.product AS preview_product,
   oi_preview.quantity AS preview_quantity
