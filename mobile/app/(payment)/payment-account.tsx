@@ -116,10 +116,13 @@ const PaymentAccountPage = () => {
     refetchInterval: 2000,
   });
 
+  const [nextScreen, setNextScreen] = useState<string | undefined>(undefined);
+
   useEffect(() => {
     if (!paymentStatus?.status) return;
     if (paymentStatus?.status === 'PaymentStatus_INITIATED') return;
     if (paymentStatus?.status === 'PaymentStatus_COMPLETED') {
+      setNextScreen(paymentData?.nextScreen);
       setLoadingModalVisible(false);
       setSuccessModalVisible(true);
       setPaymentData(undefined);
@@ -208,7 +211,7 @@ const PaymentAccountPage = () => {
           visible={successModalVisible}
           onDismiss={() => {
             setSuccessModalVisible(false);
-            router.push(paymentData?.nextScreen ?? '/(buyer)/(index)');
+            router.push((nextScreen ?? '/(buyer)/(index)') as '/(buyer)/(index)');
           }}
           style={defaultStyles.dialogSuccessContainer}>
           <Dialog.Content>

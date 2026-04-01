@@ -114,10 +114,10 @@ func (i *Impl) GetAgentStats(ctx context.Context, req *ordersgrpc.GetAgentStatsR
 	}
 
 	return &ordersgrpc.GetAgentStatsResponse{
-		AvailableCount:  int32(row.AvailableCount),
-		OngoingCount:    int32(row.OngoingCount),
-		CompletedCount:  int32(row.CompletedCount),
-		TotalEarnings:   &types.Amount{Value: row.TotalEarningsValue, CurrencyIsoCode: row.TotalEarningsCurrency},
+		AvailableCount: int32(row.AvailableCount),
+		OngoingCount:   int32(row.OngoingCount),
+		CompletedCount: int32(row.CompletedCount),
+		TotalEarnings:  &types.Amount{Value: row.TotalEarningsValue, CurrencyIsoCode: row.TotalEarningsCurrency},
 	}, nil
 }
 
@@ -277,6 +277,11 @@ func (i *Impl) ConfirmDelivery(ctx context.Context, req *ordersgrpc.ConfirmDeliv
 	)
 
 	if err != nil {
+		// Check if it's a "no rows" error (wrong secret key)
+		if errors.Is(err, sql.ErrNoRows) || strings.Contains(err.Error(), "no rows") {
+			i.logger.Debug().Msgf("no order found with secret key %v", req.GetSecretKey())
+			return nil, status.Errorf(codes.InvalidArgument, "invalid secret key provided")
+		}
 		i.logger.Debug().Msgf("error getting order with secret key %v why: %v", req.GetSecretKey(), err)
 		return nil, status.Errorf(codes.Internal, "error getting order with secret key %v why: %v", req.GetSecretKey(), err)
 	}
@@ -1670,10 +1675,10 @@ func (i *Impl) ListAgentAvailableOrders(ctx context.Context, req *ordersgrpc.Lis
 	}
 
 	rows, err := i.repo.Do().ListAgentAvailableOrders(ctx, sqlc.ListAgentAvailableOrdersParams{
-		CreatedBefore:  startKey,
-		Count:          int32(count),
-		AgentLocation:  agentLoc,
-		RadiusKm:       radiusKm,
+		CreatedBefore: startKey,
+		Count:         int32(count),
+		AgentLocation: agentLoc,
+		RadiusKm:      radiusKm,
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error getting available agent orders: %v", err)

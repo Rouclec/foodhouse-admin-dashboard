@@ -8,9 +8,10 @@ import {
   TextInput,
   Linking,
 } from 'react-native';
-import { Text, Button, Icon } from 'react-native-paper';
+import { Text, Button, Icon, Snackbar } from 'react-native-paper';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useMutation } from '@tanstack/react-query';
 import { agentOrderDetailsStyles as styles, defaultStyles } from '@/styles';
 import { Colors } from '@/constants';
 import i18n from '@/i18n';
@@ -18,10 +19,9 @@ import { mockDataStore, AgentOrder } from '@/data/mock-orders';
 import { agentDemoState } from '@/contexts/AgentContext';
 import { Context, type ContextType } from '@/app/_layout';
 import {
-  confirmDeliveryWithSecretKey,
-  dispatchOrderToAgent,
-  getAgentOrderDetailsFromBackend,
-} from '@/data/agent-orders-backend';
+  ordersConfirmDeliveryMutation,
+  ordersDispatchOrderMutation,
+} from '@/client/orders.swagger/@tanstack/react-query.gen';
 
 const AgentOrderDetails = () => {
   const insets = useSafeAreaInsets();
@@ -33,6 +33,9 @@ const AgentOrderDetails = () => {
   const [showSecurityCodeModal, setShowSecurityCodeModal] = useState(false);
   const [enteredCode, setEnteredCode] = useState('');
   const [orderNotFound, setOrderNotFound] = useState(false);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const userId = user?.userId ?? '';
 
   useEffect(() => {
     const checkDemoMode = () => {
@@ -62,7 +65,6 @@ const AgentOrderDetails = () => {
       return;
     }
 
-    const userId = user?.userId ?? '';
     if (!userId) {
       setOrder(null);
       setOrderNotFound(true);
@@ -74,6 +76,8 @@ const AgentOrderDetails = () => {
 
     void (async () => {
       try {
+        const { getAgentOrderDetailsFromBackend } =
+          await import('@/data/agent-orders-backend');
         const details = await getAgentOrderDetailsFromBackend({
           userId,
           orderNumber: orderId,
@@ -91,7 +95,50 @@ const AgentOrderDetails = () => {
         setLoading(false);
       }
     })();
-  }, [isDemo, params.orderId, user?.userId]);
+  }, [isDemo, params.orderId, userId]);
+
+  const { mutateAsync: acceptOrder } = useMutation({
+    ...ordersDispatchOrderMutation(),
+    onSuccess: () => {
+      if (order) {
+        setOrder({ ...order, status: 'picked_up' });
+      }
+      setSnackbarMessage(i18n.t('(agent).orders.orderAccepted'));
+      setSnackbarVisible(true);
+    },
+    onError: error => {
+      setSnackbarMessage(
+        (error?.response?.data as { message?: string })?.message ??
+          i18n.t('(auth).login.anUnknownError'),
+      );
+      setSnackbarVisible(true);
+    },
+  });
+
+  const { mutateAsync: confirmDelivery } = useMutation({
+    ...ordersConfirmDeliveryMutation(),
+    onSuccess: () => {
+      if (order) {
+        setOrder({ ...order, status: 'delivered' });
+      }
+      Alert.alert(i18n.t('(agent).orders.deliverySuccess'));
+    },
+    onError: error => {
+      const errorMessage =
+        (error?.response?.data as { message?: string })?.message ??
+        error?.message ??
+        '';
+      if (errorMessage.toLowerCase().includes('no rows in result set')) {
+        setSnackbarMessage(i18n.t('(agent).orders.incorrectCode'));
+      } else if (!!errorMessage) {
+        setSnackbarMessage(errorMessage);
+      } else {
+        setSnackbarMessage(i18n.t('(auth).login.anUnknownError'));
+      }
+      setSnackbarVisible(true);
+      setEnteredCode('');
+    },
+  });
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -125,70 +172,45 @@ const AgentOrderDetails = () => {
 
   const handleAcceptOrder = () => {
     if (!order) return;
-    
+
     Alert.alert(
       i18n.t('(agent).orders.acceptOrderTitle'),
-      i18n.t('(agent).orders.acceptOrderMessage', { orderNumber: order.orderNumber }),
-      [
-        { text: i18n.t('(agent).orders.cancel'), style: 'cancel' },
-        {
-          text: i18n.t('(agent).orders.accept'),
-          onPress: async () => {
-            if (isDemo) {
-              mockDataStore.acceptOrder(order.id);
-              setOrder({ ...order, status: 'picked_up' });
-              Alert.alert(i18n.t('common.success'), i18n.t('(agent).orders.orderAccepted'));
-              return;
-            }
-
-            const userId = user?.userId ?? '';
-            if (!userId) {
-              Alert.alert(i18n.t('common.error'), i18n.t('(auth).login.anUnknownError'));
-              return;
-            }
-
-            try {
-              setLoading(true);
-              await dispatchOrderToAgent({
-                userId,
-                orderNumber: String(order.orderNumber),
-                agentId: userId,
-              });
-              setOrder({ ...order, status: 'picked_up' });
-              Alert.alert(i18n.t('common.success'), i18n.t('(agent).orders.orderAccepted'));
-            } catch (_e) {
-              Alert.alert(i18n.t('common.error'), i18n.t('(auth).login.anUnknownError'));
-            } finally {
-              setLoading(false);
-            }
-          },
-        },
-      ]
-    );
-  };
-
-  const handlePickUp = () => {
-    if (!order) return;
-    
-    Alert.alert(
-      i18n.t('(agent).orders.confirmPickup'),
-      i18n.t('(agent).orders.confirmPickupMessage', {
+      i18n.t('(agent).orders.acceptOrderMessage', {
         orderNumber: order.orderNumber,
-        farmerName: order.farmerName,
       }),
       [
         { text: i18n.t('(agent).orders.cancel'), style: 'cancel' },
         {
-          text: i18n.t('(agent).orders.confirm'),
+          text: i18n.t('(agent).orders.accept'),
           onPress: () => {
             if (isDemo) {
-              mockDataStore.confirmPickup(order.id);
+              mockDataStore.acceptOrder(order.id);
+              setOrder({ ...order, status: 'picked_up' });
+              Alert.alert(
+                i18n.t('common.success'),
+                i18n.t('(agent).orders.orderAccepted'),
+              );
+              return;
             }
-            setOrder({ ...order, status: 'picked_up' });
-            Alert.alert(i18n.t('common.success'), i18n.t('(agent).orders.pickupSuccess'));
+
+            if (!userId) {
+              setSnackbarMessage(i18n.t('(auth).login.anUnknownError'));
+              setSnackbarVisible(true);
+              return;
+            }
+
+            acceptOrder({
+              body: {
+                agentId: userId,
+              },
+              path: {
+                orderNumber: String(order.orderNumber),
+                userId,
+              },
+            });
           },
         },
-      ]
+      ],
     );
   };
 
@@ -203,51 +225,41 @@ const AgentOrderDetails = () => {
     const secretKey = enteredCode.trim().toUpperCase();
 
     if (secretKey.length !== 6) {
-      Alert.alert(i18n.t('common.error'), i18n.t('(agent).orders.invalidCodeLength'));
+      setSnackbarMessage(i18n.t('(agent).orders.invalidCodeLength'));
+      setSnackbarVisible(true);
+      return;
+    }
+
+    if (isDemo) {
+      if (secretKey !== order.securityCode.toUpperCase()) {
+        setSnackbarMessage(i18n.t('(agent).orders.incorrectCode'));
+        setSnackbarVisible(true);
+        setEnteredCode('');
+        return;
+      }
+      mockDataStore.confirmDelivery(order.id);
+      setOrder({ ...order, status: 'delivered' });
+      Alert.alert(
+        i18n.t('(agent).orders.deliverySuccess'),
+        i18n.t('(agent).orders.deliveryEarningsMessage', {
+          currency: i18n.t('common.currency'),
+          amount: order.deliveryFee.toLocaleString(),
+        }),
+      );
+      return;
+    }
+
+    if (!userId) {
+      setSnackbarMessage(i18n.t('(auth).login.anUnknownError'));
+      setSnackbarVisible(true);
       return;
     }
 
     setShowSecurityCodeModal(false);
-    setLoading(true);
-    
-    setTimeout(() => {
-      void (async () => {
-        try {
-          if (isDemo) {
-            if (secretKey !== order.securityCode.toUpperCase()) {
-              Alert.alert(i18n.t('common.error'), i18n.t('(agent).orders.incorrectCode'));
-              setEnteredCode('');
-              return;
-            }
-            mockDataStore.confirmDelivery(order.id);
-          } else {
-            const userId = user?.userId ?? '';
-            if (!userId) {
-              Alert.alert(i18n.t('common.error'), i18n.t('(auth).login.anUnknownError'));
-              return;
-            }
-
-            await confirmDeliveryWithSecretKey({
-              userId,
-              secretKey,
-            });
-          }
-
-          setOrder({ ...order, status: 'delivered' });
-          Alert.alert(
-            i18n.t('(agent).orders.deliverySuccess'),
-            i18n.t('(agent).orders.deliveryEarningsMessage', {
-              currency: i18n.t('common.currency'),
-              amount: order.deliveryFee.toLocaleString(),
-            }),
-          );
-        } catch (_e) {
-          Alert.alert(i18n.t('common.error'), i18n.t('(auth).login.anUnknownError'));
-        } finally {
-          setLoading(false);
-        }
-      })();
-    }, 500);
+    confirmDelivery({
+      body: {},
+      path: { secretKey, userId },
+    });
   };
 
   const handleCallFarmer = () => {
@@ -313,14 +325,7 @@ const AgentOrderDetails = () => {
           </Button>
         );
       case 'delivered':
-        return (
-          <View style={[defaultStyles.button, defaultStyles.primaryButton, { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }]}>
-            <Icon source="check-circle" size={24} color={Colors.light[10]} />
-            <Text style={{ color: Colors.light[10], fontSize: 16, fontWeight: '600', marginLeft: 8 }}>
-              {i18n.t('(agent).orders.deliveryCompleted')}
-            </Text>
-          </View>
-        );
+        return null;
       default:
         return null;
     }
@@ -328,13 +333,34 @@ const AgentOrderDetails = () => {
 
   if (orderNotFound) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View
+        style={[
+          styles.container,
+          { justifyContent: 'center', alignItems: 'center' },
+        ]}>
         <Stack.Screen options={{ headerShown: false }} />
-        <Icon source="package-variant-closed" size={64} color={Colors.grey['61']} />
-        <Text style={{ fontSize: 18, fontWeight: '600', marginTop: 16, color: Colors.dark[10] }}>
+        <Icon
+          source="package-variant-closed"
+          size={64}
+          color={Colors.grey['61']}
+        />
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: '600',
+            marginTop: 16,
+            color: Colors.dark[10],
+          }}>
           {i18n.t('(agent).orders.orderNotFoundTitle')}
         </Text>
-        <Text style={{ fontSize: 14, color: Colors.grey['61'], marginTop: 8, textAlign: 'center', paddingHorizontal: 32 }}>
+        <Text
+          style={{
+            fontSize: 14,
+            color: Colors.grey['61'],
+            marginTop: 8,
+            textAlign: 'center',
+            paddingHorizontal: 32,
+          }}>
           {i18n.t('(agent).orders.orderNotFoundMessage')}
         </Text>
         <Button
@@ -349,7 +375,11 @@ const AgentOrderDetails = () => {
 
   if (!order) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View
+        style={[
+          styles.container,
+          { justifyContent: 'center', alignItems: 'center' },
+        ]}>
         <Stack.Screen options={{ headerShown: false }} />
         <Text>{i18n.t('common.loading')}</Text>
       </View>
@@ -359,7 +389,7 @@ const AgentOrderDetails = () => {
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
-      
+
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <View style={styles.headerTopRow}>
           <TouchableOpacity
@@ -384,23 +414,29 @@ const AgentOrderDetails = () => {
         showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
           <View style={styles.orderInfoRow}>
-            <Text style={styles.orderLabel}>{i18n.t('(agent).orders.status')}</Text>
-            <View style={[styles.statusBadge, { backgroundColor: getStatusColor(order.status) + '20' }]}>
-              <Text style={[styles.statusText, { color: getStatusColor(order.status) }]}>
+            <Text style={styles.orderLabel}>
+              {i18n.t('(agent).orders.status')}
+            </Text>
+            <View
+              style={[
+                styles.statusBadge,
+                { backgroundColor: getStatusColor(order.status) + '20' },
+              ]}>
+              <Text
+                style={[
+                  styles.statusText,
+                  { color: getStatusColor(order.status) },
+                ]}>
                 {getStatusLabel(order.status)}
               </Text>
             </View>
           </View>
           <View style={styles.orderInfoRow}>
-            <Text style={styles.orderLabel}>{i18n.t('(agent).orders.yourEarning')}</Text>
+            <Text style={styles.orderLabel}>
+              {i18n.t('(agent).orders.yourEarning')}
+            </Text>
             <Text style={styles.deliveryFee}>
               {i18n.t('common.currency')} {order.deliveryFee.toLocaleString()}
-            </Text>
-          </View>
-          <View style={styles.orderInfoRow}>
-            <Text style={styles.orderLabel}>{i18n.t('(agent).orders.totalAmount')}</Text>
-            <Text style={styles.orderValue}>
-              {i18n.t('common.currency')} {order.totalAmount.toLocaleString()}
             </Text>
           </View>
         </View>
@@ -417,89 +453,134 @@ const AgentOrderDetails = () => {
           ))}
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            {i18n.t('(agent).orders.pickupLocation')}
-          </Text>
-          <View style={styles.locationCard}>
-            <View style={styles.locationIcon}>
-              <Icon source="store" size={20} color={Colors.primary[500]} />
-            </View>
-            <View style={styles.locationInfo}>
-              <Text style={styles.locationLabel}>
-                {i18n.t('(agent).orders.farmer')}: {order.farmerName}
+        {order.status !== 'delivered' && (
+          <>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>
+                {i18n.t('(agent).orders.pickupLocation')}
               </Text>
-              <Text style={styles.locationAddress}>{order.pickupAddress}</Text>
+              <View style={styles.locationCard}>
+                <View style={styles.locationIcon}>
+                  <Icon source="store" size={20} color={Colors.primary[500]} />
+                </View>
+                <View style={styles.locationInfo}>
+                  <Text style={styles.locationLabel}>
+                    {i18n.t('(agent).orders.farmer')}: {order.farmerName}
+                  </Text>
+                  <Text style={styles.locationAddress}>
+                    {order.pickupAddress}
+                  </Text>
+                </View>
+              </View>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <TouchableOpacity
+                  style={[
+                    defaultStyles.button,
+                    styles.buttonSecondary,
+                    { flex: 1 },
+                  ]}
+                  onPress={handleNavigateToPickup}>
+                  <View style={defaultStyles.innerButtonContainer}>
+                    <Icon
+                      source="navigation"
+                      size={20}
+                      color={Colors.dark[0]}
+                    />
+                    <Text
+                      style={[styles.buttonText, styles.buttonSecondaryText]}>
+                      {i18n.t('(agent).orders.navigate')}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    defaultStyles.button,
+                    { backgroundColor: Colors.primary[500], flex: 1 },
+                  ]}
+                  onPress={handleCallFarmer}>
+                  <View style={defaultStyles.innerButtonContainer}>
+                    <Icon source="phone" size={20} color={Colors.light[10]} />
+                    <Text style={styles.buttonText}>
+                      {i18n.t('(agent).orders.call')}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
-            <TouchableOpacity
-              style={[defaultStyles.button, styles.buttonSecondary, { flex: 1 }]}
-              onPress={handleNavigateToPickup}>
-              <View style={defaultStyles.innerButtonContainer}>
-                <Icon source="navigation" size={20} color={Colors.dark[0]} />
-                <Text style={[styles.buttonText, styles.buttonSecondaryText]}>
-                  {i18n.t('(agent).orders.navigate')}
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[defaultStyles.button, { backgroundColor: Colors.primary[500], flex: 1 }]}
-              onPress={handleCallFarmer}>
-              <View style={defaultStyles.innerButtonContainer}>
-                <Icon source="phone" size={20} color={Colors.light[10]} />
-                <Text style={styles.buttonText}>{i18n.t('(agent).orders.call')}</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-        </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            {i18n.t('(agent).orders.deliveryLocation')}
-          </Text>
-          <View style={styles.locationCard}>
-            <View style={[styles.locationIcon, { backgroundColor: Colors.success + '20' }]}>
-              <Icon source="home" size={20} color={Colors.success} />
-            </View>
-            <View style={styles.locationInfo}>
-              <Text style={styles.locationLabel}>
-                {i18n.t('(agent).orders.customer')}: {order.customerName}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>
+                {i18n.t('(agent).orders.deliveryLocation')}
               </Text>
-              <Text style={styles.locationAddress}>{order.deliveryAddress}</Text>
+              <View style={styles.locationCard}>
+                <View
+                  style={[
+                    styles.locationIcon,
+                    { backgroundColor: Colors.success + '20' },
+                  ]}>
+                  <Icon source="home" size={20} color={Colors.success} />
+                </View>
+                <View style={styles.locationInfo}>
+                  <Text style={styles.locationLabel}>
+                    {i18n.t('(agent).orders.customer')}: {order.customerName}
+                  </Text>
+                  <Text style={styles.locationAddress}>
+                    {order.deliveryAddress}
+                  </Text>
+                </View>
+              </View>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <TouchableOpacity
+                  style={[
+                    defaultStyles.button,
+                    styles.buttonSecondary,
+                    { flex: 1 },
+                  ]}
+                  onPress={handleNavigateToDelivery}>
+                  <View style={defaultStyles.innerButtonContainer}>
+                    <Icon
+                      source="navigation"
+                      size={20}
+                      color={Colors.dark[0]}
+                    />
+                    <Text
+                      style={[styles.buttonText, styles.buttonSecondaryText]}>
+                      {i18n.t('(agent).orders.navigate')}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    defaultStyles.button,
+                    { backgroundColor: Colors.primary[500], flex: 1 },
+                  ]}
+                  onPress={handleCallCustomer}>
+                  <View style={defaultStyles.innerButtonContainer}>
+                    <Icon source="phone" size={20} color={Colors.light[10]} />
+                    <Text style={styles.buttonText}>
+                      {i18n.t('(agent).orders.call')}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
-            <TouchableOpacity
-              style={[defaultStyles.button, styles.buttonSecondary, { flex: 1 }]}
-              onPress={handleNavigateToDelivery}>
-              <View style={defaultStyles.innerButtonContainer}>
-                <Icon source="navigation" size={20} color={Colors.dark[0]} />
-                <Text style={[styles.buttonText, styles.buttonSecondaryText]}>
-                  {i18n.t('(agent).orders.navigate')}
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[defaultStyles.button, { backgroundColor: Colors.primary[500], flex: 1 }]}
-              onPress={handleCallCustomer}>
-              <View style={defaultStyles.innerButtonContainer}>
-                <Icon source="phone" size={20} color={Colors.light[10]} />
-                <Text style={styles.buttonText}>{i18n.t('(agent).orders.call')}</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-        </View>
+          </>
+        )}
 
         {isDemo && order.status !== 'delivered' && (
           <View style={styles.securityCodeSection}>
             <Text style={styles.securityCodeLabel}>
               {i18n.t('(agent).orders.demoSecurityCodeLabel')}
             </Text>
-            <Text style={[styles.securityCodeHint, { fontSize: 13, lineHeight: 26 }]}>
+            <Text
+              style={[
+                styles.securityCodeHint,
+                { fontSize: 13, lineHeight: 26 },
+              ]}>
               {i18n.t('(agent).orders.demoSecurityCodeHint')}
             </Text>
-            <Text style={[styles.securityCode, {lineHeight: 48, marginTop: 10}]}>
+            <Text
+              style={[styles.securityCode, { lineHeight: 48, marginTop: 10 }]}>
               {order.securityCode}
             </Text>
           </View>
@@ -556,7 +637,11 @@ const AgentOrderDetails = () => {
                   { flex: 1 },
                 ]}
                 onPress={() => setShowSecurityCodeModal(false)}>
-                <Text style={[defaultStyles.buttonText, defaultStyles.secondaryButtonText]}>
+                <Text
+                  style={[
+                    defaultStyles.buttonText,
+                    defaultStyles.secondaryButtonText,
+                  ]}>
                   {i18n.t('(agent).orders.cancel')}
                 </Text>
               </TouchableOpacity>
@@ -575,6 +660,14 @@ const AgentOrderDetails = () => {
           </View>
         </View>
       </Modal>
+
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={3000}
+        style={defaultStyles.snackbar}>
+        <Text style={defaultStyles.errorText}>{snackbarMessage}</Text>
+      </Snackbar>
     </View>
   );
 };
