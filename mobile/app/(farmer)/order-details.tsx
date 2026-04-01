@@ -35,6 +35,10 @@ import { usersGetPublicUserOptions } from '@/client/users.swagger/@tanstack/reac
 import { delay } from '@/utils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ordersgrpcOrder } from '@/client/orders.swagger';
+import PhoneNumberInput, {
+  validatePhoneNumber,
+  CAMEROON,
+} from '@/components/general/PhoneNumberInput';
 
 export default function OrderDetails() {
   const router = useRouter();
@@ -48,6 +52,11 @@ export default function OrderDetails() {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState<string>();
   const [showRejectedModal, setShowRejectedModal] = useState(false);
+  const [showPayoutPhoneModal, setShowPayoutPhoneModal] = useState(false);
+  const [payoutPhoneNumber, setPayoutPhoneNumber] = useState('');
+  const [payoutCountryCode, setPayoutCountryCode] = useState(
+    CAMEROON.dial_code
+  );
 
   const {
     data: orderDetailsResult,
@@ -93,11 +102,19 @@ export default function OrderDetails() {
     enabled: !!orderDetails?.createdBy,
   });
 
-  const handleApproveOrder = async () => {
+  const handleApproveOrder = () => {
+    setPayoutPhoneNumber(user?.phoneNumber ?? '');
+    setShowPayoutPhoneModal(true);
+  };
+
+  const confirmApproveOrder = async () => {
     try {
       setLoading(true);
+      setShowPayoutPhoneModal(false);
       await mutateAsync({
-        body: {},
+        body: {
+          payoutPhoneNumber,
+        },
         path: {
           orderId: orderDetails?.orderNumber ?? '',
           userId: user?.userId ?? '',
@@ -502,6 +519,65 @@ export default function OrderDetails() {
           </Dialog.Actions>
         </Dialog>
       </Portal>
+
+      <Portal>
+        <Dialog
+          visible={showPayoutPhoneModal}
+          onDismiss={() => setShowPayoutPhoneModal(false)}
+          style={[
+            defaultStyles.dialogSuccessContainer,
+            styles.dialogContainer,
+          ]}>
+          <Dialog.Content style={styles.selfCenter}>
+            <Text
+              variant="titleLarge"
+              style={[defaultStyles.primaryText, defaultStyles.textCenter]}>
+              {i18n.t('(farmer).order-details.confirmPayoutPhone')}
+            </Text>
+          </Dialog.Content>
+          <Dialog.Content>
+            <Text style={defaultStyles.bodyText}>
+              {i18n.t('(farmer).order-details.payoutPhoneDescription')}
+            </Text>
+          </Dialog.Content>
+          <Dialog.Content style={styles.widthFull}>
+            <View style={styles.inputContainer}>
+              <PhoneNumberInput
+                containerStyle={{ marginBottom: 0 }}
+                label={i18n.t('(farmer).order-details.payoutPhoneNumber')}
+                countryCode={payoutCountryCode}
+                phoneNumber={payoutPhoneNumber}
+                setCountryCode={setPayoutCountryCode}
+                setPhoneNumber={setPayoutPhoneNumber}
+              />
+            </View>
+          </Dialog.Content>
+          <Dialog.Actions style={styles.actionContainer}>
+            <Button
+              style={[
+                defaultStyles.secondaryButton,
+                styles.widthFull,
+              ]}
+              onPress={() => setShowPayoutPhoneModal(false)}>
+              <Text style={defaultStyles.primaryText}>
+                {i18n.t('common.cancel')}
+              </Text>
+            </Button>
+            <Button
+              style={[
+                defaultStyles.primaryButton,
+                styles.widthFull,
+              ]}
+              loading={loading}
+              onPress={confirmApproveOrder}>
+              <Text style={defaultStyles.buttonText}>
+                {i18n.t('(farmer).order-details.confirm')}
+              </Text>
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+
       <Snackbar
         visible={!!error}
         onDismiss={() => {}}

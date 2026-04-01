@@ -210,6 +210,7 @@ message ConfirmDeliveryResponse {}
 message ApproveOrderRequest {
   string order_id = 1;
   string user_id = 2;
+  string payout_phone_number = 3;
 }
 
 message ApproveOrderResponse {}
@@ -367,6 +368,12 @@ message CheckPaymentStatusRequest {
 }
 
 message CheckPaymentStatusResponse { PaymentStatus status = 1; }
+
+message GetAvailablePaymentMethodsRequest { string user_id = 1; }
+
+message GetAvailablePaymentMethodsResponse {
+  repeated PaymentMethodType available_methods = 1;
+}
 
 enum FilterType {
   FilterType_UNSPECIFIED = 0;
@@ -934,6 +941,13 @@ service Orders {
     option (google.api.http) = {
       post : "/v1/users/{user_id}/orders/create-custom-subscription"
       body : "*"
+    };
+  }
+
+  rpc GetAvailablePaymentMethods(GetAvailablePaymentMethodsRequest)
+      returns (GetAvailablePaymentMethodsResponse) {
+    option (google.api.http) = {
+      get : "/v1/public/orders/available-payment-methods"
     };
   }
 }

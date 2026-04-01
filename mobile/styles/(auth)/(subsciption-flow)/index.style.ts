@@ -224,11 +224,15 @@ export const selectionSubscriptionStyles = StyleSheet.create({
   },
 
   methodCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    rowGap: 8,
     padding: 16,
     borderRadius: 14,
     backgroundColor: '#F7F7FB',
+  },
+
+  flexRow: {
+    flexDirection: 'row',
+
   },
 
   methodInfo: {

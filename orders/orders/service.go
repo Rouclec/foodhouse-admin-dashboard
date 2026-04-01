@@ -80,6 +80,12 @@ var supportedCurrencies = map[string]struct{}{
 	"XAF": {},
 }
 
+var availablePaymentMethods = map[ordersgrpc.PaymentMethodType]struct{}{
+	ordersgrpc.PaymentMethodType_PaymentMethodType_MOBILE_MONEY: {},
+	// Orange money temporarily disabled
+	// ordersgrpc.PaymentMethodType_PaymentMethodType_ORANGE_MONEY: {},
+}
+
 // Impl is the implementation of the products service.
 type Impl struct {
 	repo               repo.OrdersRepo
@@ -114,10 +120,10 @@ func (i *Impl) GetAgentStats(ctx context.Context, req *ordersgrpc.GetAgentStatsR
 	}
 
 	return &ordersgrpc.GetAgentStatsResponse{
-		AvailableCount:  int32(row.AvailableCount),
-		OngoingCount:    int32(row.OngoingCount),
-		CompletedCount:  int32(row.CompletedCount),
-		TotalEarnings:   &types.Amount{Value: row.TotalEarningsValue, CurrencyIsoCode: row.TotalEarningsCurrency},
+		AvailableCount: int32(row.AvailableCount),
+		OngoingCount:   int32(row.OngoingCount),
+		CompletedCount: int32(row.CompletedCount),
+		TotalEarnings:  &types.Amount{Value: row.TotalEarningsValue, CurrencyIsoCode: row.TotalEarningsCurrency},
 	}, nil
 }
 
@@ -277,6 +283,11 @@ func (i *Impl) ConfirmDelivery(ctx context.Context, req *ordersgrpc.ConfirmDeliv
 	)
 
 	if err != nil {
+		// Check if it's a "no rows" error (wrong secret key)
+		if errors.Is(err, sql.ErrNoRows) || strings.Contains(err.Error(), "no rows") {
+			i.logger.Debug().Msgf("no order found with secret key %v", req.GetSecretKey())
+			return nil, status.Errorf(codes.InvalidArgument, "invalid secret key provided")
+		}
 		i.logger.Debug().Msgf("error getting order with secret key %v why: %v", req.GetSecretKey(), err)
 		return nil, status.Errorf(codes.Internal, "error getting order with secret key %v why: %v", req.GetSecretKey(), err)
 	}
@@ -366,7 +377,6 @@ func (i *Impl) ConfirmDelivery(ctx context.Context, req *ordersgrpc.ConfirmDeliv
 			}
 		}
 
-		// Also pay farmer if not already paid (farmer wasn't paid on DispatchOrder when agent was assigned)
 		// We need to pay the farmer their share
 		if order.ProductOwner != nil && order.PriceValue != nil && order.PriceCurrency != nil {
 			farmerPaymentReference := fmt.Sprintf("farmer-payout-%s", strconv.FormatInt(order.OrderNumber, 10))
@@ -1053,17 +1063,22 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 	// Only make payouts if NO agent is assigned (farmer delivering themselves)
 	// When agent is assigned, payment happens on ConfirmDelivery
 	if agentID == "" {
+		// Validate payout phone number is set on the order
+		if order.PayoutPhoneNumber == nil || *order.PayoutPhoneNumber == "" {
+			return nil, status.Errorf(codes.FailedPrecondition, "payout phone number not set on order. Please approve the order again with a valid phone number.")
+		}
+
 		paymentReference := fmt.Sprintf("payout-%s", strconv.FormatInt(order.OrderNumber, 10))
 
 		// calculate payout amount
 		payoutAmount := *order.PriceValue / TotalPercentage * FarmersPercentage
 
-		i.logger.Debug().Msgf("payout phone number %v", req.GetPayoutPhoneNumber())
+		i.logger.Debug().Msgf("payout phone number %v", *order.PayoutPhoneNumber)
 
 		// only make real payout when dev methods is not enabled
 		if !i.devMethodsEndabled {
 			_, payErr := i.paymentService.WithdrawFunds(ctx,
-				req.GetPayoutPhoneNumber(), payoutAmount,
+				*order.PayoutPhoneNumber, payoutAmount,
 				*order.PriceCurrency, fmt.Sprintf("payment to farmer for order %v", order.OrderNumber),
 				&paymentReference)
 
@@ -1077,7 +1092,7 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 			EntityID:       strconv.FormatInt(req.GetOrderNumber(), 10),
 			AmountValue:    &payoutAmount,
 			AmountCurrency: order.PriceCurrency,
-			AccountNumber:  req.GetPayoutPhoneNumber(),
+			AccountNumber:  *order.PayoutPhoneNumber,
 			Method:         ordersgrpc.PaymentMethodType_PaymentMethodType_ACCOUNT_BALANCE.String(),
 			Status:         ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED.String(),
 			ExpiresAt:      pgtype.Timestamptz{Time: time.Now().Add(5 * time.Minute), Valid: true},
@@ -1670,10 +1685,10 @@ func (i *Impl) ListAgentAvailableOrders(ctx context.Context, req *ordersgrpc.Lis
 	}
 
 	rows, err := i.repo.Do().ListAgentAvailableOrders(ctx, sqlc.ListAgentAvailableOrdersParams{
-		CreatedBefore:  startKey,
-		Count:          int32(count),
-		AgentLocation:  agentLoc,
-		RadiusKm:       radiusKm,
+		CreatedBefore: startKey,
+		Count:         int32(count),
+		AgentLocation: agentLoc,
+		RadiusKm:      radiusKm,
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error getting available agent orders: %v", err)
@@ -1837,6 +1852,11 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 		return nil, status.Errorf(codes.Internal, "payment method %s not supported", req.GetAccount().GetPaymentMethod())
 	}
 
+	// Check if the payment method is currently available
+	if _, ok := availablePaymentMethods[req.GetAccount().PaymentMethod]; !ok {
+		return nil, status.Errorf(codes.FailedPrecondition, "payment method %s is currently unavailable", req.GetAccount().GetPaymentMethod())
+	}
+
 	// check if a payment has already been initiated for that entity,
 	// to avoid users intiating payments twice
 	_, err = querier.GetPaymentByEntity(ctx, sqlc.GetPaymentByEntityParams{
@@ -1982,9 +2002,11 @@ func (i *Impl) ApproveOrder(ctx context.Context, req *ordersgrpc.ApproveOrderReq
 		return nil, status.Errorf(codes.Internal, "error getting order with id %s why: %v", req.GetOrderId(), err)
 	}
 
-	// if req.GetUserId() != *order.ProductOwner {
-	// 	return nil, status.Error(codes.PermissionDenied, "user does not have permission to approve this order")
-	// }
+	// Validate payout phone number if provided
+	var payoutPhoneNumber *string
+	if req.GetPayoutPhoneNumber() != "" {
+		payoutPhoneNumber = &req.PayoutPhoneNumber
+	}
 
 	beforeBytes, err := protojson.Marshal(converters.SqlcOrderByNumberToProto(order, i.logger))
 	if err != nil {
@@ -1992,8 +2014,9 @@ func (i *Impl) ApproveOrder(ctx context.Context, req *ordersgrpc.ApproveOrderReq
 	}
 
 	err = i.repo.Do().UpdateOrderStatus(ctx, sqlc.UpdateOrderStatusParams{
-		OrderNumber: order.OrderNumber,
-		Status:      ordersgrpc.OrderStatus_OrderStatus_APPROVED.String(),
+		OrderNumber:       order.OrderNumber,
+		Status:            ordersgrpc.OrderStatus_OrderStatus_APPROVED.String(),
+		PayoutPhoneNumber: payoutPhoneNumber,
 	})
 
 	if err != nil {
@@ -3920,5 +3943,19 @@ func (i *Impl) ListSubscriptionPlans(
 
 	return &ordersgrpc.ListSubscriptionPlansResponse{
 		SubscriptionPlans: result,
+	}, nil
+}
+
+// GetAvailablePaymentMethods returns the list of currently available payment methods.
+func (i *Impl) GetAvailablePaymentMethods(ctx context.Context,
+	req *ordersgrpc.GetAvailablePaymentMethodsRequest) (
+	*ordersgrpc.GetAvailablePaymentMethodsResponse, error) {
+	methods := make([]ordersgrpc.PaymentMethodType, 0, len(availablePaymentMethods))
+	for method := range availablePaymentMethods {
+		methods = append(methods, method)
+	}
+
+	return &ordersgrpc.GetAvailablePaymentMethodsResponse{
+		AvailableMethods: methods,
 	}, nil
 }

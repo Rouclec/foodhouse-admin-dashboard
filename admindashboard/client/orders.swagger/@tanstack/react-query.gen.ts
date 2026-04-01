@@ -31,6 +31,7 @@ import type {
   OrdersConfirmPaymentData,
   OrdersConfirmPaymentError,
   OrdersConfirmPaymentResponse,
+  OrdersGetAvailablePaymentMethodsData,
   OrdersListSubscriptionPlansData,
   OrdersGetFarmerEarningsData,
   OrdersListFarmerOrdersData,
@@ -93,6 +94,7 @@ import {
   ordersDeleteDeliveryPoint,
   ordersUpdateDeliveryPoint,
   ordersConfirmPayment,
+  ordersGetAvailablePaymentMethods,
   ordersHealthCheck,
   ordersListSubscriptionPlans,
   ordersGetFarmerEarnings,
@@ -525,6 +527,27 @@ export const ordersConfirmPaymentMutation = (
     },
   };
   return mutationOptions;
+};
+
+export const ordersGetAvailablePaymentMethodsQueryKey = (
+  options?: OptionsLegacyParser<OrdersGetAvailablePaymentMethodsData>,
+) => [createQueryKey("ordersGetAvailablePaymentMethods", options)];
+
+export const ordersGetAvailablePaymentMethodsOptions = (
+  options?: OptionsLegacyParser<OrdersGetAvailablePaymentMethodsData>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await ordersGetAvailablePaymentMethods({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: ordersGetAvailablePaymentMethodsQueryKey(options),
+  });
 };
 
 export const ordersHealthCheckQueryKey = (options?: OptionsLegacyParser) => [

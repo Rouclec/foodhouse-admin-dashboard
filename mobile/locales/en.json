@@ -497,7 +497,11 @@
       "reason": "Reason",
       "reject": "Reject",
       "orderRejected": "Order Rejected",
-      "youHaveRejected": "You have rejected this order. The customer will be notified about this action"
+      "youHaveRejected": "You have rejected this order. The customer will be notified about this action",
+      "confirmPayoutPhone": "Confirm Payout Phone",
+      "payoutPhoneDescription": "Enter your Mobile Money number where you would like to receive your payment. This can be MTN or Orange.",
+      "payoutPhoneNumber": "Payout Phone Number",
+      "confirm": "Confirm"
     },
     "sales": {
       "sales": "Sales",
@@ -786,7 +790,9 @@
     "(paymentMethods)": {
       "header": "Payment Methods",
       "description": "To proceed, please add your payment methods.",
-      "next": "Next"
+      "next": "Next",
+      "unavailable": "Temporarily unavailable",
+      "methodUnavailable": "This payment method is currently unavailable. Please try again later."
     }
   }
 }

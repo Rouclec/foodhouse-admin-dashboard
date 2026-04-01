@@ -48,6 +48,9 @@ import type {
   OrdersConfirmPaymentData,
   OrdersConfirmPaymentError,
   OrdersConfirmPaymentResponse,
+  OrdersGetAvailablePaymentMethodsData,
+  OrdersGetAvailablePaymentMethodsError,
+  OrdersGetAvailablePaymentMethodsResponse,
   OrdersHealthCheckError,
   OrdersHealthCheckResponse,
   OrdersListSubscriptionPlansData,
@@ -329,6 +332,24 @@ export const ordersConfirmPayment = <ThrowOnError extends boolean = false>(
   >({
     ...options,
     url: "/v1/public/confirm-payment",
+  });
+};
+
+export const ordersGetAvailablePaymentMethods = <
+  ThrowOnError extends boolean = false,
+>(
+  options?: OptionsLegacyParser<
+    OrdersGetAvailablePaymentMethodsData,
+    ThrowOnError
+  >,
+) => {
+  return (options?.client ?? client).get<
+    OrdersGetAvailablePaymentMethodsResponse,
+    OrdersGetAvailablePaymentMethodsError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/v1/public/orders/available-payment-methods",
   });
 };
 

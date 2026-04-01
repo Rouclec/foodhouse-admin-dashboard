@@ -65,6 +65,7 @@ const AgentHomeScreen = () => {
     refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
+    refetchInterval: 30000,
     queryFn: ({ pageParam }) =>
       listAgentAvailableOrdersPage({
         userId,
@@ -83,6 +84,7 @@ const AgentHomeScreen = () => {
     refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
+    refetchInterval: 30000,
     queryFn: ({ pageParam }) =>
       listAgentOngoingOrdersPage({
         userId,
@@ -100,6 +102,7 @@ const AgentHomeScreen = () => {
     refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
+    refetchInterval: 60000,
     queryFn: ({ pageParam }) =>
       listAgentDeliveredOrdersPage({
         userId,
@@ -114,6 +117,7 @@ const AgentHomeScreen = () => {
       path: { userId },
     }),
     enabled: useBackend,
+    refetchInterval: 60000,
   });
 
   const backendKycStatus = (() => {

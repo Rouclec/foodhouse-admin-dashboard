@@ -47,6 +47,8 @@ export default function OrderDetailsPage() {
   const [loading, setLoading] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showPayoutPhoneModal, setShowPayoutPhoneModal] = useState(false);
+  const [payoutPhoneNumber, setPayoutPhoneNumber] = useState("");
   const [error, setError] = useState<string | undefined>();
 
   const params = useParams();
@@ -250,11 +252,19 @@ export default function OrderDetailsPage() {
     },
   });
 
-  const handleApproveOrder = async () => {
+  const handleApproveOrder = () => {
+    setPayoutPhoneNumber(farmerData?.user?.phoneNumber ?? "");
+    setShowPayoutPhoneModal(true);
+  };
+
+  const confirmApproveOrder = async () => {
     try {
       setLoading(true);
+      setShowPayoutPhoneModal(false);
       await approveOrder({
-        body: {},
+        body: {
+          payoutPhoneNumber,
+        },
         path: {
           orderId: orderDetailsData?.order?.orderNumber ?? "",
           userId: user?.userId ?? "",
@@ -372,31 +382,36 @@ export default function OrderDetailsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {showRejectModal && (
+    <>
+      {showPayoutPhoneModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h3 className="text-lg font-semibold mb-4">Reject Order</h3>
-            <textarea
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
-              placeholder="Enter reason for rejection"
-              className="w-full p-2 border rounded mb-4"
-              rows={4}
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-2">Confirm Payout Phone</h3>
+            <p className="text-gray-600 mb-4">
+              Enter the farmer&apos;s Mobile Money number where they would like to receive their payment. This can be MTN or Orange.
+            </p>
+            <input
+              type="tel"
+              value={payoutPhoneNumber}
+              onChange={(e) => setPayoutPhoneNumber(e.target.value)}
+              placeholder="Enter phone number (e.g., 6XXXXXXXX)"
+              className="w-full p-3 border rounded-lg mb-4"
             />
             <div className="flex gap-2">
               <Button
-                onClick={handleRejectOrder}
-                disabled={!rejectReason || loading}
-              >
-                {loading ? "Processing..." : "Confirm Rejection"}
-              </Button>
-              <Button
                 variant="outline"
-                onClick={() => setShowRejectModal(false)}
+                onClick={() => setShowPayoutPhoneModal(false)}
                 disabled={loading}
+                className="flex-1"
               >
                 Cancel
+              </Button>
+              <Button
+                onClick={confirmApproveOrder}
+                disabled={!payoutPhoneNumber || loading}
+                className="flex-1"
+              >
+                {loading ? "Processing..." : "Confirm Approval"}
               </Button>
             </div>
           </div>
@@ -953,6 +968,6 @@ export default function OrderDetailsPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </>
   );
 }
