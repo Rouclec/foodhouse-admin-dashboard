@@ -80,6 +80,7 @@ var supportedCurrencies = map[string]struct{}{
 	"XAF": {},
 }
 
+// availablePaymentMethods is the list of payment methods that are available for the orders service.
 var availablePaymentMethods = map[ordersgrpc.PaymentMethodType]struct{}{
 	ordersgrpc.PaymentMethodType_PaymentMethodType_MOBILE_MONEY: {},
 	// Orange money temporarily disabled
