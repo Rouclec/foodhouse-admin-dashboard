@@ -22,6 +22,7 @@ import {
   ordersConfirmDeliveryMutation,
   ordersDispatchOrderMutation,
 } from '@/client/orders.swagger/@tanstack/react-query.gen';
+import { useAppRating } from '@/hooks/useAppRating';
 
 const AgentOrderDetails = () => {
   const insets = useSafeAreaInsets();
@@ -36,6 +37,7 @@ const AgentOrderDetails = () => {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const userId = user?.userId ?? '';
+  const { requestReview } = useAppRating();
 
   useEffect(() => {
     const checkDemoMode = () => {
@@ -122,6 +124,7 @@ const AgentOrderDetails = () => {
         setOrder({ ...order, status: 'delivered' });
       }
       Alert.alert(i18n.t('(agent).orders.deliverySuccess'));
+      void requestReview();
     },
     onError: error => {
       const errorMessage =
