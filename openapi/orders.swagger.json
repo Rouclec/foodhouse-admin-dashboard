@@ -633,6 +633,36 @@
         ]
       }
     },
+    "/v1/public/orders/available-payment-methods": {
+      "get": {
+        "operationId": "Orders_GetAvailablePaymentMethods",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcGetAvailablePaymentMethodsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/public/orders/health-check": {
       "get": {
         "operationId": "Orders_HealthCheck",
@@ -1726,7 +1756,12 @@
   },
   "definitions": {
     "OrdersApproveOrderBody": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "payoutPhoneNumber": {
+          "type": "string"
+        }
+      }
     },
     "OrdersBulkSettleCommissionsBody": {
       "type": "object",
@@ -2263,6 +2298,17 @@
         },
         "totalEarnings": {
           "$ref": "#/definitions/typesAmount"
+        }
+      }
+    },
+    "ordersgrpcGetAvailablePaymentMethodsResponse": {
+      "type": "object",
+      "properties": {
+        "availableMethods": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ordersgrpcPaymentMethodType"
+          }
         }
       }
     },
