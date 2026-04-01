@@ -33,6 +33,10 @@ import { Colors } from '@/constants';
 import { formatAmount, formatCurrency } from '@/utils/amountFormater';
 import { usersGetPublicUserOptions } from '@/client/users.swagger/@tanstack/react-query.gen';
 import { delay } from '@/utils';
+import {
+  buildE164FromParts,
+  splitInternationalPhone,
+} from '@/utils/splitInternationalPhone';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ordersgrpcOrder } from '@/client/orders.swagger';
 import PhoneNumberInput, {
@@ -105,7 +109,11 @@ export default function OrderDetails() {
   });
 
   const handleApproveOrder = () => {
-    setPayoutPhoneNumber(user?.phoneNumber ?? '');
+    const { dialCode, nationalNumber } = splitInternationalPhone(
+      user?.phoneNumber,
+    );
+    setPayoutCountryCode(dialCode);
+    setPayoutPhoneNumber(nationalNumber);
     setShowPayoutPhoneModal(true);
   };
 
@@ -115,7 +123,10 @@ export default function OrderDetails() {
       setShowPayoutPhoneModal(false);
       await mutateAsync({
         body: {
-          payoutPhoneNumber,
+          payoutPhoneNumber: buildE164FromParts(
+            payoutCountryCode,
+            payoutPhoneNumber,
+          ),
         },
         path: {
           orderId: orderDetails?.orderNumber ?? '',
@@ -530,6 +541,7 @@ export default function OrderDetails() {
           style={[
             defaultStyles.dialogSuccessContainer,
             styles.dialogContainer,
+            styles.payoutPhoneDialog,
           ]}>
           <Dialog.Content style={styles.selfCenter}>
             <Text
@@ -543,10 +555,10 @@ export default function OrderDetails() {
               {i18n.t('(farmer).order-details.payoutPhoneDescription')}
             </Text>
           </Dialog.Content>
-          <Dialog.Content style={styles.widthFull}>
+          <Dialog.Content style={[styles.widthFull, { maxWidth: '100%' }]}>
             <View style={styles.inputContainer}>
               <PhoneNumberInput
-                containerStyle={{ marginBottom: 0 }}
+                containerStyle={{ marginBottom: 0, width: '100%', maxWidth: '100%' }}
                 label={i18n.t('(farmer).order-details.payoutPhoneNumber')}
                 countryCode={payoutCountryCode}
                 phoneNumber={payoutPhoneNumber}

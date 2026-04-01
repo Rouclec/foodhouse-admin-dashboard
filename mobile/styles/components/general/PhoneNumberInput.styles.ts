@@ -5,6 +5,9 @@ export const phoneNumberInputStyles = StyleSheet.create({
   mainContainer: {
     flexDirection: 'row',
     columnGap: 12,
+    width: '100%',
+    alignSelf: 'stretch',
+    minWidth: 0,
   },
   inputContainer: {
     borderWidth: 1,
@@ -38,6 +41,7 @@ export const phoneNumberInputStyles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 0.5,
     borderColor: Colors.primary['300'],
+    flexShrink: 0,
   },
   countryCodeText: {
     fontSize: 16,
@@ -60,6 +64,8 @@ export const phoneNumberInputStyles = StyleSheet.create({
   input: {
     backgroundColor: Colors.grey['ea'],
     flexGrow: 1,
+    flexShrink: 1,
+    minWidth: 0,
     height: 56,
     fontSize: 16,
     borderRadius: 10,

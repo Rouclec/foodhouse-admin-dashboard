@@ -72,7 +72,7 @@ const (
 
 	// DefaultOrderServiceFeeAmountXAF is a flat platform fee charged on every order.
 	// It is NOT included in farmer payout calculations.
-	DefaultOrderServiceFeeAmountXAF = 100.00
+	DefaultOrderServiceFeeAmountXAF = 250.00
 	DefaultOrderServiceFeeCurrency  = "XAF"
 )
 
