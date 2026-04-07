@@ -1,4 +1,11 @@
-import React, { useContext, useState, useEffect, useRef } from 'react';
+import React, {
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from 'react';
 import {
   View,
   TouchableOpacity,
@@ -36,6 +43,8 @@ import {
   GooglePlacesAutocompleteRef,
 } from 'react-native-google-places-autocomplete';
 import { typesPoint } from '@/client/orders.swagger';
+
+const GOOGLE_PLACES_PREDEFINED: [] = [];
 
 type FormData = {
   fullName: string;
@@ -117,31 +126,34 @@ export default function PersonalInfo() {
     setIsImagePickerVisible(false);
   };
 
-  const handleAddressSelect = (
-    data: GooglePlaceData,
-    details: GooglePlaceDetail | null = null,
-  ) => {
-    if (!data?.description) {
-      return;
-    }
+  const handleAddressSelect = useCallback(
+    (data: GooglePlaceData, details: GooglePlaceDetail | null = null) => {
+      if (!data?.description) {
+        return;
+      }
 
-    const newFormData = { ...formData, address: data.description };
-    let newLocation = null;
+      setFormData(prev => {
+        const next = { ...prev, address: data.description };
+        if (details?.geometry?.location) {
+          next.locationCoordinates = {
+            lat: details.geometry.location.lat,
+            lon: details.geometry.location.lng,
+            address: data.description,
+          };
+        } else {
+          next.locationCoordinates = null;
+        }
+        return next;
+      });
 
-    if (details?.geometry?.location) {
-      newLocation = {
-        lat: details.geometry.location.lat,
-        lon: details.geometry.location.lng,
-        address: data.description,
-      };
-      newFormData.locationCoordinates = newLocation;
-      setLastSelectedAddress(data.description);
-    } else {
-      newFormData.locationCoordinates = null;
-      setLastSelectedAddress(null);
-    }
-    setFormData(newFormData);
-  };
+      if (details?.geometry?.location) {
+        setLastSelectedAddress(data.description);
+      } else {
+        setLastSelectedAddress(null);
+      }
+    },
+    [],
+  );
 
   const { mutateAsync: updateProfile } = useMutation({
     ...usersCompleteRegistrationMutation(),
@@ -210,16 +222,104 @@ export default function PersonalInfo() {
 
   const insets = useSafeAreaInsets();
 
+  const initialPlaceAddress = user?.locationCoordinates?.address;
+
   useEffect(() => {
-    if (
-      user?.locationCoordinates?.address &&
-      googlePlacesAutoCompleteRef?.current
-    ) {
-      googlePlacesAutoCompleteRef.current.setAddressText(
-        user?.locationCoordinates?.address,
-      );
+    if (!initialPlaceAddress || !googlePlacesAutoCompleteRef.current) {
+      return;
     }
-  }, [user, googlePlacesAutoCompleteRef]);
+    googlePlacesAutoCompleteRef.current.setAddressText(initialPlaceAddress);
+  }, [initialPlaceAddress]);
+
+  const googlePlacesQuery = useMemo(
+    () => ({
+      key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_AUTOCOMPLETE_KEY,
+      language: 'en',
+    }),
+    [],
+  );
+
+  const googlePlacesStyles = useMemo(
+    () => ({
+      textInput: {
+        ...defaultStyles.input,
+        backgroundColor: Colors.light[10],
+        height: 56,
+        borderRadius: 15,
+        borderColor: Colors.grey['bg'],
+        borderWidth: 1,
+        paddingLeft: 28,
+        fontWeight: '500',
+      },
+      listView: {
+        backgroundColor: Colors.light[10],
+        borderRadius: 15,
+        marginTop: 5,
+        elevation: 3,
+        maxHeight: 220,
+        zIndex: 99999,
+      },
+      row: {
+        flexWrap: 'wrap' as const,
+        paddingHorizontal: 10,
+        paddingVertical: 12,
+      },
+      description: {
+        flexWrap: 'wrap' as const,
+        fontSize: 14,
+        lineHeight: 18,
+      },
+    }),
+    [],
+  );
+
+  const googlePlacesTextInputProps = useMemo(
+    () => ({
+      placeholderTextColor: Colors.grey['3c'],
+      value: formData.address,
+      autoCorrect: false,
+      autoCapitalize: 'none' as const,
+      onChangeText: (text: string) => {
+        setFormData(prev => {
+          let next = { ...prev, address: text };
+          if (lastSelectedAddress && text !== lastSelectedAddress) {
+            next = { ...next, locationCoordinates: null };
+          }
+          return next;
+        });
+        if (lastSelectedAddress && text !== lastSelectedAddress) {
+          setLastSelectedAddress(null);
+        }
+      },
+      onFocus: () => {},
+      onBlur: () => {},
+    }),
+    [formData.address, lastSelectedAddress],
+  );
+
+  const renderPlacesRow = useCallback((data: GooglePlaceData) => (
+    <View
+      style={{
+        flex: 1,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        overflow: 'hidden',
+        maxWidth: '100%',
+      }}>
+      <Text
+        style={{
+          flexShrink: 1,
+          flex: 1,
+          fontSize: 14,
+          lineHeight: 18,
+          color: Colors.grey['3c'],
+          flexWrap: 'wrap',
+        }}
+        numberOfLines={0}>
+        {data.description}
+      </Text>
+    </View>
+  ), []);
 
   return (
     <>
@@ -329,87 +429,16 @@ export default function PersonalInfo() {
                     )}
                     fetchDetails={true}
                     onPress={handleAddressSelect}
-                    query={{
-                      key: process.env
-                        .EXPO_PUBLIC_GOOGLE_PLACES_AUTOCOMPLETE_KEY,
-                      language: 'en',
-                    }}
-                    styles={{
-                      textInput: {
-                        ...defaultStyles.input,
-                        backgroundColor: Colors.light[10],
-                        height: 56,
-                        borderRadius: 15,
-                        borderColor: Colors.grey['bg'],
-                        borderWidth: 1,
-                        paddingLeft: 28,
-                        fontWeight: '500',
-                      },
-
-                      listView: {
-                        backgroundColor: Colors.light[10],
-                        borderRadius: 15,
-                        marginTop: 5,
-                        elevation: 3,
-                        maxHeight: 220,
-                        zIndex: 99999,
-                      },
-                      row: {
-                        flexWrap: 'wrap', // <- allow wrapping
-                        paddingHorizontal: 10,
-                        paddingVertical: 12,
-                      },
-                      description: {
-                        flexWrap: 'wrap', // <- wrap text
-                        fontSize: 14,
-                        lineHeight: 18,
-                      },
-                    }}
-                    renderRow={data => (
-                      <View
-                        style={{
-                          flex: 1,
-                          paddingVertical: 8,
-                          paddingHorizontal: 12,
-                          overflowX: 'hidden',
-                          width: 20,
-                        }}>
-                        <Text
-                          style={{
-                            flexShrink: 1,
-                            flex: 1,
-                            fontSize: 14,
-                            lineHeight: 18,
-                            color: Colors.grey['3c'],
-                            flexWrap: 'wrap', // allow wrapping
-                          }}
-                          numberOfLines={0} // allow unlimited lines
-                        >
-                          {data.description}
-                        </Text>
-                      </View>
-                    )}
-                    textInputProps={{
-                      placeholderTextColor: Colors.grey['3c'],
-                      value: formData.address,
-                      autoCorrect: false,
-                      autoCapitalize: 'none',
-                      onChangeText: text => {
-                        handleInputChange('address', text);
-                        if (lastSelectedAddress && text !== lastSelectedAddress) {
-                          setLastSelectedAddress(null);
-                          handleInputChange('locationCoordinates', null);
-                        }
-                      },
-                      onFocus: () => { },
-                      onBlur: () => { },
-                    }}
+                    query={googlePlacesQuery}
+                    styles={googlePlacesStyles}
+                    renderRow={renderPlacesRow}
+                    textInputProps={googlePlacesTextInputProps}
                     nearbyPlacesAPI="GooglePlacesSearch"
                     debounce={200}
                     timeout={20000}
                     minLength={3}
                     enablePoweredByContainer={false}
-                    predefinedPlaces={[]}
+                    predefinedPlaces={GOOGLE_PLACES_PREDEFINED}
                   />
                 </View>
               </View>

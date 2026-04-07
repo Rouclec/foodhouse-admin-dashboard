@@ -6,7 +6,14 @@ import i18n from '@/i18n';
 import { defaultStyles } from '@/styles';
 import { RelativePathString, useRouter } from 'expo-router';
 import { useLocalSearchParams } from 'expo-router';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, {
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+  useCallback,
+} from 'react';
 import {
   View,
   TouchableOpacity,
@@ -28,6 +35,8 @@ import { Appbar, Button, Checkbox, Icon, Text } from 'react-native-paper';
 import { FilterBottomSheetRef } from '@/components/(buyer)/(index)/FilterBottomSheet';
 import { deliveryAddressStyles as styles } from '@/styles';
 import {
+  GooglePlaceData,
+  GooglePlaceDetail,
   GooglePlacesAutocomplete,
   GooglePlacesAutocompleteRef,
 } from 'react-native-google-places-autocomplete';
@@ -42,6 +51,8 @@ const INITIAL_REGION = {
 };
 
 const { height } = Dimensions.get('window');
+
+const GOOGLE_PLACES_PREDEFINED: [] = [];
 
 export default function DeliveryAddress() {
   const insets = useSafeAreaInsets();
@@ -154,6 +165,65 @@ export default function DeliveryAddress() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deliveryLocation?.description]);
 
+  const googlePlacesQuery = useMemo(
+    () => ({
+      key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_AUTOCOMPLETE_KEY,
+      language: 'en',
+    }),
+    [],
+  );
+
+  const googlePlacesStyles = useMemo(
+    () => ({
+      textInput: styles.googlePlacesAutocompleteTextInput,
+      listView: styles.listView,
+    }),
+    [],
+  );
+
+  const handlePlacesChangeText = useCallback(
+    (text: string) => {
+      setAddressQuery(text);
+      if (lastSelectedDescription && text !== lastSelectedDescription) {
+        setLastSelectedDescription(null);
+        setDeliveryLocation(undefined);
+      }
+    },
+    [lastSelectedDescription, setDeliveryLocation],
+  );
+
+  const googlePlacesTextInputProps = useMemo(
+    () => ({
+      placeholderTextColor: Colors.grey['3c'],
+      value: addressQuery,
+      autoCorrect: false,
+      autoCapitalize: 'none' as const,
+      onChangeText: handlePlacesChangeText,
+    }),
+    [addressQuery, handlePlacesChangeText],
+  );
+
+  const handlePlaceSelect = useCallback(
+    (data: GooglePlaceData, details: GooglePlaceDetail | null = null) => {
+      setLoadingLocation(false);
+      setAddressQuery(data.description);
+      setLastSelectedDescription(data.description);
+      const lat = details?.geometry?.location?.lat ?? 0;
+      const lng = details?.geometry?.location?.lng ?? 0;
+      setDeliveryLocation({
+        description: data.description,
+        address: data?.description,
+        region: {
+          latitude: lat,
+          longitude: lng,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+      });
+    },
+    [setDeliveryLocation],
+  );
+
   return (
     <>
       <KeyboardAwareScrollView
@@ -246,49 +316,17 @@ export default function DeliveryAddress() {
                 placeholder={i18n.t(
                   '(buyer).(order).delivery-address.addressHere',
                 )}
-                styles={{
-                  textInput: styles.googlePlacesAutocompleteTextInput,
-                  listView: styles.listView,
-                }}
-                textInputProps={{
-                  placeholderTextColor: Colors.grey['3c'],
-                  value: addressQuery,
-                  autoCorrect: false,
-                  autoCapitalize: 'none',
-                  onChangeText: text => {
-                    setAddressQuery(text);
-                    if (lastSelectedDescription && text !== lastSelectedDescription) {
-                      setLastSelectedDescription(null);
-                      setDeliveryLocation(undefined);
-                    }
-                  },
-                }}
-                onPress={(data, details = null) => {
-                  setLoadingLocation(false);
-                  setAddressQuery(data.description);
-                  setLastSelectedDescription(data.description);
-                  setDeliveryLocation({
-                    description: data.description,
-                    address: data?.description,
-                    region: {
-                      latitude: details?.geometry.location.lat ?? 0,
-                      longitude: details?.geometry.location.lng ?? 0,
-                      latitudeDelta: 0.01,
-                      longitudeDelta: 0.01,
-                    },
-                  });
-                }}
+                styles={googlePlacesStyles}
+                textInputProps={googlePlacesTextInputProps}
+                onPress={handlePlaceSelect}
                 fetchDetails={true}
                 nearbyPlacesAPI="GooglePlacesSearch"
                 debounce={200}
                 timeout={20000}
                 minLength={3}
-                predefinedPlaces={[]}
+                predefinedPlaces={GOOGLE_PLACES_PREDEFINED}
                 enablePoweredByContainer={false}
-                query={{
-                  key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_AUTOCOMPLETE_KEY,
-                  language: 'en',
-                }}
+                query={googlePlacesQuery}
                 keyboardShouldPersistTaps="always"
               />
               <View style={[styles.flexRow, styles.marginTop12]}>

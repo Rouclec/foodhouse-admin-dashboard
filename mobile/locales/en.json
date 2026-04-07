@@ -199,7 +199,11 @@
         },
         "rejected": {
           "title": "KYC Rejected",
-          "subtitle": "Your documents were not accepted. Please resubmit."
+          "subtitle": "Your documents were not accepted. Please resubmit.",
+          "seeWhy": "See why",
+          "feedbackTitle": "Why your KYC was rejected",
+          "noDetails": "No additional details were provided. Please review your documents and resubmit, or contact support if you need help.",
+          "dismissModal": "Got it"
         }
       }
     }
@@ -607,7 +611,8 @@
         "pleaseAcceptPermissions": "Please accept permissions to access your location",
         "errorGettingLocation": "Error getting location",
         "currentLocation": "Current location",
-        "unknownError": "An unknown error occured"
+        "unknownError": "An unknown error occured",
+        "removeFromOrder": "Remove from cart"
       },
       "select-pickup-point": {
         "selectPickupPoint": "Select Pickup Point",
@@ -660,8 +665,11 @@
     "Cart": {
       "title_one": "Cart ({{count}} item)",
       "title_other": "Cart ({{count}} items)",
+      "title_zero": "Cart ({{count}} items)",
       "continueShopping": "Continue Shopping",
-      "checkout": "Checkout"
+      "checkout": "Checkout",
+      "emptyDescription": "Your cart is empty. Add products to get started.",
+      "addItems": "Add items"
     },
     "PhoneNumberInput": {
       "mobileNumber": "Mobile number"

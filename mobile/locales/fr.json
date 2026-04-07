@@ -459,7 +459,8 @@
         "pleaseAcceptPermissions": "Veuillez accepter les autorisations pour accéder à votre localisation",
         "errorGettingLocation": "Erreur lors de l'obtention de la localisation",
         "currentLocation": "Localisation actuelle",
-        "unknownError": "Une erreur inconnue s'est produite"
+        "unknownError": "Une erreur inconnue s'est produite",
+        "removeFromOrder": "Retirer du panier"
       },
       "select-pickup-point": {
         "selectPickupPoint": "Sélectionner un point de collecte",
@@ -512,8 +513,11 @@
     "Cart": {
       "title_one": "Panier ({{count}} article)",
       "title_other": "Panier ({{count}} articles)",
+      "title_zero": "Panier ({{count}} article)",
       "continueShopping": "Continuer les achats",
-      "checkout": "Commander"
+      "checkout": "Commander",
+      "emptyDescription": "Votre panier est vide. Ajoutez des produits pour commencer.",
+      "addItems": "Ajouter des articles"
     },
     "PhoneNumberInput": {
       "mobileNumber": "Numéro de téléphone"
@@ -810,7 +814,11 @@
         },
         "rejected": {
           "title": "KYC refusé",
-          "subtitle": "Vos documents n’ont pas été acceptés. Veuillez les soumettre à nouveau."
+          "subtitle": "Vos documents n’ont pas été acceptés. Veuillez les soumettre à nouveau.",
+          "seeWhy": "Voir pourquoi",
+          "feedbackTitle": "Motif du refus de votre KYC",
+          "noDetails": "Aucun détail supplémentaire n’a été fourni. Vérifiez vos documents et soumettez-les à nouveau, ou contactez le support si besoin.",
+          "dismissModal": "Compris"
         }
       }
     }

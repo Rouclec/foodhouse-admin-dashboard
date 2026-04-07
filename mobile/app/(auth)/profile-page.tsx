@@ -1,4 +1,11 @@
-import React, { useContext, useState, useRef, useEffect } from 'react';
+import React, {
+  useContext,
+  useState,
+  useRef,
+  useEffect,
+  useMemo,
+  useCallback,
+} from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import {
   Appbar,
@@ -35,6 +42,8 @@ import {
 import { UsersCompleteRegistrationBody } from '@/client/users.swagger';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 // import { ScrollView } from 'react-native-virtualized-view';
+
+const GOOGLE_PLACES_PREDEFINED: [] = [];
 
 const ProfilePage = () => {
   const { user, setUser } = useContext(Context) as ContextType;
@@ -168,34 +177,103 @@ const ProfilePage = () => {
     }
   };
 
-  const handleAddressSelect = (
-    data: GooglePlaceData,
-    details: GooglePlaceDetail | null,
-  ) => {
-    console.log('handleAddressSelect: Data:', data);
-    setAddress(data.description);
-    setLastSelectedAddress(data.description);
-    if (details?.geometry?.location) {
-      setLocationCoordinates({
-        lat: details.geometry.location.lat,
-        lon: details.geometry.location.lng,
-        address: data.description,
-      });
-    } else {
-      setLocationCoordinates(undefined);
-    }
-  };
+  const handleAddressSelect = useCallback(
+    (data: GooglePlaceData, details: GooglePlaceDetail | null) => {
+      console.log('handleAddressSelect: Data:', data);
+      setAddress(data.description);
+      setLastSelectedAddress(data.description);
+      if (details?.geometry?.location) {
+        setLocationCoordinates({
+          lat: details.geometry.location.lat,
+          lon: details.geometry.location.lng,
+          address: data.description,
+        });
+      } else {
+        setLocationCoordinates(undefined);
+      }
+    },
+    [],
+  );
+
+  const initialPlaceAddress = user?.locationCoordinates?.address;
 
   useEffect(() => {
-    if (
-      user?.locationCoordinates?.address &&
-      googlePlacesAutoCompleteRef?.current
-    ) {
-      googlePlacesAutoCompleteRef.current.setAddressText(
-        user?.locationCoordinates?.address,
-      );
+    if (!initialPlaceAddress || !googlePlacesAutoCompleteRef.current) {
+      return;
     }
-  }, [user, googlePlacesAutoCompleteRef]);
+    googlePlacesAutoCompleteRef.current.setAddressText(initialPlaceAddress);
+  }, [initialPlaceAddress]);
+
+  const googlePlacesQuery = useMemo(
+    () => ({
+      key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_AUTOCOMPLETE_KEY,
+      language: 'en',
+    }),
+    [],
+  );
+
+  const googlePlacesStyles = useMemo(
+    () => ({
+      textInput: {
+        ...defaultStyles.input,
+        backgroundColor: Colors.light[10],
+        height: 56,
+        borderRadius: 15,
+        borderColor: Colors.grey['bg'],
+        borderWidth: 1,
+        paddingLeft: 28,
+        fontWeight: '500',
+      },
+      listView: {
+        backgroundColor: Colors.light[10],
+        borderRadius: 15,
+        marginTop: 5,
+        elevation: 3,
+        maxHeight: 220,
+        zIndex: 9999,
+        position: 'absolute' as const,
+        top: 0,
+        left: 0,
+        right: 0,
+      },
+      row: {
+        flexDirection: 'row' as const,
+        alignItems: 'flex-start' as const,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+      },
+    }),
+    [],
+  );
+
+  const handleAddressChangeText = useCallback((text: string) => {
+    setAddress(text);
+  }, []);
+
+  const googlePlacesTextInputProps = useMemo(
+    () => ({
+      placeholderTextColor: Colors.grey['3c'],
+      value: address,
+      onChangeText: handleAddressChangeText,
+    }),
+    [address, handleAddressChangeText],
+  );
+
+  const renderPlacesRow = useCallback((data: GooglePlaceData) => (
+    <View style={{ flexDirection: 'row', flex: 1 }}>
+      <Text
+        style={{
+          flexShrink: 1,
+          flexGrow: 1,
+          fontSize: 14,
+          lineHeight: 18,
+          color: Colors.grey['3c'],
+        }}
+        numberOfLines={0}>
+        {data.description}
+      </Text>
+    </View>
+  ), []);
 
   return (
     <>
@@ -333,70 +411,18 @@ const ProfilePage = () => {
                 placeholder={i18n.t(
                   '(farmer).(profile-flow).(personal-info).address',
                 )}
-                query={{
-                  key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_AUTOCOMPLETE_KEY,
-                  language: 'en',
-                }}
-                styles={{
-                  textInput: {
-                    ...defaultStyles.input,
-                    backgroundColor: Colors.light[10],
-                    height: 56,
-                    borderRadius: 15,
-                    borderColor: Colors.grey['bg'],
-                    borderWidth: 1,
-                    paddingLeft: 28,
-                    fontWeight: '500',
-                  },
-                  listView: {
-                    backgroundColor: Colors.light[10],
-                    borderRadius: 15,
-                    marginTop: 5,
-                    elevation: 3,
-                    maxHeight: 220,
-                    zIndex: 9999,
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                  },
-                  row: {
-                    flexDirection: 'row',
-                    alignItems: 'flex-start',
-                    paddingHorizontal: 12,
-                    paddingVertical: 10,
-                  },
-                }}
-                renderRow={data => (
-                  <View style={{ flexDirection: 'row', flex: 1 }}>
-                    <Text
-                      style={{
-                        flexShrink: 1,
-                        flexGrow: 1,
-                        fontSize: 14,
-                        lineHeight: 18,
-                        color: Colors.grey['3c'],
-                      }}
-                      numberOfLines={0}>
-                      {data.description}
-                    </Text>
-                  </View>
-                )}
-                textInputProps={{
-                  placeholderTextColor: Colors.grey['3c'],
-                  value: address,
-                  onChangeText: text => {
-                    setAddress(text);
-                  },
-                }}
-                onPress={(data, details) => handleAddressSelect(data, details)}
+                query={googlePlacesQuery}
+                styles={googlePlacesStyles}
+                renderRow={renderPlacesRow}
+                textInputProps={googlePlacesTextInputProps}
+                onPress={handleAddressSelect}
                 fetchDetails={true}
                 nearbyPlacesAPI="GooglePlacesSearch"
                 debounce={200}
                 timeout={20000}
                 minLength={3}
                 enablePoweredByContainer={false}
-                predefinedPlaces={[]}
+                predefinedPlaces={GOOGLE_PLACES_PREDEFINED}
               />
               {checkError &&
                 user?.role === 'USER_ROLE_FARMER' &&

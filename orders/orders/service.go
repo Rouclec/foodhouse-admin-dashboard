@@ -1675,7 +1675,8 @@ func (i *Impl) ListAgentAvailableOrders(ctx context.Context, req *ordersgrpc.Lis
 		count = 20
 	}
 
-	radiusKm := req.GetRadiusKm()
+	reqRadiusKm := req.GetRadiusKm()
+	radiusKm := reqRadiusKm
 	if radiusKm <= 0 {
 		radiusKm = 300
 	}
@@ -1684,6 +1685,16 @@ func (i *Impl) ListAgentAvailableOrders(ctx context.Context, req *ordersgrpc.Lis
 	if err != nil {
 		return nil, err
 	}
+
+	i.logger.Debug().
+		Str("agent_id", agentID).
+		Float64("agent_lon", agentLoc.P.X).
+		Float64("agent_lat", agentLoc.P.Y).
+		Float64("requested_radius_km", reqRadiusKm).
+		Float64("effective_radius_km", radiusKm).
+		Int("count", count).
+		Time("created_before", startKey).
+		Msg("ListAgentAvailableOrders: query params (agent point is lon,lat as x,y for PostGIS haversine)")
 
 	rows, err := i.repo.Do().ListAgentAvailableOrders(ctx, sqlc.ListAgentAvailableOrdersParams{
 		CreatedBefore: startKey,
@@ -1695,7 +1706,30 @@ func (i *Impl) ListAgentAvailableOrders(ctx context.Context, req *ordersgrpc.Lis
 		return nil, status.Errorf(codes.Internal, "error getting available agent orders: %v", err)
 	}
 
+	agentPt := &types.Point{Lat: agentLoc.P.Y, Lon: agentLoc.P.X}
+	for _, row := range rows {
+		ev := i.logger.Debug().
+			Int64("order_number", row.OrderNumber).
+			Float64("effective_radius_km", radiusKm)
+		if row.DeliveryLocation.Valid {
+			d := &types.Point{Lat: row.DeliveryLocation.P.Y, Lon: row.DeliveryLocation.P.X}
+			dkm := Distance(agentPt, d)
+			ev = ev.Float64("delivery_lon", row.DeliveryLocation.P.X).
+				Float64("delivery_lat", row.DeliveryLocation.P.Y).
+				Float64("distance_km_haversine", dkm).
+				Bool("within_radius_by_go", dkm <= radiusKm)
+		} else {
+			ev = ev.Str("delivery_location", "invalid_or_missing")
+		}
+		ev.Msg("ListAgentAvailableOrders: row (distance uses same haversine as EstimateDeliveryFee / SQL filter)")
+	}
+
 	protoOrders := converters.SqlcAgentAvailableOrdersToProto(rows)
+	i.logger.Debug().
+		Int("returned_orders", len(rows)).
+		Bool("has_next_page", len(protoOrders) >= count).
+		Msg("ListAgentAvailableOrders: result summary")
+
 	nextKey := ""
 	if len(protoOrders) >= count {
 		nextKey = protoOrders[len(protoOrders)-1].GetCreatedAt().AsTime().Format(time.RFC3339)

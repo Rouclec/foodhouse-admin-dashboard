@@ -41,21 +41,25 @@ export const FilterBottomSheet = forwardRef<
   });
 
   const open = () => {
-    setIsOpen(true);
-    Animated.timing(animation, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
+    // Defer state + animation to the next frame so we don't schedule updates during
+    // the same commit as react-native-paper's useInsertionEffect (avoids RN warning).
+    requestAnimationFrame(() => {
+      setIsOpen(true);
+      Animated.timing(animation, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    });
   };
 
   const close = () => {
     Animated.timing(animation, {
       toValue: 0,
       duration: 300,
-      useNativeDriver: false,
+      useNativeDriver: true,
     }).start(() => {
-      setIsOpen(false); // Hide after animation finishes
+      setIsOpen(false);
     });
   };
 
