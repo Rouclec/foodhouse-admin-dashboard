@@ -199,7 +199,11 @@
         },
         "rejected": {
           "title": "KYC imekataliwa",
-          "subtitle": "Hati zako hazikukubaliwa. Tafadhali wasilisha tena."
+          "subtitle": "Hati zako hazikukubaliwa. Tafadhali wasilisha tena.",
+          "seeWhy": "Ona sababu",
+          "feedbackTitle": "Kwa nini KYC yako ilikataliwa",
+          "noDetails": "Hakuna maelezo ya ziada yaliyotolewa. Hakiki hati zako na wasilisha tena, au wasiliana na msaada ikiwa unahitaji msaada.",
+          "dismissModal": "Sawa"
         }
       }
     }
@@ -623,7 +627,8 @@
         "pleaseAcceptPermissions": "Tafadhali kubali ruhusa ili kupata eneo lako",
         "errorGettingLocation": "Kosa katika kupata eneo",
         "currentLocation": "Eneo la sasa",
-        "unknownError": "Hitilafu isiyojulikana imetokea"
+        "unknownError": "Hitilafu isiyojulikana imetokea",
+        "removeFromOrder": "Ondoa kwenye kikapu"
       },
       "select-pickup-point": {
         "selectPickupPoint": "Chagua sehemu ya kuchukua",
@@ -676,8 +681,11 @@
     "Cart": {
       "title_one": "Kikapu ({{count}} bidhaa)",
       "title_other": "Kikapu ({{count}} bidhaa)",
+      "title_zero": "Kikapu ({{count}} bidhaa)",
       "continueShopping": "Endelea kununua",
-      "checkout": "Lipa"
+      "checkout": "Lipa",
+      "emptyDescription": "Kikapu chako ni tupu. Ongeza bidhaa kuanza.",
+      "addItems": "Ongeza bidhaa"
     },
     "PhoneNumberInput": {
       "mobileNumber": "Nambari ya simu"

@@ -1,5 +1,7 @@
 import { Colors } from "@/constants";
-import { StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
+
+const screenWidth = Dimensions.get("window").width;
 
 export const orderDetailsStyles = StyleSheet.create({
   productImage: {
@@ -54,7 +56,20 @@ export const orderDetailsStyles = StyleSheet.create({
     alignItems: "flex-start",
   },
   widthFull: { width: "100%" },
-  inputContainer: { height: 96 },
+  inputContainer: { minHeight: 96, width: "100%", maxWidth: "100%" },
   selfCenter: { alignSelf: "center" },
-  actionContainer: { width: "100%", paddingBottom: 12 },
+  actionContainer: {
+    width: "100%",
+    paddingBottom: 12,
+    flexDirection: "column",
+    gap: 12,
+    alignItems: "stretch",
+    alignSelf: "stretch",
+  },
+  payoutPhoneDialog: {
+    width: Math.min(screenWidth * 0.92, 400),
+    maxWidth: "100%",
+    alignSelf: "center",
+    alignItems: "stretch",
+  },
 });

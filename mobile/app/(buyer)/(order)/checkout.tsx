@@ -10,6 +10,8 @@ import {
   KeyboardAvoidingView,
   TouchableOpacity,
   ScrollView,
+  TextInput,
+  Platform,
 } from 'react-native';
 import { Chase } from 'react-native-animated-spinkit';
 import {
@@ -18,7 +20,6 @@ import {
   Icon,
   Snackbar,
   Text,
-  TextInput,
 } from 'react-native-paper';
 import { checkoutStyles as styles } from '@/styles';
 import { formatAmount } from '@/utils/amountFormater';
@@ -32,7 +33,7 @@ import { Image } from 'expo-image';
 export default function Checkout() {
   const router = useRouter();
 
-  const { user, productId, deliveryLocation, setPaymentData, cartItems } =
+  const { user, productId, deliveryLocation, setPaymentData, cartItems, removeFromCart } =
     useContext(Context) as ContextType & { cartItems: CartItem[] };
 
   const [loading, setLoading] = useState(false);
@@ -64,6 +65,18 @@ export default function Checkout() {
       return newItems;
     });
   };
+
+  const handleRemoveItem = (productId: string) => {
+    removeFromCart(productId);
+    setOrderItems(prev => {
+      const next = prev.filter(item => item.id !== productId);
+      if (next.length === 0) {
+        router.replace('/(buyer)/(index)');
+      }
+      return next;
+    });
+  };
+
   useEffect(() => {
     const total = orderItems.reduce(
       (sum, item) => sum + item.price * (item.quantity || 0),
@@ -334,48 +347,55 @@ export default function Checkout() {
                     </Text>
                     <View style={styles.buttonsContainer}>
                       <TouchableOpacity
-                        // Use item.quantity
                         disabled={item.quantity === 1}
                         onPress={() => handleQuantityChange(index, 'decrease')}
-                        style={[
-                          styles.quantityButton,
-                          item.quantity === 1 && styles.inactiveButton,
-                        ]}>
-                        <Text
-                          variant="titleMedium"
-                          style={[
-                            styles.textCenter,
-                            item.quantity === 1 && styles.inactiveText,
-                          ]}>
-                          -
-                        </Text>
+                        style={styles.quantityButton}>
+                        <Icon
+                          source="minus"
+                          size={16}
+                          color={
+                            item.quantity === 1
+                              ? Colors.grey['bd']
+                              : Colors.primary[500]
+                          }
+                        />
                       </TouchableOpacity>
                       <TextInput
-                        style={styles.quantityInput}
-                        theme={{
-                          colors: {
-                            primary: Colors.primary[500],
-                            background: Colors.grey['fa'],
-                            error: Colors.error,
-                          },
-                          roundness: 10,
-                        }}
-                        contentStyle={styles.quantityInputContent}
-                        mode="outlined"
-                        // Use item.quantity
+                        style={[
+                          styles.quantityNativeInput,
+                          Platform.OS === 'android' &&
+                            styles.quantityNativeInputAndroid,
+                        ]}
                         value={(item.quantity ?? 0).toString()}
-                        // Use handler specific to this item's index
                         onChangeText={text =>
                           handleQuantityChange(index, 'input', text)
                         }
+                        keyboardType="number-pad"
                         inputMode="numeric"
+                        selectTextOnFocus
                       />
                       <TouchableOpacity
                         onPress={() => handleQuantityChange(index, 'increase')}
                         style={styles.quantityButton}>
-                        <Text variant="titleMedium" style={styles.textCenter}>
-                          +
-                        </Text>
+                        <Icon
+                          source="plus"
+                          size={16}
+                          color={Colors.primary[500]}
+                        />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.removeButton}
+                        onPress={() => handleRemoveItem(item.id)}
+                        accessibilityRole="button"
+                        accessibilityLabel={i18n.t(
+                          '(buyer).(order).checkout.removeFromOrder',
+                        )}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                        <Icon
+                          source="trash-can-outline"
+                          size={20}
+                          color={Colors.error}
+                        />
                       </TouchableOpacity>
                     </View>
                   </View>

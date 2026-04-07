@@ -1,6 +1,7 @@
 import React, { useContext, useImperativeHandle, forwardRef, useRef } from 'react';
 import {
   Animated,
+  StyleSheet,
   TouchableWithoutFeedback,
   TouchableOpacity,
   View,
@@ -44,19 +45,21 @@ export const CartBottomSheet = forwardRef<CartBottomSheetRef, CartBottomSheetPro
     });
 
     const open = () => {
-      setIsOpen(true);
-      Animated.timing(animation, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
+      requestAnimationFrame(() => {
+        setIsOpen(true);
+        Animated.timing(animation, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }).start();
+      });
     };
 
     const close = () => {
       Animated.timing(animation, {
         toValue: 0,
         duration: 300,
-        useNativeDriver: false,
+        useNativeDriver: true,
       }).start(() => {
         setIsOpen(false);
       });
@@ -137,9 +140,7 @@ export const CartBottomSheet = forwardRef<CartBottomSheetRef, CartBottomSheetPro
       </View>
     );
 
-    if (cartItems.length === 0) {
-      return null;
-    }
+    const isEmpty = cartItems.length === 0;
 
     return (
       <>
@@ -171,41 +172,64 @@ export const CartBottomSheet = forwardRef<CartBottomSheetRef, CartBottomSheetPro
             />
           </View>
 
-          <FlatList
-            data={cartItems}
-            keyExtractor={(item) => item.id}
-            renderItem={renderCartItem}
-            contentContainerStyle={styles.listContent}
-            showsVerticalScrollIndicator={false}
-          />
-
-          <View style={styles.footer}>
-            <View style={styles.totalContainer}>
-              <Text style={styles.totalLabel}>{i18n.t('common.total')}</Text>
-              <Text style={styles.totalAmount}>
-                {currency} {formatAmount(totalAmount, { decimalPlaces: 0 })}
+          {isEmpty ? (
+            <View style={styles.emptyState}>
+              <Icon
+                source="cart-outline"
+                size={56}
+                color={Colors.grey['bd']}
+              />
+              <Text style={styles.emptyDescription}>
+                {i18n.t('components.Cart.emptyDescription')}
               </Text>
-            </View>
-            <View style={styles.footerButtons}>
-              <Button
-                mode="outlined"
-                style={[styles.checkoutButton, styles.continueShoppingButton]}
-                textColor={Colors.primary[500]}
-                onPress={() => {
-                  close();
-                  router.back();
-                }}>
-                {i18n.t('components.Cart.continueShopping')}
-              </Button>
               <Button
                 mode="contained"
-                style={styles.checkoutButton}
+                style={styles.addItemsButton}
                 buttonColor={Colors.primary[500]}
-                onPress={handleCheckout}>
-                {i18n.t('components.Cart.checkout')}
+                onPress={close}>
+                {i18n.t('components.Cart.addItems')}
               </Button>
             </View>
-          </View>
+          ) : (
+            <>
+              <FlatList
+                data={cartItems}
+                keyExtractor={(item) => item.id}
+                renderItem={renderCartItem}
+                contentContainerStyle={styles.listContent}
+                style={styles.listFlex}
+                showsVerticalScrollIndicator={false}
+              />
+
+              <View style={styles.footer}>
+                <View style={styles.totalContainer}>
+                  <Text style={styles.totalLabel}>{i18n.t('common.total')}</Text>
+                  <Text style={styles.totalAmount}>
+                    {currency} {formatAmount(totalAmount, { decimalPlaces: 0 })}
+                  </Text>
+                </View>
+                <View style={styles.footerButtons}>
+                  <Button
+                    mode="outlined"
+                    style={[styles.checkoutButton, styles.continueShoppingButton]}
+                    textColor={Colors.primary[500]}
+                    onPress={() => {
+                      close();
+                      router.back();
+                    }}>
+                    {i18n.t('components.Cart.continueShopping')}
+                  </Button>
+                  <Button
+                    mode="contained"
+                    style={styles.checkoutButton}
+                    buttonColor={Colors.primary[500]}
+                    onPress={handleCheckout}>
+                    {i18n.t('components.Cart.checkout')}
+                  </Button>
+                </View>
+              </View>
+            </>
+          )}
         </Animated.View>
       </>
     );
@@ -353,6 +377,26 @@ const styles = {
   continueShoppingButton: {
     borderColor: Colors.primary[500],
   },
+  listFlex: {
+    flex: 1,
+  },
+  emptyState: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    rowGap: 16,
+  },
+  emptyDescription: {
+    fontSize: 16,
+    lineHeight: 22,
+    color: Colors.grey['61'],
+    textAlign: 'center',
+  },
+  addItemsButton: {
+    marginTop: 8,
+    borderRadius: 12,
+    minWidth: 200,
+  },
 };
-
-import { StyleSheet } from 'react-native';

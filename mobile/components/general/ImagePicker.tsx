@@ -73,7 +73,11 @@ export const ImagePicker: FC<Props> = ({
 
   return (
     <Portal>
-      <Dialog visible={visible} style={styles.dialog}>
+      <Dialog
+        visible={visible}
+        onDismiss={onClose}
+        dismissable
+        style={styles.dialog}>
         <Dialog.Content style={styles.content}>
           <TouchableOpacity
             style={[styles.innerContent, styles.button, styles.bottomBorder]}

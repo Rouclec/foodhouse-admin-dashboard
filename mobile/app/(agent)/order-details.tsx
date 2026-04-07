@@ -105,8 +105,7 @@ const AgentOrderDetails = () => {
       if (order) {
         setOrder({ ...order, status: 'picked_up' });
       }
-      setSnackbarMessage(i18n.t('(agent).orders.orderAccepted'));
-      setSnackbarVisible(true);
+      Alert.alert(i18n.t('(agent).orders.orderAccepted'));
     },
     onError: error => {
       setSnackbarMessage(

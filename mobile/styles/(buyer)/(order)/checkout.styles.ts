@@ -1,6 +1,5 @@
 import { Colors } from '@/constants';
-import { lstat } from 'fs';
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 
 export const checkoutStyles = StyleSheet.create({
   notFoundContainer: {
@@ -28,25 +27,19 @@ export const checkoutStyles = StyleSheet.create({
   buttonsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    columnGap: 12,
+    columnGap: 8,
+  },
+  removeButton: {
+    marginLeft: 8,
+    padding: 4,
   },
   quantityButton: {
-    width: 32,
-    height: 32,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: Colors.grey['fa'],
     alignItems: 'center',
     justifyContent: 'center',
-    borderColor: Colors.dark[10],
-    borderWidth: 1,
-    borderRadius: 12,
-  },
-  inactiveButton: {
-    borderColor: Colors.grey['bd'],
-  },
-  inactiveText: {
-    color: Colors.grey['bd'],
-  },
-  textCenter: {
-    textAlign: 'center',
   },
   price: {
     color: Colors.primary[500],
@@ -107,16 +100,23 @@ export const checkoutStyles = StyleSheet.create({
   text16: {
     fontSize: 16,
   },
-  quantityInput: {
-    width: 60,
-    height: 40,
-  },
-  quantityInputContent: {
+  quantityNativeInput: {
+    width: 44,
+    height: 28,
+    marginVertical: 0,
+    paddingHorizontal: 6,
+    paddingVertical: Platform.OS === 'ios' ? 5 : 0,
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: Colors.grey['fa'],
+    fontSize: 14,
+    fontWeight: '600',
     textAlign: 'center',
+    color: Colors.dark[0],
+  },
+  quantityNativeInputAndroid: {
     textAlignVertical: 'center',
+    includeFontPadding: false,
     paddingVertical: 0,
-    paddingHorizontal: 0,
-    paddingRight: 4,
-    alignItems: 'center',
   },
 });

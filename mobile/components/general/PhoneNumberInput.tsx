@@ -116,6 +116,18 @@ const PhoneNumberInput: FC<Props> = ({
     if (country?.dial_code) setCountryCode(country.dial_code);
   }, [country]);
 
+  useEffect(() => {
+    if (!countryCode) return;
+    const matched =
+      [CAMEROON, GABON, RWANDA, TANZANIA].find((c) => c.dial_code === countryCode) ??
+      allCountries.find((c) => c.dial_code === countryCode);
+    if (matched) {
+      setCountry((prev) =>
+        prev.dial_code === matched.dial_code ? prev : matched,
+      );
+    }
+  }, [countryCode]);
+
   return (
     <View style={containerStyle} testID="phone-number-component">
       <View style={styles.mainContainer}>

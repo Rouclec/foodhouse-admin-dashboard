@@ -6,7 +6,13 @@ import {
   RefreshControl,
   Alert,
 } from 'react-native';
-import { Icon, Button, Text } from 'react-native-paper';
+import {
+  Icon,
+  Button,
+  Text,
+  Portal,
+  Dialog,
+} from 'react-native-paper';
 import { router } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -18,7 +24,10 @@ import {
   listAgentDeliveredOrdersPage,
   listAgentOngoingOrdersPage,
 } from '@/data/agent-orders-backend';
-import { usersGetKycByUserIdOptions } from '@/client/users.swagger/@tanstack/react-query.gen';
+import {
+  usersGetKycByUserIdOptions,
+  usersGetKycByUserIdQueryKey,
+} from '@/client/users.swagger/@tanstack/react-query.gen';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { usersgrpcKYCStatus } from '@/client/users.swagger';
 import { agentDemoState } from '@/contexts/AgentContext';
@@ -29,6 +38,8 @@ const AgentHomeScreen = () => {
   const insets = useSafeAreaInsets();
   const { user } = useContext(Context) as ContextType;
   const [refreshing, setRefreshing] = useState(false);
+  const [kycRejectionModalVisible, setKycRejectionModalVisible] =
+    useState(false);
   const [isDemo, setIsDemo] = useState(false);
   const [demoStats, setDemoStats] = useState({ totalEarnings: 0, completedDeliveries: 0, ongoingDeliveries: 0 });
   const [tab, setTab] = useState<'available' | 'ongoing' | 'completed'>('available');
@@ -120,6 +131,9 @@ const AgentHomeScreen = () => {
     refetchInterval: 60000,
   });
 
+  const kycRejectionReason =
+    backendKycData?.kycVerification?.rejectionReason?.trim() ?? '';
+
   const backendKycStatus = (() => {
     const status = backendKycData?.kycVerification?.status as usersgrpcKYCStatus | undefined;
     switch (status) {
@@ -172,6 +186,9 @@ const AgentHomeScreen = () => {
         queryClient.resetQueries({ queryKey: ['agentAvailableOrders', userId] }),
         queryClient.resetQueries({ queryKey: ['agentOngoingOrders', userId] }),
         queryClient.resetQueries({ queryKey: ['agentCompletedOrders', userId] }),
+        queryClient.invalidateQueries({
+          queryKey: usersGetKycByUserIdQueryKey({ path: { userId } }),
+        }),
       ]);
     }
   }, [isDemo, queryClient, userId]);
@@ -298,6 +315,7 @@ const AgentHomeScreen = () => {
   };
 
   return (
+    <>
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + 24 }]}>
         <View style={styles.headerTop}>
@@ -362,6 +380,19 @@ const AgentHomeScreen = () => {
                 <Text style={{ fontSize: 14, color: Colors.grey['61'], marginBottom: 12 }}>
                   {kycMessage.subtitle}
                 </Text>
+                {kycStatus === 'rejected' && !isDemo && (
+                  <Button
+                    mode="outlined"
+                    onPress={() => setKycRejectionModalVisible(true)}
+                    textColor={Colors.error}
+                    style={{
+                      marginBottom: kycMessage.showKYCButton ? 8 : 0,
+                      borderColor: Colors.error,
+                      borderRadius: 8,
+                    }}>
+                    {i18n.t('(agent).home.kycBanner.rejected.seeWhy')}
+                  </Button>
+                )}
                 {kycMessage.showKYCButton && (
                   <Button
                     mode="contained"
@@ -528,6 +559,31 @@ const AgentHomeScreen = () => {
         }
       />
     </View>
+    <Portal>
+      <Dialog
+        visible={kycRejectionModalVisible}
+        onDismiss={() => setKycRejectionModalVisible(false)}
+        style={defaultStyles.dialogContainer}>
+        <Dialog.Title style={{ color: Colors.dark[0] }}>
+          {i18n.t('(agent).home.kycBanner.rejected.feedbackTitle')}
+        </Dialog.Title>
+        <Dialog.Content>
+          <Text variant="bodyMedium" style={{ color: Colors.grey['61'] }}>
+            {kycRejectionReason ||
+              i18n.t('(agent).home.kycBanner.rejected.noDetails')}
+          </Text>
+        </Dialog.Content>
+        <Dialog.Actions>
+          <Button
+            mode="contained"
+            buttonColor={Colors.primary[500]}
+            onPress={() => setKycRejectionModalVisible(false)}>
+            {i18n.t('(agent).home.kycBanner.rejected.dismissModal')}
+          </Button>
+        </Dialog.Actions>
+      </Dialog>
+    </Portal>
+    </>
   );
 };
 
