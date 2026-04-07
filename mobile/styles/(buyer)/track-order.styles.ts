@@ -1,5 +1,5 @@
 import { Colors } from '@/constants';
-import { Dimensions, StyleSheet } from 'react-native';
+import { Dimensions, Platform, StyleSheet } from 'react-native';
 
 const { width } = Dimensions.get('window');
 export const trackOrderStyles = StyleSheet.create({
@@ -113,5 +113,23 @@ export const trackOrderStyles = StyleSheet.create({
   },
   padding: {
     padding: 8,
+  },
+  orderSecretCodeRow: {
+    width: '100%',
+    paddingHorizontal: 16,
+    alignItems: 'flex-start',
+  },
+  orderSecretCodeLine: {
+    fontSize: 16,
+    lineHeight: 16,
+    fontWeight: '700',
+    color: Colors.primary[500],
+    textAlign: 'left',
+    alignSelf: 'flex-start',
+    maxWidth: '100%',
+    ...Platform.select({
+      android: { includeFontPadding: false },
+      default: {},
+    }),
   },
 });

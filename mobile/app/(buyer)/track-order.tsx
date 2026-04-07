@@ -111,6 +111,13 @@ export default function TrackOrder() {
 
   const insets = useSafeAreaInsets();
 
+  const deliverySecret = (orderDetails?.order?.secretKey ?? '').trim();
+  const showDeliveryCode =
+    deliverySecret.length > 0 &&
+    orderDetails?.order?.status !== 'OrderStatus_PAYMENT_FAILED' &&
+    orderDetails?.order?.status !== 'OrderStatus_REJECTED' &&
+    orderDetails?.order?.status !== 'OrderStatus_DELIVERED';
+
   if (isOrderDetailsLoading) {
     return (
       <>
@@ -254,6 +261,24 @@ export default function TrackOrder() {
               )}
             />
           </View>
+
+          {showDeliveryCode && (
+            <>
+              <View style={trackOrderStyles.divider} />
+              <View style={styles.orderSecretCodeRow}>
+                <Text
+                  style={styles.orderSecretCodeLine}
+                  selectable
+                  accessibilityLabel={i18n.t(
+                    '(buyer).track-order.orderSecretCodeA11y',
+                  )}>
+                  {i18n.t('(buyer).track-order.orderSecretCode', {
+                    code: deliverySecret.toUpperCase(),
+                  })}
+                </Text>
+              </View>
+            </>
+          )}
 
           {/* Divider */}
           <View style={trackOrderStyles.divider} />

@@ -82,7 +82,7 @@ const AgentHomeScreen = () => {
         userId,
         count: pageSize,
         startKey: pageParam,
-        radiusKm: 300,
+        radiusKm: process.env.EXPO_PUBLIC_AGENT_RADIUS_KM ? parseInt(process.env.EXPO_PUBLIC_AGENT_RADIUS_KM) : 300,
       }),
     getNextPageParam: (lastPage) => lastPage.nextKey,
   });
