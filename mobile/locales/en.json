@@ -648,7 +648,9 @@
       "unknownState": "The state of this order is unknonw, contact admin for more info",
       "orderNumber": "Order number",
       "confirmDelivery": "Confirm delivery",
-      "unknownError": "An unknown error occured"
+      "unknownError": "An unknown error occured",
+      "orderSecretCode": "ORDER SECRET CODE: {{code}}",
+      "orderSecretCodeA11y": "Order secret code"
     },
     "farmer-details": {
       "farmerInformation": "Farmer Information",

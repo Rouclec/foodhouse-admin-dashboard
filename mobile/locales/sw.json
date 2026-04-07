@@ -664,7 +664,9 @@
       "unknownState": "Hali ya agizo hili haijulikani, wasiliana na msimamizi kwa maelezo zaidi",
       "orderNumber": "Nambari ya agizo",
       "confirmDelivery": "Thibitisha usafirishaji",
-      "unknownError": "Hitilafu isiyojulikana imetokea"
+      "unknownError": "Hitilafu isiyojulikana imetokea",
+      "orderSecretCode": "NAMBA SIIRI YA AGIZO: {{code}}",
+      "orderSecretCodeA11y": "Namba siri ya agizo"
     },
     "farmer-details": {
       "farmerInformation": "Taarifa za mkulima",

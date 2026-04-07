@@ -496,7 +496,9 @@
       "unknownState": "L'état de cette commande est inconnu, contactez l'administrateur pour plus d'informations",
       "orderNumber": "Numéro de commande",
       "confirmDelivery": "Confirmer la livraison",
-      "unknownError": "Une erreur inconnue est survenue"
+      "unknownError": "Une erreur inconnue est survenue",
+      "orderSecretCode": "CODE SECRET DE COMMANDE : {{code}}",
+      "orderSecretCodeA11y": "Code secret de commande"
     },
     "farmer-details": {
       "farmerInformation": "Informations sur l'agriculteur",
