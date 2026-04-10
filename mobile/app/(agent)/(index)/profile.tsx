@@ -3,12 +3,17 @@ import { Keyboard, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Colors } from '@/constants';
 import i18n from '@/i18n';
 import { agentDemoState } from '@/contexts/AgentContext';
 import { Context, type ContextType } from '@/app/_layout';
-import { usersRevokeRefreshTokenMutation } from '@/client/users.swagger/@tanstack/react-query.gen';
+import {
+  usersGetKycByUserIdOptions,
+  usersRevokeRefreshTokenMutation,
+} from '@/client/users.swagger/@tanstack/react-query.gen';
+import type { usersgrpcKYCStatus } from '@/client/users.swagger';
+import { ordersGetAgentStatsOptions } from '@/client/orders.swagger/@tanstack/react-query.gen';
 import {
   buyerProductsStyles,
   defaultStyles,
@@ -26,18 +31,69 @@ const AgentProfile = () => {
   const sheetRef = useRef<FilterBottomSheetRef>(null);
   const { user, setUser } = useContext(Context) as ContextType;
   const [loading, setLoading] = useState(false);
-  const [state, setState] = useState(agentDemoState.getState());
+  const [isDemo, setIsDemo] = useState(false);
+  const [demoState, setDemoState] = useState(agentDemoState.getState());
 
   useEffect(() => {
-    const unsubscribe = agentDemoState.subscribe(setState);
+    const checkDemoMode = () => {
+      const state = agentDemoState.getState();
+      setIsDemo(state.isDemoMode && state.isLoggedIn);
+      setDemoState(state);
+    };
+    checkDemoMode();
+    const unsubscribe = agentDemoState.subscribe(checkDemoMode);
     return () => {
       unsubscribe();
     };
   }, []);
 
-  const displayFirstName = state.isDemoMode ? state.agent?.firstName : user?.firstName;
-  const displayLastName = state.isDemoMode ? state.agent?.lastName : user?.lastName;
-  const displayEmail = state.isDemoMode ? state.agent?.email : user?.email;
+  const displayFirstName = isDemo ? demoState.agent?.firstName : user?.firstName;
+  const displayLastName = isDemo ? demoState.agent?.lastName : user?.lastName;
+  const displayEmail = isDemo ? demoState.agent?.email : user?.email;
+  const userId = user?.userId ?? '';
+
+  const { data: backendKycData } = useQuery({
+    ...usersGetKycByUserIdOptions({
+      path: { userId },
+    }),
+    enabled: !isDemo && !!userId,
+  });
+
+  const backendKycStatus = (() => {
+    const status = backendKycData?.kycVerification?.status as usersgrpcKYCStatus | undefined;
+    switch (status) {
+      case 'KYC_STATUS_VERIFIED':
+        return 'verified' as const;
+      case 'KYC_STATUS_REJECTED':
+        return 'rejected' as const;
+      case 'KYC_STATUS_PENDING':
+        return 'pending' as const;
+      default:
+        return backendKycData?.kycVerification ? ('pending' as const) : ('not_started' as const);
+    }
+  })();
+
+  const kycStatus = isDemo ? demoState.kycStatus : backendKycStatus;
+  const isKycVerified = kycStatus === 'verified';
+
+  const { data: agentStatsData } = useQuery({
+    ...ordersGetAgentStatsOptions({
+      path: { userId },
+    }),
+    enabled: !isDemo && !!userId,
+  });
+
+  const totalEarnings = isDemo
+    ? demoState.earnings
+    : (agentStatsData?.totalEarnings?.value ?? 0);
+
+  const completedDeliveries = isDemo
+    ? demoState.completedDeliveries
+    : (agentStatsData?.completedCount ?? 0);
+
+  const ongoingDeliveries = isDemo
+    ? demoState.pendingDeliveries
+    : (agentStatsData?.ongoingCount ?? 0);
 
   const { mutate: revokeRefreshToken } = useMutation({
     ...usersRevokeRefreshTokenMutation(),
@@ -61,7 +117,7 @@ const AgentProfile = () => {
       updateAuthHeader('');
       setUser(undefined);
 
-      if (state.isDemoMode) {
+      if (isDemo) {
         agentDemoState.logout();
       }
 
@@ -87,7 +143,16 @@ const AgentProfile = () => {
             i18n.t('(agent).profile.defaultName')}{' '}
           {(displayLastName ?? '') || ''}
         </Text>
-        <Text style={styles.email}>{displayEmail || 'agent@foodhouse.demo'}</Text>
+        <Text style={styles.email}>
+          {displayEmail || (isDemo ? 'agent@foodhouse.demo' : '')}
+        </Text>
+        {isDemo && (
+          <View style={{ backgroundColor: Colors.gold, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, marginTop: 8 }}>
+            <Text style={{ color: Colors.dark[0], fontSize: 10, fontWeight: '600' }}>
+              DEMO
+            </Text>
+          </View>
+        )}
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -96,20 +161,14 @@ const AgentProfile = () => {
           <View style={styles.infoRow}>
             <Text style={styles.label}>{i18n.t('(agent).profile.kycStatusLabel')}</Text>
             <View style={[styles.statusBadge, { 
-              backgroundColor: state.kycStatus === 'verified' ? Colors.success + '20' : Colors.gold + '20' 
+              backgroundColor: isKycVerified ? Colors.success + '20' : Colors.gold + '20' 
             }]}>
               <Text style={[styles.statusText, { 
-                color: state.kycStatus === 'verified' ? Colors.success : Colors.gold 
+                color: isKycVerified ? Colors.success : Colors.gold 
               }]}>
-                {i18n.t(`(agent).profile.kycStatus.${state.kycStatus}`)}
+                {i18n.t(`(agent).profile.kycStatus.${kycStatus}`)}
               </Text>
             </View>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>{i18n.t('(agent).profile.agentStatusLabel')}</Text>
-            <Text style={styles.value}>
-              {i18n.t(`(agent).profile.agentStatus.${state.agentStatus}`)}
-            </Text>
           </View>
         </View>
 
@@ -117,7 +176,7 @@ const AgentProfile = () => {
           <Text style={styles.sectionTitle}>{i18n.t('(agent).profile.statistics')}</Text>
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{state.earnings.toLocaleString()}</Text>
+              <Text style={styles.statValue}>{totalEarnings.toLocaleString()}</Text>
               <Text style={styles.statLabel}>
                 {i18n.t('(agent).profile.totalEarningsWithCurrency', {
                   currency: i18n.t('common.currency'),
@@ -125,15 +184,15 @@ const AgentProfile = () => {
               </Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{state.completedDeliveries}</Text>
+              <Text style={styles.statValue}>{completedDeliveries}</Text>
               <Text style={styles.statLabel}>
                 {i18n.t('(agent).profile.completed')}
               </Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{state.pendingDeliveries}</Text>
+              <Text style={styles.statValue}>{ongoingDeliveries}</Text>
               <Text style={styles.statLabel}>
-                {i18n.t('(agent).profile.pending')}
+                {i18n.t('(agent).profile.ongoing')}
               </Text>
             </View>
           </View>
@@ -219,6 +278,7 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 32,
     fontWeight: 'bold',
+    lineHeight: 64,
     color: Colors.primary[500],
   },
   name: {

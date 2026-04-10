@@ -48,6 +48,9 @@ import type {
   OrdersConfirmPaymentData,
   OrdersConfirmPaymentError,
   OrdersConfirmPaymentResponse,
+  OrdersGetAvailablePaymentMethodsData,
+  OrdersGetAvailablePaymentMethodsError,
+  OrdersGetAvailablePaymentMethodsResponse,
   OrdersHealthCheckError,
   OrdersHealthCheckResponse,
   OrdersListSubscriptionPlansData,
@@ -77,6 +80,15 @@ import type {
   OrdersInitiatePaymentData,
   OrdersInitiatePaymentError,
   OrdersInitiatePaymentResponse,
+  OrdersListAgentAvailableOrdersData,
+  OrdersListAgentAvailableOrdersError,
+  OrdersListAgentAvailableOrdersResponse,
+  OrdersListAgentDeliveredOrdersData,
+  OrdersListAgentDeliveredOrdersError,
+  OrdersListAgentDeliveredOrdersResponse,
+  OrdersListAgentOngoingOrdersData,
+  OrdersListAgentOngoingOrdersError,
+  OrdersListAgentOngoingOrdersResponse,
   OrdersListDeliveryCitiesData,
   OrdersListDeliveryCitiesError,
   OrdersListDeliveryCitiesResponse,
@@ -323,6 +335,24 @@ export const ordersConfirmPayment = <ThrowOnError extends boolean = false>(
   });
 };
 
+export const ordersGetAvailablePaymentMethods = <
+  ThrowOnError extends boolean = false,
+>(
+  options?: OptionsLegacyParser<
+    OrdersGetAvailablePaymentMethodsData,
+    ThrowOnError
+  >,
+) => {
+  return (options?.client ?? client).get<
+    OrdersGetAvailablePaymentMethodsResponse,
+    OrdersGetAvailablePaymentMethodsError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/v1/public/orders/available-payment-methods",
+  });
+};
+
 export const ordersHealthCheck = <ThrowOnError extends boolean = false>(
   options?: OptionsLegacyParser<unknown, ThrowOnError>,
 ) => {
@@ -388,7 +418,7 @@ export const ordersGetAgentRatingSummary = <
     ThrowOnError
   >({
     ...options,
-    url: "/v1/users/{userId}/agents/{agentId}/delivery-rating-summary",
+    url: "/v1/users/{userId}/agents/{agentId}/get-delivery-rating-summary",
   });
 };
 
@@ -459,6 +489,57 @@ export const ordersInitiatePayment = <ThrowOnError extends boolean = false>(
   >({
     ...options,
     url: "/v1/users/{userId}/orders/initiate-payment",
+  });
+};
+
+export const ordersListAgentAvailableOrders = <
+  ThrowOnError extends boolean = false,
+>(
+  options: OptionsLegacyParser<
+    OrdersListAgentAvailableOrdersData,
+    ThrowOnError
+  >,
+) => {
+  return (options?.client ?? client).get<
+    OrdersListAgentAvailableOrdersResponse,
+    OrdersListAgentAvailableOrdersError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/v1/users/{userId}/orders/list-agent-available-orders",
+  });
+};
+
+export const ordersListAgentDeliveredOrders = <
+  ThrowOnError extends boolean = false,
+>(
+  options: OptionsLegacyParser<
+    OrdersListAgentDeliveredOrdersData,
+    ThrowOnError
+  >,
+) => {
+  return (options?.client ?? client).get<
+    OrdersListAgentDeliveredOrdersResponse,
+    OrdersListAgentDeliveredOrdersError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/v1/users/{userId}/orders/list-agent-delivered-orders",
+  });
+};
+
+export const ordersListAgentOngoingOrders = <
+  ThrowOnError extends boolean = false,
+>(
+  options: OptionsLegacyParser<OrdersListAgentOngoingOrdersData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    OrdersListAgentOngoingOrdersResponse,
+    OrdersListAgentOngoingOrdersError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/v1/users/{userId}/orders/list-agent-ongoing-orders",
   });
 };
 
@@ -584,7 +665,7 @@ export const ordersCreateDeliveryRating = <
     ThrowOnError
   >({
     ...options,
-    url: "/v1/users/{userId}/orders/{orderNumber}/delivery-rating",
+    url: "/v1/users/{userId}/orders/{orderNumber}/create-delivery-rating",
   });
 };
 

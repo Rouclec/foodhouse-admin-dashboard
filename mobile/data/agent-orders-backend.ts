@@ -2,11 +2,18 @@ import {
   ordersConfirmDelivery,
   ordersDispatchOrder,
   ordersGetOrderDetails,
-  ordersListUserOrders,
+  ordersListAgentAvailableOrders,
+  ordersListAgentDeliveredOrders,
+  ordersListAgentOngoingOrders,
   type ordersgrpcOrder,
   type ordersgrpcOrderStatus,
 } from '@/client/orders.swagger';
 import type { AgentOrder } from '@/data/mock-orders';
+
+export type AgentOrdersPage = {
+  orders: AgentOrder[];
+  nextKey?: string;
+};
 
 function mapOrderStatus(status?: ordersgrpcOrderStatus): AgentOrder['status'] {
   switch (status) {
@@ -22,6 +29,35 @@ function mapOrderStatus(status?: ordersgrpcOrderStatus): AgentOrder['status'] {
   }
 }
 
+function formatUnitLabel(params: { qtyRaw: string; unitRaw: string }): string {
+  const qtyNum = Number(params.qtyRaw);
+  const unitClean = params.unitRaw.replace(/^per_/, '').trim();
+  if (!unitClean) return '';
+
+  // Common measurement units are typically not pluralized with an "s".
+  // Everything else gets a simple pluralization when qty > 1.
+  const nonPluralUnits = new Set([
+    'kg',
+    'g',
+    'l',
+    'ml',
+    'cl',
+    'm',
+    'cm',
+    'mm',
+    'lb',
+    'oz',
+  ]);
+
+  const shouldPluralize =
+    Number.isFinite(qtyNum) &&
+    qtyNum > 1 &&
+    !nonPluralUnits.has(unitClean.toLowerCase()) &&
+    !unitClean.toLowerCase().endsWith('s');
+
+  return shouldPluralize ? `${unitClean}s` : unitClean;
+}
+
 export function mapBackendOrderToAgentOrder(order: ordersgrpcOrder): AgentOrder {
   const orderNumber = Number(order.orderNumber ?? 0);
   const deliveryLat = order.deliveryLocation?.lat ?? 0;
@@ -30,6 +66,12 @@ export function mapBackendOrderToAgentOrder(order: ordersgrpcOrder): AgentOrder 
     order.deliveryLocation?.address ??
     (deliveryLat && deliveryLng ? `${deliveryLat}, ${deliveryLng}` : 'Delivery address not available');
 
+  const pickupLat = order.pickupLocation?.lat ?? 0;
+  const pickupLng = order.pickupLocation?.lon ?? 0;
+  const pickupAddress =
+    order.pickupLocation?.address ??
+    (pickupLat && pickupLng ? `${pickupLat}, ${pickupLng}` : 'Pickup address not available');
+
   const totalAmount = order.sumTotal?.value ?? 0;
   const deliveryFee = order.deliveryFee?.value ?? 0;
 
@@ -37,8 +79,8 @@ export function mapBackendOrderToAgentOrder(order: ordersgrpcOrder): AgentOrder 
     id: (order.orderNumber ?? '').toString() || String(orderNumber || Date.now()),
     orderNumber: Number.isFinite(orderNumber) && orderNumber > 0 ? orderNumber : 0,
     status: mapOrderStatus(order.status),
-    pickupAddress: 'Pickup address not available',
-    pickupLocation: { lat: deliveryLat, lng: deliveryLng },
+    pickupAddress,
+    pickupLocation: { lat: pickupLat, lng: pickupLng },
     deliveryAddress,
     deliveryLocation: { lat: deliveryLat, lng: deliveryLng },
     securityCode: (order.secretKey ?? '').toString(),
@@ -55,11 +97,71 @@ export function mapBackendOrderToAgentOrder(order: ordersgrpcOrder): AgentOrder 
         const qty = (i.quantity ?? '').toString().trim();
         const unit = (i.unitType ?? '').trim();
         const left = name || 'Item';
-        const right = [qty, unit].filter(Boolean).join(' ');
+        const unitLabel = formatUnitLabel({ qtyRaw: qty, unitRaw: unit });
+        const right = [qty, unitLabel].filter(Boolean).join(' ');
         return right ? `${left} (${right})` : left;
       })
       .filter(Boolean),
   };
+}
+
+export async function listAgentAvailableOrdersPage(params: {
+  userId: string;
+  count?: number;
+  startKey?: string;
+  radiusKm?: number;
+}): Promise<AgentOrdersPage> {
+  const { data } = await ordersListAgentAvailableOrders({
+    path: { userId: params.userId },
+    query: {
+      count: params.count ?? 20,
+      startKey: params.startKey,
+      radiusKm: params.radiusKm ?? 300,
+    },
+  });
+
+  const orders = ((data?.orders ?? []) as ordersgrpcOrder[]).map(mapBackendOrderToAgentOrder);
+  const nextKey = (data?.nextKey ?? '') || undefined;
+
+  return { orders, nextKey };
+}
+
+export async function listAgentOngoingOrdersPage(params: {
+  userId: string;
+  count?: number;
+  startKey?: string;
+}): Promise<AgentOrdersPage> {
+  const { data } = await ordersListAgentOngoingOrders({
+    path: { userId: params.userId },
+    query: {
+      count: params.count ?? 20,
+      startKey: params.startKey,
+    },
+  });
+
+  const orders = ((data?.orders ?? []) as ordersgrpcOrder[]).map(mapBackendOrderToAgentOrder);
+  const nextKey = (data?.nextKey ?? '') || undefined;
+
+  return { orders, nextKey };
+}
+
+export async function listAgentDeliveredOrdersPage(params: {
+  userId: string;
+  count?: number;
+  startKey?: string;
+}): Promise<AgentOrdersPage> {
+  const { data } = await ordersListAgentDeliveredOrders({
+    path: { userId: params.userId },
+    query: {
+      count: params.count ?? 20,
+      startKey: params.startKey,
+    },
+  });
+
+  const orders = ((data?.orders ?? []) as ordersgrpcOrder[]).map(mapBackendOrderToAgentOrder);
+  const nextKey = (data?.nextKey ?? '') || undefined;
+
+  return { orders, nextKey };
 }
 
 export async function listAgentOrdersFromBackend(params: {
@@ -67,16 +169,25 @@ export async function listAgentOrdersFromBackend(params: {
   statuses?: ordersgrpcOrderStatus[];
   count?: number;
 }): Promise<AgentOrder[]> {
-  const { data } = await ordersListUserOrders({
-    path: { userId: params.userId },
-    query: {
-      count: params.count ?? 50,
-      statuses: params.statuses,
-    },
-  });
+  const status = params.statuses?.[0];
 
-  const orders = (data?.orders ?? []) as ordersgrpcOrder[];
-  return orders.map(mapBackendOrderToAgentOrder);
+  const count = params.count ?? 50;
+
+  if (status === 'OrderStatus_IN_TRANSIT') {
+    const page = await listAgentOngoingOrdersPage({ userId: params.userId, count });
+    return page.orders;
+  }
+  if (status === 'OrderStatus_DELIVERED') {
+    const page = await listAgentDeliveredOrdersPage({ userId: params.userId, count });
+    return page.orders;
+  }
+
+  const page = await listAgentAvailableOrdersPage({
+    userId: params.userId,
+    count,
+    radiusKm: 300,
+  });
+  return page.orders;
 }
 
 export async function getAgentOrderDetailsFromBackend(params: {

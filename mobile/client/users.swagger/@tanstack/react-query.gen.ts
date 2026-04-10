@@ -11,9 +11,6 @@ import type {
   UsersListKycVerificationsData,
   UsersListKycVerificationsError,
   UsersListKycVerificationsResponse,
-  UsersUpdateKycStatusData,
-  UsersUpdateKycStatusError,
-  UsersUpdateKycStatusResponse,
   UsersExportUsersPdfData,
   UsersGrantAdminData,
   UsersGrantAdminError,
@@ -31,6 +28,9 @@ import type {
   UsersSuspendUserData,
   UsersSuspendUserError,
   UsersSuspendUserResponse,
+  UsersUpdateKycStatusData,
+  UsersUpdateKycStatusError,
+  UsersUpdateKycStatusResponse,
   UsersOAuthData,
   UsersOAuthError,
   UsersOAuthResponse,
@@ -69,21 +69,20 @@ import type {
   UsersDeleteUserAccountData,
   UsersListFarmersData,
   UsersListFarmersReivewsData,
-  UsersGetUserByIdData,
   UsersGetKycByUserIdData,
-  UsersCreateKycData,
-  UsersCreateKycError,
-  UsersCreateKycResponse,
+  UsersGetUserByIdData,
   UsersReviewFarmerData,
   UsersReviewFarmerError,
   UsersReviewFarmerResponse,
+  UsersCreateKycData,
+  UsersCreateKycError,
+  UsersCreateKycResponse,
   UsersGetFarmerByIdData,
 } from '../types.gen';
 import type { AxiosError } from 'axios';
 import {
   client,
   usersListKycVerifications,
-  usersUpdateKycStatus,
   usersExportUsersPdf,
   usersGrantAdmin,
   usersGrantAgent,
@@ -91,6 +90,7 @@ import {
   usersDeleteAgent,
   usersReactivateUser,
   usersSuspendUser,
+  usersUpdateKycStatus,
   usersOAuth,
   usersRevokeRefreshToken,
   usersAuthenticate,
@@ -108,10 +108,10 @@ import {
   usersDeleteUserAccount,
   usersListFarmers,
   usersListFarmersReivews,
-  usersGetUserById,
   usersGetKycByUserId,
-  usersCreateKyc,
+  usersGetUserById,
   usersReviewFarmer,
+  usersCreateKyc,
   usersGetFarmerById,
 } from '../sdk.gen';
 
@@ -150,11 +150,11 @@ const createQueryKey = <TOptions extends OptionsLegacyParser>(
 };
 
 export const usersListKycVerificationsQueryKey = (
-  options?: OptionsLegacyParser<UsersListKycVerificationsData>,
+  options: OptionsLegacyParser<UsersListKycVerificationsData>,
 ) => [createQueryKey('usersListKycVerifications', options)];
 
 export const usersListKycVerificationsOptions = (
-  options?: OptionsLegacyParser<UsersListKycVerificationsData>,
+  options: OptionsLegacyParser<UsersListKycVerificationsData>,
 ) => {
   return queryOptions({
     queryFn: async ({ queryKey, signal }) => {
@@ -208,13 +208,13 @@ const createInfiniteParams = <
 };
 
 export const usersListKycVerificationsInfiniteQueryKey = (
-  options?: OptionsLegacyParser<UsersListKycVerificationsData>,
+  options: OptionsLegacyParser<UsersListKycVerificationsData>,
 ): QueryKey<OptionsLegacyParser<UsersListKycVerificationsData>> => [
   createQueryKey('usersListKycVerifications', options, true),
 ];
 
 export const usersListKycVerificationsInfiniteOptions = (
-  options?: OptionsLegacyParser<UsersListKycVerificationsData>,
+  options: OptionsLegacyParser<UsersListKycVerificationsData>,
 ) => {
   return infiniteQueryOptions<
     UsersListKycVerificationsResponse,
@@ -254,26 +254,6 @@ export const usersListKycVerificationsInfiniteOptions = (
       queryKey: usersListKycVerificationsInfiniteQueryKey(options),
     },
   );
-};
-
-export const usersUpdateKycStatusMutation = (
-  options?: Partial<OptionsLegacyParser<UsersUpdateKycStatusData>>,
-) => {
-  const mutationOptions: UseMutationOptions<
-    UsersUpdateKycStatusResponse,
-    AxiosError<UsersUpdateKycStatusError>,
-    OptionsLegacyParser<UsersUpdateKycStatusData>
-  > = {
-    mutationFn: async localOptions => {
-      const { data } = await usersUpdateKycStatus({
-        ...options,
-        ...localOptions,
-        throwOnError: true,
-      });
-      return data;
-    },
-  };
-  return mutationOptions;
 };
 
 export const usersExportUsersPdfQueryKey = (
@@ -450,6 +430,26 @@ export const usersSuspendUserMutation = (
   > = {
     mutationFn: async localOptions => {
       const { data } = await usersSuspendUser({
+        ...options,
+        ...localOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const usersUpdateKycStatusMutation = (
+  options?: Partial<OptionsLegacyParser<UsersUpdateKycStatusData>>,
+) => {
+  const mutationOptions: UseMutationOptions<
+    UsersUpdateKycStatusResponse,
+    AxiosError<UsersUpdateKycStatusError>,
+    OptionsLegacyParser<UsersUpdateKycStatusData>
+  > = {
+    mutationFn: async localOptions => {
+      const { data } = await usersUpdateKycStatus({
         ...options,
         ...localOptions,
         throwOnError: true,
@@ -1035,27 +1035,6 @@ export const usersListFarmersReivewsOptions = (
   });
 };
 
-export const usersGetUserByIdQueryKey = (
-  options: OptionsLegacyParser<UsersGetUserByIdData>,
-) => [createQueryKey('usersGetUserById', options)];
-
-export const usersGetUserByIdOptions = (
-  options: OptionsLegacyParser<UsersGetUserByIdData>,
-) => {
-  return queryOptions({
-    queryFn: async ({ queryKey, signal }) => {
-      const { data } = await usersGetUserById({
-        ...options,
-        ...queryKey[0],
-        signal,
-        throwOnError: true,
-      });
-      return data;
-    },
-    queryKey: usersGetUserByIdQueryKey(options),
-  });
-};
-
 export const usersGetKycByUserIdQueryKey = (
   options: OptionsLegacyParser<UsersGetKycByUserIdData>,
 ) => [createQueryKey('usersGetKycByUserId', options)];
@@ -1077,16 +1056,16 @@ export const usersGetKycByUserIdOptions = (
   });
 };
 
-export const usersCreateKycQueryKey = (
-  options: OptionsLegacyParser<UsersCreateKycData>,
-) => [createQueryKey('usersCreateKyc', options)];
+export const usersGetUserByIdQueryKey = (
+  options: OptionsLegacyParser<UsersGetUserByIdData>,
+) => [createQueryKey('usersGetUserById', options)];
 
-export const usersCreateKycOptions = (
-  options: OptionsLegacyParser<UsersCreateKycData>,
+export const usersGetUserByIdOptions = (
+  options: OptionsLegacyParser<UsersGetUserByIdData>,
 ) => {
   return queryOptions({
     queryFn: async ({ queryKey, signal }) => {
-      const { data } = await usersCreateKyc({
+      const { data } = await usersGetUserById({
         ...options,
         ...queryKey[0],
         signal,
@@ -1094,28 +1073,8 @@ export const usersCreateKycOptions = (
       });
       return data;
     },
-    queryKey: usersCreateKycQueryKey(options),
+    queryKey: usersGetUserByIdQueryKey(options),
   });
-};
-
-export const usersCreateKycMutation = (
-  options?: Partial<OptionsLegacyParser<UsersCreateKycData>>,
-) => {
-  const mutationOptions: UseMutationOptions<
-    UsersCreateKycResponse,
-    AxiosError<UsersCreateKycError>,
-    OptionsLegacyParser<UsersCreateKycData>
-  > = {
-    mutationFn: async localOptions => {
-      const { data } = await usersCreateKyc({
-        ...options,
-        ...localOptions,
-        throwOnError: true,
-      });
-      return data;
-    },
-  };
-  return mutationOptions;
 };
 
 export const usersReviewFarmerQueryKey = (
@@ -1149,6 +1108,47 @@ export const usersReviewFarmerMutation = (
   > = {
     mutationFn: async localOptions => {
       const { data } = await usersReviewFarmer({
+        ...options,
+        ...localOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const usersCreateKycQueryKey = (
+  options: OptionsLegacyParser<UsersCreateKycData>,
+) => [createQueryKey('usersCreateKyc', options)];
+
+export const usersCreateKycOptions = (
+  options: OptionsLegacyParser<UsersCreateKycData>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await usersCreateKyc({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: usersCreateKycQueryKey(options),
+  });
+};
+
+export const usersCreateKycMutation = (
+  options?: Partial<OptionsLegacyParser<UsersCreateKycData>>,
+) => {
+  const mutationOptions: UseMutationOptions<
+    UsersCreateKycResponse,
+    AxiosError<UsersCreateKycError>,
+    OptionsLegacyParser<UsersCreateKycData>
+  > = {
+    mutationFn: async localOptions => {
+      const { data } = await usersCreateKyc({
         ...options,
         ...localOptions,
         throwOnError: true,

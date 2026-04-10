@@ -2092,7 +2092,7 @@ func (i *Impl) UpdateKYCStatus(ctx context.Context,
 	statusStr := req.GetStatus().String()
 	kyc, err := querier.UpdateKYCStatus(ctx, sqlc.UpdateKYCStatusParams{
 		ID:              req.GetKycId(),
-		Status:          &statusStr,
+		Status:          statusStr,
 		RejectionReason: req.GetRejectionReason(),
 	})
 
@@ -2133,7 +2133,8 @@ func normalizeListOffset(offset int32) int32 {
 
 func normalizeKycStatusFilter(status usersgrpc.KYCStatus) string {
 	if status == usersgrpc.KYCStatus_KYC_STATUS_UNSPECIFIED {
-		return usersgrpc.KYCStatus_KYC_STATUS_PENDING.String()
+		// Unspecified means "no filter" (list all).
+		return ""
 	}
 	return status.String()
 }

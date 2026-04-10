@@ -206,10 +206,6 @@ export default function BuyerProducts() {
                   <TouchableOpacity
                     style={styles.iconContainer}
                     onPress={() => {
-                      if (cartItems.length === 0) {
-                        return;
-                      }
-
                       cartSheetRef.current?.open();
                     }}>
                     <View style={defaultStyles.relativeContainer}>

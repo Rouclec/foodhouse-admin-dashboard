@@ -72,12 +72,19 @@ const (
 
 	// DefaultOrderServiceFeeAmountXAF is a flat platform fee charged on every order.
 	// It is NOT included in farmer payout calculations.
-	DefaultOrderServiceFeeAmountXAF = 100.00
+	DefaultOrderServiceFeeAmountXAF = 250.00
 	DefaultOrderServiceFeeCurrency  = "XAF"
 )
 
 var supportedCurrencies = map[string]struct{}{
 	"XAF": {},
+}
+
+// availablePaymentMethods is the list of payment methods that are available for the orders service.
+var availablePaymentMethods = map[ordersgrpc.PaymentMethodType]struct{}{
+	ordersgrpc.PaymentMethodType_PaymentMethodType_MOBILE_MONEY: {},
+	// Orange money temporarily disabled
+	// ordersgrpc.PaymentMethodType_PaymentMethodType_ORANGE_MONEY: {},
 }
 
 // Impl is the implementation of the products service.
@@ -114,10 +121,10 @@ func (i *Impl) GetAgentStats(ctx context.Context, req *ordersgrpc.GetAgentStatsR
 	}
 
 	return &ordersgrpc.GetAgentStatsResponse{
-		AvailableCount:  int32(row.AvailableCount),
-		OngoingCount:    int32(row.OngoingCount),
-		CompletedCount:  int32(row.CompletedCount),
-		TotalEarnings:   &types.Amount{Value: row.TotalEarningsValue, CurrencyIsoCode: row.TotalEarningsCurrency},
+		AvailableCount: int32(row.AvailableCount),
+		OngoingCount:   int32(row.OngoingCount),
+		CompletedCount: int32(row.CompletedCount),
+		TotalEarnings:  &types.Amount{Value: row.TotalEarningsValue, CurrencyIsoCode: row.TotalEarningsCurrency},
 	}, nil
 }
 
@@ -277,6 +284,11 @@ func (i *Impl) ConfirmDelivery(ctx context.Context, req *ordersgrpc.ConfirmDeliv
 	)
 
 	if err != nil {
+		// Check if it's a "no rows" error (wrong secret key)
+		if errors.Is(err, sql.ErrNoRows) || strings.Contains(err.Error(), "no rows") {
+			i.logger.Debug().Msgf("no order found with secret key %v", req.GetSecretKey())
+			return nil, status.Errorf(codes.InvalidArgument, "invalid secret key provided")
+		}
 		i.logger.Debug().Msgf("error getting order with secret key %v why: %v", req.GetSecretKey(), err)
 		return nil, status.Errorf(codes.Internal, "error getting order with secret key %v why: %v", req.GetSecretKey(), err)
 	}
@@ -366,7 +378,6 @@ func (i *Impl) ConfirmDelivery(ctx context.Context, req *ordersgrpc.ConfirmDeliv
 			}
 		}
 
-		// Also pay farmer if not already paid (farmer wasn't paid on DispatchOrder when agent was assigned)
 		// We need to pay the farmer their share
 		if order.ProductOwner != nil && order.PriceValue != nil && order.PriceCurrency != nil {
 			farmerPaymentReference := fmt.Sprintf("farmer-payout-%s", strconv.FormatInt(order.OrderNumber, 10))
@@ -861,6 +872,28 @@ func (i *Impl) CreateOrder(ctx context.Context, req *ordersgrpc.CreateOrderReque
 		totalAmount += p.Product.Amount.Value * float64(p.Quantity) * TotalPercentage
 	}
 
+	// Fetch farmer pickup location (registered location).
+	if i.userService == nil {
+		return nil, status.Error(codes.FailedPrecondition, "users service is not configured")
+	}
+	farmerResp, err := i.userService.GetUserByID(ctx, &usersgrpc.GetUserByIDRequest{UserId: farmerID})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to fetch farmer profile: %v", err)
+	}
+	farmer := farmerResp.GetUser()
+	if farmer == nil {
+		return nil, status.Error(codes.NotFound, "farmer not found")
+	}
+	farmerLoc := farmer.GetLocationCoordinates()
+	if farmerLoc == nil || (farmerLoc.GetLat() == 0 && farmerLoc.GetLon() == 0) {
+		return nil, status.Error(codes.FailedPrecondition, "farmer has no pickup location configured")
+	}
+
+	pickupAddress := strings.TrimSpace(farmer.GetAddress())
+	if pickupAddress == "" {
+		pickupAddress = strings.TrimSpace(fmt.Sprintf("%v, %v", farmerLoc.GetLat(), farmerLoc.GetLon()))
+	}
+
 	// Calculate the devliery fee
 	deliveryFee, err := i.EstimateDeliveryFee(ctx, &ordersgrpc.EstimateDeliveryFeeRequest{
 		UserId:           req.GetUserId(),
@@ -876,6 +909,10 @@ func (i *Impl) CreateOrder(ctx context.Context, req *ordersgrpc.CreateOrderReque
 		DeliveryLocation: pgtype.Point{P: pgtype.Vec2{X: float64(req.GetDeliveryLocation().GetLon()),
 			Y: float64(req.GetDeliveryLocation().GetLat())},
 			Valid: true},
+		PickupLocation: pgtype.Point{
+			P:     pgtype.Vec2{X: float64(farmerLoc.GetLon()), Y: float64(farmerLoc.GetLat())},
+			Valid: true,
+		},
 		PriceValue:          totalAmount,
 		PriceCurrency:       productInfos[0].Product.GetAmount().GetCurrencyIsoCode(),
 		Status:              ordersgrpc.OrderStatus_OrderStatus_CREATED.String(),
@@ -883,6 +920,7 @@ func (i *Impl) CreateOrder(ctx context.Context, req *ordersgrpc.CreateOrderReque
 		SecretKey:           secretKey,
 		ProductOwner:        productInfos[0].Product.GetCreatedBy(),
 		DeliveryAddress:     req.GetDeliveryLocation().GetAddress(),
+		PickupAddress:       pickupAddress,
 		DeliveryFeeAmount:   deliveryFee.EstimatedDeliveryFee.Value,
 		DeliveryFeeCurrency: deliveryFee.EstimatedDeliveryFee.CurrencyIsoCode,
 		ServiceFeeAmount:    DefaultOrderServiceFeeAmountXAF,
@@ -1026,17 +1064,22 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 	// Only make payouts if NO agent is assigned (farmer delivering themselves)
 	// When agent is assigned, payment happens on ConfirmDelivery
 	if agentID == "" {
+		// Validate payout phone number is set on the order
+		if order.PayoutPhoneNumber == nil || *order.PayoutPhoneNumber == "" {
+			return nil, status.Errorf(codes.FailedPrecondition, "payout phone number not set on order. Please approve the order again with a valid phone number.")
+		}
+
 		paymentReference := fmt.Sprintf("payout-%s", strconv.FormatInt(order.OrderNumber, 10))
 
 		// calculate payout amount
 		payoutAmount := *order.PriceValue / TotalPercentage * FarmersPercentage
 
-		i.logger.Debug().Msgf("payout phone number %v", req.GetPayoutPhoneNumber())
+		i.logger.Debug().Msgf("payout phone number %v", *order.PayoutPhoneNumber)
 
 		// only make real payout when dev methods is not enabled
 		if !i.devMethodsEndabled {
 			_, payErr := i.paymentService.WithdrawFunds(ctx,
-				req.GetPayoutPhoneNumber(), payoutAmount,
+				*order.PayoutPhoneNumber, payoutAmount,
 				*order.PriceCurrency, fmt.Sprintf("payment to farmer for order %v", order.OrderNumber),
 				&paymentReference)
 
@@ -1050,7 +1093,7 @@ func (i *Impl) DispatchOrder(ctx context.Context, req *ordersgrpc.DispatchOrderR
 			EntityID:       strconv.FormatInt(req.GetOrderNumber(), 10),
 			AmountValue:    &payoutAmount,
 			AmountCurrency: order.PriceCurrency,
-			AccountNumber:  req.GetPayoutPhoneNumber(),
+			AccountNumber:  *order.PayoutPhoneNumber,
 			Method:         ordersgrpc.PaymentMethodType_PaymentMethodType_ACCOUNT_BALANCE.String(),
 			Status:         ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED.String(),
 			ExpiresAt:      pgtype.Timestamptz{Time: time.Now().Add(5 * time.Minute), Valid: true},
@@ -1580,6 +1623,208 @@ func (i *Impl) ListUserOrders(ctx context.Context, req *ordersgrpc.ListUserOrder
 	}, nil
 }
 
+func (i *Impl) agentRegisteredLocationPoint(ctx context.Context, agentID string) (pgtype.Point, error) {
+	if i.userService == nil {
+		return pgtype.Point{}, status.Error(codes.FailedPrecondition, "users service is not configured")
+	}
+
+	resp, err := i.userService.GetUserByID(ctx, &usersgrpc.GetUserByIDRequest{UserId: agentID})
+	if err != nil {
+		return pgtype.Point{}, status.Errorf(codes.Internal, "failed to fetch agent profile: %v", err)
+	}
+	u := resp.GetUser()
+	if u == nil {
+		return pgtype.Point{}, status.Error(codes.NotFound, "agent not found")
+	}
+
+	loc := u.GetLocationCoordinates()
+	if loc == nil {
+		return pgtype.Point{}, status.Error(codes.FailedPrecondition, "agent has no registered location")
+	}
+
+	lat := loc.GetLat()
+	lon := loc.GetLon()
+	if lat == 0 && lon == 0 {
+		return pgtype.Point{}, status.Error(codes.FailedPrecondition, "agent has no registered location")
+	}
+
+	return pgtype.Point{
+		P:     pgtype.Vec2{X: lon, Y: lat},
+		Valid: true,
+	}, nil
+}
+
+// ListAgentAvailableOrders implements ordersgrpc.OrdersServer.
+func (i *Impl) ListAgentAvailableOrders(ctx context.Context, req *ordersgrpc.ListAgentAvailableOrdersRequest) (*ordersgrpc.ListAgentAvailableOrdersResponse, error) {
+	agentID := strings.TrimSpace(req.GetUserId())
+	if agentID == "" {
+		return nil, status.Error(codes.InvalidArgument, "user_id is required")
+	}
+
+	var err error
+	startKey := time.Now().Add(time.Hour)
+	if req.GetStartKey() != "" {
+		startKey, err = time.Parse(time.RFC3339, req.GetStartKey())
+		if err != nil {
+			return nil, status.Error(codes.InvalidArgument, "Invalid start key")
+		}
+	}
+
+	count := int(req.GetCount())
+	if count == 0 {
+		count = 20
+	}
+
+	reqRadiusKm := req.GetRadiusKm()
+	radiusKm := reqRadiusKm
+	if radiusKm <= 0 {
+		radiusKm = 300
+	}
+
+	agentLoc, err := i.agentRegisteredLocationPoint(ctx, agentID)
+	if err != nil {
+		return nil, err
+	}
+
+	i.logger.Debug().
+		Str("agent_id", agentID).
+		Float64("agent_lon", agentLoc.P.X).
+		Float64("agent_lat", agentLoc.P.Y).
+		Float64("requested_radius_km", reqRadiusKm).
+		Float64("effective_radius_km", radiusKm).
+		Int("count", count).
+		Time("created_before", startKey).
+		Msg("ListAgentAvailableOrders: query params (agent point is lon,lat as x,y for PostGIS haversine)")
+
+	rows, err := i.repo.Do().ListAgentAvailableOrders(ctx, sqlc.ListAgentAvailableOrdersParams{
+		CreatedBefore: startKey,
+		Count:         int32(count),
+		AgentLocation: agentLoc,
+		RadiusKm:      radiusKm,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting available agent orders: %v", err)
+	}
+
+	agentPt := &types.Point{Lat: agentLoc.P.Y, Lon: agentLoc.P.X}
+	for _, row := range rows {
+		ev := i.logger.Debug().
+			Int64("order_number", row.OrderNumber).
+			Float64("effective_radius_km", radiusKm)
+		if row.DeliveryLocation.Valid {
+			d := &types.Point{Lat: row.DeliveryLocation.P.Y, Lon: row.DeliveryLocation.P.X}
+			dkm := Distance(agentPt, d)
+			ev = ev.Float64("delivery_lon", row.DeliveryLocation.P.X).
+				Float64("delivery_lat", row.DeliveryLocation.P.Y).
+				Float64("distance_km_haversine", dkm).
+				Bool("within_radius_by_go", dkm <= radiusKm)
+		} else {
+			ev = ev.Str("delivery_location", "invalid_or_missing")
+		}
+		ev.Msg("ListAgentAvailableOrders: row (distance uses same haversine as EstimateDeliveryFee / SQL filter)")
+	}
+
+	protoOrders := converters.SqlcAgentAvailableOrdersToProto(rows)
+	i.logger.Debug().
+		Int("returned_orders", len(rows)).
+		Bool("has_next_page", len(protoOrders) >= count).
+		Msg("ListAgentAvailableOrders: result summary")
+
+	nextKey := ""
+	if len(protoOrders) >= count {
+		nextKey = protoOrders[len(protoOrders)-1].GetCreatedAt().AsTime().Format(time.RFC3339)
+	}
+
+	return &ordersgrpc.ListAgentAvailableOrdersResponse{
+		Orders:  protoOrders,
+		NextKey: nextKey,
+	}, nil
+}
+
+// ListAgentOngoingOrders implements ordersgrpc.OrdersServer.
+func (i *Impl) ListAgentOngoingOrders(ctx context.Context, req *ordersgrpc.ListAgentOngoingOrdersRequest) (*ordersgrpc.ListAgentOngoingOrdersResponse, error) {
+	agentID := strings.TrimSpace(req.GetUserId())
+	if agentID == "" {
+		return nil, status.Error(codes.InvalidArgument, "user_id is required")
+	}
+
+	var err error
+	startKey := time.Now().Add(time.Hour)
+	if req.GetStartKey() != "" {
+		startKey, err = time.Parse(time.RFC3339, req.GetStartKey())
+		if err != nil {
+			return nil, status.Error(codes.InvalidArgument, "Invalid start key")
+		}
+	}
+
+	count := int(req.GetCount())
+	if count == 0 {
+		count = 20
+	}
+
+	rows, err := i.repo.Do().ListAgentOngoingOrders(ctx, sqlc.ListAgentOngoingOrdersParams{
+		AgentID:       agentID,
+		CreatedBefore: startKey,
+		Count:         int32(count),
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting ongoing agent orders: %v", err)
+	}
+
+	protoOrders := converters.SqlcAgentOngoingOrdersToProto(rows)
+	nextKey := ""
+	if len(protoOrders) >= count {
+		nextKey = protoOrders[len(protoOrders)-1].GetCreatedAt().AsTime().Format(time.RFC3339)
+	}
+
+	return &ordersgrpc.ListAgentOngoingOrdersResponse{
+		Orders:  protoOrders,
+		NextKey: nextKey,
+	}, nil
+}
+
+// ListAgentDeliveredOrders implements ordersgrpc.OrdersServer.
+func (i *Impl) ListAgentDeliveredOrders(ctx context.Context, req *ordersgrpc.ListAgentDeliveredOrdersRequest) (*ordersgrpc.ListAgentDeliveredOrdersResponse, error) {
+	agentID := strings.TrimSpace(req.GetUserId())
+	if agentID == "" {
+		return nil, status.Error(codes.InvalidArgument, "user_id is required")
+	}
+
+	var err error
+	startKey := time.Now().Add(time.Hour)
+	if req.GetStartKey() != "" {
+		startKey, err = time.Parse(time.RFC3339, req.GetStartKey())
+		if err != nil {
+			return nil, status.Error(codes.InvalidArgument, "Invalid start key")
+		}
+	}
+
+	count := int(req.GetCount())
+	if count == 0 {
+		count = 20
+	}
+
+	rows, err := i.repo.Do().ListAgentDeliveredOrders(ctx, sqlc.ListAgentDeliveredOrdersParams{
+		AgentID:       agentID,
+		CreatedBefore: startKey,
+		Count:         int32(count),
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error getting delivered agent orders: %v", err)
+	}
+
+	protoOrders := converters.SqlcAgentDeliveredOrdersToProto(rows)
+	nextKey := ""
+	if len(protoOrders) >= count {
+		nextKey = protoOrders[len(protoOrders)-1].GetCreatedAt().AsTime().Format(time.RFC3339)
+	}
+
+	return &ordersgrpc.ListAgentDeliveredOrdersResponse{
+		Orders:  protoOrders,
+		NextKey: nextKey,
+	}, nil
+}
+
 func convertOrderStatusesToStrings(orderStatus []ordersgrpc.OrderStatus) []string {
 	stringStatuses := make([]string, len(orderStatus))
 
@@ -1640,6 +1885,11 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 
 	if req.GetAccount().PaymentMethod != ordersgrpc.PaymentMethodType_PaymentMethodType_MOBILE_MONEY && req.GetAccount().PaymentMethod != ordersgrpc.PaymentMethodType_PaymentMethodType_ORANGE_MONEY {
 		return nil, status.Errorf(codes.Internal, "payment method %s not supported", req.GetAccount().GetPaymentMethod())
+	}
+
+	// Check if the payment method is currently available
+	if _, ok := availablePaymentMethods[req.GetAccount().PaymentMethod]; !ok {
+		return nil, status.Errorf(codes.FailedPrecondition, "payment method %s is currently unavailable", req.GetAccount().GetPaymentMethod())
 	}
 
 	// check if a payment has already been initiated for that entity,
@@ -1787,9 +2037,11 @@ func (i *Impl) ApproveOrder(ctx context.Context, req *ordersgrpc.ApproveOrderReq
 		return nil, status.Errorf(codes.Internal, "error getting order with id %s why: %v", req.GetOrderId(), err)
 	}
 
-	// if req.GetUserId() != *order.ProductOwner {
-	// 	return nil, status.Error(codes.PermissionDenied, "user does not have permission to approve this order")
-	// }
+	// Validate payout phone number if provided
+	var payoutPhoneNumber *string
+	if req.GetPayoutPhoneNumber() != "" {
+		payoutPhoneNumber = &req.PayoutPhoneNumber
+	}
 
 	beforeBytes, err := protojson.Marshal(converters.SqlcOrderByNumberToProto(order, i.logger))
 	if err != nil {
@@ -1797,8 +2049,9 @@ func (i *Impl) ApproveOrder(ctx context.Context, req *ordersgrpc.ApproveOrderReq
 	}
 
 	err = i.repo.Do().UpdateOrderStatus(ctx, sqlc.UpdateOrderStatusParams{
-		OrderNumber: order.OrderNumber,
-		Status:      ordersgrpc.OrderStatus_OrderStatus_APPROVED.String(),
+		OrderNumber:       order.OrderNumber,
+		Status:            ordersgrpc.OrderStatus_OrderStatus_APPROVED.String(),
+		PayoutPhoneNumber: payoutPhoneNumber,
 	})
 
 	if err != nil {
@@ -3725,5 +3978,19 @@ func (i *Impl) ListSubscriptionPlans(
 
 	return &ordersgrpc.ListSubscriptionPlansResponse{
 		SubscriptionPlans: result,
+	}, nil
+}
+
+// GetAvailablePaymentMethods returns the list of currently available payment methods.
+func (i *Impl) GetAvailablePaymentMethods(ctx context.Context,
+	req *ordersgrpc.GetAvailablePaymentMethodsRequest) (
+	*ordersgrpc.GetAvailablePaymentMethodsResponse, error) {
+	methods := make([]ordersgrpc.PaymentMethodType, 0, len(availablePaymentMethods))
+	for method := range availablePaymentMethods {
+		methods = append(methods, method)
+	}
+
+	return &ordersgrpc.GetAvailablePaymentMethodsResponse{
+		AvailableMethods: methods,
 	}, nil
 }

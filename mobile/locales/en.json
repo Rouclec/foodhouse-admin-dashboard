@@ -53,6 +53,7 @@
       "statistics": "Statistics",
       "totalEarningsWithCurrency": "Total Earnings ({{currency}})",
       "completed": "Completed",
+      "ongoing": "Ongoing",
       "pending": "Pending",
       "logoutConfirm": "Are you sure you want to logout?"
     },
@@ -198,7 +199,11 @@
         },
         "rejected": {
           "title": "KYC Rejected",
-          "subtitle": "Your documents were not accepted. Please resubmit."
+          "subtitle": "Your documents were not accepted. Please resubmit.",
+          "seeWhy": "See why",
+          "feedbackTitle": "Why your KYC was rejected",
+          "noDetails": "No additional details were provided. Please review your documents and resubmit, or contact support if you need help.",
+          "dismissModal": "Got it"
         }
       }
     }
@@ -496,7 +501,11 @@
       "reason": "Reason",
       "reject": "Reject",
       "orderRejected": "Order Rejected",
-      "youHaveRejected": "You have rejected this order. The customer will be notified about this action"
+      "youHaveRejected": "You have rejected this order. The customer will be notified about this action",
+      "confirmPayoutPhone": "Confirm Payout Phone",
+      "payoutPhoneDescription": "Enter your Mobile Money number where you would like to receive your payment. This can be MTN or Orange.",
+      "payoutPhoneNumber": "Payout Phone Number",
+      "confirm": "Confirm"
     },
     "sales": {
       "sales": "Sales",
@@ -602,7 +611,8 @@
         "pleaseAcceptPermissions": "Please accept permissions to access your location",
         "errorGettingLocation": "Error getting location",
         "currentLocation": "Current location",
-        "unknownError": "An unknown error occured"
+        "unknownError": "An unknown error occured",
+        "removeFromOrder": "Remove from cart"
       },
       "select-pickup-point": {
         "selectPickupPoint": "Select Pickup Point",
@@ -638,7 +648,9 @@
       "unknownState": "The state of this order is unknonw, contact admin for more info",
       "orderNumber": "Order number",
       "confirmDelivery": "Confirm delivery",
-      "unknownError": "An unknown error occured"
+      "unknownError": "An unknown error occured",
+      "orderSecretCode": "ORDER SECRET CODE: {{code}}",
+      "orderSecretCodeA11y": "Order secret code"
     },
     "farmer-details": {
       "farmerInformation": "Farmer Information",
@@ -655,8 +667,11 @@
     "Cart": {
       "title_one": "Cart ({{count}} item)",
       "title_other": "Cart ({{count}} items)",
+      "title_zero": "Cart ({{count}} items)",
       "continueShopping": "Continue Shopping",
-      "checkout": "Checkout"
+      "checkout": "Checkout",
+      "emptyDescription": "Your cart is empty. Add products to get started.",
+      "addItems": "Add items"
     },
     "PhoneNumberInput": {
       "mobileNumber": "Mobile number"
@@ -785,7 +800,9 @@
     "(paymentMethods)": {
       "header": "Payment Methods",
       "description": "To proceed, please add your payment methods.",
-      "next": "Next"
+      "next": "Next",
+      "unavailable": "Temporarily unavailable",
+      "methodUnavailable": "This payment method is currently unavailable. Please try again later."
     }
   }
 }

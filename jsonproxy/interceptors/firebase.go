@@ -27,9 +27,10 @@ func NewFirebaseAuthenticationInterceptor(client TokenVerifier) HTTPInterceptor 
 			// Extract the Firebase ID token from the Authorization header
 			idToken := r.Header.Get(HeaderAuthentication)
 
-			// If the authorization header is empty, continue to the next handler
+			// If the authorization header is missing/invalid for a protected endpoint, deny.
+			// (Previously, we'd fall through to authorization and incorrectly return "User is inactive".)
 			if len(idToken) <= len(BearerPrefix) {
-				next.ServeHTTP(w, r)
+				http.Error(w, "Missing ID token", http.StatusUnauthorized)
 				return
 			}
 

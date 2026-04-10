@@ -58,6 +58,10 @@ message Order {
   optional google.protobuf.Timestamp expected_delivery_date = 18;
   // Flat platform fee charged on the order (excluded from farmer payout).
   types.Amount service_fee = 19;
+
+  // Pickup location for delivery agents (farmer location at time of order
+  // creation).
+  types.Point pickup_location = 20;
 }
 
 message OrderAuditLog {
@@ -206,6 +210,7 @@ message ConfirmDeliveryResponse {}
 message ApproveOrderRequest {
   string order_id = 1;
   string user_id = 2;
+  string payout_phone_number = 3;
 }
 
 message ApproveOrderResponse {}
@@ -317,12 +322,58 @@ message ListOrdersResponse {
   string next_key = 2;
 }
 
+// Lists orders that are available for an agent to accept.
+// "Available" means the order is approved and not yet assigned to an agent.
+// Results are filtered to orders within a radius (km) of the agent's registered
+// location.
+message ListAgentAvailableOrdersRequest {
+  string user_id = 1; // agent user id
+  int32 count = 2;
+  string start_key = 3;
+  double radius_km = 4; // defaults to 300 when omitted/<=0
+}
+
+message ListAgentAvailableOrdersResponse {
+  repeated Order orders = 1;
+  string next_key = 2;
+}
+
+// Lists ongoing (in-transit) orders assigned to the agent.
+message ListAgentOngoingOrdersRequest {
+  string user_id = 1; // agent user id
+  int32 count = 2;
+  string start_key = 3;
+}
+
+message ListAgentOngoingOrdersResponse {
+  repeated Order orders = 1;
+  string next_key = 2;
+}
+
+// Lists delivered orders completed by the agent.
+message ListAgentDeliveredOrdersRequest {
+  string user_id = 1; // agent user id
+  int32 count = 2;
+  string start_key = 3;
+}
+
+message ListAgentDeliveredOrdersResponse {
+  repeated Order orders = 1;
+  string next_key = 2;
+}
+
 message CheckPaymentStatusRequest {
   string payment_id = 1;
   string user_id = 2;
 }
 
 message CheckPaymentStatusResponse { PaymentStatus status = 1; }
+
+message GetAvailablePaymentMethodsRequest { string user_id = 1; }
+
+message GetAvailablePaymentMethodsResponse {
+  repeated PaymentMethodType available_methods = 1;
+}
 
 enum FilterType {
   FilterType_UNSPECIFIED = 0;
@@ -661,6 +712,27 @@ service Orders {
     };
   }
 
+  rpc ListAgentAvailableOrders(ListAgentAvailableOrdersRequest)
+      returns (ListAgentAvailableOrdersResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/orders/list-agent-available-orders"
+    };
+  }
+
+  rpc ListAgentOngoingOrders(ListAgentOngoingOrdersRequest)
+      returns (ListAgentOngoingOrdersResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/orders/list-agent-ongoing-orders"
+    };
+  }
+
+  rpc ListAgentDeliveredOrders(ListAgentDeliveredOrdersRequest)
+      returns (ListAgentDeliveredOrdersResponse) {
+    option (google.api.http) = {
+      get : "/v1/users/{user_id}/orders/list-agent-delivered-orders"
+    };
+  }
+
   rpc ListFarmerOrders(ListFarmerOrdersRequest)
       returns (ListFarmerOrdersResponse) {
     option (google.api.http) = {
@@ -869,6 +941,13 @@ service Orders {
     option (google.api.http) = {
       post : "/v1/users/{user_id}/orders/create-custom-subscription"
       body : "*"
+    };
+  }
+
+  rpc GetAvailablePaymentMethods(GetAvailablePaymentMethodsRequest)
+      returns (GetAvailablePaymentMethodsResponse) {
+    option (google.api.http) = {
+      get : "/v1/public/orders/available-payment-methods"
     };
   }
 }

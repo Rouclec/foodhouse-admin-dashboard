@@ -49,7 +49,8 @@ func isRequestAllowed(r *http.Request) (bool, int, string) {
 		return true, 0, ""
 	}
 	if !isUserActive(status) {
-		return false, http.StatusUnauthorized, "User is inactive"
+		// Authenticated user but suspended/inactive should be forbidden, not unauthenticated.
+		return false, http.StatusForbidden, "User is inactive"
 	}
 	if isAdmin(role) {
 		return true, 0, ""

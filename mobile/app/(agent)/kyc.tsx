@@ -46,7 +46,6 @@ function mapGrpcKycStatusToUi(status?: usersgrpcKYCStatus): KycUiStatus {
 }
 
 const KYC = () => {
-  const [agentState, setAgentState] = useState(agentDemoState.getState());
   const [identityDocumentFront, setIdentityDocumentFront] =
     useState<DocumentState | null>(null);
   const [identityDocumentBack, setIdentityDocumentBack] =
@@ -57,12 +56,19 @@ const KYC = () => {
   );
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [isDemo, setIsDemo] = useState(false);
+  const [demoState, setDemoState] = useState(agentDemoState.getState());
   const { user } = useContext(Context) as ContextType;
   const userId = user?.userId ?? '';
-  const isDemoMode = agentState.isDemoMode;
 
   useEffect(() => {
-    const unsubscribe = agentDemoState.subscribe(setAgentState);
+    const checkDemoMode = () => {
+      const state = agentDemoState.getState();
+      setIsDemo(state.isDemoMode && state.isLoggedIn);
+      setDemoState(state);
+    };
+    checkDemoMode();
+    const unsubscribe = agentDemoState.subscribe(checkDemoMode);
     return () => { unsubscribe(); };
   }, []);
 
@@ -70,7 +76,7 @@ const KYC = () => {
     ...usersGetKycByUserIdOptions({
       path: { userId },
     }),
-    enabled: !!userId && !isDemoMode,
+    enabled: !isDemo && !!userId,
   });
 
   const backendKycStatus: KycUiStatus = useMemo(() => {
@@ -79,8 +85,8 @@ const KYC = () => {
     return mapGrpcKycStatusToUi(verification.status);
   }, [backendKycData?.kycVerification]);
 
-  const kycStatus: KycUiStatus = isDemoMode
-    ? (agentState.kycStatus as KycUiStatus)
+  const kycStatus: KycUiStatus = isDemo
+    ? (demoState.kycStatus as KycUiStatus)
     : backendKycStatus;
 
   const { mutateAsync: createKyc } = useMutation({
@@ -274,7 +280,7 @@ const KYC = () => {
     setLoading(true);
     try {
       // Demo mode: keep existing mock behavior.
-      if (isDemoMode) {
+      if (isDemo) {
         if (!demoConfig.enabled) {
           Alert.alert(
             i18n.t('common.error'),
@@ -286,6 +292,7 @@ const KYC = () => {
         agentDemoState.loginAsAgent(true);
         agentDemoState.submitKYC();
         setSubmitted(true);
+        router.replace('/(agent)/(index)');
         return;
       }
 
@@ -333,6 +340,7 @@ const KYC = () => {
       });
 
       setSubmitted(true);
+      router.replace('/(agent)/(index)');
     } catch (error) {
       console.error('Error submitting KYC:', error);
       Alert.alert(
@@ -353,7 +361,6 @@ const KYC = () => {
   const isSubmitDisabled = loading || !isFormValid;
 
   if (submitted || kycStatus === 'verified') {
-    const isContinueDisabled = kycStatus === 'pending';
     return (
       <View style={[defaultStyles.flex, defaultStyles.container]}>
         <View style={kycStyles.successContainer}>
@@ -371,7 +378,7 @@ const KYC = () => {
               : i18n.t('(agent).kyc.submittedMessage')}
           </Text>
           
-          {isDemoMode && agentState.kycStatus === 'pending' && (
+          {isDemo && demoState.kycStatus === 'pending' && (
             <View style={{ marginTop: 24, padding: 16, backgroundColor: Colors.primary[50], borderRadius: 12 }}>
               <Text style={{ fontSize: 14, fontWeight: '600', color: Colors.primary[500], marginBottom: 8 }}>
                 {i18n.t('(agent).kyc.demoActiveTitle')}
@@ -393,13 +400,8 @@ const KYC = () => {
             mode="contained"
             onPress={() => router.replace('/(agent)/(index)')}
             style={defaultStyles.button}
-            buttonColor={
-              isContinueDisabled ? Colors.grey['bg'] : Colors.primary[500]
-            }
-            disabled={isContinueDisabled}>
-            {kycStatus === 'verified' 
-              ? i18n.t('(agent).kyc.continueToDashboard')
-              : i18n.t('(agent).kyc.pleaseWait')}
+            buttonColor={Colors.primary[500]}>
+            {i18n.t('(agent).kyc.continueToDashboard')}
           </Button>
         </View>
       </View>
@@ -555,7 +557,7 @@ const KYC = () => {
           </TouchableOpacity>
         </View>
 
-      {isDemoMode && (
+      {isDemo && (
           <View style={{ marginTop: 16, padding: 12, backgroundColor: Colors.gold + '20', borderRadius: 8 }}>
             <Text style={{ fontSize: 12, color: Colors.grey['61'], textAlign: 'center' }}>
               Demo Mode: KYC will auto-approve after submission.

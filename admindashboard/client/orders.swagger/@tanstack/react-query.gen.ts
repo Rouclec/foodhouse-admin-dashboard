@@ -31,6 +31,7 @@ import type {
   OrdersConfirmPaymentData,
   OrdersConfirmPaymentError,
   OrdersConfirmPaymentResponse,
+  OrdersGetAvailablePaymentMethodsData,
   OrdersListSubscriptionPlansData,
   OrdersGetFarmerEarningsData,
   OrdersListFarmerOrdersData,
@@ -48,6 +49,9 @@ import type {
   OrdersInitiatePaymentData,
   OrdersInitiatePaymentError,
   OrdersInitiatePaymentResponse,
+  OrdersListAgentAvailableOrdersData,
+  OrdersListAgentDeliveredOrdersData,
+  OrdersListAgentOngoingOrdersData,
   OrdersListDeliveryCitiesData,
   OrdersListDeliveryPointsData,
   OrdersListUserOrdersData,
@@ -90,6 +94,7 @@ import {
   ordersDeleteDeliveryPoint,
   ordersUpdateDeliveryPoint,
   ordersConfirmPayment,
+  ordersGetAvailablePaymentMethods,
   ordersHealthCheck,
   ordersListSubscriptionPlans,
   ordersGetFarmerEarnings,
@@ -100,6 +105,9 @@ import {
   ordersEstimateDeliveryFee,
   ordersGetAgentStats,
   ordersInitiatePayment,
+  ordersListAgentAvailableOrders,
+  ordersListAgentDeliveredOrders,
+  ordersListAgentOngoingOrders,
   ordersListDeliveryCities,
   ordersListDeliveryPoints,
   ordersListUserOrders,
@@ -521,6 +529,27 @@ export const ordersConfirmPaymentMutation = (
   return mutationOptions;
 };
 
+export const ordersGetAvailablePaymentMethodsQueryKey = (
+  options?: OptionsLegacyParser<OrdersGetAvailablePaymentMethodsData>,
+) => [createQueryKey("ordersGetAvailablePaymentMethods", options)];
+
+export const ordersGetAvailablePaymentMethodsOptions = (
+  options?: OptionsLegacyParser<OrdersGetAvailablePaymentMethodsData>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await ordersGetAvailablePaymentMethods({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: ordersGetAvailablePaymentMethodsQueryKey(options),
+  });
+};
+
 export const ordersHealthCheckQueryKey = (options?: OptionsLegacyParser) => [
   createQueryKey("ordersHealthCheck", options),
 ];
@@ -807,6 +836,69 @@ export const ordersInitiatePaymentMutation = (
     },
   };
   return mutationOptions;
+};
+
+export const ordersListAgentAvailableOrdersQueryKey = (
+  options: OptionsLegacyParser<OrdersListAgentAvailableOrdersData>,
+) => [createQueryKey("ordersListAgentAvailableOrders", options)];
+
+export const ordersListAgentAvailableOrdersOptions = (
+  options: OptionsLegacyParser<OrdersListAgentAvailableOrdersData>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await ordersListAgentAvailableOrders({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: ordersListAgentAvailableOrdersQueryKey(options),
+  });
+};
+
+export const ordersListAgentDeliveredOrdersQueryKey = (
+  options: OptionsLegacyParser<OrdersListAgentDeliveredOrdersData>,
+) => [createQueryKey("ordersListAgentDeliveredOrders", options)];
+
+export const ordersListAgentDeliveredOrdersOptions = (
+  options: OptionsLegacyParser<OrdersListAgentDeliveredOrdersData>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await ordersListAgentDeliveredOrders({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: ordersListAgentDeliveredOrdersQueryKey(options),
+  });
+};
+
+export const ordersListAgentOngoingOrdersQueryKey = (
+  options: OptionsLegacyParser<OrdersListAgentOngoingOrdersData>,
+) => [createQueryKey("ordersListAgentOngoingOrders", options)];
+
+export const ordersListAgentOngoingOrdersOptions = (
+  options: OptionsLegacyParser<OrdersListAgentOngoingOrdersData>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await ordersListAgentOngoingOrders({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: ordersListAgentOngoingOrdersQueryKey(options),
+  });
 };
 
 export const ordersListDeliveryCitiesQueryKey = (

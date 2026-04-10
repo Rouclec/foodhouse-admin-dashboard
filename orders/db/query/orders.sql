@@ -1,6 +1,7 @@
 -- name: CreateOrder :one
 INSERT INTO orders (
     delivery_location, 
+    pickup_location,
     price_value, 
     price_currency, 
     status, 
@@ -11,6 +12,7 @@ INSERT INTO orders (
     rating, 
     review,
     delivery_address,
+    pickup_address,
     delivery_fee_amount,
     delivery_fee_currency,
     service_fee_amount,
@@ -20,6 +22,7 @@ INSERT INTO orders (
 )
 VALUES (
     sqlc.arg(delivery_location)::point,    -- Enforcing as POINT (casting delivery_location)
+    sqlc.arg(pickup_location)::point,
     sqlc.arg(price_value)::float,         -- Enforcing as BIGINT
     sqlc.arg(price_currency)::varchar(3),  -- Enforcing as VARCHAR(3)
     sqlc.arg(status)::text,                -- Enforcing as TEXT
@@ -30,6 +33,7 @@ VALUES (
     1, -- Default rating
     '', -- Default review
     sqlc.arg(delivery_address)::text,
+    sqlc.arg(pickup_address)::text,
     sqlc.arg(delivery_fee_amount)::float,
     sqlc.arg(delivery_fee_currency)::varchar(3),
     sqlc.arg(service_fee_amount)::float,
@@ -44,7 +48,8 @@ UPDATE orders
 SET
   status = $2,
   updated_at = now(),
-  dispatched_by = COALESCE($3, dispatched_by)
+  dispatched_by = COALESCE($3, dispatched_by),
+  payout_phone_number = COALESCE($4, payout_phone_number)
 WHERE order_number = $1;
 
 
@@ -58,7 +63,7 @@ WHERE order_number = $1;
 
 -- name: GetOrderByOrderNumber :one
 SELECT 
-    o.*,
+    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, COALESCE(o.review, '')::text AS review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.service_fee_amount, o.service_fee_currency, o.agent_id, o.pickup_location, COALESCE(o.pickup_address, '')::text AS pickup_address,
     COALESCE(
         JSON_AGG(
             JSON_BUILD_OBJECT(
@@ -77,7 +82,7 @@ GROUP BY o.order_number;
 
 -- name: GetUserOrderBySecretKey :one
 SELECT 
-    o.*,
+    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, COALESCE(o.review, '')::text AS review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.service_fee_amount, o.service_fee_currency, o.agent_id, o.pickup_location, COALESCE(o.pickup_address, '')::text AS pickup_address,
     COALESCE(
         JSON_AGG(
             JSON_BUILD_OBJECT(
@@ -96,7 +101,7 @@ GROUP BY o.order_number;
 
 -- name: ListUserOrders :many
 SELECT 
-  o.*,
+  o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, COALESCE(o.review, '')::text AS review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.user_subscription_id, o.expected_delivery_date, o.service_fee_amount, o.service_fee_currency, o.agent_id, o.pickup_location, COALESCE(o.pickup_address, '')::text AS pickup_address,
   COALESCE(oi_count.total_items, 0)::int AS total_items,
   oi_preview.product AS preview_product,
   oi_preview.quantity AS preview_quantity
@@ -132,7 +137,7 @@ LIMIT sqlc.arg(count)::int;
 
 -- name: ListFarmerOrders :many
 SELECT 
-    o.*,
+    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, COALESCE(o.review, '')::text AS review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.service_fee_amount, o.service_fee_currency, o.agent_id, o.pickup_location, COALESCE(o.pickup_address, '')::text AS pickup_address,
     COALESCE(oi_count.total_items, 0)::int AS total_items,
     oi_preview.product AS preview_product,
     oi_preview.quantity AS preview_quantity
@@ -162,7 +167,7 @@ LIMIT sqlc.arg(count)::int;
 
 -- name: ListOrders :many
 SELECT 
-    o.*,
+    o.order_number, o.delivery_location, o.price_value, o.price_currency, o.status, o.rating, COALESCE(o.review, '')::text AS review, o.created_by, o.created_at, o.updated_at, o.secret_key, o.product_owner, o.payout_phone_number, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.service_fee_amount, o.service_fee_currency, o.agent_id, o.pickup_location, COALESCE(o.pickup_address, '')::text AS pickup_address,
     COALESCE(oi_count.total_items, 0)::int AS total_items,
     oi_preview.product AS preview_product,
     oi_preview.quantity AS preview_quantity
@@ -186,6 +191,107 @@ WHERE
        OR o.created_at < sqlc.arg(created_before)::timestamptz)
   AND (sqlc.arg(search_key)::TEXT IS NULL 
        OR o.order_number::TEXT ILIKE '%' || sqlc.arg(search_key) || '%')
+ORDER BY o.created_at DESC
+LIMIT sqlc.arg(count)::int;
+
+-- name: ListAgentAvailableOrders :many
+SELECT
+  o.order_number, o.delivery_location, o.status, o.created_by, o.created_at, o.updated_at, o.product_owner, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.agent_id, o.pickup_location, COALESCE(o.pickup_address, '')::text AS pickup_address,
+  COALESCE(oi_count.total_items, 0)::int AS total_items,
+  oi_preview.product AS preview_product,
+  oi_preview.quantity AS preview_quantity
+FROM orders o
+LEFT JOIN LATERAL (
+    SELECT product, quantity
+    FROM order_items
+    WHERE order_number = o.order_number
+    LIMIT 1
+) AS oi_preview ON TRUE
+LEFT JOIN (
+    SELECT order_number, COUNT(*) AS total_items
+    FROM order_items
+    GROUP BY order_number
+) AS oi_count ON oi_count.order_number = o.order_number
+WHERE
+  o.status = 'OrderStatus_APPROVED'
+  AND o.agent_id IS NULL
+  AND o.delivery_location IS NOT NULL
+  AND (
+    sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR
+    o.created_at < sqlc.arg(created_before)::timestamptz
+  )
+  AND (
+    6371 * 2 * asin(
+      sqrt(
+        power(
+          sin(radians((o.delivery_location[1] - (sqlc.arg(agent_location)::point)[1]) / 2)),
+          2
+        ) +
+        cos(radians((sqlc.arg(agent_location)::point)[1])) *
+        cos(radians(o.delivery_location[1])) *
+        power(
+          sin(radians((o.delivery_location[0] - (sqlc.arg(agent_location)::point)[0]) / 2)),
+          2
+        )
+      )
+    )
+  ) <= sqlc.arg(radius_km)::float8
+ORDER BY o.created_at DESC
+LIMIT sqlc.arg(count)::int;
+
+-- name: ListAgentOngoingOrders :many
+SELECT
+  o.order_number, o.delivery_location, o.status, o.created_by, o.created_at, o.updated_at, o.product_owner, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.agent_id, o.pickup_location, COALESCE(o.pickup_address, '')::text AS pickup_address,
+  COALESCE(oi_count.total_items, 0)::int AS total_items,
+  oi_preview.product AS preview_product,
+  oi_preview.quantity AS preview_quantity
+FROM orders o
+LEFT JOIN LATERAL (
+    SELECT product, quantity
+    FROM order_items
+    WHERE order_number = o.order_number
+    LIMIT 1
+) AS oi_preview ON TRUE
+LEFT JOIN (
+    SELECT order_number, COUNT(*) AS total_items
+    FROM order_items
+    GROUP BY order_number
+) AS oi_count ON oi_count.order_number = o.order_number
+WHERE
+  o.status = 'OrderStatus_IN_TRANSIT'
+  AND o.agent_id = sqlc.arg(agent_id)::varchar(36)
+  AND (
+    sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR
+    o.created_at < sqlc.arg(created_before)::timestamptz
+  )
+ORDER BY o.created_at DESC
+LIMIT sqlc.arg(count)::int;
+
+-- name: ListAgentDeliveredOrders :many
+SELECT
+  o.order_number, o.delivery_location, o.status, o.created_by, o.created_at, o.updated_at, o.product_owner, o.delivery_address, o.dispatched_by, o.delivery_fee_amount, o.delivery_fee_currency, o.agent_id, o.pickup_location, COALESCE(o.pickup_address, '')::text AS pickup_address,
+  COALESCE(oi_count.total_items, 0)::int AS total_items,
+  oi_preview.product AS preview_product,
+  oi_preview.quantity AS preview_quantity
+FROM orders o
+LEFT JOIN LATERAL (
+    SELECT product, quantity
+    FROM order_items
+    WHERE order_number = o.order_number
+    LIMIT 1
+) AS oi_preview ON TRUE
+LEFT JOIN (
+    SELECT order_number, COUNT(*) AS total_items
+    FROM order_items
+    GROUP BY order_number
+) AS oi_count ON oi_count.order_number = o.order_number
+WHERE
+  o.status = 'OrderStatus_DELIVERED'
+  AND o.agent_id = sqlc.arg(agent_id)::varchar(36)
+  AND (
+    sqlc.arg(created_before)::timestamptz = '0001-01-01 00:00:00+00'::timestamptz OR
+    o.created_at < sqlc.arg(created_before)::timestamptz
+  )
 ORDER BY o.created_at DESC
 LIMIT sqlc.arg(count)::int;
 

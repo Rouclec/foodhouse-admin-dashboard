@@ -82,6 +82,16 @@ func SqlcOrderBySecretKeyToProto(order sqlc.GetUserOrderBySecretKeyRow) *ordersg
 			Lat:     order.DeliveryLocation.P.Y,
 			Lon:     order.DeliveryLocation.P.X,
 		},
+		PickupLocation: func() *types.Point {
+			if !order.PickupLocation.Valid {
+				return nil
+			}
+			return &types.Point{
+				Address: order.PickupAddress,
+				Lat:     order.PickupLocation.P.Y,
+				Lon:     order.PickupLocation.P.X,
+			}
+		}(),
 		SumTotal:          price,
 		Status:            statusEnum,
 		Rating:            int32(order.Rating.Int.Int64()),
@@ -167,6 +177,16 @@ func SqlcOrderByNumberToProto(order sqlc.GetOrderByOrderNumberRow, logger zerolo
 			Lat:     order.DeliveryLocation.P.Y,
 			Lon:     order.DeliveryLocation.P.X,
 		},
+		PickupLocation: func() *types.Point {
+			if !order.PickupLocation.Valid {
+				return nil
+			}
+			return &types.Point{
+				Address: order.PickupAddress,
+				Lat:     order.PickupLocation.P.Y,
+				Lon:     order.PickupLocation.P.X,
+			}
+		}(),
 		SumTotal:          price,
 		Status:            statusEnum,
 		Rating:            int32(order.Rating.Int.Int64()),
@@ -238,6 +258,16 @@ func SqlcOrderRowToProto(order sqlc.ListOrdersRow) *ordersgrpc.Order {
 			Lat:     order.DeliveryLocation.P.Y,
 			Lon:     order.DeliveryLocation.P.X,
 		},
+		PickupLocation: func() *types.Point {
+			if !order.PickupLocation.Valid {
+				return nil
+			}
+			return &types.Point{
+				Address: order.PickupAddress,
+				Lat:     order.PickupLocation.P.Y,
+				Lon:     order.PickupLocation.P.X,
+			}
+		}(),
 		SumTotal:          price,
 		Status:            statusEnum,
 		Rating:            int32(order.Rating.Int.Int64()),
@@ -310,6 +340,16 @@ func SqlcUserOrderRowToProto(order sqlc.ListUserOrdersRow) *ordersgrpc.Order {
 			Lat:     order.DeliveryLocation.P.Y,
 			Lon:     order.DeliveryLocation.P.X,
 		},
+		PickupLocation: func() *types.Point {
+			if !order.PickupLocation.Valid {
+				return nil
+			}
+			return &types.Point{
+				Address: order.PickupAddress,
+				Lat:     order.PickupLocation.P.Y,
+				Lon:     order.PickupLocation.P.X,
+			}
+		}(),
 		SumTotal:          price,
 		Status:            statusEnum,
 		Rating:            int32(order.Rating.Int.Int64()),
@@ -382,6 +422,16 @@ func SqlcFarmerOrderRowToProto(order sqlc.ListFarmerOrdersRow) *ordersgrpc.Order
 			Lat:     order.DeliveryLocation.P.Y,
 			Lon:     order.DeliveryLocation.P.X,
 		},
+		PickupLocation: func() *types.Point {
+			if !order.PickupLocation.Valid {
+				return nil
+			}
+			return &types.Point{
+				Address: order.PickupAddress,
+				Lat:     order.PickupLocation.P.Y,
+				Lon:     order.PickupLocation.P.X,
+			}
+		}(),
 		SumTotal:          price,
 		Status:            statusEnum,
 		Rating:            int32(order.Rating.Int.Int64()),
@@ -443,6 +493,16 @@ func SqlcOrderToProto(order sqlc.Order) *ordersgrpc.Order {
 			Lat:     order.DeliveryLocation.P.Y,
 			Lon:     order.DeliveryLocation.P.X,
 		},
+		PickupLocation: func() *types.Point {
+			if !order.PickupLocation.Valid {
+				return nil
+			}
+			return &types.Point{
+				Address: order.PickupAddress,
+				Lat:     order.PickupLocation.P.Y,
+				Lon:     order.PickupLocation.P.X,
+			}
+		}(),
 		SumTotal:          price,
 		Status:            statusEnum,
 		Rating:            int32(order.Rating.Int.Int64()),
@@ -471,6 +531,219 @@ func SqlcOrdersToProto(orders []sqlc.ListOrdersRow) []*ordersgrpc.Order {
 		result = append(result, SqlcOrderRowToProto(order))
 	}
 	return result
+}
+
+func SqlcAgentAvailableOrdersToProto(orders []sqlc.ListAgentAvailableOrdersRow) []*ordersgrpc.Order {
+	result := make([]*ordersgrpc.Order, 0, len(orders))
+	for _, order := range orders {
+		result = append(result, SqlcAgentAvailableOrderRowToProto(order))
+	}
+	return result
+}
+
+func SqlcAgentAvailableOrderRowToProto(order sqlc.ListAgentAvailableOrdersRow) *ordersgrpc.Order {
+	// Convert status (string → enum)
+	statusEnum := ordersgrpc.OrderStatus_OrderStatus_UNSPECIFIED
+	switch order.Status {
+	case ordersgrpc.OrderStatus_OrderStatus_CREATED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_CREATED
+	case ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL
+	case ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED
+	case ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT
+	case ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_DELIVERED
+	case ordersgrpc.OrderStatus_OrderStatus_APPROVED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_APPROVED
+	case ordersgrpc.OrderStatus_OrderStatus_REJECTED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_REJECTED
+	}
+
+	// Convert preview item
+	var previewItems []*ordersgrpc.OrderItem
+	if order.PreviewProduct != "" {
+		previewItems = []*ordersgrpc.OrderItem{
+			{
+				ProductId: order.PreviewProduct,
+				Quantity:  int64(order.PreviewQuantity),
+			},
+		}
+	}
+
+	return &ordersgrpc.Order{
+		OrderNumber: stringFromInt64(order.OrderNumber),
+		DeliveryLocation: &types.Point{
+			Address: order.DeliveryAddress,
+			Lat:     order.DeliveryLocation.P.Y,
+			Lon:     order.DeliveryLocation.P.X,
+		},
+		PickupLocation: func() *types.Point {
+			if !order.PickupLocation.Valid {
+				return nil
+			}
+			return &types.Point{
+				Address: order.PickupAddress,
+				Lat:     order.PickupLocation.P.Y,
+				Lon:     order.PickupLocation.P.X,
+			}
+		}(),
+		Status:       statusEnum,
+		CreatedBy:    derefString(order.CreatedBy),
+		CreatedAt:    timestamppb.New(order.CreatedAt.Time),
+		UpdatedAt:    timestamppb.New(order.UpdatedAt.Time),
+		ProductOwner: derefString(order.ProductOwner),
+		DispatchedBy: derefString(order.DispatchedBy),
+		DeliveryFee: &types.Amount{
+			Value:           derefFloat(order.DeliveryFeeAmount),
+			CurrencyIsoCode: derefString(order.DeliveryFeeCurrency),
+		},
+		TotalItems: order.TotalItems,
+		OrderItems: previewItems,
+	}
+}
+
+func SqlcAgentOngoingOrdersToProto(orders []sqlc.ListAgentOngoingOrdersRow) []*ordersgrpc.Order {
+	result := make([]*ordersgrpc.Order, 0, len(orders))
+	for _, order := range orders {
+		result = append(result, SqlcAgentOngoingOrderRowToProto(order))
+	}
+	return result
+}
+
+func SqlcAgentOngoingOrderRowToProto(order sqlc.ListAgentOngoingOrdersRow) *ordersgrpc.Order {
+	// Convert status (string → enum)
+	statusEnum := ordersgrpc.OrderStatus_OrderStatus_UNSPECIFIED
+	switch order.Status {
+	case ordersgrpc.OrderStatus_OrderStatus_CREATED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_CREATED
+	case ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL
+	case ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED
+	case ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT
+	case ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_DELIVERED
+	case ordersgrpc.OrderStatus_OrderStatus_APPROVED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_APPROVED
+	case ordersgrpc.OrderStatus_OrderStatus_REJECTED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_REJECTED
+	}
+
+	// Convert preview item
+	var previewItems []*ordersgrpc.OrderItem
+	if order.PreviewProduct != "" {
+		previewItems = []*ordersgrpc.OrderItem{
+			{
+				ProductId: order.PreviewProduct,
+				Quantity:  int64(order.PreviewQuantity),
+			},
+		}
+	}
+
+	return &ordersgrpc.Order{
+		OrderNumber: stringFromInt64(order.OrderNumber),
+		DeliveryLocation: &types.Point{
+			Address: order.DeliveryAddress,
+			Lat:     order.DeliveryLocation.P.Y,
+			Lon:     order.DeliveryLocation.P.X,
+		},
+		PickupLocation: func() *types.Point {
+			if !order.PickupLocation.Valid {
+				return nil
+			}
+			return &types.Point{
+				Address: order.PickupAddress,
+				Lat:     order.PickupLocation.P.Y,
+				Lon:     order.PickupLocation.P.X,
+			}
+		}(),
+		Status:       statusEnum,
+		CreatedBy:    derefString(order.CreatedBy),
+		CreatedAt:    timestamppb.New(order.CreatedAt.Time),
+		UpdatedAt:    timestamppb.New(order.UpdatedAt.Time),
+		ProductOwner: derefString(order.ProductOwner),
+		DispatchedBy: derefString(order.DispatchedBy),
+		DeliveryFee: &types.Amount{
+			Value:           derefFloat(order.DeliveryFeeAmount),
+			CurrencyIsoCode: derefString(order.DeliveryFeeCurrency),
+		},
+		TotalItems: order.TotalItems,
+		OrderItems: previewItems,
+	}
+}
+
+func SqlcAgentDeliveredOrdersToProto(orders []sqlc.ListAgentDeliveredOrdersRow) []*ordersgrpc.Order {
+	result := make([]*ordersgrpc.Order, 0, len(orders))
+	for _, order := range orders {
+		result = append(result, SqlcAgentDeliveredOrderRowToProto(order))
+	}
+	return result
+}
+
+func SqlcAgentDeliveredOrderRowToProto(order sqlc.ListAgentDeliveredOrdersRow) *ordersgrpc.Order {
+	// Convert status (string → enum)
+	statusEnum := ordersgrpc.OrderStatus_OrderStatus_UNSPECIFIED
+	switch order.Status {
+	case ordersgrpc.OrderStatus_OrderStatus_CREATED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_CREATED
+	case ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL
+	case ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_FAILED
+	case ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_IN_TRANSIT
+	case ordersgrpc.OrderStatus_OrderStatus_DELIVERED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_DELIVERED
+	case ordersgrpc.OrderStatus_OrderStatus_APPROVED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_APPROVED
+	case ordersgrpc.OrderStatus_OrderStatus_REJECTED.String():
+		statusEnum = ordersgrpc.OrderStatus_OrderStatus_REJECTED
+	}
+
+	// Convert preview item
+	var previewItems []*ordersgrpc.OrderItem
+	if order.PreviewProduct != "" {
+		previewItems = []*ordersgrpc.OrderItem{
+			{
+				ProductId: order.PreviewProduct,
+				Quantity:  int64(order.PreviewQuantity),
+			},
+		}
+	}
+
+	return &ordersgrpc.Order{
+		OrderNumber: stringFromInt64(order.OrderNumber),
+		DeliveryLocation: &types.Point{
+			Address: order.DeliveryAddress,
+			Lat:     order.DeliveryLocation.P.Y,
+			Lon:     order.DeliveryLocation.P.X,
+		},
+		PickupLocation: func() *types.Point {
+			if !order.PickupLocation.Valid {
+				return nil
+			}
+			return &types.Point{
+				Address: order.PickupAddress,
+				Lat:     order.PickupLocation.P.Y,
+				Lon:     order.PickupLocation.P.X,
+			}
+		}(),
+		Status:       statusEnum,
+		CreatedBy:    derefString(order.CreatedBy),
+		CreatedAt:    timestamppb.New(order.CreatedAt.Time),
+		UpdatedAt:    timestamppb.New(order.UpdatedAt.Time),
+		ProductOwner: derefString(order.ProductOwner),
+		DispatchedBy: derefString(order.DispatchedBy),
+		DeliveryFee: &types.Amount{
+			Value:           derefFloat(order.DeliveryFeeAmount),
+			CurrencyIsoCode: derefString(order.DeliveryFeeCurrency),
+		},
+		TotalItems: order.TotalItems,
+		OrderItems: previewItems,
+	}
 }
 
 func SqlcFarmerOrdersToProto(orders []sqlc.ListFarmerOrdersRow) []*ordersgrpc.Order {
@@ -764,7 +1037,7 @@ func SqlcCommissionToProto(commission sqlc.Commission) *ordersgrpc.Commission {
 
 	var paidAt *timestamppb.Timestamp
 
-	if &commission.PaidAt != nil {
+	if commission.PaidAt.Valid {
 		paidAt = timestamppb.New(commission.PaidAt.Time)
 	}
 

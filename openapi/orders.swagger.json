@@ -633,6 +633,36 @@
         ]
       }
     },
+    "/v1/public/orders/available-payment-methods": {
+      "get": {
+        "operationId": "Orders_GetAvailablePaymentMethods",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcGetAvailablePaymentMethodsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
     "/v1/public/orders/health-check": {
       "get": {
         "operationId": "Orders_HealthCheck",
@@ -799,7 +829,7 @@
         ]
       }
     },
-    "/v1/users/{userId}/agents/{agentId}/delivery-rating-summary": {
+    "/v1/users/{userId}/agents/{agentId}/get-delivery-rating-summary": {
       "get": {
         "operationId": "Orders_GetAgentRatingSummary",
         "responses": {
@@ -1010,6 +1040,146 @@
             "schema": {
               "$ref": "#/definitions/OrdersInitiatePaymentBody"
             }
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/v1/users/{userId}/orders/list-agent-available-orders": {
+      "get": {
+        "operationId": "Orders_ListAgentAvailableOrders",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcListAgentAvailableOrdersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "description": "agent user id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "startKey",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "radiusKm",
+            "description": "defaults to 300 when omitted/\u003c=0",
+            "in": "query",
+            "required": false,
+            "type": "number",
+            "format": "double"
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/v1/users/{userId}/orders/list-agent-delivered-orders": {
+      "get": {
+        "operationId": "Orders_ListAgentDeliveredOrders",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcListAgentDeliveredOrdersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "description": "agent user id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "startKey",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/v1/users/{userId}/orders/list-agent-ongoing-orders": {
+      "get": {
+        "operationId": "Orders_ListAgentOngoingOrders",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ordersgrpcListAgentOngoingOrdersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "description": "agent user id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "startKey",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -1376,7 +1546,7 @@
         ]
       }
     },
-    "/v1/users/{userId}/orders/{orderNumber}/delivery-rating": {
+    "/v1/users/{userId}/orders/{orderNumber}/create-delivery-rating": {
       "post": {
         "operationId": "Orders_CreateDeliveryRating",
         "responses": {
@@ -1586,7 +1756,12 @@
   },
   "definitions": {
     "OrdersApproveOrderBody": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "payoutPhoneNumber": {
+          "type": "string"
+        }
+      }
     },
     "OrdersBulkSettleCommissionsBody": {
       "type": "object",
@@ -2126,6 +2301,17 @@
         }
       }
     },
+    "ordersgrpcGetAvailablePaymentMethodsResponse": {
+      "type": "object",
+      "properties": {
+        "availableMethods": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ordersgrpcPaymentMethodType"
+          }
+        }
+      }
+    },
     "ordersgrpcGetFarmerEarningsResponse": {
       "type": "object",
       "properties": {
@@ -2176,6 +2362,51 @@
       "properties": {
         "payment": {
           "$ref": "#/definitions/ordersgrpcPayment"
+        }
+      }
+    },
+    "ordersgrpcListAgentAvailableOrdersResponse": {
+      "type": "object",
+      "properties": {
+        "orders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ordersgrpcOrder"
+          }
+        },
+        "nextKey": {
+          "type": "string"
+        }
+      }
+    },
+    "ordersgrpcListAgentDeliveredOrdersResponse": {
+      "type": "object",
+      "properties": {
+        "orders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ordersgrpcOrder"
+          }
+        },
+        "nextKey": {
+          "type": "string"
+        }
+      }
+    },
+    "ordersgrpcListAgentOngoingOrdersResponse": {
+      "type": "object",
+      "properties": {
+        "orders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ordersgrpcOrder"
+          }
+        },
+        "nextKey": {
+          "type": "string"
         }
       }
     },
@@ -2409,6 +2640,10 @@
         "serviceFee": {
           "$ref": "#/definitions/typesAmount",
           "description": "Flat platform fee charged on the order (excluded from farmer payout)."
+        },
+        "pickupLocation": {
+          "$ref": "#/definitions/typesPoint",
+          "description": "Pickup location for delivery agents (farmer location at time of order\ncreation)."
         }
       }
     },

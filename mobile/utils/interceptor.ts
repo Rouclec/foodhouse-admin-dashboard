@@ -84,7 +84,10 @@ const handleResponseError = async (error: any) => {
       const { accessToken } = response?.data;
 
       updateAuthHeader(accessToken);
-      // TODO Find a way to update the access token in the session
+
+      // Retry the original request with the new token
+      originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
+      return axios(originalRequest);
     } catch (refreshError) {
       // Handle refresh token errors by clearing stored tokens and redirecting to the login page.
       console.error('Token refresh failed:', refreshError);
