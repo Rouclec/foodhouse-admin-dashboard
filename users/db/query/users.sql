@@ -184,12 +184,13 @@ WHERE id = $1;
 -- KYC Queries
 
 -- name: CreateKYC :one
-INSERT INTO kyc_verifications (user_id, identity_document_urls, selfie_urls, vehicle_document_urls, status)
-VALUES ($1, $2, $3, $4, 'KYC_STATUS_PENDING')
+INSERT INTO kyc_verifications (user_id, identity_document_urls, selfie_urls, vehicle_document_urls, vehicle_type, status)
+VALUES ($1, $2, $3, $4, $5, 'KYC_STATUS_PENDING')
 ON CONFLICT (user_id) DO UPDATE
 SET identity_document_urls = EXCLUDED.identity_document_urls,
     selfie_urls = EXCLUDED.selfie_urls,
     vehicle_document_urls = EXCLUDED.vehicle_document_urls,
+    vehicle_type = EXCLUDED.vehicle_type,
     status = 'KYC_STATUS_PENDING',
     updated_at = now()
 RETURNING *;

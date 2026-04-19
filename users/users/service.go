@@ -1994,6 +1994,7 @@ func (i *Impl) CreateKYC(ctx context.Context,
 		IdentityDocumentUrls: identityUrls,
 		SelfieUrls:           selfieUrls,
 		VehicleDocumentUrls:  vehicleUrls,
+		VehicleType:          req.GetVehicleType(),
 	})
 
 	if err != nil {
@@ -2017,6 +2018,7 @@ func (i *Impl) CreateKYC(ctx context.Context,
 			IdentityDocumentUrls: kyc.IdentityDocumentUrls,
 			SelfieUrls:           kyc.SelfieUrls,
 			VehicleDocumentUrls:  kyc.VehicleDocumentUrls,
+			VehicleType:          kyc.VehicleType,
 			Status: func() usersgrpc.KYCStatus {
 				if kyc.Status != nil {
 					return usersgrpc.KYCStatus(usersgrpc.KYCStatus_value[*kyc.Status])

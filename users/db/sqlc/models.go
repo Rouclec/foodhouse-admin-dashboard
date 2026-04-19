@@ -30,6 +30,7 @@ type KycVerification struct {
 	IdentityDocumentUrls []string           `json:"identity_document_urls"`
 	SelfieUrls           []string           `json:"selfie_urls"`
 	VehicleDocumentUrls  []string           `json:"vehicle_document_urls"`
+	VehicleType          string             `json:"vehicle_type"`
 }
 
 type Referral struct {

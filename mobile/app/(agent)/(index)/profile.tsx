@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Keyboard, ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Text } from 'react-native-paper';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { Image, Keyboard, ScrollView, StyleSheet, View, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Appbar, Button, Text, Icon, Snackbar } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -9,7 +9,7 @@ import i18n from '@/i18n';
 import { agentDemoState } from '@/contexts/AgentContext';
 import { Context, type ContextType } from '@/app/_layout';
 import {
-  usersGetKycByUserIdOptions,
+  usersCompleteRegistrationMutation,
   usersRevokeRefreshTokenMutation,
 } from '@/client/users.swagger/@tanstack/react-query.gen';
 import type { usersgrpcKYCStatus } from '@/client/users.swagger';
@@ -23,7 +23,8 @@ import {
   FilterBottomSheet,
   type FilterBottomSheetRef,
 } from '@/components/(buyer)/(index)/FilterBottomSheet';
-import { clearStorage, readData, updateAuthHeader } from '@/utils';
+import { clearStorage, readData, updateAuthHeader, isLocalImageUri, uploadImage, useCompressImage } from '@/utils';
+import { ImagePicker } from '@/components';
 
 const AgentProfile = () => {
   const router = useRouter();
@@ -33,6 +34,9 @@ const AgentProfile = () => {
   const [loading, setLoading] = useState(false);
   const [isDemo, setIsDemo] = useState(false);
   const [demoState, setDemoState] = useState(agentDemoState.getState());
+  const [errorMessage, setErrorMessage] = useState('');
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
 
   useEffect(() => {
     const checkDemoMode = () => {
@@ -95,6 +99,67 @@ const AgentProfile = () => {
     ? demoState.pendingDeliveries
     : (agentStatsData?.ongoingCount ?? 0);
 
+  const originalProfileImage = user?.profileImage ?? '';
+
+  const handleImageSelect = async (asset: any) => {
+    if (asset && asset.uri !== originalProfileImage) {
+      setProfileImage(asset.uri);
+    }
+    setIsImagePickerVisible(false);
+  };
+
+  const { mutateAsync: updateProfile } = useMutation({
+    ...usersCompleteRegistrationMutation(),
+    onSuccess: async () => {
+      if (user && profileImage && profileImage !== originalProfileImage) {
+        setUser({ ...user, profileImage: profileImage });
+      }
+    },
+    onError: async error => {
+      console.error('updateProfile onError:', error);
+      setErrorMessage(
+        error?.response?.data?.message ?? i18n.t('(auth).profile.unknownError'),
+      );
+    },
+  });
+
+  const { compressImage } = useCompressImage(profileImage ?? '');
+
+  const handleSave = useCallback(async (): Promise<void> => {
+    try {
+      let finalImageUrl = profileImage;
+
+      if (
+        profileImage &&
+        profileImage !== originalProfileImage &&
+        isLocalImageUri(profileImage)
+      ) {
+        const imageUri = await compressImage();
+        if (!imageUri) {
+          throw new Error('Image compression failed');
+        }
+        finalImageUrl = await uploadImage({
+          uri: imageUri,
+          filename: `profile_${user?.userId}_${Date.now()}.jpg`,
+          directory: 'profile_images',
+        });
+      }
+
+      const data = {
+        firstName: user?.firstName,
+        lastName: user?.lastName,
+        email: user?.email,
+        address: user?.address,
+        profileImage: finalImageUrl,
+        locationCoordinates: user?.locationCoordinates,
+      };
+
+      await updateProfile({ body: data, path: { userId: user?.userId || '' } });
+    } catch (error) {
+      console.error('handleSave error:', error);
+    }
+  }, [profileImage, originalProfileImage, user, compressImage, updateProfile]);
+
   const { mutate: revokeRefreshToken } = useMutation({
     ...usersRevokeRefreshTokenMutation(),
     onError: async error => {
@@ -133,11 +198,26 @@ const AgentProfile = () => {
   return (
     <View style={styles.screen}>
       <View style={[styles.header, { paddingTop: insets.top + 24 }]}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>
-            {(displayFirstName ?? 'A')?.[0] || 'A'}
-          </Text>
-        </View>
+        <TouchableOpacity
+          style={styles.avatar}
+          onPress={() => setIsImagePickerVisible(true)}
+          disabled={isDemo}>
+          {(profileImage || user?.profileImage) ? (
+            <Image
+              source={{ uri: profileImage || user?.profileImage }}
+              style={styles.avatarImage}
+            />
+          ) : (
+            <Text style={styles.avatarText}>
+              {(displayFirstName ?? 'A')?.[0] || 'A'}
+            </Text>
+          )}
+          {!isDemo && (
+            <View style={styles.editAvatarButton}>
+              <Icon source="pencil" size={14} color="#fff" />
+            </View>
+          )}
+        </TouchableOpacity>
         <Text style={styles.name}>
           {(displayFirstName ?? i18n.t('(agent).profile.defaultName')) ||
             i18n.t('(agent).profile.defaultName')}{' '}
@@ -212,7 +292,7 @@ const AgentProfile = () => {
         </View>
       </ScrollView>
 
-      <FilterBottomSheet ref={sheetRef} sheetHeight={200}>
+<FilterBottomSheet ref={sheetRef} sheetHeight={200}>
         <View style={[buyerProductsStyles.filtersContainer]}>
           <View style={profileFlowStyles.content}>
             <Text variant="titleMedium" style={buyerProductsStyles.title}>
@@ -238,11 +318,6 @@ const AgentProfile = () => {
             </Button>
             <Button
               onPress={handleLogout}
-              style={[
-                defaultStyles.button,
-                defaultStyles.primaryButton,
-                buyerProductsStyles.halfButton,
-              ]}
               loading={loading}
               disabled={loading}>
               <Text style={defaultStyles.buttonText}>{i18n.t('common.logout')}</Text>
@@ -250,6 +325,19 @@ const AgentProfile = () => {
           </View>
         </View>
       </FilterBottomSheet>
+      <Snackbar
+        visible={!!errorMessage}
+        onDismiss={() => setErrorMessage('')}
+        duration={3000}
+        style={defaultStyles.snackbar}>
+        <Text style={defaultStyles.errorText}>{errorMessage}</Text>
+      </Snackbar>
+      <ImagePicker
+        visible={isImagePickerVisible}
+        setImage={handleImageSelect}
+        onClose={() => setIsImagePickerVisible(false)}
+        aspect={[1, 1]}
+      />
     </View>
   );
 };
@@ -353,6 +441,24 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.grey['61'],
     marginTop: 4,
+  },
+  avatarImage: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+  },
+  editAvatarButton: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: Colors.primary[500],
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#fff',
   },
 });
 

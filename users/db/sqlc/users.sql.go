@@ -46,6 +46,7 @@ type CreateKYCParams struct {
 	IdentityDocumentUrls []string `json:"identity_document_urls"`
 	SelfieUrls           []string `json:"selfie_urls"`
 	VehicleDocumentUrls  []string `json:"vehicle_document_urls"`
+	VehicleType          string   `json:"vehicle_type"`
 }
 
 // KYC Queries
@@ -55,6 +56,7 @@ func (q *Queries) CreateKYC(ctx context.Context, arg CreateKYCParams) (KycVerifi
 		arg.IdentityDocumentUrls,
 		arg.SelfieUrls,
 		arg.VehicleDocumentUrls,
+		arg.VehicleType,
 	)
 	var i KycVerification
 	err := row.Scan(
@@ -68,6 +70,7 @@ func (q *Queries) CreateKYC(ctx context.Context, arg CreateKYCParams) (KycVerifi
 		&i.IdentityDocumentUrls,
 		&i.SelfieUrls,
 		&i.VehicleDocumentUrls,
+		&i.VehicleType,
 	)
 	return i, err
 }

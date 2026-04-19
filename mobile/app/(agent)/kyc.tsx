@@ -7,6 +7,7 @@ import {
   Alert,
 } from 'react-native';
 import { Appbar, Text, Button, Icon } from 'react-native-paper';
+import { Menu } from 'react-native-paper';
 import * as ExpoImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { router } from 'expo-router';
@@ -54,6 +55,8 @@ const KYC = () => {
   const [vehicleDocument, setVehicleDocument] = useState<DocumentState | null>(
     null,
   );
+  const [selectedVehicleType, setSelectedVehicleType] = useState<string>('');
+  const [vehicleTypeMenuVisible, setVehicleTypeMenuVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [isDemo, setIsDemo] = useState(false);
@@ -324,18 +327,23 @@ const KYC = () => {
         filename: `kyc_${userId}_vehicle_${now}.${vehicleExt}`,
       });
 
+      const vehicleTypeMap: Record<string, string> = {
+        'Truck': 'VEHICLE_TYPE_TRUCK',
+        'Tricycle': 'VEHICLE_TYPE_TRICYCLE',
+        'Van': 'VEHICLE_TYPE_VAN',
+        'Car': 'VEHICLE_TYPE_CAR',
+      };
+
       await createKyc({
         path: { userId },
         body: {
-          // New array-based fields
           identityDocumentUrls: [idFrontUrl, idBackUrl],
           selfieUrls: [selfieUrl],
           vehicleDocumentUrls: [vehicleUrl],
-
-          // Back-compat fields (server still supports these)
           identityDocumentUrl: idFrontUrl,
           selfieUrl,
           vehicleDocumentUrl: vehicleUrl,
+          vehicleType: vehicleTypeMap[selectedVehicleType] || '',
         },
       });
 
@@ -356,7 +364,8 @@ const KYC = () => {
     identityDocumentFront &&
     identityDocumentBack &&
     selfie &&
-    vehicleDocument;
+    vehicleDocument &&
+    selectedVehicleType;
 
   const isSubmitDisabled = loading || !isFormValid;
 
@@ -555,6 +564,65 @@ const KYC = () => {
               </View>
             )}
           </TouchableOpacity>
+        </View>
+
+        <View style={kycStyles.documentCard}>
+          <Text style={kycStyles.documentTitle}>
+            {i18n.t('(agent).kyc.vehicleType')}
+          </Text>
+          <Text style={kycStyles.documentDescription}>
+            {i18n.t('(agent).kyc.vehicleTypeDesc')}
+          </Text>
+          <Menu
+            visible={vehicleTypeMenuVisible}
+            onDismiss={() => setVehicleTypeMenuVisible(false)}
+            anchor={
+              <TouchableOpacity
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: 12,
+                  backgroundColor: Colors.grey['bg'],
+                  borderRadius: 8,
+                  marginTop: 8,
+                }}
+                onPress={() => setVehicleTypeMenuVisible(true)}>
+                <Text style={{ flex: 1, color: selectedVehicleType ? '#000000' : Colors.grey['61'] }}>
+                  {selectedVehicleType || i18n.t('(agent).kyc.vehicleType')}
+                </Text>
+                <Icon source="menu-down" size={24} color={Colors.grey['61']} />
+              </TouchableOpacity>
+            }>
+            <Menu.Item
+              onPress={() => {
+                setSelectedVehicleType('Truck');
+                setVehicleTypeMenuVisible(false);
+              }}
+              title="Truck"
+            />
+            <Menu.Item
+              onPress={() => {
+                setSelectedVehicleType('Tricycle');
+                setVehicleTypeMenuVisible(false);
+              }}
+              title="Tricycle"
+            />
+            <Menu.Item
+              onPress={() => {
+                setSelectedVehicleType('Van');
+                setVehicleTypeMenuVisible(false);
+              }}
+              title="Van"
+            />
+            <Menu.Item
+              onPress={() => {
+                setSelectedVehicleType('Car');
+                setVehicleTypeMenuVisible(false);
+              }}
+              title="Car"
+            />
+          </Menu>
         </View>
 
       {isDemo && (
