@@ -519,6 +519,7 @@ type KYCVerification struct {
 	IdentityDocumentUrls []string `protobuf:"bytes,11,rep,name=identity_document_urls,json=identityDocumentUrls,proto3" json:"identity_document_urls,omitempty"`
 	SelfieUrls           []string `protobuf:"bytes,12,rep,name=selfie_urls,json=selfieUrls,proto3" json:"selfie_urls,omitempty"`
 	VehicleDocumentUrls  []string `protobuf:"bytes,13,rep,name=vehicle_document_urls,json=vehicleDocumentUrls,proto3" json:"vehicle_document_urls,omitempty"`
+	VehicleType          string   `protobuf:"bytes,14,opt,name=vehicle_type,json=vehicleType,proto3" json:"vehicle_type,omitempty"`
 }
 
 func (x *KYCVerification) Reset() {
@@ -640,6 +641,13 @@ func (x *KYCVerification) GetVehicleDocumentUrls() []string {
 		return x.VehicleDocumentUrls
 	}
 	return nil
+}
+
+func (x *KYCVerification) GetVehicleType() string {
+	if x != nil {
+		return x.VehicleType
+	}
+	return ""
 }
 
 type AuthFactor struct {
@@ -4213,6 +4221,7 @@ type CreateKYCRequest struct {
 	IdentityDocumentUrls []string `protobuf:"bytes,5,rep,name=identity_document_urls,json=identityDocumentUrls,proto3" json:"identity_document_urls,omitempty"`
 	SelfieUrls           []string `protobuf:"bytes,6,rep,name=selfie_urls,json=selfieUrls,proto3" json:"selfie_urls,omitempty"`
 	VehicleDocumentUrls  []string `protobuf:"bytes,7,rep,name=vehicle_document_urls,json=vehicleDocumentUrls,proto3" json:"vehicle_document_urls,omitempty"`
+	VehicleType          string   `protobuf:"bytes,8,opt,name=vehicle_type,json=vehicleType,proto3" json:"vehicle_type,omitempty"`
 }
 
 func (x *CreateKYCRequest) Reset() {
@@ -4292,6 +4301,13 @@ func (x *CreateKYCRequest) GetVehicleDocumentUrls() []string {
 		return x.VehicleDocumentUrls
 	}
 	return nil
+}
+
+func (x *CreateKYCRequest) GetVehicleType() string {
+	if x != nil {
+		return x.VehicleType
+	}
+	return ""
 }
 
 type CreateKYCResponse struct {

@@ -58,6 +58,9 @@ message KYCVerification {
   repeated string identity_document_urls = 11;
   repeated string selfie_urls = 12;
   repeated string vehicle_document_urls = 13;
+
+  // Vehicle type for delivery agents (as string for simplicity)
+  string vehicle_type = 14;
 }
 
 enum KYCStatus {
@@ -65,6 +68,14 @@ enum KYCStatus {
   KYC_STATUS_PENDING = 1;
   KYC_STATUS_VERIFIED = 2;
   KYC_STATUS_REJECTED = 3;
+}
+
+enum VehicleType {
+  VEHICLE_TYPE_UNSPECIFIED = 0;
+  VEHICLE_TYPE_TRUCK = 1;
+  VEHICLE_TYPE_TRICYCLE = 2;
+  VEHICLE_TYPE_VAN = 3;
+  VEHICLE_TYPE_CAR = 4;
 }
 
 message AuthFactor {
@@ -657,6 +668,10 @@ message CreateKYCRequest {
   repeated string identity_document_urls = 5;
   repeated string selfie_urls = 6;
   repeated string vehicle_document_urls = 7;
+
+  // Vehicle type for delivery agents (as string for simplicity)
+  // Values: TRUCK, TRICYCLE, VAN, CAR
+  string vehicle_type = 8;
 }
 
 message CreateKYCResponse { KYCVerification kyc_verification = 1; }

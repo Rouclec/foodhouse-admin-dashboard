@@ -100,7 +100,7 @@ const Register = () => {
                   ]}
                   onPress={() => setUserRole('USER_TYPE_AGENT')}>
                   <ImageBackground
-                    source={require('@/assets/images/farmer.png')}
+                    source={require('@/assets/images/delivery-agent.jpeg')}
                     style={signupStyles.roleImageBackground}
                     imageStyle={signupStyles.roleImage}>
                     <View style={signupStyles.textOverlay}>

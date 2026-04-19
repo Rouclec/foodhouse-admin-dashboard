@@ -182,6 +182,10 @@ export type UsersCreateKYCBody = {
   identityDocumentUrls?: Array<string>;
   selfieUrls?: Array<string>;
   vehicleDocumentUrls?: Array<string>;
+  /**
+   * Vehicle type for delivery agents (TRUCK, TRICYCLE, VAN, CAR)
+   */
+  vehicleType?: string;
 };
 
 export type UsersGrantAdminBody = {
