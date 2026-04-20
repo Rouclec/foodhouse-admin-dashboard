@@ -55,7 +55,8 @@
       "completed": "Imekamilika",
       "ongoing": "Inaendelea",
       "pending": "Inasubiri",
-      "logoutConfirm": "Una uhakika unataka kuondoka?"
+      "logoutConfirm": "Una uhakika unataka kuondoka?",
+      "editProfile": "Hariri wasifu"
     },
     "kyc": {
       "title": "Thibitisha Utambulisho Wako",
@@ -70,6 +71,10 @@
       "vehicleDocumentDesc": "Pakia hati ya usajili wa gari lako (picha au PDF)",
       "vehicleType": "Aina ya Gari",
       "vehicleTypeDesc": "Chagua aina ya gari unayotumia kwa uwasilishaji",
+      "vehicleTypeTruck": "Lori",
+      "vehicleTypeTricycle": "Bajaji",
+      "vehicleTypeVan": "Van",
+      "vehicleTypeCar": "Gari",
       "uploadPhoto": "Gusa kupakia",
       "takePhoto": "Gusa kuchukua picha",
       "uploadDocument": "Gusa kupakia hati",
@@ -92,9 +97,6 @@
       "continueToDashboard": "Endelea kwenye dashibodi",
       "pleaseWait": "Tafadhali subiri..."
     },
-    "profile": {
-      "editProfile": "Hariri faili"
-    },
     "orders": {
       "title": "Maagizo Yanayopatikana",
       "subtitle": "Maagizo karibu nawe",
@@ -105,9 +107,9 @@
       "status": "Hali",
       "statusPending": "Inasubiri",
       "statusAssigned": "Imepangiwa kwako",
-      "statusPickedUp": "Imepokelewa",
+      "statusPickedUp": "Njiani",
       "statusDelivered": "Imewasilishwa",
-      "yourEarning": "Kibwerso Chako",
+      "yourEarning": "Mapato yako",
       "pickupLocation": "Mahali pa Kuchukua",
       "deliveryLocation": "Mahali pa Utoaji",
       "pickup": "Kuchukua",
@@ -250,6 +252,7 @@
       "continueWith": "Endelea na",
       "dontHaveAnAccount": "Huna akaunti?",
       "registerNow": "Jisajili sasa",
+      "invalidUser": "Mtumiaji si sahihi",
       "demoModeTitle": "Hali ya Demo",
       "demoModeMessage": "Anzisha demo ya wakala kwa data ya mfano?",
       "startDemo": "Anzisha Demo"
@@ -303,25 +306,14 @@
         "resendCode": "Tuma tena nambari",
         "in": "ndani ya",
         "verifyOtp": "Thibitisha OTP"
-      },
-      "create-new-password": {
-        "createNewPassword": "Unda nenosiri jipya",
-        "password": "Nenosiri",
-        "confirmPassword": "Thibitisha nenosiri",
-        "passwordMustBe": "Nenosiri lazima liwe na angalau herufi 12",
-        "passwordsDoNot": "Nenosiri hayalingani",
-        "continue": "Endelea",
-        "yourPasswordHasBeenReset": "Nenosiri lako limewekwa upya kwa mafanikio. Utaelekezwa kwenye ukurasa wa kuingia baada ya sekunde chache.",
-        "unknownError": "Hitilafu isiyojulikana imetokea",
-        "passwordReset": "Nenosiri Limewekwa Upya!"
       }
     },
     "location": {
       "title": "Utoaji wa Eneo Unahitajika",
       "body": "Hatuwezi kupata eneo lako. Tafadhali wezesha huduma za eneo kwenye mipangilio ya kifaa chako ili kuendelea. Hii inatusaidia kuonyesha taarifa sahihi na kuboresha uzoefu wako.",
       "tail": "Ushauri: Nenda kwenye Mipangilio → Programu → [foodhouse] → Ruhusa → Eneo, kisha iwashe.",
-      "button1": "Fungua Mipangilio",
-      "button2": "Ghairi"
+      "button2": "Fungua Mipangilio",
+      "button1": "Ghairi"
     },
     "register": {
       "createAccount": "Unda Akaunti",
@@ -341,39 +333,12 @@
       "farmerAccount": "Unda Akaunti ya Mkulima",
       "buyerAccount": "Unda Akaunti ya Mnunuzi",
       "agentAccount": "Unda Akaunti ya Msaidizi wa utoaji",
-      "agentAccount": "Unda Akaunti ya Mjumbe",
       "createPassword": "Unda Nenosiri",
       "createAccount": "Unda Akaunti",
       "enterEmail": "Weka Barua Pepe Yako",
       "reEnterPassword": "Weka tena nenosiri lako",
       "placeholder": "Nenosiri lazima liwe na angalau herufi 12",
       "passwordMustBe": "Nenosiri lazima liwe na angalau herufi 12"
-    },
-    "agent": {
-      "kyc": {
-        "title": "Thibitisha Utambulisho Wako",
-        "subtitle": "Tafadhali pakua hati zinazohitajika ili kuwa msafiri",
-        "identityDocument": "Hati ya Utambulisho",
-        "identityDocumentDesc": "Pakia picha wazi ya mbele na nyuma ya kitambulisho chako au pasipoti",
-        "front": "Mbele",
-        "back": "Nyuma",
-        "selfie": "Picha ya Kujitolea",
-        "selfieDesc": "Chukua picha ya kujitolea kuthibitisha utambulisho wako",
-        "vehicleDocument": "Usajili wa Gari",
-        "vehicleDocumentDesc": "Pakia hati ya usajili wa gari lako (picha au PDF)",
-        "uploadPhoto": "Gusa kupakia",
-        "takePhoto": "Gusa kuchukua picha",
-        "uploadDocument": "Gusa kupakia hati",
-        "submit": "Wasilisha kwa Mapitio",
-        "submittedTitle": "Hati Zimewasilishwa!",
-        "submittedMessage": "Hati zako zinachunguzwa. Tutakuarifu utakapothibitishwa.",
-        "continueButton": "Endelea",
-        "missingDocuments": "Hati Hazijachukuliwa",
-        "uploadAllDocuments": "Tafadhali pakua hati zote zinazohitajika",
-        "submitError": "Imeshindwa kuwasilisha hati za KYC. Jaribu tena.",
-        "selectDocument": "Chagua Hati",
-        "uploadPdf": "Pakia PDF"
-      }
     },
     "(subsciption-flow)": {
       "index": {
@@ -431,7 +396,11 @@
       "pleaseEnterADescription": "Tafadhali ingiza maelezo ya bidhaa",
       "congratulations": "Hongera",
       "yourProductHasBeenUploaded": "Bidhaa yako imechapishwa",
-      "description": "Maelezo"
+      "description": "Maelezo",
+      "editProduct": "Hariri Bidhaa",
+      "currency": "sarafu",
+      "save": "Hifadhi",
+      "message": "Bidhaa imesasishwa kwa mafanikio"
     },
     "(index)": {
       "_layout": {
@@ -536,7 +505,11 @@
       "reason": "Sababu",
       "reject": "Kataa",
       "orderRejected": "Agizo limekataliwa",
-      "youHaveRejected": "Umekataa agizo hili. Mteja ataarifiwa."
+      "youHaveRejected": "Umekataa agizo hili. Mteja ataarifiwa.",
+      "confirmPayoutPhone": "Thibitisha nambari ya malipo",
+      "payoutPhoneDescription": "Weka nambari yako ya Mobile Money unayotaka kupokea malipo. Inaweza kuwa MTN au Orange.",
+      "payoutPhoneNumber": "Nambari ya malipo",
+      "confirm": "Thibitisha"
     },
     "sales": {
       "sales": "Uuzaji",
@@ -567,6 +540,7 @@
       "products": {
         "products": "Bidhaa",
         "searchProducts": "Tafuta bidhaa",
+        "searchCategories": "Tafuta makundi",
         "goodMorning": "Habari za asubuhi",
         "goodAfternoon": "Habari za mchana",
         "goodEvening": "Habari za jioni",
@@ -592,8 +566,12 @@
         "howWasYourProduct": "Bidhaa yako ilikuwaje?",
         "pleaseGiveYourRating": "Tafadhali toa alama yako na pia tathmini yako",
         "review": "Tathmini",
+        "rateYourDeliveryAgent": "Mpe alama wakala wako wa utoaji",
+        "howWasYourDelivery": "Uzoefu wako wa utoaji ulikuwaje?",
+        "deliveryReview": "Tathmini ya utoaji",
         "cancel": "Ghairi",
-        "submit": "Tuma"
+        "submit": "Tuma",
+        "items": "zaidi"
       },
       "farmers": {
         "farmers": "Wakulima",
@@ -607,7 +585,11 @@
       "description": "Maelezo",
       "farmer": "Mkulima",
       "orderNow": "Ongeza kwenye kapu",
-      "price": "Bei"
+      "price": "Bei",
+      "edit": "Hariri",
+      "delete": "Futa",
+      "confirmation": "Una uhakika unataka kufuta bidhaa hii?",
+      "confirmation2": "Hatua hii haiwezi kurudishwa nyuma. Bidhaa itafutwa kabisa."
     },
     "(order)": {
       "index": {
@@ -778,9 +760,11 @@
       "header": "Chagua bidhaa",
       "budgetUsed": "Bajeti iliyotumika",
       "remaining": "Iliyobaki",
+      "leftoverOk": "Ni sawa kama hutatumia bajeti yote — utalipa tu kwa ulichokichagua.",
       "delivery": "Usafirishaji",
       "selectedItems": "Vitu vilivyochaguliwa",
       "availableProducts": "Bidhaa zinazopatikana",
+      "budgetExceeded": "Hii itazidi bajeti yako ya usafirishaji.",
       "viewSummary": "Angalia muhtasari",
       "deliveryBudgetLine": "Usafirishaji {{index}}: {{currency}} {{total}} / {{max}}",
       "selectProductsForDelivery": "Chagua bidhaa kwa usafirishaji {{index}}",
@@ -820,7 +804,9 @@
     "(paymentMethods)": {
       "header": "Njia za malipo",
       "description": "Ili kuendelea, tafadhali ongeza njia zako za malipo.",
-      "next": "Ifuatayo"
+      "next": "Ifuatayo",
+      "unavailable": "Haipatikani kwa muda",
+      "methodUnavailable": "Njia hii ya malipo haipatikani kwa sasa. Tafadhali jaribu tena baadaye."
     }
   }
 }
