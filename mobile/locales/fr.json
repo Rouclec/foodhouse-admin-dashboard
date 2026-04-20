@@ -168,6 +168,31 @@
       "passwordMustBe": "Le mot de passe doit contenir au moins 12 caractères"
     },
     "agent": {
+      "profile": {
+        "defaultName": "Agent",
+        "accountStatus": "Statut du compte",
+        "kycStatusLabel": "Statut KYC",
+        "agentStatusLabel": "Statut Agent",
+        "kycStatus": {
+          "not_started": "NON COMMENCÉ",
+          "pending": "EN ATTENTE",
+          "verified": "VÉRIFIÉ",
+          "rejected": "REJETÉ"
+        },
+        "agentStatus": {
+          "not_registered": "Non enregistré",
+          "registered": "Enregistré",
+          "online": "En ligne",
+          "offline": "Hors ligne"
+        },
+        "statistics": "Statistiques",
+        "totalEarningsWithCurrency": "Gains totaux ({{currency}})",
+        "completed": "Terminés",
+        "ongoing": "En cours",
+        "pending": "En attente",
+        "logoutConfirm": "Êtes-vous sûr de vouloir vous déconnecter ?",
+        "editProfile": "Modifier le profil"
+      },
       "kyc": {
         "title": "Vérifiez Votre Identité",
         "subtitle": "Veuillez télécharger les documents requis pour devenir agent",

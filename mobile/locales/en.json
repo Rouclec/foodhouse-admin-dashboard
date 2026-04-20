@@ -55,7 +55,8 @@
       "completed": "Completed",
       "ongoing": "Ongoing",
       "pending": "Pending",
-      "logoutConfirm": "Are you sure you want to logout?"
+      "logoutConfirm": "Are you sure you want to logout?",
+      "editProfile": "Edit Profile"
     },
     "kyc": {
       "title": "Verify Your Identity",

@@ -182,6 +182,7 @@ export type UsersCreateKYCBody = {
   identityDocumentUrls?: Array<string>;
   selfieUrls?: Array<string>;
   vehicleDocumentUrls?: Array<string>;
+  vehicleType?: string;
 };
 
 export type UsersGrantAdminBody = {
@@ -319,6 +320,7 @@ export type usersgrpcKYCVerification = {
   identityDocumentUrls?: Array<string>;
   selfieUrls?: Array<string>;
   vehicleDocumentUrls?: Array<string>;
+  vehicleType?: string;
 };
 
 export type usersgrpcLastOtpForFactorResponse = {

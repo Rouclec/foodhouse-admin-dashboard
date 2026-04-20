@@ -22,8 +22,11 @@ import {
 import * as ExpoImagePicker from 'expo-image-picker';
 import { signupStyles, defaultStyles } from '@/styles';
 import { router } from 'expo-router';
-import { usersCompleteRegistrationMutation } from '@/client/users.swagger/@tanstack/react-query.gen';
-import { useMutation } from '@tanstack/react-query';
+import {
+  usersCompleteRegistrationMutation,
+  usersGetKycByUserIdOptions,
+} from '@/client/users.swagger/@tanstack/react-query.gen';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { delay, uploadImage, useCompressImage } from '@/utils';
 import { Context, ContextType } from '../_layout';
 import i18n from '@/i18n';
@@ -47,15 +50,18 @@ const GOOGLE_PLACES_PREDEFINED: [] = [];
 
 const ProfilePage = () => {
   const { user, setUser } = useContext(Context) as ContextType;
+  const queryClient = useQueryClient();
   const [firstName, setFirstName] = useState(user?.firstName);
   const [lastName, setLastName] = useState(user?.lastName);
   const [email, setEmail] = useState(user?.email);
-  const [address, setAddress] = useState(user?.address);
+  const [address, setAddress] = useState(
+    user?.address || user?.locationCoordinates?.address || '',
+  );
   const [locationCoordinates, setLocationCoordinates] = useState(
     user?.locationCoordinates,
   );
   const [lastSelectedAddress, setLastSelectedAddress] = useState<string | null>(
-    user?.locationCoordinates?.address ?? null,
+    user?.locationCoordinates?.address ?? user?.address ?? null,
   );
   const [loading, setLoading] = useState(false);
   const [profileImage, setProfileImage] = useState<
@@ -85,13 +91,35 @@ const ProfilePage = () => {
     onSuccess: async () => {
       setSuccessModalVisible(true);
       setTimeout(() => {
-        if (user?.role === 'USER_ROLE_FARMER') {
-          router.replace('/(farmer)/(index)');
-        } else if (user?.role === 'USER_ROLE_AGENT') {
-          router.replace('/(agent)/kyc');
-        } else {
+        void (async () => {
+          if (user?.role === 'USER_ROLE_FARMER') {
+            router.replace('/(farmer)/(index)');
+            return;
+          }
+
+          if (user?.role === 'USER_ROLE_AGENT') {
+            const userId = user?.userId ?? '';
+            if (!userId) {
+              router.replace('/(agent)/kyc');
+              return;
+            }
+
+            try {
+              const kycData = await queryClient.fetchQuery(
+                usersGetKycByUserIdOptions({ path: { userId } }),
+              );
+              const hasSubmittedKyc = !!kycData?.kycVerification;
+              router.replace(hasSubmittedKyc ? '/(agent)/(index)' : '/(agent)/kyc');
+              return;
+            } catch {
+              // If we can't confirm KYC state, default to KYC screen.
+              router.replace('/(agent)/kyc');
+              return;
+            }
+          }
+
           router.replace('/(buyer)/(index)');
-        }
+        })();
       }, 3000);
     },
   });
@@ -195,14 +223,23 @@ const ProfilePage = () => {
     [],
   );
 
-  const initialPlaceAddress = user?.locationCoordinates?.address;
+  const initialPlaceAddress = user?.locationCoordinates;
 
   useEffect(() => {
-    if (!initialPlaceAddress || !googlePlacesAutoCompleteRef.current) {
+    if (!initialPlaceAddress) {
       return;
     }
-    googlePlacesAutoCompleteRef.current.setAddressText(initialPlaceAddress);
-  }, [initialPlaceAddress]);
+
+    // `GooglePlacesAutocomplete` is con(trolled via `textInputProps.value`.
+    // Keep state in sync; then (best-effort) sync the internal input via ref.
+    setAddress(initialPlaceAddress?.address ?? '');
+    setLocationCoordinates(initialPlaceAddress);
+    requestAnimationFrame(() => {
+      googlePlacesAutoCompleteRef.current?.setAddressText(
+        initialPlaceAddress.address ?? '',
+      );
+    });
+  }, [initialPlaceAddress, setAddress, setLocationCoordinates]);
 
   const googlePlacesQuery = useMemo(
     () => ({
@@ -259,21 +296,24 @@ const ProfilePage = () => {
     [address, handleAddressChangeText],
   );
 
-  const renderPlacesRow = useCallback((data: GooglePlaceData) => (
-    <View style={{ flexDirection: 'row', flex: 1 }}>
-      <Text
-        style={{
-          flexShrink: 1,
-          flexGrow: 1,
-          fontSize: 14,
-          lineHeight: 18,
-          color: Colors.grey['3c'],
-        }}
-        numberOfLines={0}>
-        {data.description}
-      </Text>
-    </View>
-  ), []);
+  const renderPlacesRow = useCallback(
+    (data: GooglePlaceData) => (
+      <View style={{ flexDirection: 'row', flex: 1 }}>
+        <Text
+          style={{
+            flexShrink: 1,
+            flexGrow: 1,
+            fontSize: 14,
+            lineHeight: 18,
+            color: Colors.grey['3c'],
+          }}
+          numberOfLines={0}>
+          {data.description}
+        </Text>
+      </View>
+    ),
+    [],
+  );
 
   return (
     <>
@@ -300,6 +340,16 @@ const ProfilePage = () => {
                 placeholder={{
                   uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
                 }} // Optional placeholder
+                contentFit="cover"
+                transition={1000}
+              />
+            ) : user?.profileImage ? (
+              <Image
+                source={{ uri: user.profileImage }}
+                style={signupStyles.profileImage}
+                placeholder={{
+                  uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+                }}
                 contentFit="cover"
                 transition={1000}
               />

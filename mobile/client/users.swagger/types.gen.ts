@@ -182,9 +182,6 @@ export type UsersCreateKYCBody = {
   identityDocumentUrls?: Array<string>;
   selfieUrls?: Array<string>;
   vehicleDocumentUrls?: Array<string>;
-  /**
-   * Vehicle type for delivery agents (TRUCK, TRICYCLE, VAN, CAR)
-   */
   vehicleType?: string;
 };
 
@@ -323,6 +320,7 @@ export type usersgrpcKYCVerification = {
   identityDocumentUrls?: Array<string>;
   selfieUrls?: Array<string>;
   vehicleDocumentUrls?: Array<string>;
+  vehicleType?: string;
 };
 
 export type usersgrpcLastOtpForFactorResponse = {

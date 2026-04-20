@@ -3,3 +3,4 @@ export * from './interceptor';
 export * from './delay';
 export * from './uploadImage';
 export * from './useCompressImage';
+export * from './isLocalImageUri';

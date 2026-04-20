@@ -39,6 +39,7 @@ import {
   MessageCircle,
   ExternalLink,
   Download,
+  Car,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -623,6 +624,21 @@ export default function KYCVerificationsPage() {
                   </Button>
                 </div>
               </div>
+
+              {/* Vehicle Type */}
+              {selectedVerification.vehicleType && (
+                <div className="flex items-center justify-between p-4 border rounded-lg bg-blue-50">
+                  <div className="flex items-center gap-2">
+                    <Car className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <p className="text-sm text-gray-600">Vehicle Type</p>
+                      <p className="font-medium">
+                        {selectedVerification.vehicleType.replace('VEHICLE_TYPE_', '')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Documents */}
               <div className="space-y-4">

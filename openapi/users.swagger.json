@@ -1293,6 +1293,10 @@
           "items": {
             "type": "string"
           }
+        },
+        "vehicleType": {
+          "type": "string",
+          "title": "Vehicle type for delivery agents (as string for simplicity)\nValues: TRUCK, TRICYCLE, VAN, CAR"
         }
       }
     },
@@ -1743,6 +1747,10 @@
           "items": {
             "type": "string"
           }
+        },
+        "vehicleType": {
+          "type": "string",
+          "title": "Vehicle type for delivery agents (as string for simplicity)"
         }
       }
     },
