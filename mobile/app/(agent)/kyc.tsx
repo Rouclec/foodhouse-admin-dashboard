@@ -7,7 +7,7 @@ import {
   Alert,
 } from 'react-native';
 import { Appbar, Text, Button, Icon } from 'react-native-paper';
-import { Menu } from 'react-native-paper';
+import { Dropdown } from '@/components';
 import * as ExpoImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { router } from 'expo-router';
@@ -56,7 +56,6 @@ const KYC = () => {
     null,
   );
   const [selectedVehicleType, setSelectedVehicleType] = useState<string>('');
-  const [vehicleTypeMenuVisible, setVehicleTypeMenuVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [isDemo, setIsDemo] = useState(false);
@@ -349,11 +348,12 @@ const KYC = () => {
 
       setSubmitted(true);
       router.replace('/(agent)/(index)');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting KYC:', error);
+      const errorMessage = error?.response?.data?.message || error?.message || i18n.t('(agent).kyc.submitError');
       Alert.alert(
         i18n.t('(auth).login.anUnknownError'),
-        i18n.t('(agent).kyc.submitError'),
+        errorMessage,
       );
     } finally {
       setLoading(false);
@@ -573,56 +573,19 @@ const KYC = () => {
           <Text style={kycStyles.documentDescription}>
             {i18n.t('(agent).kyc.vehicleTypeDesc')}
           </Text>
-          <Menu
-            visible={vehicleTypeMenuVisible}
-            onDismiss={() => setVehicleTypeMenuVisible(false)}
-            anchor={
-              <TouchableOpacity
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: 12,
-                  backgroundColor: Colors.grey['bg'],
-                  borderRadius: 8,
-                  marginTop: 8,
-                }}
-                onPress={() => setVehicleTypeMenuVisible(true)}>
-                <Text style={{ flex: 1, color: selectedVehicleType ? '#000000' : Colors.grey['61'] }}>
-                  {selectedVehicleType || i18n.t('(agent).kyc.vehicleType')}
-                </Text>
-                <Icon source="menu-down" size={24} color={Colors.grey['61']} />
-              </TouchableOpacity>
-            }>
-            <Menu.Item
-              onPress={() => {
-                setSelectedVehicleType('Truck');
-                setVehicleTypeMenuVisible(false);
-              }}
-              title="Truck"
+          <View style={{ marginTop: 8 }}>
+            <Dropdown
+              value={selectedVehicleType}
+              onSelect={setSelectedVehicleType}
+              data={[
+                { label: i18n.t('(agent).kyc.vehicleTypeTruck'), value: 'Truck' },
+                { label: i18n.t('(agent).kyc.vehicleTypeTricycle'), value: 'Tricycle' },
+                { label: i18n.t('(agent).kyc.vehicleTypeVan'), value: 'Van' },
+                { label: i18n.t('(agent).kyc.vehicleTypeCar'), value: 'Car' },
+              ]}
+              label={i18n.t('(agent).kyc.vehicleType')}
             />
-            <Menu.Item
-              onPress={() => {
-                setSelectedVehicleType('Tricycle');
-                setVehicleTypeMenuVisible(false);
-              }}
-              title="Tricycle"
-            />
-            <Menu.Item
-              onPress={() => {
-                setSelectedVehicleType('Van');
-                setVehicleTypeMenuVisible(false);
-              }}
-              title="Van"
-            />
-            <Menu.Item
-              onPress={() => {
-                setSelectedVehicleType('Car');
-                setVehicleTypeMenuVisible(false);
-              }}
-              title="Car"
-            />
-          </Menu>
+          </View>
         </View>
 
       {isDemo && (

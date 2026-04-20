@@ -30,15 +30,16 @@ func (q *Queries) CountUsers(ctx context.Context, arg CountUsersParams) (int64, 
 
 const createKYC = `-- name: CreateKYC :one
 
-INSERT INTO kyc_verifications (user_id, identity_document_urls, selfie_urls, vehicle_document_urls, status)
-VALUES ($1, $2, $3, $4, 'KYC_STATUS_PENDING')
+INSERT INTO kyc_verifications (user_id, identity_document_urls, selfie_urls, vehicle_document_urls, vehicle_type, status)
+VALUES ($1, $2, $3, $4, $5, 'KYC_STATUS_PENDING')
 ON CONFLICT (user_id) DO UPDATE
 SET identity_document_urls = EXCLUDED.identity_document_urls,
     selfie_urls = EXCLUDED.selfie_urls,
     vehicle_document_urls = EXCLUDED.vehicle_document_urls,
+    vehicle_type = EXCLUDED.vehicle_type,
     status = 'KYC_STATUS_PENDING',
     updated_at = now()
-RETURNING id, user_id, status, rejection_reason, verified_at, created_at, updated_at, identity_document_urls, selfie_urls, vehicle_document_urls
+RETURNING id, user_id, status, rejection_reason, verified_at, created_at, updated_at, identity_document_urls, selfie_urls, vehicle_document_urls, vehicle_type
 `
 
 type CreateKYCParams struct {
@@ -172,7 +173,7 @@ func (q *Queries) GetFarmer(ctx context.Context, id string) (User, error) {
 }
 
 const getKYCByID = `-- name: GetKYCByID :one
-SELECT id, user_id, status, rejection_reason, verified_at, created_at, updated_at, identity_document_urls, selfie_urls, vehicle_document_urls FROM kyc_verifications WHERE id = $1
+SELECT id, user_id, status, rejection_reason, verified_at, created_at, updated_at, identity_document_urls, selfie_urls, vehicle_document_urls, vehicle_type FROM kyc_verifications WHERE id = $1
 `
 
 func (q *Queries) GetKYCByID(ctx context.Context, id string) (KycVerification, error) {
@@ -189,12 +190,13 @@ func (q *Queries) GetKYCByID(ctx context.Context, id string) (KycVerification, e
 		&i.IdentityDocumentUrls,
 		&i.SelfieUrls,
 		&i.VehicleDocumentUrls,
+		&i.VehicleType,
 	)
 	return i, err
 }
 
 const getKYCByUserID = `-- name: GetKYCByUserID :one
-SELECT id, user_id, status, rejection_reason, verified_at, created_at, updated_at, identity_document_urls, selfie_urls, vehicle_document_urls FROM kyc_verifications WHERE user_id = $1
+SELECT id, user_id, status, rejection_reason, verified_at, created_at, updated_at, identity_document_urls, selfie_urls, vehicle_document_urls, vehicle_type FROM kyc_verifications WHERE user_id = $1
 `
 
 func (q *Queries) GetKYCByUserID(ctx context.Context, userID string) (KycVerification, error) {
@@ -211,6 +213,7 @@ func (q *Queries) GetKYCByUserID(ctx context.Context, userID string) (KycVerific
 		&i.IdentityDocumentUrls,
 		&i.SelfieUrls,
 		&i.VehicleDocumentUrls,
+		&i.VehicleType,
 	)
 	return i, err
 }
@@ -563,7 +566,7 @@ func (q *Queries) ListFarmersByRating(ctx context.Context, arg ListFarmersByRati
 }
 
 const listKYCVerifications = `-- name: ListKYCVerifications :many
-SELECT id, user_id, status, rejection_reason, verified_at, created_at, updated_at, identity_document_urls, selfie_urls, vehicle_document_urls FROM kyc_verifications 
+SELECT id, user_id, status, rejection_reason, verified_at, created_at, updated_at, identity_document_urls, selfie_urls, vehicle_document_urls, vehicle_type FROM kyc_verifications 
 WHERE ($1::text = '' OR status = $1::text)
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
@@ -595,6 +598,7 @@ func (q *Queries) ListKYCVerifications(ctx context.Context, arg ListKYCVerificat
 			&i.IdentityDocumentUrls,
 			&i.SelfieUrls,
 			&i.VehicleDocumentUrls,
+			&i.VehicleType,
 		); err != nil {
 			return nil, err
 		}
@@ -714,7 +718,7 @@ SET status = $1::text,
     END,
     updated_at = now()
 WHERE id = $3::text
-RETURNING id, user_id, status, rejection_reason, verified_at, created_at, updated_at, identity_document_urls, selfie_urls, vehicle_document_urls
+RETURNING id, user_id, status, rejection_reason, verified_at, created_at, updated_at, identity_document_urls, selfie_urls, vehicle_document_urls, vehicle_type
 `
 
 type UpdateKYCStatusParams struct {
@@ -737,6 +741,7 @@ func (q *Queries) UpdateKYCStatus(ctx context.Context, arg UpdateKYCStatusParams
 		&i.IdentityDocumentUrls,
 		&i.SelfieUrls,
 		&i.VehicleDocumentUrls,
+		&i.VehicleType,
 	)
 	return i, err
 }

@@ -13,6 +13,7 @@ import {
   usersRevokeRefreshTokenMutation,
 } from '@/client/users.swagger/@tanstack/react-query.gen';
 import type { usersgrpcKYCStatus } from '@/client/users.swagger';
+import {usersGetKycByUserIdOptions} from '@/client/users.swagger/@tanstack/react-query.gen';
 import { ordersGetAgentStatsOptions } from '@/client/orders.swagger/@tanstack/react-query.gen';
 import {
   buyerProductsStyles,
@@ -54,6 +55,7 @@ const AgentProfile = () => {
   const displayFirstName = isDemo ? demoState.agent?.firstName : user?.firstName;
   const displayLastName = isDemo ? demoState.agent?.lastName : user?.lastName;
   const displayEmail = isDemo ? demoState.agent?.email : user?.email;
+  const displayPhone = isDemo ? '+237612345678' : user?.phoneNumber;
   const userId = user?.userId ?? '';
 
   const { data: backendKycData } = useQuery({
@@ -150,7 +152,7 @@ const AgentProfile = () => {
         lastName: user?.lastName,
         email: user?.email,
         address: user?.address,
-        profileImage: finalImageUrl,
+        profileImage: finalImageUrl ?? undefined,
         locationCoordinates: user?.locationCoordinates,
       };
 
@@ -226,6 +228,9 @@ const AgentProfile = () => {
         <Text style={styles.email}>
           {displayEmail || (isDemo ? 'agent@foodhouse.demo' : '')}
         </Text>
+        <Text style={styles.phone}>
+          {displayPhone || ''}
+        </Text>
         {isDemo && (
           <View style={{ backgroundColor: Colors.gold, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, marginTop: 8 }}>
             <Text style={{ color: Colors.dark[0], fontSize: 10, fontWeight: '600' }}>
@@ -279,6 +284,16 @@ const AgentProfile = () => {
         </View>
 
         <View style={{ marginTop: 24, padding: 16 }}>
+          <Button
+            mode="contained"
+            onPress={() => router.push('/(auth)/profile-page')}
+            style={defaultStyles.button}
+            buttonColor={Colors.primary[500]}>
+            {i18n.t('(agent).profile.editProfile')}
+          </Button>
+        </View>
+
+        <View style={{ padding: 16, paddingTop: 0 }}>
           <Button
             mode="outlined"
             onPress={() => {
@@ -378,6 +393,11 @@ const styles = StyleSheet.create({
   email: {
     fontSize: 14,
     color: 'rgba(255,255,255,0.8)',
+  },
+  phone: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.8)',
+    marginTop: 4,
   },
   content: {
     flex: 1,

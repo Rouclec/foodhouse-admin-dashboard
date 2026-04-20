@@ -54,16 +54,11 @@ import {
   clearStorage,
   readData,
   updateAuthHeader,
+  isLocalImageUri,
   uploadImage,
   useCompressImage,
 } from '@/utils';
 import { ImagePicker } from '@/components';
-
-const isLocalImageUri = (uri: string) =>
-  uri.startsWith('file://') ||
-  uri.startsWith('content://') ||
-  uri.startsWith('ph://') ||
-  uri.startsWith('assets-library://');
 
 export default function Profile() {
   const router = useRouter();
