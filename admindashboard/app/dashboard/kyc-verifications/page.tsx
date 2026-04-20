@@ -4,12 +4,7 @@ import React, { useContext, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -77,8 +72,11 @@ const STATUS_FILTERS: Array<{
 export default function KYCVerificationsPage() {
   const { user } = useContext(Context) as ContextType;
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<usersgrpcKYCStatus | "ALL">("ALL");
-  const [selectedVerification, setSelectedVerification] = useState<usersgrpcKYCVerification | null>(null);
+  const [statusFilter, setStatusFilter] = useState<usersgrpcKYCStatus | "ALL">(
+    "ALL",
+  );
+  const [selectedVerification, setSelectedVerification] =
+    useState<usersgrpcKYCVerification | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
@@ -143,8 +141,13 @@ export default function KYCVerificationsPage() {
     : undefined;
 
   const getUserDisplayName = (u?: usersgrpcUser, fallbackId?: string) => {
-    const fullName = [u?.firstName, u?.lastName].filter(Boolean).join(" ").trim();
-    return fullName || u?.email || u?.phoneNumber || fallbackId || "Unknown user";
+    const fullName = [u?.firstName, u?.lastName]
+      .filter(Boolean)
+      .join(" ")
+      .trim();
+    return (
+      fullName || u?.email || u?.phoneNumber || fallbackId || "Unknown user"
+    );
   };
 
   const toWhatsAppPhone = (phone?: string) => {
@@ -245,7 +248,12 @@ export default function KYCVerificationsPage() {
           setExpandedImage({ url: props.url!, title: props.title ?? props.alt })
         }
       >
-        <Image src={props.url} alt={props.alt} fill className="object-contain" />
+        <Image
+          src={props.url}
+          alt={props.alt}
+          fill
+          className="object-contain"
+        />
         <span className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-md p-1">
           <ExternalLink className="h-4 w-4 text-gray-700" />
         </span>
@@ -336,7 +344,8 @@ export default function KYCVerificationsPage() {
       const backendMessage = getBackendErrorMessage(error);
       toast({
         title: "Error",
-        description: backendMessage ?? "Failed to approve KYC. Please try again.",
+        description:
+          backendMessage ?? "Failed to approve KYC. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -378,7 +387,8 @@ export default function KYCVerificationsPage() {
       const backendMessage = getBackendErrorMessage(error);
       toast({
         title: "Error",
-        description: backendMessage ?? "Failed to reject KYC. Please try again.",
+        description:
+          backendMessage ?? "Failed to reject KYC. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -460,7 +470,7 @@ export default function KYCVerificationsPage() {
                 <p className="text-sm font-medium text-gray-600">Pending</p>
                 <p className="text-2xl font-bold">
                   {kycData?.kycVerifications?.filter(
-                    (k) => k.status === "KYC_STATUS_PENDING"
+                    (k) => k.status === "KYC_STATUS_PENDING",
                   ).length ?? 0}
                 </p>
               </div>
@@ -477,7 +487,7 @@ export default function KYCVerificationsPage() {
                 <p className="text-sm font-medium text-gray-600">Verified</p>
                 <p className="text-2xl font-bold">
                   {kycData?.kycVerifications?.filter(
-                    (k) => k.status === "KYC_STATUS_VERIFIED"
+                    (k) => k.status === "KYC_STATUS_VERIFIED",
                   ).length ?? 0}
                 </p>
               </div>
@@ -500,7 +510,9 @@ export default function KYCVerificationsPage() {
               <div className="rounded-full bg-gray-100 p-3 mb-4">
                 <Shield className="h-6 w-6 text-gray-400" />
               </div>
-              <h3 className="text-lg font-medium">No KYC verifications found</h3>
+              <h3 className="text-lg font-medium">
+                No KYC verifications found
+              </h3>
               <p className="text-sm text-gray-500 text-center mt-1">
                 {searchTerm || statusFilter !== "ALL"
                   ? "Try adjusting your search or filter criteria"
@@ -518,17 +530,25 @@ export default function KYCVerificationsPage() {
                     <Avatar className="h-12 w-12">
                       <AvatarImage src={kyc.selfieUrl ?? ""} alt="Agent" />
                       <AvatarFallback className="bg-primary text-white">
-                        {getUserDisplayName(userById[kyc.userId ?? ""], kyc.userId)?.[0]?.toUpperCase() ??
-                          "A"}
+                        {getUserDisplayName(
+                          userById[kyc.userId ?? ""],
+                          kyc.userId,
+                        )?.[0]?.toUpperCase() ?? "A"}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <p className="font-medium">
-                        {getUserDisplayName(userById[kyc.userId ?? ""], kyc.userId)}
+                        {getUserDisplayName(
+                          userById[kyc.userId ?? ""],
+                          kyc.userId,
+                        )}
                       </p>
-                      <p className="text-xs text-gray-500">User ID: {kyc.userId}</p>
+                      <p className="text-xs text-gray-500">
+                        User ID: {kyc.userId}
+                      </p>
                       <p className="text-sm text-gray-500">
-                        Submitted: {moment(kyc.createdAt).format("DD-MM-YYYY HH:mm")}
+                        Submitted:{" "}
+                        {moment(kyc.createdAt).format("DD-MM-YYYY HH:mm")}
                       </p>
                     </div>
                   </div>
@@ -561,7 +581,8 @@ export default function KYCVerificationsPage() {
           <DialogHeader>
             <DialogTitle>KYC Verification Review</DialogTitle>
             <DialogDescription>
-              Review the agent&apos;s identity documents before approving or rejecting
+              Review the agent&apos;s identity documents before approving or
+              rejecting
             </DialogDescription>
           </DialogHeader>
 
@@ -571,7 +592,9 @@ export default function KYCVerificationsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500">Current Status</p>
-                  <Badge className={getStatusColor(selectedVerification.status)}>
+                  <Badge
+                    className={getStatusColor(selectedVerification.status)}
+                  >
                     <span className="flex items-center gap-1">
                       {getStatusIcon(selectedVerification.status)}
                       {getStatusLabel(selectedVerification.status)}
@@ -581,9 +604,14 @@ export default function KYCVerificationsPage() {
                 <div className="text-right">
                   <p className="text-sm text-gray-500">User</p>
                   <p className="font-medium">
-                    {getUserDisplayName(selectedUser, selectedVerification.userId)}
+                    {getUserDisplayName(
+                      selectedUser,
+                      selectedVerification.userId,
+                    )}
                   </p>
-                  <p className="text-xs text-gray-500">{selectedVerification.userId}</p>
+                  <p className="text-xs text-gray-500">
+                    {selectedVerification.userId}
+                  </p>
                 </div>
               </div>
 
@@ -592,17 +620,26 @@ export default function KYCVerificationsPage() {
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
                     <AvatarImage
-                      src={selectedUser?.profileImage ?? selectedVerification.selfieUrl ?? ""}
+                      src={
+                        selectedUser?.profileImage ??
+                        selectedVerification.selfieUrl ??
+                        ""
+                      }
                       alt="User"
                     />
                     <AvatarFallback className="bg-primary text-white">
-                      {getUserDisplayName(selectedUser, selectedVerification.userId)?.[0]?.toUpperCase() ??
-                        "U"}
+                      {getUserDisplayName(
+                        selectedUser,
+                        selectedVerification.userId,
+                      )?.[0]?.toUpperCase() ?? "U"}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <p className="font-medium">
-                      {getUserDisplayName(selectedUser, selectedVerification.userId)}
+                      {getUserDisplayName(
+                        selectedUser,
+                        selectedVerification.userId,
+                      )}
                     </p>
                     <p className="text-sm text-gray-600">
                       {selectedUser?.phoneNumber ?? selectedUser?.email ?? ""}
@@ -626,19 +663,21 @@ export default function KYCVerificationsPage() {
               </div>
 
               {/* Vehicle Type */}
-              {selectedVerification.vehicleType && (
-                <div className="flex items-center justify-between p-4 border rounded-lg bg-blue-50">
-                  <div className="flex items-center gap-2">
-                    <Car className="h-5 w-5 text-blue-600" />
-                    <div>
-                      <p className="text-sm text-gray-600">Vehicle Type</p>
-                      <p className="font-medium">
-                        {selectedVerification.vehicleType.replace('VEHICLE_TYPE_', '')}
-                      </p>
-                    </div>
+
+              <div className="flex items-center justify-between p-4 border rounded-lg bg-blue-50">
+                <div className="flex items-center gap-2">
+                  <Car className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <p className="text-sm text-gray-600">Vehicle Type</p>
+                    <p className="font-medium">
+                      {(selectedVerification?.vehicleType ?? "").replace(
+                        "VEHICLE_TYPE_",
+                        "",
+                      )}
+                    </p>
                   </div>
                 </div>
-              )}
+              </div>
 
               {/* Documents */}
               <div className="space-y-4">
@@ -687,7 +726,9 @@ export default function KYCVerificationsPage() {
                           <div className="h-40 flex flex-col items-center justify-center bg-gray-100 rounded gap-2 p-3">
                             <FileText className="h-10 w-10 text-gray-500" />
                             <p className="text-sm font-medium text-gray-700 text-center break-all">
-                              {getFilenameFromUrl(selectedVerification.vehicleDocumentUrl) || "Vehicle document.pdf"}
+                              {getFilenameFromUrl(
+                                selectedVerification.vehicleDocumentUrl,
+                              ) || "Vehicle document.pdf"}
                             </p>
                             <div className="flex gap-2">
                               <a
@@ -732,7 +773,8 @@ export default function KYCVerificationsPage() {
                 <div className="space-y-2">
                   <Label>Rejection Reason</Label>
                   <p className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-800">
-                    {selectedVerification.rejectionReason || "No reason provided"}
+                    {selectedVerification.rejectionReason ||
+                      "No reason provided"}
                   </p>
                 </div>
               )}

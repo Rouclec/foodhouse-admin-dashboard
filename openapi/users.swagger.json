@@ -1295,7 +1295,7 @@
           }
         },
         "vehicleType": {
-          "type": "string",
+          "$ref": "#/definitions/usersgrpcVehicleType",
           "title": "Vehicle type for delivery agents (as string for simplicity)\nValues: TRUCK, TRICYCLE, VAN, CAR"
         }
       }
@@ -1749,7 +1749,7 @@
           }
         },
         "vehicleType": {
-          "type": "string",
+          "$ref": "#/definitions/usersgrpcVehicleType",
           "title": "Vehicle type for delivery agents (as string for simplicity)"
         }
       }
@@ -2147,6 +2147,17 @@
         "USER_TYPE_AGENT"
       ],
       "default": "USER_TYPE_UNSPECIFIED"
+    },
+    "usersgrpcVehicleType": {
+      "type": "string",
+      "enum": [
+        "VEHICLE_TYPE_UNSPECIFIED",
+        "VEHICLE_TYPE_TRUCK",
+        "VEHICLE_TYPE_TRICYCLE",
+        "VEHICLE_TYPE_VAN",
+        "VEHICLE_TYPE_CAR"
+      ],
+      "default": "VEHICLE_TYPE_UNSPECIFIED"
     },
     "usersgrpcVerifyOtpRequest": {
       "type": "object",

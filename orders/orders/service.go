@@ -340,6 +340,17 @@ func (i *Impl) ConfirmDelivery(ctx context.Context, req *ordersgrpc.ConfirmDeliv
 
 	// If there's an agent assigned, pay them their delivery fee
 	if order.AgentID != nil && *order.AgentID != "" {
+		deliveryAgent, err := i.userService.GetUserByID(ctx, &usersgrpc.GetUserByIDRequest{UserId: *order.AgentID})
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error getting delivery agent %v", err)
+		}
+		if deliveryAgent.GetUser() == nil {
+			return nil, status.Errorf(codes.Internal, "delivery agent not found")
+		}
+		deliveryAgentPhoneNumber := deliveryAgent.GetUser().GetPhoneNumber()
+		if deliveryAgentPhoneNumber == "" {
+			return nil, status.Errorf(codes.Internal, "delivery agent phone number not found")
+		}
 		// Pay the agent their delivery fee
 		if order.DeliveryFeeAmount != nil && *order.DeliveryFeeAmount > 0 {
 			agentPaymentReference := fmt.Sprintf("agent-delivery-%s", strconv.FormatInt(order.OrderNumber, 10))
@@ -349,9 +360,9 @@ func (i *Impl) ConfirmDelivery(ctx context.Context, req *ordersgrpc.ConfirmDeliv
 				deliveryCurrency = *order.DeliveryFeeCurrency
 			}
 
-			if !i.devMethodsEndabled && req.GetAgentPayoutPhoneNumber() != "" {
+			if !i.devMethodsEndabled && deliveryAgentPhoneNumber != "" {
 				_, payErr := i.paymentService.WithdrawFunds(ctx,
-					req.GetAgentPayoutPhoneNumber(), deliveryFee,
+					deliveryAgentPhoneNumber, deliveryFee,
 					deliveryCurrency, fmt.Sprintf("delivery fee for order %v", order.OrderNumber),
 					&agentPaymentReference)
 
@@ -365,7 +376,7 @@ func (i *Impl) ConfirmDelivery(ctx context.Context, req *ordersgrpc.ConfirmDeliv
 				EntityID:       strconv.FormatInt(order.OrderNumber, 10),
 				AmountValue:    &deliveryFee,
 				AmountCurrency: &deliveryCurrency,
-				AccountNumber:  req.GetAgentPayoutPhoneNumber(),
+				AccountNumber:  deliveryAgentPhoneNumber,
 				Method:         ordersgrpc.PaymentMethodType_PaymentMethodType_ACCOUNT_BALANCE.String(),
 				Status:         ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED.String(),
 				ExpiresAt:      pgtype.Timestamptz{Time: time.Now().Add(5 * time.Minute), Valid: true},

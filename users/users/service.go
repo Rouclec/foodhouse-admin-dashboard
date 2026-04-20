@@ -1994,7 +1994,7 @@ func (i *Impl) CreateKYC(ctx context.Context,
 		IdentityDocumentUrls: identityUrls,
 		SelfieUrls:           selfieUrls,
 		VehicleDocumentUrls:  vehicleUrls,
-		VehicleType:          req.GetVehicleType(),
+		VehicleType:          req.GetVehicleType().String(),
 	})
 
 	if err != nil {
@@ -2018,7 +2018,7 @@ func (i *Impl) CreateKYC(ctx context.Context,
 			IdentityDocumentUrls: kyc.IdentityDocumentUrls,
 			SelfieUrls:           kyc.SelfieUrls,
 			VehicleDocumentUrls:  kyc.VehicleDocumentUrls,
-			VehicleType:          kyc.VehicleType,
+			VehicleType:          usersgrpc.VehicleType(usersgrpc.VehicleType_value[kyc.VehicleType]),
 			Status: func() usersgrpc.KYCStatus {
 				if kyc.Status != nil {
 					return usersgrpc.KYCStatus(usersgrpc.KYCStatus_value[*kyc.Status])
@@ -2068,6 +2068,7 @@ func (i *Impl) GetKYCByUserID(ctx context.Context,
 				}
 				return ""
 			}(),
+			VehicleType: usersgrpc.VehicleType(usersgrpc.VehicleType_value[kyc.VehicleType]),
 			IdentityDocumentUrls: kyc.IdentityDocumentUrls,
 			SelfieUrls:           kyc.SelfieUrls,
 			VehicleDocumentUrls:  kyc.VehicleDocumentUrls,
@@ -2200,6 +2201,7 @@ func (i *Impl) ListKYCVerifications(ctx context.Context,
 			VerifiedAt:           timestampOrNil(row.VerifiedAt),
 			CreatedAt:            timestamppb.New(row.CreatedAt.Time),
 			UpdatedAt:            timestamppb.New(row.UpdatedAt.Time),
+			VehicleType:          usersgrpc.VehicleType(usersgrpc.VehicleType_value[row.VehicleType]),
 		})
 	}
 

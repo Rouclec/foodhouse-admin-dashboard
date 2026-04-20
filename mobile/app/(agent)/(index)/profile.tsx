@@ -1,5 +1,19 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { Image, Keyboard, ScrollView, StyleSheet, View, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import {
+  Image,
+  Keyboard,
+  ScrollView,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
 import { Appbar, Button, Text, Icon, Snackbar } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,7 +27,7 @@ import {
   usersRevokeRefreshTokenMutation,
 } from '@/client/users.swagger/@tanstack/react-query.gen';
 import type { usersgrpcKYCStatus } from '@/client/users.swagger';
-import {usersGetKycByUserIdOptions} from '@/client/users.swagger/@tanstack/react-query.gen';
+import { usersGetKycByUserIdOptions } from '@/client/users.swagger/@tanstack/react-query.gen';
 import { ordersGetAgentStatsOptions } from '@/client/orders.swagger/@tanstack/react-query.gen';
 import {
   buyerProductsStyles,
@@ -24,7 +38,14 @@ import {
   FilterBottomSheet,
   type FilterBottomSheetRef,
 } from '@/components/(buyer)/(index)/FilterBottomSheet';
-import { clearStorage, readData, updateAuthHeader, isLocalImageUri, uploadImage, useCompressImage } from '@/utils';
+import {
+  clearStorage,
+  readData,
+  updateAuthHeader,
+  isLocalImageUri,
+  uploadImage,
+  useCompressImage,
+} from '@/utils';
 import { ImagePicker } from '@/components';
 
 const AgentProfile = () => {
@@ -52,7 +73,9 @@ const AgentProfile = () => {
     };
   }, []);
 
-  const displayFirstName = isDemo ? demoState.agent?.firstName : user?.firstName;
+  const displayFirstName = isDemo
+    ? demoState.agent?.firstName
+    : user?.firstName;
   const displayLastName = isDemo ? demoState.agent?.lastName : user?.lastName;
   const displayEmail = isDemo ? demoState.agent?.email : user?.email;
   const displayPhone = isDemo ? '+237612345678' : user?.phoneNumber;
@@ -66,7 +89,9 @@ const AgentProfile = () => {
   });
 
   const backendKycStatus = (() => {
-    const status = backendKycData?.kycVerification?.status as usersgrpcKYCStatus | undefined;
+    const status = backendKycData?.kycVerification?.status as
+      | usersgrpcKYCStatus
+      | undefined;
     switch (status) {
       case 'KYC_STATUS_VERIFIED':
         return 'verified' as const;
@@ -75,7 +100,9 @@ const AgentProfile = () => {
       case 'KYC_STATUS_PENDING':
         return 'pending' as const;
       default:
-        return backendKycData?.kycVerification ? ('pending' as const) : ('not_started' as const);
+        return backendKycData?.kycVerification
+          ? ('pending' as const)
+          : ('not_started' as const);
     }
   })();
 
@@ -204,7 +231,7 @@ const AgentProfile = () => {
           style={styles.avatar}
           onPress={() => setIsImagePickerVisible(true)}
           disabled={isDemo}>
-          {(profileImage || user?.profileImage) ? (
+          {profileImage || user?.profileImage ? (
             <Image
               source={{ uri: profileImage || user?.profileImage }}
               style={styles.avatarImage}
@@ -228,12 +255,22 @@ const AgentProfile = () => {
         <Text style={styles.email}>
           {displayEmail || (isDemo ? 'agent@foodhouse.demo' : '')}
         </Text>
-        <Text style={styles.phone}>
-          {displayPhone || ''}
-        </Text>
+        <Text style={styles.phone}>{displayPhone || ''}</Text>
         {isDemo && (
-          <View style={{ backgroundColor: Colors.gold, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, marginTop: 8 }}>
-            <Text style={{ color: Colors.dark[0], fontSize: 10, fontWeight: '600' }}>
+          <View
+            style={{
+              backgroundColor: Colors.gold,
+              paddingHorizontal: 8,
+              paddingVertical: 2,
+              borderRadius: 8,
+              marginTop: 8,
+            }}>
+            <Text
+              style={{
+                color: Colors.dark[0],
+                fontSize: 10,
+                fontWeight: '600',
+              }}>
               DEMO
             </Text>
           </View>
@@ -242,15 +279,29 @@ const AgentProfile = () => {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{i18n.t('(agent).profile.accountStatus')}</Text>
+          <Text style={styles.sectionTitle}>
+            {i18n.t('(agent).profile.accountStatus')}
+          </Text>
           <View style={styles.infoRow}>
-            <Text style={styles.label}>{i18n.t('(agent).profile.kycStatusLabel')}</Text>
-            <View style={[styles.statusBadge, { 
-              backgroundColor: isKycVerified ? Colors.success + '20' : Colors.gold + '20' 
-            }]}>
-              <Text style={[styles.statusText, { 
-                color: isKycVerified ? Colors.success : Colors.gold 
-              }]}>
+            <Text style={styles.label}>
+              {i18n.t('(agent).profile.kycStatusLabel')}
+            </Text>
+            <View
+              style={[
+                styles.statusBadge,
+                {
+                  backgroundColor: isKycVerified
+                    ? Colors.success + '20'
+                    : Colors.gold + '20',
+                },
+              ]}>
+              <Text
+                style={[
+                  styles.statusText,
+                  {
+                    color: isKycVerified ? Colors.success : Colors.gold,
+                  },
+                ]}>
                 {i18n.t(`(agent).profile.kycStatus.${kycStatus}`)}
               </Text>
             </View>
@@ -258,10 +309,14 @@ const AgentProfile = () => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{i18n.t('(agent).profile.statistics')}</Text>
+          <Text style={styles.sectionTitle}>
+            {i18n.t('(agent).profile.statistics')}
+          </Text>
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{totalEarnings.toLocaleString()}</Text>
+              <Text style={styles.statValue}>
+                {totalEarnings.toLocaleString()}
+              </Text>
               <Text style={styles.statLabel}>
                 {i18n.t('(agent).profile.totalEarningsWithCurrency', {
                   currency: i18n.t('common.currency'),
@@ -307,7 +362,7 @@ const AgentProfile = () => {
         </View>
       </ScrollView>
 
-<FilterBottomSheet ref={sheetRef} sheetHeight={200}>
+      <FilterBottomSheet ref={sheetRef} sheetHeight={200}>
         <View style={[buyerProductsStyles.filtersContainer]}>
           <View style={profileFlowStyles.content}>
             <Text variant="titleMedium" style={buyerProductsStyles.title}>
@@ -329,13 +384,22 @@ const AgentProfile = () => {
                 buyerProductsStyles.halfButton,
               ]}
               disabled={loading}>
-              <Text style={defaultStyles.primaryText}>{i18n.t('common.cancel')}</Text>
+              <Text style={defaultStyles.primaryText}>
+                {i18n.t('common.cancel')}
+              </Text>
             </Button>
             <Button
+              style={[
+                defaultStyles.button,
+                defaultStyles.primaryButton,
+                buyerProductsStyles.halfButton,
+              ]}
               onPress={handleLogout}
               loading={loading}
               disabled={loading}>
-              <Text style={defaultStyles.buttonText}>{i18n.t('common.logout')}</Text>
+              <Text style={defaultStyles.buttonText}>
+                {i18n.t('common.logout')}
+              </Text>
             </Button>
           </View>
         </View>

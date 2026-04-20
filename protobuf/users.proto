@@ -60,7 +60,7 @@ message KYCVerification {
   repeated string vehicle_document_urls = 13;
 
   // Vehicle type for delivery agents (as string for simplicity)
-  string vehicle_type = 14;
+  VehicleType vehicle_type = 14;
 }
 
 enum KYCStatus {
@@ -671,7 +671,7 @@ message CreateKYCRequest {
 
   // Vehicle type for delivery agents (as string for simplicity)
   // Values: TRUCK, TRICYCLE, VAN, CAR
-  string vehicle_type = 8;
+  VehicleType vehicle_type = 8;
 }
 
 message CreateKYCResponse { KYCVerification kyc_verification = 1; }

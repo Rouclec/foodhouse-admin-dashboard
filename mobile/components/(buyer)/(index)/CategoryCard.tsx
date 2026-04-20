@@ -31,34 +31,47 @@ export const CategoryCard: FC<CategoryCardProps> = ({
       ]}
       onPress={onPress}
       activeOpacity={0.7}>
-      <View style={styles.iconContainer}>
+      <View
+        style={[
+          styles.mediaContainer,
+          { backgroundColor: isSelected ? Colors.primary[500] : Colors.grey['fa'] },
+        ]}>
         {category.image ? (
           <Image
             source={{ uri: category.image }}
-            style={styles.iconContainer}
+            style={styles.mediaImage}
+            resizeMode="cover"
           />
         ) : (
-          <Icon source="cart-outline" size={28} color={Colors.primary[500]} />
+          <View style={styles.mediaPlaceholder}>
+            <Icon
+              source="cart-outline"
+              size={44}
+              color={isSelected ? Colors.light[10] : Colors.primary[500]}
+            />
+          </View>
         )}
       </View>
-      <Text
-        variant="titleMedium"
-        style={[
-          styles.categoryName,
-          { color: isSelected ? Colors.light[10] : Colors.dark[0] },
-        ]}
-        numberOfLines={1}>
-        {category.name}
-      </Text>
-      {productCount !== undefined && (
+      <View style={styles.textContainer}>
         <Text
+          variant="titleMedium"
           style={[
-            styles.productCount,
-            { color: isSelected ? Colors.light[10] : Colors.grey['61'] },
-          ]}>
-          {productCount} {productCount === 1 ? 'item' : 'items'}
+            styles.categoryName,
+            { color: isSelected ? Colors.light[10] : Colors.dark[0] },
+          ]}
+          numberOfLines={2}>
+          {category.name}
         </Text>
-      )}
+        {productCount !== undefined && (
+          <Text
+            style={[
+              styles.productCount,
+              { color: isSelected ? Colors.light[10] : Colors.grey['61'] },
+            ]}>
+            {productCount} {productCount === 1 ? 'item' : 'items'}
+          </Text>
+        )}
+      </View>
     </TouchableOpacity>
   );
 };
@@ -66,33 +79,39 @@ export const CategoryCard: FC<CategoryCardProps> = ({
 const styles = {
   card: {
     width: CARD_WIDTH,
-    paddingVertical: 20,
-    paddingHorizontal: 12,
     borderRadius: 16,
     borderWidth: 1,
-    alignItems: 'center' as const,
+    alignItems: 'stretch' as const,
     marginBottom: 12,
+    overflow: 'hidden' as const,
   },
-  iconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: Colors.grey['fa'],
+  mediaContainer: {
+    width: '100%' as const,
+    height: 116,
+    overflow: 'hidden' as const,
+  },
+  mediaImage: {
+    width: '100%' as const,
+    height: '100%' as const,
+  },
+  mediaPlaceholder: {
+    flex: 1,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
-    marginBottom: 12,
+    backgroundColor: Colors.grey['fa'],
   },
-  iconImage: {
-    width: 32,
-    height: 32,
+  textContainer: {
+    paddingHorizontal: 10,
+    paddingTop: 10,
+    paddingBottom: 12,
   },
   categoryName: {
     fontSize: 14,
     fontWeight: '600' as const,
-    textAlign: 'center' as const,
+    textAlign: 'left' as const,
+    minHeight: 34,
   },
   productCount: {
     fontSize: 12,
-    marginTop: 4,
   },
 };
