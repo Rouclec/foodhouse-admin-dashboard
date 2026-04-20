@@ -23,7 +23,7 @@ import {
   usersGetKycByUserIdOptions,
 } from '@/client/users.swagger/@tanstack/react-query.gen';
 import { uploadImage } from '@/utils';
-import type { usersgrpcKYCStatus } from '@/client/users.swagger';
+import type { usersgrpcKYCStatus, usersgrpcVehicleType } from '@/client/users.swagger';
 
 interface DocumentState {
   uri: string;
@@ -326,7 +326,7 @@ const KYC = () => {
         filename: `kyc_${userId}_vehicle_${now}.${vehicleExt}`,
       });
 
-      const vehicleTypeMap: Record<string, string> = {
+      const vehicleTypeMap: Record<string, usersgrpcVehicleType> = {
         'Truck': 'VEHICLE_TYPE_TRUCK',
         'Tricycle': 'VEHICLE_TYPE_TRICYCLE',
         'Van': 'VEHICLE_TYPE_VAN',
@@ -342,7 +342,7 @@ const KYC = () => {
           identityDocumentUrl: idFrontUrl,
           selfieUrl,
           vehicleDocumentUrl: vehicleUrl,
-          vehicleType: vehicleTypeMap[selectedVehicleType] || '',
+          vehicleType: vehicleTypeMap[selectedVehicleType] || "VEHICLE_TYPE_UNSPECIFIED",
         },
       });
 

@@ -182,7 +182,7 @@ export type UsersCreateKYCBody = {
   identityDocumentUrls?: Array<string>;
   selfieUrls?: Array<string>;
   vehicleDocumentUrls?: Array<string>;
-  vehicleType?: string;
+  vehicleType?: usersgrpcVehicleType;
 };
 
 export type UsersGrantAdminBody = {
@@ -320,7 +320,7 @@ export type usersgrpcKYCVerification = {
   identityDocumentUrls?: Array<string>;
   selfieUrls?: Array<string>;
   vehicleDocumentUrls?: Array<string>;
-  vehicleType?: string;
+  vehicleType?: usersgrpcVehicleType;
 };
 
 export type usersgrpcLastOtpForFactorResponse = {
@@ -489,6 +489,13 @@ export type usersgrpcUserType =
   | "USER_TYPE_FARMER"
   | "USER_TYPE_BUYER"
   | "USER_TYPE_AGENT";
+
+export type usersgrpcVehicleType =
+  | "VEHICLE_TYPE_UNSPECIFIED"
+  | "VEHICLE_TYPE_TRUCK"
+  | "VEHICLE_TYPE_TRICYCLE"
+  | "VEHICLE_TYPE_VAN"
+  | "VEHICLE_TYPE_CAR";
 
 export type usersgrpcVerifyOtpRequest = {
   authFactor?: usersgrpcAuthFactor;
