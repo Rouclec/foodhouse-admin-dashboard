@@ -2068,7 +2068,7 @@ func (i *Impl) GetKYCByUserID(ctx context.Context,
 				}
 				return ""
 			}(),
-			VehicleType: usersgrpc.VehicleType(usersgrpc.VehicleType_value[kyc.VehicleType]),
+			VehicleType:          usersgrpc.VehicleType(usersgrpc.VehicleType_value[kyc.VehicleType]),
 			IdentityDocumentUrls: kyc.IdentityDocumentUrls,
 			SelfieUrls:           kyc.SelfieUrls,
 			VehicleDocumentUrls:  kyc.VehicleDocumentUrls,
