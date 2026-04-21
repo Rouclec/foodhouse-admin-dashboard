@@ -18,6 +18,12 @@ export default function paymentFlow() {
 
       <Stack.Screen name="payment-account" options={{ headerShown: false }} />
       <Stack.Screen name="subscription" options={{ headerShown: false }} />
+      <Stack.Screen name="tpw-card-webview" options={{ headerShown: false }} />
+      <Stack.Screen name="custom-package" options={{ headerShown: false }} />
+      <Stack.Screen name="package-details" options={{ headerShown: false }} />
+      <Stack.Screen name="select-products" options={{ headerShown: false }} />
+      <Stack.Screen name="summary" options={{ headerShown: false }} />
+      <Stack.Screen name="subscription-checkout" options={{ headerShown: false }} />
     </Stack>
   );
 }

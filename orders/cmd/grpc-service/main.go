@@ -39,7 +39,7 @@ type Config struct {
 	UsersHostPort    string `conf:"env:USERS_HOST_PORT,required"`
 	ProductsHostPort string `conf:"env:PRODUCTS_HOST_PORT,required"`
 
-	FrontendBaseUrl string `conf:"env:FRONTEND_BASE_URL,default:"`
+	FrontendBaseUrl string `conf:"env:FRONTEND_BASE_URL,required"`
 
 	MigrationPath string `conf:"env:MIGRATION_PATH,required"`
 
