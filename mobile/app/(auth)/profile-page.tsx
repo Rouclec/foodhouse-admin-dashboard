@@ -207,7 +207,6 @@ const ProfilePage = () => {
 
   const handleAddressSelect = useCallback(
     (data: GooglePlaceData, details: GooglePlaceDetail | null) => {
-      console.log('handleAddressSelect: Data:', data);
       setAddress(data.description);
       setLastSelectedAddress(data.description);
       if (details?.geometry?.location) {

@@ -673,7 +673,26 @@
     "(paymentMethods)": {
       "header": "Méthodes de paiement",
       "description": "Pour continuer, veuillez ajouter vos méthodes de paiement.",
-      "next": "Suivant"
+      "next": "Suivant",
+      "unavailable": "Temporairement indisponible",
+      "methodUnavailable": "Ce moyen de paiement est temporairement indisponible. Veuillez réessayer plus tard.",
+      "momo": "MTN Mobile Money",
+      "orangeMoney": "Orange Money",
+      "creditCard": "Carte bancaire"
+    },
+    "(payment)": {
+      "confirmPayment": "Confirmer le paiement",
+      "cardConfirmHint": "Confirmez pour continuer vers le paiement par carte.",
+      "cardPaymentTitle": "Paiement par carte",
+      "confirmingCardPayment": "Confirmation de votre paiement par carte…",
+      "paymentCanceledTitle": "Paiement annulé",
+      "paymentCanceledMessage": "Vous avez annulé le paiement par carte. Vous pouvez réessayer.",
+      "missingCheckoutUrl": "Lien de paiement manquant. Veuillez réessayer.",
+      "missingContext": "Contexte de paiement manquant. Veuillez relancer le processus.",
+      "missingDetails": "Les détails du paiement sont manquants. Veuillez relancer le processus.",
+      "enterAccountNumber": "Veuillez saisir votre numéro de compte",
+      "paymentSuccessful": "Paiement réussi",
+      "paymentFailed": "Paiement échoué"
     }
   },
   "(agent)": {

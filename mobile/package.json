@@ -70,7 +70,8 @@
     "react-native-screens": "~4.11.1",
     "react-native-svg": "15.11.2",
     "react-native-virtualized-view": "^1.0.0",
-    "react-native-web": "~0.20.0"
+    "react-native-web": "~0.20.0",
+    "react-native-webview": "^13.16.1"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",

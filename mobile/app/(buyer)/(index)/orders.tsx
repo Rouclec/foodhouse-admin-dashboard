@@ -234,8 +234,6 @@ export default function Orders() {
     }
   };
 
-  console.log({ tabItem });
-
   return (
     <>
       <KeyboardAvoidingView

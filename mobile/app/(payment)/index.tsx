@@ -43,13 +43,18 @@ const PaymentMethodsPage = () => {
   }> = [
     {
       id: 'PaymentMethodType_MOBILE_MONEY',
-      name: 'MTN Mobile Money',
+      name: i18n.t('(subscription).(paymentMethods).momo'),
       icon: require('@/assets/images/icons/momo.png'),
     },
     {
       id: 'PaymentMethodType_ORANGE_MONEY',
-      name: 'Orange Money',
+      name: i18n.t('(subscription).(paymentMethods).orangeMoney'),
       icon: require('@/assets/images/icons/orangeMoney.png'),
+    },
+    {
+      id: 'PaymentMethodType_CREDIT_CARD',
+      name: i18n.t('(subscription).(paymentMethods).creditCard'),
+      icon: require('@/assets/images/icons/masterCard-removebg-preview.png'),
     },
   ];
 

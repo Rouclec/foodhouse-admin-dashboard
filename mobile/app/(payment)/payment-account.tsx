@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import {
   View,
   ScrollView,
@@ -50,39 +50,77 @@ const PaymentAccountPage = () => {
 
   const { paymentMethod } = params;
 
+  const isCreditCard = useMemo(() => {
+    return (
+      (paymentMethod as ordersgrpcPaymentMethodType) ===
+      'PaymentMethodType_CREDIT_CARD'
+    );
+  }, [paymentMethod]);
+
   useEffect(() => {
     if (paymentData) return;
-    setErrorMessage('Missing payment context. Please restart checkout/subscription flow.');
+    setErrorMessage(
+      i18n.t('(subscription).(payment).missingContext'),
+    );
     setError(true);
-  }, [paymentData]);
+  }, []);
 
   const handleSubmit = async () => {
     if (!paymentData?.entity || !paymentData?.entityId || !paymentData?.amount) {
-      setErrorMessage('Payment details are missing. Please restart checkout/subscription flow.');
+      setErrorMessage(i18n.t('(subscription).(payment).missingDetails'));
       setError(true);
       return;
     }
-    if (!mobile.trim()) {
-      setErrorMessage('Please enter your account number');
+    if (!isCreditCard && !mobile.trim()) {
+      setErrorMessage(i18n.t('(subscription).(payment).enterAccountNumber'));
       setError(true);
       return;
     }
     try {
       setLoading(true);
-      await mutateAsync({
+      const res = await mutateAsync({
         body: {
           paymentEntity: paymentData?.entity,
           entityId: paymentData?.entityId,
           amount: paymentData?.amount,
           account: {
             paymentMethod: paymentMethod as ordersgrpcPaymentMethodType,
-            accountNumber: `${callingCode}${mobile}`,
+            accountNumber: isCreditCard ? '' : `${callingCode}${mobile}`,
           },
         },
         path: {
           userId: user?.userId ?? '',
         },
       });
+
+      // Credit card flow: open TPW checkout URL in webview
+      if (isCreditCard) {
+        const checkoutUrl =
+          (res as any)?.ReturnUrl ??
+          (res as any)?.returnUrl ??
+          (res as any)?.returnURL;
+
+        if (!checkoutUrl || typeof checkoutUrl !== 'string') {
+          setErrorMessage(
+            i18n.t('(subscription).(payment).missingCheckoutUrl'),
+          );
+          setError(true);
+          return;
+        }
+
+        router.push({
+          pathname: '/(payment)/tpw-card-webview' as any,
+          params: {
+            checkoutUrl,
+            paymentId: res?.payment?.id ?? '',
+            paymentMethod: paymentMethod as ordersgrpcPaymentMethodType,
+          },
+        });
+        return;
+      }
+
+      // Mobile money flow: show loading modal and start polling
+      setLoadingModalVisible(true);
     } catch (error) {
       console.error('error initiating payment ', error);
     } finally {
@@ -92,9 +130,6 @@ const PaymentAccountPage = () => {
 
   const { mutateAsync, data } = useMutation({
     ...ordersInitiatePaymentMutation(),
-    onSuccess: () => {
-      setLoadingModalVisible(true);
-    },
     onError: async error => {
       setErrorMessage(
         error?.response?.data?.message ??
@@ -164,13 +199,20 @@ const PaymentAccountPage = () => {
                 : ''}
             </Text>
 
-            <PhoneNumberInput
-              setCountryCode={setCallingCode}
-              countryCode={callingCode}
-              setPhoneNumber={setMobile}
-              phoneNumber={mobile}
-              containerStyle={signupStyles.phoneNumberInputContainerStyle}
-            />
+            {!isCreditCard && (
+              <PhoneNumberInput
+                setCountryCode={setCallingCode}
+                countryCode={callingCode}
+                setPhoneNumber={setMobile}
+                phoneNumber={mobile}
+                containerStyle={signupStyles.phoneNumberInputContainerStyle}
+              />
+            )}
+            {isCreditCard && (
+              <Text style={defaultStyles.bodyText}>
+                {i18n.t('(subscription).(payment).cardConfirmHint')}
+              </Text>
+            )}
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
@@ -182,9 +224,11 @@ const PaymentAccountPage = () => {
           textColor={Colors.light['10']}
           buttonColor={Colors.primary['500']}
           style={defaultStyles.button}
-          disabled={!mobile.trim() || loading}
+          disabled={(!isCreditCard && !mobile.trim()) || loading}
           loading={loading}>
-          {i18n.t('(auth).(subsciption-flow).account.button')}
+          {isCreditCard
+            ? i18n.t('(subscription).(payment).confirmPayment')
+            : i18n.t('(auth).(subsciption-flow).account.button')}
         </Button>
       </View>
 

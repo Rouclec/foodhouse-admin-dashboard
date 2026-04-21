@@ -214,7 +214,7 @@ export default function TrackOrder() {
           </Appbar.Header>
 
           {/* TOP SECTION — 60% height */}
-          <View style={{ flex: 0.6, overflow: 'hidden' }}>
+          <View style={{ flex: 0.4, overflow: 'hidden' }}>
             <FlatList
               data={orderDetails?.order?.orderItems ?? []}
               keyExtractor={(item, index) => index.toString()}
@@ -284,7 +284,7 @@ export default function TrackOrder() {
           <View style={trackOrderStyles.divider} />
 
           {/* BOTTOM SECTION — 40% height */}
-          <View style={{ flex: 0.4 }}>
+          <View style={{ flex: 0.6 }}>
             <FlatList
               data={filteredLogs ?? []}
               keyExtractor={(item, index) => index.toString()}
