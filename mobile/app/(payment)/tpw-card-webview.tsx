@@ -8,9 +8,7 @@ import { Chase } from 'react-native-animated-spinkit';
 
 import { Colors } from '@/constants';
 import { defaultStyles } from '@/styles';
-import {
-  ordersCheckPaymentStatusOptions,
-} from '@/client/orders.swagger/@tanstack/react-query.gen';
+import { ordersCheckPaymentStatusOptions } from '@/client/orders.swagger/@tanstack/react-query.gen';
 import { Context, ContextType } from '../_layout';
 import { useAppRating } from '@/hooks/useAppRating';
 import i18n from '@/i18n';
@@ -192,7 +190,8 @@ const TPWCardWebViewPage = () => {
           onDismiss={() => {
             setSuccessModalVisible(false);
             router.push(
-              (paymentData?.nextScreen ?? '/(buyer)/(index)') as '/(buyer)/(index)',
+              (paymentData?.nextScreen ??
+                '/(buyer)/(index)') as '/(buyer)/(index)',
             );
           }}
           style={defaultStyles.dialogSuccessContainer}>
@@ -237,4 +236,3 @@ const TPWCardWebViewPage = () => {
 };
 
 export default TPWCardWebViewPage;
-
