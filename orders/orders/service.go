@@ -85,6 +85,7 @@ var availablePaymentMethods = map[ordersgrpc.PaymentMethodType]struct{}{
 	ordersgrpc.PaymentMethodType_PaymentMethodType_MOBILE_MONEY: {},
 	// Orange money temporarily disabled
 	// ordersgrpc.PaymentMethodType_PaymentMethodType_ORANGE_MONEY: {},
+	ordersgrpc.PaymentMethodType_PaymentMethodType_CREDIT_CARD: {},
 }
 
 // Impl is the implementation of the products service.
@@ -1890,13 +1891,18 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 		}
 	}()
 
-	if req.GetPaymentEntity() != ordersgrpc.PaymentEntity_PaymentEntity_ORDER && req.GetPaymentEntity() != ordersgrpc.PaymentEntity_PaymentEntity_SUBSCRIPTION {
+	if req.GetPaymentEntity() != ordersgrpc.PaymentEntity_PaymentEntity_ORDER &&
+		req.GetPaymentEntity() != ordersgrpc.PaymentEntity_PaymentEntity_SUBSCRIPTION {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid payment entity %s", req.GetPaymentEntity())
 	}
 
-	if req.GetAccount().PaymentMethod != ordersgrpc.PaymentMethodType_PaymentMethodType_MOBILE_MONEY && req.GetAccount().PaymentMethod != ordersgrpc.PaymentMethodType_PaymentMethodType_ORANGE_MONEY {
+	if req.GetAccount().GetPaymentMethod() != ordersgrpc.PaymentMethodType_PaymentMethodType_MOBILE_MONEY &&
+		req.GetAccount().GetPaymentMethod() != ordersgrpc.PaymentMethodType_PaymentMethodType_ORANGE_MONEY &&
+		req.GetAccount().GetPaymentMethod() != ordersgrpc.PaymentMethodType_PaymentMethodType_CREDIT_CARD {
 		return nil, status.Errorf(codes.Internal, "payment method %s not supported", req.GetAccount().GetPaymentMethod())
 	}
+
+	isCreditCard := req.GetAccount().GetPaymentMethod() == ordersgrpc.PaymentMethodType_PaymentMethodType_CREDIT_CARD
 
 	// Check if the payment method is currently available
 	if _, ok := availablePaymentMethods[req.GetAccount().PaymentMethod]; !ok {
@@ -1972,32 +1978,45 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 		return nil, status.Errorf(codes.Internal, "error creating payment entity %v", err)
 	}
 
-	formattedNumber, err := formatPhoneNumber(req.Account.GetAccountNumber())
-	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid phone number: %v", err)
-	}
-
-	i.logger.Debug().Msgf("Formated number log %v", formattedNumber)
-
-	supportedCurrencies := []string{"XAF"}
-	currencySupported := false
-	for _, c := range supportedCurrencies {
-		currencySupported = req.GetAmount().GetCurrencyIsoCode() == c
-		if currencySupported {
-			break
-		}
-	}
-	if !currencySupported {
-		return nil, status.Errorf(codes.Internal, "currency %s is not supported", req.GetAmount().GetCurrencyIsoCode())
-	}
+	var returnUrl string
 
 	// make request to TPW to initiate actual payment only when dev methods is not enabled
 	if !i.devMethodsEndabled {
-		_, payErr := i.paymentService.RequestPayment(ctx, formattedNumber, *totalPrice, req.GetAmount().GetCurrencyIsoCode(), req.GetPaymentEntity().String(), &req.EntityId)
+		if isCreditCard {
+			redirectUrl, payErr := i.paymentService.RequestCreditCardPayment(
+				ctx,
+				*totalPrice,
+				req.GetAmount().GetCurrencyIsoCode(),
+				req.GetPaymentEntity().String(),
+				&req.EntityId,
+			)
+			if payErr != nil {
+				i.logger.Debug().Msgf("payment error %v", payErr)
+				return nil, status.Errorf(codes.Internal, "error initiating payment %v", payErr)
+			}
+			if redirectUrl != nil {
+				returnUrl = *redirectUrl
+			}
+		} else {
+			formattedNumber, fmtErr := formatPhoneNumber(req.Account.GetAccountNumber())
+			if fmtErr != nil {
+				return nil, status.Errorf(codes.InvalidArgument, "invalid phone number: %v", fmtErr)
+			}
 
-		if payErr != nil {
-			i.logger.Debug().Msgf("payment error %v", payErr)
-			return nil, status.Errorf(codes.Internal, "error initiating payment %v", payErr)
+			i.logger.Debug().Msgf("Formated number log %v", formattedNumber)
+
+			_, payErr := i.paymentService.RequestPayment(
+				ctx,
+				formattedNumber,
+				*totalPrice,
+				req.GetAmount().GetCurrencyIsoCode(),
+				req.GetPaymentEntity().String(),
+				&req.EntityId,
+			)
+			if payErr != nil {
+				i.logger.Debug().Msgf("payment error %v", payErr)
+				return nil, status.Errorf(codes.Internal, "error initiating payment %v", payErr)
+			}
 		}
 	}
 
@@ -2029,6 +2048,7 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 			},
 			ExpiresAt: timestamppb.New(payment.ExpiresAt.Time),
 		},
+		ReturnUrl: returnUrl,
 	}, nil
 }
 

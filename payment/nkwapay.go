@@ -226,3 +226,7 @@ func (np *NkwaPayProvider) CheckPaymentStatus(ctx context.Context, paymentId str
 		return StatusUnknown, nil
 	}
 }
+
+func (np *NkwaPayProvider) RequestCreditCardPayment(context.Context, float64, string, string, *string) (*string, error){
+	panic("unimplemented")
+}

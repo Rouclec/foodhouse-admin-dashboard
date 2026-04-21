@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 
@@ -37,6 +38,8 @@ type Config struct {
 	ListenPort       uint   `conf:"env:LISTEN_PORT,required"`
 	UsersHostPort    string `conf:"env:USERS_HOST_PORT,required"`
 	ProductsHostPort string `conf:"env:PRODUCTS_HOST_PORT,required"`
+
+	FrontendBaseUrl string `conf:"env:FRONTEND_BASE_URL,default:"`
 
 	MigrationPath string `conf:"env:MIGRATION_PATH,required"`
 
@@ -86,6 +89,25 @@ type CampayConfig struct {
 	CampayPassword string `conf:"env:CAMPAY_PASSWORD,required"`
 	CampayBaseUrl  string `conf:"env:CAMPAY_BASE_URL,required"`
 	CampayWebHook  string `conf:"env:CAMPAY_WEBHOOK,required"`
+}
+
+func buildAbsoluteURL(base string, path string) string {
+	base = strings.TrimSpace(base)
+	if base == "" {
+		return ""
+	}
+
+	u, err := url.Parse(base)
+	if err != nil {
+		return ""
+	}
+
+	ref, err := url.Parse(path)
+	if err != nil {
+		return ""
+	}
+
+	return u.ResolveReference(ref).String()
 }
 
 func main() {
@@ -154,7 +176,18 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 	reflection.Register(grpcServer)
 
 	// paymentService, err := payment.NewCampayProvider(config.CampayConfig.CampayUsername, config.CampayConfig.CampayPassword, config.CampayConfig.CampayBaseUrl, config.CampayConfig.CampayWebHook)
-	paymentService, err := payment.NewTPWProvider(config.TrustPayWay.SecretKey, config.TrustPayWay.AppToken, config.TrustPayWay.BaseUrl, config.TrustPayWay.WebHook, logger)
+	returnUrl := buildAbsoluteURL(config.FrontendBaseUrl, "/payments/tpw/return")
+	cancelUrl := buildAbsoluteURL(config.FrontendBaseUrl, "/payments/tpw/cancel")
+
+	paymentService, err := payment.NewTPWProvider(
+		config.TrustPayWay.SecretKey,
+		config.TrustPayWay.AppToken,
+		config.TrustPayWay.BaseUrl,
+		config.TrustPayWay.WebHook,
+		returnUrl,
+		cancelUrl,
+		logger,
+	)
 	// paymentService, err := payment.NewNkwaPayProvider(config.NkwaPay.ApiKey, config.NkwaPay.BaseUrl, logger)
 
 	if err != nil {
