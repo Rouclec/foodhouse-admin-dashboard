@@ -18,7 +18,14 @@ export default function paymentFlow() {
 
       <Stack.Screen name="payment-account" options={{ headerShown: false }} />
       <Stack.Screen name="subscription" options={{ headerShown: false }} />
-      <Stack.Screen name="tpw-card-webview" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="tpw-card-webview"
+        options={{
+          headerShown: false,
+          // Full-bleed checkout; safe area / scroll room handled in the screen + injected CSS.
+          contentStyle: { flex: 1, paddingBottom: 0 },
+        }}
+      />
       <Stack.Screen name="custom-package" options={{ headerShown: false }} />
       <Stack.Screen name="package-details" options={{ headerShown: false }} />
       <Stack.Screen name="select-products" options={{ headerShown: false }} />
