@@ -124,7 +124,8 @@ Resources:
               Value: !Ref UsersHostPort
             - Name: PRODUCTS_HOST_PORT
               Value: !Ref ProductsHostPort
-
+            - Name: FRONTEND_BASE_URL
+              Value: "https://foodhouse-admin-dashboard-bfsc.vercel.app"
           Secrets:
             - Name: DB_NAME
               ValueFrom: !Sub "${AppDatabaseSecret}:dbname::"
