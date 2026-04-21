@@ -806,7 +806,24 @@
       "description": "Ili kuendelea, tafadhali ongeza njia zako za malipo.",
       "next": "Ifuatayo",
       "unavailable": "Haipatikani kwa muda",
-      "methodUnavailable": "Njia hii ya malipo haipatikani kwa sasa. Tafadhali jaribu tena baadaye."
+      "methodUnavailable": "Njia hii ya malipo haipatikani kwa sasa. Tafadhali jaribu tena baadaye.",
+      "momo": "MTN Mobile Money",
+      "orangeMoney": "Orange Money",
+      "creditCard": "Kadi ya benki"
+    },
+    "(payment)": {
+      "confirmPayment": "Thibitisha malipo",
+      "cardConfirmHint": "Thibitisha ili uendelee kwenye malipo ya kadi.",
+      "cardPaymentTitle": "Malipo ya kadi",
+      "confirmingCardPayment": "Inathibitisha malipo yako ya kadi…",
+      "paymentCanceledTitle": "Malipo yameghairiwa",
+      "paymentCanceledMessage": "Umeghairi malipo ya kadi. Unaweza kujaribu tena.",
+      "missingCheckoutUrl": "Kiungo cha malipo hakipo. Tafadhali jaribu tena.",
+      "missingContext": "Muktadha wa malipo haupo. Tafadhali anza upya.",
+      "missingDetails": "Maelezo ya malipo hayapo. Tafadhali anza upya.",
+      "enterAccountNumber": "Tafadhali ingiza namba yako ya akaunti",
+      "paymentSuccessful": "Malipo yamefanikiwa",
+      "paymentFailed": "Malipo yameshindwa"
     }
   }
 }

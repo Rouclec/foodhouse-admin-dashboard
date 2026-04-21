@@ -119,7 +119,6 @@ export default function Profile() {
   };
 
   const handleImageSelect = async (asset: any) => {
-    console.log('handleImageSelect: Asset received:', asset?.uri);
     if (asset && asset.uri !== originalProfileImage) {
       setProfileImage(asset.uri);
     }

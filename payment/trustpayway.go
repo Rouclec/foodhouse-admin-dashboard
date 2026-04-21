@@ -8,6 +8,7 @@ import (
 	"math"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/rs/zerolog"
 )
@@ -17,6 +18,8 @@ type TrustPayWayProvider struct {
 	AppToken  string
 	BaseUrl   string
 	WebHook   string
+	ReturnUrl string
+	CancelUrl string
 	Logger    zerolog.Logger
 	Client    *http.Client
 }
@@ -87,16 +90,67 @@ type CheckPaymentResponse struct {
 	TransactionId      string `json:"transactionId"`
 }
 
+type GenerateSignatureRequest struct {
+	CpmAmount        string `json:"cpm_amount"`
+	CpmCurrency      string `json:"cpm_currency"`
+	CpmTransId       string `json:"cpm_trans_id"`
+	CpmTransDate     string `json:"cpm_trans_date"`
+	CpmPaymentConfig string `json:"cpm_payment_config"`
+	CpmPageAction    string `json:"cpm_page_action"`
+	CpmVersion       string `json:"cpm_version"`
+	CpmLanguage      string `json:"cpm_language"`
+	CpmDesignation   string `json:"cpm_designation"`
+	CpmCustom        string `json:"cpm_custom"`
+}
+
+type GenerateSignatureResponse struct {
+	Code    int32  `json:"code"`
+	Message string `json:"message"`
+	Data    struct {
+		Signature string `json:"signature"`
+	} `json:"data"`
+}
+
+type InitiateCreditCardPaymentRequest struct {
+	CpmAmount        string `json:"cpm_amount"`
+	CpmCurrency      string `json:"cpm_currency"`
+	CpmTransId       string `json:"cpm_trans_id"`
+	CpmTransDate     string `json:"cpm_trans_date"`
+	CpmPaymentConfig string `json:"cpm_payment_config"`
+	CpmPageAction    string `json:"cpm_page_action"`
+	CpmVersion       string `json:"cpm_version"`
+	CpmLanguage      string `json:"cpm_language"`
+	CpmDesignation   string `json:"cpm_designation"`
+	CpmCustom        string `json:"cpm_custom"`
+	Signature        string `json:"signature"`
+	ReturnUrl        string `json:"return_url"`
+	CancelUrl        string `json:"cancel_url"`
+	NotifyUrl        string `json:"notify_url"`
+}
+
+type InitiateCreditCardPaymentResponse struct {
+	Code    int32  `json:"code"`
+	Message string `json:"message"`
+	Data    struct {
+		RedirectUrl string `json:"redirect_url"`
+	} `json:"data"`
+}
+
 func NewTPWProvider(trustPayWaySecretKey string,
 	trustPayWayAppToken string,
 	trustPayWayBaseUrl string,
-	trustPayWayWebHook string, logger zerolog.Logger) (
+	trustPayWayWebHook string,
+	trustPayWayReturnUrl string,
+	trustPayWayCancelUrl string,
+	logger zerolog.Logger) (
 	*TrustPayWayProvider, error) {
 	return &TrustPayWayProvider{
 		SecretKey: trustPayWaySecretKey,
 		AppToken:  trustPayWayAppToken,
 		BaseUrl:   trustPayWayBaseUrl,
 		WebHook:   trustPayWayWebHook,
+		ReturnUrl: trustPayWayReturnUrl,
+		CancelUrl: trustPayWayCancelUrl,
 		Logger:    logger,
 		Client:    http.DefaultClient,
 	}, nil
@@ -315,6 +369,68 @@ func (tp *TrustPayWayProvider) authenticate(ctx context.Context) (*LoginResponse
 	return &response, nil
 }
 
+func (tp *TrustPayWayProvider) GenerateSignature(ctx context.Context, amount float64, currency string, description string, externalReference *string) (*string, error) {
+
+	loginResponse, err := tp.authenticate(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to authenticate request %v", err)
+	}
+
+	url := fmt.Sprintf("%s/api/payment/token", tp.BaseUrl)
+
+	requestBody := GenerateSignatureRequest{
+		CpmAmount:        fmt.Sprintf("%.0f", math.Floor(amount)),
+		CpmCurrency:      currency,
+		CpmTransId:       *externalReference,
+		CpmTransDate:     time.Now().Format("2006-01-02 15:04:05"),
+		CpmPaymentConfig: "SINGLE",
+		CpmPageAction:    "PAYMENT",
+		CpmVersion:       "V1",
+		CpmLanguage:      "en",
+		CpmDesignation:   description,
+		CpmCustom:        *externalReference,
+	}
+
+	tp.Logger.Debug().Msgf("generate signature request body: %v", requestBody)
+
+	jsonBody, err := json.Marshal(requestBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal generate signature request: %w", err)
+	}
+
+	tp.Logger.Debug().Msgf("JSON body %v", jsonBody)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(jsonBody))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+loginResponse.AccessToken)
+	req.Header.Set("Content-Type", "application/json")
+
+	tp.Logger.Debug().Msgf("raw request: %v", req)
+
+	// Then send the request as usual
+	resp, err := tp.Client.Do(req)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	tp.Logger.Debug().Msgf("Raw response %v", resp)
+
+	var response GenerateSignatureResponse
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return nil, fmt.Errorf("failed to decode Infobip response: %w", err)
+	}
+
+	tp.Logger.Debug().Msgf("Generate signature response body %v", response)
+
+	return &response.Data.Signature, nil
+}
+
 // RemovePlusPrefix removes the '+' from the start of the number if present.
 func RemovePlusPrefix(number string) string {
 	number = strings.TrimSpace(number)
@@ -322,4 +438,87 @@ func RemovePlusPrefix(number string) string {
 		return number[1:]
 	}
 	return number
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, v := range values {
+		if strings.TrimSpace(v) != "" {
+			return v
+		}
+	}
+	return ""
+}
+
+func (tp *TrustPayWayProvider) RequestCreditCardPayment(ctx context.Context, amount float64, currency string, description string, externalReference *string) (*string, error) {
+	// 1. authenticate
+	loginResponse, err := tp.authenticate(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to authenticate request %v", err)
+	}
+
+	// 2. generate secure token
+	token, err := tp.GenerateSignature(ctx, amount, currency, description, externalReference)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate signature %v", err)
+	}
+
+	// 3. initiate payment
+	url := fmt.Sprintf("%s/api/payment/init", tp.BaseUrl)
+
+	requestBody := InitiateCreditCardPaymentRequest{
+		CpmAmount:        fmt.Sprintf("%.0f", math.Floor(amount)),
+		CpmCurrency:      currency,
+		CpmTransId:       *externalReference,
+		CpmTransDate:     time.Now().Format("2006-01-02 15:04:05"),
+		CpmPaymentConfig: "SINGLE",
+		CpmPageAction:    "PAYMENT",
+		CpmVersion:       "V1",
+		CpmLanguage:      "en",
+		CpmDesignation:   description,
+		CpmCustom:        *externalReference,
+		Signature:        *token,
+		ReturnUrl:        firstNonEmpty(tp.ReturnUrl, tp.WebHook),
+		CancelUrl:        firstNonEmpty(tp.CancelUrl, tp.WebHook),
+		NotifyUrl:        tp.WebHook,
+	}
+
+	tp.Logger.Debug().Msgf("generate signature request body: %v", requestBody)
+
+	jsonBody, err := json.Marshal(requestBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal generate signature request: %w", err)
+	}
+
+	tp.Logger.Debug().Msgf("JSON body %v", jsonBody)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(jsonBody))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+loginResponse.AccessToken)
+	req.Header.Set("Content-Type", "application/json")
+
+	tp.Logger.Debug().Msgf("raw request: %v", req)
+
+	// Then send the request as usual
+	resp, err := tp.Client.Do(req)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	tp.Logger.Debug().Msgf("Raw response %v", resp)
+
+	var response InitiateCreditCardPaymentResponse
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return nil, fmt.Errorf("failed to decode Infobip response: %w", err)
+	}
+
+	tp.Logger.Debug().Msgf("Initiate credit card payment response body %v", response)
+
+	// 4. return payment link
+	return &response.Data.RedirectUrl, nil
 }

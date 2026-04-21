@@ -118,7 +118,6 @@ export default function PersonalInfo() {
   };
 
   const handleImageSelect = (asset: any) => {
-    console.log('handleImageSelect: Asset received:', asset?.uri);
     if (asset && asset.uri !== originalProfileImage) {
       setProfileImage(asset.uri);
       setHasChanges(true);

@@ -59,9 +59,6 @@ export default function PersonalInfo() {
 
   const { user, setUser } = useContext(Context) as ContextType;
   const googlePlacesAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
-  const [lastSelectedAddress, setLastSelectedAddress] = useState<string | null>(
-    formData.locationCoordinates?.address ?? null,
-  );
 
   const [originalProfileImage, setOriginalProfileImage] = useState(
     user?.profileImage || '',
@@ -74,6 +71,10 @@ export default function PersonalInfo() {
     email: user?.email || '',
     locationCoordinates: user?.locationCoordinates || null,
   });
+
+  const [lastSelectedAddress, setLastSelectedAddress] = useState<string | null>(
+    user?.locationCoordinates?.address ?? null,
+  );
 
   const [loading, setLoading] = useState(false);
   const [isImagePickerVisible, setIsImagePickerVisible] = useState(false);
@@ -129,7 +130,6 @@ export default function PersonalInfo() {
   };
 
   const handleImageSelect = (asset: any) => {
-    console.log('handleImageSelect: Asset received:', asset?.uri);
     if (asset && asset.uri !== originalProfileImage) {
       setProfileImage(asset.uri);
       setHasChanges(true);

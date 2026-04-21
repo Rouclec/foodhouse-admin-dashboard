@@ -809,7 +809,24 @@
       "description": "To proceed, please add your payment methods.",
       "next": "Next",
       "unavailable": "Temporarily unavailable",
-      "methodUnavailable": "This payment method is currently unavailable. Please try again later."
+      "methodUnavailable": "This payment method is currently unavailable. Please try again later.",
+      "momo": "MTN Mobile Money",
+      "orangeMoney": "Orange Money",
+      "creditCard": "Credit Card"
+    },
+    "(payment)": {
+      "confirmPayment": "Confirm payment",
+      "cardConfirmHint": "Confirm to continue to card checkout.",
+      "cardPaymentTitle": "Card payment",
+      "confirmingCardPayment": "Confirming your card payment…",
+      "paymentCanceledTitle": "Payment canceled",
+      "paymentCanceledMessage": "You canceled the card payment. You can try again.",
+      "missingCheckoutUrl": "Missing checkout URL from payment provider. Please try again.",
+      "missingContext": "Missing payment context. Please restart checkout/subscription flow.",
+      "missingDetails": "Payment details are missing. Please restart checkout/subscription flow.",
+      "enterAccountNumber": "Please enter your account number",
+      "paymentSuccessful": "Payment successful",
+      "paymentFailed": "Payment failed"
     }
   }
 }

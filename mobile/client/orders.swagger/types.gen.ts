@@ -208,6 +208,18 @@ export type ordersgrpcHealthCheckResponse = unknown;
 
 export type ordersgrpcInitiatePaymentResponse = {
   payment?: ordersgrpcPayment;
+  /**
+   * Optional message from backend.
+   * Note: the JSON key may be `Message` depending on gateway config.
+   */
+  Message?: string;
+  message?: string;
+  /**
+   * For CREDIT_CARD payments, backend returns the card checkout redirect URL.
+   * Note: the JSON key may be `ReturnUrl` depending on gateway config.
+   */
+  ReturnUrl?: string;
+  returnUrl?: string;
 };
 
 export type ordersgrpcListAgentAvailableOrdersResponse = {

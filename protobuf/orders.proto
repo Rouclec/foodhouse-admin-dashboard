@@ -140,7 +140,11 @@ message InitiatePaymentRequest {
   Account account = 5;
 }
 
-message InitiatePaymentResponse { Payment payment = 1; }
+message InitiatePaymentResponse {
+  Payment payment = 1;
+  string Message = 2;
+  string ReturnUrl = 3;
+}
 
 message ListPaymentsRequest {
   string user_id = 1;

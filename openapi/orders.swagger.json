@@ -2362,6 +2362,12 @@
       "properties": {
         "payment": {
           "$ref": "#/definitions/ordersgrpcPayment"
+        },
+        "Message": {
+          "type": "string"
+        },
+        "ReturnUrl": {
+          "type": "string"
         }
       }
     },

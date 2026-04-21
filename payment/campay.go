@@ -72,9 +72,13 @@ func (cp *CampayProvider) WithdrawFunds(ctx context.Context, to string, amount f
 	// }
 
 	// return &response.Reference, nil
-	panic("unimplimented")
+	panic("unimplemented")
 }
 
 func (cp *CampayProvider) CheckPaymentStatus(context.Context, string) (PaymentStatus, error) {
-	panic("unimplimented")
+	panic("unimplemented")
+}
+
+func (cp *CampayProvider) RequestCreditCardPayment(context.Context, float64, string, string, *string) (*string, error){
+	panic("unimplemented")
 }
