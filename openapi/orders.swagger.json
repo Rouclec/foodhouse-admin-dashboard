@@ -2105,6 +2105,14 @@
         "orderId": {
           "type": "string",
           "title": "This is the external id from TrustPayWay"
+        },
+        "cpmTransId": {
+          "type": "string",
+          "description": "the orginal transaction id",
+          "title": "these fields are for when the payment is done via CreditCard"
+        },
+        "cpmTransStatus": {
+          "type": "string"
         }
       }
     },
