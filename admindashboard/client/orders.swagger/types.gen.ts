@@ -99,6 +99,11 @@ export type ordersgrpcConfirmPaymentRequest = {
   externalReference?: string;
   phoneNumber?: string;
   orderId?: string;
+  /**
+   * the orginal transaction id
+   */
+  cpmTransId?: string;
+  cpmTransStatus?: string;
 };
 
 export type ordersgrpcConfirmPaymentResponse = unknown;
@@ -208,6 +213,8 @@ export type ordersgrpcHealthCheckResponse = unknown;
 
 export type ordersgrpcInitiatePaymentResponse = {
   payment?: ordersgrpcPayment;
+  Message?: string;
+  ReturnUrl?: string;
 };
 
 export type ordersgrpcListAgentAvailableOrdersResponse = {

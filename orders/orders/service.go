@@ -52,7 +52,10 @@ const (
 
 	TPWPaymentStatusCompleted = "COMPLETED"
 
-	TPWPaymentStatusFailed = "FAILED"
+	TPWPaymentStatusFailed       = "FAILED"
+	CPMTransactionStatusAccepted = "ACCEPTED"
+	CPMTransactionStatusRejected = "REJECTED"
+	CPMTransactionStatusPending  = "PENDING"
 
 	TotalPercentage = 1.00
 
@@ -481,8 +484,8 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 	}
 
 	i.logger.Debug().Msgf("TPW request body: %v", req)
-	i.logger.Debug().Msgf("payment id %v", req.GetOrderId())
-	i.logger.Debug().Msgf("payment status %v", req.GetStatus())
+	i.logger.Debug().Msgf("payment id %v, %v", req.GetOrderId(), req.GetCpmTransId())
+	i.logger.Debug().Msgf("payment status %v, %v", req.GetStatus(), req.GetCpmTransStatus())
 
 	// Proper rollback handling
 	defer func() {
@@ -494,7 +497,15 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 
 	var paymentEntity ordersgrpc.PaymentEntity
 
-	if strings.HasPrefix(req.GetOrderId(), "sub-") {
+	var orderId string
+
+	if req.GetCpmTransId() != "" && req.GetCpmTransStatus() != "" {
+		orderId = req.GetCpmTransId()
+	} else {
+		orderId = req.GetOrderId()
+	}
+
+	if strings.HasPrefix(orderId, "sub-") {
 		paymentEntity = ordersgrpc.PaymentEntity_PaymentEntity_SUBSCRIPTION
 	} else {
 		paymentEntity = ordersgrpc.PaymentEntity_PaymentEntity_ORDER
@@ -503,7 +514,7 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 	payment, err := querier.GetPaymentByEntity(ctx, sqlc.GetPaymentByEntityParams{
 		// req.GetReference(),
 		PaymentEntity: paymentEntity.String(),
-		EntityID:      req.GetOrderId(),
+		EntityID:      orderId,
 	})
 
 	if err != nil {
@@ -541,7 +552,16 @@ func (i *Impl) ConfirmPayment(ctx context.Context, req *ordersgrpc.ConfirmPaymen
 		shouldSendReceipt := false
 		shouldNotifyFarmer := false
 
-		if req.GetStatus() == TPWPaymentStatusCompleted {
+		isCardPayment := req.GetCpmTransId() != "" && req.GetCpmTransStatus() != ""
+
+		paymentSucceeded := false
+		if isCardPayment {
+			paymentSucceeded = req.GetCpmTransStatus() == CPMTransactionStatusAccepted
+		} else {
+			paymentSucceeded = req.GetStatus() == TPWPaymentStatusCompleted
+		}
+
+		if paymentSucceeded {
 			updatedPaymentStatus = ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED
 			updatedOrderStatus = ordersgrpc.OrderStatus_OrderStatus_PAYMENT_SUCCESSFUL
 			shouldSendReceipt = true

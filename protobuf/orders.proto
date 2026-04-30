@@ -190,6 +190,10 @@ message ConfirmPaymentRequest {
   string phone_number = 11; // The phone number that initiated the transaction
 
   string order_id = 12; // This is the external id from TrustPayWay
+
+  // these fields are for when the payment is done via CreditCard
+  string cpm_trans_id = 13; // the orginal transaction id
+  string cpm_trans_status = 14;
 }
 
 message ConfirmPaymentResponse {}
