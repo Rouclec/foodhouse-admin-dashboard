@@ -3,6 +3,7 @@ import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Appbar, Dialog, Icon, Portal, Text } from 'react-native-paper';
 import { WebView } from 'react-native-webview';
+import type { ShouldStartLoadRequest } from 'react-native-webview/lib/WebViewTypes';
 import { useQuery } from '@tanstack/react-query';
 import { Chase } from 'react-native-animated-spinkit';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -41,6 +42,7 @@ const TPWCardWebViewPage = () => {
   const params = useLocalSearchParams<Params>();
   const insets = useSafeAreaInsets();
   const webViewRef = useRef<WebView>(null);
+  const terminalNavigationHandledRef = useRef(false);
   const { requestReview } = useAppRating();
 
   const { user, paymentData, setPaymentData, clearCart } = useContext(
@@ -62,7 +64,7 @@ const TPWCardWebViewPage = () => {
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [failureModalVisible, setFailureModalVisible] = useState(false);
 
-  const terminalPath = useMemo(() => {
+  const { returnPath, cancelPath } = useMemo(() => {
     // These are the frontend endpoints we configured TPW to redirect to.
     // We match by path instead of exact domain to keep it environment-agnostic.
     return {
@@ -70,6 +72,46 @@ const TPWCardWebViewPage = () => {
       cancelPath: '/payments/tpw/cancel',
     };
   }, []);
+
+  useEffect(() => {
+    terminalNavigationHandledRef.current = false;
+  }, [checkoutUrl]);
+
+  const handleTerminalUrl = useCallback(
+    (url: string): boolean => {
+      if (!url) return false;
+      if (url.includes(cancelPath)) {
+        if (!terminalNavigationHandledRef.current) {
+          terminalNavigationHandledRef.current = true;
+          setCancelModalVisible(true);
+        }
+        return true;
+      }
+      if (url.includes(returnPath)) {
+        if (!terminalNavigationHandledRef.current) {
+          terminalNavigationHandledRef.current = true;
+          setLoadingModalVisible(true);
+        }
+        return true;
+      }
+      return false;
+    },
+    [cancelPath, returnPath],
+  );
+
+  const onShouldStartLoadWithRequest = useCallback(
+    (request: ShouldStartLoadRequest) => {
+      if (request.isTopFrame === false) {
+        return true;
+      }
+      const url = request.url ?? '';
+      if (handleTerminalUrl(url)) {
+        return false;
+      }
+      return true;
+    },
+    [handleTerminalUrl],
+  );
 
   const { data: paymentStatus } = useQuery({
     ...ordersCheckPaymentStatusOptions({
@@ -150,18 +192,12 @@ const TPWCardWebViewPage = () => {
           startInLoadingState={true}
           injectedJavaScriptBeforeContentLoaded={scrollAssistBeforeLoad}
           onLoadEnd={reinjectScrollAssist}
-          onNavigationStateChange={(navState: any) => {
+          onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
+          onNavigationStateChange={(navState) => {
             const url = navState.url ?? '';
-            if (!url) return;
-
-            // When TPW redirects to our frontend, react immediately.
-            if (url.includes(terminalPath.cancelPath)) {
-              setCancelModalVisible(true);
-            }
-
-            if (url.includes(terminalPath.returnPath)) {
-              // Payment finished on provider side; now confirm backend status.
-              setLoadingModalVisible(true);
+            // Fallback when a redirect bypasses shouldOverride (mainly some Android cases).
+            if (handleTerminalUrl(url)) {
+              webViewRef.current?.stopLoading();
             }
           }}
         />
