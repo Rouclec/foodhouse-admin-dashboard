@@ -2,7 +2,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } 
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Appbar, Dialog, Icon, Portal, Text } from 'react-native-paper';
-import { WebView } from 'react-native-webview';
+import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import type { ShouldStartLoadRequest } from 'react-native-webview/lib/WebViewTypes';
 import { useQuery } from '@tanstack/react-query';
 import { Chase } from 'react-native-animated-spinkit';
@@ -14,6 +14,10 @@ import { ordersCheckPaymentStatusOptions } from '@/client/orders.swagger/@tansta
 import { Context, ContextType } from '../_layout';
 import { useAppRating } from '@/hooks/useAppRating';
 import i18n from '@/i18n';
+
+// 1. Get frontend URL from environment (fallback to empty string if undefined)
+// Make sure this is defined in your .env, e.g., EXPO_PUBLIC_FRONTEND_URL=https://myapp.com
+const FRONTEND_URL = process.env.EXPO_PUBLIC_FRONTEND_URL?.replace(/\/$/, '') ?? '';
 
 type Params = {
   checkoutUrl?: string;
@@ -35,6 +39,32 @@ const buildScrollAssistScript = (bottomInsetPx: number) => `
   (document.head || document.documentElement).appendChild(s);
   true;
 })();
+`;
+
+// 2. Inject JS to continually poll for URL changes
+// This completely bypasses the Android redirect limitation
+const INJECTED_JS = `
+  (function() {
+    var lastUrl = window.location.href;
+    
+    function notifyUrlChange(url) {
+      if (window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'URL_CHANGE', url: url }));
+      }
+    }
+    
+    // Check every 300ms if the URL changed (handles server-side redirects on Android)
+    setInterval(function() {
+      if (window.location.href !== lastUrl) {
+        lastUrl = window.location.href;
+        notifyUrlChange(lastUrl);
+      }
+    }, 300);
+
+    // Also notify immediately on initial load
+    notifyUrlChange(window.location.href);
+  })();
+  true;
 `;
 
 const TPWCardWebViewPage = () => {
@@ -64,12 +94,11 @@ const TPWCardWebViewPage = () => {
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [failureModalVisible, setFailureModalVisible] = useState(false);
 
-  const { returnPath, cancelPath } = useMemo(() => {
-    // These are the frontend endpoints we configured TPW to redirect to.
-    // We match by path instead of exact domain to keep it environment-agnostic.
+  // 3. Construct the exact full URL paths
+  const { fullReturnUrl, fullCancelUrl } = useMemo(() => {
     return {
-      returnPath: '/payments/tpw/return',
-      cancelPath: '/payments/tpw/cancel',
+      fullReturnUrl: `${FRONTEND_URL}/payments/tpw/return`,
+      fullCancelUrl: `${FRONTEND_URL}/payments/tpw/cancel`,
     };
   }, []);
 
@@ -77,26 +106,55 @@ const TPWCardWebViewPage = () => {
     terminalNavigationHandledRef.current = false;
   }, [checkoutUrl]);
 
+  // 4. Update matching to use exact full URL matching
   const handleTerminalUrl = useCallback(
     (url: string): boolean => {
       if (!url) return false;
-      if (url.includes(cancelPath)) {
-        if (!terminalNavigationHandledRef.current) {
-          terminalNavigationHandledRef.current = true;
-          setCancelModalVisible(true);
+      
+      try {
+        // Strip query params and hash from the incoming URL to match exact base endpoint
+        const cleanUrl = url.split('?')[0].split('#')[0].replace(/\/$/, '');
+        
+        if (cleanUrl === fullCancelUrl) {
+          if (!terminalNavigationHandledRef.current) {
+            terminalNavigationHandledRef.current = true;
+            setCancelModalVisible(true);
+          }
+          return true;
         }
-        return true;
-      }
-      if (url.includes(returnPath)) {
-        if (!terminalNavigationHandledRef.current) {
-          terminalNavigationHandledRef.current = true;
-          setLoadingModalVisible(true);
+        
+        if (cleanUrl === fullReturnUrl) {
+          if (!terminalNavigationHandledRef.current) {
+            terminalNavigationHandledRef.current = true;
+            setLoadingModalVisible(true);
+          }
+          return true;
         }
-        return true;
+      } catch (e) {
+        console.warn('Failed to parse WebView URL:', e);
       }
       return false;
     },
-    [cancelPath, returnPath],
+    [fullCancelUrl, fullReturnUrl],
+  );
+
+  // 5. Handle messages from the injected JS
+  const onMessage = useCallback(
+    (event: WebViewMessageEvent) => {
+      try {
+        const data = JSON.parse(event.nativeEvent.data);
+        if (data.type === 'URL_CHANGE') {
+          const isTerminal = handleTerminalUrl(data.url);
+          if (isTerminal) {
+            // Stop loading the terminal page to prevent blank screens
+            webViewRef.current?.stopLoading();
+          }
+        }
+      } catch (e) {
+        // Ignore JSON parse errors
+      }
+    },
+    [handleTerminalUrl]
   );
 
   const onShouldStartLoadWithRequest = useCallback(
@@ -106,7 +164,7 @@ const TPWCardWebViewPage = () => {
       }
       const url = request.url ?? '';
       if (handleTerminalUrl(url)) {
-        return false;
+        return false; // Intercept direct navigation (Works reliably on iOS)
       }
       return true;
     },
@@ -190,12 +248,20 @@ const TPWCardWebViewPage = () => {
           style={styles.webview}
           source={{ uri: checkoutUrl }}
           startInLoadingState={true}
+          
+          // 6. CRITICAL: Handle all schemes to prevent opening system browser
+          originWhitelist={['*']}
+          
+          // 7. Inject JS to track URLs robustly
+          injectedJavaScript={INJECTED_JS}
+          onMessage={onMessage}
+          
           injectedJavaScriptBeforeContentLoaded={scrollAssistBeforeLoad}
           onLoadEnd={reinjectScrollAssist}
           onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
           onNavigationStateChange={(navState) => {
             const url = navState.url ?? '';
-            // Fallback when a redirect bypasses shouldOverride (mainly some Android cases).
+            // Fallback for standard flow
             if (handleTerminalUrl(url)) {
               webViewRef.current?.stopLoading();
             }
