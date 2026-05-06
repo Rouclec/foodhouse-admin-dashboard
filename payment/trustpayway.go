@@ -467,7 +467,7 @@ func (tp *TrustPayWayProvider) RequestCreditCardPayment(ctx context.Context, amo
 	url := fmt.Sprintf("%s/api/payment/init", tp.BaseUrl)
 
 	requestBody := InitiateCreditCardPaymentRequest{
-		CpmAmount:        fmt.Sprintf("%.0f", math.Floor(amount)),
+		CpmAmount:        fmt.Sprintf("%d", int64(math.Ceil(amount))),
 		CpmCurrency:      currency,
 		CpmTransId:       *externalReference,
 		CpmTransDate:     time.Now().Format("2006-01-02 15:04:05"),
