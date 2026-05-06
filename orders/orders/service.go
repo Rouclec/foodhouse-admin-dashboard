@@ -288,7 +288,7 @@ func (i *Impl) ConfirmDelivery(ctx context.Context, req *ordersgrpc.ConfirmDeliv
 	)
 
 	if err != nil {
-		// Check if it's a "no rows" error (wrong secret key)
+		// Check if it's a "no rows" error (wrong secret key).
 		if errors.Is(err, sql.ErrNoRows) || strings.Contains(err.Error(), "no rows") {
 			i.logger.Debug().Msgf("no order found with secret key %v", req.GetSecretKey())
 			return nil, status.Errorf(codes.InvalidArgument, "invalid secret key provided")
