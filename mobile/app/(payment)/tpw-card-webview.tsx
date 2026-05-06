@@ -15,6 +15,12 @@ import { Context, ContextType } from '../_layout';
 import { useAppRating } from '@/hooks/useAppRating';
 import i18n from '@/i18n';
 
+const logTpw = (...args: unknown[]) => {
+  if (__DEV__) {
+    console.log('[TPW WebView]', ...args);
+  }
+};
+
 // 1. Get frontend URL from environment (fallback to empty string if undefined)
 // Make sure this is defined in your .env, e.g., EXPO_PUBLIC_FRONTEND_URL=https://myapp.com
 const FRONTEND_URL = process.env.EXPO_PUBLIC_FRONTEND_URL?.replace(/\/$/, '') ?? '';
@@ -93,6 +99,12 @@ const TPWCardWebViewPage = () => {
   const [loadingModalVisible, setLoadingModalVisible] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [failureModalVisible, setFailureModalVisible] = useState(false);
+  /** Unmount WebView once checkout reaches a terminal URL so modals are not over the provider page. */
+  const [checkoutWebViewVisible, setCheckoutWebViewVisible] = useState(true);
+  /** Same pattern as payment-account: capture before setPaymentData(undefined). */
+  const [successNextPath, setSuccessNextPath] = useState<string>(
+    '/(buyer)/(index)',
+  );
 
   // 3. Construct the exact full URL paths
   const { fullReturnUrl, fullCancelUrl } = useMemo(() => {
@@ -103,29 +115,73 @@ const TPWCardWebViewPage = () => {
   }, []);
 
   useEffect(() => {
+    logTpw('screen mount / terminal config', {
+      FRONTEND_URL: FRONTEND_URL || '(empty — terminal URL matching will fail)',
+      fullReturnUrl,
+      fullCancelUrl,
+    });
+  }, [fullReturnUrl, fullCancelUrl]);
+
+  useEffect(() => {
     terminalNavigationHandledRef.current = false;
+    setCheckoutWebViewVisible(true);
   }, [checkoutUrl]);
+
+  useEffect(() => {
+    logTpw('checkout session params', {
+      checkoutUrl: checkoutUrl
+        ? `${checkoutUrl.slice(0, 80)}${checkoutUrl.length > 80 ? '…' : ''}`
+        : '(empty)',
+      paymentId: paymentId || '(empty)',
+    });
+  }, [checkoutUrl, paymentId]);
 
   // 4. Update matching to use exact full URL matching
   const handleTerminalUrl = useCallback(
-    (url: string): boolean => {
+    (url: string, source: string): boolean => {
       if (!url) return false;
-      
+
       try {
         // Strip query params and hash from the incoming URL to match exact base endpoint
         const cleanUrl = url.split('?')[0].split('#')[0].replace(/\/$/, '');
-        
+
+        const matchesCancel = cleanUrl === fullCancelUrl;
+        const matchesReturn = cleanUrl === fullReturnUrl;
+
+        if (matchesCancel || matchesReturn) {
+          logTpw('terminal URL matched', {
+            source,
+            raw: url,
+            cleanUrl,
+            kind: matchesCancel ? 'cancel' : 'return',
+            alreadyHandled: terminalNavigationHandledRef.current,
+          });
+        } else if (
+          url.includes('/payments/tpw/return') ||
+          url.includes('/payments/tpw/cancel')
+        ) {
+          logTpw('TPW path in URL but no exact config match', {
+            source,
+            raw: url,
+            cleanUrl,
+            expectedReturn: fullReturnUrl,
+            expectedCancel: fullCancelUrl,
+          });
+        }
+
         if (cleanUrl === fullCancelUrl) {
           if (!terminalNavigationHandledRef.current) {
             terminalNavigationHandledRef.current = true;
+            setCheckoutWebViewVisible(false);
             setCancelModalVisible(true);
           }
           return true;
         }
-        
+
         if (cleanUrl === fullReturnUrl) {
           if (!terminalNavigationHandledRef.current) {
             terminalNavigationHandledRef.current = true;
+            setCheckoutWebViewVisible(false);
             setLoadingModalVisible(true);
           }
           return true;
@@ -141,31 +197,44 @@ const TPWCardWebViewPage = () => {
   // 5. Handle messages from the injected JS
   const onMessage = useCallback(
     (event: WebViewMessageEvent) => {
+      const raw = event.nativeEvent.data;
       try {
-        const data = JSON.parse(event.nativeEvent.data);
+        const data = JSON.parse(raw);
         if (data.type === 'URL_CHANGE') {
-          const isTerminal = handleTerminalUrl(data.url);
+          logTpw('postMessage URL_CHANGE', { url: data.url });
+          const isTerminal = handleTerminalUrl(data.url, 'injectedJs');
           if (isTerminal) {
-            // Stop loading the terminal page to prevent blank screens
             webViewRef.current?.stopLoading();
           }
+        } else {
+          logTpw('postMessage (other type)', { type: data.type, data });
         }
       } catch (e) {
-        // Ignore JSON parse errors
+        logTpw('postMessage parse error', { raw: raw?.slice?.(0, 200), e });
       }
     },
-    [handleTerminalUrl]
+    [handleTerminalUrl],
   );
 
   const onShouldStartLoadWithRequest = useCallback(
     (request: ShouldStartLoadRequest) => {
+      const url = request.url ?? '';
       if (request.isTopFrame === false) {
+        logTpw('shouldStartLoad: allow (subframe)', {
+          url: url.slice(0, 120),
+          navigationType: request.navigationType,
+        });
         return true;
       }
-      const url = request.url ?? '';
-      if (handleTerminalUrl(url)) {
-        return false; // Intercept direct navigation (Works reliably on iOS)
+      const isTerminal = handleTerminalUrl(url, 'shouldStartLoad');
+      if (isTerminal) {
+        logTpw('shouldStartLoad: BLOCK (terminal)', { url });
+        return false;
       }
+      logTpw('shouldStartLoad: allow', {
+        url: url.slice(0, 120),
+        navigationType: request.navigationType,
+      });
       return true;
     },
     [handleTerminalUrl],
@@ -184,9 +253,12 @@ const TPWCardWebViewPage = () => {
 
   useEffect(() => {
     if (!paymentStatus?.status) return;
+    logTpw('paymentStatus poll', { status: paymentStatus.status, paymentId });
     if (paymentStatus?.status === 'PaymentStatus_INITIATED') return;
 
     if (paymentStatus?.status === 'PaymentStatus_COMPLETED') {
+      logTpw('paymentStatus → success modal');
+      setSuccessNextPath(paymentData?.nextScreen ?? '/(buyer)/(index)');
       setLoadingModalVisible(false);
       setSuccessModalVisible(true);
       setPaymentData(undefined);
@@ -195,10 +267,11 @@ const TPWCardWebViewPage = () => {
     }
 
     if (paymentStatus?.status === 'PaymentStatus_FAILED') {
+      logTpw('paymentStatus → failure modal');
       setLoadingModalVisible(false);
       setFailureModalVisible(true);
     }
-  }, [paymentStatus]);
+  }, [paymentStatus, paymentId]);
 
   const scrollAssistBeforeLoad = useMemo(
     () => buildScrollAssistScript(insets.bottom),
@@ -243,30 +316,57 @@ const TPWCardWebViewPage = () => {
       <View style={styles.screenRoot}>
         {renderHeader()}
 
-        <WebView
-          ref={webViewRef}
-          style={styles.webview}
-          source={{ uri: checkoutUrl }}
-          startInLoadingState={true}
-          
-          // 6. CRITICAL: Handle all schemes to prevent opening system browser
-          originWhitelist={['*']}
-          
-          // 7. Inject JS to track URLs robustly
-          injectedJavaScript={INJECTED_JS}
-          onMessage={onMessage}
-          
-          injectedJavaScriptBeforeContentLoaded={scrollAssistBeforeLoad}
-          onLoadEnd={reinjectScrollAssist}
-          onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
-          onNavigationStateChange={(navState) => {
-            const url = navState.url ?? '';
-            // Fallback for standard flow
-            if (handleTerminalUrl(url)) {
-              webViewRef.current?.stopLoading();
-            }
-          }}
-        />
+        {checkoutWebViewVisible ? (
+          <WebView
+            ref={webViewRef}
+            style={styles.webview}
+            source={{ uri: checkoutUrl }}
+            startInLoadingState={true}
+            // 6. CRITICAL: Handle all schemes to prevent opening system browser
+            originWhitelist={['*']}
+            // 7. Inject JS to track URLs robustly
+            injectedJavaScript={INJECTED_JS}
+            onMessage={onMessage}
+            injectedJavaScriptBeforeContentLoaded={scrollAssistBeforeLoad}
+            onLoadEnd={(e) => {
+              logTpw('onLoadEnd', {
+                url: e.nativeEvent.url,
+                title: e.nativeEvent.title,
+              });
+              reinjectScrollAssist();
+            }}
+            onLoadStart={(e) => {
+              logTpw('onLoadStart', { url: e.nativeEvent.url });
+            }}
+            onError={(e) => {
+              logTpw('onError', {
+                url: e.nativeEvent.url,
+                code: e.nativeEvent.code,
+                description: e.nativeEvent.description,
+              });
+            }}
+            onHttpError={(e) => {
+              logTpw('onHttpError', {
+                url: e.nativeEvent.url,
+                statusCode: e.nativeEvent.statusCode,
+              });
+            }}
+            onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
+            onNavigationStateChange={(navState) => {
+              const url = navState.url ?? '';
+              logTpw('onNavigationStateChange', {
+                url: url.slice(0, 160),
+                loading: navState.loading,
+                canGoBack: navState.canGoBack,
+              });
+              if (handleTerminalUrl(url, 'navigationState')) {
+                webViewRef.current?.stopLoading();
+              }
+            }}
+          />
+        ) : (
+          <View style={styles.webviewPlaceholder} />
+        )}
       </View>
 
       {/* Loading Portal */}
@@ -320,10 +420,7 @@ const TPWCardWebViewPage = () => {
           visible={successModalVisible}
           onDismiss={() => {
             setSuccessModalVisible(false);
-            router.push(
-              (paymentData?.nextScreen ??
-                '/(buyer)/(index)') as '/(buyer)/(index)',
-            );
+            router.push(successNextPath as '/(buyer)/(index)');
           }}
           style={defaultStyles.dialogSuccessContainer}>
           <Dialog.Content>
@@ -380,6 +477,10 @@ const styles = StyleSheet.create({
   webview: {
     flex: 1,
     margin: 0,
+    backgroundColor: Colors.light['bg'],
+  },
+  webviewPlaceholder: {
+    flex: 1,
     backgroundColor: Colors.light['bg'],
   },
   errorBody: {
