@@ -2293,25 +2293,86 @@ func ParsePaymentStatus(status string) (ordersgrpc.PaymentStatus, error) {
 func (i *Impl) CheckPaymentStatus(ctx context.Context, req *ordersgrpc.CheckPaymentStatusRequest) (*ordersgrpc.CheckPaymentStatusResponse, error) {
 	i.logger.Debug().Msgf("payment id %v", req.GetPaymentId())
 
-	payment, err := i.repo.Do().GetPaymentById(ctx, req.GetPaymentId())
+	dbPayment, err := i.repo.Do().GetPaymentById(ctx, req.GetPaymentId())
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error fetching payment %v", err)
 	}
 
-	if payment.CreatedBy != req.GetUserId() {
+	if dbPayment.CreatedBy != req.GetUserId() {
 		return nil, status.Error(codes.PermissionDenied, "user does not have permission to fetch this payment")
 	}
 
-	paymentStatus, err := ParsePaymentStatus(payment.Status)
+	paymentStatus, err := ParsePaymentStatus(dbPayment.Status)
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "cannot parse status %v.", err)
 	}
 
-	return &ordersgrpc.CheckPaymentStatusResponse{
-		Status: paymentStatus,
-	}, nil
+	// If the payment is still pending after a short grace period, check directly with the provider.
+	// This covers cases where the provider webhook doesn't return.
+	const providerFallbackAfter = 2 * time.Minute
+	createdAt := time.Time{}
+	if dbPayment.CreatedAt.Valid {
+		createdAt = dbPayment.CreatedAt.Time
+	}
+	age := time.Since(createdAt)
+
+	// Only perform the provider fallback for payments that are still pending/initiated.
+	if createdAt.IsZero() || age < providerFallbackAfter || paymentStatus != ordersgrpc.PaymentStatus_PaymentStatus_INITIATED {
+		return &ordersgrpc.CheckPaymentStatusResponse{
+			Status: paymentStatus,
+		}, nil
+	}
+
+	providerStatus, provErr := i.paymentService.CheckPaymentStatus(ctx, dbPayment.ID)
+	if provErr != nil {
+		i.logger.Error().Err(provErr).Msgf("failed to check provider payment status for %s", dbPayment.ID)
+		// Fail open to the backend status; client can retry.
+		return &ordersgrpc.CheckPaymentStatusResponse{
+			Status: paymentStatus,
+		}, nil
+	}
+
+	switch providerStatus {
+	case payment.StatusPending, payment.StatusUnknown:
+		return &ordersgrpc.CheckPaymentStatusResponse{
+			Status: ordersgrpc.PaymentStatus_PaymentStatus_INITIATED,
+		}, nil
+
+	case payment.StatusFailed, payment.StatusCanceled, payment.StatusExpired:
+		// Reuse the same resolver logic as the webhook.
+		_, confirmErr := i.ConfirmPayment(ctx, &ordersgrpc.ConfirmPaymentRequest{
+			Status:  TPWPaymentStatusFailed,
+			OrderId: dbPayment.EntityID,
+		})
+		if confirmErr != nil {
+			return nil, status.Errorf(codes.Internal, "error resolving failed payment: %v", confirmErr)
+		}
+		return &ordersgrpc.CheckPaymentStatusResponse{
+			Status: ordersgrpc.PaymentStatus_PaymentStatus_FAILED,
+		}, nil
+
+	case payment.StatusCompleted:
+		// Reuse the same resolver logic as the webhook.
+		_, confirmErr := i.ConfirmPayment(ctx, &ordersgrpc.ConfirmPaymentRequest{
+			Status:  TPWPaymentStatusCompleted,
+			OrderId: dbPayment.EntityID,
+		})
+		if confirmErr != nil {
+			return nil, status.Errorf(codes.Internal, "error resolving successful payment: %v", confirmErr)
+		}
+		return &ordersgrpc.CheckPaymentStatusResponse{
+			Status: ordersgrpc.PaymentStatus_PaymentStatus_COMPLETED,
+		}, nil
+
+	default:
+		// If we don't understand the provider response, stick to backend status.
+		return &ordersgrpc.CheckPaymentStatusResponse{
+			Status: paymentStatus,
+		}, nil
+	}
+
 }
 
 type GroupBy string
