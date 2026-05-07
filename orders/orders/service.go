@@ -2318,6 +2318,8 @@ func (i *Impl) CheckPaymentStatus(ctx context.Context, req *ordersgrpc.CheckPaym
 	}
 	age := time.Since(createdAt)
 
+	i.logger.Debug().Msgf("age %v", age);
+
 	// Only perform the provider fallback for payments that are still pending/initiated.
 	if createdAt.IsZero() || age < providerFallbackAfter || paymentStatus != ordersgrpc.PaymentStatus_PaymentStatus_INITIATED {
 		return &ordersgrpc.CheckPaymentStatusResponse{
@@ -2333,6 +2335,8 @@ func (i *Impl) CheckPaymentStatus(ctx context.Context, req *ordersgrpc.CheckPaym
 			Status: paymentStatus,
 		}, nil
 	}
+
+	i.logger.Debug().Msgf("provider status %v", providerStatus);
 
 	switch providerStatus {
 	case payment.StatusPending, payment.StatusUnknown:
