@@ -2000,7 +2000,7 @@ func (i *Impl) InitiatePayment(ctx context.Context, req *ordersgrpc.InitiatePaym
 
 	var returnUrl string
 
-	// make request to TPW to initiate actual payment only when dev methods is not enabled
+	// make request to TPW to initiate actual payment only when dev methods is not enabled.
 	if !i.devMethodsEndabled {
 		if isCreditCard {
 			redirectUrl, payErr := i.paymentService.RequestCreditCardPayment(
