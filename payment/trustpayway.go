@@ -136,6 +136,33 @@ type InitiateCreditCardPaymentResponse struct {
 	} `json:"data"`
 }
 
+type CheckCardPaymentStatusRequest struct {
+	CpmTransId    string `json:"cpm_trans_id"`
+	PaymentMethod string `json:"payment_method"`
+}
+
+type CheckCardPaymentStatusResponse struct {
+	Success bool `json:"success"`
+	Data    struct {
+		Transaction struct {
+			CpmSiteId      string `json:"cpm_site_id"`
+			CpmAmount      string `json:"cpm_amount"`
+			CpmTransId     string `json:"cpm_trans_id"`
+			CpmTransStatus string `json:"cpm_trans_status"`
+			CpmResult      string `json:"cpm_result"`
+			CpmPayid       string `json:"cpm_payid"`
+			CpmCurrency    string `json:"cpm_currency"`
+			CpmDesignation string `json:"cpm_designation"`
+			CpmPaymentDate string `json:"cpm_payment_date"`
+			CpmPaymentTime string `json:"cpm_payment_time"`
+			PaymentMethod  string `json:"payment_method"`
+			BuyerEmail     string `json:"buyer_email"`
+			BuyerName      string `json:"buyer_name"`
+			BuyerPhone     string `json:"buyer_phone"`
+		} `json:"transaction"`
+	} `json:"data"`
+}
+
 func NewTPWProvider(trustPayWaySecretKey string,
 	trustPayWayAppToken string,
 	trustPayWayBaseUrl string,
@@ -280,6 +307,60 @@ func (tp *TrustPayWayProvider) WithdrawFunds(ctx context.Context, to string, amo
 	tp.Logger.Debug().Msgf("Withdrawal response body %v", response)
 
 	return &response.Data.TransactionId, nil
+}
+
+func (tp *TrustPayWayProvider) CheckCreditCardPaymentStatus(ctx context.Context, paymentId string) (PaymentStatus, error) {
+	url := fmt.Sprintf("%s/api/payment/check", tp.BaseUrl)
+
+	requestBody := CheckCardPaymentStatusRequest{
+		CpmTransId:    paymentId,
+		PaymentMethod: "credit_card",
+	}
+
+	tp.Logger.Debug().Msgf("check card payment status request body: %v", requestBody)
+
+	jsonBody, err := json.Marshal(requestBody)
+	if err != nil {
+		return StatusUnknown, fmt.Errorf("failed to marshal check card payment status request: %w", err)
+	}
+
+	tp.Logger.Debug().Msgf("JSON body %v", jsonBody)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(jsonBody))
+	if err != nil {
+		return StatusUnknown, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+tp.SecretKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	tp.Logger.Debug().Msgf("raw request: %v", req)
+
+	resp, err := tp.Client.Do(req)
+	if err != nil {
+		return StatusUnknown, fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	tp.Logger.Debug().Msgf("Raw response %v", resp)
+
+	var response CheckCardPaymentStatusResponse
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return StatusUnknown, fmt.Errorf("failed to decode Infobip response: %w", err)
+	}
+
+	tp.Logger.Debug().Msgf("check card payment status response body %v", response)
+
+	switch response.Data.Transaction.CpmTransStatus {
+	case "ACCEPTED":
+		return StatusCompleted, nil
+	case "REJECTED":
+		return StatusFailed, nil
+	case "PENDING":
+		return StatusPending, nil
+	default:
+		return StatusUnknown, nil
+	}
 }
 
 func (tp *TrustPayWayProvider) CheckPaymentStatus(ctx context.Context, paymentId string) (PaymentStatus, error) {

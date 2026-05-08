@@ -2327,7 +2327,17 @@ func (i *Impl) CheckPaymentStatus(ctx context.Context, req *ordersgrpc.CheckPaym
 		}, nil
 	}
 
-	providerStatus, provErr := i.paymentService.CheckPaymentStatus(ctx, dbPayment.ID)
+	isCreditCard := dbPayment.Method == ordersgrpc.PaymentMethodType_PaymentMethodType_CREDIT_CARD.String()
+
+	var (
+		providerStatus payment.PaymentStatus
+		provErr        error
+	)
+	if isCreditCard {
+		providerStatus, provErr = i.paymentService.CheckCreditCardPaymentStatus(ctx, dbPayment.EntityID)
+	} else {
+		providerStatus, provErr = i.paymentService.CheckPaymentStatus(ctx, dbPayment.EntityID)
+	}
 	if provErr != nil {
 		i.logger.Error().Err(provErr).Msgf("failed to check provider payment status for %s", dbPayment.ID)
 		// Fail open to the backend status; client can retry.
