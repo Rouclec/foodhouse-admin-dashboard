@@ -63,7 +63,7 @@ const (
 
 	FarmersPercentage = 1.00
 
-	// Flat commission amount paid to the referrer when a referred user completes
+	// Flat commission amount paid to the referrer when a referred user completes,
 	// registration using a referral code.
 	ReferralSignupCommissionAmountXAF = 200.00
 	ReferralSignupCommissionCurrency  = "XAF"
