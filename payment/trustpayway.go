@@ -331,7 +331,13 @@ func (tp *TrustPayWayProvider) CheckCreditCardPaymentStatus(ctx context.Context,
 		return StatusUnknown, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	req.Header.Set("Authorization", "Bearer "+tp.SecretKey)
+	loginResponse, err := tp.authenticate(ctx)
+
+	if err != nil {
+		return StatusUnknown, fmt.Errorf("failed to authenticate request %v", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+loginResponse.AccessToken)
 	req.Header.Set("Content-Type", "application/json")
 
 	tp.Logger.Debug().Msgf("raw request: %v", req)
