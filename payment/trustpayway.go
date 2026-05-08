@@ -142,25 +142,26 @@ type CheckCardPaymentStatusRequest struct {
 }
 
 type CheckCardPaymentStatusResponse struct {
-	Success bool `json:"success"`
-	Data    struct {
-		Transaction struct {
-			CpmSiteId      string `json:"cpm_site_id"`
-			CpmAmount      string `json:"cpm_amount"`
-			CpmTransId     string `json:"cpm_trans_id"`
-			CpmTransStatus string `json:"cpm_trans_status"`
-			CpmResult      string `json:"cpm_result"`
-			CpmPayid       string `json:"cpm_payid"`
-			CpmCurrency    string `json:"cpm_currency"`
-			CpmDesignation string `json:"cpm_designation"`
-			CpmPaymentDate string `json:"cpm_payment_date"`
-			CpmPaymentTime string `json:"cpm_payment_time"`
-			PaymentMethod  string `json:"payment_method"`
-			BuyerEmail     string `json:"buyer_email"`
-			BuyerName      string `json:"buyer_name"`
-			BuyerPhone     string `json:"buyer_phone"`
-		} `json:"transaction"`
-	} `json:"data"`
+	Transaction struct {
+		BuyerEmail      string `json:"buyer_email"`
+		BuyerName       string `json:"buyer_name"`
+		BuyerPhone      string `json:"buyer_phone"`
+		CancelUrl       string `json:"cancel_url"`
+		CpmAmount       string `json:"cpm_amount"`
+		CpmCurrency     string `json:"cpm_currency"`
+		CpmCustom       string `json:"cpm_custom"`
+		CpmDesignation  string `json:"cpm_designation"`
+		CpmErrorMessage string `json:"cpm_error_message"`
+		CpmPayid        string `json:"cpm_payid"`
+		CpmResult       string `json:"cpm_result"`
+		CpmSiteId       string `json:"cpm_site_id"`
+		CpmTransDate    string `json:"cpm_trans_date"`
+		CpmTransId      string `json:"cpm_trans_id"`
+		CpmTransStatus  string `json:"cpm_trans_status"`
+		PaymentMethod   string `json:"payment_method"`
+		ReturnUrl       string `json:"return_url"`
+		Signature       string `json:"signature"`
+	} `json:"transaction"`
 }
 
 func NewTPWProvider(trustPayWaySecretKey string,
@@ -357,7 +358,7 @@ func (tp *TrustPayWayProvider) CheckCreditCardPaymentStatus(ctx context.Context,
 
 	tp.Logger.Debug().Msgf("check card payment status response body %v", response)
 
-	switch response.Data.Transaction.CpmTransStatus {
+	switch response.Transaction.CpmTransStatus {
 	case "ACCEPTED":
 		return StatusCompleted, nil
 	case "REJECTED":
