@@ -82,3 +82,7 @@ func (cp *CampayProvider) CheckPaymentStatus(context.Context, string) (PaymentSt
 func (cp *CampayProvider) RequestCreditCardPayment(context.Context, float64, string, string, *string) (*string, error){
 	panic("unimplemented")
 }
+
+func (cp *CampayProvider) CheckCreditCardPaymentStatus(context.Context, string) (PaymentStatus, error) {
+	panic("unimplemented")
+}

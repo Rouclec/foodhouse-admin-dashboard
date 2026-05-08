@@ -18,4 +18,5 @@ type PaymentProvider interface {
 	WithdrawFunds(ctx context.Context, to string, amount float64, currency string, description string, externalReference *string) (*string, error)
 	CheckPaymentStatus(ctx context.Context, paymentId string) (PaymentStatus, error)
 	RequestCreditCardPayment(ctx context.Context, amount float64, currency string, description string, externalReference *string) (*string, error)
+	CheckCreditCardPaymentStatus(ctx context.Context, paymentId string) (PaymentStatus, error)
 }
