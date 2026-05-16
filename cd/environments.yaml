@@ -6,7 +6,7 @@
   
 - envId: testing
   name: Testing
-  gitRefName: release/testing/app-version-2
+  gitRefName: release/updated-cors
   awsAccountId: 615857074259
   domainName: foodhousetesting.online
 
