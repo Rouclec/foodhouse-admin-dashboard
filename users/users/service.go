@@ -2086,7 +2086,7 @@ func (i *Impl) GetKYCByUserID(ctx context.Context,
 	}, nil
 }
 
-// UpdateKYCStatus updates the status of a KYC verification (admin only).
+// UpdateKYCStatus updates the status of a KYC verification (admin only endpoint).
 func (i *Impl) UpdateKYCStatus(ctx context.Context,
 	req *usersgrpc.UpdateKYCStatusRequest) (
 	*usersgrpc.UpdateKYCStatusResponse, error) {
