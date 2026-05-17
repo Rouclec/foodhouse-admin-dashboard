@@ -209,7 +209,7 @@ export const usersSuspendUser = <ThrowOnError extends boolean = false>(
 export const usersUpdateKycStatus = <ThrowOnError extends boolean = false>(
   options: OptionsLegacyParser<UsersUpdateKycStatusData, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).patch<
+  return (options?.client ?? client).put<
     UsersUpdateKycStatusResponse,
     UsersUpdateKycStatusError,
     ThrowOnError
