@@ -643,7 +643,7 @@ service Users {
   rpc UpdateKYCStatus(UpdateKYCStatusRequest)
       returns (UpdateKYCStatusResponse) {
     option (google.api.http) = {
-      patch : "/v1/admin/{admin_user_id}/{kyc_id}/update-kyc-status"
+      put : "/v1/admin/{admin_user_id}/{kyc_id}/update-kyc-status"
       body : "*"
     };
   }
