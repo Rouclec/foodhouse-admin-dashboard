@@ -419,7 +419,7 @@
       }
     },
     "/v1/admin/{adminUserId}/{kycId}/update-kyc-status": {
-      "patch": {
+      "put": {
         "operationId": "Users_UpdateKYCStatus",
         "responses": {
           "200": {
